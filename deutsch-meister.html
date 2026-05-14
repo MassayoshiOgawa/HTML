@@ -1,0 +1,980 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeutschMeister — Aprenda Alemão do Zero ao Intermediário</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f8f9fc;--bg2:#ffffff;--bg3:#f0f2f6;--text:#1a1a2e;--text2:#4a4a6a;--text3:#8a8aaa;--primary:#6c5ce7;--primary2:#5a4bd1;--primary3:#e8e6ff;--accent:#00cec9;--accent2:#00b8b3;--success:#00b894;--error:#e17055;--warn:#fdcb6e;--border:#e0e0e8;--shadow:0 4px 24px rgba(108,92,231,0.08);--radius:16px;--radius-sm:10px;--font:'Segoe UI',system-ui,-apple-system,sans-serif;--mono:'Cascadia Code','Fira Code',monospace;--navbar-h:64px;--sidebar-w:280px;--transition:0.3s cubic-bezier(.4,0,.2,1)}
+[data-theme="dark"]{--bg:#0d0d1a;--bg2:#161625;--bg3:#1e1e32;--text:#e8e8f0;--text2:#a8a8c0;--text3:#686888;--primary3:#1a1a3a;--border:#2a2a40;--shadow:0 4px 24px rgba(0,0,0,0.3)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;transition:background var(--transition),color var(--transition);overflow-x:hidden}
+a{color:var(--primary);text-decoration:none}
+i{font-style:normal}
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;transition:opacity .5s}
+#loader.hide{opacity:0;pointer-events:none}
+#loader-logo{font-size:2.5rem;font-weight:800;color:var(--primary);letter-spacing:-1px}
+#loader-logo span{color:var(--accent)}
+#loader-bar{width:200px;height:3px;background:var(--border);border-radius:3px;overflow:hidden}
+#loader-bar span{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:3px;transition:width 2s ease}
+.navbar{position:fixed;top:0;left:0;right:0;height:var(--navbar-h);z-index:1000;background:rgba(255,255,255,0.85);backdrop-filter:blur(20px) saturate(1.2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;transition:background var(--transition)}
+[data-theme="dark"] .navbar{background:rgba(22,22,37,0.85)}
+.navbar-brand{font-size:1.25rem;font-weight:800;color:var(--primary);display:flex;align-items:center;gap:8px;cursor:pointer;white-space:nowrap}
+.navbar-brand span{color:var(--accent)}
+.navbar-spacer{flex:1}
+.navbar-progress{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--text2)}
+.navbar-progress .bar{width:100px;height:6px;background:var(--border);border-radius:6px;overflow:hidden}
+.navbar-progress .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:6px;transition:width .5s}
+.navbar-btn{width:38px;height:38px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;transition:all var(--transition)}
+.navbar-btn:hover{background:var(--primary3);color:var(--primary);border-color:var(--primary)}
+#sidebar-overlay{position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,0.3);opacity:0;pointer-events:none;transition:opacity var(--transition)}
+#sidebar-overlay.open{opacity:1;pointer-events:all}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);z-index:1200;background:var(--bg2);border-right:1px solid var(--border);transform:translateX(-100%);transition:transform var(--transition);overflow-y:auto;display:flex;flex-direction:column}
+#sidebar.open{transform:translateX(0)}
+#sidebar-header{padding:20px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+#sidebar-header h2{font-size:1.1rem;color:var(--primary)}
+#sidebar-close{cursor:pointer;font-size:1.2rem;color:var(--text3)}
+#sidebar-search{margin:12px 16px;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--font);font-size:.85rem;outline:none;transition:border var(--transition)}
+#sidebar-search:focus{border-color:var(--primary)}
+#sidebar-list{flex:1;padding:8px 0;overflow-y:auto}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--text2);cursor:pointer;font-size:.85rem;transition:all .2s;border-left:3px solid transparent}
+.sidebar-item:hover{background:var(--primary3);color:var(--primary)}
+.sidebar-item.active{background:var(--primary3);color:var(--primary);border-left-color:var(--primary);font-weight:600}
+.sidebar-item .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--border)}
+.sidebar-item .dot.done{background:var(--success)}
+.sidebar-item .dot.active-dot{background:var(--primary);box-shadow:0 0 8px var(--primary)}
+.sidebar-item .level-badge{font-size:.65rem;padding:2px 8px;border-radius:20px;background:var(--primary3);color:var(--primary);margin-left:auto;flex-shrink:0}
+#cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 60px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%)}
+#cover::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,var(--primary3) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+#cover::after{content:'';position:absolute;bottom:-30%;left:-10%;width:400px;height:400px;background:radial-gradient(circle,var(--primary3) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+.cover-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;background:var(--primary3);color:var(--primary);border-radius:20px;font-size:.8rem;font-weight:600;margin-bottom:24px;position:relative;z-index:1}
+.cover-title{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;line-height:1.1;position:relative;z-index:1}
+.cover-title span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cover-sub{font-size:clamp(1rem,2vw,1.3rem);color:var(--text2);margin:16px 0 32px;max-width:600px;position:relative;z-index:1}
+.cover-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+.btn{padding:12px 32px;border-radius:var(--radius-sm);font-family:var(--font);font-size:.95rem;font-weight:600;cursor:pointer;border:none;transition:all var(--transition);display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,92,231,0.25)}
+.btn-outline{background:transparent;color:var(--text);border:2px solid var(--border)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary);transform:translateY(-2px)}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover{opacity:.9;transform:translateY(-2px)}
+.btn-sm{padding:8px 16px;font-size:.8rem}
+.cover-stats{display:flex;gap:32px;margin-top:48px;position:relative;z-index:1;flex-wrap:wrap;justify-content:center}
+.cover-stat{text-align:center}
+.cover-stat-num{font-size:1.8rem;font-weight:800;color:var(--primary)}
+.cover-stat-label{font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.section{padding:80px 24px;max-width:900px;margin:0 auto}
+.section-header{text-align:center;margin-bottom:48px}
+.section-tag{display:inline-block;padding:4px 14px;border-radius:20px;background:var(--primary3);color:var(--primary);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-bottom:12px}
+.section-desc{color:var(--text2);max-width:600px;margin:0 auto;font-size:1.05rem}
+#toc .toc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.toc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all var(--transition);position:relative;overflow:hidden}
+.toc-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--primary)}
+.toc-card.locked{opacity:.5;cursor:not-allowed}
+.toc-card.locked:hover{transform:none;box-shadow:none;border-color:var(--border)}
+.toc-card .num{font-size:.75rem;font-weight:700;color:var(--primary);margin-bottom:4px}
+.toc-card h3{font-size:.95rem;margin-bottom:4px}
+.toc-card p{font-size:.8rem;color:var(--text3)}
+.toc-card .status{position:absolute;top:12px;right:12px;font-size:.7rem;padding:2px 10px;border-radius:12px;font-weight:600}
+.toc-card .status.done{background:var(--success);color:#fff}
+.toc-card .status.active{background:var(--primary);color:#fff}
+.toc-card .status.locked-status{background:var(--border);color:var(--text3)}
+.chapter{padding:80px 24px;max-width:900px;margin:0 auto;opacity:0;transform:translateY(30px);transition:opacity .6s,transform .6s;scroll-margin-top:80px}
+.chapter.visible{opacity:1;transform:translateY(0)}
+.chapter-header{margin-bottom:32px}
+.chapter-level{display:inline-block;padding:3px 12px;border-radius:12px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.chapter-level.a1{background:#e8f8f5;color:#00b894}
+.chapter-level.a2{background:#e8f0fe;color:#4a7cf7}
+.chapter-level.b1{background:#f3e8ff;color:#8b5cf6}
+[data-theme="dark"] .chapter-level.a1{background:rgba(0,184,148,0.15);color:#00b894}
+[data-theme="dark"] .chapter-level.a2{background:rgba(74,124,247,0.15);color:#4a7cf7}
+[data-theme="dark"] .chapter-level.b1{background:rgba(139,92,246,0.15);color:#8b5cf6}
+.chapter-number{font-size:.85rem;color:var(--text3);margin-bottom:4px}
+.chapter-title{font-size:1.8rem;font-weight:800;margin-bottom:8px}
+.chapter-desc{color:var(--text2);font-size:1rem}
+.theory-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px;transition:all var(--transition)}
+.theory-box:hover{box-shadow:var(--shadow)}
+.theory-box h3{font-size:1.15rem;margin-bottom:12px;color:var(--primary)}
+.theory-box h4{font-size:1rem;margin-bottom:8px;margin-top:16px}
+.theory-box p{margin-bottom:12px;color:var(--text2)}
+.theory-box ul,.theory-box ol{margin:8px 0 12px 20px;color:var(--text2)}
+.theory-box li{margin-bottom:6px}
+.theory-box code{background:var(--bg3);padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:.85rem;color:var(--primary)}
+.theory-box .example{background:var(--primary3);border-left:3px solid var(--primary);padding:12px 16px;margin:12px 0;border-radius:0 var(--radius-sm) var(--radius-sm) 0}
+.theory-box .example strong{color:var(--primary)}
+.theory-box .example .de{display:block;font-weight:600;color:var(--text);margin-bottom:2px}
+.theory-box .example .pt{display:block;color:var(--text3);font-size:.9rem}
+.theory-box .note{background:rgba(253,203,110,0.15);border-left:3px solid var(--warn);padding:12px 16px;margin:12px 0;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:.9rem}
+.theory-box .table-wrap{overflow-x:auto;margin:12px 0}
+.theory-box table{width:100%;border-collapse:collapse;font-size:.9rem}
+.theory-box th,.theory-box td{padding:8px 12px;border:1px solid var(--border);text-align:left}
+.theory-box th{background:var(--primary3);color:var(--primary);font-weight:600}
+.exercise-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px;transition:all var(--transition)}
+.exercise-box:hover{box-shadow:var(--shadow)}
+.exercise-box .ex-num{font-size:.75rem;font-weight:700;color:var(--primary);margin-bottom:4px}
+.exercise-box .ex-question{font-size:1rem;font-weight:600;margin-bottom:16px;line-height:1.5}
+.exercise-box .ex-hint{font-size:.85rem;color:var(--text3);margin-bottom:12px;padding:8px 12px;background:var(--bg3);border-radius:var(--radius-sm);display:none}
+.exercise-box .ex-hint.show{display:block}
+.ex-box-input{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ex-box-input input[type="text"]{flex:1;min-width:180px;padding:10px 14px;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--font);font-size:.95rem;outline:none;transition:border .2s}
+.ex-box-input input[type="text"]:focus{border-color:var(--primary)}
+.ex-box-input input[type="text"].correct{border-color:var(--success);background:rgba(0,184,148,0.05)}
+.ex-box-input input[type="text"].wrong{border-color:var(--error);background:rgba(225,112,85,0.05)}
+.ex-word-bank{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.ex-word-bank .word-tile{padding:6px 14px;border-radius:8px;background:var(--primary3);color:var(--primary);font-weight:600;cursor:pointer;font-size:.85rem;transition:all .2s;border:2px solid transparent;user-select:none}
+.ex-word-bank .word-tile:hover{background:var(--primary);color:#fff;transform:scale(1.05)}
+.ex-word-bank .word-tile.used{opacity:.3;pointer-events:none}
+.ex-word-bank .word-tile.selected{border-color:var(--primary);background:var(--primary);color:#fff}
+.ex-slot-container{display:flex;flex-wrap:wrap;gap:6px;min-height:38px;padding:8px;background:var(--bg3);border-radius:var(--radius-sm);margin:12px 0;border:2px dashed var(--border);align-items:center}
+.ex-slot-container .slot-item{padding:4px 12px;border-radius:6px;background:var(--primary);color:#fff;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;animation:slotIn .2s ease}
+.ex-slot-container .slot-item:hover{opacity:.8}
+@keyframes slotIn{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+.ex-multi{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.ex-multi button{text-align:left;padding:10px 16px;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--font);font-size:.9rem;cursor:pointer;transition:all .2s}
+.ex-multi button:hover{border-color:var(--primary);background:var(--primary3)}
+.ex-multi button.selected{border-color:var(--primary);background:var(--primary3);font-weight:600}
+.ex-multi button.correct{border-color:var(--success);background:rgba(0,184,148,0.1)}
+.ex-multi button.wrong{border-color:var(--error);background:rgba(225,112,85,0.1)}
+.ex-feedback{padding:14px 16px;border-radius:var(--radius-sm);margin-top:12px;font-size:.9rem;display:none;animation:fbIn .3s ease}
+.ex-feedback.show{display:block}
+.ex-feedback.success{background:rgba(0,184,148,0.1);border:1px solid var(--success);color:var(--success)}
+.ex-feedback.error{background:rgba(225,112,85,0.1);border:1px solid var(--error);color:var(--error)}
+.ex-feedback.partial{background:rgba(253,203,110,0.15);border:1px solid var(--warn);color:#b8860b}
+@keyframes fbIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ex-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.review-box{background:linear-gradient(135deg,var(--primary3),transparent);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px}
+.review-box h3{font-size:1.1rem;color:var(--primary);margin-bottom:12px}
+.review-box ul{list-style:none;padding:0}
+.review-box li{padding:8px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start}
+.review-box li:last-child{border:none}
+.review-box li::before{content:'✓';color:var(--success);font-weight:700;flex-shrink:0}
+#glossary .gloss-search{display:flex;gap:8px;margin-bottom:24px}
+#glossary .gloss-search input{flex:1;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:var(--font);font-size:.9rem;outline:none}
+#glossary .gloss-search input:focus{border-color:var(--primary)}
+.gloss-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.gloss-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);transition:all .2s}
+.gloss-item:hover{border-color:var(--primary);box-shadow:var(--shadow)}
+.gloss-item .de{font-weight:600}
+.gloss-item .pt{color:var(--text3);font-size:.85rem}
+.gloss-item .fav{cursor:pointer;color:var(--text3);transition:color .2s;font-size:1rem}
+.gloss-item .fav.active{color:var(--warn)}
+.gloss-cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.gloss-cats button{padding:4px 12px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:.8rem;cursor:pointer;font-family:var(--font);transition:all .2s}
+.gloss-cats button:hover,.gloss-cats button.active{background:var(--primary3);color:var(--primary);border-color:var(--primary)}
+#notes-area{width:100%;min-height:200px;padding:16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:var(--font);font-size:.9rem;resize:vertical;outline:none;transition:border .2s;line-height:1.6}
+#notes-area:focus{border-color:var(--primary)}
+#conclusion{text-align:center;padding:80px 24px;max-width:700px;margin:0 auto}
+#conclusion .big-icon{font-size:4rem;margin-bottom:16px}
+#conclusion h2{font-size:2rem;font-weight:800;margin-bottom:12px}
+#conclusion p{color:var(--text2);margin-bottom:24px}
+#settings-panel{position:fixed;top:0;right:0;bottom:0;width:320px;z-index:1300;background:var(--bg2);box-shadow:-4px 0 24px rgba(0,0,0,0.1);transform:translateX(100%);transition:transform var(--transition);display:flex;flex-direction:column}
+#settings-panel.open{transform:translateX(0)}
+#settings-overlay{position:fixed;inset:0;z-index:1250;background:rgba(0,0,0,0.3);opacity:0;pointer-events:none;transition:opacity var(--transition)}
+#settings-overlay.open{opacity:1;pointer-events:all}
+#settings-panel-header{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+#settings-panel-header h3{font-size:1.1rem}
+#settings-panel-close{cursor:pointer;color:var(--text3);font-size:1.2rem}
+#settings-panel-body{flex:1;padding:20px;overflow-y:auto}
+.setting-group{margin-bottom:24px}
+.setting-group h4{font-size:.8rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:12px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+.setting-row label{font-size:.9rem;color:var(--text2)}
+.toggle{position:relative;width:44px;height:24px;cursor:pointer}
+.toggle input{display:none}
+.toggle .slider{position:absolute;inset:0;background:var(--border);border-radius:24px;transition:all .3s}
+.toggle .slider::before{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:all .3s}
+.toggle input:checked+.slider{background:var(--primary)}
+.toggle input:checked+.slider::before{transform:translateX(20px)}
+#reset-btn{width:100%;padding:10px;border-radius:var(--radius-sm);background:rgba(225,112,85,0.1);border:1px solid var(--error);color:var(--error);font-family:var(--font);font-weight:600;cursor:pointer;font-size:.85rem;transition:all .2s}
+#reset-btn:hover{background:var(--error);color:#fff}
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 20px;border-radius:var(--radius-sm);font-size:.85rem;color:#fff;animation:slideIn .3s ease;max-width:360px;box-shadow:0 4px 16px rgba(0,0,0,0.15)}
+.toast.success{background:var(--success)}
+.toast.error{background:var(--error)}
+.toast.info{background:var(--primary)}
+@keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+@media(max-width:768px){:root{--navbar-h:56px}.navbar{padding:0 12px;gap:8px}.navbar-brand{font-size:1rem}.navbar-progress .bar{width:60px}.section,.chapter{padding:48px 16px}#cover{padding:100px 16px 40px}.cover-stats{gap:16px}.toc-grid{grid-template-columns:1fr}.gloss-list{grid-template-columns:1fr}#settings-panel{width:100%}.cover-title{font-size:clamp(1.8rem,8vw,2.5rem)}}
+@media(max-width:480px){.navbar-progress .bar{width:40px}.btn{padding:10px 20px;font-size:.85rem}}
+</style>
+</head>
+<body>
+<div id="loader"><div id="loader-logo">Deutsch<span>Meister</span></div><div id="loader-bar"><span></span></div></div>
+<div id="toast-container"></div>
+<div id="settings-overlay"></div>
+<div id="settings-panel">
+<div id="settings-panel-header"><h3>Configurações</h3><span id="settings-panel-close">✕</span></div>
+<div id="settings-panel-body">
+<div class="setting-group"><h4>Aparência</h4><div class="setting-row"><label>Modo escuro</label><label class="toggle"><input type="checkbox" id="dark-toggle"><span class="slider"></span></label></div></div>
+<div class="setting-group"><h4>Dificuldade</h4><div class="setting-row"><label>Dificuldade adaptativa</label><label class="toggle"><input type="checkbox" id="adaptive-toggle" checked><span class="slider"></span></label></div></div>
+<div class="setting-group"><h4>Dados</h4><button id="export-btn" class="btn btn-outline btn-sm" style="width:100%;margin-bottom:8px">📤 Exportar progresso</button><button id="import-btn" class="btn btn-outline btn-sm" style="width:100%;margin-bottom:8px">📥 Importar progresso</button><input type="file" id="import-file" accept=".json" style="display:none"><button id="reset-btn">🗑️ Resetar todo o progresso</button></div>
+</div></div>
+<div id="sidebar-overlay"></div>
+<nav class="navbar" id="navbar">
+<button class="navbar-btn" id="menu-btn" aria-label="Menu">☰</button>
+<div class="navbar-brand" onclick="scrollToSection('cover')">Deutsch<span>Meister</span></div>
+<div class="navbar-spacer"></div>
+<div class="navbar-progress"><span id="progress-pct">0%</span><div class="bar"><span id="progress-bar-fill" style="width:0%"></span></div></div>
+<button class="navbar-btn" id="settings-btn" aria-label="Configurações">⚙️</button>
+</nav>
+<aside id="sidebar">
+<div id="sidebar-header"><h2>📚 Capítulos</h2><span id="sidebar-close">✕</span></div>
+<input type="text" id="sidebar-search" placeholder="Buscar capítulos...">
+<div id="sidebar-list"></div>
+</aside>
+<section id="cover">
+<div class="cover-badge">🌟 Curso Completo A1 → B1</div>
+<h1 class="cover-title">Domine o <span>Alemão</span></h1>
+<p class="cover-sub">Do zero absoluto ao nível intermediário com lições interativas, exercícios inteligentes e acompanhamento de progresso — tudo em um só lugar.</p>
+<div class="cover-actions">
+<button class="btn btn-primary" onclick="scrollToSection('intro')">🚀 Começar agora</button>
+<button class="btn btn-outline" onclick="scrollToSection('toc')">📖 Ver conteúdo</button>
+</div>
+<div class="cover-stats">
+<div class="cover-stat"><div class="cover-stat-num" id="stat-chapters">20</div><div class="cover-stat-label">Capítulos</div></div>
+<div class="cover-stat"><div class="cover-stat-num" id="stat-exercises">120+</div><div class="cover-stat-label">Exercícios</div></div>
+<div class="cover-stat"><div class="cover-stat-num" id="stat-words">500+</div><div class="cover-stat-label">Palavras</div></div>
+<div class="cover-stat"><div class="cover-stat-num">3</div><div class="cover-stat-label">Níveis (A1–B1)</div></div>
+</div>
+</section>
+<section id="intro" class="section">
+<div class="section-header"><div class="section-tag">Boas-vindas</div><h2 class="section-title">Bem-vindo ao DeutschMeister</h2><p class="section-desc">Sua jornada completa para aprender alemão do zero absoluto até conversas intermediárias com confiança.</p></div>
+<div class="theory-box"><h3>🎯 Como funciona</h3><p>Este curso foi cuidadosamente estruturado em <strong>20 capítulos</strong> divididos em 3 níveis, seguindo o padrão europeu (CEFR):</p><ul><li><strong>A1 — Iniciante</strong> (Capítulos 1–8): Alfabeto, saudações, números, artigos, presente simples, frases básicas, adjetivos, família.</li><li><strong>A2 — Básico</strong> (Capítulos 9–15): Passado (Perfekt), casos acusativo/dativo, verbos modais, preposições, verbos separáveis, orientação.</li><li><strong>B1 — Intermediário</strong> (Capítulos 16–20): Voz passiva, Konjunktiv II, orações relativas, vocabulário avançado, revisão final.</li></ul><p>Cada capítulo contém <strong>teoria clara</strong>, <strong>exemplos autênticos</strong>, <strong>exercícios interativos</strong> e um <strong>mini teste</strong> final. Seu progresso é salvo automaticamente.</p></div>
+<div class="theory-box"><h3>💡 Dicas de estudo</h3><ul><li>Estude em sequência — os capítulos constroem conhecimento progressivamente.</li><li>Pratique os exercícios até acertar todos.</li><li>Use o glossário para revisar vocabulário novo.</li><li>Ative o modo escuro se preferir estudar à noite.</li><li>Suas notas pessoais ficam salvas automaticamente.</li></ul></div>
+</section>
+<section id="toc" class="section">
+<div class="section-header"><div class="section-tag">Navegação</div><h2 class="section-title">Sumário Interativo</h2><p class="section-desc">Clique em qualquer capítulo para começar. Capítulos são desbloqueados progressivamente.</p></div>
+<div class="toc-grid" id="toc-grid"></div>
+</section>
+<div id="chapters-container"></div>
+<section id="glossary" class="section">
+<div class="section-header"><div class="section-tag">Vocabulário</div><h2 class="section-title">Glossário completo</h2><p class="section-desc">Pesquise, favorite e revise todas as palavras aprendidas durante o curso.</p></div>
+<div class="gloss-cats" id="gloss-cats"></div>
+<div class="gloss-search"><input type="text" id="gloss-search-input" placeholder="Buscar palavra em alemão ou português..."></div>
+<div class="gloss-list" id="gloss-list"></div>
+</section>
+<section id="notes-section" class="section">
+<div class="section-header"><div class="section-tag">Anotações</div><h2 class="section-title">Suas anotações pessoais</h2><p class="section-desc">Escreva suas próprias observações, exemplos ou dúvidas. Salvamos automaticamente.</p></div>
+<textarea id="notes-area" placeholder="Digite suas anotações aqui..."></textarea>
+</section>
+<section id="conclusion">
+<div class="big-icon">🎉</div><h2>Parabéns pela sua jornada!</h2>
+<p>Você completou o curso DeutschMeister. Lembre-se: aprender um idioma é uma jornada contínua. Continue praticando, lendo, ouvindo e falando alemão todos os dias.</p>
+<div class="cover-stats" style="margin-bottom:24px"><div class="cover-stat"><div class="cover-stat-num" id="final-completed">0</div><div class="cover-stat-label">Capítulos</div></div><div class="cover-stat"><div class="cover-stat-num" id="final-pct">0%</div><div class="cover-stat-label">Progresso</div></div></div>
+<div class="cover-actions"><button class="btn btn-primary" onclick="scrollToSection('cover')">🏠 Voltar ao início</button><button class="btn btn-outline" onclick="exportProgress()">📤 Exportar certificado</button></div>
+</section>
+<div style="text-align:center;padding:24px;color:var(--text3);font-size:.8rem;border-top:1px solid var(--border)">DeutschMeister © 2026 — Feito com 💜 para aprendizes de alemão</div>
+<script>
+const CHAPTERS=[
+{id:1,level:'A1',title:'Das Alphabet',desc:'O alfabeto alemão e pronúncia básica',short:'Alfabeto'},
+{id:2,level:'A1',title:'Begrüßungen',desc:'Saudações, apresentações e cortesias',short:'Saudações'},
+{id:3,level:'A1',title:'Die Zahlen',desc:'Números, contagem e datas',short:'Números'},
+{id:4,level:'A1',title:'Artikel & Nomen',desc:'Artigos definidos, indefinidos e substantivos',short:'Artigos'},
+{id:5,level:'A1',title:'Das Präsens',desc:'Presente dos verbos regulares e irregulares',short:'Presente'},
+{id:6,level:'A1',title:'Sätze bilden',desc:'Formação de frases e ordem das palavras',short:'Frases'},
+{id:7,level:'A1',title:'Farben & Adjektive',desc:'Cores, adjetivos e concordância',short:'Adjetivos'},
+{id:8,level:'A1',title:'Meine Familie',desc:'Família, possessivos e descrições',short:'Família'},
+{id:9,level:'A2',title:'Das Perfekt',desc:'Passado com haben/sein e Partizip II',short:'Perfekt'},
+{id:10,level:'A2',title:'Der Akkusativ',desc:'Caso acusativo: artigos e pronomes',short:'Akkusativ'},
+{id:11,level:'A2',title:'Der Dativ',desc:'Caso dativo: artigos e uso',short:'Dativ'},
+{id:12,level:'A2',title:'Modalverben',desc:'Verbos modais: können, müssen, dürfen, sollen, wollen',short:'Modais'},
+{id:13,level:'A2',title:'Präpositionen',desc:'Preposições de lugar, tempo e modo',short:'Preposições'},
+{id:14,level:'A2',title:'Trennbare Verben',desc:'Verbos separáveis no presente e Perfekt',short:'Separáveis'},
+{id:15,level:'A2',title:'Wegbeschreibung',desc:'Direções, transporte e orientação',short:'Direções'},
+{id:16,level:'B1',title:'Das Passiv',desc:'Voz passiva: formação e uso',short:'Passiv'},
+{id:17,level:'B1',title:'Konjunktiv II',desc:'Cortesia, desejos e situações irreais',short:'Konjunktiv II'},
+{id:18,level:'B1',title:'Relativsätze',desc:'Orações relativas com Nominativ, Akkusativ, Dativ',short:'Relativsätze'},
+{id:19,level:'B1',title:'Erweiterter Wortschatz',desc:'Vocabulário avançado: trabalho, saúde, sociedade',short:'Wortschatz'},
+{id:20,level:'B1',title:'Abschlusswiederholung',desc:'Revisão final integrada de todo o curso',short:'Revisão Final'}
+];
+const VOCAB=[
+{de:'Hallo',pt:'Olá',ch:2,cat:'Saudações'},{de:'Tschüss',pt:'Tchau',ch:2,cat:'Saudações'},
+{de:'Guten Morgen',pt:'Bom dia',ch:2,cat:'Saudações'},{de:'Guten Abend',pt:'Boa noite',ch:2,cat:'Saudações'},
+{de:'Gute Nacht',pt:'Boa noite (dormir)',ch:2,cat:'Saudações'},{de:'Auf Wiedersehen',pt:'Até logo',ch:2,cat:'Saudações'},
+{de:'Bitte',pt:'Por favor / De nada',ch:2,cat:'Cortesia'},{de:'Danke',pt:'Obrigado',ch:2,cat:'Cortesia'},
+{de:'Entschuldigung',pt:'Com licença / Desculpe',ch:2,cat:'Cortesia'},{de:'Ja',pt:'Sim',ch:2,cat:'Básico'},
+{de:'Nein',pt:'Não',ch:2,cat:'Básico'},{de:'Wie geht es Ihnen?',pt:'Como vai? (formal)',ch:2,cat:'Saudações'},
+{de:'Mir geht es gut',pt:'Estou bem',ch:2,cat:'Saudações'},{de:'Ich heiße ...',pt:'Eu me chamo ...',ch:2,cat:'Apresentação'},
+{de:'Wie heißt du?',pt:'Como você se chama?',ch:2,cat:'Apresentação'},{de:'Freut mich',pt:'Prazer em conhecê-lo',ch:2,cat:'Apresentação'},
+{de:'eins',pt:'um',ch:3,cat:'Números'},{de:'zwei',pt:'dois',ch:3,cat:'Números'},
+{de:'drei',pt:'três',ch:3,cat:'Números'},{de:'vier',pt:'quatro',ch:3,cat:'Números'},
+{de:'fünf',pt:'cinco',ch:3,cat:'Números'},{de:'sechs',pt:'seis',ch:3,cat:'Números'},
+{de:'sieben',pt:'sete',ch:3,cat:'Números'},{de:'acht',pt:'oito',ch:3,cat:'Números'},
+{de:'neun',pt:'nove',ch:3,cat:'Números'},{de:'zehn',pt:'dez',ch:3,cat:'Números'},
+{de:'zwanzig',pt:'vinte',ch:3,cat:'Números'},{de:'hundert',pt:'cem',ch:3,cat:'Números'},
+{de:'tausend',pt:'mil',ch:3,cat:'Números'},{de:'der',pt:'o (artigo masc)',ch:4,cat:'Artigos'},
+{de:'die',pt:'a (artigo fem)',ch:4,cat:'Artigos'},{de:'das',pt:'o/a (artigo neutro)',ch:4,cat:'Artigos'},
+{de:'ein',pt:'um/uma (masc/neutro)',ch:4,cat:'Artigos'},{de:'eine',pt:'uma (feminino)',ch:4,cat:'Artigos'},
+{de:'Mann',pt:'homem',ch:4,cat:'Substantivos'},{de:'Frau',pt:'mulher',ch:4,cat:'Substantivos'},
+{de:'Kind',pt:'criança',ch:4,cat:'Substantivos'},{de:'Haus',pt:'casa',ch:4,cat:'Substantivos'},
+{de:'Buch',pt:'livro',ch:4,cat:'Substantivos'},{de:'Tisch',pt:'mesa',ch:4,cat:'Substantivos'},
+{de:'sein',pt:'ser/estar (inf)',ch:5,cat:'Verbos'},{de:'haben',pt:'ter (inf)',ch:5,cat:'Verbos'},
+{de:'kommen',pt:'vir',ch:5,cat:'Verbos'},{de:'gehen',pt:'ir',ch:5,cat:'Verbos'},
+{de:'sprechen',pt:'falar',ch:5,cat:'Verbos'},{de:'lesen',pt:'ler',ch:5,cat:'Verbos'},
+{de:'schreiben',pt:'escrever',ch:5,cat:'Verbos'},{de:'trinken',pt:'beber',ch:5,cat:'Verbos'},
+{de:'essen',pt:'comer',ch:5,cat:'Verbos'},{de:'lernen',pt:'aprender',ch:5,cat:'Verbos'},
+{de:'wohnen',pt:'morar',ch:5,cat:'Verbos'},{de:'arbeiten',pt:'trabalhar',ch:5,cat:'Verbos'},
+{de:'rot',pt:'vermelho',ch:7,cat:'Cores'},{de:'blau',pt:'azul',ch:7,cat:'Cores'},
+{de:'grün',pt:'verde',ch:7,cat:'Cores'},{de:'gelb',pt:'amarelo',ch:7,cat:'Cores'},
+{de:'schwarz',pt:'preto',ch:7,cat:'Cores'},{de:'weiß',pt:'branco',ch:7,cat:'Cores'},
+{de:'groß',pt:'grande',ch:7,cat:'Adjetivos'},{de:'klein',pt:'pequeno',ch:7,cat:'Adjetivos'},
+{de:'gut',pt:'bom',ch:7,cat:'Adjetivos'},{de:'schlecht',pt:'ruim',ch:7,cat:'Adjetivos'},
+{de:'schön',pt:'bonito',ch:7,cat:'Adjetivos'},{de:'neu',pt:'novo',ch:7,cat:'Adjetivos'},
+{de:'alt',pt:'velho',ch:7,cat:'Adjetivos'},{de:'schnell',pt:'rápido',ch:7,cat:'Adjetivos'},
+{de:'Mutter',pt:'mãe',ch:8,cat:'Família'},{de:'Vater',pt:'pai',ch:8,cat:'Família'},
+{de:'Schwester',pt:'irmã',ch:8,cat:'Família'},{de:'Bruder',pt:'irmão',ch:8,cat:'Família'},
+{de:'Tochter',pt:'filha',ch:8,cat:'Família'},{de:'Sohn',pt:'filho',ch:8,cat:'Família'},
+{de:'Opa',pt:'avô',ch:8,cat:'Família'},{de:'Oma',pt:'avó',ch:8,cat:'Família'},
+{de:'Onkel',pt:'tio',ch:8,cat:'Família'},{de:'Tante',pt:'tia',ch:8,cat:'Família'},
+{de:'mein',pt:'meu',ch:8,cat:'Possessivos'},{de:'dein',pt:'teu',ch:8,cat:'Possessivos'},
+{de:'sein',pt:'seu (dele)',ch:8,cat:'Possessivos'},{de:'ihr',pt:'seu (dela)',ch:8,cat:'Possessivos'},
+{de:'unser',pt:'nosso',ch:8,cat:'Possessivos'},{de:'euer',pt:'vosso',ch:8,cat:'Possessivos'},
+{de:'gemacht',pt:'feito (Partizip)',ch:9,cat:'Verbos'},{de:'gesagt',pt:'dito (Partizip)',ch:9,cat:'Verbos'},
+{de:'gegessen',pt:'comido (Partizip)',ch:9,cat:'Verbos'},{de:'getrunken',pt:'bebido (Partizip)',ch:9,cat:'Verbos'},
+{de:'gegangen',pt:'ido (Partizip)',ch:9,cat:'Verbos'},{de:'gekommen',pt:'vindo (Partizip)',ch:9,cat:'Verbos'},
+{de:'geschrieben',pt:'escrito (Partizip)',ch:9,cat:'Verbos'},{de:'gespielt',pt:'jogado (Partizip)',ch:9,cat:'Verbos'},
+{de:'gekauft',pt:'comprado (Partizip)',ch:9,cat:'Verbos'},{de:'gelesen',pt:'lido (Partizip)',ch:9,cat:'Verbos'},
+{de:'den',pt:'o (acusativo masc)',ch:10,cat:'Artigos'},{de:'einen',pt:'um (acusativo masc)',ch:10,cat:'Artigos'},
+{de:'dem',pt:'ao (dativo masc/neutro)',ch:11,cat:'Artigos'},{de:'der (Dat)',pt:'à (dativo fem)',ch:11,cat:'Artigos'},
+{de:'können',pt:'poder (saber)',ch:12,cat:'Modais'},{de:'müssen',pt:'precisar / ter que',ch:12,cat:'Modais'},
+{de:'dürfen',pt:'poder (permissão)',ch:12,cat:'Modais'},{de:'sollen',pt:'dever (obrigação)',ch:12,cat:'Modais'},
+{de:'wollen',pt:'querer',ch:12,cat:'Modais'},{de:'mögen',pt:'gostar de',ch:12,cat:'Modais'},
+{de:'möchte',pt:'gostaria',ch:12,cat:'Modais'},{de:'in',pt:'em / dentro',ch:13,cat:'Preposições'},
+{de:'auf',pt:'em cima de',ch:13,cat:'Preposições'},{de:'unter',pt:'embaixo de',ch:13,cat:'Preposições'},
+{de:'neben',pt:'ao lado de',ch:13,cat:'Preposições'},{de:'hinter',pt:'atrás de',ch:13,cat:'Preposições'},
+{de:'vor',pt:'na frente de',ch:13,cat:'Preposições'},{de:'zwischen',pt:'entre',ch:13,cat:'Preposições'},
+{de:'an',pt:'em / junto a',ch:13,cat:'Preposições'},{de:'über',pt:'sobre / acima',ch:13,cat:'Preposições'},
+{de:'aus',pt:'de (dentro de)',ch:13,cat:'Preposições'},{de:'mit',pt:'com',ch:13,cat:'Preposições'},
+{de:'nach',pt:'para / após',ch:13,cat:'Preposições'},{de:'zu',pt:'para (direção)',ch:13,cat:'Preposições'},
+{de:'für',pt:'para (benefício)',ch:13,cat:'Preposições'},{de:'durch',pt:'através de',ch:13,cat:'Preposições'},
+{de:'gegen',pt:'contra',ch:13,cat:'Preposições'},{de:'ohne',pt:'sem',ch:13,cat:'Preposições'},
+{de:'anrufen',pt:'telefonar (separável)',ch:14,cat:'Verbos'},{de:'aufstehen',pt:'levantar-se (separável)',ch:14,cat:'Verbos'},
+{de:'einkaufen',pt:'fazer compras',ch:14,cat:'Verbos'},{de:'mitkommen',pt:'vir junto',ch:14,cat:'Verbos'},
+{de:'aufmachen',pt:'abrir (separável)',ch:14,cat:'Verbos'},{de:'zumachen',pt:'fechar (separável)',ch:14,cat:'Verbos'},
+{de:'links',pt:'esquerda',ch:15,cat:'Direções'},{de:'rechts',pt:'direita',ch:15,cat:'Direções'},
+{de:'geradeaus',pt:'em frente',ch:15,cat:'Direções'},{de:'Bahnhof',pt:'estação de trem',ch:15,cat:'Transporte'},
+{de:'Flughafen',pt:'aeroporto',ch:15,cat:'Transporte'},{de:'Bus',pt:'ônibus',ch:15,cat:'Transporte'},
+{de:'Zug',pt:'trem',ch:15,cat:'Transporte'},{de:'Passiv',pt:'voz passiva',ch:16,cat:'Gramática'},
+{de:'werden + Partizip II',pt:'voz passiva',ch:16,cat:'Gramática'},{de:'würde',pt:'forma cortês / condicional',ch:17,cat:'Gramática'},
+{de:'könnte',pt:'poderia',ch:17,cat:'Gramática'},{de:'wäre',pt:'seria / estaria',ch:17,cat:'Gramática'},
+{de:'hätte',pt:'teria',ch:17,cat:'Gramática'},{de:'möchte',pt:'gostaria',ch:17,cat:'Gramática'},
+{de:'der (Relativ)',pt:'que (rel nom masc)',ch:18,cat:'Gramática'},{de:'die (Relativ)',pt:'que (rel nom fem)',ch:18,cat:'Gramática'},
+{de:'das (Relativ)',pt:'que (rel nom neutro)',ch:18,cat:'Gramática'},{de:'den (Relativ)',pt:'que (rel akk masc)',ch:18,cat:'Gramática'},
+{de:'dem (Relativ)',pt:'que (rel dat masc/neutro)',ch:18,cat:'Gramática'},{de:'Arbeit',pt:'trabalho',ch:19,cat:'Trabalho'},
+{de:'Beruf',pt:'profissão',ch:19,cat:'Trabalho'},{de:'Krankenhaus',pt:'hospital',ch:19,cat:'Saúde'},
+{de:'Arzt',pt:'médico',ch:19,cat:'Saúde'},{de:'Krankenschwester',pt:'enfermeira',ch:19,cat:'Saúde'},
+{de:'Gesellschaft',pt:'sociedade',ch:19,cat:'Sociedade'},{de:'Umwelt',pt:'meio ambiente',ch:19,cat:'Sociedade'},
+{de:'Politik',pt:'política',ch:19,cat:'Sociedade'},{de:'Wirtschaft',pt:'economia',ch:19,cat:'Sociedade'},
+{de:'Bildung',pt:'educação',ch:19,cat:'Sociedade'},{de:'Wissenschaft',pt:'ciência',ch:19,cat:'Sociedade'}
+];
+const VOCAB_UNIQUE=Object.values(Object.fromEntries(VOCAB.map(v=>[v.de.toLowerCase()+'|'+v.pt.toLowerCase(),v])));
+const EX={}; EX[1]=[
+{q:'Como se pronuncia a letra "W" em alemão?',opts:['Vê','Dáblio','Uá'],a:0,h:'O som é similar a "V" em português.',t:'m'},
+{q:'Quantas letras tem o alfabeto alemão padrão?',opts:['26','30','28'],a:0,h:'São 26 letras mais caracteres especiais.',t:'m'},
+{q:'Escreva o som da letra "ß" (eszett) em português:',a:'ss',alts:['ss','s'],h:'O ß representa o som de "ss" duplo.',t:'t'},
+{q:'Qual NÃO é uma letra do alfabeto alemão?',opts:['Ü','Ñ','Ö'],a:1,h:'Ñ não existe em alemão.',t:'m'},
+{q:'O "W" alemão soa como qual letra em português?',opts:['V','F','U'],a:0,h:'W alemão = V português. Ex: Wasser.',t:'m'},
+{q:'Complete: "Die ___ (os) Buchstaben" (artigo plural):',a:'die',alts:['die'],h:'Plural = die.',t:'t'}
+]; EX[2]=[
+{q:'Como se diz "Bom dia" em alemão?',a:'Guten Morgen',alts:['guten morgen','Guten morgen'],h:'Começa com "Guten"...',t:'t'},
+{q:'Como se diz "Obrigado" em alemão?',a:'Danke',alts:['danke'],h:'É curta: D-a-n-k-e.',t:'t'},
+{q:'"Entschuldigung" significa:',opts:['Com licença / Desculpe','Obrigado','Até logo'],a:0,h:'Usado para pedir desculpas.',t:'m'},
+{q:'Ordene: "Wie heißt du?":',w:['Wie','heißt','du'],h:'Interrogativa + verbo + sujeito.',t:'o'},
+{q:'Complete: "Mir ___ es gut"',a:'geht',alts:['geht'],h:'Verbo gehen 3ªp.',t:'t'},
+{q:'"Freut mich" significa:',opts:['Prazer em conhecê-lo','Estou bem','Até logo'],a:0,h:'Expressão de cortesia.',t:'m'}
+]; EX[3]=[
+{q:'Como se diz "três" em alemão?',a:'drei',alts:['drei'],h:'Soa como "drai".',t:'t'},
+{q:'Como se diz "dez" em alemão?',a:'zehn',alts:['zehn'],h:'Soa como "tsên".',t:'t'},
+{q:'"eins, zwei, drei, vier, fünf, sechs, sieben, acht, neun, zehn" — entre "fünf" e "sieben":',opts:['sechs','vier','acht'],a:0,h:'É o 6.',t:'m'},
+{q:'Complete: "21 = ___undzwanzig"',a:'ein',alts:['ein','eins'],h:'Eins perde o s.',t:'t'},
+{q:'Como se diz "cem" em alemão?',a:'hundert',alts:['hundert'],h:'Não confunda com tausend.',t:'t'},
+{q:'"vierundachtzig" é:',opts:['84','48','80'],a:0,h:'Unidade antes da dezena.',t:'m'}
+]; EX[4]=[
+{q:'Artigo de "Mann":',opts:['der','die','das'],a:0,h:'Mann é masculino.',t:'m'},
+{q:'Artigo de "Frau":',opts:['der','die','das'],a:1,h:'Frau é feminino.',t:'m'},
+{q:'Artigo de "Kind":',opts:['der','die','das'],a:2,h:'Kind é neutro.',t:'m'},
+{q:'Artigo indefinido de "Buch":',a:'ein',alts:['ein'],h:'Buch é neutro, então ein.',t:'t'},
+{q:'Complete: "___ Tisch" (um)',a:'Ein',alts:['Ein','einen'],h:'Maskulinum nominativ.',t:'t'},
+{q:'"Das ist ..." significa:',opts:['Isto é','Aqui está','Lá está'],a:0,h:'Expressão básica.',t:'m'}
+]; EX[5]=[
+{q:'Conjugue: "Ich ___ (sein)"',a:'bin',alts:['bin'],h:'Eu sou/estou.',t:'t'},
+{q:'Conjugue: "Er ___ (haben)"',a:'hat',alts:['hat'],h:'Ele tem.',t:'t'},
+{q:'"Du sprichst" significa:',opts:['Tu falas','Ele fala','Nós falamos'],a:0,h:'Du = tu.',t:'m'},
+{q:'Traduza: "nós vamos" (gehen)',a:'wir gehen',alts:['wir gehen'],h:'wir = nós.',t:'t'},
+{q:'Qual é irregular?',opts:['spielen','lesen','kochen'],a:1,h:'lesen muda e→ie.',t:'m'},
+{q:'"Ich lerne Deutsch" significa:',opts:['Eu aprendo alemão','Eu ensino alemão','Eu falo alemão'],a:0,h:'lernen = aprender.',t:'m'}
+]; EX[6]=[
+{q:'Ordene: "Ich spreche ein bisschen Deutsch"',w:['Ich','spreche','ein bisschen','Deutsch'],h:'Sujeito + verbo + objeto.',t:'o'},
+{q:'Traduza: "Você fala português?" (formal)',a:'Sprechen Sie Portugiesisch?',alts:['sprechen sie portugiesisch','Sprechen Sie Portugiesisch?'],h:'Sie formal + verbo.',t:'t'},
+{q:'Posição do verbo em orações principais:',opts:['Segunda posição','Primeira posição','Última posição'],a:0,h:'Verbo em 2ª posição.',t:'m'},
+{q:'Complete: "Er ___ (wohnen) in Berlin"',a:'wohnt',alts:['wohnt'],h:'3ª pessoa singular.',t:'t'},
+{q:'O que "und" significa?',opts:['E','Ou','Mas'],a:0,h:'Conectivo básico.',t:'m'},
+{q:'Traduza: "Nós aprendemos alemão"',a:'Wir lernen Deutsch.',alts:['wir lernen deutsch','Wir lernen Deutsch'],h:'lernen = aprender.',t:'t'}
+]; EX[7]=[
+{q:'"rot" em português é:',opts:['vermelho','azul','verde'],a:0,h:'Cor do sangue.',t:'m'},
+{q:'"schwarz" significa:',opts:['preto','branco','cinza'],a:0,h:'É a cor mais escura.',t:'m'},
+{q:'Complete: "Das Haus ist ___ (grande)"',a:'groß',alts:['groß','gross'],h:'Adjetivo para grande.',t:'t'},
+{q:'"schnell" significa:',opts:['rápido','lento','forte'],a:0,h:'O oposto de langsam.',t:'m'},
+{q:'Traduza: "flores amarelas"',a:'gelbe Blumen',alts:['gelbe Blumen'],h:'Blumen = flores (plural).',t:'t'},
+{q:'"besser" é comparativo de:',opts:['gut','schlecht','groß'],a:0,h:'gut → besser.',t:'m'}
+]; EX[8]=[
+{q:'"Mutter" significa:',opts:['mãe','pai','irmã'],a:0,h:'Parente feminina.',t:'m'},
+{q:'"mein Bruder" significa:',opts:['meu irmão','meu pai','meu primo'],a:0,h:'Bruder = irmão.',t:'m'},
+{q:'"Dein Vater" significa:',opts:['Teu pai','Meu pai','O pai'],a:0,h:'dein = teu.',t:'m'},
+{q:'Complete: "___ (nossa) Mutter"',a:'Unsere',alts:['Unsere','unsere'],h:'unser + e (feminino).',t:'t'},
+{q:'"Ihre Schwester" — "Ihre" refere-se a:',opts:['dela','dele','meu'],a:0,h:'Ihre = possessivo feminino.',t:'m'},
+{q:'Ordene: "Meine Mutter ist Lehrerin"',w:['Meine','Mutter','ist','Lehrerin'],h:'Possessivo + subst + verbo + profissão.',t:'o'}
+]; EX[9]=[
+{q:'Auxiliar para verbos de movimento:',opts:['sein','haben','werden'],a:0,h:'Movimento = sein.',t:'m'},
+{q:'Complete: "Ich ___ (haben) gegessen"',a:'habe',alts:['habe'],h:'haben 1ªp.',t:'t'},
+{q:'Traduza: "eu comi"',a:'Ich habe gegessen.',alts:['ich habe gegessen','Ich habe gegessen'],h:'haben + Partizip.',t:'t'},
+{q:'"gegangen" é Partizip de:',opts:['gehen','kommen','sagen'],a:0,h:'gehen → gegangen.',t:'m'},
+{q:'Complete: "Sie ___ (sein) gekommen"',a:'ist',alts:['ist'],h:'sein 3ªp.',t:'t'},
+{q:'Ordene: "Wir haben Fußball gespielt"',w:['Wir','haben','Fußball','gespielt'],h:'Sujeito + aux + obj + Partizip.',t:'o'}
+]; EX[10]=[
+{q:'"der" no acusativo se torna:',opts:['den','dem','die'],a:0,h:'Apenas masculino muda.',t:'m'},
+{q:'"einen" é (artigo + caso):',opts:['ein (Akkusativ)','ein (Nominativ)','ein (Dativ)'],a:0,h:'Acusativo masculino.',t:'m'},
+{q:'Complete: "Ich sehe ___ (der) Mann"',a:'den',alts:['den'],h:'Maskulinum Akkusativ = den.',t:'t'},
+{q:'"Ich habe ___ (ein) Hund"',a:'einen',alts:['einen'],h:'ein → einen no acusativo.',t:'t'},
+{q:'"Wen" pergunta pelo:',opts:['Objeto direto','Sujeito','Objeto indireto'],a:0,h:'Wen = quem? (acusativo).',t:'m'},
+{q:'Traduza: "Eu vejo a mulher"',a:'Ich sehe die Frau.',alts:['ich sehe die Frau','Ich sehe die Frau'],h:'die Frau não muda.',t:'t'}
+]; EX[11]=[
+{q:'"der" no dativo se torna:',opts:['dem','den','der'],a:0,h:'Maskulinum/Neutrum Dativ.',t:'m'},
+{q:'"die" no dativo se torna:',opts:['der','dem','die'],a:0,h:'Femininum Dativ = der.',t:'m'},
+{q:'Complete: "Ich danke ___ (der) Frau"',a:'der',alts:['der'],h:'danken + Dativ.',t:'t'},
+{q:'Preposição que exige dativo:',opts:['mit','für','durch'],a:0,h:'mit = sempre dativo.',t:'m'},
+{q:'"Ich helfe dem Freund" — "helfen" exige:',opts:['Dativ','Akkusativ','Nominativ'],a:0,h:'helfen + Dativ.',t:'m'},
+{q:'Ordene: "Ich helfe dem Freund"',w:['Ich','helfe','dem','Freund'],h:'Sujeito + verbo + dativo.',t:'o'}
+]; EX[12]=[
+{q:'"Eu posso" (habilidade) em alemão:',a:'Ich kann',alts:['ich kann','Ich kann'],h:'können 1ªp.',t:'t'},
+{q:'"Du musst" significa:',opts:['Tu precisas','Tu podes','Tu queres'],a:0,h:'müssen = necessidade.',t:'m'},
+{q:'"Ihr dürft" significa:',opts:['Vós podeis','Nós podemos','Eles podem'],a:0,h:'dürfen = permissão.',t:'m'},
+{q:'Traduza: "Nós queremos aprender"',a:'Wir wollen lernen.',alts:['wir wollen lernen','Wir wollen lernen'],h:'wollen + infinitivo.',t:'t'},
+{q:'"möchte" é cortesia de:',opts:['mögen','können','wollen'],a:0,h:'mögen → möchte (Konjunktiv).',t:'m'},
+{q:'Ordene: "Er kann gut singen"',w:['Er','kann','gut','singen'],h:'Sujeito + modal + adv + inf.',t:'o'}
+]; EX[13]=[
+{q:'"auf" significa:',opts:['em cima de','embaixo de','ao lado de'],a:0,h:'Antônimo de unter.',t:'m'},
+{q:'"neben" significa:',opts:['ao lado de','atrás de','entre'],a:0,h:'Posição adjacente.',t:'m'},
+{q:'Complete: "Das Buch ist ___ (auf) dem Tisch" (dativo)',a:'auf',alts:['auf',],h:'auf + Dativ (posição).',t:'t'},
+{q:'"Ich gehe in ___ (der) Schule" (mov → akk)',opts:['die','der','den'],a:0,h:'die Schule, movimento → acusativo = die.',t:'m'},
+{q:'"Wohin?" pergunta por:',opts:['Direção/movimento','Posição estática','Tempo'],a:0,h:'Wohin = para onde? → Akk.',t:'m'},
+{q:'Traduza: "Vou para o mercado" (der Supermarkt)',a:'Ich gehe in den Supermarkt.',alts:['ich gehe in den supermarkt','Ich gehe in den Supermarkt'],h:'Movimento → Akk: der → den.',t:'t'}
+]; EX[14]=[
+{q:'"aufstehen" significa:',opts:['levantar-se','sentar-se','deitar-se'],a:0,h:'stehen + auf = levantar.',t:'m'},
+{q:'No presente, o prefixo separável vai:',opts:['para o final','para o início','permanece junto'],a:0,h:'Prefixo separado vai ao final.',t:'m'},
+{q:'Complete: "Ich ___ (einkaufen) morgen"',a:'kaufe ein',alts:['kaufe ein'],h:'kaufen conjugado + ein no final.',t:'t'},
+{q:'"Sie ruft ihn ___" (anrufen)',a:'an',alts:['an'],h:'Prefix an vai ao final.',t:'t'},
+{q:'No Perfekt: "aufhören" → ______',opts:['aufgehört','geaufhört','aufgehören'],a:0,h:'ge- entre prefixo e radical.',t:'m'},
+{q:'Ordene: "Wir stehen um 7 Uhr auf"',w:['Wir','stehen','um 7 Uhr','auf'],h:'Sujeito + verbo + complementos + prefixo.',t:'o'}
+]; EX[15]=[
+{q:'"links" significa:',opts:['esquerda','direita','reto'],a:0,h:'Oposto de rechts.',t:'m'},
+{q:'"geradeaus" significa:',opts:['em frente','esquerda','direita'],a:0,h:'Indica "reto".',t:'m'},
+{q:'Pergunta para "Onde fica o trem?"',a:'Wo ist der Bahnhof?',alts:['wo ist der bahnhof','Wo ist der Bahnhof'],h:'Bahnhof = estação de trem.',t:'t'},
+{q:'"Ich fahre mit dem Bus" — caso de "dem Bus":',opts:['Dativ','Akkusativ','Nominativ'],a:0,h:'mit exige Dativ.',t:'m'},
+{q:'"Der Flughafen" significa:',opts:['aeroporto','estação','porto'],a:0,h:'Flug = voo, Hafen = porto.',t:'m'},
+{q:'Complete: "Gehen Sie ___ (rechts)"',a:'rechts',alts:['rechts','nach rechts'],h:'rechts = direita.',t:'t'}
+]; EX[16]=[
+{q:'Formação da voz passiva:',opts:['werden + Partizip II','sein + Partizip II','haben + Partizip II'],a:0,h:'werden + Partizip.',t:'m'},
+{q:'Traduza: "A carta é escrita" (der Brief, schreiben)',a:'Der Brief wird geschrieben.',alts:['der brief wird geschrieben','Der Brief wird geschrieben'],h:'wird + geschrieben.',t:'t'},
+{q:'"wurde" indica passado em:',opts:['Präteritum do Passiv','Perfekt do Passiv','Futuro'],a:0,h:'wurde = passado de werden.',t:'m'},
+{q:'Complete: "Das Haus ___ (werden) gebaut"',a:'wird',alts:['wird'],h:'werden 3ªp = wird.',t:'t'},
+{q:'Ordene: "Das Fenster wird geöffnet"',w:['Das','Fenster','wird','geöffnet'],h:'Artikel + Subst + werden + Partizip.',t:'o'},
+{q:'Traduza: "O trabalho é feito" (die Arbeit)',a:'Die Arbeit wird gemacht.',alts:['die arbeit wird gemacht','Die Arbeit wird gemacht'],h:'Die Arbeit = o trabalho (fem).',t:'t'}
+]; EX[17]=[
+{q:'"Ich würde" expressa:',opts:['Cortesia / desejos','Fatos concretos','Ordens'],a:0,h:'Konjunktiv II = cortesia.',t:'m'},
+{q:'Traduza: "Eu gostaria de um café"',a:'Ich möchte einen Kaffee.',alts:['ich möchte einen kaffee','Ich möchte einen Kaffee'],h:'möchte = gostaria.',t:'t'},
+{q:'"Wäre das möglich?" — "wäre" é Konjunktiv de:',opts:['sein','haben','werden'],a:0,h:'sein → wäre (Konjunktiv II).',t:'m'},
+{q:'"Wenn ich Zeit hätte" — "hätte" significa:',opts:['teria','tinha','tive'],a:0,h:'Condição irreal.',t:'m'},
+{q:'"Könntest du mir helfen?" significa:',opts:['Você poderia me ajudar?','Você pode me ajudar?','Você quer me ajudar?'],a:0,h:'könntest = poderia.',t:'m'},
+{q:'Ordene: "Ich würde gern reisen"',w:['Ich','würde','gern','reisen'],h:'Sujeito + würde + adv + inf.',t:'o'}
+]; EX[18]=[
+{q:'Pronome relativo Nominativ masculino:',opts:['der','den','dem'],a:0,h:'Nom mask = der.',t:'m'},
+{q:'Pronome relativo Akkusativ feminino:',opts:['die','der','den'],a:0,h:'Akk fem = die.',t:'m'},
+{q:'Complete: "Der Mann, ___ hier ist" (quem)',a:'der',alts:['der'],h:'Nominativ mask = der.',t:'t'},
+{q:'Em oração relativa, o verbo vai para:',opts:['o final','2ª posição','1ª posição'],a:0,h:'Subordinada = verbo no final.',t:'m'},
+{q:'Traduza: "O livro que eu leio" (das Buch)',a:'Das Buch, das ich lese.',alts:['das buch das ich lese','Das Buch, das ich lese'],h:'das (Relativ) + ich + lese.',t:'t'},
+{q:'Ordene: "Das ist das Buch, das ich lese"',w:['Das','ist','das Buch,','das','ich','lese'],h:'Principal + relativa.',t:'o'}
+]; EX[19]=[
+{q:'"die Arbeit" significa:',opts:['o trabalho','o escritório','o emprego'],a:0,h:'Arbeit = trabalho.',t:'m'},
+{q:'"Der Arzt" significa:',opts:['o médico','o advogado','o professor'],a:0,h:'Profissional da saúde.',t:'m'},
+{q:'"Krankenhaus" é:',opts:['hospital','farmácia','clínica'],a:0,h:'Krank = doente, Haus = casa.',t:'m'},
+{q:'"Umwelt" significa:',opts:['meio ambiente','economia','sociedade'],a:0,h:'Um = ao redor, Welt = mundo.',t:'m'},
+{q:'"Gesellschaft" significa:',opts:['sociedade','empresa','amizade'],a:0,h:'Termo amplo para sociedade.',t:'m'},
+{q:'Complete: "Er hat ___ (ein) wichtigen Beruf"',a:'einen',alts:['einen'],h:'Akkusativ mask = einen.',t:'t'}
+]; EX[20]=[
+{q:'NÃO é palavra alemã:',opts:['Schokolade','Computador','Fernseher'],a:1,h:'Computador é português. Alemão: Computer.',t:'m'},
+{q:'Traduza: "Estou aprendendo alemão há um ano"',a:'Ich lerne seit einem Jahr Deutsch.',alts:['ich lerne seit einem jahr deutsch','Ich lerne seit einem Jahr Deutsch'],h:'seit + Dativ.',t:'t'},
+{q:'Ordem correta com "weil":',opts:['..., weil ich Deutsch lerne.','..., weil ich lerne Deutsch.','..., weil Deutsch ich lerne.'],a:0,h:'weil → verbo no final.',t:'m'},
+{q:'Complete: "Ich hoffe, dass du ___ (kommen) kannst"',a:'kommen',alts:['kommen'],h:'dass + verbo no final.',t:'t'},
+{q:'Traduza: "Se eu fosse rico, viajaria" (Konjunktiv II)',a:'Wenn ich reich wäre, würde ich reisen.',alts:['wenn ich reich wäre würde ich reisen','Wenn ich reich wäre, würde ich reisen'],h:'wäre (fosse) + würde...reisen.',t:'t'},
+{q:'Ordene: "Ich glaube, dass er morgen kommt"',w:['Ich','glaube,','dass','er','morgen','kommt'],h:'dass + sujeito + comp + verbo.',t:'o'}
+];
+let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true};
+function loadState(){try{const r=localStorage.getItem('deutschmeister_state');if(r){const p=JSON.parse(r);state={...state,...p}}}catch(e){}}
+function saveState(){try{localStorage.setItem('deutschmeister_state',JSON.stringify(state))}catch(e){}}
+function $(s,c){return(c||document).querySelector(s)}
+function $$(s,c){return Array.from((c||document).querySelectorAll(s))}
+function scrollToSection(id){const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})}
+function normalize(s){return s.toLowerCase().trim().replace(/[.,!?;:]/g,'').replace(/\s+/g,' ')}
+function isSimilar(u,a){if(Array.isArray(a))return a.some(x=>normalize(u)===normalize(x));return normalize(u)===normalize(a)}
+function toast(msg,t){const c=$('#toast-container');const d=document.createElement('div');d.className='toast '+(t||'info');d.textContent=msg;c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .3s';setTimeout(()=>d.remove(),300)},3000)}
+function getChapter(id){return CHAPTERS.find(c=>c.id===id)}
+function isUnlocked(id){if(id===1)return true;const p=getChapter(id-1);return p&&state.progress[p.id]&&state.progress[p.id].testPassed}
+function isCompleted(id){return state.completed[id]===true}
+function getProgress(id){const p=state.progress[id];if(!p)return 0;const exs=EX[id]||[];let tot=exs.length+1,done=0;if(p.exercisesDone)done+=p.exercisesDone;if(p.testPassed)done+=1;return tot>0?Math.round(done/tot*100):0}
+function getOverall(){let t=0,d=0;CHAPTERS.forEach(c=>{t+=100;d+=getProgress(c.id)});return t>0?Math.round(d/t*100):0}
+function getCompleted(){return CHAPTERS.filter(c=>isCompleted(c.id)).length}
+const THEORY={}; const TH=THEORY;
+TH[1]='<h3>📖 O Alfabeto Alemão (Das deutsche Alphabet)</h3><p>O alfabeto alemão tem as mesmas <strong>26 letras</strong> do alfabeto latino, mais <strong>4 caracteres especiais</strong>: Ä, Ö, Ü (Umlaute) e ß (Eszett).</p><div class="table-wrap"><table><tr><th>Letra</th><th>Nome em Alemão</th><th>Pronúncia Aprox.</th></tr><tr><td>A a</td><td>A</td><td>"a" (pato)</td></tr><tr><td>B b</td><td>Be</td><td>"bê"</td></tr><tr><td>C c</td><td>Ce</td><td>"tsê"</td></tr><tr><td>D d</td><td>De</td><td>"dê"</td></tr><tr><td>E e</td><td>E</td><td>"ê"</td></tr><tr><td>F f</td><td>Ef</td><td>"éf"</td></tr><tr><td>G g</td><td>Ge</td><td>"guê"</td></tr><tr><td>H h</td><td>Ha</td><td>"rá" (aspirado)</td></tr><tr><td>I i</td><td>I</td><td>"i"</td></tr><tr><td>J j</td><td>Jot</td><td>"iôt"</td></tr><tr><td>K k</td><td>Ka</td><td>"ká"</td></tr><tr><td>L l</td><td>El</td><td>"él"</td></tr><tr><td>M m</td><td>Em</td><td>"ém"</td></tr><tr><td>N n</td><td>En</td><td>"én"</td></tr><tr><td>O o</td><td>O</td><td>"o"</td></tr><tr><td>P p</td><td>Pe</td><td>"pê"</td></tr><tr><td>Q q</td><td>Qu</td><td>"ku"</td></tr><tr><td>R r</td><td>Er</td><td>"ér" (r vibrante/uvular)</td></tr><tr><td>S s</td><td>Es</td><td>"és"</td></tr><tr><td>T t</td><td>Te</td><td>"tê"</td></tr><tr><td>U u</td><td>U</td><td>"u"</td></tr><tr><td>V v</td><td>Vau</td><td>"fau" (som de F)</td></tr><tr><td>W w</td><td>We</td><td>"vê" (som de V!)</td></tr><tr><td>X x</td><td>Ix</td><td>"iks"</td></tr><tr><td>Y y</td><td>Ypsilon</td><td>"üpsilon"</td></tr><tr><td>Z z</td><td>Zett</td><td>"tsét"</td></tr></table></div><h4>🔤 Caracteres Especiais</h4><p><strong>Ä ä</strong> — pronuncia-se "é" (Mädchen = menina)<br><strong>Ö ö</strong> — som entre ê e i, lábios arredondados (schön = bonito)<br><strong>Ü ü</strong> — som de u com lábios de i (grün = verde)<br><strong>ß</strong> — Eszett, som de "ss" (Straße = rua)</p><div class="example"><strong>💡 Importante:</strong><span>A letra <strong>W</strong> soa como <strong>V</strong>! Ex: "Wasser" (água) = "vásser". O <strong>V</strong> soa como <strong>F</strong>: "Vogel" (pássaro) = "fógel".</span></div><h4>🎯 Regras de Pronúncia</h4><ul><li><strong>CH</strong> — após a/o/u: gutural (Buch). Após e/i/ä/ö/ü: palatal (ich).</li><li><strong>SCH</strong> — som de "x" (Schule = escola).</li><li><strong>SP/ST</strong> — no início: "xp"/"xt" (Sport, Straße).</li><li><strong>EI</strong> — soa "ai" (mein = main). <strong>IE</strong> — soa "i" (Liebe = libe).</li><li><strong>EU/ÄU</strong> — soa "oi" (Deutsch = doitch, Häuser = hóiser).</li></ul>';
+TH[2]='<h3>👋 Saudações e Apresentações</h3><p>As saudações são o primeiro passo. É importante saber diferenciar o tratamento <strong>formal (Sie)</strong> do <strong>informal (du)</strong>.</p><div class="table-wrap"><table><tr><th>Alemão</th><th>Português</th><th>Contexto</th></tr><tr><td>Hallo!</td><td>Olá!</td><td>Informal/neutro</td></tr><tr><td>Guten Morgen!</td><td>Bom dia!</td><td>Até ~10h</td></tr><tr><td>Guten Tag!</td><td>Boa tarde!</td><td>10h–18h</td></tr><tr><td>Guten Abend!</td><td>Boa noite!</td><td>Após 18h</td></tr><tr><td>Gute Nacht!</td><td>Boa noite!</td><td>Ao dormir</td></tr><tr><td>Tschüss!</td><td>Tchau!</td><td>Informal</td></tr><tr><td>Auf Wiedersehen!</td><td>Até logo!</td><td>Formal</td></tr></table></div><div class="example"><strong class="de">Ich heiße Anna.</strong><span class="pt">Eu me chamo Anna.</span><strong class="de">Wie heißt du?</strong><span class="pt">Como você se chama? (informal)</span><strong class="de">Wie heißen Sie?</strong><span class="pt">Como o(a) sr(a) se chama? (formal)</span><strong class="de">Freut mich!</strong><span class="pt">Prazer em conhecê-lo(a)!</span></div><h4>📌 Du vs. Sie</h4><p><strong>DU</strong> (informal): amigos, família, crianças, colegas próximos.<br><strong>SIE</strong> (formal): estranhos, superiores, idosos, contexto profissional. Sempre com S maiúsculo.</p><div class="note">Na dúvida, use "Sie". É melhor ser formal demais!</div><h4>💬 Como está você?</h4><div class="example"><strong class="de">Wie geht es Ihnen?</strong><span class="pt">Como vai? (formal)</span><strong class="de">Wie geht es dir?</strong><span class="pt">Como vai? (informal)</span><strong class="de">Mir geht es gut.</strong><span class="pt">Estou bem.</span><strong class="de">So lala.</strong><span class="pt">Mais ou menos.</span><strong class="de">Und Ihnen?</strong><span class="pt">E o(a) sr(a)?</span></div>';
+TH[3]='<h3>🔢 Números em Alemão (Die Zahlen)</h3><div class="table-wrap"><table><tr><th>N</th><th>Alemão</th><th>N</th><th>Alemão</th></tr><tr><td>0</td><td>null</td><td>11</td><td>elf</td></tr><tr><td>1</td><td>eins</td><td>12</td><td>zwölf</td></tr><tr><td>2</td><td>zwei</td><td>13</td><td>dreizehn</td></tr><tr><td>3</td><td>drei</td><td>14</td><td>vierzehn</td></tr><tr><td>4</td><td>vier</td><td>15</td><td>fünfzehn</td></tr><tr><td>5</td><td>fünf</td><td>16</td><td>sechzehn</td></tr><tr><td>6</td><td>sechs</td><td>17</td><td>siebzehn</td></tr><tr><td>7</td><td>sieben</td><td>18</td><td>achtzehn</td></tr><tr><td>8</td><td>acht</td><td>19</td><td>neunzehn</td></tr><tr><td>9</td><td>neun</td><td>20</td><td>zwanzig</td></tr><tr><td>10</td><td>zehn</td><td></td><td></td></tr></table></div><h4>🧮 Dezenas e Compostos</h4><p>20=zwanzig, 30=dreißig, 40=vierzig, 50=fünfzig, 60=sechzig, 70=siebzig, 80=achtzig, 90=neunzig.</p><p><strong>Atenção!</strong> Unidade ANTES da dezena, com "und":</p><div class="example"><strong>21</strong> = einundzwanzig (1e20)<br><strong>47</strong> = siebenundvierzig (7e40)<br><strong>99</strong> = neunundneunzig (9e90)</div><h4>💯 Centenas e Milhares</h4><p>100=hundert, 200=zweihundert, 1000=tausend, 1.000.000=eine Million.</p><div class="example">125 = einhundertfünfundzwanzig<br>2024 = zweitausendvierundzwanzig</div><h4>📅 Datas</h4><p>Usa-se ordinal + "." + mês: 1. Januar (erster Januar), 25. Dezember (fünfundzwanzigster Dezember).</p><div class="note">Meses: Januar, Februar, März, April, Mai, Juni, Juli, August, September, Oktober, November, Dezember.</div>';
+TH[4]='<h3>📦 Artigos e Substantivos (Artikel und Nomen)</h3><table><tr><th>Gênero</th><th>Definido</th><th>Indefinido</th><th>Exemplo</th></tr><tr><td>Masculino</td><td>der</td><td>ein</td><td>der/ein Mann</td></tr><tr><td>Feminino</td><td>die</td><td>eine</td><td>die/eine Frau</td></tr><tr><td>Neutro</td><td>das</td><td>ein</td><td>das/ein Kind</td></tr><tr><td>Plural</td><td>die</td><td>—</td><td>die Kinder</td></tr></table><div class="note"><strong>Dica:</strong> SEMPRE aprenda o substantivo COM o artigo!</div><h4>📝 Gênero por terminação</h4><table><tr><th>Masculino (der)</th><th>Feminino (die)</th><th>Neutro (das)</th></tr><tr><td>-er, -el, -en, -ling</td><td>-e, -ung, -heit, -keit, -schaft, -ion, -tät</td><td>-chen, -lein, -um, -ment, -tum</td></tr></table><div class="example"><strong class="de">Der Lehrer</strong><span class="pt">o professor</span><strong class="de">Die Zeitung</strong><span class="pt">o jornal</span><strong class="de">Das Mädchen</strong><span class="pt">a menina</span></div><h4>🌍 Nacionalidades</h4><div class="example"><strong class="de">Er ist brasilianisch.</strong><span class="pt">Ele é brasileiro.</span><strong class="de">Ich komme aus Brasilien.</strong><span class="pt">Eu venho do Brasil.</span></div>';
+TH[5]='<h3>⚡ Presente do Indicativo (Das Präsens)</h3><p>O Präsens é o tempo mais usado, para ações presentes e futuras.</p><h4>🔧 Verbos Regulares</h4><p>Radical + terminação:</p><div class="example"><strong>spielen (jogar):</strong><br>ich spiel<strong>e</strong>, du spiel<strong>st</strong>, er spiel<strong>t</strong>, wir spiel<strong>en</strong>, ihr spiel<strong>t</strong>, sie spiel<strong>en</strong></div><h4>⚠️ Irregulares (mudança de vogal)</h4><table><tr><th>Verbo</th><th>du</th><th>er/sie/es</th></tr><tr><td>sprechen (falar)</td><td>sprichst</td><td>spricht</td></tr><tr><td>lesen (ler)</td><td>liest</td><td>liest</td></tr><tr><td>sehen (ver)</td><td>siehst</td><td>sieht</td></tr><tr><td>essen (comer)</td><td>isst</td><td>isst</td></tr><tr><td>fahren (dirigir)</td><td>fährst</td><td>fährt</td></tr><tr><td>schlafen (dormir)</td><td>schläfst</td><td>schläft</td></tr></table><h4>🌟 Os 3 Mais Importantes</h4><div class="example"><strong>sein:</strong> ich bin, du bist, er ist, wir sind, ihr seid, sie sind<br><strong>haben:</strong> ich habe, du hast, er hat, wir haben, ihr habt, sie haben<br><strong>werden:</strong> ich werde, du wirst, er wird, wir werden, ihr werdet, sie werden</div>';
+TH[6]='<h3>📐 Formação de Frases (Sätze bilden)</h3><h4>📌 Regra de Ouro: Verbo em 2ª Posição</h4><p>Em orações principais declarativas, o verbo conjugado SEMPRE ocupa a segunda posição.</p><div class="example"><strong class="de">Ich lerne Deutsch.</strong><span class="pt">1: Ich, 2: lerne</span><strong class="de">Heute lerne ich Deutsch.</strong><span class="pt">1: Heute, 2: lerne, 3: ich</span></div><h4>❓ Perguntas</h4><p><strong>Sim/Não:</strong> Verbo na 1ª posição: <strong>Lernst du Deutsch?</strong></p><p><strong>W-Fragen:</strong> Palavra W + verbo + sujeito.</p><div class="example"><strong class="de">Wo wohnst du?</strong><span class="pt">Onde moras?</span><strong class="de">Wie heißt sie?</strong><span class="pt">Como ela se chama?</span><strong class="de">Was machst du?</strong><span class="pt">O que fazes?</span></div><h4>📋 W-Fragen</h4><p>Wer? (quem), Was? (o quê), Wo? (onde), Wohin? (para onde), Woher? (de onde), Wie? (como), Wann? (quando), Warum? (por quê), Welcher/e/es? (qual), Wie viel? (quanto).</p><h4>🔗 Conectivos</h4><p><strong>und</strong> (e), <strong>oder</strong> (ou), <strong>aber</strong> (mas) — não alteram a posição do verbo.</p>';
+TH[7]='<h3>🎨 Cores e Adjetivos (Farben und Adjektive)</h3><h4>🌈 Cores</h4><p>rot (vermelho), blau (azul), grün (verde), gelb (amarelo), schwarz (preto), weiß (branco), orange, rosa, lila, braun (marrom), grau (cinza).</p><h4>📝 Predicativos vs. Atributivos</h4><p><strong>Predicativos</strong> (com sein): não mudam. Ex: <em>Das Haus ist groß.</em></p><p><strong>Atributivos</strong> (antes do substantivo): recebem terminações.</p><h4>🔤 Declinação (Nominativo)</h4><table><tr><th></th><th>Masc</th><th>Fem</th><th>Neutro</th><th>Plural</th></tr><tr><td>c/ der</td><td>der große Mann</td><td>die große Frau</td><td>das große Kind</td><td>die großen Kinder</td></tr><tr><td>c/ ein</td><td>ein großer Mann</td><td>eine große Frau</td><td>ein großes Kind</td><td>— große Kinder</td></tr></table><h4>📈 Comparativo e Superlativo</h4><div class="example"><strong>Comparativo:</strong> -er. Ex: schneller (mais rápido)<br><strong>Superlativo:</strong> am -sten. Ex: am schnellsten (o mais rápido)<br><strong>Irregulares:</strong> gut → besser → am besten; viel → mehr → am meisten</div>';
+TH[8]='<h3>👨‍👩‍👧‍👦 Família e Possessivos</h3><h4>👪 Membros</h4><p>der Vater (pai), die Mutter (mãe), der Bruder (irmão), die Schwester (irmã), der Sohn (filho), die Tochter (filha), der Opa (avô), die Oma (avó), der Onkel (tio), die Tante (tia).</p><h4>📌 Pronomes Possessivos (Nominativo)</h4><table><tr><th></th><th>Masc</th><th>Fem</th><th>Neutro</th><th>Plural</th></tr><tr><td>meu</td><td>mein</td><td>meine</td><td>mein</td><td>meine</td></tr><tr><td>teu</td><td>dein</td><td>deine</td><td>dein</td><td>deine</td></tr><tr><td>dele</td><td>sein</td><td>seine</td><td>sein</td><td>seine</td></tr><tr><td>dela</td><td>ihr</td><td>ihre</td><td>ihr</td><td>ihre</td></tr><tr><td>nosso</td><td>unser</td><td>unsere</td><td>unser</td><td>unsere</td></tr><tr><td>vosso</td><td>euer</td><td>eure</td><td>euer</td><td>eure</td></tr><tr><td>deles</td><td>ihr</td><td>ihre</td><td>ihr</td><td>ihre</td></tr><tr><td>formal</td><td>Ihr</td><td>Ihre</td><td>Ihr</td><td>Ihre</td></tr></table><div class="example"><strong class="de">Mein Vater ist Arzt.</strong><span class="pt">Meu pai é médico.</span><strong class="de">Ihre Schwester heißt Maria.</strong><span class="pt">A irmã dela chama-se Maria.</span></div>';
+TH[9]='<h3>⏳ Passado: Perfekt</h3><p>O Perfekt é o passado mais usado em conversas. É formado por <strong>haben/sein</strong> + <strong>Partizip II</strong>.</p><h4>🔨 Partizip II</h4><p><strong>Regulares:</strong> ge- + radical + -t: machen → gemacht, spielen → gespielt.</p><p><strong>Irregulares:</strong> ge- + radical (modif.) + -en: gehen → gegangen, kommen → gekommen, essen → gegessen, schreiben → geschrieben.</p><p>Verbos em -ieren NÃO recebem ge-: studieren → studiert.</p><h4>🤔 Haben ou Sein?</h4><table><tr><th>haben</th><th>sein</th></tr><tr><td>Verbos transitivos (com obj)</td><td>Verbos de movimento</td></tr><tr><td>Verbos reflexivos</td><td>Mudança de estado</td></tr><tr><td>Modais</td><td>bleiben, sein, werden</td></tr></table><h4>📝 Estrutura</h4><p>Auxiliar em 2ª posição, Partizip no FINAL.</p><div class="example"><strong class="de">Ich habe einen Kaffee getrunken.</strong><span class="pt">Eu bebi um café.</span><strong class="de">Sie ist nach Berlin gefahren.</strong><span class="pt">Ela foi a Berlim.</span></div>';
+TH[10]='<h3>🎯 Caso Acusativo (Akkusativ)</h3><p>O acusativo é o caso do <strong>objeto direto</strong> — quem recebe a ação.</p><table><tr><th></th><th>Masc</th><th>Fem</th><th>Neutro</th><th>Plural</th></tr><tr><td>Definido</td><td>der→<strong>den</strong></td><td>die→die</td><td>das→das</td><td>die→die</td></tr><tr><td>Indefinido</td><td>ein→<strong>einen</strong></td><td>eine→eine</td><td>ein→ein</td><td>—</td></tr></table><p><strong>Só o masculino muda!</strong></p><h4>🔍 Verbos com Acusativo</h4><div class="example"><strong class="de">Ich sehe den Mann.</strong><span class="pt">Eu vejo o homem.</span><strong class="de">Ich habe einen Hund.</strong><span class="pt">Eu tenho um cachorro.</span><strong class="de">Er kauft das Buch.</strong><span class="pt">Ele compra o livro.</span></div><h4>📌 Perguntas</h4><p><strong>Wen?</strong> (quem?) para pessoas. <strong>Was?</strong> (o quê?) para coisas.</p>';
+TH[11]='<h3>🎯 Caso Dativo (Dativ)</h3><p>O dativo é o caso do <strong>objeto indireto</strong> — a quem se dá ou para quem se faz algo. Responde a "Wem?" (a quem?).</p><table><tr><th></th><th>Masc</th><th>Neutro</th><th>Fem</th><th>Plural</th></tr><tr><td>Definido</td><td>dem</td><td>dem</td><td>der</td><td>den (+n)</td></tr><tr><td>Indefinido</td><td>einem</td><td>einem</td><td>einer</td><td>—</td></tr></table><div class="note">No dativo plural, adiciona-se -n ao substantivo: den Kindern, den Männern.</div><h4>🔍 Verbos com Dativo</h4><div class="example"><strong class="de">Ich danke dem Freund.</strong><span class="pt">Agradeço ao amigo.</span><strong class="de">Er hilft der Frau.</strong><span class="pt">Ele ajuda a mulher.</span><strong class="de">Das gefällt dem Kind.</strong><span class="pt">Isso agrada à criança.</span></div><h4>📌 Verbo com Dativo + Acusativo</h4><div class="example"><strong class="de">Ich gebe dem Kind einen Apfel.</strong><span class="pt">Eu dou uma maçã à criança.</span><strong class="de">Sie sagt der Mutter die Wahrheit.</strong><span class="pt">Ela diz a verdade à mãe.</span></div><p><strong>Regra:</strong> Pessoa (DAT) + Coisa (AKK).</p>';
+TH[12]='<h3>🔧 Verbos Modais (Modalverben)</h3><table><tr><th>Modal</th><th>Sentido</th><th>ich</th><th>du</th><th>er/es/sie</th></tr><tr><td>können</td><td>poder (saber)</td><td>kann</td><td>kannst</td><td>kann</td></tr><tr><td>müssen</td><td>precisar</td><td>muss</td><td>musst</td><td>muss</td></tr><tr><td>dürfen</td><td>poder (permissão)</td><td>darf</td><td>darfst</td><td>darf</td></tr><tr><td>sollen</td><td>dever (moral)</td><td>soll</td><td>sollst</td><td>soll</td></tr><tr><td>wollen</td><td>querer</td><td>will</td><td>willst</td><td>will</td></tr><tr><td>mögen</td><td>gostar</td><td>mag</td><td>magst</td><td>mag</td></tr></table><h4>📌 Estrutura</h4><p>Modal conjugado em 2ª posição + verbo principal no <strong>infinitivo</strong> no <strong>final</strong>.</p><div class="example"><strong class="de">Ich kann Deutsch sprechen.</strong><span class="pt">Eu sei falar alemão.</span><strong class="de">Du musst jetzt gehen.</strong><span class="pt">Tu precisas ir agora.</span><strong class="de">Wir wollen morgen reisen.</strong><span class="pt">Queremos viajar amanhã.</span></div><h4>💡 möchte (gostaria)</h4><p>Konjunktiv II de mögen: ich möchte, du möchtest, er möchte, wir möchten, ihr möchtet, sie möchten.</p><div class="example"><strong class="de">Ich möchte einen Kaffee, bitte.</strong><span class="pt">Gostaria de um café, por favor.</span></div>';
+TH[13]='<h3>📍 Preposições (Präpositionen)</h3><h4>📌 Dativo (sempre)</h4><p><strong>aus</strong> (de dentro), <strong>bei</strong> (perto de), <strong>mit</strong> (com), <strong>nach</strong> (para/após), <strong>seit</strong> (desde), <strong>von</strong> (de), <strong>zu</strong> (para).</p><div class="example"><strong class="de">Ich komme aus Brasilien.</strong><span class="pt">Venho do Brasil.</span><strong class="de">Er fährt mit dem Bus.</strong><span class="pt">Ele vai de ônibus.</span></div><h4>📌 Acusativo (sempre)</h4><p><strong>durch</strong> (através), <strong>für</strong> (para), <strong>gegen</strong> (contra), <strong>ohne</strong> (sem), <strong>um</strong> (ao redor).</p><div class="example"><strong class="de">Das Geschenk ist für dich.</strong><span class="pt">O presente é para ti.</span></div><h4>🔄 Wechselpräpositionen (DAT ou AKK)</h4><p>in, auf, unter, über, neben, zwischen, hinter, vor, an.</p><div class="example"><strong>Dativ (posição — Wo?):</strong> Das Buch liegt <em>auf dem Tisch</em>.<br><strong>Akkusativ (movimento — Wohin?):</strong> Ich lege das Buch <em>auf den Tisch</em>.</div><div class="note"><strong>Regra:</strong> Wo? (onde) = Dativ. Wohin? (para onde) = Akkusativ.</div>';
+TH[14]='<h3>🔀 Verbos Separáveis (Trennbare Verben)</h3><p>Prefixo + verbo. No presente, o prefixo vai para o <strong>final da frase</strong>.</p><h4>📋 Prefixos Comuns</h4><p><strong>an-</strong> (em direção), <strong>auf-</strong> (para cima), <strong>aus-</strong> (para fora), <strong>bei-</strong> (junto), <strong>ein-</strong> (para dentro), <strong>mit-</strong> (junto), <strong>nach-</strong> (após), <strong>vor-</strong> (na frente), <strong>weg-</strong> (longe), <strong>zu-</strong> (fechado).</p><h4>🔧 Presente</h4><div class="example"><strong class="de">Ich stehe um 7 Uhr auf.</strong><span class="pt">Levanto-me às 7h.</span><strong class="de">Er ruft seine Mutter an.</strong><span class="pt">Ele telefona para a mãe.</span><strong class="de">Wir kaufen morgen ein.</strong><span class="pt">Fazemos compras amanhã.</span></div><h4>📌 Perfekt</h4><p>ge- entre prefixo e radical: <strong>auf</strong> + <strong>ge</strong> + <strong>standen</strong> = aufgestanden.</p><div class="example"><strong class="de">Ich bin um 7 Uhr aufgestanden.</strong><span class="pt">Levantei-me às 7h.</span></div>';
+TH[15]='<h3>🗺️ Direções e Transporte</h3><h4>🧭 Vocabulário de Direções</h4><p><strong>links</strong> (esquerda), <strong>rechts</strong> (direita), <strong>geradeaus</strong> (em frente), <strong>an der Ecke</strong> (na esquina), <strong>um die Ecke</strong> (virando a esquina).</p><h4>🚗 Transporte</h4><p><strong>der Bahnhof</strong> (estação de trem), <strong>der Flughafen</strong> (aeroporto), <strong>die Bushaltestelle</strong> (ponto de ônibus), <strong>der Zug</strong> (trem), <strong>der Bus</strong> (ônibus), <strong>das Taxi</strong> (táxi).</p><h4>💬 Frases Úteis</h4><div class="example"><strong class="de">Wo ist der Bahnhof?</strong><span class="pt">Onde fica a estação?</span><strong class="de">Wie komme ich zum Flughafen?</strong><span class="pt">Como chego ao aeroporto?</span><strong class="de">Fahren Sie geradeaus und dann links.</strong><span class="pt">Vá em frente e depois à esquerda.</span></div><div class="note">"mit" + Dativ: Ich fahre <em>mit dem Bus</em> (de ônibus), <em>mit dem Zug</em> (de trem).</div>';
+TH[16]='<h3>🔊 Voz Passiva (Das Passiv)</h3><p>A voz passiva enfatiza a ação, não quem a pratica.</p><h4>📌 Formação</h4><p><strong>werden</strong> (conjugado) + <strong>Partizip II</strong></p><div class="example"><strong>Presente:</strong> Der Brief <em>wird</em> geschrieben.<span class="pt">A carta é escrita.</span><strong>Passado (Präteritum):</strong> Der Brief <em>wurde</em> geschrieben.<span class="pt">A carta foi escrita.</span></div><h4>🔧 Conjugação de werden</h4><p>ich werde, du wirst, er wird, wir werden, ihr werdet, sie werden.</p><h4>💡 Agente da Passiva</h4><p><strong>von</strong> + Dativ (pessoa) ou <strong>durch</strong> + Akkusativ (coisa/meio).</p><div class="example"><strong class="de">Das Haus wird von dem Architekten gebaut.</strong><span class="pt">A casa é construída pelo arquiteto.</span></div><div class="note">No Perfekt do Passiv, usa-se "ist ... worden" (sem ge-): Der Brief ist geschrieben worden.</div>';
+TH[17]='<h3>🌟 Konjunktiv II (Cortesia e Desejos)</h3><p>Usado para situações irreais, desejos, conselhos educados e cortesia.</p><h4>📌 Formação Principal: würden + Infinitiv</h4><div class="example"><strong class="de">Ich würde gern ein Bier trinken.</strong><span class="pt">Eu gostaria de beber uma cerveja.</span><strong class="de">Würdest du mir helfen?</strong><span class="pt">Tu me ajudarias?</span></div><h4>🔧 Verbos Especiais (formas próprias)</h4><table><tr><th>Verbo</th><th>Konjunktiv II</th><th>Exemplo</th></tr><tr><td>sein</td><td>wäre</td><td>Wenn ich reich wäre... (Se eu fosse rico...)</td></tr><tr><td>haben</td><td>hätte</td><td>Wenn ich Zeit hätte... (Se eu tivesse tempo...)</td></tr><tr><td>können</td><td>könnte</td><td>Ich könnte kommen. (Eu poderia vir.)</td></tr><tr><td>mögen</td><td>möchte</td><td>Ich möchte zahlen. (Gostaria de pagar.)</td></tr></table><div class="example"><strong class="de">Wenn ich Zeit hätte, würde ich verreisen.</strong><span class="pt">Se eu tivesse tempo, viajaria.</span></div>';
+TH[18]='<h3>🔗 Orações Relativas (Relativsätze)</h3><p>Orações relativas começam com pronome relativo e o verbo vai para o <strong>final</strong>.</p><h4>📌 Pronomes Relativos</h4><table><tr><th>Caso</th><th>Masc</th><th>Fem</th><th>Neutro</th><th>Plural</th></tr><tr><td>Nominativ</td><td>der</td><td>die</td><td>das</td><td>die</td></tr><tr><td>Akkusativ</td><td>den</td><td>die</td><td>das</td><td>die</td></tr><tr><td>Dativ</td><td>dem</td><td>der</td><td>dem</td><td>denen</td></tr></table><div class="example"><strong class="de">Der Mann, der hier wohnt, ist Arzt.</strong><span class="pt">O homem que mora aqui é médico.</span><strong class="de">Das Buch, das ich lese, ist gut.</strong><span class="pt">O livro que leio é bom.</span><strong class="de">Der Freund, dem ich helfe, kommt.</strong><span class="pt">O amigo a quem ajudo vem.</span></div><div class="note">Na oração relativa, o verbo conjugado vai para o <strong>final</strong> da oração.</div>';
+TH[19]='<h3>📚 Vocabulário Avançado (Erweiterter Wortschatz)</h3><h4>💼 Trabalho</h4><p>die Arbeit (trabalho), der Beruf (profissão), die Firma (empresa), das Büro (escritório), der Kollege (colega), die Besprechung (reunião).</p><h4>🏥 Saúde</h4><p>das Krankenhaus (hospital), der Arzt (médico), die Krankenschwester (enfermeira), die Apotheke (farmácia), die Medizin (medicina).</p><h4>🌍 Sociedade</h4><p>die Gesellschaft (sociedade), die Politik (política), die Wirtschaft (economia), die Bildung (educação), die Wissenschaft (ciência), die Umwelt (meio ambiente).</p><div class="example"><strong class="de">Er arbeitet in einer Firma.</strong><span class="pt">Ele trabalha em uma empresa.</span><strong class="de">Sie ist Ärztin im Krankenhaus.</strong><span class="pt">Ela é médica no hospital.</span><strong class="de">Die Umwelt ist wichtig.</strong><span class="pt">O meio ambiente é importante.</span></div>';
+TH[20]='<h3>🎯 Revisão Final (Abschlusswiederholung)</h3><p>Este capítulo revisa os principais tópicos de todo o curso, com foco em orações subordinadas e Konjunktiv II avançado.</p><h4>📌 Orações com "dass" e "weil"</h4><p>Ambos enviam o verbo para o <strong>final</strong> da oração.</p><div class="example"><strong class="de">Ich glaube, dass er morgen kommt.</strong><span class="pt">Acredito que ele vem amanhã.</span><strong class="de">Ich lerne Deutsch, weil es Spaß macht.</strong><span class="pt">Aprendo alemão porque é divertido.</span></div><h4>🔄 Konjunktiv II Avançado</h4><div class="example"><strong class="de">Wenn ich mehr Zeit hätte, würde ich drei Sprachen lernen.</strong><span class="pt">Se eu tivesse mais tempo, aprenderia três idiomas.</span></div><h4>📊 Resumo dos Casos</h4><table><tr><th></th><th>Nominativ</th><th>Akkusativ</th><th>Dativ</th></tr><tr><td>der (masc)</td><td>der</td><td>den</td><td>dem</td></tr><tr><td>die (fem)</td><td>die</td><td>die</td><td>der</td></tr><tr><td>das (neutro)</td><td>das</td><td>das</td><td>dem</td></tr><tr><td>die (plural)</td><td>die</td><td>die</td><td>den (+n)</td></tr></table><div class="note"><strong>Parabéns!</strong> Você chegou ao final do curso. Continue praticando diariamente para consolidar seu conhecimento. Viel Erfolg! (Boa sorte!)</div>';
+function renderTOC(){
+  const grid=$('#toc-grid');grid.innerHTML='';
+  CHAPTERS.forEach(ch=>{
+    const unlocked=isUnlocked(ch.id),completed=isCompleted(ch.id);
+    const prog=getProgress(ch.id);
+    const card=document.createElement('div');
+    card.className='toc-card'+(unlocked?'':' locked');
+    const lvlClass=ch.level.toLowerCase();
+    let statusLabel,statusClass;
+    if(completed){statusLabel='✓ Concluído';statusClass='done'}
+    else if(prog>0){statusLabel=prog+'%';statusClass='active'}
+    else if(unlocked){statusLabel='Disponível';statusClass='active'}
+    else{statusLabel='🔒 Bloqueado';statusClass='locked-status'}
+    card.innerHTML='<span class="num">Capítulo '+ch.id+' — '+ch.level+'</span><h3>'+ch.title+'</h3><p>'+ch.desc+'</p><span class="status '+statusClass+'">'+statusLabel+'</span>';
+    if(unlocked)card.onclick=()=>scrollToSection('ch-'+ch.id);
+    grid.appendChild(card);
+  });
+}
+
+function renderChapters(){
+  const container=$('#chapters-container');container.innerHTML='';
+  CHAPTERS.forEach(ch=>{
+    const sec=document.createElement('section');
+    sec.className='chapter';sec.id='ch-'+ch.id;
+    const unlocked=isUnlocked(ch.id);
+    const lvlClass=ch.level.toLowerCase();
+    const theory=TH[ch.id]||'<p>Conteúdo em breve.</p>';
+    const exs=EX[ch.id]||[];
+    sec.innerHTML='<div class="chapter-header"><span class="chapter-level '+lvlClass+'">'+ch.level+'</span><div class="chapter-number">Capítulo '+ch.id+'</div><h2 class="chapter-title">'+ch.title+'</h2><p class="chapter-desc">'+ch.desc+'</p></div>';
+    if(!unlocked){
+      sec.innerHTML+='<div class="theory-box"><p style="text-align:center;padding:20px;color:var(--text3)">🔒 Complete o capítulo anterior para desbloquear este conteúdo.</p></div>';
+    }else{
+      sec.innerHTML+='<div class="theory-box">'+theory+'</div>';
+      sec.innerHTML+='<div id="exercises-'+ch.id+'"></div>';
+      const revContent=getReviewContent(ch.id);
+      if(revContent)sec.innerHTML+='<div class="review-box"><h3>📝 Revisão — '+ch.title+'</h3><ul>'+revContent+'</ul></div>';
+      sec.innerHTML+='<div id="mini-test-'+ch.id+'" class="exercise-box"><div class="ex-num">📋 Mini Teste Final</div><p class="ex-question">Responda o mini teste para concluir este capítulo e desbloquear o próximo.</p><div id="mini-test-content-'+ch.id+'"></div></div>';
+    }
+    container.appendChild(sec);
+  });
+}
+
+function getReviewContent(id){
+  const r={
+1:'<li>O alfabeto alemão tem 26 letras + Ä, Ö, Ü, ß.</li><li>W soa como V; V soa como F em muitas palavras.</li><li>EI = "ai" (mein), IE = "i" (Liebe), EU/ÄU = "oi" (Deutsch).</li><li>CH pode ser gutural (Buch) ou palatal (ich).</li><li>SCH = som de "x" (Schule).</li>',
+2:'<li>Saudações: Hallo, Guten Morgen, Guten Tag, Guten Abend, Tschüss.</li><li>Sie (formal) vs. du (informal).</li><li>"Wie geht es Ihnen/dir?" para perguntar como a pessoa está.</li><li>"Ich heiße..." para se apresentar.</li>',
+3:'<li>1-10: eins, zwei, drei, vier, fünf, sechs, sieben, acht, neun, zehn.</li><li>Unidade antes da dezena: 21 = einundzwanzig.</li><li>100 = hundert, 1000 = tausend.</li>',
+4:'<li>Artigos: der (masc), die (fem), das (neutro).</li><li>Indefinidos: ein (masc/neutro), eine (fem).</li><li>Sempre aprenda o substantivo com o artigo!</li>',
+5:'<li>Verbos regulares: radical + e, st, t, en, t, en.</li><li>Irregulares mudam vogal na 2ª/3ªp: sprechen → sprichst/spricht.</li><li>sein: bin, bist, ist, sind, seid, sind. haben: habe, hast, hat, haben, habt, haben.</li>',
+6:'<li>Verbo em 2ª posição em orações principais.</li><li>Perguntas: verbo na 1ª (sim/não) ou W-Wort + verbo + sujeito.</li><li>Conectivos (und, oder, aber) não alteram posição do verbo.</li>',
+7:'<li>Adjetivos predicativos (com sein) não mudam.</li><li>Atributivos recebem terminação (ex: ein großer Mann).</li><li>Comparativo: -er (schneller). Superlativo: am -sten (am schnellsten).</li>',
+8:'<li>Possessivos: mein, dein, sein, ihr, unser, euer, ihr, Ihr.</li><li>Concordam com o substantivo, não com o possuidor.</li><li>Feminino/adicionam -e: meine, deine, seine, ihre...</li>',
+9:'<li>Perfekt = haben/sein + Partizip II.</li><li>Partizip regular: ge- + radical + -t. Irregular: ge- + radical (mod) + -en.</li><li>Movimento/mudança de estado: sein. Demais: haben.</li>',
+10:'<li>Apenas o masculino muda no acusativo: der→den, ein→einen.</li><li>Feminino, neutro e plural permanecem iguais.</li><li>Wen? (quem?) para objeto direto.</li>',
+11:'<li>Dativo: der→dem, die→der, das→dem, Plural→den + -n.</li><li>Verbos com dativo: danken, helfen, gefallen, gehören.</li><li>Pessoa (DAT) + Coisa (AKK).</li>',
+12:'<li>Modais: können, müssen, dürfen, sollen, wollen, mögen.</li><li>Modal conjugado + infinitivo no final.</li><li>möchte = Konjunktiv de mögen (gostaria).</li>',
+13:'<li>Dativo: aus, bei, mit, nach, seit, von, zu.</li><li>Acusativo: durch, für, gegen, ohne, um.</li><li>Wechselpräpositionen: Wo? (DAT) vs. Wohin? (AKK).</li>',
+14:'<li>Prefixos separáveis: an-, auf-, aus-, ein-, mit-, etc.</li><li>No presente: prefixo vai ao final.</li><li>No Perfekt: prefixo + ge- + radical (ex: aufgestanden).</li>',
+15:'<li>Direções: links, rechts, geradeaus.</li><li>Transporte: Bahnhof, Flughafen, Bus, Zug.</li><li>"mit" + Dativ: mit dem Bus, mit dem Zug.</li>',
+16:'<li>Passiv: werden + Partizip II.</li><li>Präteritum: wurde + Partizip II.</li><li>Agente: von + Dativ (pessoa).</li>',
+17:'<li>Konjunktiv II: würde + Infinitiv (cortesia/desejos).</li><li>Essenciais: wäre (seria), hätte (teria), könnte (poderia).</li><li>Wenn + Konjunktiv II + würde (frase condicional).</li>',
+18:'<li>Pronomes relativos: der/die/das (Nom), den/die/das (Akk), dem/der/dem (Dat).</li><li>Verbo vai ao final da oração relativa.</li><li>Vírgula separa oração principal da relativa.</li>',
+19:'<li>Arbeit (trabalho), Krankenhaus (hospital), Gesellschaft (sociedade), Umwelt (meio ambiente).</li><li>Artigos: die Arbeit, der Beruf, das Krankenhaus.</li>',
+20:'<li>"dass" e "weil" enviam verbo ao final.</li><li>Konjunktiv II: wenn + wäre/hätte + würde + Infinitiv.</li><li>Casos: Nom (sujeito), Akk (obj direto), Dat (obj indireto).</li>'
+  };
+  return r[id]||'<li>Revise os tópicos deste capítulo.</li>';
+}
+function renderExercises(chId){
+  const container=$('#exercises-'+chId);if(!container)return;
+  const exs=EX[chId]||[];container.innerHTML='';
+  exs.forEach((ex,i)=>{
+    const box=document.createElement('div');box.className='exercise-box';box.id='ex-'+chId+'-'+i;
+    let html='<div class="ex-num">Exercício '+(i+1)+'</div><div class="ex-question">'+ex.q+'</div>';
+    html+='<div class="ex-hint" id="hint-'+chId+'-'+i+'">💡 '+ex.h+'</div>';
+    if(ex.t==='m'){
+      html+='<div class="ex-multi" id="multi-'+chId+'-'+i+'">';
+      ex.opts.forEach((o,j)=>{
+        html+='<button data-idx="'+j+'" onclick="checkMulti('+chId+','+i+','+j+')">'+o+'</button>';
+      });
+      html+='</div>';
+    }else if(ex.t==='t'){
+      html+='<div class="ex-box-input"><input type="text" id="input-'+chId+'-'+i+'" placeholder="Digite sua resposta..."><button class="btn btn-primary btn-sm" onclick="checkTranslate('+chId+','+i+')">Verificar</button></div>';
+    }else if(ex.t==='o'){
+      html+='<div class="ex-slot-container" id="slots-'+chId+'-'+i+'"></div><div class="ex-word-bank" id="bank-'+chId+'-'+i+'">';
+      const shuffled=[...ex.w].sort(()=>Math.random()-.5);
+      shuffled.forEach((w,j)=>{
+        html+='<span class="word-tile" data-word="'+w.replace(/"/g,'&quot;')+'" data-idx="'+j+'" onclick="placeWord('+chId+','+i+',this)">'+w+'</span>';
+      });
+      html+='</div><div class="ex-actions"><button class="btn btn-primary btn-sm" onclick="checkOrder('+chId+','+i+')">Verificar</button><button class="btn btn-outline btn-sm" onclick="resetOrder('+chId+','+i+')">Resetar</button></div>';
+    }
+    html+='<div class="ex-feedback" id="fb-'+chId+'-'+i+'"></div>';
+    if(!ex.tried)ex.tried=0;
+    html+='<div class="ex-actions"><button class="btn btn-outline btn-sm" onclick="showHint('+chId+','+i+')">💡 Dica</button></div>';
+    box.innerHTML=html;container.appendChild(box);
+  });
+}
+
+function renderMiniTest(chId){
+  const container=$('#mini-test-content-'+chId);if(!container)return;
+  const exs=EX[chId]||[];
+  const testExs=exs.slice(0,3);
+  if(testExs.length===0){container.innerHTML='<p style="color:var(--text3)">Nenhum teste disponível.</p>';return}
+  let html='<p style="margin-bottom:12px;color:var(--text2);font-size:.9rem">Responda corretamente às perguntas abaixo para passar no teste.</p>';
+  testExs.forEach((ex,i)=>{
+    html+='<div style="margin-bottom:16px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm)" id="mt-'+chId+'-'+i+'">';
+    html+='<div style="font-size:.85rem;font-weight:600;margin-bottom:8px">'+(i+1)+'. '+ex.q+'</div>';
+    if(ex.t==='m'){
+      html+='<div class="ex-multi" style="margin:0">';
+      ex.opts.forEach((o,j)=>{
+        html+='<button style="font-size:.85rem;padding:8px 14px" onclick="checkMTMulti('+chId+','+i+','+j+',this)">'+o+'</button>';
+      });
+      html+='</div>';
+    }else{
+      html+='<div class="ex-box-input"><input type="text" id="mt-input-'+chId+'-'+i+'" style="font-size:.85rem;padding:8px 12px" placeholder="Digite..."><button class="btn btn-primary btn-sm" onclick="checkMTTranslate('+chId+','+i+')">Verificar</button></div>';
+    }
+    html+='<div class="ex-feedback" id="mt-fb-'+chId+'-'+i+'"></div>';
+    html+='</div>';
+  });
+  html+='<button class="btn btn-success" onclick="submitMiniTest('+chId+')">✅ Finalizar Mini Teste</button>';
+  container.innerHTML=html;
+}
+
+function showHint(chId,i){
+  const hint=$('#hint-'+chId+'-'+i);
+  if(hint)hint.classList.toggle('show');
+}
+
+function checkMulti(chId,i,idx){
+  const ex=EX[chId][i];
+  const btns=$$('button','#multi-'+chId+'-'+i);
+  const fb=$('#fb-'+chId+'-'+i);
+  btns.forEach((b,j)=>{
+    b.disabled=true;
+    if(j===ex.a)b.className='correct';
+    else if(j===idx)b.className='wrong';
+    else b.style.opacity='.5';
+  });
+  const correct=idx===ex.a;
+  if(correct){fb.className='ex-feedback show success';fb.innerHTML='✅ Correto! '+(ex.explain||'');toast('Correto!','success')}
+  else{fb.className='ex-feedback show error';fb.innerHTML='❌ Incorreto. A resposta era: <strong>'+ex.opts[ex.a]+'</strong>.'+(ex.explain?'<br>'+ex.explain:'');toast('Tente novamente!','error')}
+  trackExercise(chId,correct);
+}
+
+function checkTranslate(chId,i){
+  const ex=EX[chId][i];
+  const input=$('#input-'+chId+'-'+i);
+  const fb=$('#fb-'+chId+'-'+i);
+  if(!input)return;
+  const val=input.value;
+  const alts=[ex.a].concat(ex.alts||[]);
+  const correct=isSimilar(val,alts);
+  input.className=correct?'correct':'wrong';
+  if(correct){fb.className='ex-feedback show success';fb.innerHTML='✅ Correto!';toast('Correto!','success')}
+  else{
+    let msg='❌ Incorreto. A resposta é: <strong>'+ex.a+'</strong>.';
+    if(val.trim()){
+      const normUser=normalize(val),normAns=normalize(ex.a);
+      const lev=levenshtein(normUser,normAns);
+      if(lev<=2)msg+='<br>↳ Quase lá! Verifique a ortografia.';
+    }
+    fb.className='ex-feedback show error';fb.innerHTML=msg;toast('Tente novamente!','error')
+  }
+  trackExercise(chId,correct);
+}
+
+function placeWord(chId,i,el){
+  const word=el.dataset.word;
+  const slots=$('#slots-'+chId+'-'+i);
+  if(el.classList.contains('used'))return;
+  el.classList.add('used');
+  const span=document.createElement('span');
+  span.className='slot-item';
+  span.textContent=word;
+  span.dataset.word=word;
+  span.onclick=function(){this.remove();const tile=$$('.word-tile','#bank-'+chId+'-'+i).find(t=>t.dataset.word===word);if(tile)tile.classList.remove('used')};
+  slots.appendChild(span);
+}
+
+function resetOrder(chId,i){
+  const slots=$('#slots-'+chId+'-'+i);slots.innerHTML='';
+  $$('.word-tile','#bank-'+chId+'-'+i).forEach(t=>t.classList.remove('used'));
+}
+
+function checkOrder(chId,i){
+  const ex=EX[chId][i];
+  const slots=$$('.slot-item','#slots-'+chId+'-'+i);
+  const fb=$('#fb-'+chId+'-'+i);
+  const userOrder=slots.map(s=>s.textContent).join(' ');
+  const correctOrder=ex.w.join(' ');
+  const correct=normalize(userOrder)===normalize(correctOrder);
+  if(correct){fb.className='ex-feedback show success';fb.innerHTML='✅ Correto!';toast('Correto!','success')}
+  else{fb.className='ex-feedback show error';fb.innerHTML='❌ Incorreto. A ordem correta é: <strong>'+correctOrder+'</strong>.';toast('Tente novamente!','error')}
+  trackExercise(chId,correct);
+}
+
+function checkMTMulti(chId,i,idx,btn){
+  const ex=EX[chId][i];const container=btn.parentElement;
+  $$('button',container).forEach(b=>b.disabled=true);
+  const correct=idx===ex.a;
+  if(correct){container.innerHTML+='<div style="color:var(--success);font-weight:600;margin-top:4px">✅</div>'}
+  else{container.innerHTML+='<div style="color:var(--error);font-weight:600;margin-top:4px">❌ ('+ex.opts[ex.a]+')</div>'}
+  const fb=$('#mt-fb-'+chId+'-'+i);
+  if(!fb.dataset)fb.dataset={};fb.dataset.done=correct?'ok':'no';
+  btn.style.display='none';
+  trackExercise(chId,correct);
+}
+
+function checkMTTranslate(chId,i){
+  const ex=EX[chId][i];
+  const input=$('#mt-input-'+chId+'-'+i);
+  const fb=$('#mt-fb-'+chId+'-'+i);
+  if(!input)return;
+  const val=input.value;
+  const alts=[ex.a].concat(ex.alts||[]);
+  const correct=isSimilar(val,alts);
+  input.className=correct?'correct':'wrong';
+  if(correct){fb.className='ex-feedback show success';fb.innerHTML='✅';}
+  else{fb.className='ex-feedback show error';fb.innerHTML='❌ ('+ex.a+')';}
+  fb.dataset={};fb.dataset.done=correct?'ok':'no';
+  trackExercise(chId,correct);
+}
+
+function submitMiniTest(chId){
+  const fbs=$$('[id^="mt-fb-'+chId+'"]');
+  let allDone=true,hasCorrect=false;
+  fbs.forEach(fb=>{
+    if(!fb.dataset||!fb.dataset.done)allDone=false;
+    else if(fb.dataset.done==='ok')hasCorrect=true;
+  });
+  if(!allDone){toast('Responda todas as perguntas do mini teste!','error');return}
+  if(!hasCorrect){toast('Você precisa acertar pelo menos uma pergunta!','error');return}
+  if(!state.progress[chId])state.progress[chId]={};
+  state.progress[chId].testPassed=true;
+  state.completed[chId]=true;
+  saveState();updateAll();
+  toast('🎉 Capítulo concluído!','success');
+  renderChapters();renderExercises(chId);renderMiniTest(chId);
+}
+
+let exerciseCounts={};
+function trackExercise(chId,correct){
+  if(!state.progress[chId])state.progress[chId]={};
+  const p=state.progress[chId];
+  if(!p.exercisesDone)p.exercisesDone=0;
+  if(!p.exerciseTotal)p.exerciseTotal=0;
+  p.exerciseTotal++;
+  if(correct)p.exercisesDone++;
+  saveState();updateAll();
+}
+
+function levenshtein(a,b){
+  const m=a.length,n=b.length;
+  const d=Array.from({length:m+1},()=>Array(n+1).fill(0));
+  for(let i=0;i<=m;i++)d[i][0]=i;
+  for(let j=0;j<=n;j++)d[0][j]=j;
+  for(let j=1;j<=n;j++)for(let i=1;i<=m;i++)
+    d[i][j]=a[i-1]===b[j-1]?d[i-1][j-1]:1+Math.min(d[i-1][j],d[i][j-1],d[i-1][j-1]);
+  return d[m][n];
+}
+function renderSidebar(){
+  const list=$('#sidebar-list');list.innerHTML='';
+  const q=$('#sidebar-search').value.toLowerCase();
+  CHAPTERS.filter(ch=>!q||ch.title.toLowerCase().includes(q)||ch.short.toLowerCase().includes(q)||ch.desc.toLowerCase().includes(q)||ch.level.toLowerCase().includes(q)).forEach(ch=>{
+    const item=document.createElement('div');item.className='sidebar-item';
+    const unlocked=isUnlocked(ch.id),completed=isCompleted(ch.id);
+    const dotClass=completed?'done':(unlocked?'active-dot':'');
+    item.innerHTML='<span class="dot '+dotClass+'"></span><span>'+ch.short+'</span><span class="level-badge">'+ch.level+'</span>';
+    if(unlocked)item.onclick=()=>{scrollToSection('ch-'+ch.id);closeSidebar()};
+    else item.style.opacity='.4';
+    list.appendChild(item);
+  });
+}
+
+function openSidebar(){$('#sidebar').classList.add('open');$('#sidebar-overlay').classList.add('open')}
+function closeSidebar(){$('#sidebar').classList.remove('open');$('#sidebar-overlay').classList.remove('open')}
+
+function renderGlossary(){
+  const list=$('#gloss-list');const search=$('#gloss-search-input').value.toLowerCase();
+  const activeCat=$('#gloss-cats .active');const cat=activeCat?activeCat.dataset.cat:'all';
+  const filtered=VOCAB_UNIQUE.filter(v=>{
+    if(cat!=='all'&&v.cat!==cat)return false;
+    return !search||v.de.toLowerCase().includes(search)||v.pt.toLowerCase().includes(search);
+  });
+  list.innerHTML=filtered.map(v=>{
+    const isFav=state.favorites&&state.favorites.includes(v.de);
+    return '<div class="gloss-item"><span><span class="de">'+v.de+'</span> <span class="pt">— '+v.pt+'</span></span><span class="fav '+(isFav?'active':'')+'" onclick="toggleFav(\''+v.de+'\')">'+(isFav?'★':'☆')+'</span></div>';
+  }).join('');
+  if(filtered.length===0)list.innerHTML='<p style="color:var(--text3);text-align:center;grid-column:1/-1">Nenhuma palavra encontrada.</p>';
+}
+
+function renderGlossCats(){
+  const cats=['all',...new Set(VOCAB_UNIQUE.map(v=>v.cat))];
+  const c=$('#gloss-cats');c.innerHTML=cats.map(cat=>'<button data-cat="'+cat+'" class="'+(cat==='all'?'active':'')+'" onclick="filterGloss(\''+cat+'\')">'+(cat==='all'?'Todas':cat)+'</button>').join('');
+}
+
+function filterGloss(cat){
+  $$('#gloss-cats button').forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
+  renderGlossary();
+}
+
+function toggleFav(word){
+  if(!state.favorites)state.favorites=[];
+  const idx=state.favorites.indexOf(word);
+  if(idx>-1)state.favorites.splice(idx,1);
+  else state.favorites.push(word);
+  saveState();renderGlossary();
+}
+
+function updateAll(){
+  const pct=getOverall();const comp=getCompleted();
+  $('#progress-pct').textContent=pct+'%';
+  $('#progress-bar-fill').style.width=pct+'%';
+  $('#final-completed').textContent=comp+'/20';
+  $('#final-pct').textContent=pct+'%';
+  renderTOC();renderSidebar();
+}
+
+// Setup
+function setup(){
+  loadState();
+  if(state.darkMode)document.documentElement.setAttribute('data-theme','dark');
+  renderChapters();renderTOC();renderSidebar();
+  renderGlossCats();renderGlossary();
+  const notes=$('#notes-area');
+  if(notes){notes.value=state.notes||'';notes.oninput=function(){state.notes=this.value;saveState()}}
+  
+  // Dark mode toggle
+  const dt=$('#dark-toggle');
+  if(dt){dt.checked=state.darkMode;dt.onchange=function(){state.darkMode=this.checked;document.documentElement.setAttribute('data-theme',state.darkMode?'dark':'');saveState()}}
+  
+  // Adaptive toggle
+  const at=$('#adaptive-toggle');
+  if(at){at.checked=state.adaptive;at.onchange=function(){state.adaptive=this.checked;saveState()}}
+  
+  // Menu toggle
+  $('#menu-btn').onclick=openSidebar;
+  $('#sidebar-close').onclick=closeSidebar;
+  $('#sidebar-overlay').onclick=closeSidebar;
+  
+  // Settings
+  $('#settings-btn').onclick=()=>{$('#settings-panel').classList.add('open');$('#settings-overlay').classList.add('open')};
+  $('#settings-panel-close').onclick=()=>{$('#settings-panel').classList.remove('open');$('#settings-overlay').classList.remove('open')};
+  $('#settings-overlay').onclick=()=>{$('#settings-panel').classList.remove('open');$('#settings-overlay').classList.remove('open')};
+  
+  // Sidebar search
+  $('#sidebar-search').oninput=renderSidebar;
+  
+  // Glossary search
+  $('#gloss-search-input').oninput=renderGlossary;
+  
+  // Export
+  $('#export-btn').onclick=exportProgress;
+  
+  // Reset
+  $('#reset-btn').onclick=function(){
+    if(confirm('Tem certeza? Todo o progresso será perdido.')){
+      localStorage.removeItem('deutschmeister_state');
+      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true};
+      renderChapters();renderTOC();renderSidebar();renderGlossary();
+      if(notes)notes.value='';
+      updateAll();toast('Progresso resetado.','info');
+    }
+  };
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){closeSidebar();$('#settings-panel').classList.remove('open');$('#settings-overlay').classList.remove('open')}
+    if(e.key==='m'&&e.ctrlKey){e.preventDefault();dt&&dt.click()}
+    if(e.key==='/'&&e.ctrlKey){e.preventDefault();$('#sidebar-search').focus()}
+  });
+  
+  // Exercise rendering
+  CHAPTERS.forEach(ch=>{
+    const container=$('#exercises-'+ch.id);
+    if(container)renderExercises(ch.id);
+    renderMiniTest(ch.id);
+  });
+  
+  updateAll();
+  
+  // Observer for animations
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}
+    });
+  },{threshold:0.1});
+  $$('.chapter').forEach(ch=>observer.observe(ch));
+  
+  // Loader
+  setTimeout(()=>{$('#loader').classList.add('hide')},1500);
+}
+
+function exportProgress(){
+  const data={exportedAt:new Date().toISOString(),version:1,state:state};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='deutschmeister-progress.json';a.click();
+  URL.revokeObjectURL(a.href);toast('Progresso exportado!','success');
+}
+
+function importProgress(){
+  const input=$('#import-file');input.click();
+}
+
+$('#import-btn').onclick=importProgress;
+$('#import-file').onchange=function(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!data.state||!data.state.progress){toast('Arquivo inválido!','error');return}
+      state=data.state;
+      saveState();
+      renderChapters();renderTOC();renderSidebar();renderGlossary();renderGlossCats();
+      const notes=$('#notes-area');if(notes)notes.value=state.notes||'';
+      if(state.darkMode)document.documentElement.setAttribute('data-theme','dark');
+      else document.documentElement.removeAttribute('data-theme');
+      const dt=$('#dark-toggle');if(dt)dt.checked=state.darkMode;
+      updateAll();
+      CHAPTERS.forEach(ch=>{renderExercises(ch.id);renderMiniTest(ch.id)});
+      toast('Progresso restaurado com sucesso!','success');
+    }catch(e){toast('Erro ao ler o arquivo.','error')}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+};
+
+document.addEventListener('DOMContentLoaded',setup);
+</script>
+</body>
+</html>
