@@ -373,7 +373,7 @@ const VOCAB=[
 ];
 const VOCAB_UNIQUE=Object.values(Object.fromEntries(VOCAB.map(v=>[v.de.toLowerCase()+'|'+v.pt.toLowerCase(),v])));
 const EX={}; EX[1]=[
-{q:'Como se pronuncia a letra "W" em alemão?',opts:['Vê','Dáblio','Uá'],a:0,h:['O som é similar a "V" em português.','W é pronunciado com os lábios como V.','Ex: Wasser soa como "Vasser".'],t:'m'},
+{q:'Como se pronuncia a letra "W" em alemão?',opts:['Vê','Dáblio','Uá'],a:0,h:['O som é similar a "V" em português.','W é pronunciado com os lábios como V.','Ex: Wasser soa como "Vasser".'],t:'m',explain:'<div style="margin-bottom:8px">🎯 <strong>Regra importante:</strong> No alemão, a letra <strong>W</strong> é sempre pronunciada como <strong>V</strong> em português. É o oposto do inglês!</div><div style="margin-bottom:6px;padding:8px 12px;background:var(--bg2);border-radius:6px">📝 <strong>Exemplos:</strong><br>• <strong>Wasser</strong> (água) → soa como "Vasser"<br>• <strong>wo</strong> (onde) → soa como "vo"<br>• <strong>wie</strong> (como) → soa como "vi"</div><div style="color:var(--text3)">💡 <strong>Dica de memória:</strong> Alemão W = som de V. Associe: W de Wasser = V de "V água"!</div>'},
 {q:'Quantas letras tem o alfabeto alemão padrão?',opts:['26','30','28'],a:0,h:['São 26 letras mais caracteres especiais.','O alfabeto alemão tem o mesmo número de letras que o inglês.','26 letras + Ä, Ö, Ü, ß = 30 caracteres no total.'],t:'m'},
 {q:'Escreva o som da letra "ß" (eszett) em português:',a:'ss',alts:['ss','s'],h:['O ß representa o som de "ss" duplo.','Pense em "rua" em alemão: Straße.','ß é sempre pronunciado como um S forte e surdo.'],t:'t'},
 {q:'Qual NÃO é uma letra do alfabeto alemão?',opts:['Ü','Ñ','Ö'],a:1,h:['Ñ não existe em alemão.','Ü e Ö são Umlaute alemães.','Ñ é usado em espanhol, não em alemão.'],t:'m'},
@@ -1254,6 +1254,304 @@ const LANG={
 };
 function _t(key){const lang=state.lang||'pt';return LANG[lang]&&LANG[lang][key]!==undefined?LANG[lang][key]:LANG.pt[key]||key}
 function getEx(chId){return (state.lang==='en'&&EX_EN[chId])?EX_EN[chId]:EX[chId]}
+function buildExplanation(ex,correct,userAnswer){
+  const isEn=state.lang==='en';
+  const hints=Array.isArray(ex.h)?ex.h:[ex.h];
+  const q=ex.q;
+  const icon=correct?'✅':'📖';
+  const title=isEn?'📖 Learn from this:':'📖 Aprenda com isso:';
+
+  if(ex.explain){
+    let html='<div class="ex-explanation" style="margin-top:14px;padding:16px;border-radius:var(--radius-sm);background:var(--bg3);font-size:.85rem;line-height:1.7">';
+    html+='<div style="font-weight:700;margin-bottom:12px;color:var(--text);font-size:.9rem">'+icon+' '+title+'</div>';
+    if(!correct){
+      if(ex.t==='m'){
+        html+='<div style="color:var(--success);font-weight:600;margin-bottom:10px;padding:10px 14px;background:rgba(0,184,148,0.1);border-radius:8px;font-size:.9rem">✔ '+(isEn?'Correct answer:':'Resposta correta:')+' <strong>'+ex.opts[ex.a]+'</strong></div>';
+      }else if(ex.t==='t'){
+        html+='<div style="color:var(--primary);font-weight:600;margin-bottom:10px;padding:10px 14px;background:var(--primary3);border-radius:8px;font-size:.9rem">✏ '+(isEn?'Expected answer:':'Resposta esperada:')+' <strong>'+ex.a+'</strong></div>';
+      }
+    }
+    html+=ex.explain;
+    if(!correct){
+      html+='<div style="margin-top:12px;padding:12px 14px;background:rgba(225,112,85,0.08);border-radius:8px;border-left:4px solid var(--error)">'
+        +'<div style="font-weight:600;color:var(--error);margin-bottom:4px">💪 '+(isEn?'How to get it right next time:':'Como acertar na próxima:')+'</div>'
+        +'<div style="color:var(--text2)">'+(isEn?'Study the explanation above carefully. Focus on <strong>understanding the rule</strong>, not memorizing the answer. Try to apply the logic step by step the next time you see a similar question.'
+          :'Estude a explicação acima com atenção. Foque em <strong>entender a regra</strong>, não em decorar a resposta. Tente aplicar a lógica passo a passo na próxima vez que ver uma pergunta parecida.')+'</div>'
+        +'</div>';
+    }
+    html+='</div>';
+    return html;
+  }
+
+  let answerHtml='',explainHtml='',tipHtml='',ruleHtml='',extraHtml='';
+
+  if(ex.t==='m'){
+    const correctAns=ex.opts[ex.a];
+    const wrongHint=correct?'':(isEn?'You selected an incorrect option.':'Você selecionou uma opção incorreta.');
+    answerHtml='<div style="color:var(--success);font-weight:600;margin-bottom:10px;padding:10px 14px;background:rgba(0,184,148,0.1);border-radius:8px;font-size:.9rem">✔ '+(isEn?'Correct answer:':'Resposta correta:')+' <strong>'+correctAns+'</strong></div>';
+    
+    explainHtml='<div style="font-weight:600;margin-bottom:6px;color:var(--text);font-size:.9rem">📚 '+(isEn?'Detailed explanation:':'Explicação detalhada:')+'</div>';
+    
+    if(!correct){
+      const userChoice=userAnswer!==undefined&&ex.opts[userAnswer]?ex.opts[userAnswer]:'';
+      if(userChoice){
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:rgba(225,112,85,0.08);border-radius:8px;border-left:3px solid var(--error)"><span style="font-weight:600;color:var(--error)">❌ '+(isEn?'Your answer:':'Sua resposta:')+'</span> <strong style="color:var(--text)">'+userChoice+'</strong></div>';
+      }
+    }
+    
+    if(correct){
+      explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:rgba(0,184,148,0.08);border-radius:8px;border-left:3px solid var(--success)"><span style="font-weight:600;color:var(--success)">✅ '+(isEn?'Right choice!':'Escolha certa!')+'</span></div>';
+    }
+
+    const depth=(()=>{
+      const chInfo=CHAPTERS.find(c=>{const exs=getEx(c.id);return exs&&exs.includes(ex)});
+      const chId=chInfo?chInfo.id:0;
+      const lv=chInfo?chInfo.level:'A1';
+      if(lv==='A1')return 3;if(lv==='A2')return 2;return 1;
+    })();
+
+    hints.forEach((h,i)=>{
+      if(depth>1||i<2){
+        explainHtml+='<div style="margin-bottom:5px;padding-left:14px;border-left:3px solid var(--primary);color:var(--text2);line-height:1.6">'+(i===0?'🎯 ':'• ')+h+'</div>';
+      }
+    });
+
+    if(depth>=2){
+      ruleHtml='<div style="margin-top:10px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">';
+      ruleHtml+='<div style="font-weight:600;color:var(--primary);margin-bottom:4px;font-size:.85rem">📌 '+(isEn?'Key rule to remember:':'Regra-chave para lembrar:')+'</div>';
+      ruleHtml+='<div style="color:var(--text2);font-size:.85rem">';
+      
+      const ql=q.toLowerCase();
+      if(/pronunc/i.test(ql)){
+        ruleHtml+=isEn?'In German, the written form often differs from pronunciation. Always learn the <strong>sound</strong> alongside the spelling.':'Em alemão, a forma escrita frequentemente difere da pronúncia. Sempre aprenda o <strong>som</strong> junto com a grafia.';
+      }else if(/artigo|article/i.test(ql)){
+        ruleHtml+=isEn?'Every German noun has a gender: <strong>der</strong> (masculine), <strong>die</strong> (feminine), <strong>das</strong> (neuter). Learn the noun with its article from day one!':'Todo substantivo alemão tem um gênero: <strong>der</strong> (masculino), <strong>die</strong> (feminino), <strong>das</strong> (neutro). Aprenda o substantivo com seu artigo desde o início!';
+      }else if(/conjug/i.test(ql)||/verbo|verb/i.test(ql)){
+        ruleHtml+=isEn?'German verbs change their endings depending on the subject. <strong>Regular verbs</strong> follow a predictable pattern (e + st + t + en + t + en). <strong>Irregular verbs</strong> may also change the vowel.':'Verbos alemães mudam suas terminações conforme o sujeito. <strong>Verbos regulares</strong> seguem um padrão previsível (e + st + t + en + t + en). <strong>Irregulares</strong> podem também mudar a vogal.';
+      }else if(/número|number|zahl/i.test(ql)){
+        ruleHtml+=isEn?'Pay attention: in German, the <strong>unit</strong> comes <strong>before</strong> the ten (ein<strong>und</strong>zwanzig = 1 and 20 = 21). This is the opposite of English!':'Atenção: em alemão, a <strong>unidade</strong> vem <strong>antes</strong> da dezena (ein<strong>und</strong>zwanzig = 1 e 20 = 21). Isso é o oposto do português!';
+      }else if(/preposição|preposition/i.test(ql)){
+        ruleHtml+=isEn?'Prepositions in German <strong>govern cases</strong>. Some always take dative (mit, nach, aus), some always accusative (für, ohne, durch), and some can take either depending on meaning (in, auf, unter).':'Preposições em alemão <strong>regem casos</strong>. Algumas sempre pedem dativo (mit, nach, aus), algumas sempre acusativo (für, ohne, durch) e algumas podem usar ambos dependendo do sentido (in, auf, unter).';
+      }else if(/caso|case|acusativo|accusative|dativo|dative|nominativo|nominative/i.test(ql)){
+        ruleHtml+=isEn?'The <strong>case</strong> of a noun/article changes based on its role: nominative (subject), accusative (direct object), dative (indirect object). Only the masculine changes visibly in accusative (der→den).':'O <strong>caso</strong> de um substantivo/artigo muda conforme seu papel: nominativo (sujeito), acusativo (objeto direto), dativo (objeto indireto). Apenas o masculino muda visivelmente no acusativo (der→den).';
+      }else if(/ordem|ordena|word.order|sentence|frase|satz/i.test(ql)||ex.t==='o'){
+        ruleHtml+=isEn?'In German main clauses, the conjugated verb is ALWAYS in the <strong>second position</strong>. This is the most important rule of German sentence structure.':'Em orações principais alemãs, o verbo conjugado está SEMPRE na <strong>segunda posição</strong>. Esta é a regra mais importante da estrutura de frases em alemão.';
+      }else if(/traduz|translate|significa|means/i.test(ql)){
+        ruleHtml+=isEn?'Build your answer word by word: identify the noun (with its correct article/case), verb (with correct conjugation), and any prepositions or adjectives needed. Combine them following German word order rules.':'Construa sua resposta palavra por palavra: identifique o substantivo (com seu artigo/caso correto), verbo (com conjugação correta) e preposições ou adjetivos necessários. Combine-os seguindo as regras de ordem alemãs.';
+      }else{
+        ruleHtml+=isEn?'German follows specific patterns. Break down each sentence into parts, learn the rules step by step, and practice regularly to build intuition.':'O alemão segue padrões específicos. Divida cada frase em partes, aprenda as regras passo a passo e pratique regularmente para construir intuição.';
+      }
+      ruleHtml+='</div></div>';
+    }
+
+    if(depth>=3&&correct){
+      extraHtml='<div style="margin-top:10px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--accent)">';
+      extraHtml+='<div style="font-weight:600;color:var(--accent2);margin-bottom:4px;font-size:.85rem">💡 '+(isEn?'Did you know?':'Sabia que?')+'</div>';
+      extraHtml+='<div style="color:var(--text2);font-size:.85rem">'+(
+        isEn?'Even when you get it right, reviewing the rule helps reinforce it for next time. Try explaining this rule to someone else — that is the best way to truly learn!'
+        :'Mesmo quando você acerta, revisar a regra ajuda a fixá-la para a próxima vez. Tente explicar esta regra para outra pessoa — essa é a melhor forma de realmente aprender!'
+      )+'</div></div>';
+    }
+
+    explainHtml+=ruleHtml+extraHtml;
+    explainHtml+='<div style="margin-top:8px;padding:8px 12px;background:var(--bg2);border-radius:6px;font-size:.8rem;color:var(--text3)">';
+    if(correct){
+      explainHtml+=isEn?'✅ Great job! Notice the <strong>pattern</strong> behind this answer. Understanding the pattern helps you apply it to new situations.':'✅ Muito bem! Perceba o <strong>padrão</strong> por trás desta resposta. Entender o padrão ajuda você a aplicá-lo em novas situações.';
+    }else{
+      explainHtml+=isEn?'💡 Tip: Try to eliminate wrong options first, then choose the best among the remaining ones. This strategy often helps!':'💡 Dica: Tente eliminar as opções erradas primeiro, depois escolha a melhor entre as restantes. Essa estratégia geralmente ajuda!';
+    }
+    explainHtml+='</div>';
+  }
+
+  else if(ex.t==='t'){
+    const isConj=/conjug/i.test(q);
+    answerHtml='<div style="color:var(--primary);font-weight:600;margin-bottom:10px;padding:10px 14px;background:var(--primary3);border-radius:8px;font-size:.9rem">✏ '+(isEn?'Expected answer:':'Resposta esperada:')+' <strong>'+ex.a+'</strong></div>';
+    
+    if(!correct&&userAnswer){
+      answerHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:rgba(225,112,85,0.08);border-radius:8px;border-left:3px solid var(--error)"><span style="font-weight:600;color:var(--error)">❌ '+(isEn?'Your answer:':'Sua resposta:')+'</span> <strong style="color:var(--text)">'+userAnswer+'</strong></div>';
+    }
+
+    if(isConj){
+      const verbMatch=q.match(/"([^"]+)"/);
+      const verb=verbMatch?verbMatch[1]:'';
+      const personMatch=q.match(/(\d+)[ª°]/);
+      const person=personMatch?personMatch[1]:'';
+      let pLabel='';
+      if(person){
+        const pMap={1:{pt:'primeira',en:'first'},2:{pt:'segunda',en:'second'},3:{pt:'terceira',en:'third'}};
+        pLabel=pMap[person]?(isEn?pMap[person].en:pMap[person].pt):person;
+      }
+      if(verb){
+        explainHtml='<div style="font-weight:600;margin-bottom:8px;color:var(--text);font-size:.9rem">🔤 '+(isEn?'Conjugation of <strong>"'+verb+'"</strong>:':'Conjugação de <strong>"'+verb+'"</strong>:')+'</div>';
+        if(person){
+          const pn=parseInt(person);
+          const pronMap={1:{pt:'ich (eu)',en:'I'},2:{pt:'du (tu)',en:'you'},3:{pt:'er/sie/es (ele/ela)',en:'he/she/it'}};
+          const pron=pronMap[pn]?pronMap[pn][isEn?'en':'pt']:'';
+          explainHtml+='<div style="margin-bottom:6px;padding:6px 10px;background:var(--bg2);border-radius:6px;color:var(--text2)">'+(isEn?'The <strong>'+pLabel+'</strong> person singular uses the pronoun <strong>'+pron+'</strong>. The verb ending must match this subject.':'A <strong>'+pLabel+'</strong> pessoa do singular usa o pronome <strong>'+pron+'</strong>. A terminação do verbo deve concordar com este sujeito.')+'</div>';
+        }
+        explainHtml+='<div style="margin-bottom:8px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">';
+        explainHtml+='<div style="font-weight:600;color:var(--primary);margin-bottom:4px;font-size:.85rem">📋 '+(isEn?'Conjugation table:':'Tabela de conjugação:')+'</div>';
+        if(verb==='sein'){
+          explainHtml+='<div style="font-size:.85rem;color:var(--text2)"><strong>ich</strong> bin, <strong>du</strong> bist, <strong>er/sie/es</strong> ist, <strong>wir</strong> sind, <strong>ihr</strong> seid, <strong>sie</strong> sind</div>';
+        }else if(verb==='haben'){
+          explainHtml+='<div style="font-size:.85rem;color:var(--text2)"><strong>ich</strong> habe, <strong>du</strong> hast, <strong>er/sie/es</strong> hat, <strong>wir</strong> haben, <strong>ihr</strong> habt, <strong>sie</strong> haben</div>';
+        }else if(verb==='werden'){
+          explainHtml+='<div style="font-size:.85rem;color:var(--text2)"><strong>ich</strong> werde, <strong>du</strong> wirst, <strong>er/sie/es</strong> wird, <strong>wir</strong> werden, <strong>ihr</strong> werdet, <strong>sie</strong> werden</div>';
+        }else if(verb==='können'||verb==='müssen'||verb==='dürfen'||verb==='sollen'||verb==='wollen'||verb==='mögen'){
+          const modalEndings={können:'kann/kannst/kann/können/könnt/können',müssen:'muss/musst/muss/müssen/müsst/müssen',dürfen:'darf/darfst/darf/dürfen/dürft/dürfen',sollen:'soll/sollst/soll/sollen/sollt/sollen',wollen:'will/willst/will/wollen/wollt/wollen',mögen:'mag/magst/mag/mögen/mögt/mögen'};
+          explainHtml+='<div style="font-size:.85rem;color:var(--text2)"><strong>ich/du/er/wir/ihr/sie:</strong> '+modalEndings[verb]+'</div>';
+          explainHtml+='<div style="margin-top:4px;font-size:.8rem;color:var(--text3)">'+(isEn?'Note: modals change the stem in singular forms (ich, du, er/sie/es).':'Nota: modais mudam o radical nas formas singulares (ich, du, er/sie/es).')+'</div>';
+        }else{
+          const stem=verb.replace(/en$/,'');
+          explainHtml+='<div style="font-size:.85rem;color:var(--text2)"><strong>ich</strong> '+stem+'e, <strong>du</strong> '+stem+'st, <strong>er/sie/es</strong> '+stem+'t, <strong>wir</strong> '+stem+'en, <strong>ihr</strong> '+stem+'t, <strong>sie</strong> '+stem+'en</div>';
+        }
+        explainHtml+='</div>';
+      }
+
+      if(correct){
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:rgba(0,184,148,0.08);border-radius:8px;border-left:3px solid var(--success)"><span style="font-weight:600;color:var(--success)">✅ '+(isEn?'Correct conjugation!':'Conjugação correta!')+'</span> '+(isEn?'You matched the subject with the right verb ending.':'Você combinou o sujeito com a terminação verbal correta.')+'</div>';
+      }else{
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:rgba(225,112,85,0.08);border-radius:8px;border-left:3px solid var(--error)"><span style="font-weight:600;color:var(--error)">❌ '+(isEn?'Conjugation error:':'Erro de conjugação:')+'</span> '+(isEn?'Check the table above to find the correct ending for this subject.':'Consulte a tabela acima para encontrar a terminação correta para este sujeito.')+'</div>';
+      }
+
+      explainHtml+='<div style="font-weight:600;margin-bottom:4px;color:var(--text);font-size:.85rem">💡 '+(isEn?'Step-by-step:':'Passo a passo:')+'</div>';
+      hints.forEach((h,i)=>{
+        explainHtml+='<div style="margin-bottom:4px;padding-left:14px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(i===0?'1️⃣ ':(i===1?'2️⃣ ':(i===2?'3️⃣ ':'• ')))+h+'</div>';
+      });
+
+    }else{
+      const targetMatch=q.match(/"([^"]+)"/);
+      const target=targetMatch?targetMatch[1]:'';
+      explainHtml='<div style="font-weight:600;margin-bottom:8px;color:var(--text);font-size:.9rem">📝 '+(isEn?'How to build this answer:':'Como construir esta resposta:')+'</div>';
+      
+      if(target){
+        explainHtml+='<div style="margin-bottom:6px;padding:6px 10px;background:var(--bg2);border-radius:6px;color:var(--text2)">'+(isEn?'You need to translate <strong>"'+target+'"</strong>. Let us break it down:':'Você precisa traduzir <strong>"'+target+'"</strong>. Vamos decompor:')+'</div>';
+      }
+
+      const ql=q.toLowerCase();
+      
+      if(/artigo|article/i.test(ql)){
+        explainHtml+='<div style="margin-bottom:8px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">';
+        explainHtml+='<div style="font-weight:600;color:var(--primary);margin-bottom:4px;font-size:.85rem">📋 '+(isEn?'Articles reference:':'Tabela de artigos:')+'</div>';
+        explainHtml+='<div style="font-size:.85rem;color:var(--text2)">';
+        const artMatch=ex.a.match(/^(der|die|das|ein|eine|einen|einem|einer|den|dem)\b/i);
+        if(artMatch){
+          const art=artMatch[1].toLowerCase();
+          if(art==='der')explainHtml+=isEn?'<strong>der</strong> = masculine nominative (the). Used for masculine subjects.':'<strong>der</strong> = masculino nominativo (o). Usado para sujeitos masculinos.';
+          else if(art==='die')explainHtml+=isEn?'<strong>die</strong> = feminine nominative OR plural (the). Used for feminine subjects or any plural.':'<strong>die</strong> = feminino nominativo OU plural (a/os). Usado para sujeitos femininos ou qualquer plural.';
+          else if(art==='das')explainHtml+=isEn?'<strong>das</strong> = neuter nominative (the). Used for neuter subjects.':'<strong>das</strong> = neutro nominativo (o/a). Usado para sujeitos neutros.';
+          else if(art==='ein')explainHtml+=isEn?'<strong>ein</strong> = indefinite article for masculine/neuter nominative (a/an).':'<strong>ein</strong> = artigo indefinido para masculino/neutro nominativo (um/uma).';
+          else if(art==='eine')explainHtml+=isEn?'<strong>eine</strong> = indefinite article for feminine nominative (a/an).':'<strong>eine</strong> = artigo indefinido para feminino nominativo (uma).';
+          else if(art==='einen')explainHtml+=isEn?'<strong>einen</strong> = indefinite article for masculine accusative (a/an). The -en ending signals masculine direct object.':'<strong>einen</strong> = artigo indefinido para acusativo masculino (um). A terminação -en sinaliza objeto direto masculino.';
+          else if(art==='dem')explainHtml+=isEn?'<strong>dem</strong> = definite article for masculine/neuter dative (to the).':'<strong>dem</strong> = artigo definido para dativo masculino/neutro (ao).';
+          else if(art==='den')explainHtml+=isEn?'<strong>den</strong> = definite article for masculine accusative OR dative plural. Context determines the case.':'<strong>den</strong> = artigo definido para acusativo masculino OU dativo plural. O contexto determina o caso.';
+          else explainHtml+=isEn?'Choose the article based on gender (der/die/das) and case (nominative/accusative/dative).':'Escolha o artigo baseado no gênero (der/die/das) e caso (nominativo/acusativo/dativo).';
+        }
+        explainHtml+='</div></div>';
+        if(!correct){
+          explainHtml+='<div style="margin-bottom:6px;padding:8px 12px;background:rgba(225,112,85,0.08);border-radius:6px;border-left:3px solid var(--error);color:var(--text2);font-size:.85rem">'+(isEn?'🔑 <strong>Remember:</strong> The article must match the noun\'s <strong>gender</strong> (masculine/feminine/neuter) and <strong>case</strong> (subject/direct object/indirect object).':'🔑 <strong>Lembre-se:</strong> O artigo deve combinar com o <strong>gênero</strong> do substantivo (masculino/feminino/neutro) e o <strong>caso</strong> (sujeito/objeto direto/objeto indireto).')+'</div>';
+        }
+      }else if(/plural/i.test(ql)){
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(isEn?'🔑 <strong>Rule:</strong> All German plurals use the article <strong>die</strong> in nominative and accusative. The noun itself changes (often adding -e, -er, -en, or -s).':'🔑 <strong>Regra:</strong> Todos os plurais alemães usam o artigo <strong>die</strong> no nominativo e acusativo. O substantivo em si muda (frequentemente adicionando -e, -er, -en ou -s).')+'</div>';
+      }else if(/preposição|preposition/i.test(ql)){
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(isEn?'🔑 Each preposition <strong>governs a case</strong>. Memorize them in groups: always dative (mit, nach, aus, bei, seit, von, zu), always accusative (für, ohne, durch, gegen, um), or flexible (in, auf, unter, über).':'🔑 Cada preposição <strong>rege um caso</strong>. Memorize-as em grupos: sempre dativo (mit, nach, aus, bei, seit, von, zu), sempre acusativo (für, ohne, durch, gegen, um) ou flexíveis (in, auf, unter, über).')+'</div>';
+      }else if(/pronome|pronoun/i.test(ql)){
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(isEn?'🔑 Pronouns change by case: nominative (I, you, he...), accusative (me, you, him...), dative (to me, to you, to him...). The pronoun\'s form tells you its role in the sentence.':'🔑 Pronomes mudam por caso: nominativo (eu, tu, ele...), acusativo (me, te, o...), dativo (para mim, para ti, para ele...). A forma do pronome indica seu papel na frase.')+'</div>';
+      }else if(/posses|possessivo/i.test(ql)){
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(isEn?'🔑 Possessives agree with the <strong>noun they modify</strong>, not the owner. Add -e for feminine/plural: mein (my, masc/neut) → meine (my, fem/pl).':'🔑 Possessivos concordam com o <strong>substantivo que modificam</strong>, não com o dono. Adicione -e para feminino/plural: mein (meu, masc/neut) → meine (minha, fem/pl).')+'</div>';
+      }else if(/separável|separável|trennbar|prefixo|prefix/i.test(ql)){
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(isEn?'🔑 In present tense, the <strong>prefix separates</strong> and goes to the <strong>end</strong> of the sentence. In Perfekt, <strong>ge-</strong> goes between the prefix and the stem.':'🔑 No presente, o <strong>prefixo se separa</strong> e vai para o <strong>final</strong> da frase. No Perfekt, o <strong>ge-</strong> vai entre o prefixo e o radical.')+'</div>';
+      }else if(/passiv|passiva|passive/i.test(ql)){
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(isEn?'🔑 Passive voice = <strong>werden</strong> (conjugated) + <strong>Partizip II</strong>. The agent (who does it) uses <strong>von</strong> + dative.':'🔑 Voz passiva = <strong>werden</strong> (conjugado) + <strong>Partizip II</strong>. O agente (quem faz) usa <strong>von</strong> + dativo.')+'</div>';
+      }else if(/relativa|relative|relativ/i.test(ql)){
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(isEn?'🔑 In relative clauses, the <strong>verb goes to the end</strong>. The relative pronoun matches the noun\'s gender and its role in the relative clause.':'🔑 Em orações relativas, o <strong>verbo vai para o final</strong>. O pronome relativo concorda com o gênero do substantivo e seu papel na oração relativa.')+'</div>';
+      }else if(/konjunktiv|konj\.|ii/i.test(ql)){
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(isEn?'🔑 Konjunktiv II expresses <strong>unreal situations</strong>: wishes, polite requests, or hypotheticals. Form with <strong>würde</strong> + infinitive, or use special forms (wäre, hätte, könnte).':'🔑 Konjunktiv II expressa <strong>situações irreais</strong>: desejos, pedidos educados ou hipóteses. Forme com <strong>würde</strong> + infinitivo, ou use formas especiais (wäre, hätte, könnte).')+'</div>';
+      }else{
+        explainHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(isEn?'🔑 Break the sentence into parts: find the <strong>subject</strong>, the <strong>verb</strong> (conjugated correctly), and any <strong>objects</strong> or <strong>complements</strong>. Then check articles and prepositions.':'🔑 Divida a frase em partes: encontre o <strong>sujeito</strong>, o <strong>verbo</strong> (conjugado corretamente) e quaisquer <strong>objetos</strong> ou <strong>complementos</strong>. Depois verifique artigos e preposições.')+'</div>';
+      }
+
+      hints.forEach((h,i)=>{
+        explainHtml+='<div style="margin-bottom:4px;padding-left:14px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(i===0?'💡 ':'• ')+h+'</div>';
+      });
+    }
+
+    if(ex.alts&&ex.alts.length>0){
+      explainHtml+='<div style="margin-top:8px;padding:6px 10px;background:var(--bg2);border-radius:6px;color:var(--text3);font-size:.8rem">🔄 '+(isEn?'Also accepted:':'Também aceito:')+' <strong>'+ex.alts.join(', ')+'</strong></div>';
+    }
+    
+    if(correct){
+      explainHtml+='<div style="margin-top:8px;padding:8px 12px;background:rgba(0,184,148,0.06);border-radius:6px;font-size:.8rem;color:var(--text3)">'+(isEn?'✅ Correct! Pay attention to the <strong>structure</strong> of the sentence — notice how the words fit together. This pattern will repeat in similar exercises.':'✅ Correto! Preste atenção na <strong>estrutura</strong> da frase — note como as palavras se encaixam. Esse padrão se repetirá em exercícios similares.')+'</div>';
+    }else{
+      explainHtml+='<div style="margin-top:8px;padding:8px 12px;background:rgba(225,112,85,0.06);border-radius:6px;font-size:.8rem;color:var(--text3)">'+(isEn?'💪 Compare your answer with the expected one. Identify each part: did you use the correct article? The correct verb form? The right word order? This analysis is key to improving.':'💪 Compare sua resposta com a esperada. Identifique cada parte: você usou o artigo correto? A forma verbal certa? A ordem de palavras certa? Essa análise é essencial para melhorar.')+'</div>';
+    }
+  }
+
+  else if(ex.t==='o'){
+    const userStr=userAnswer&&Array.isArray(userAnswer)?userAnswer.join(' '):'';
+    answerHtml='<div style="color:var(--accent2);font-weight:600;margin-bottom:10px;padding:10px 14px;background:rgba(0,206,201,0.1);border-radius:8px;font-size:.9rem">🔤 '+(isEn?'Correct order:':'Ordem correta:')+' <strong>'+ex.w.join(' ')+'</strong></div>';
+
+    if(!correct&&userStr){
+      answerHtml+='<div style="margin-bottom:8px;padding:8px 12px;background:rgba(225,112,85,0.08);border-radius:8px;border-left:3px solid var(--error)"><span style="font-weight:600;color:var(--error)">❌ '+(isEn?'Your order:':'Sua ordem:')+'</span> <strong style="color:var(--text)">'+userStr+'</strong></div>';
+    }
+
+    explainHtml='<div style="font-weight:600;margin-bottom:8px;color:var(--text);font-size:.9rem">📐 '+(isEn?'Sentence structure analysis:':'Análise da estrutura:')+'</div>';
+    
+    const words=ex.w;
+    let analysis='';
+    words.forEach((w,i)=>{
+      let role='';
+      const wl=w.toLowerCase();
+      if(i===0){
+        if(/^(ich|du|er|sie|es|wir|ihr|der|die|das|mein|dein|sein|ihr|unser|euer|wer|was|wo|wie|warum|wann|heute|morgen|gestern|da|dort|hier)$/i.test(wl))role=isEn?'subject/topic':'sujeito/tópico';
+        else if(/^(bin|bist|ist|sind|seid|habe|hast|hat|haben|habt|werde|wirst|wird|werden|werdet|kann|kannst|können|könnt|muss|musst|müssen|müsst|darf|darfst|dürfen|dürft|soll|sollst|sollen|sollt|will|willst|wollen|wollt|mag|magst|mögen|mögt|lerne|lernst|lernt|lernen|spiele|spielst|spielt|spielen|gehe|gehst|geht|gehen|komme|kommst|kommt|kommen|wohne|wohnst|wohnt|wohnen|heiße|heißt|heißen|spreche|sprichst|spricht|sprechen)$/i.test(wl))role=isEn?'verb (position 2)':'verbo (posição 2)';
+        else role=isEn?'opening element':'elemento de abertura';
+      }else if(i===1){
+        if(/^(bin|bist|ist|sind|seid|habe|hast|hat|haben|habt|werde|wirst|wird|werden|werdet|kann|kannst|können|könnt|muss|musst|müssen|müsst|darf|darfst|dürfen|dürft|soll|sollst|sollen|sollt|will|willst|wollen|wollt|mag|magst|mögen|mögt|lerne|lernst|lernt|lernen|spiele|spielst|spielt|spielen|gehe|gehst|geht|gehen|komme|kommst|kommt|kommen|wohne|wohnst|wohnt|wohnen|heiße|heißt|heißen|spreche|sprichst|spricht|sprechen)$/i.test(wl))role=isEn?'verb (position 2)':'verbo (posição 2)';
+        else role=isEn?'subject':'sujeito';
+      }else if(i===words.length-1&&/[,.]$/.test(w)){
+        role=isEn?'verb / end of clause':'verbo / fim da oração';
+      }else{
+        role=isEn?'complement':'complemento';
+      }
+      analysis+=isEn?'<div style="font-size:.82rem;color:var(--text2);margin-bottom:2px"><strong>'+w+'</strong> → '+role+'</div>':'<div style="font-size:.82rem;color:var(--text2);margin-bottom:2px"><strong>'+w+'</strong> → '+role+'</div>';
+    });
+    explainHtml+='<div style="margin-bottom:8px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">';
+    explainHtml+='<div style="font-weight:600;color:var(--primary);margin-bottom:6px;font-size:.85rem">🔍 '+(isEn?'Word by word:':'Palavra por palavra:')+'</div>';
+    explainHtml+=analysis+'</div>';
+    
+    explainHtml+='<div style="font-weight:600;margin-bottom:4px;color:var(--text);font-size:.85rem">📌 '+(isEn?'Rules applied:':'Regras aplicadas:')+'</div>';
+    hints.forEach((h,i)=>{
+      explainHtml+='<div style="margin-bottom:4px;padding-left:14px;border-left:3px solid var(--accent);color:var(--text2);font-size:.85rem">'+(i===0?'🔑 ':(i===1?'📍 ':'• '))+h+'</div>';
+    });
+
+    if(correct){
+      explainHtml+='<div style="margin-top:8px;padding:8px 12px;background:rgba(0,184,148,0.06);border-radius:6px;font-size:.8rem;color:var(--text3)">'+(isEn?'✅ Perfect order! Notice how the verb stays firmly in the <strong>second position</strong> — this is the backbone of every German sentence.':'✅ Ordem perfeita! Note como o verbo se mantém firmemente na <strong>segunda posição</strong> — esta é a espinha dorsal de toda frase alemã.')+'</div>';
+    }else{
+      explainHtml+='<div style="margin-top:8px;padding:8px 12px;background:rgba(225,112,85,0.06);border-radius:6px;font-size:.8rem;color:var(--text3)">'+(isEn?'💡 The verb must be in <strong>second position</strong>. Try rearranging your order starting with this rule and see if the sentence makes more sense.':'💡 O verbo deve estar na <strong>segunda posição</strong>. Tente reorganizar sua ordem começando com esta regra e veja se a frase faz mais sentido.')+'</div>';
+    }
+  }
+
+  if(!correct){
+    tipHtml='<div style="margin-top:12px;padding:12px 14px;background:rgba(225,112,85,0.08);border-radius:8px;border-left:4px solid var(--error)">'
+      +'<div style="font-weight:600;color:var(--error);margin-bottom:4px;font-size:.85rem">💪 '+(isEn?'How to improve:':'Como melhorar:')+'</div>'
+      +'<div style="color:var(--text2);font-size:.85rem">'+(isEn?'Read the explanation carefully. Identify the <strong>specific rule</strong> being tested (vocabulary, conjugation, article, word order, etc.). Practice by creating your own similar sentences applying the same rule.'
+        :'Leia a explicação com atenção. Identifique a <strong>regra específica</strong> sendo testada (vocabulário, conjugação, artigo, ordem das palavras, etc.). Pratique criando suas próprias frases similares aplicando a mesma regra.')+'</div>'
+      +'</div>';
+  }else{
+    tipHtml='<div style="margin-top:10px;padding:10px 14px;background:rgba(0,184,148,0.06);border-radius:8px;border-left:3px solid var(--success)">'
+      +'<div style="font-weight:600;color:var(--success);margin-bottom:2px;font-size:.85rem">🎯 '+(isEn?'You understood it!':'Você entendeu!')+'</div>'
+      +'<div style="color:var(--text2);font-size:.82rem">'+(isEn?'By reviewing even your correct answers, you strengthen the neural pathways that help you recall this rule automatically in conversations.'
+        :'Ao revisar até suas respostas corretas, você fortalece as conexões neurais que ajudam a lembrar desta regra automaticamente em conversas.')+'</div>'
+      +'</div>';
+  }
+
+  let html='<div class="ex-explanation" style="margin-top:14px;padding:16px;border-radius:var(--radius-sm);background:var(--bg3);font-size:.85rem;line-height:1.7">';
+  html+='<div style="font-weight:700;margin-bottom:12px;color:var(--text);font-size:.9rem">'+icon+' '+title+'</div>';
+  html+=answerHtml+explainHtml+tipHtml;
+  html+='</div>';
+  return html;
+}
 function getTh(chId){return (state.lang==='en'&&TH_EN[chId])?TH_EN[chId]:TH[chId]}
 function getRev(id){return (state.lang==='en'&&REVIEW_EN[id])?REVIEW_EN[id]:REVIEW[id]}
 function applyLang(){
@@ -1452,8 +1750,8 @@ function checkMulti(chId,i,idx){
     else b.style.opacity='.5';
   });
   const correct=idx===ex.a;
-  if(correct){fb.className='ex-feedback show success';fb.innerHTML=_t('exercises.correct')+' '+(ex.explain||'');toast(_t('toast.correct'),'success')}
-  else{fb.className='ex-feedback show error';fb.innerHTML=_t('exercises.incorrect')+' '+_t('exercises.answer')+': <strong>'+ex.opts[ex.a]+'</strong>.'+(ex.explain?'<br>'+ex.explain:'');toast(_t('toast.wrong'),'error')}
+  if(correct){fb.className='ex-feedback show success';fb.innerHTML=_t('exercises.correct')+buildExplanation(ex,true,idx);toast(_t('toast.correct'),'success')}
+  else{fb.className='ex-feedback show error';fb.innerHTML=_t('exercises.incorrect')+buildExplanation(ex,false,idx);toast(_t('toast.wrong'),'error')}
   trackExercise(chId,correct);
 }
 
@@ -1466,13 +1764,13 @@ function checkTranslate(chId,i){
   const alts=[ex.a].concat(ex.alts||[]);
   const correct=isSimilar(val,alts);
   input.className=correct?'correct':'wrong';
-  if(correct){fb.className='ex-feedback show success';fb.innerHTML=_t('exercises.correct');toast(_t('toast.correct'),'success')}
+  if(correct){fb.className='ex-feedback show success';fb.innerHTML=_t('exercises.correct')+buildExplanation(ex,true,val);toast(_t('toast.correct'),'success')}
   else{
-    let msg=_t('exercises.incorrect')+' '+_t('exercises.answer')+': <strong>'+ex.a+'</strong>.';
+    let msg=_t('exercises.incorrect')+buildExplanation(ex,false,val);
     if(val.trim()){
       const normUser=normalize(val),normAns=normalize(ex.a);
       const lev=levenshtein(normUser,normAns);
-      if(lev<=2)msg+='<br>'+_t('exercises.almost');
+      if(lev<=2)msg+='<div style="margin-top:6px;color:var(--warn);font-weight:600">↳ '+_t('exercises.almost')+'</div>';
     }
     fb.className='ex-feedback show error';fb.innerHTML=msg;toast(_t('toast.wrong'),'error')
   }
@@ -1503,23 +1801,28 @@ function checkOrder(chId,i){
   const slotsContainer=$('#slots-'+chId+'-'+i);
   const slots=slotsContainer?$$('.slot-item',slotsContainer):[];
   const fb=$('#fb-'+chId+'-'+i);
-  const userOrder=slots.map(s=>s.textContent).join(' ');
+  const userWords=slots.map(s=>s.textContent);
+  const userOrder=userWords.join(' ');
   const correctOrder=ex.w.join(' ');
   const correct=normalize(userOrder)===normalize(correctOrder);
-  if(correct){fb.className='ex-feedback show success';fb.innerHTML=_t('exercises.correct');toast(_t('toast.correct'),'success')}
-  else{fb.className='ex-feedback show error';fb.innerHTML=_t('exercises.incorrect')+' '+_t('exercises.ordering')+': <strong>'+correctOrder+'</strong>.';toast(_t('toast.wrong'),'error')}
+  if(correct){fb.className='ex-feedback show success';fb.innerHTML=_t('exercises.correct')+buildExplanation(ex,true,userWords);toast(_t('toast.correct'),'success')}
+  else{fb.className='ex-feedback show error';fb.innerHTML=_t('exercises.incorrect')+buildExplanation(ex,false,userWords);toast(_t('toast.wrong'),'error')}
   trackExercise(chId,correct);
 }
 
 function checkMTMulti(chId,i,idx,btn){
   const ex=(getEx(chId)||[])[i];const container=btn.parentElement;
-  $$('button',container).forEach(b=>b.disabled=true);
+  $$('button',container).forEach((b,j)=>{
+    b.disabled=true;
+    if(j===ex.a)b.className='correct';
+    else if(j===idx)b.className='wrong';
+    else b.style.opacity='.5';
+  });
   const correct=idx===ex.a;
-  if(correct){container.innerHTML+='<div style="color:var(--success);font-weight:600;margin-top:4px">✅</div>'}
-  else{container.innerHTML+='<div style="color:var(--error);font-weight:600;margin-top:4px">❌ ('+ex.opts[ex.a]+')</div>'}
   const fb=$('#mt-fb-'+chId+'-'+i);
-  if(!fb.dataset)fb.dataset={};fb.dataset.done=correct?'ok':'no';
-  btn.style.display='none';
+  fb.dataset.done=correct?'ok':'no';
+  if(correct){fb.className='ex-feedback show success';fb.innerHTML='<div style="font-weight:600;margin-top:4px">✅ Correto!</div>'+buildExplanation(ex,true,idx)}
+  else{fb.className='ex-feedback show error';fb.innerHTML='<div style="font-weight:600;margin-top:4px">❌ ('+ex.opts[ex.a]+')</div>'+buildExplanation(ex,false,idx)}
   trackExercise(chId,correct);
 }
 
@@ -1532,8 +1835,8 @@ function checkMTTranslate(chId,i){
   const alts=[ex.a].concat(ex.alts||[]);
   const correct=isSimilar(val,alts);
   input.className=correct?'correct':'wrong';
-  if(correct){fb.className='ex-feedback show success';fb.innerHTML='✅';}
-  else{fb.className='ex-feedback show error';fb.innerHTML='❌ ('+ex.a+')';}
+  if(correct){fb.innerHTML='<div style="color:var(--success);font-weight:600;margin-top:4px">✅</div>'+buildExplanation(ex,true,val)}
+  else{fb.innerHTML='<div style="color:var(--error);font-weight:600;margin-top:4px">❌ ('+ex.a+')</div>'+buildExplanation(ex,false,val)}
   fb.dataset={};fb.dataset.done=correct?'ok':'no';
   trackExercise(chId,correct);
 }
