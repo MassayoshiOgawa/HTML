@@ -198,7 +198,104 @@ i{font-style:normal}
 .toast.info{background:var(--primary)}
 @keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
 @media(max-width:768px){:root{--navbar-h:56px}.navbar{padding:0 12px;gap:8px}.navbar-brand{font-size:1rem}.navbar-progress .bar{width:60px}.section,.chapter{padding:48px 16px}#cover{padding:100px 16px 40px}.cover-stats{gap:16px}.toc-grid{grid-template-columns:1fr}.gloss-list{grid-template-columns:1fr}#settings-panel{width:100%}.cover-title{font-size:clamp(1.8rem,8vw,2.5rem)}}
-@media(max-width:480px){.navbar-progress .bar{width:40px}.btn{padding:10px 20px;font-size:.85rem}}
+@media(max-width:480px){.navbar-progress .bar{width:40px}.btn{padding:10px 20px;font-size:.85rem}.conj-row{flex-wrap:wrap}.conj-row .conj-pronoun{width:65px;font-size:.85rem}.conj-row input{max-width:140px;font-size:.82rem}.conj-verb-card{padding:12px}}
+/* Unlock cheat field */ #unlock-input{width:100%;padding:8px 12px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--text3);font-family:var(--mono);font-size:.72rem;text-align:center;outline:none;transition:all .3s;margin-top:4px}#unlock-input:focus{border-color:var(--primary);color:var(--text);background:var(--bg);box-shadow:0 0 8px rgba(108,92,231,0.15)}#unlock-input.unlocked{border-color:var(--success);color:var(--success);background:rgba(0,184,148,0.05)}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+/* Conjugation Trainer */
+.conj-trainer{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px;transition:all var(--transition)}
+.conj-trainer:hover{box-shadow:var(--shadow)}
+.conj-trainer h3{font-size:1.1rem;color:var(--primary);margin-bottom:4px}
+.conj-trainer .conj-sub{color:var(--text3);font-size:.85rem;margin-bottom:20px}
+.conj-verb-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:14px;transition:all var(--transition);position:relative}
+.conj-verb-card:hover{border-color:var(--primary);box-shadow:0 2px 12px rgba(108,92,231,0.06)}
+.conj-verb-card .conj-verb-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.conj-verb-card .conj-verb-name{font-size:1.05rem;font-weight:700;color:var(--primary)}
+.conj-verb-card .conj-verb-meaning{font-size:.82rem;color:var(--text3)}
+.conj-verb-card .conj-verb-type{font-size:.68rem;padding:3px 10px;border-radius:12px;font-weight:600}
+.conj-verb-card .conj-verb-type.regular{background:rgba(0,184,148,0.12);color:var(--success)}
+.conj-verb-card .conj-verb-type.irregular{background:rgba(225,112,85,0.12);color:var(--error)}
+.conj-verb-card .conj-verb-type.modal{background:rgba(108,92,231,0.12);color:var(--primary)}
+.conj-verb-card .conj-verb-type.separable{background:rgba(0,206,201,0.12);color:var(--accent2)}
+.conj-verb-card .conj-progress{font-size:.75rem;color:var(--text3);margin-left:auto}
+.conj-verb-card .conj-progress .mini-bar{display:inline-block;width:50px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;vertical-align:middle;margin:0 6px}
+.conj-verb-card .conj-progress .mini-bar span{display:block;height:100%;background:var(--success);border-radius:4px;transition:width .4s}
+.conj-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.conj-row:last-child{border-bottom:none}
+.conj-row .conj-pronoun{width:80px;font-weight:700;font-family:var(--mono);font-size:.95rem;color:var(--text);text-align:right;flex-shrink:0}
+.conj-row .conj-arrow{color:var(--text3);font-size:.85rem;flex-shrink:0}
+.conj-row input{flex:1;max-width:220px;padding:8px 12px;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--bg2);color:var(--text);font-family:var(--font);font-size:.9rem;outline:none;transition:border .2s}
+.conj-row input:focus{border-color:var(--primary)}
+.conj-row input.correct{border-color:var(--success);background:rgba(0,184,148,0.05);color:var(--success)}
+.conj-row input.wrong{border-color:var(--error);background:rgba(225,112,85,0.05);color:var(--error)}
+.conj-row .conj-hint-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--bg2);color:var(--text3);cursor:pointer;font-size:.8rem;transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.conj-row .conj-hint-btn:hover{background:var(--warn);color:#fff;border-color:var(--warn)}
+.conj-row .conj-hint-btn.used{opacity:.4;pointer-events:none}
+.conj-row .conj-hint-text{flex:1;font-size:.78rem;color:var(--text3);font-style:italic;line-height:1.3;min-width:0;word-break:break-word;display:none;animation:conjHintIn .3s ease}
+.conj-row .conj-hint-text.show{display:block}
+@keyframes conjHintIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+.conj-row .conj-status{width:22px;font-size:.9rem;flex-shrink:0;text-align:center}
+.conj-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.conj-fb{border-radius:var(--radius-sm);padding:16px;margin-top:12px;font-size:.85rem;line-height:1.7;display:none;animation:conjFbIn .3s ease}
+.conj-fb.show{display:block}
+.conj-fb.success{background:rgba(0,184,148,0.06);border:1px solid var(--success)}
+.conj-fb.error{background:rgba(225,112,85,0.06);border:1px solid var(--error)}
+@keyframes conjFbIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.conj-section-header{margin-bottom:16px}
+.conj-section-header .conj-mastery{font-size:.8rem;color:var(--text3)}
+.conj-section-header .conj-mastery-bar{width:100%;height:5px;background:var(--border);border-radius:5px;overflow:hidden;margin-top:4px}
+.conj-section-header .conj-mastery-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:5px;transition:width .5s}
+/* Verb Deep Dive — Premium Educational Section */
+.verb-deep-dive{margin-top:16px;background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 40%);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;animation:deepDiveIn .45s ease}
+@keyframes deepDiveIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.verb-deep-dive-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:2px solid var(--primary3);background:linear-gradient(135deg,var(--primary3) 0%,transparent 100%)}
+.verb-deep-dive-header .deep-icon{font-size:1.4rem;flex-shrink:0}
+.verb-deep-dive-header .deep-title{font-size:1rem;font-weight:700;color:var(--primary);line-height:1.3}
+.verb-deep-dive-header .deep-subtitle{font-size:.78rem;color:var(--text3);font-weight:400}
+.verb-deep-dive-body{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.deep-overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.deep-fact-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;transition:all .2s}
+.deep-fact-card:hover{border-color:var(--primary);box-shadow:0 2px 12px rgba(108,92,231,0.06);transform:translateY(-1px)}
+.deep-fact-card .fact-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:4px}
+.deep-fact-card .fact-value{font-size:.92rem;font-weight:700;color:var(--text)}
+.deep-fact-card .fact-value.primary{color:var(--primary)}
+.deep-fact-card .fact-value.success{color:var(--success)}
+.deep-fact-card .fact-value.accent{color:var(--accent2)}
+.deep-fact-card .fact-detail{font-size:.75rem;color:var(--text3);margin-top:3px}
+.deep-section{margin-top:4px}
+.deep-section-title{font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:6px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.deep-section-title .sec-icon{font-size:.95rem}
+.deep-pattern-box{padding:14px 16px;background:var(--bg);border-radius:var(--radius-sm);border-left:3px solid var(--primary);margin-bottom:10px;line-height:1.7;font-size:.88rem;color:var(--text2)}
+.deep-pattern-box strong{color:var(--primary)}
+.deep-pattern-box .highlight{background:var(--primary3);padding:1px 5px;border-radius:3px;font-weight:600;color:var(--primary)}
+.deep-comparison{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
+.deep-comp-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;transition:all .2s}
+.deep-comp-card:hover{border-color:var(--primary);box-shadow:0 2px 12px rgba(108,92,231,0.06)}
+.deep-comp-card-header{padding:10px 14px;background:var(--bg3);font-weight:700;font-size:.82rem;color:var(--primary);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.deep-comp-card-header .comp-badge{font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap}
+.deep-comp-card-header .comp-badge.same{background:rgba(0,184,148,0.12);color:var(--success)}
+.deep-comp-card-header .comp-badge.diff{background:rgba(225,112,85,0.1);color:var(--error)}
+.deep-comp-card-body{padding:10px 14px;font-size:.82rem;color:var(--text2);line-height:1.6}
+.deep-comp-card-body .comp-table{width:100%;border-collapse:collapse;font-size:.8rem;margin:6px 0}
+.deep-comp-card-body .comp-table td{padding:5px 8px;border-bottom:1px solid var(--border)}
+.deep-comp-card-body .comp-table td:first-child{font-weight:600;font-family:var(--mono);width:80px;color:var(--text)}
+.deep-comp-card-body .comp-table tr.highlight-row td{background:var(--primary3)}
+.deep-comp-card-body .comp-table tr.highlight-row td:first-child{color:var(--primary)}
+.deep-insight-box{padding:12px 16px;border-radius:var(--radius-sm);font-size:.84rem;line-height:1.65;margin-top:4px}
+.deep-insight-box.tip{background:rgba(108,92,231,0.05);border-left:3px solid var(--primary)}
+.deep-insight-box.warn{background:rgba(253,203,110,0.08);border-left:3px solid var(--warn)}
+.deep-insight-box.fun{background:rgba(0,206,201,0.05);border-left:3px solid var(--accent)}
+.deep-insight-box.success-box{background:rgba(0,184,148,0.05);border-left:3px solid var(--success)}
+.deep-insight-box strong{color:var(--text)}
+.deep-example-list{display:flex;flex-direction:column;gap:8px}
+.deep-example-item{padding:10px 14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);font-size:.85rem;transition:all .2s}
+.deep-example-item:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(108,92,231,0.04);transform:translateX(2px)}
+.deep-example-item .example-de{font-weight:600;color:var(--text);margin-bottom:2px}
+.deep-example-item .example-pt{font-size:.78rem;color:var(--text3)}
+.deep-example-item .example-context{font-size:.72rem;color:var(--text3);font-style:italic;margin-top:2px}
+.deep-tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.deep-tag{padding:4px 10px;border-radius:12px;font-size:.72rem;font-weight:600;background:var(--primary3);color:var(--primary);cursor:default;transition:all .15s}
+.deep-tag:hover{background:var(--primary);color:#fff;transform:scale(1.04)}
+@media(max-width:768px){.deep-overview{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.deep-overview{grid-template-columns:1fr}.deep-comparison{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -212,6 +309,7 @@ i{font-style:normal}
 <div class="setting-group"><h4 data-i18n="settings.difficulty">Dificuldade</h4><div class="setting-row"><label data-i18n="settings.adaptive">Dificuldade adaptativa</label><label class="toggle"><input type="checkbox" id="adaptive-toggle" checked><span class="slider"></span></label></div></div>
 <div class="setting-group"><h4 data-i18n="settings.language">Idioma</h4><div class="setting-row"><label data-i18n="settings.langLabel">Português / English</label><label class="toggle"><input type="checkbox" id="lang-toggle"><span class="slider"></span></label></div></div>
 <div class="setting-group"><h4 data-i18n="settings.data">Dados</h4><button id="export-btn" class="btn btn-outline btn-sm" style="width:100%;margin-bottom:8px" data-i18n="settings.export">📤 Exportar progresso</button><button id="import-btn" class="btn btn-outline btn-sm" style="width:100%;margin-bottom:8px" data-i18n="settings.import">📥 Importar progresso</button><input type="file" id="import-file" accept=".json" style="display:none"><button id="reset-btn" data-i18n="settings.reset">🗑️ Resetar todo o progresso</button></div>
+<div class="setting-group" style="opacity:.5"><h4 style="font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--text3)">🔑 Dev</h4><input type="text" id="unlock-input" placeholder="..."></div>
 </div></div>
 <div id="sidebar-overlay"></div>
 <nav class="navbar" id="navbar">
@@ -555,11 +653,11 @@ const EX={}; EX[1]=[
 {q:'ß também é chamado de:',a:'Eszett',alts:['eszett','scharfes S','scharfes s'],h:['Literalmente significa "S agudo".','O nome vem de "sz" em alemão antigo.','É chamado "Eszett" ou "scharfes S".'],t:'t'},
 {q:'Traduza "som" para o alemão:',a:'Laut',alts:['laut'],h:['É uma palavra curta de 4 letras.','Começa com L.','A resposta é "der Laut".'],t:'t'},
 {q:'Qual letra NÃO existe no alfabeto alemão?',opts:['É','Ó','K'],a:1,h:['Todas as letras com acento agudo não existem.','O alemão tem Umlaute, não acentos.','Ó não faz parte do alfabeto alemão padrão.'],t:'m'},
-{q:'Monte a frase em alemão:',qPt:'Eu aprendo alemão',qEn:'I learn German',w:['Ich','lerne','Deutsch','gehe','spreche','Schule'],correct:['Ich','lerne','Deutsch'],meanings:{'Ich':{pt:'Eu',en:'I'},'lerne':{pt:'aprendo',en:'learn'},'Deutsch':{pt:'alemão',en:'German'},'gehe':{pt:'vou',en:'go'},'spreche':{pt:'falo',en:'speak'},'Schule':{pt:'escola',en:'school'}},h:['Sujeito + verbo + objeto.','Ich = eu, lerne = aprendo.','Ordem básica alemã: sujeito, verbo, complemento.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Estrutura SVO</div><div style="margin-bottom:8px;color:var(--text2)">Esta é a estrutura mais básica do alemão: <strong>Sujeito + Verbo + Objeto</strong> (SVO). O verbo <strong>lerne</strong> (aprendo) está na posição 2.\n\n🧠 <strong>Entenda o padrão:</strong> Toda frase declarativa simples em alemão segue esta ordem. As palavras vêm do vocabulário do Capítulo 1.</div><div style="padding:8px 12px;background:var(--bg2);border-radius:6px;color:var(--primary);font-size:.85rem">💡 <strong>Dica:</strong> Ich é sempre sujeito, depois vem o verbo, depois o complemento. Os distratores "gehe" (vou) e "spreche" (falo) são verbos que também poderiam ser usados em outras frases.</div>'},
-{q:'Monte a frase em alemão:',qPt:'O alfabeto é fácil',qEn:'The alphabet is easy',w:['Das','Alphabet','ist','einfach','schwer','schön'],correct:['Das','Alphabet','ist','einfach'],meanings:{'Das':{pt:'O (neutro)',en:'The (neut)'},'Alphabet':{pt:'alfabeto',en:'alphabet'},'ist':{pt:'é',en:'is'},'einfach':{pt:'fácil',en:'easy'},'schwer':{pt:'difícil',en:'difficult'},'schön':{pt:'bonito',en:'beautiful'}},h:['Artigo neutro das + substantivo + sein + adjetivo.','Alphabet é neutro → das.','A estrutura é: Das Alphabet + ist + einfach.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Sujeito + sein + predicativo</div><div style="margin-bottom:8px;color:var(--text2)"><strong>das Alphabet</strong> (neutro) é o sujeito. <strong>ist</strong> é o verbo sein na 3ª pessoa. <strong>einfach</strong> é o adjetivo predicativo (não muda).\n\n⚠️ <strong>Erro comum:</strong> Não usar "schwer" (difícil) ou "schön" (bonito) no lugar de "einfach". Cada adjetivo tem seu contexto.</div><div style="padding:8px 12px;background:var(--bg2);border-radius:6px;color:var(--primary);font-size:.85rem">📌 <strong>Regra:</strong> Adjetivos predicativos (depois de sein) não recebem terminação!</div>'},
-{q:'Monte a frase em alemão:',qPt:'Hoje eu aprendo alemão',qEn:'Today I learn German',w:['Heute','lerne','ich','Deutsch','gehe','spreche'],correct:['Heute','lerne','ich','Deutsch'],meanings:{'Heute':{pt:'Hoje',en:'Today'},'lerne':{pt:'aprendo',en:'learn'},'ich':{pt:'eu',en:'I'},'Deutsch':{pt:'alemão',en:'German'},'gehe':{pt:'vou',en:'go'},'spreche':{pt:'falo',en:'speak'}},h:['Advérbio no início → verbo + sujeito.','Quando um advérbio ocupa a posição 1, o sujeito vai para a posição 3.','Ordem: Heute (1) + lerne (2) + ich (3).'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Inversão com advérbio</div><div style="margin-bottom:8px;color:var(--text2)">Quando a frase começa com um advérbio de tempo (<strong>Heute</strong>), o verbo <strong>permanece na posição 2</strong> e o sujeito vai para a posição 3. Isso é a chamada "inversão".\n\n🧠 <strong>Entenda:</strong> O alemão é rígido quanto à posição do verbo. Não importa o que venha na posição 1, o verbo conjugado sempre ocupa a posição 2.</div><div style="padding:8px 12px;background:var(--bg2);border-radius:6px;color:var(--primary);font-size:.85rem">📌 <strong>Regra de ouro:</strong> Verbo conjugado = posição 2, SEMPRE.</div>'},
-{q:'Monte a frase em alemão:',qPt:'Eu posso falar alemão',qEn:'I can speak German',w:['Ich','kann','Deutsch','sprechen','lerne','gehe'],correct:['Ich','kann','Deutsch','sprechen'],meanings:{'Ich':{pt:'Eu',en:'I'},'kann':{pt:'posso',en:'can'},'Deutsch':{pt:'alemão',en:'German'},'sprechen':{pt:'falar',en:'speak'},'lerne':{pt:'aprendo',en:'learn'},'gehe':{pt:'vou',en:'go'}},h:['Modal kann + infinitivo no final.','Estrutura: sujeito + modal + complementos + infinitivo.','O verbo principal sprechen vai no final.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Modalverb + Infinitiv</div><div style="margin-bottom:8px;color:var(--text2)"><strong>kann</strong> (posso) é o verbo modal conjugado na posição 2. O verbo principal <strong>sprechen</strong> (falar) vai no final da frase em sua forma infinitiva.\n\n🧠 <strong>Padrão:</strong> Modal conjugado posição 2 + ... + infinitivo no final. Os distratores "lerne" e "gehe" são formas conjugadas, não infinitivos.</div><div style="padding:8px 12px;background:var(--bg2);border-radius:6px;color:var(--primary);font-size:.85rem">📌 <strong>Regra:</strong> Com verbos modais, o verbo principal SEMPRE vai no final no infinitivo.</div>'},
-{q:'Monte a frase em alemão:',qPt:'O W alemão tem som de V',qEn:'The German W sounds like V',w:['Das','deutsche','W','klingt','wie','V','Buch','spricht'],correct:['Das','deutsche','W','klingt','wie','V'],meanings:{'Das':{pt:'O',en:'The'},'deutsche':{pt:'alemão',en:'German'},'W':{pt:'W',en:'W'},'klingt':{pt:'soa',en:'sounds'},'wie':{pt:'como',en:'like'},'V':{pt:'V',en:'V'},'Buch':{pt:'livro',en:'book'},'spricht':{pt:'fala',en:'speaks'}},h:['Frase com comparação wie.','Conteúdo do Capítulo 1: W soa como V.','Ordem: Das deutsche W + klingt + wie + V.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Frase com comparação</div><div style="margin-bottom:8px;color:var(--text2)">Esta frase usa <strong>klingen wie</strong> (soar como). O verbo klingt está na posição 2. <strong>wie</strong> introduz a comparação.\n\n🎯 <strong>Lembre-se sempre:</strong> W alemão = som de V. É uma das primeiras regras de pronúncia que todo iniciante deve dominar.</div><div style="padding:8px 12px;background:var(--bg2);border-radius:6px;color:var(--primary);font-size:.85rem">💡 <strong>Curiosidade:</strong> Muitos brasileiros erram ao pronunciar W como "u" (como em inglês). W em alemão é sempre V!</div>'}
+{q:'Monte a frase em alemão:',qPt:'Eu aprendo alemão',qEn:'I learn German',w:['Ich','lerne','Deutsch','gehe','spreche','Schule'],correct:['Ich','lerne','Deutsch'],meanings:{'Ich':{pt:'Eu',en:'I'},'lerne':{pt:'aprendo',en:'learn'},'Deutsch':{pt:'alemão',en:'German'},'gehe':{pt:'vou',en:'go'},'spreche':{pt:'falo',en:'speak'},'Schule':{pt:'escola',en:'school'}},h:['Sujeito + verbo + objeto.','Ich = eu, lerne = aprendo.','Ordem básica alemã: sujeito, verbo, complemento.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Estrutura SVO</div><div style="margin-bottom:8px;color:var(--text2)">Esta é a estrutura mais básica do alemão: <strong>Sujeito + Verbo + Objeto</strong> (SVO). O verbo <strong>lerne</strong> (aprendo) está na posição 2.<br><br>🧠 <strong>Entenda o padrão:</strong> Toda frase declarativa simples em alemão segue esta ordem. As palavras vêm do vocabulário do Capítulo 1.</div><div style="padding:8px 12px;background:var(--bg2);border-radius:6px;color:var(--primary);font-size:.85rem">💡 <strong>Dica:</strong> Ich é sempre sujeito, depois vem o verbo, depois o complemento. Os distratores "gehe" (vou) e "spreche" (falo) são verbos que também poderiam ser usados em outras frases.</div>'},
+{q:'Monte a frase em alemão:',qPt:'O alfabeto é fácil',qEn:'The alphabet is easy',w:['Das','Alphabet','ist','einfach','schwer','schön'],correct:['Das','Alphabet','ist','einfach'],meanings:{'Das':{pt:'O (neutro)',en:'The (neut)'},'Alphabet':{pt:'alfabeto',en:'alphabet'},'ist':{pt:'é',en:'is'},'einfach':{pt:'fácil',en:'easy'},'schwer':{pt:'difícil',en:'difficult'},'schön':{pt:'bonito',en:'beautiful'}},h:['Artigo neutro das + substantivo + sein + adjetivo.','Alphabet é neutro → das.','A estrutura é: Das Alphabet + ist + einfach.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Sujeito + sein + predicativo</div><div style="margin-bottom:8px;color:var(--text2)"><strong>das Alphabet</strong> (neutro) é o sujeito. <strong>ist</strong> é o verbo sein na 3ª pessoa. <strong>einfach</strong> é o adjetivo predicativo (não muda).<br><br>⚠️ <strong>Erro comum:</strong> Não usar "schwer" (difícil) ou "schön" (bonito) no lugar de "einfach". Cada adjetivo tem seu contexto.</div><div style="padding:8px 12px;background:var(--bg2);border-radius:6px;color:var(--primary);font-size:.85rem">📌 <strong>Regra:</strong> Adjetivos predicativos (depois de sein) não recebem terminação!</div>'},
+{q:'Monte a frase em alemão:',qPt:'Hoje eu aprendo alemão',qEn:'Today I learn German',w:['Heute','lerne','ich','Deutsch','gehe','spreche'],correct:['Heute','lerne','ich','Deutsch'],meanings:{'Heute':{pt:'Hoje',en:'Today'},'lerne':{pt:'aprendo',en:'learn'},'ich':{pt:'eu',en:'I'},'Deutsch':{pt:'alemão',en:'German'},'gehe':{pt:'vou',en:'go'},'spreche':{pt:'falo',en:'speak'}},h:['Advérbio no início → verbo + sujeito.','Quando um advérbio ocupa a posição 1, o sujeito vai para a posição 3.','Ordem: Heute (1) + lerne (2) + ich (3).'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Inversão com advérbio</div><div style="margin-bottom:8px;color:var(--text2)">Quando a frase começa com um advérbio de tempo (<strong>Heute</strong>), o verbo <strong>permanece na posição 2</strong> e o sujeito vai para a posição 3. Isso é a chamada "inversão".<br><br>🧠 <strong>Entenda:</strong> O alemão é rígido quanto à posição do verbo. Não importa o que venha na posição 1, o verbo conjugado sempre ocupa a posição 2.</div><div style="padding:8px 12px;background:var(--bg2);border-radius:6px;color:var(--primary);font-size:.85rem">📌 <strong>Regra de ouro:</strong> Verbo conjugado = posição 2, SEMPRE.</div>'},
+{q:'Monte a frase em alemão:',qPt:'Eu posso falar alemão',qEn:'I can speak German',w:['Ich','kann','Deutsch','sprechen','lerne','gehe'],correct:['Ich','kann','Deutsch','sprechen'],meanings:{'Ich':{pt:'Eu',en:'I'},'kann':{pt:'posso',en:'can'},'Deutsch':{pt:'alemão',en:'German'},'sprechen':{pt:'falar',en:'speak'},'lerne':{pt:'aprendo',en:'learn'},'gehe':{pt:'vou',en:'go'}},h:['Modal kann + infinitivo no final.','Estrutura: sujeito + modal + complementos + infinitivo.','O verbo principal sprechen vai no final.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Modalverb + Infinitiv</div><div style="margin-bottom:8px;color:var(--text2)"><strong>kann</strong> (posso) é o verbo modal conjugado na posição 2. O verbo principal <strong>sprechen</strong> (falar) vai no final da frase em sua forma infinitiva.<br><br>🧠 <strong>Padrão:</strong> Modal conjugado posição 2 + ... + infinitivo no final. Os distratores "lerne" e "gehe" são formas conjugadas, não infinitivos.</div><div style="padding:8px 12px;background:var(--bg2);border-radius:6px;color:var(--primary);font-size:.85rem">📌 <strong>Regra:</strong> Com verbos modais, o verbo principal SEMPRE vai no final no infinitivo.</div>'},
+{q:'Monte a frase em alemão:',qPt:'O W alemão tem som de V',qEn:'The German W sounds like V',w:['Das','deutsche','W','klingt','wie','V','Buch','spricht'],correct:['Das','deutsche','W','klingt','wie','V'],meanings:{'Das':{pt:'O',en:'The'},'deutsche':{pt:'alemão',en:'German'},'W':{pt:'W',en:'W'},'klingt':{pt:'soa',en:'sounds'},'wie':{pt:'como',en:'like'},'V':{pt:'V',en:'V'},'Buch':{pt:'livro',en:'book'},'spricht':{pt:'fala',en:'speaks'}},h:['Frase com comparação wie.','Conteúdo do Capítulo 1: W soa como V.','Ordem: Das deutsche W + klingt + wie + V.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Frase com comparação</div><div style="margin-bottom:8px;color:var(--text2)">Esta frase usa <strong>klingen wie</strong> (soar como). O verbo klingt está na posição 2. <strong>wie</strong> introduz a comparação.<br><br>🎯 <strong>Lembre-se sempre:</strong> W alemão = som de V. É uma das primeiras regras de pronúncia que todo iniciante deve dominar.</div><div style="padding:8px 12px;background:var(--bg2);border-radius:6px;color:var(--primary);font-size:.85rem">💡 <strong>Curiosidade:</strong> Muitos brasileiros erram ao pronunciar W como "u" (como em inglês). W em alemão é sempre V!</div>'}
 ]; EX[2]=[
 {q:'Como se diz "Bom dia" em alemão?',a:'Guten Morgen',alts:['guten morgen','Guten morgen'],h:['Começa com "Guten" como saudação.','Morgen significa manhã.','É "Guten Morgen" (literalmente "boa manhã").'],t:'t'},
 {q:'Como se diz "Obrigado" em alemão?',a:'Danke',alts:['danke'],h:['É curta: D-a-n-k-e.','Muito parecido com o inglês "thanks".','A resposta é "Danke".'],t:'t'},
@@ -576,11 +674,11 @@ const EX={}; EX[1]=[
 {q:'Monte a frase em alemão:',qPt:'Eu me chamo Maria',qEn:'My name is Maria',w:['Ich','heiße','Maria','bin','geht','du'],correct:['Ich','heiße','Maria'],meanings:{'Ich':{pt:'Eu',en:'I'},'heiße':{pt:'chamo-me',en:'am called'},'Maria':{pt:'Maria',en:'Maria'},'bin':{pt:'sou',en:'am'},'geht':{pt:'vai',en:'goes'},'du':{pt:'tu',en:'you'}},h:['Sujeito + verbo + nome.','Ich = eu, heiße = chamo-me.','Ordem: Ich heiße Maria.'],t:'o'},
 {q:'"Gute Nacht" é usado:',opts:['Ao dormir','Pela manhã','À tarde'],a:0,h:['Nacht = noite.','Usado quando se vai dormir.','"Gute Nacht" = boa noite (ao dormir).'],t:'m'},
 {q:'Traduza: "Estou bem." em alemão:',a:'Mir geht es gut.',alts:['mir geht es gut','Mir geht es gut'],h:['Usa "geht" com dativo.','Mir = para mim, gut = bem.','"Mir geht es gut" é a resposta padrão.'],t:'t'},
-{q:'Monte a frase em alemão:',qPt:'Bom dia, como vai?',qEn:'Good morning, how are you?',w:['Guten','Morgen,','wie','geht','es','Ihnen','Abend','Nacht'],correct:['Guten','Morgen,','wie','geht','es','Ihnen'],meanings:{'Guten':{pt:'Bom',en:'Good'},'Morgen,':{pt:'dia,',en:'morning,'},'wie':{pt:'como',en:'how'},'geht':{pt:'vai',en:'goes'},'es':{pt:'(neutro)',en:'it'},'Ihnen':{pt:'você (formal)',en:'you (formal)'},'Abend':{pt:'tarde/noite',en:'evening'},'Nacht':{pt:'noite',en:'night'}},h:['Saudação formal: Guten Morgen + Wie geht es Ihnen?','Ihnen = pronome formal dativo.','Guten Morgen é a saudação matinal padrão.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Saudação composta</div><div style="margin-bottom:8px;color:var(--text2)">Esta frase combina a saudação <strong>Guten Morgen</strong> (Bom dia) com a pergunta formal <strong>Wie geht es Ihnen?</strong> (Como vai?). <strong>Ihnen</strong> é o pronome dativo formal.\n\n⚠️ <strong>Erro comum:</strong> Não confundir Guten Abend (boa noite ao chegar) com Gute Nacht (boa noite ao dormir).</div>'},
-{q:'Monte a frase em alemão:',qPt:'Prazer em conhecê-lo!',qEn:'Nice to meet you!',w:['Freut','mich!','Danke','Tschüss'],correct:['Freut','mich!'],meanings:{'Freut':{pt:'Alegra',en:'Pleases'},'mich!':{pt:'me!',en:'me!'},'Danke':{pt:'Obrigado',en:'Thanks'},'Tschüss':{pt:'Tchau',en:'Bye'}},h:['Expressão de cortesia fixa.','Literalmente: "Alegra-me".','Usado ao ser apresentado a alguém.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Expressão fixa</div><div style="margin-bottom:8px;color:var(--text2)"><strong>Freut mich!</strong> é uma expressão fixa equivalente a "Prazer em conhecê-lo!". Literalmente significa "Alegra-me!". É usada após apresentações.\n\n💡 <strong>Dica:</strong> Aprenda expressões fixas como blocos. Não tente traduzir palavra por palavra.</div>'},
+{q:'Monte a frase em alemão:',qPt:'Bom dia, como vai?',qEn:'Good morning, how are you?',w:['Guten','Morgen,','wie','geht','es','Ihnen','Abend','Nacht'],correct:['Guten','Morgen,','wie','geht','es','Ihnen'],meanings:{'Guten':{pt:'Bom',en:'Good'},'Morgen,':{pt:'dia,',en:'morning,'},'wie':{pt:'como',en:'how'},'geht':{pt:'vai',en:'goes'},'es':{pt:'(neutro)',en:'it'},'Ihnen':{pt:'você (formal)',en:'you (formal)'},'Abend':{pt:'tarde/noite',en:'evening'},'Nacht':{pt:'noite',en:'night'}},h:['Saudação formal: Guten Morgen + Wie geht es Ihnen?','Ihnen = pronome formal dativo.','Guten Morgen é a saudação matinal padrão.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Saudação composta</div><div style="margin-bottom:8px;color:var(--text2)">Esta frase combina a saudação <strong>Guten Morgen</strong> (Bom dia) com a pergunta formal <strong>Wie geht es Ihnen?</strong> (Como vai?). <strong>Ihnen</strong> é o pronome dativo formal.<br><br>⚠️ <strong>Erro comum:</strong> Não confundir Guten Abend (boa noite ao chegar) com Gute Nacht (boa noite ao dormir).</div>'},
+{q:'Monte a frase em alemão:',qPt:'Prazer em conhecê-lo!',qEn:'Nice to meet you!',w:['Freut','mich!','Danke','Tschüss'],correct:['Freut','mich!'],meanings:{'Freut':{pt:'Alegra',en:'Pleases'},'mich!':{pt:'me!',en:'me!'},'Danke':{pt:'Obrigado',en:'Thanks'},'Tschüss':{pt:'Tchau',en:'Bye'}},h:['Expressão de cortesia fixa.','Literalmente: "Alegra-me".','Usado ao ser apresentado a alguém.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Expressão fixa</div><div style="margin-bottom:8px;color:var(--text2)"><strong>Freut mich!</strong> é uma expressão fixa equivalente a "Prazer em conhecê-lo!". Literalmente significa "Alegra-me!". É usada após apresentações.<br><br>💡 <strong>Dica:</strong> Aprenda expressões fixas como blocos. Não tente traduzir palavra por palavra.</div>'},
 {q:'Monte a frase em alemão:',qPt:'Até logo e obrigado!',qEn:'Goodbye and thank you!',w:['Auf','Wiedersehen','und','Danke!','Tschüss','Bitte'],correct:['Auf','Wiedersehen','und','Danke!'],meanings:{'Auf':{pt:'Até',en:'Until'},'Wiedersehen':{pt:'ver novamente',en:'seeing again'},'und':{pt:'e',en:'and'},'Danke!':{pt:'Obrigado!',en:'Thanks!'},'Tschüss':{pt:'Tchau',en:'Bye'},'Bitte':{pt:'Por favor',en:'Please'}},h:['Despedida formal: Auf Wiedersehen.','und = e (conectivo).','Auf Wiedersehen und Danke = Até logo e obrigado.'],t:'o'},
-{q:'Monte a frase em alemão:',qPt:'Como você se chama? (formal)',qEn:'What is your name? (formal)',w:['Wie','heißen','Sie?','du?','geht','Ihnen'],correct:['Wie','heißen','Sie?'],meanings:{'Wie':{pt:'Como',en:'How'},'heißen':{pt:'chamar-se',en:'to be called'},'Sie?':{pt:'você? (formal)',en:'you? (formal)'},'du?':{pt:'você? (informal)',en:'you? (inf)'},'geht':{pt:'vai',en:'goes'},'Ihnen':{pt:'você (dat)',en:'you (dat)'}},h:['W-Frage: Wie + verbo + sujeito.','Sie é formal, du é informal.','heißen = chamar-se, verbo conjugado para Sie.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 W-Frage com formalidade</div><div style="margin-bottom:8px;color:var(--text2)"><strong>Wie heißen Sie?</strong> é a pergunta formal. O verbo heißen está conjugado para Sie (3ª pessoa plural). A ordem é W-Wort + verbo + sujeito.\n\n⚡ <strong>Importante:</strong> Em contexto formal, sempre use Sie (com S maiúsculo), nunca du.</div>'},
-{q:'Monte a frase em alemão:',qPt:'Estou bem, e você? (informal)',qEn:'I am fine, and you? (informal)',w:['Mir','geht','es','gut,','und','dir?','Ihnen','schlecht'],correct:['Mir','geht','es','gut,','und','dir?'],meanings:{'Mir':{pt:'Para mim',en:'To me'},'geht':{pt:'vai',en:'goes'},'es':{pt:'(neutro)',en:'it'},'gut,':{pt:'bem,',en:'fine,'},'und':{pt:'e',en:'and'},'dir?':{pt:'você? (inf)',en:'you? (inf)'},'Ihnen':{pt:'você (formal)',en:'you (formal)'},'schlecht':{pt:'mal',en:'bad'}},h:['Resposta padrão: Mir geht es gut.','dir = dativo informal.','und dir? = e você? (informal).'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Resposta pessoal</div><div style="margin-bottom:8px;color:var(--text2)"><strong>Mir geht es gut</strong> é a resposta padrão para "Wie geht es dir/Ihnen?". O pronome dativo <strong>Mir</strong> (para mim) indica a quem se refere. <strong>dir</strong> é o dativo informal de du.\n\n⚠️ <strong>Erro comum:</strong> Não usar "Ich bin gut" — em alemão usa-se "Mir geht es gut" (literalmente: "A mim vai bem").</div>'}
+{q:'Monte a frase em alemão:',qPt:'Como você se chama? (formal)',qEn:'What is your name? (formal)',w:['Wie','heißen','Sie?','du?','geht','Ihnen'],correct:['Wie','heißen','Sie?'],meanings:{'Wie':{pt:'Como',en:'How'},'heißen':{pt:'chamar-se',en:'to be called'},'Sie?':{pt:'você? (formal)',en:'you? (formal)'},'du?':{pt:'você? (informal)',en:'you? (inf)'},'geht':{pt:'vai',en:'goes'},'Ihnen':{pt:'você (dat)',en:'you (dat)'}},h:['W-Frage: Wie + verbo + sujeito.','Sie é formal, du é informal.','heißen = chamar-se, verbo conjugado para Sie.'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 W-Frage com formalidade</div><div style="margin-bottom:8px;color:var(--text2)"><strong>Wie heißen Sie?</strong> é a pergunta formal. O verbo heißen está conjugado para Sie (3ª pessoa plural). A ordem é W-Wort + verbo + sujeito.<br><br>⚡ <strong>Importante:</strong> Em contexto formal, sempre use Sie (com S maiúsculo), nunca du.</div>'},
+{q:'Monte a frase em alemão:',qPt:'Estou bem, e você? (informal)',qEn:'I am fine, and you? (informal)',w:['Mir','geht','es','gut,','und','dir?','Ihnen','schlecht'],correct:['Mir','geht','es','gut,','und','dir?'],meanings:{'Mir':{pt:'Para mim',en:'To me'},'geht':{pt:'vai',en:'goes'},'es':{pt:'(neutro)',en:'it'},'gut,':{pt:'bem,',en:'fine,'},'und':{pt:'e',en:'and'},'dir?':{pt:'você? (inf)',en:'you? (inf)'},'Ihnen':{pt:'você (formal)',en:'you (formal)'},'schlecht':{pt:'mal',en:'bad'}},h:['Resposta padrão: Mir geht es gut.','dir = dativo informal.','und dir? = e você? (informal).'],t:'o',explain:'<div style="margin-bottom:8px;font-weight:600;color:var(--text)">📐 Resposta pessoal</div><div style="margin-bottom:8px;color:var(--text2)"><strong>Mir geht es gut</strong> é a resposta padrão para "Wie geht es dir/Ihnen?". O pronome dativo <strong>Mir</strong> (para mim) indica a quem se refere. <strong>dir</strong> é o dativo informal de du.<br><br>⚠️ <strong>Erro comum:</strong> Não usar "Ich bin gut" — em alemão usa-se "Mir geht es gut" (literalmente: "A mim vai bem").</div>'}
 ]; EX[3]=[
 {q:'Como se diz "três" em alemão?',a:'drei',alts:['drei'],h:['Soa como "drai".','Tem 4 letras.','A resposta é "drei".'],t:'t'},
 {q:'Como se diz "dez" em alemão?',a:'zehn',alts:['zehn'],h:['Soa como "tsên".','Começa com Z.','A resposta é "zehn".'],t:'t'},
@@ -1892,11 +1990,13 @@ function renderChapters(){
       sec.innerHTML+='<div id="exercises-'+ch.id+'"></div>';
       const revContent=getReviewContent(ch.id);
       if(revContent)sec.innerHTML+='<div class="review-box"><h3>'+_t('chapter.review')+' — '+ch.title+'</h3><ul>'+revContent+'</ul></div>';
+      sec.innerHTML+='<div class="conj-trainer" id="conj-trainer-'+ch.id+'"></div>';
       sec.innerHTML+='<div id="mini-test-'+ch.id+'" class="exercise-box"><div class="ex-num">'+_t('minitest.title')+'</div><p class="ex-question">'+_t('minitest.desc')+'</p><div id="mini-test-content-'+ch.id+'"></div></div>';
     }
     container.appendChild(sec);
     if(unlocked){
       renderExercises(ch.id);
+      renderConjugationTrainer(ch.id);
       renderMiniTest(ch.id);
     }
   });
@@ -2213,6 +2313,644 @@ function updateAll(){
   renderTOC();renderSidebar();
 }
 
+// ========== VERB CONJUGATION DATABASE ==========
+// Classification: type: 'regular'|'irregular'|'modal'|'separable'|'inseparable'|'mixed'|'auxiliary'
+// vowelChange: {du:newVowel, er:newVowel} for stem-vowel-changing verbs
+// prefix: separable prefix (e.g. 'auf') — the conjugated part is the base verb
+// special: {pronoun:form} for completely irregular forms
+// meaning: {pt:'...', en:'...'}
+// conjugations: [ich, du, er, wir, ihr, sie] PRESENT tense only
+const VERB_DB={
+  lernen:{infinitive:'lernen',conj:['lerne','lernst','lernt','lernen','lernt','lernen'],type:'regular',pattern:'standard -en',meaning:{pt:'aprender/estudar',en:'learn/study'},chapters:[1,5],example:{de:'Ich lerne Deutsch.',pt:'Eu aprendo alemão.'},related:[{verb:'lehren',meaning:{pt:'ensinar',en:'teach'}}]},
+  machen:{infinitive:'machen',conj:['mache','machst','macht','machen','macht','machen'],type:'regular',pattern:'standard -en',meaning:{pt:'fazer',en:'make/do'},chapters:[2,5],example:{de:'Was machst du?',pt:'O que fazes?'}},
+  kommen:{infinitive:'kommen',conj:['komme','kommst','kommt','kommen','kommt','kommen'],type:'regular',pattern:'standard -en',meaning:{pt:'vir',en:'come'},chapters:[5,9],example:{de:'Er kommt aus Berlin.',pt:'Ele vem de Berlim.'},perfektAux:'sein',partizip:'gekommen'},
+  gehen:{infinitive:'gehen',conj:['gehe','gehst','geht','gehen','geht','gehen'],type:'regular',pattern:'standard -en',meaning:{pt:'ir',en:'go'},chapters:[5,9],example:{de:'Wir gehen nach Hause.',pt:'Vamos para casa.'},perfektAux:'sein',partizip:'gegangen'},
+  wohnen:{infinitive:'wohnen',conj:['wohne','wohnst','wohnt','wohnen','wohnt','wohnen'],type:'regular',pattern:'standard -en',meaning:{pt:'morar',en:'live/dwell'},chapters:[5,6],example:{de:'Ich wohne in Berlin.',pt:'Moro em Berlim.'}},
+  sprechen:{infinitive:'sprechen',conj:['spreche','sprichst','spricht','sprechen','sprecht','sprechen'],type:'irregular',vowelChange:{du:'i',er:'i'},pattern:'e→i (strong)',meaning:{pt:'falar',en:'speak'},chapters:[5,6],example:{de:'Sprichst du Deutsch?',pt:'Você fala alemão?'},related:[{verb:'sprechen',note:'e→i only in 2nd/3rd person singular'}]},
+  lesen:{infinitive:'lesen',conj:['lese','liest','liest','lesen','lest','lesen'],type:'irregular',vowelChange:{du:'ie',er:'ie'},pattern:'e→ie',meaning:{pt:'ler',en:'read'},chapters:[5],example:{de:'Er liest ein Buch.',pt:'Ele lê um livro.'}},
+  sehen:{infinitive:'sehen',conj:['sehe','siehst','sieht','sehen','seht','sehen'],type:'irregular',vowelChange:{du:'ie',er:'ie'},pattern:'e→ie + h-drop',meaning:{pt:'ver',en:'see'},chapters:[5,10],example:{de:'Siehst du den Mann?',pt:'Vês o homem?'}},
+  essen:{infinitive:'essen',conj:['esse','isst','isst','essen','esst','essen'],type:'irregular',vowelChange:{du:'i',er:'i'},pattern:'e→i (strong)',meaning:{pt:'comer',en:'eat'},chapters:[5],example:{de:'Isst du gern Pizza?',pt:'Gostas de comer pizza?'}},
+  schreiben:{infinitive:'schreiben',conj:['schreibe','schreibst','schreibt','schreiben','schreibt','schreiben'],type:'regular',pattern:'standard -en',meaning:{pt:'escrever',en:'write'},chapters:[5,9],example:{de:'Ich schreibe einen Brief.',pt:'Escrevo uma carta.'},partizip:'geschrieben'},
+  trinken:{infinitive:'trinken',conj:['trinke','trinkst','trinkt','trinken','trinkt','trinken'],type:'regular',pattern:'standard -en',meaning:{pt:'beber',en:'drink'},chapters:[5,9],example:{de:'Er trinkt Wasser.',pt:'Ele bebe água.'},partizip:'getrunken'},
+  spielen:{infinitive:'spielen',conj:['spiele','spielst','spielt','spielen','spielt','spielen'],type:'regular',pattern:'standard -en',meaning:{pt:'jogar/brincar',en:'play'},chapters:[5,9],example:{de:'Wir spielen Fußball.',pt:'Jogamos futebol.'}},
+  arbeiten:{infinitive:'arbeiten',conj:['arbeite','arbeitest','arbeitet','arbeiten','arbeitet','arbeiten'],type:'regular',pattern:'-ten (t-stem)',meaning:{pt:'trabalhar',en:'work'},chapters:[5,19],example:{de:'Er arbeitet im Büro.',pt:'Ele trabalha no escritório.'},note:'Extra -e- before -st and -t for pronunciation'},
+  heißen:{infinitive:'heißen',conj:['heiße','heißt','heißt','heißen','heißt','heißen'],type:'regular',pattern:'-ßen (s-stem)',meaning:{pt:'chamar-se',en:'be called'},chapters:[2,5],example:{de:'Wie heißt du?',pt:'Como te chamas?'},note:'du/er forms drop extra s: heißt not heißst'},
+  freuen:{infinitive:'freuen',conj:['freue','freust','freut','freuen','freut','freuen'],type:'regular',pattern:'standard -en',meaning:{pt:'alegrar(-se)',en:'rejoice/be glad'},chapters:[2],example:{de:'Ich freue mich.',pt:'Estou contente.'}},
+  fahren:{infinitive:'fahren',conj:['fahre','fährst','fährt','fahren','fahrt','fahren'],type:'irregular',vowelChange:{du:'ä',er:'ä'},pattern:'a→ä',meaning:{pt:'dirigir/ir (veículo)',en:'drive/go (vehicle)'},chapters:[9,15],example:{de:'Er fährt mit dem Bus.',pt:'Ele vai de ônibus.'},perfektAux:'sein',partizip:'gefahren'},
+  schlafen:{infinitive:'schlafen',conj:['schlafe','schläfst','schläft','schlafen','schlaft','schlafen'],type:'irregular',vowelChange:{du:'ä',er:'ä'},pattern:'a→ä',meaning:{pt:'dormir',en:'sleep'},chapters:[5,9],example:{de:'Das Kind schläft.',pt:'A criança dorme.'},partizip:'geschlafen'},
+  kaufen:{infinitive:'kaufen',conj:['kaufe','kaufst','kauft','kaufen','kauft','kaufen'],type:'regular',pattern:'standard -en',meaning:{pt:'comprar',en:'buy'},chapters:[9,10],example:{de:'Ich kaufe ein Buch.',pt:'Compro um livro.'},partizip:'gekauft'},
+  finden:{infinitive:'finden',conj:['finde','findest','findet','finden','findet','finden'],type:'regular',pattern:'-den (d-stem)',meaning:{pt:'encontrar/achar',en:'find'},chapters:[7],example:{de:'Ich finde das schön.',pt:'Acho isso bonito.'},note:'Extra -e- before -st for pronunciation',partizip:'gefunden'},
+  singen:{infinitive:'singen',conj:['singe','singst','singt','singen','singt','singen'],type:'regular',pattern:'standard -en',meaning:{pt:'cantar',en:'sing'},chapters:[12],example:{de:'Er kann gut singen.',pt:'Ele sabe cantar bem.'},partizip:'gesungen'},
+  tanzen:{infinitive:'tanzen',conj:['tanze','tanzt','tanzt','tanzen','tanzt','tanzen'],type:'regular',pattern:'-zen (z-stem)',meaning:{pt:'dançar',en:'dance'},chapters:[8],example:{de:'Sie tanzt gern.',pt:'Ela gosta de dançar.'},note:'du/er: tanzt not tanzst (z+s simplifies)'},
+  helfen:{infinitive:'helfen',conj:['helfe','hilfst','hilft','helfen','helft','helfen'],type:'irregular',vowelChange:{du:'i',er:'i'},pattern:'e→i (strong)',meaning:{pt:'ajudar',en:'help'},chapters:[11],example:{de:'Er hilft der Frau.',pt:'Ele ajuda a mulher.'},governs:'Dativ'},
+  geben:{infinitive:'geben',conj:['gebe','gibst','gibt','geben','gebt','geben'],type:'irregular',vowelChange:{du:'i',er:'i'},pattern:'e→i (strong)',meaning:{pt:'dar',en:'give'},chapters:[11],example:{de:'Ich gebe dir das Buch.',pt:'Dou-te o livro.'},governs:'Dativ + Akkusativ'},
+  nehmen:{infinitive:'nehmen',conj:['nehme','nimmst','nimmt','nehmen','nehmt','nehmen'],type:'irregular',vowelChange:{du:'i',er:'i'},pattern:'e→i + h-drop + mm',meaning:{pt:'pegar/tomar',en:'take'},chapters:[10],example:{de:'Nimmst du einen Kaffee?',pt:'Tomas um café?'}},
+  werden:{infinitive:'werden',conj:['werde','wirst','wird','werden','werdet','werden'],type:'irregular',pattern:'highly irregular',meaning:{pt:'tornar-se/será (futuro)',en:'become/will'},chapters:[9,16],special:{du:'wirst',er:'wird'},example:{de:'Er wird Arzt.',pt:'Ele torna-se médico.'}},
+  wissen:{infinitive:'wissen',conj:['weiß','weißt','weiß','wissen','wisst','wissen'],type:'irregular',pattern:'mixed: modal-like + ß',meaning:{pt:'saber (fato)',en:'know (fact)'},chapters:[20],special:{ich:'weiß',er:'weiß'},example:{de:'Ich weiß es nicht.',pt:'Não sei.'}},
+  denken:{infinitive:'denken',conj:['denke','denkst','denkt','denken','denkt','denken'],type:'regular',pattern:'standard -en',meaning:{pt:'pensar',en:'think'},chapters:[20],example:{de:'Was denkst du?',pt:'O que pensas?'}},
+  glauben:{infinitive:'glauben',conj:['glaube','glaubst','glaubt','glauben','glaubt','glauben'],type:'regular',pattern:'standard -en',meaning:{pt:'acreditar',en:'believe'},chapters:[20],example:{de:'Ich glaube, dass er kommt.',pt:'Acredito que ele vem.'}},
+  reisen:{infinitive:'reisen',conj:['reise','reist','reist','reisen','reist','reisen'],type:'regular',pattern:'sen (s-stem)',meaning:{pt:'viajar',en:'travel'},chapters:[17],example:{de:'Wir reisen nach Berlin.',pt:'Viajamos para Berlim.'},note:'du/er: reist not reisst',perfektAux:'sein'},
+  kochen:{infinitive:'kochen',conj:['koche','kochst','kocht','kochen','kocht','kochen'],type:'regular',pattern:'standard -en',meaning:{pt:'cozinhar',en:'cook'},chapters:[5],example:{de:'Sie kocht gern.',pt:'Ela gosta de cozinhar.'}},
+  backen:{infinitive:'backen',conj:['backe','bäckst','bäckt','backen','backt','backen'],type:'mixed',vowelChange:{du:'ä',er:'ä'},pattern:'a→ä (optional, also regular bäckst/backst)',meaning:{pt:'assar',en:'bake'},chapters:[5],example:{de:'Ich backe Brot.',pt:'Asso pão.'}},
+  studieren:{infinitive:'studieren',conj:['studiere','studierst','studiert','studieren','studiert','studieren'],type:'regular',pattern:'-ieren (no ge- in Partizip)',meaning:{pt:'estudar (universidade)',en:'study (university)'},chapters:[9],example:{de:'Sie studiert Medizin.',pt:'Ela estuda medicina.'}},
+  // Modal verbs
+  können:{infinitive:'können',conj:['kann','kannst','kann','können','könnt','können'],type:'modal',pattern:'modal: stem change singular',meaning:{pt:'poder (habilidade)',en:'can (ability)'},chapters:[12],special:{ich:'kann',er:'kann'},example:{de:'Ich kann Deutsch sprechen.',pt:'Eu sei falar alemão.'}},
+  müssen:{infinitive:'müssen',conj:['muss','musst','muss','müssen','müsst','müssen'],type:'modal',pattern:'modal: stem change singular',meaning:{pt:'precisar / ter que',en:'must / have to'},chapters:[12],special:{ich:'muss',er:'muss'},example:{de:'Du musst jetzt gehen.',pt:'Precisas ir agora.'}},
+  dürfen:{infinitive:'dürfen',conj:['darf','darfst','darf','dürfen','dürft','dürfen'],type:'modal',pattern:'modal: stem change singular',meaning:{pt:'poder (permissão)',en:'may (permission)'},chapters:[12],special:{ich:'darf',er:'darf'},example:{de:'Darf ich herein?',pt:'Posso entrar?'}},
+  sollen:{infinitive:'sollen',conj:['soll','sollst','soll','sollen','sollt','sollen'],type:'modal',pattern:'modal: no umlaut, regular endings',meaning:{pt:'dever (obrigação moral)',en:'should (obligation)'},chapters:[12],special:{ich:'soll',er:'soll'},example:{de:'Du sollst mehr lernen.',pt:'Deves estudar mais.'}},
+  wollen:{infinitive:'wollen',conj:['will','willst','will','wollen','wollt','wollen'],type:'modal',pattern:'modal: stem change singular',meaning:{pt:'querer',en:'want'},chapters:[12],special:{ich:'will',er:'will'},example:{de:'Ich will reisen.',pt:'Quero viajar.'}},
+  mögen:{infinitive:'mögen',conj:['mag','magst','mag','mögen','mögt','mögen'],type:'modal',pattern:'modal: stem change singular',meaning:{pt:'gostar de',en:'like'},chapters:[12],special:{ich:'mag',er:'mag'},example:{de:'Ich mag Kaffee.',pt:'Gosto de café.'},note:'Konjunktiv II: möchte (gostaria)'},
+  // Separable verbs
+  aufstehen:{infinitive:'aufstehen',baseVerb:'stehen',prefix:'auf',conj:['stehe auf','stehst auf','steht auf','stehen auf','steht auf','stehen auf'],type:'separable',pattern:'separable: auf-',meaning:{pt:'levantar-se',en:'get up'},chapters:[14],example:{de:'Ich stehe um 7 Uhr auf.',pt:'Levanto-me às 7h.'},perfektAux:'sein',partizip:'aufgestanden'},
+  einkaufen:{infinitive:'einkaufen',baseVerb:'kaufen',prefix:'ein',conj:['kaufe ein','kaufst ein','kauft ein','kaufen ein','kauft ein','kaufen ein'],type:'separable',pattern:'separable: ein-',meaning:{pt:'fazer compras',en:'go shopping'},chapters:[14],example:{de:'Wir kaufen morgen ein.',pt:'Fazemos compras amanhã.'}},
+  anrufen:{infinitive:'anrufen',baseVerb:'rufen',prefix:'an',conj:['rufe an','rufst an','ruft an','rufen an','ruft an','rufen an'],type:'separable',pattern:'separable: an-',meaning:{pt:'telefonar',en:'call (phone)'},chapters:[14],example:{de:'Er ruft seine Mutter an.',pt:'Ele telefona para a mãe.'}},
+  mitkommen:{infinitive:'mitkommen',baseVerb:'kommen',prefix:'mit',conj:['komme mit','kommst mit','kommt mit','kommen mit','kommt mit','kommen mit'],type:'separable',pattern:'separable: mit-',meaning:{pt:'vir junto',en:'come along'},chapters:[14],example:{de:'Kommst du mit?',pt:'Vens junto?'},perfektAux:'sein'},
+  aufmachen:{infinitive:'aufmachen',baseVerb:'machen',prefix:'auf',conj:['mache auf','machst auf','macht auf','machen auf','macht auf','machen auf'],type:'separable',pattern:'separable: auf-',meaning:{pt:'abrir',en:'open'},chapters:[14],example:{de:'Machst du die Tür auf?',pt:'Abres a porta?'}},
+  zumachen:{infinitive:'zumachen',baseVerb:'machen',prefix:'zu',conj:['mache zu','machst zu','macht zu','machen zu','macht zu','machen zu'],type:'separable',pattern:'separable: zu-',meaning:{pt:'fechar',en:'close'},chapters:[14],example:{de:'Er macht das Fenster zu.',pt:'Ele fecha a janela.'}},
+  // Auxiliary / essential
+  sein:{infinitive:'sein',conj:['bin','bist','ist','sind','seid','sind'],type:'auxiliary',pattern:'completely irregular (suppletive)',meaning:{pt:'ser/estar',en:'be'},chapters:[5,9,16],special:{ich:'bin',du:'bist',er:'ist',wir:'sind',ihr:'seid',sie:'sind'},example:{de:'Ich bin müde.',pt:'Estou cansado.'}},
+  haben:{infinitive:'haben',conj:['habe','hast','hat','haben','habt','haben'],type:'auxiliary',pattern:'irregular: b-drop + t in 3rd',meaning:{pt:'ter',en:'have'},chapters:[5,9],special:{du:'hast',er:'hat'},example:{de:'Ich habe einen Hund.',pt:'Tenho um cachorro.'}},
+  tragen:{infinitive:'tragen',conj:['trage','trägst','trägt','tragen','tragt','tragen'],type:'irregular',vowelChange:{du:'ä',er:'ä'},pattern:'a→ä',meaning:{pt:'vestir/carregar',en:'wear/carry'},chapters:[7],example:{de:'Sie trägt ein Kleid.',pt:'Ela veste um vestido.'}},
+  zählen:{infinitive:'zählen',conj:['zähle','zählst','zählt','zählen','zählt','zählen'],type:'regular',pattern:'standard -en',meaning:{pt:'contar',en:'count'},chapters:[3],example:{de:'Ich zähle bis zehn.',pt:'Conto até dez.'}},
+  besuchen:{infinitive:'besuchen',conj:['besuche','besuchst','besucht','besuchen','besucht','besuchen'],type:'regular',pattern:'standard -en (inseparable prefix be-)',meaning:{pt:'visitar',en:'visit'},chapters:[8],example:{de:'Ich besuche meine Eltern.',pt:'Visito meus pais.'}},
+  lieben:{infinitive:'lieben',conj:['liebe','liebst','liebt','lieben','liebt','lieben'],type:'regular',pattern:'standard -en',meaning:{pt:'amar',en:'love'},chapters:[10],example:{de:'Ich liebe dich.',pt:'Eu te amo.'}}
+};
+
+// ========== VERB EDUCATIONAL DATABASE ==========
+const VERB_EDUCATION={
+  lernen:{usage:{pt:'"lernen" é o ato de estudar ou adquirir conhecimento. Diferente de "studieren" (estudar na universidade), "lernen" cobre qualquer tipo de aprendizado.',en:'"lernen" is the act of learning or acquiring knowledge. Unlike "studieren" (university study), "lernen" covers any kind of learning.'},memoryTip:{pt:'Associe "lernen" com "learn" — ambas começam com L e terminam com N. O radical "lern-" nunca muda.',en:'Associate "lernen" with "learn" — both start with L and end with N. The stem "lern-" never changes.'},commonPhrases:{pt:['etwas auswendig lernen (decorar algo)','aus Fehlern lernen (aprender com erros)'],en:['etwas auswendig lernen (to memorize sth)','aus Fehlern lernen (to learn from mistakes)']},funFact:{pt:'No alemão medieval, "lernen" e "lehren" (ensinar) eram frequentemente confundidos porque a diferença entre aprender e ensinar era vista como dois lados da mesma moeda.',en:'In medieval German, "lernen" (learn) and "lehren" (teach) were often confused — learning and teaching were seen as two sides of the same coin.'},frequency:5,contexts:{pt:['educação','cotidiano','autoaprendizado'],en:['education','daily life','self-study']},confusedWith:{pt:'Não confunda com "studieren" (frequentar universidade) nem com "lehren" (ensinar).',en:'Don\'t confuse with "studieren" (attend university) or "lehren" (teach).'}},
+  machen:{usage:{pt:'"machen" é o coringa dos verbos alemães — significa "fazer" e aparece em inúmeras expressões. É um dos verbos mais versáteis do idioma.',en:'"machen" is the wildcard of German verbs — means "to do/make" and appears in countless expressions. One of the language\'s most versatile verbs.'},memoryTip:{pt:'Pense no inglês "make": m-a-c-h-e-n ≈ m-a-k-e. A raiz "mach-" é estável e nunca muda.',en:'Think of English "make": m-a-c-h-e-n ≈ m-a-k-e. The root "mach-" is stable.'},commonPhrases:{pt:['Was machst du? (O que você faz?)','Das macht nichts. (Não faz mal.)','Feierabend machen (encerrar o expediente)'],en:['Was machst du? (What are you doing?)','Das macht nichts. (It doesn\'t matter.)','Feierabend machen (to call it a day)']},funFact:{pt:'Em alemão coloquial, "machen" substitui dezenas de verbos específicos. Um nativo pode dizer "Ich mach mal das Licht" em vez de "Ich schalte das Licht an".',en:'In colloquial German, "machen" replaces dozens of specific verbs. A native might say "Ich mach mal das Licht" instead of "Ich schalte das Licht an".'},frequency:5,contexts:{pt:['cotidiano','conversação','expressões idiomáticas'],en:['daily life','conversation','idiomatic expressions']}},
+  kommen:{usage:{pt:'"kommen" significa "vir" — movimento físico e figurativo. No Perfekt, usa "sein" como auxiliar ("ich bin gekommen").',en:'"kommen" means "to come" — physical and figurative movement. In Perfekt uses "sein" ("ich bin gekommen").'},memoryTip:{pt:'Verbos de movimento geralmente usam "sein" no Perfekt. Pense: "ich BIN gekommen" — o movimento está em você.',en:'Movement verbs usually take "sein" in Perfekt. Think: "ich BIN gekommen" — the movement is in you.'},commonPhrases:{pt:['Kommst du mit? (Vens junto?)','Es kommt darauf an. (Depende.)','ans Licht kommen (vir à tona)'],en:['Kommst du mit? (Coming along?)','Es kommt darauf an. (It depends.)','ans Licht kommen (to come to light)']},funFact:{pt:'"Es kommt darauf an" é uma das expressões mais alemãs que existem — reflete a mentalidade de que as coisas raramente são absolutas.',en:'"Es kommt darauf an" is one of the most quintessentially German expressions — things are rarely absolute.'},frequency:5,contexts:{pt:['movimento','conversação','Perfekt com sein'],en:['movement','conversation','Perfekt with sein']}},
+  gehen:{usage:{pt:'"gehen" significa "ir" e "andar a pé". Também aparece em expressões de estado: "Wie geht es dir?" (Como vai?). No Perfekt usa "sein".',en:'"gehen" means "to go/walk". Also appears in state expressions: "Wie geht es dir?" (How are you?). Uses "sein" in Perfekt.'},memoryTip:{pt:'"gehen" é irmão gêmeo de "kommen": ambos são movimento, ambos usam "sein" no Perfekt. Sabe conjugar um, sabe o padrão do outro.',en:'"gehen" is the twin of "kommen": both are movement, both use "sein" in Perfekt. Conjugate one, you know the other\'s pattern.'},commonPhrases:{pt:['Wie geht es Ihnen? (Como vai?)','Das geht nicht. (Não funciona.)','in Erfüllung gehen (realizar-se)'],en:['Wie geht es Ihnen? (How are you?)','Das geht nicht. (That won\'t work.)','in Erfüllung gehen (to come true)']},funFact:{pt:'Na Áustria e Baviera, "Geh!" é uma interjeição comum equivalente a "Puxa!" ou "Imagine!".',en:'In Austria and Bavaria, "Geh!" is a common interjection equivalent to "Wow!" or "Imagine!".'},frequency:5,contexts:{pt:['movimento','cotidiano','estados'],en:['movement','daily life','states']}},
+  wohnen:{usage:{pt:'"wohnen" significa "morar" — residir em um lugar. Diferente de "leben" (viver existencialmente).',en:'"wohnen" means "to live/dwell" — residing in a place. Different from "leben" (to live existentially).'},memoryTip:{pt:'"wohnen" → Wohnung (apartamento). Onde você "wohnt" é sua "Wohnung".',en:'"wohnen" → Wohnung (apartment). Where you "wohnst" is your "Wohnung".'},commonPhrases:{pt:['Wo wohnst du? (Onde você mora?)','zur Miete wohnen (morar de aluguel)'],en:['Wo wohnst du? (Where do you live?)','zur Miete wohnen (to live in a rental)']},frequency:4,contexts:{pt:['moradia','apresentação pessoal'],en:['housing','personal introduction']}},
+  sprechen:{usage:{pt:'"sprechen" é "falar" — comunicação verbal. Verbo forte com mudança e→i na 2ª e 3ª pessoa. Rege acusativo com objeto direto.',en:'"sprechen" is "to speak" — verbal communication. Strong verb with e→i change in 2nd/3rd person. Governs accusative.'},memoryTip:{pt:'A mudança sprEchen → sprIchst: o "e" se afunila em "i" quando você fala diretamente com alguém (du) ou sobre alguém (er).',en:'The change sprEchen → sprIchst: the "e" narrows into "i" when speaking directly to someone (du) or about someone (er).'},commonPhrases:{pt:['Deutsch sprechen (falar alemão)','für sich selbst sprechen (falar por si mesmo)'],en:['Deutsch sprechen (to speak German)','für sich selbst sprechen (to speak for itself)']},funFact:{pt:'130 milhões de pessoas no mundo falam alemão como língua materna — e você está se juntando a elas.',en:'130 million people worldwide speak German as their mother tongue — and you are joining them.'},frequency:5,contexts:{pt:['comunicação','apresentações','viagens'],en:['communication','introductions','travel']}},
+  lesen:{usage:{pt:'"lesen" significa "ler". Verbo forte e→ie na 2ª/3ª pessoa, com s→ß em algumas formas. Perfekt: "gelesen".',en:'"lesen" means "to read". Strong verb e→ie in 2nd/3rd person, with s→ß. Perfekt: "gelesen".'},memoryTip:{pt:'L-E-S-E-N → L-IE-S-T. A vogal se "abre" de "e" para "ie" no du/er. A palavra estica para acomodar a terminação.',en:'L-E-S-E-N → L-IE-S-T. The vowel "opens" from "e" to "ie" in du/er. The word stretches to fit the ending.'},commonPhrases:{pt:['ein Buch lesen (ler um livro)','zwischen den Zeilen lesen (ler nas entrelinhas)'],en:['ein Buch lesen (to read a book)','zwischen den Zeilen lesen (to read between the lines)']},funFact:{pt:'Na era digital, "lesen" ganhou novo contexto: "eine Nachricht lesen" (ler mensagem no WhatsApp).',en:'In the digital age, "lesen" gained new context: "eine Nachricht lesen" (read a WhatsApp message).'},frequency:5,contexts:{pt:['leitura','educação','comunicação digital'],en:['reading','education','digital communication']}},
+  sehen:{usage:{pt:'"sehen" significa "ver". Verbo forte e→ie + queda do "h" na 2ª/3ª pessoa. Perfekt: "gesehen".',en:'"sehen" means "to see". Strong verb e→ie + h-drop in 2nd/3rd person. Perfekt: "gesehen".'},memoryTip:{pt:'O "h" some no du/er — o verbo "perde o fôlego": seHen → sieHst → sieHt. O h só aparece no infinitivo e plurais.',en:'The "h" disappears in du/er — the verb "loses its breath": seHen → sieHst → sieHt. The h only appears in infinitive and plurals.'},commonPhrases:{pt:['auf Wiedersehen! (Até logo!)','Mal sehen. (Vamos ver.)'],en:['auf Wiedersehen! (Goodbye!)','Mal sehen. (We\'ll see.)']},frequency:5,contexts:{pt:['percepção','cotidiano','expressões'],en:['perception','daily life','expressions']}},
+  essen:{usage:{pt:'"essen" significa "comer" (humanos — animais usam "fressen"). Verbo forte e→i. "isst" (come) NÃO é "ist" (é)!',en:'"essen" means "to eat" (humans — animals use "fressen"). Strong verb e→i. "isst" (eats) is NOT "ist" (is)!'},memoryTip:{pt:'ESSEN → ISST. O "e" fecha em "i" e o "ss" se mantém. Duas letras "s" fazem toda a diferença entre comer e ser!',en:'ESSEN → ISST. The "e" closes into "i" and "ss" stays. Two "s" letters make all the difference between eating and being!'},commonPhrases:{pt:['zu Mittag essen (almoçar)','auswärts essen (comer fora)'],en:['zu Mittag essen (to eat lunch)','auswärts essen (to eat out)']},funFact:{pt:'Usar "fressen" para uma pessoa é insulto — significa "comer como um animal".',en:'Using "fressen" for a person is an insult — it means "to eat like an animal".'},frequency:5,contexts:{pt:['alimentação','cotidiano','cultura'],en:['food','daily life','culture']}},
+  schreiben:{usage:{pt:'"schreiben" significa "escrever". Presente regular, mas Partizip II "geschrieben" (ei→ie) — padrão de verbos fortes Classe I.',en:'"schreiben" means "to write". Regular present but Partizip II "geschrieben" (ei→ie) — Class I strong verb pattern.'},memoryTip:{pt:'Presente regular, Perfekt irregular: "schreiben" → "geschrieben" (como "bleiben" → "geblieben").',en:'Regular present, irregular Perfekt: "schreiben" → "geschrieben" (like "bleiben" → "geblieben").'},commonPhrases:{pt:['einen Brief schreiben (escrever uma carta)','Geschichte schreiben (fazer história)'],en:['einen Brief schreiben (to write a letter)','Geschichte schreiben (to make history)']},frequency:4,contexts:{pt:['comunicação escrita','educação','trabalho'],en:['written communication','education','work']}},
+  trinken:{usage:{pt:'"trinken" significa "beber". Presente regular, Partizip II "getrunken" (i→u) — classe III forte.',en:'"trinken" means "to drink". Regular present, Partizip II "getrunken" (i→u) — Class III strong.'},memoryTip:{pt:'O Partizip "getrunken" com "u" segue o padrão de "singen"→"gesungen" e "springen"→"gesprungen".',en:'Partizip "getrunken" follows the pattern of "singen"→"gesungen" and "springen"→"gesprungen".'},commonPhrases:{pt:['Wasser trinken (beber água)','auf jemanden trinken (brindar a alguém)'],en:['Wasser trinken (to drink water)','auf jemanden trinken (to toast someone)']},frequency:4,contexts:{pt:['alimentação','vida social','cotidiano'],en:['food','social life','daily life']}},
+  spielen:{usage:{pt:'"spielen" une três conceitos em um: jogar, brincar E tocar instrumento. Um único verbo que em português são três palavras diferentes.',en:'"spielen" unites three concepts: play (game), play (child), AND play (instrument). One verb covers three different concepts.'},memoryTip:{pt:'spielen = Spiel (jogo) + en. Se há um jogo, há "spielen". Também: "eine Rolle spielen" = interpretar um papel.',en:'spielen = Spiel (game) + en. Where there is a game, there is "spielen". Also: "eine Rolle spielen" = to play a role.'},commonPhrases:{pt:['Fußball spielen (jogar futebol)','Klavier spielen (tocar piano)','eine Rolle spielen (desempenhar um papel)'],en:['Fußball spielen (to play soccer)','Klavier spielen (to play piano)','eine Rolle spielen (to play a role)']},frequency:5,contexts:{pt:['esportes','música','lazer','teatro'],en:['sports','music','leisure','theater']}},
+  arbeiten:{usage:{pt:'"arbeiten" significa "trabalhar". Regular mas com "e" extra antes de -st/-t porque o radical termina em "t": "du arbeitest" (não "arbeitst").',en:'"arbeiten" means "to work". Regular but with extra "e" before -st/-t because the stem ends in "t": "du arbeitest" (not "arbeitst").'},memoryTip:{pt:'Regra do "e" de pronúncia: radical em -t, -d, -s, -ß, -z → insira -e- antes de -st e -t. Sua boca agradece.',en:'The pronunciation "e" rule: stem ends in -t, -d, -s, -ß, -z → insert -e- before -st and -t. Your mouth will thank you.'},commonPhrases:{pt:['hart arbeiten (trabalhar duro)','an etwas arbeiten (trabalhar em algo)'],en:['hart arbeiten (to work hard)','an etwas arbeiten (to work on something)']},funFact:{pt:'"Arbeit" originalmente significava "sofrimento" no alto alemão antigo. Hoje é o termo neutro para trabalho.',en:'"Arbeit" originally meant "suffering" in Old High German. Today it is the neutral term for work.'},frequency:5,contexts:{pt:['vida profissional','cotidiano'],en:['professional life','daily life']}},
+  heißen:{usage:{pt:'"heißen" significa "chamar-se". Radical termina em "ß" → du/er perdem o "s" extra: "du heißt" (não "heißst").',en:'"heißen" means "to be called". Stem ends in "ß" → du/er drop extra "s": "du heißt" (not "heißst").'},memoryTip:{pt:'Radical com som de "s" (ß, s, z, ss) → terminação -st perde o "s": heiß + t = heißt.',en:'Stem with "s" sound (ß, s, z, ss) → -st ending loses the "s": heiß + t = heißt.'},commonPhrases:{pt:['Wie heißt du? (Como se chama?)','Das heißt... (Isso significa...)'],en:['Wie heißt du? (What\'s your name?)','Das heißt... (That means...)']},frequency:5,contexts:{pt:['apresentações','definições','cotidiano'],en:['introductions','definitions','daily life']}},
+  freuen:{usage:{pt:'"freuen" = alegrar-se. Quase sempre reflexivo: "sich freuen". Rege "auf" (futuro) ou "über" (presente/passado).',en:'"freuen" = to be glad. Almost always reflexive: "sich freuen". Governs "auf" (future) or "über" (present/past).'},memoryTip:{pt:'"freuen auf" = expectativa futura, "freuen über" = alegria presente. auf é para frente, über é sobre algo que já aconteceu.',en:'"freuen auf" = future expectation, "freuen über" = present joy. auf is forward, über is about something that already happened.'},commonPhrases:{pt:['Freut mich! (Prazer!)','sich auf etwas freuen (estar ansioso por algo)'],en:['Freut mich! (Nice to meet you!)','sich auf etwas freuen (to look forward to sth)']},frequency:4,contexts:{pt:['emoções','cortesia','vida social'],en:['emotions','courtesy','social life']}},
+  fahren:{usage:{pt:'"fahren" = ir/dirigir (veículo). Verbo forte a→ä: "du fährst", "er fährt". Perfekt com "sein": "bin gefahren".',en:'"fahren" = to go/drive (vehicle). Strong verb a→ä: "du fährst", "er fährt". Perfekt with "sein": "bin gefahren".'},memoryTip:{pt:'O trema (¨) aparece no du/er como um "volante" que vira. a → ä é a mudança vocálica mais visual do alemão.',en:'The umlaut (¨) appears in du/er like a "steering wheel" turning. a → ä is the most visual vowel change in German.'},commonPhrases:{pt:['mit dem Auto fahren (ir de carro)','Fahr vorsichtig! (Dirija com cuidado!)'],en:['mit dem Auto fahren (to go by car)','Fahr vorsichtig! (Drive carefully!)']},frequency:5,contexts:{pt:['transporte','viagem','cotidiano'],en:['transport','travel','daily life']}},
+  schlafen:{usage:{pt:'"schlafen" = dormir. Verbo forte a→ä: "du schläfst", "er schläft". Perfekt: "geschlafen".',en:'"schlafen" = to sleep. Strong verb a→ä: "du schläfst", "er schläft". Perfekt: "geschlafen".'},memoryTip:{pt:'a→ä, mesma família de "fahren" e "tragen". Três grandes padrões: e→i, a→ä, e→ie. Decore os 3 grupos.',en:'a→ä, same family as "fahren" and "tragen". Three big patterns: e→i, a→ä, e→ie. Memorize the 3 groups.'},commonPhrases:{pt:['gut schlafen (dormir bem)','darüber schlafen (consultar o travesseiro)'],en:['gut schlafen (to sleep well)','darüber schlafen (to sleep on it)']},frequency:4,contexts:{pt:['cotidiano','saúde','bem-estar'],en:['daily life','health','well-being']}},
+  kaufen:{usage:{pt:'"kaufen" = comprar. Regular no presente, Partizip II "gekauft" (com -t). Prefixo "ein-" cria "einkaufen" (fazer compras).',en:'"kaufen" = to buy. Regular present, Partizip II "gekauft" (with -t). Prefix "ein-" creates "einkaufen" (to shop).'},memoryTip:{pt:'"kaufen" → "einkaufen". Adicionar prefixo transforma "comprar" em "fazer compras". É assim que o alemão cria precisão.',en:'"kaufen" → "einkaufen". Adding a prefix transforms "to buy" into "to shop". This is how German creates precision.'},commonPhrases:{pt:['etwas günstig kaufen (comprar algo barato)','online kaufen (comprar online)'],en:['etwas günstig kaufen (to buy sth cheap)','online kaufen (to buy online)']},frequency:4,contexts:{pt:['comércio','cotidiano','compras'],en:['commerce','daily life','shopping']}},
+  finden:{usage:{pt:'"finden" = encontrar/achar (físico e opinião). Radical em "d" → "du findest" (e extra). Partizip "gefunden" (i→u).',en:'"finden" = to find (physical and opinion). Stem in "d" → "du findest" (extra e). Partizip "gefunden" (i→u).'},memoryTip:{pt:'Mesmo padrão de "arbeiten": radical dental → e de pronúncia. Partizip "gefunden" = classe III forte (i→u).',en:'Same pattern as "arbeiten": dental stem → pronunciation e. Partizip "gefunden" = Class III strong (i→u).'},commonPhrases:{pt:['Ich finde das schön. (Acho bonito.)','den Weg finden (encontrar o caminho)'],en:['Ich finde das schön. (I find that beautiful.)','den Weg finden (to find the way)']},frequency:5,contexts:{pt:['opinião','localização','cotidiano'],en:['opinion','location','daily life']}},
+  singen:{usage:{pt:'"singen" = cantar. Presente regular, Partizip "gesungen" (i→u). Classe III forte como "trinken".',en:'"singen" = to sing. Regular present, Partizip "gesungen" (i→u). Class III strong like "trinken".'},memoryTip:{pt:'Trio i→u no Partizip: singen→gesungen, trinken→getrunken, finden→gefunden. Sabe um, sabe o caminho dos outros.',en:'i→u trio in Partizip: singen→gesungen, trinken→getrunken, finden→gefunden. Know one, know the path of the others.'},commonPhrases:{pt:['ein Lied singen (cantar uma canção)','falsch singen (cantar desafinado)'],en:['ein Lied singen (to sing a song)','falsch singen (to sing off-key)']},frequency:3,contexts:{pt:['música','lazer','arte'],en:['music','leisure','art']}},
+  tanzen:{usage:{pt:'"tanzen" = dançar. Radical em "z" → "du tanzt" (não "tanzst"). O "z" já carrega o som sibilante.',en:'"tanzen" = to dance. Stem in "z" → "du tanzt" (not "tanzst"). The "z" already carries the sibilant sound.'},memoryTip:{pt:'Mesma regra do "heißen": radical sibilante → sem "s" extra. tanzen → du tanzt. Sua língua evita a repetição.',en:'Same rule as "heißen": sibilant stem → no extra "s". tanzen → du tanzt. Your tongue avoids repetition.'},commonPhrases:{pt:['gern tanzen (gostar de dançar)','aus der Reihe tanzen (sair da linha)'],en:['gern tanzen (to like to dance)','aus der Reihe tanzen (to step out of line)']},frequency:3,contexts:{pt:['lazer','vida social','arte'],en:['leisure','social life','art']}},
+  helfen:{usage:{pt:'"helfen" = ajudar. Verbo forte e→i: "du hilfst", "er hilft". IMPORTANTE: rege DATIVO — "Ich helfe DEM Mann".',en:'"helfen" = to help. Strong verb e→i: "du hilfst", "er hilft". IMPORTANT: governs DATIVE — "Ich helfe DEM Mann".'},memoryTip:{pt:'"helfen" → Dativ. Você ajuda A ALGUÉM, não "alguém" como objeto direto. Nuance que separa básico do intermediário.',en:'"helfen" → Dative. You help TO SOMEONE, not "someone" as direct object. This nuance separates basic from intermediate.'},commonPhrases:{pt:['Kannst du mir helfen? (Pode me ajudar?)','sich zu helfen wissen (saber se virar)'],en:['Kannst du mir helfen? (Can you help me?)','sich zu helfen wissen (to know how to manage)']},funFact:{pt:'O dativo com "helfen" é um dos erros mais comuns de aprendizes — até avançados escorregam. Dominar isso é um rito de passagem.',en:'Dative with "helfen" is one of the most common learner errors — even advanced speakers slip. Mastering this is a rite of passage.'},frequency:4,contexts:{pt:['socorro','cotidiano','serviços'],en:['help','daily life','services']}},
+  geben:{usage:{pt:'"geben" = dar. Verbo forte e→i: "du gibst", "er gibt". DATIVO (pessoa) + ACUSATIVO (coisa): "Ich gebe DIR das BUCH".',en:'"geben" = to give. Strong verb e→i: "du gibst", "er gibt". DATIVE (person) + ACCUSATIVE (thing): "Ich gebe DIR das BUCH".'},memoryTip:{pt:'Pergunta mágica: "Wem gebe ich was?" (A QUEM dou O QUÊ?). Wem → dativo, was → acusativo.',en:'Magic question: "Wem gebe ich was?" (To WHOM do I give WHAT?). Wem → dative, was → accusative.'},commonPhrases:{pt:['Es gibt... (Há / Existe...)','Gib nicht auf! (Não desista!)'],en:['Es gibt... (There is/are...)','Gib nicht auf! (Don\'t give up!)']},funFact:{pt:'"Es gibt" é a expressão alemã para existência — literalmente "isso dá". A realidade "dá" as coisas que existem.',en:'"Es gibt" is the German expression for existence — literally "it gives". Reality "gives" the things that exist.'},frequency:5,contexts:{pt:['transferência','existência','cotidiano'],en:['transfer','existence','daily life']}},
+  nehmen:{usage:{pt:'"nehmen" = pegar/tomar. Um dos mais irregulares: perde "h", muda e→i, duplica "m": "du nimmst", "er nimmt".',en:'"nehmen" = to take. One of the most irregular: loses "h", changes e→i, doubles "m": "du nimmst", "er nimmt".'},memoryTip:{pt:'"nehmen" é o rebelde: perde h (nehm→nimm), muda vogal (e→i), duplica consoante (m→mm). O verbo inteiro se contrai no du/er.',en:'"nehmen" is the rebel: loses h (nehm→nimm), changes vowel (e→i), doubles consonant (m→mm). The entire verb contracts in du/er.'},commonPhrases:{pt:['Platz nehmen (tomar assento)','Abschied nehmen (despedir-se)'],en:['Platz nehmen (to take a seat)','Abschied nehmen (to say goodbye)']},frequency:5,contexts:{pt:['cotidiano','expressões formais'],en:['daily life','formal expressions']}},
+  werden:{usage:{pt:'"werden" é 3 verbos em 1: "tornar-se", auxiliar de futuro (ich werde lernen) E auxiliar de passiva (es wird gemacht).',en:'"werden" is 3 verbs in 1: "to become", future auxiliary (ich werde lernen) AND passive auxiliary (es wird gemacht).'},memoryTip:{pt:'Canivete suíço do alemão. Decore: werde, WIRST, WIRD. Formas du/er são imprevisíveis — só memorização pura.',en:'Swiss Army knife of German. Memorize: werde, WIRST, WIRD. Du/er forms are unpredictable — pure memorization.'},commonPhrases:{pt:['Er wird Arzt. (Torna-se médico.)','Ich werde reisen. (Viajarei.)','Es wird gemacht. (Está sendo feito.)'],en:['Er wird Arzt. (He becomes a doctor.)','Ich werde reisen. (I will travel.)','Es wird gemacht. (It is being done.)']},funFact:{pt:'"Werden" aparece em TODOS os níveis do CEFR. A1 como "tornar-se", B1 como futuro, B2 como passiva. O verbo cresce com você.',en:'"Werden" appears at ALL CEFR levels. A1 as "become", B1 as future, B2 as passive. The verb grows with you.'},frequency:5,contexts:{pt:['transformação','futuro','voz passiva'],en:['transformation','future','passive voice']}},
+  wissen:{usage:{pt:'"wissen" = saber (fato). Híbrido: singular como modal (ich weiß — sem terminação), plural regular (wir wissen).',en:'"wissen" = to know (fact). Hybrid: singular modal-like (ich weiß — no ending), plural regular (wir wissen).'},memoryTip:{pt:'"wissen" é o filho perdido dos modais: singular sem terminação + plural regular. "weiß" com ß é a marca registrada.',en:'"wissen" is the lost child of modals: singular without ending + regular plural. "weiß" with ß is the trademark.'},commonPhrases:{pt:['Ich weiß nicht. (Não sei.)','Bescheid wissen (estar informado)'],en:['Ich weiß nicht. (I don\'t know.)','Bescheid wissen (to be in the know)']},frequency:5,contexts:{pt:['conhecimento','conversação','informação'],en:['knowledge','conversation','information']}},
+  denken:{usage:{pt:'"denken" = pensar. Regular no presente, Partizip "gedacht" irregular. Usa "an" + acusativo: "Ich denke an dich".',en:'"denken" = to think. Regular present, Partizip "gedacht" irregular. Uses "an" + accusative: "Ich denke an dich".'},memoryTip:{pt:'"denken an" (acusativo) = pensar em (lembrança). "denken über" = refletir sobre. Não confunda as preposições!',en:'"denken an" (accusative) = think of (memory). "denken über" = reflect on. Don\'t confuse the prepositions!'},commonPhrases:{pt:['Ich denke, dass... (Penso que...)','an jemanden denken (pensar em alguém)'],en:['Ich denke, dass... (I think that...)','an jemanden denken (to think of someone)']},frequency:5,contexts:{pt:['opinião','raciocínio','conversação'],en:['opinion','reasoning','conversation']}},
+  glauben:{usage:{pt:'"glauben" = acreditar. Regular. Usa dativo para pessoa: "Ich glaube dir" (Acredito em você).',en:'"glauben" = to believe. Regular. Uses dative for person: "Ich glaube dir" (I believe you).'},memoryTip:{pt:'"glauben" + dativo (pessoa). "an" + acusativo para fé profunda: "Ich glaube an dich".',en:'"glauben" + dative (person). "an" + accusative for deep faith: "Ich glaube an dich".'},commonPhrases:{pt:['Ich glaube schon. (Acho que sim.)','Kaum zu glauben! (Inacreditável!)'],en:['Ich glaube schon. (I think so.)','Kaum zu glauben! (Hard to believe!)']},frequency:4,contexts:{pt:['crença','opinião','cotidiano'],en:['belief','opinion','daily life']}},
+  reisen:{usage:{pt:'"reisen" = viajar. Radical em "s" → "du reist" (não "reisst"). Perfekt com "sein": "bin gereist".',en:'"reisen" = to travel. Stem in "s" → "du reist" (not "reisst"). Perfekt with "sein": "bin gereist".'},memoryTip:{pt:'Radical -s + -st → perda do s extra. Mesma regra de "heißen" e "tanzen". Movimento → sein no Perfekt.',en:'Stem -s + -st → loss of extra s. Same rule as "heißen" and "tanzen". Movement → sein in Perfekt.'},commonPhrases:{pt:['ins Ausland reisen (viajar para o exterior)','geschäftlich reisen (viajar a negócios)'],en:['ins Ausland reisen (to travel abroad)','geschäftlich reisen (to travel on business)']},frequency:3,contexts:{pt:['turismo','negócios','lazer'],en:['tourism','business','leisure']}},
+  kochen:{usage:{pt:'"kochen" = cozinhar/ferver. Completamente regular. Figurativo: "vor Wut kochen" = ferver de raiva.',en:'"kochen" = to cook/boil. Completely regular. Figurative: "vor Wut kochen" = to boil with rage.'},memoryTip:{pt:'"kochen" é irmão do inglês "cook". k-o-c-h-e-n ≈ c-o-o-k. Uma das palavras mais transparentes.',en:'"kochen" is sibling of English "cook". k-o-c-h-e-n ≈ c-o-o-k. One of the most transparent words.'},commonPhrases:{pt:['Kaffee kochen (fazer café)','vor Wut kochen (ferver de raiva)'],en:['Kaffee kochen (to make coffee)','vor Wut kochen (to boil with rage)']},frequency:3,contexts:{pt:['culinária','cotidiano','expressões'],en:['cooking','daily life','expressions']}},
+  backen:{usage:{pt:'"backen" = assar. Verbo misto: aceita "du backst" (regular) OU "du bäckst" (com trema). As duas formas são corretas!',en:'"backen" = to bake. Mixed verb: accepts "du backst" (regular) OR "du bäckst" (with umlaut). Both are correct!'},memoryTip:{pt:'Raro: você pode escolher! "backst" (regular) ou "bäckst" (tradicional). "bäckst" soa mais nativo.',en:'Rare: you can choose! "backst" (regular) or "bäckst" (traditional). "bäckst" sounds more native.'},commonPhrases:{pt:['Brot backen (assar pão)','frisch gebacken (recém-assado / recém-formado)'],en:['Brot backen (to bake bread)','frisch gebacken (freshly baked / newly graduated)']},funFact:{pt:'"Frisch gebacken" serve para pão quentinho E para recém-formado na universidade. Alemão adora metáforas de padaria!',en:'"Frisch gebacken" works for hot bread AND a new graduate. German loves bakery metaphors!'},frequency:3,contexts:{pt:['culinária','padaria','expressões'],en:['cooking','bakery','expressions']}},
+  studieren:{usage:{pt:'"studieren" = estudar (universidade) — mais específico que "lernen". Verbos em -ieren NÃO recebem ge- no Partizip!',en:'"studieren" = to study (university) — more specific than "lernen". -ieren verbs do NOT get ge- in Partizip!'},memoryTip:{pt:'-ieren → sem ge- no Partizip. "studieren" → "studiert" (não "gestudiert"). Regra fixa para TODOS os verbos em -ieren.',en:'-ieren → no ge- in Partizip. "studieren" → "studiert" (not "gestudiert"). Fixed rule for ALL -ieren verbs.'},commonPhrases:{pt:['Medizin studieren (estudar medicina)','etwas genau studieren (examinar atentamente)'],en:['Medizin studieren (to study medicine)','etwas genau studieren (to examine closely)']},frequency:3,contexts:{pt:['educação superior','pesquisa'],en:['higher education','research']}},
+  können:{usage:{pt:'"können" = poder (habilidade). Modal: singular sem terminação, plural como infinitivo. Acompanha infinitivo no final.',en:'"können" = can (ability). Modal: singular without ending, plural like infinitive. Accompanies infinitive at the end.'},memoryTip:{pt:'"kann" é a marca do singular. Todos os modais: singular sem terminação, plural como infinitivo.',en:'"kann" is the singular trademark. All modals: singular without ending, plural like infinitive.'},commonPhrases:{pt:['Ich kann Deutsch sprechen.','Kann sein. (Pode ser.)'],en:['Ich kann Deutsch sprechen.','Kann sein. (Could be.)']},funFact:{pt:'Os modais são a chave para soar natural. "Kann sein" é a resposta alemã para "talvez".',en:'Modals are the key to sounding natural. "Kann sein" is the German answer to "maybe".'},frequency:5,contexts:{pt:['modalidade','conversação','cotidiano'],en:['modality','conversation','daily life']}},
+  müssen:{usage:{pt:'"müssen" = precisar/ter que (obrigação externa). Diferente de "sollen" (dever moral/sugestão).',en:'"müssen" = must/have to (external obligation). Different from "sollen" (moral duty/suggestion).'},memoryTip:{pt:'müssen = necessidade externa (a chuva obriga). sollen = dever moral ou ordem de alguém (o médico diz que devo).',en:'müssen = external necessity (rain forces). sollen = moral duty or someone\'s order (doctor says I should).'},commonPhrases:{pt:['Ich muss los. (Preciso ir.)','Muss das sein? (É necessário?)'],en:['Ich muss los. (I have to go.)','Muss das sein? (Is that necessary?)']},frequency:5,contexts:{pt:['obrigação','necessidade','cotidiano'],en:['obligation','necessity','daily life']}},
+  dürfen:{usage:{pt:'"dürfen" = poder (permissão). "Darf ich...?" é a forma educada. Também para proibições: "Hier darf man nicht rauchen".',en:'"dürfen" = may (permission). "Darf ich...?" is the polite form. Also for prohibitions: "Hier darf man nicht rauchen".'},memoryTip:{pt:'dürfen = permissão. können = habilidade. "Darf ich fragen?" (Permissão) vs "Kann ich fragen?" (Capacidade).',en:'dürfen = permission. können = ability. "Darf ich fragen?" (Permission) vs "Kann ich fragen?" (Ability).'},commonPhrases:{pt:['Darf ich vorstellen? (Posso apresentar?)','Das darfst du nicht. (Não pode fazer isso.)'],en:['Darf ich vorstellen? (May I introduce?)','Das darfst du nicht. (You may not do that.)']},frequency:4,contexts:{pt:['permissão','proibição','regras'],en:['permission','prohibition','rules']}},
+  sollen:{usage:{pt:'"sollen" = dever (moral/recomendação). Único modal sem trema. Também para boatos: "Es soll regnen" (Dizem que vai chover).',en:'"sollen" = should (moral/recommendation). Only modal without umlaut. Also for hearsay: "Es soll regnen" (It\'s supposed to rain).'},memoryTip:{pt:'"soll" sem trema é a pista: único modal sem trema no singular. "S" de "sugestão" (vem de fora).',en:'"soll" without umlaut is the clue: only modal without umlaut in singular. "S" for "suggestion" (comes from outside).'},commonPhrases:{pt:['Was soll ich tun? (O que devo fazer?)','Es soll schneien. (Dizem que vai nevar.)'],en:['Was soll ich tun? (What should I do?)','Es soll schneien. (It\'s supposed to snow.)']},frequency:4,contexts:{pt:['dever','recomendação','boatos'],en:['duty','recommendation','hearsay']}},
+  wollen:{usage:{pt:'"wollen" = querer (vontade/intenção). Forte e direto. Em contextos formais, prefira "möchte" (gostaria).',en:'"wollen" = to want (will/intention). Strong and direct. In formal contexts, prefer "möchte" (would like).'},memoryTip:{pt:'"will" parece inglês mas é alemão puro. "ich will" NÃO é futuro ("I will"), é vontade presente.',en:'"will" looks English but is pure German. "ich will" is NOT future ("I will"), it is present will.'},commonPhrases:{pt:['Ich will Deutsch lernen.','ganz wie du willst (como quiser)'],en:['Ich will Deutsch lernen.','ganz wie du willst (as you wish)']},frequency:5,contexts:{pt:['desejo','intenção','conversação'],en:['desire','intention','conversation']}},
+  mögen:{usage:{pt:'"mögen" = gostar de. Konjunktiv II "möchte" (gostaria) é extremamente comum para pedidos educados.',en:'"mögen" = to like. Konjunktiv II "möchte" (would like) is extremely common for polite requests.'},memoryTip:{pt:'"mögen" = afeto. "Ich mag Kaffee" (gosto). Para pedidos: SEMPRE "möchte": "Ich möchte bitte einen Kaffee".',en:'"mögen" = affection. "Ich mag Kaffee" (I like). For requests: ALWAYS "möchte": "Ich möchte bitte einen Kaffee".'},commonPhrases:{pt:['Ich mag dich. (Gosto de você.)','Ich möchte... (Eu gostaria...)'],en:['Ich mag dich. (I like you.)','Ich möchte... (I would like...)']},frequency:5,contexts:{pt:['gosto pessoal','cortesia','restaurantes'],en:['personal taste','courtesy','restaurants']}},
+  aufstehen:{usage:{pt:'"aufstehen" = levantar-se. Separável: "Ich stehe um 7 Uhr auf". Perfekt com "sein": "aufgestanden".',en:'"aufstehen" = to get up. Separable: "Ich stehe um 7 Uhr auf". Perfekt with "sein": "aufgestanden".'},memoryTip:{pt:'"auf" = para cima. Perfekt: auf + ge + standen = aufgestanden (ge- ENTRE prefixo e verbo).',en:'"auf" = upward. Perfekt: auf + ge + standen = aufgestanden (ge- BETWEEN prefix and verb).'},commonPhrases:{pt:['Wann stehst du auf? (Quando se levanta?)','früh aufstehen (levantar cedo)'],en:['Wann stehst du auf? (When do you get up?)','früh aufstehen (to get up early)']},frequency:4,contexts:{pt:['rotina','cotidiano','verbos separáveis'],en:['routine','daily life','separable verbs']}},
+  einkaufen:{usage:{pt:'"einkaufen" = fazer compras. Separável: "Ich kaufe im Supermarkt ein". "ein" = para dentro.',en:'"einkaufen" = to shop. Separable: "Ich kaufe im Supermarkt ein". "ein" = inward.'},memoryTip:{pt:'"ein" + "kaufen" = comprar + para dentro = abastecer-se. Prefixo transforma "comprar" em "fazer compras".',en:'"ein" + "kaufen" = buy + inward = to stock up. Prefix transforms "to buy" into "to shop".'},commonPhrases:{pt:['einkaufen gehen (ir fazer compras)','im Internet einkaufen (comprar online)'],en:['einkaufen gehen (to go shopping)','im Internet einkaufen (to shop online)']},frequency:4,contexts:{pt:['compras','cotidiano','verbos separáveis'],en:['shopping','daily life','separable verbs']}},
+  anrufen:{usage:{pt:'"anrufen" = telefonar. Separável: "Ich rufe dich an". Perfekt: "angerufen" (ge- no meio).',en:'"anrufen" = to call (phone). Separable: "Ich rufe dich an". Perfekt: "angerufen" (ge- in the middle).'},memoryTip:{pt:'"an" + "rufen" (chamar) = telefonar. Perfekt: an + ge + rufen = angerufen.',en:'"an" + "rufen" (to call out) = to phone. Perfekt: an + ge + rufen = angerufen.'},commonPhrases:{pt:['Ruf mich an! (Me liga!)','den Arzt anrufen (ligar para o médico)'],en:['Ruf mich an! (Call me!)','den Arzt anrufen (to call the doctor)']},frequency:4,contexts:{pt:['comunicação','tecnologia','verbos separáveis'],en:['communication','technology','separable verbs']}},
+  mitkommen:{usage:{pt:'"mitkommen" = vir junto. Separável: "Kommst du mit?". Perfekt com "sein": "mitgekommen".',en:'"mitkommen" = to come along. Separable: "Kommst du mit?". Perfekt with "sein": "mitgekommen".'},memoryTip:{pt:'"mit" = junto/com. Movimento (kommen) → Perfekt com "sein".',en:'"mit" = along/with. Movement (kommen) → Perfekt with "sein".'},commonPhrases:{pt:['Kommst du mit? (Vens junto?)','da komme ich nicht mit (não estou entendendo)'],en:['Kommst du mit? (Coming along?)','da komme ich nicht mit (I can\'t follow)']},frequency:3,contexts:{pt:['companhia','convites','verbos separáveis'],en:['company','invitations','separable verbs']}},
+  aufmachen:{usage:{pt:'"aufmachen" = abrir. Separável: "Ich mache die Tür auf". auf (aberto) + machen (fazer).',en:'"aufmachen" = to open. Separable: "Ich mache die Tür auf". auf (open) + machen (to make).'},memoryTip:{pt:'aufmachen ↔ zumachen são irmãos opostos. Mesmo verbo base (machen), prefixo define tudo.',en:'aufmachen ↔ zumachen are opposite siblings. Same base verb (machen), prefix defines everything.'},commonPhrases:{pt:['Mach die Tür auf! (Abra a porta!)','die Augen aufmachen (abrir os olhos)'],en:['Mach die Tür auf! (Open the door!)','die Augen aufmachen (to open one\'s eyes)']},frequency:3,contexts:{pt:['ações','cotidiano','verbos separáveis'],en:['actions','daily life','separable verbs']}},
+  zumachen:{usage:{pt:'"zumachen" = fechar. Separável: "Er macht das Fenster zu". Oposto de "aufmachen".',en:'"zumachen" = to close. Separable: "Er macht das Fenster zu". Opposite of "aufmachen".'},memoryTip:{pt:'Par perfeito: aufmachen ↔ zumachen. Aprenda os dois juntos e nunca mais esquecerá nenhum.',en:'Perfect pair: aufmachen ↔ zumachen. Learn both together and you\'ll never forget either.'},commonPhrases:{pt:['Mach das Fenster zu! (Feche a janela!)','den Mund zumachen (calar-se)'],en:['Mach das Fenster zu! (Close the window!)','den Mund zumachen (to shut up)']},frequency:3,contexts:{pt:['ações','cotidiano','verbos separáveis'],en:['actions','daily life','separable verbs']}},
+  sein:{usage:{pt:'"sein" = ser/estar. O verbo mais importante do alemão. 100% irregular (formas supletivas de 3 raízes diferentes).',en:'"sein" = to be. The most important German verb. 100% irregular (suppletive forms from 3 different roots).'},memoryTip:{pt:'Decore as 6 formas como se fossem 6 palavras diferentes — porque ETIMOLOGICAMENTE elas vêm de raízes diferentes.',en:'Memorize the 6 forms as if they were 6 different words — because ETYMOLOGICALLY they come from different roots.'},commonPhrases:{pt:['Ich bin müde. (Estou cansado.)','Das ist gut. (Isso é bom.)'],en:['Ich bin müde. (I am tired.)','Das ist gut. (That is good.)']},funFact:{pt:'"sein" vem de 3 raízes proto-indo-europeias: *h₁es- (ist, sind), *bʰuH- (bin, bist), *wes- (sein, war). 3 verbos fundidos em 1 ao longo de milênios.',en:'"sein" comes from 3 PIE roots: *h₁es- (ist, sind), *bʰuH- (bin, bist), *wes- (sein, war). 3 verbs merged into 1 over millennia.'},frequency:5,contexts:{pt:['existência','estado','auxiliar'],en:['existence','state','auxiliary']}},
+  haben:{usage:{pt:'"haben" = ter. Auxiliar da maioria dos verbos no Perfekt. Irregular: perde "b" no du/er: "du hast", "er hat".',en:'"haben" = to have. Perfekt auxiliary for most verbs. Irregular: loses "b" in du/er: "du hast", "er hat".'},memoryTip:{pt:'"haben" emagrece no du/er: habe → hast (perdeu b e e), hat (perdeu b e en). "hat" = 3ª pessoa mais curta (3 letras).',en:'"haben" slims down in du/er: habe → hast (lost b and e), hat (lost b and en). "hat" = shortest 3rd person (3 letters).'},commonPhrases:{pt:['Ich habe eine Frage. (Tenho uma pergunta.)','Recht haben (ter razão)'],en:['Ich habe eine Frage. (I have a question.)','Recht haben (to be right)']},frequency:5,contexts:{pt:['posse','auxiliar','cotidiano'],en:['possession','auxiliary','daily life']}},
+  tragen:{usage:{pt:'"tragen" = vestir/carregar. Verbo forte a→ä: "du trägst", "er trägt". Contexto define se é roupa ou peso.',en:'"tragen" = to wear/carry. Strong verb a→ä: "du trägst", "er trägt". Context defines if it\'s clothing or weight.'},memoryTip:{pt:'Mesma família de "fahren" e "schlafen" (a→ä). Trema no du/er é a assinatura desta família.',en:'Same family as "fahren" and "schlafen" (a→ä). Umlaut in du/er is this family\'s signature.'},commonPhrases:{pt:['ein Kleid tragen (vestir um vestido)','die Verantwortung tragen (carregar a responsabilidade)'],en:['ein Kleid tragen (to wear a dress)','die Verantwortung tragen (to bear responsibility)']},frequency:4,contexts:{pt:['vestuário','carga','responsabilidade'],en:['clothing','carrying','responsibility']}},
+  zählen:{usage:{pt:'"zählen" = contar (numérico e figurativo: "auf jemanden zählen" = contar com alguém). Regular.',en:'"zählen" = to count (numerical and figurative: "auf jemanden zählen" = to count on someone). Regular.'},memoryTip:{pt:'"zählen" → Zahl (número). Você "zählt" uma "Zahl". O trema (ä) permanece em todas as formas.',en:'"zählen" → Zahl (number). You "zählst" a "Zahl". The umlaut (ä) stays in all forms.'},commonPhrases:{pt:['bis zehn zählen (contar até dez)','auf jemanden zählen (contar com alguém)'],en:['bis zehn zählen (to count to ten)','auf jemanden zählen (to count on someone)']},frequency:3,contexts:{pt:['números','confiança','classificação'],en:['numbers','trust','classification']}},
+  besuchen:{usage:{pt:'"besuchen" = visitar. Prefixo INSEPARÁVEL "be-" — nunca se separa e NÃO recebe ge- no Partizip.',en:'"besuchen" = to visit. INSEPARABLE prefix "be-" — never separates and does NOT get ge- in Partizip.'},memoryTip:{pt:'be-, er-, ver-, zer-, ent-, emp-, ge-, miss- → NUNCA se separam, NUNCA recebem ge-. "besuchen" → "besucht".',en:'be-, er-, ver-, zer-, ent-, emp-, ge-, miss- → NEVER separate, NEVER get ge-. "besuchen" → "besucht".'},commonPhrases:{pt:['Freunde besuchen (visitar amigos)','die Schule besuchen (frequentar a escola)'],en:['Freunde besuchen (to visit friends)','die Schule besuchen (to attend school)']},frequency:4,contexts:{pt:['visitas','turismo','verbos inseparáveis'],en:['visiting','tourism','inseparable verbs']}},
+  lieben:{usage:{pt:'"lieben" = amar. Regular. Em alemão, "Ich liebe dich" é declaração séria — menos casual que "love" em inglês.',en:'"lieben" = to love. Regular. In German, "Ich liebe dich" is a serious declaration — less casual than "love" in English.'},memoryTip:{pt:'Cultural: alemães usam "lieben" com mais peso. "Ich mag dich" (gosto de você) é mais comum no dia a dia.',en:'Cultural: Germans use "lieben" more heavily. "Ich mag dich" (I like you) is more common day to day.'},commonPhrases:{pt:['Ich liebe dich. (Eu te amo.)','Musik lieben (amar música)'],en:['Ich liebe dich. (I love you.)','Musik lieben (to love music)']},frequency:4,contexts:{pt:['emoções','relacionamentos','gostos'],en:['emotions','relationships','tastes']}}
+};
+
+// ========== SIMILAR VERB DETECTION SYSTEM ==========
+function getVerbSimilarityScore(verbA,verbB){
+  if(!verbA||!verbB||verbA.key===verbB.key)return 0;
+  const a=verbA,b=verbB;let score=0;
+  if(a.type===b.type)score+=3;
+  if(a.type==='irregular'&&b.type==='irregular'&&a.vowelChange&&b.vowelChange){
+    if(a.vowelChange.du===b.vowelChange.du&&a.vowelChange.er===b.vowelChange.er)score+=5;
+    else if(a.vowelChange.du===b.vowelChange.du||a.vowelChange.er===b.vowelChange.er)score+=2;
+  }
+  if(a.pattern&&b.pattern&&a.pattern===b.pattern)score+=3;
+  if(a.type==='separable'&&b.type==='separable'&&a.prefix&&b.prefix&&a.prefix===b.prefix)score+=5;
+  if(a.baseVerb&&b.baseVerb&&a.baseVerb===b.baseVerb)score+=4;
+  if(a.type==='modal'&&b.type==='modal')score+=4;
+  if(a.perfektAux&&b.perfektAux&&a.perfektAux===b.perfektAux)score+=2;
+  if(a.pattern&&b.pattern&&((a.pattern.includes('t-stem')&&b.pattern.includes('t-stem'))||(a.pattern.includes('s-stem')&&b.pattern.includes('s-stem'))))score+=2;
+  if(a.governs&&b.governs&&a.governs===b.governs)score+=2;
+  return score;
+}
+
+function getSimilarVerbs(currentVerb,allVerbs,isEn){
+  const scored=allVerbs.filter(v=>v.key!==currentVerb.key).map(v=>({verb:v,score:getVerbSimilarityScore(currentVerb,v)}));
+  scored.sort((a,b)=>b.score-a.score);
+  const top=scored.filter(s=>s.score>=3).slice(0,3);
+  return top.map(s=>{
+    const v=s.verb;const reason=[];
+    if(v.type===currentVerb.type){
+      if(currentVerb.type==='irregular'&&v.vowelChange&&currentVerb.vowelChange&&v.vowelChange.du===currentVerb.vowelChange.du)reason.push(isEn?'Same vowel change pattern ('+currentVerb.vowelChange.du+' in du/er)':'Mesmo padrão de mudança vocálica ('+currentVerb.vowelChange.du+' no du/er)');
+      else if(currentVerb.type==='modal')reason.push(isEn?'Both are modal verbs with identical conjugation logic':'Ambos são verbos modais com lógica de conjugação idêntica');
+      else if(currentVerb.type==='separable'&&v.prefix===currentVerb.prefix)reason.push(isEn?'Both use the separable prefix "'+currentVerb.prefix+'"':'Ambos usam o prefixo separável "'+currentVerb.prefix+'"');
+      else if(currentVerb.type==='regular')reason.push(isEn?'Both are regular verbs following the same conjugation template':'Ambos são verbos regulares seguindo o mesmo modelo de conjugação');
+      else reason.push(isEn?'Same verb type with matching conjugation behavior':'Mesmo tipo verbal com comportamento de conjugação compatível');
+    }
+    if(v.pattern===currentVerb.pattern)reason.push(isEn?'Identical conjugation pattern: "'+currentVerb.pattern+'"':'Padrão de conjugação idêntico: "'+currentVerb.pattern+'"');
+    if(v.perfektAux&&currentVerb.perfektAux&&v.perfektAux===currentVerb.perfektAux)reason.push(isEn?'Both use "'+currentVerb.perfektAux+'" as Perfekt auxiliary':'Ambos usam "'+currentVerb.perfektAux+'" como auxiliar no Perfekt');
+    if(v.baseVerb&&currentVerb.baseVerb&&v.baseVerb===currentVerb.baseVerb)reason.push(isEn?'Share the same base verb "'+currentVerb.baseVerb+'"':'Compartilham o mesmo verbo base "'+currentVerb.baseVerb+'"');
+    if(v.governs&&currentVerb.governs&&v.governs===currentVerb.governs)reason.push(isEn?'Both govern the '+currentVerb.governs+' case':'Ambos regem o caso '+currentVerb.governs);
+    return{verb:v,reason:reason,score:s.score};
+  });
+}
+
+// ========== VERB DEEP DIVE RENDERER ==========
+function generateVerbDeepDive(verb,chId,vIdx,isEn){
+  const allVerbs=[];for(const key in VERB_DB){if(key===verb.infinitive)continue;allVerbs.push({key:key,...VERB_DB[key]})}
+  const currentWithKey={key:verb.infinitive,...verb};
+  const similar=getSimilarVerbs(currentWithKey,allVerbs,isEn);
+  const edu=VERB_EDUCATION[verb.infinitive]||{};
+  const meaning=verb.meaning[isEn?'en':'pt'];
+  const typeLabels={regular:isEn?'Regular':'Regular',irregular:isEn?'Irregular (Strong)':'Irregular (Forte)',modal:isEn?'Modal':'Modal',separable:isEn?'Separable':'Separável',mixed:isEn?'Mixed':'Misto',auxiliary:isEn?'Auxiliary':'Auxiliar'};
+  const typeLabel=typeLabels[verb.type]||verb.type;
+  const stars={1:'★',2:'★★',3:'★★★',4:'★★★★',5:'★★★★★'};
+  const freq=edu.frequency||3;
+
+  let html='<div class="verb-deep-dive" id="deep-'+chId+'-'+vIdx+'">';
+
+  // Header
+  html+='<div class="verb-deep-dive-header"><span class="deep-icon">🔍</span><div><div class="deep-title">'+(isEn?'Exploring the verb':'Explorando o verbo')+' <span style="color:var(--accent)">'+verb.infinitive+'</span></div><div class="deep-subtitle">'+(isEn?'Deep dive into conjugation, patterns, usage & related verbs':'Mergulho em conjugação, padrões, uso & verbos relacionados')+'</div></div></div>';
+
+  html+='<div class="verb-deep-dive-body">';
+
+  // Overview cards
+  html+='<div class="deep-overview">';
+  html+='<div class="deep-fact-card"><div class="fact-label">'+(isEn?'Type':'Tipo')+'</div><div class="fact-value primary">'+typeLabel+'</div><div class="fact-detail">'+(verb.pattern||'')+'</div></div>';
+  html+='<div class="deep-fact-card"><div class="fact-label">'+(isEn?'Meaning':'Significado')+'</div><div class="fact-value">'+meaning+'</div><div class="fact-detail">'+(verb.example?verb.example[isEn?'de':'pt']:'')+'</div></div>';
+  html+='<div class="deep-fact-card"><div class="fact-label">'+(isEn?'Frequency':'Frequência')+'</div><div class="fact-value accent">'+stars[freq]+'</div><div class="fact-detail">'+(freq>=5?(isEn?'Essential':'Essencial'):freq>=4?(isEn?'Very common':'Muito comum'):freq>=3?(isEn?'Common':'Comum'):isEn?'Less common':'Menos comum')+'</div></div>';
+  if(verb.perfektAux||verb.partizip)html+='<div class="deep-fact-card"><div class="fact-label">'+(isEn?'Perfekt':'Perfekt')+'</div><div class="fact-value success">'+(verb.partizip||'')+'</div><div class="fact-detail">'+(verb.perfektAux?isEn?'Auxiliary: '+verb.perfektAux:'Auxiliar: '+verb.perfektAux:'')+'</div></div>';
+  html+='</div>';
+
+  // Usage & pattern
+  html+='<div class="deep-section"><div class="deep-section-title"><span class="sec-icon">📖</span> '+(isEn?'Usage & Behavior':'Uso e Comportamento')+'</div>';
+  if(edu.usage)html+='<div class="deep-pattern-box">'+(isEn?edu.usage.en:edu.usage.pt)+'</div>';
+  else if(verb.type==='regular')html+='<div class="deep-pattern-box">'+(isEn?'<strong>'+verb.infinitive+'</strong> follows the standard regular pattern. The stem <strong>'+verb.infinitive.replace(/(ier)?en$/,'')+'-</strong> receives endings <strong>-e, -st, -t, -en, -t, -en</strong> — the most predictable German verb family.':'<strong>'+verb.infinitive+'</strong> segue o padrão regular. O radical <strong>'+verb.infinitive.replace(/(ier)?en$/,'')+'-</strong> recebe as terminações <strong>-e, -st, -t, -en, -t, -en</strong> — a família verbal mais previsível do alemão.')+'</div>';
+  else if(verb.type==='separable')html+='<div class="deep-pattern-box">'+(isEn?'<strong>'+verb.infinitive+'</strong> is a <strong>separable verb</strong>. In main clauses, the prefix <strong>"'+verb.prefix+'"</strong> detaches and goes to the <strong>very end</strong> of the clause. The base verb conjugates normally in position 2. This is one of the most characteristic features of German.':'<strong>'+verb.infinitive+'</strong> é um <strong>verbo separável</strong>. Em orações principais, o prefixo <strong>"'+verb.prefix+'"</strong> se destaca e vai para o <strong>final</strong> da oração. O verbo base conjuga normalmente na posição 2. Esta é uma das características mais marcantes do alemão.')+'</div>';
+  else if(verb.type==='modal')html+='<div class="deep-pattern-box">'+(isEn?'<strong>'+verb.infinitive+'</strong> is a <strong>modal verb</strong>. Modals drop their ending in singular (ich/er) and return to infinitive-like form in plural. They always accompany another verb in the infinitive at the end of the clause.':'<strong>'+verb.infinitive+'</strong> é um <strong>verbo modal</strong>. Modais perdem a terminação no singular (ich/er) e retornam à forma do infinitivo no plural. Sempre acompanham outro verbo no infinitivo ao final da oração.')+'</div>';
+  else if(verb.type==='auxiliary')html+='<div class="deep-pattern-box">'+(isEn?'<strong>'+verb.infinitive+'</strong> is an <strong>auxiliary verb</strong> — a structural pillar of German. Its conjugation is extremely irregular with forms from different etymological roots. It is essential for forming Perfekt, future, and passive tenses.':'<strong>'+verb.infinitive+'</strong> é um <strong>verbo auxiliar</strong> — um pilar estrutural do alemão. Sua conjugação é extremamente irregular com formas de raízes etimológicas diferentes. É essencial para formar Perfekt, futuro e voz passiva.')+'</div>';
+  else html+='<div class="deep-pattern-box">'+(isEn?'<strong>'+verb.infinitive+'</strong> is an <strong>irregular verb</strong>. Its stem vowel changes in the 2nd and 3rd person singular, following one of the strong verb patterns (e→i, a→ä, or e→ie). The plural forms return to the original vowel.':'<strong>'+verb.infinitive+'</strong> é um <strong>verbo irregular</strong>. Sua vogal do radical muda na 2ª e 3ª pessoa do singular, seguindo um dos padrões fortes (e→i, a→ä ou e→ie). As formas plurais retornam à vogal original.')+'</div>';
+  html+='</div>';
+
+  // Memory tip
+  if(edu.memoryTip){
+    html+='<div class="deep-section"><div class="deep-section-title"><span class="sec-icon">🧠</span> '+(isEn?'Memory Hack':'Dica de Memorização')+'</div>';
+    html+='<div class="deep-insight-box tip">'+(isEn?edu.memoryTip.en:edu.memoryTip.pt)+'</div></div>';
+  }
+
+  // Similar verbs
+  if(similar.length>0){
+    html+='<div class="deep-section"><div class="deep-section-title"><span class="sec-icon">🔗</span> '+(isEn?'Similar Verbs — Comparative Analysis':'Verbos Parecidos — Análise Comparativa')+'</div>';
+    similar.forEach((sim,simIdx)=>{
+      const sv=sim.verb;
+      html+='<div class="deep-comparison"><div class="deep-comp-card">';
+      html+='<div class="deep-comp-card-header"><span>'+verb.infinitive+' <span style="font-weight:400;color:var(--text3)">↔</span> '+sv.infinitive+'</span><span class="comp-badge same">'+(isEn?'Similar':'Parecido')+'</span></div>';
+      html+='<div class="deep-comp-card-body">';
+      html+='<div style="margin-bottom:10px;color:var(--text2);font-size:.82rem;line-height:1.65"><strong style="color:var(--primary)">'+(isEn?'Why are they similar?':'Por que são parecidos?')+'</strong><br>';
+      sim.reason.forEach(r=>{html+='• '+r+'<br>'});
+      html+='</div>';
+      html+='<table class="comp-table"><tr><td></td><td style="font-weight:700;color:var(--primary)">'+verb.infinitive+'</td><td style="font-weight:700;color:var(--accent2)">'+sv.infinitive+'</td></tr>';
+      PRONOUNS.forEach((pronoun,pIdx)=>{
+        const mainForm=verb.conj[pIdx];
+        const simForm=sv.conj?sv.conj[pIdx]:'';
+        html+='<tr'+(pIdx===1||pIdx===2?' class="highlight-row"':'')+'><td>'+pronoun.label+'</td><td style="color:var(--primary);font-weight:600">'+mainForm+'</td><td style="color:var(--accent2);font-weight:600">'+simForm+'</td></tr>';
+      });
+      html+='</table>';
+      if(verb.vowelChange&&sv.vowelChange){
+        html+='<div style="margin-top:8px;padding:8px 10px;background:var(--primary3);border-radius:6px;font-size:.78rem;color:var(--text2);line-height:1.55">'+(isEn?'<strong>Pattern insight:</strong> Both follow the <strong style="color:var(--primary)">same structural logic</strong> — vowel change only in du/er, plural unchanged — but with their own specific vowel.':'<strong>Insight do padrão:</strong> Ambos seguem a <strong style="color:var(--primary)">mesma lógica estrutural</strong> — mudança vocálica só no du/er, plural inalterado — mas com sua própria vogal específica.')+'</div>';
+      }
+      html+='<div class="deep-insight-box warn" style="margin-top:8px;font-size:.78rem">⚠️ <strong>'+(isEn?'Watch out:':'Atenção:')+'</strong> '+(isEn?"Don't mix them up! The pattern is shared, but each verb has its own specific conjugated forms. Always conjugate each verb independently.":'Não misture! O padrão é compartilhado, mas cada verbo tem suas próprias formas conjugadas. Sempre conjugue cada verbo independentemente.')+'</div>';
+      html+='</div></div></div>';
+      if(simIdx<similar.length-1)html+='<div style="height:8px"></div>';
+    });
+    html+='</div>';
+  }else{
+    html+='<div class="deep-section"><div class="deep-section-title"><span class="sec-icon">⭐</span> '+(isEn?'What Makes This Verb Special':'O que Torna Este Verbo Especial')+'</div>';
+    if(verb.type==='regular')html+='<div class="deep-pattern-box">'+(isEn?'<strong>'+verb.infinitive+'</strong> belongs to the largest verb family in German: regular -en verbs. Once you master this pattern, you can conjugate <strong>hundreds of verbs</strong>. It is the default conjugation template of the German language.':'<strong>'+verb.infinitive+'</strong> pertence à maior família verbal do alemão: os verbos regulares em -en. Uma vez dominado este padrão, você pode conjugar <strong>centenas de verbos</strong>. É o modelo padrão de conjugação da língua alemã.')+'</div>';
+    else if(verb.type==='auxiliary')html+='<div class="deep-pattern-box">'+(isEn?'<strong>'+verb.infinitive+'</strong> is not just a verb — it is a <strong>structural pillar</strong>. As an auxiliary, it forms compound tenses for other verbs. Its extreme irregularity comes from ancient Indo-European roots that merged over thousands of years. There is no shortcut — only exposure and repetition will fix it in your memory.':'<strong>'+verb.infinitive+'</strong> não é apenas um verbo — é um <strong>pilar estrutural</strong>. Como auxiliar, forma tempos compostos para outros verbos. Sua irregularidade extrema vem de raízes indo-europeias antigas que se fundiram por milênios. Não há atalho — apenas exposição e repetição fixarão na sua memória.')+'</div>';
+    html+='</div>';
+  }
+
+  // Examples
+  html+='<div class="deep-section"><div class="deep-section-title"><span class="sec-icon">💬</span> '+(isEn?'In Context — Real Usage':'Em Contexto — Uso Real')+'</div><div class="deep-example-list">';
+  if(verb.example)html+='<div class="deep-example-item"><div class="example-de">'+verb.example.de+'</div><div class="example-pt">'+(verb.example.pt||'')+'</div></div>';
+  const extraEx={lernen:{de:'Ich lerne jeden Tag eine Stunde Deutsch.',pt:isEn?'I learn German for one hour every day.':'Aprendo alemão uma hora por dia.'},gehen:{de:'Am Samstag gehen wir ins Kino.',pt:isEn?'On Saturday we\'re going to the cinema.':'No sábado vamos ao cinema.'},essen:{de:'Isst du gern italienisch? — Ja, sehr gern!',pt:isEn?'Do you like Italian food? — Yes, very much!':'Gostas de comida italiana? — Sim, muito!'},sprechen:{de:'Entschuldigung, sprechen Sie Englisch?',pt:isEn?'Excuse me, do you speak English?':'Desculpe, o(a) sr(a) fala inglês?'},arbeiten:{de:'Mein Vater arbeitet seit 20 Jahren bei der Firma.',pt:isEn?'My father has worked at the company for 20 years.':'Meu pai trabalha na empresa há 20 anos.'},können:{de:'Kannst du mir bitte helfen? Ich kann das nicht allein.',pt:isEn?'Can you please help me? I can\'t do this alone.':'Podes me ajudar? Não consigo fazer isso sozinho.'},wollen:{de:'Willst du mitkommen? — Ja, ich will!',pt:isEn?'Do you want to come along? — Yes, I do!':'Queres vir junto? — Sim, quero!'},aufstehen:{de:'Unter der Woche stehe ich um 6 Uhr auf.',pt:isEn?'During the week I get up at 6 o\'clock.':'Durante a semana levanto-me às 6h.'},sein:{de:'Ich bin heute müde, aber glücklich.',pt:isEn?'I am tired today, but happy.':'Estou cansado hoje, mas feliz.'},haben:{de:'Hast du morgen Zeit für einen Kaffee?',pt:isEn?'Do you have time for a coffee tomorrow?':'Tens tempo para um café amanhã?'},machen:{de:'Was machst du am Wochenende? — Nichts Besonderes.',pt:isEn?'What are you doing on the weekend? — Nothing special.':'O que fazes no fim de semana? — Nada de especial.'}};
+  if(extraEx[verb.infinitive])html+='<div class="deep-example-item"><div class="example-de">'+extraEx[verb.infinitive].de+'</div><div class="example-pt">'+extraEx[verb.infinitive].pt+'</div></div>';
+  html+='</div></div>';
+
+  // Common phrases
+  if(edu.commonPhrases){const phrases=edu.commonPhrases[isEn?'en':'pt'];if(phrases&&phrases.length>0){
+    html+='<div class="deep-section"><div class="deep-section-title"><span class="sec-icon">💎</span> '+(isEn?'Common Expressions':'Expressões Comuns')+'</div><div class="deep-example-list">';
+    phrases.forEach(p=>{html+='<div class="deep-example-item" style="border-left:2px solid var(--primary)"><div class="example-de">'+p+'</div></div>'});
+    html+='</div></div>';
+  }}
+
+  // Fun fact
+  if(edu.funFact){
+    html+='<div class="deep-section"><div class="deep-section-title"><span class="sec-icon">💡</span> '+(isEn?'Did You Know?':'Você Sabia?')+'</div>';
+    html+='<div class="deep-insight-box fun">'+(isEn?edu.funFact.en:edu.funFact.pt)+'</div></div>';
+  }
+
+  // Confused with
+  if(edu.confusedWith){
+    html+='<div class="deep-section"><div class="deep-section-title"><span class="sec-icon">⚠️</span> '+(isEn?'Watch Out!':'Cuidado!')+'</div>';
+    html+='<div class="deep-insight-box warn">'+(edu.confusedWith[isEn?'en':'pt']||edu.confusedWith.pt||edu.confusedWith)+'</div></div>';
+  }
+
+  // Context tags
+  if(edu.contexts){
+    html+='<div class="deep-section"><div class="deep-section-title"><span class="sec-icon">🏷️</span> '+(isEn?'Contexts':'Contextos')+'</div><div class="deep-tag-row">';
+    const ctx=edu.contexts[isEn?'en':'pt']||edu.contexts.pt||[];
+    ctx.forEach(tag=>{html+='<span class="deep-tag">'+tag+'</span>'});
+    html+='</div></div>';
+  }
+
+  // Quick reference
+  html+='<div class="deep-section"><div class="deep-section-title"><span class="sec-icon">📋</span> '+(isEn?'Quick Reference':'Referência Rápida')+'</div>';
+  html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
+  verb.conj.forEach((form,i)=>{html+='<span style="padding:5px 10px;background:'+(i===1||i===2?'var(--primary3)':'var(--bg)')+';border-radius:6px;font-family:var(--mono);font-size:.8rem;border:1px solid '+(i===1||i===2?'var(--primary)':'var(--border)')+'"><strong>'+PRONOUNS[i].label+'</strong> '+form+'</span>'});
+  html+='</div></div>';
+
+  html+='</div></div>';
+  return html;
+}
+
+function rebuildConjDeepDives(chId){
+  const verbs=getChapterVerbs(chId);
+  verbs.forEach((verb,vIdx)=>{
+    const container=document.getElementById('deep-'+chId+'-'+vIdx);
+    if(container){const isEn=state.lang==='en';container.outerHTML=generateVerbDeepDive(verb,chId,vIdx,isEn)}
+  });
+}
+
+// ========== END VERB EDUCATIONAL SYSTEM ==========
+
+// Pronoun display data
+const PRONOUNS=[
+  {id:'ich',label:'ich',hintKey:'ich',desc:'1ª pessoa singular',descEn:'1st person singular'},
+  {id:'du',label:'du',hintKey:'du',desc:'2ª pessoa singular (informal)',descEn:'2nd person singular (informal)'},
+  {id:'er',label:'er/sie/es',hintKey:'er',desc:'3ª pessoa singular',descEn:'3rd person singular'},
+  {id:'wir',label:'wir',hintKey:'wir',desc:'1ª pessoa plural',descEn:'1st person plural'},
+  {id:'ihr',label:'ihr',hintKey:'ihr',desc:'2ª pessoa plural (informal)',descEn:'2nd person plural (informal)'},
+  {id:'sie',label:'sie/Sie',hintKey:'sie',desc:'3ª pessoa plural / formal',descEn:'3rd person plural / formal'}
+];
+
+// Get verbs relevant to a chapter
+function getChapterVerbs(chId){
+  const verbs=[];
+  for(const key in VERB_DB){
+    const v=VERB_DB[key];
+    if(v.chapters&&v.chapters.indexOf(chId)!==-1)verbs.push({key:key,...v});
+  }
+  // Sort by difficulty: regular first, then irregular, then modal, then separable
+  const order={regular:0,irregular:1,mixed:1,auxiliary:2,separable:3,inseparable:3,modal:4};
+  verbs.sort((a,b)=>(order[a.type]||5)-(order[b.type]||5));
+  return verbs;
+}
+
+// Generate hint for a specific pronoun and verb
+function getConjHint(verb,pronounId,isEn){
+  const v=verb;const p=pronounId;
+  const conj=v.conj;const idx=PRONOUNS.findIndex(pr=>pr.id===p);
+  const correctForm=idx>=0?conj[idx]:'';
+  
+  // Build highly specific, non-answer-giving hints
+  const hints={};
+  
+  if(v.type==='auxiliary'){
+    hints.ich=isEn?'The verb "sein" is completely irregular — its "ich" form has only 3 letters and starts with "b".':'O verbo "sein" é completamente irregular — sua forma "ich" tem apenas 3 letras e começa com "b".';
+    hints.du=isEn?'For "sein" with "du", add "-st" to a short base that starts with "b".':'Para "sein" com "du", adicione "-st" a uma base curta que começa com "b".';
+    hints.er=isEn?'"sein" in 3rd person singular: think of the English word "is" — the German form also has 3 letters.':'"sein" na 3ª pessoa singular: pense na palavra inglesa "is" — a forma alemã também tem 3 letras.';
+    hints.wir=isEn?'For "wir", "sein" uses a form with 4 letters starting with "s".':'Para "wir", "sein" usa uma forma com 4 letras começando com "s".';
+    hints.ihr=isEn?'"ihr" with "sein" — ends in "-d" and has 4 letters.':'"ihr" com "sein" — termina em "-d" e tem 4 letras.';
+    hints.sie=isEn?'"sie/Sie" with "sein" — same as the "wir" form (4 letters starting with "s").':'"sie/Sie" com "sein" — mesma forma que "wir" (4 letras começando com "s").';
+  }else if(v.type==='modal'){
+    hints.ich=isEn?'Modal verbs drop their umlaut and change stem in "ich". The form is short (3-4 letters).':'Verbos modais perdem o trema e mudam o radical em "ich". A forma é curta (3-4 letras).';
+    hints.du=isEn?'For "du", take the "ich" stem (without ending) and add the standard "-st" ending.':'Para "du", pegue o radical do "ich" (sem terminação) e adicione a terminação padrão "-st".';
+    hints.er=isEn?'For "er/sie/es", the modal form is identical to "ich" — no ending added!':'Para "er/sie/es", a forma modal é idêntica ao "ich" — nenhuma terminação é adicionada!';
+    hints.wir=isEn?'For plural "wir", modals return to their infinitive-like form (with umlaut if present).':'Para o plural "wir", os modais voltam à forma próxima do infinitivo (com trema se houver).';
+    hints.ihr=isEn?'"ihr" with modals: take the "wir" stem and add "-t".':'"ihr" com modais: pegue o radical do "wir" e adicione "-t".';
+    hints.sie=isEn?'"sie/Sie" with modals: identical to the "wir" form.':'"sie/Sie" com modais: idêntico à forma "wir".';
+  }else if(v.type==='separable'){
+    const prefix=v.prefix||'';
+    hints.ich=isEn?'This is a separable verb. Conjugate the base verb normally in 2nd position, then add "'+prefix+'" at the end with a space.':'Este é um verbo separável. Conjugue o verbo base normalmente na 2ª posição e adicione "'+prefix+'" no final com espaço.';
+    hints.du=isEn?'Separable verbs: conjugate the base for "du" (usually + "-st"), then write the prefix "'+prefix+'" separately at the end.':'Verbos separáveis: conjugue a base para "du" (geralmente + "-st"), depois escreva o prefixo "'+prefix+'" separado no final.';
+    hints.er=isEn?'For "er/sie/es", conjugate the base verb (usually + "-t"), then add the prefix "'+prefix+'" at the end.':'Para "er/sie/es", conjugue o verbo base (geralmente + "-t"), depois adicione o prefixo "'+prefix+'" no final.';
+    hints.wir=isEn?'"wir" with separable verbs: the base verb stays as infinitive stem + "en", prefix "'+prefix+'" goes to the end.':'"wir" com separáveis: o verbo base fica como radical do infinitivo + "en", prefixo "'+prefix+'" vai ao final.';
+    hints.ihr=isEn?'"ihr" with separables: base verb + "-t", then prefix "'+prefix+'" at the end.':'"ihr" com separáveis: verbo base + "-t", depois prefixo "'+prefix+'" no final.';
+    hints.sie=isEn?'"sie/Sie" with separables: same form as "wir" — base verb + "en", prefix "'+prefix+'" at the end.':'"sie/Sie" com separáveis: mesma forma que "wir" — verbo base + "en", prefixo "'+prefix+'" no final.';
+  }else if(v.type==='irregular'||v.vowelChange){
+    const vc=v.vowelChange||{};
+    hints.ich=isEn?'For "ich", remove "-en" from the infinitive and add "-e". The stem vowel does NOT change in "ich".':'Para "ich", remova "-en" do infinitivo e adicione "-e". A vogal do radical NÃO muda em "ich".';
+    hints.du=isEn?'CRITICAL for "du": the stem vowel changes! The vowel becomes "'+(vc.du||'?')+'" before adding "-st". This is a strong/irregular verb.':'CRÍTICO para "du": a vogal do radical muda! A vogal se torna "'+(vc.du||'?')+'" antes de adicionar "-st". Este é um verbo forte/irregular.';
+    hints.er=isEn?'For "er/sie/es": like "du", the stem vowel changes to "'+(vc.er||'?')+'" and the ending is "-t" (or just the changed stem if it already ends in a sibilant).':'Para "er/sie/es": como "du", a vogal do radical muda para "'+(vc.er||'?')+'" e a terminação é "-t" (ou só o radical modificado se já terminar em sibilante).';
+    hints.wir=isEn?'For "wir": the vowel change REVERTS. Use the infinitive stem (no vowel change) + "-en".':'Para "wir": a mudança vocálica REVERTE. Use o radical do infinitivo (sem mudança) + "-en".';
+    hints.ihr=isEn?'For "ihr": same as "wir" — no vowel change. Infinitive stem + "-t".':'Para "ihr": igual ao "wir" — sem mudança vocálica. Radical do infinitivo + "-t".';
+    hints.sie=isEn?'For "sie/Sie": no vowel change (like "wir"). Infinitive stem + "-en".':'Para "sie/Sie": sem mudança vocálica (como "wir"). Radical do infinitivo + "-en".';
+  }else{
+    // Regular verb hints
+    hints.ich=isEn?'For regular verbs with "ich": remove "-en" from the infinitive and add "-e".':'Para verbos regulares com "ich": remova "-en" do infinitivo e adicione "-e".';
+    hints.du=isEn?'For regular "du": remove "-en", add "-st". If the stem ends in -t, -d, -s, -ß, -z, add an extra "-e-" before "-st" for pronunciation.':'Para "du" regular: remova "-en", adicione "-st". Se o radical terminar em -t, -d, -s, -ß, -z, adicione um "-e-" extra antes de "-st".';
+    hints.er=isEn?'For "er/sie/es": remove "-en", add "-t". Remember: stems ending in -t or -d need "-et" instead.':'Para "er/sie/es": remova "-en", adicione "-t". Lembre-se: radicais terminados em -t ou -d precisam de "-et".';
+    hints.wir=isEn?'For "wir": the verb stays almost like the infinitive. Simply use the infinitive form (no change needed for regular verbs).':'Para "wir": o verbo fica quase igual ao infinitivo. Simplesmente use a forma do infinitivo (sem mudança para verbos regulares).';
+    hints.ihr=isEn?'For "ihr": remove "-en" and add "-t". This is like the "er/sie/es" form but for plural.':'Para "ihr": remova "-en" e adicione "-t". É como a forma "er/sie/es" mas para plural.';
+    hints.sie=isEn?'For "sie/Sie": identical to "wir" — use the infinitive form (verb stem + "-en").':'Para "sie/Sie": idêntico ao "wir" — use a forma do infinitivo (radical + "-en").';
+  }
+  
+  // Add verb-specific nuance
+  let specificHint='';
+  if(v.infinitive==='sein'){
+    if(p==='ich')specificHint=isEn?' Think: "I am" = "Ich ___".':' Pense: "Eu sou" = "Ich ___".';
+    if(p==='du')specificHint=isEn?' The stem completely changes from the infinitive.':' O radical muda completamente do infinitivo.';
+    if(p==='er')specificHint=isEn?' Same short form as English "is".':' Mesma forma curta que o inglês "is".';
+  }
+  if(v.infinitive==='haben'&&p==='du')specificHint=isEn?' The "b" from the infinitive disappears completely.':' O "b" do infinitivo desaparece completamente.';
+  if(v.infinitive==='haben'&&p==='er')specificHint=isEn?' The form is very short — just 3 letters, completely different from the infinitive.':' A forma é muito curta — apenas 3 letras, completamente diferente do infinitivo.';
+  if(v.infinitive==='sprechen'&&(p==='du'||p==='er'))specificHint=isEn?' The "e" becomes "i": sprEchen → sprIchst/sprIcht.':' O "e" vira "i": sprEchen → sprIchst/sprIcht.';
+  if(v.infinitive==='lesen'&&(p==='du'||p==='er'))specificHint=isEn?' The "e" becomes "ie" AND the "s" changes.':' O "e" vira "ie" E o "s" muda.';
+  if(v.infinitive==='nehmen'&&(p==='du'||p==='er'))specificHint=isEn?' Extreme change: the "h" drops, "e"→"i", and "m" doubles!':' Mudança extrema: o "h" cai, "e"→"i" e o "m" duplica!';
+  if(v.infinitive==='werden'&&p==='du')specificHint=isEn?' The "e" becomes "i" AND "d" is dropped before the ending.':' O "e" vira "i" E o "d" é removido antes da terminação.';
+  if(v.infinitive==='wissen'&&(p==='ich'||p==='er'))specificHint=isEn?' This verb uses "ß" (Eszett) in singular — it behaves like a modal.':' Este verbo usa "ß" (Eszett) no singular — comporta-se como um modal.';
+  if(v.type==='separable'&&v.prefix){
+    specificHint=isEn?' Remember: write the conjugated base verb FIRST, then a SPACE, then "'+v.prefix+'".':' Lembre-se: escreva o verbo base conjugado PRIMEIRO, depois um ESPAÇO, depois "'+v.prefix+'".';
+  }
+  
+  return (hints[p]||(isEn?'Conjugate carefully based on the verb pattern and pronoun.':'Conjugue com cuidado baseado no padrão do verbo e no pronome.'))+specificHint;
+}
+
+function buildConjFeedback(verb,pronounId,userAnswer,isCorrect,isEn){
+  const idx=PRONOUNS.findIndex(pr=>pr.id===pronounId);
+  const correctForm=idx>=0?verb.conj[idx]:'';
+  const pronounLabel=PRONOUNS[idx]?PRONOUNS[idx].label:pronounId;
+  const infinitive=verb.infinitive;
+  const typeLabelMap={regular:{pt:'regular',en:'regular'},irregular:{pt:'irregular (forte)',en:'irregular (strong)'},modal:{pt:'modal',en:'modal'},separable:{pt:'separável',en:'separable'},inseparable:{pt:'inseparável',en:'inseparable'},mixed:{pt:'misto',en:'mixed'},auxiliary:{pt:'auxiliar',en:'auxiliary'}};
+  const typeLabel=typeLabelMap[verb.type]?typeLabelMap[verb.type][isEn?'en':'pt']:verb.type;
+  let fb='';
+  
+  if(isCorrect){
+    fb='<div style="font-weight:700;color:var(--success);margin-bottom:8px;font-size:.95rem">✅ '+(isEn?'Correct! "':'Correto! "')+pronounLabel+' '+correctForm+'"</div>';
+    fb+='<div style="margin-bottom:6px;color:var(--text2)">';
+    if(verb.type==='regular'){
+      fb+=isEn?'The verb <strong>"'+infinitive+'"</strong> is '+typeLabel+'. In "'+pronounLabel+'", we follow the standard pattern: remove <strong>-en</strong> from the infinitive and add the appropriate ending.':'O verbo <strong>"'+infinitive+'"</strong> é '+typeLabel+'. Em "'+pronounLabel+'", seguimos o padrão: removemos <strong>-en</strong> do infinitivo e adicionamos a terminação adequada.';
+    }else if(verb.type==='irregular'||verb.type==='mixed'){
+      fb+=isEn?'The verb <strong>"'+infinitive+'"</strong> is '+typeLabel+' — it undergoes a vowel change in 2nd and 3rd person singular. In "'+pronounLabel+'", '+(verb.vowelChange&&(pronounId==='du'||pronounId==='er')?isEn?'the vowel shifts.':'a vogal se altera.':isEn?'the vowel returns to its original form (no change in plural).':'a vogal retorna à forma original (sem mudança no plural).'):'O verbo <strong>"'+infinitive+'"</strong> é '+typeLabel+' — sofre mudança vocálica na 2ª e 3ª pessoa do singular. Em "'+pronounLabel+'", '+(verb.vowelChange&&(pronounId==='du'||pronounId==='er')?isEn?'the vowel shifts.':'a vogal se altera.':isEn?'the vowel returns to its original form (no change in plural).':'a vogal retorna à forma original (sem mudança no plural).');
+    }else if(verb.type==='modal'){
+      fb+=isEn?'The modal verb <strong>"'+infinitive+'"</strong> '+(pronounId==='ich'||pronounId==='er'?isEn?'drops its ending entirely in singular.':'perde sua terminação completamente no singular.':isEn?'returns to the infinitive-like stem in plural.':'retorna ao radical próximo do infinitivo no plural.'):'O verbo modal <strong>"'+infinitive+'"</strong> '+(pronounId==='ich'||pronounId==='er'?isEn?'drops its ending entirely in singular.':'perde sua terminação completamente no singular.':isEn?'returns to the infinitive-like stem in plural.':'retorna ao radical próximo do infinitivo no plural.');
+    }else if(verb.type==='separable'){
+      fb+=isEn?'The separable verb <strong>"'+infinitive+'"</strong> splits: the base verb is conjugated normally, and the prefix <strong>"'+verb.prefix+'"</strong> goes to the end separated by a space.':'O verbo separável <strong>"'+infinitive+'"</strong> se divide: o verbo base é conjugado normalmente, e o prefixo <strong>"'+verb.prefix+'"</strong> vai ao final separado por espaço.';
+    }else if(verb.type==='auxiliary'){
+      fb+=isEn?'The verb <strong>"'+infinitive+'"</strong> is an auxiliary with a highly irregular conjugation. Its "'+pronounLabel+'" form must be memorized.':'O verbo <strong>"'+infinitive+'"</strong> é um auxiliar com conjugação altamente irregular. Sua forma "'+pronounLabel+'" deve ser memorizada.';
+    }
+    fb+='</div>';
+    fb+='<div style="padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);margin-bottom:8px">';
+    fb+='<div style="font-weight:600;color:var(--primary);margin-bottom:4px;font-size:.85rem">📋 '+(isEn?'Conjugation breakdown:':'Detalhamento da conjugação:')+'</div>';
+    fb+='<div style="font-size:.82rem;color:var(--text2);line-height:1.7">'+verb.conj.map((f,i)=>(i===idx?'<strong style="color:var(--success)">':(i===1||i===2?'<span style="color:var(--error)">':'<span>'))+PRONOUNS[i].label+' '+f+(i===idx?'</strong>':(i===1||i===2?'</span>':'</span>'))).join('<br>')+'</div>';
+    fb+='</div>';
+    if(verb.related){
+      fb+='<div style="padding:8px 12px;background:var(--bg2);border-radius:6px;font-size:.82rem;color:var(--text3)">🔗 '+(isEn?'Similar verbs: ':'Verbos parecidos: ')+verb.related.map(r=>'<strong>'+r.verb+'</strong> ('+(r.meaning[isEn?'en':'pt'])+')').join(', ')+'</div>';
+    }
+    if(verb.example){
+      fb+='<div style="margin-top:8px;padding:10px 14px;background:var(--bg2);border-radius:8px;border-left:3px solid var(--accent)"><div style="font-weight:600;color:var(--accent2);margin-bottom:2px;font-size:.8rem">💬 '+(isEn?'Example:':'Exemplo:')+'</div><div style="font-size:.85rem"><strong style="color:var(--text)">'+verb.example.de+'</strong><br><span style="color:var(--text3)">'+(verb.example.pt||'')+'</span></div></div>';
+    }
+    fb+='<div style="margin-top:8px;padding:8px 12px;background:rgba(0,184,148,0.06);border-radius:6px;font-size:.8rem;color:var(--text3)">🎯 '+(isEn?'You got this right! Every correct conjugation strengthens your mental model of German verb patterns. Keep reinforcing this across different verbs.':'Você acertou! Cada conjugação correta fortalece seu modelo mental dos padrões verbais alemães. Continue reforçando em diferentes verbos.')+'</div>';
+  }else{
+    fb='<div style="font-weight:700;color:var(--error);margin-bottom:8px;font-size:.95rem">❌ '+(isEn?'Incorrect for "':'Incorreto para "')+pronounLabel+'"</div>';
+    fb+='<div style="margin-bottom:6px;padding:8px 12px;background:rgba(225,112,85,0.08);border-radius:6px;border-left:3px solid var(--error);font-size:.85rem">';
+    fb+='<div style="font-weight:600;color:var(--error);margin-bottom:2px">'+(isEn?'Your answer:':'Sua resposta:')+' <span style="text-decoration:line-through">'+(userAnswer||'(vazio/empty)')+'</span></div>';
+    fb+='<div style="font-weight:600;color:var(--success)">'+(isEn?'Correct:':'Correto:')+' <strong>'+correctForm+'</strong></div>';
+    fb+='</div>';
+    
+    fb+='<div style="margin-bottom:8px;color:var(--text2);font-size:.85rem;line-height:1.7">';
+    fb+='<div style="font-weight:600;color:var(--primary);margin-bottom:4px">📚 '+(isEn?'Why? — Deep analysis:':'Por quê? — Análise profunda:')+'</div>';
+    
+    // Personalized error analysis
+    if(!userAnswer||userAnswer.trim()===''){
+      fb+=isEn?'You left this field empty. Even if you are unsure, try writing what you think might be correct — the brain learns better through attempt than through avoidance.':'Você deixou este campo vazio. Mesmo sem ter certeza, tente escrever o que acha que pode ser — o cérebro aprende melhor pela tentativa do que pela esquiva.';
+    }else{
+      const normUser=(userAnswer||'').toLowerCase().trim();
+      const normCorrect=correctForm.toLowerCase().trim();
+      
+      if(verb.type==='separable'&&verb.prefix){
+        if(!normUser.includes(verb.prefix)){
+          fb+=isEn?'⚠️ <strong>You forgot the separable prefix!</strong> The verb <strong>"'+infinitive+'"</strong> is separable — the prefix <strong>"'+verb.prefix+'"</strong> MUST appear at the end with a space before it. In German, separable prefixes detach and go to the end of the clause.':'⚠️ <strong>Você esqueceu o prefixo separável!</strong> O verbo <strong>"'+infinitive+'"</strong> é separável — o prefixo <strong>"'+verb.prefix+'"</strong> DEVE aparecer no final com um espaço antes. Em alemão, prefixos separáveis se destacam e vão ao final.';
+        }else if(normUser.indexOf(verb.prefix)===0){
+          fb+=isEn?'⚠️ <strong>The prefix is at the start!</strong> With separable verbs, conjugate the base verb FIRST (in position 2), then add the prefix at the END with a space. Example structure: "Ich [base verb conj.] ... [prefix]".':'⚠️ <strong>O prefixo está no começo!</strong> Com verbos separáveis, conjugue o verbo base PRIMEIRO (na posição 2), depois adicione o prefixo no FINAL com espaço. Exemplo: "Ich [base conj.] ... [prefixo]".';
+        }else{
+          fb+=isEn?'The verb <strong>"'+infinitive+'"</strong> is a separable verb ('+typeLabel+'). Its prefix <strong>"'+verb.prefix+'"</strong> must be separated: conjugate the base verb, then write the prefix at the end.':'O verbo <strong>"'+infinitive+'"</strong> é separável ('+typeLabel+'). Seu prefixo <strong>"'+verb.prefix+'"</strong> deve ser separado: conjugue o verbo base, depois escreva o prefixo no final.';
+        }
+      }else if(verb.vowelChange&&(pronounId==='du'||pronounId==='er')){
+        const stemInfinitive=infinitive.replace(/(ier)?en$/,'');
+        if(normUser.indexOf(stemInfinitive)!==-1&&normUser.indexOf(verb.vowelChange[pronounId])===-1){
+          fb+=isEn?'⚠️ <strong>You missed the vowel change!</strong> The verb <strong>"'+infinitive+'"</strong> is a strong/irregular verb. In "'+pronounLabel+'", the stem vowel changes from the infinitive form. The vowel <strong>becomes "'+(verb.vowelChange[pronounId]||'?')+'"</strong> before adding the ending. This is a key feature of strong German verbs.':'⚠️ <strong>Você perdeu a mudança vocálica!</strong> O verbo <strong>"'+infinitive+'"</strong> é forte/irregular. Em "'+pronounLabel+'", a vogal do radical muda em relação ao infinitivo. A vogal <strong>se torna "'+(verb.vowelChange[pronounId]||'?')+'"</strong> antes de adicionar a terminação. Esta é uma característica essencial dos verbos fortes alemães.';
+        }else{
+          fb+=isEn?'The verb <strong>"'+infinitive+'"</strong> is irregular. In "'+pronounLabel+'", it undergoes a vowel change. Compare: infinitive stem vs. the conjugated form.':'O verbo <strong>"'+infinitive+'"</strong> é irregular. Em "'+pronounLabel+'", ele sofre mudança vocálica. Compare: radical do infinitivo vs. a forma conjugada.';
+        }
+      }else if(verb.type==='modal'){
+        if(pronounId==='ich'||pronounId==='er'){
+          fb+=isEn?'Modal verbs in singular (ich, er/sie/es) have <strong>no ending</strong> — just the changed stem. The infinitive ending "-en" is completely dropped.':'Verbos modais no singular (ich, er/sie/es) <strong>não têm terminação</strong> — apenas o radical modificado. A terminação "-en" do infinitivo é completamente removida.';
+        }else{
+          fb+=isEn?'Modal verbs change their stem in singular but return to a form closer to the infinitive in plural (wir, ihr, sie).':'Verbos modais mudam o radical no singular mas retornam a uma forma mais próxima do infinitivo no plural (wir, ihr, sie).';
+        }
+      }else if(verb.type==='auxiliary'){
+        fb+=isEn?'The verb <strong>"'+infinitive+'"</strong> is completely irregular and must be memorized. Its "'+pronounLabel+'" form has no connection to the infinitive — it is a suppletive form (a different root entirely).':'O verbo <strong>"'+infinitive+'"</strong> é completamente irregular e deve ser memorizado. Sua forma "'+pronounLabel+'" não tem conexão com o infinitivo — é uma forma supletiva (raiz completamente diferente).';
+      }else if(verb.type==='regular'){
+        const stem=infinitive.replace(/en$/,'');
+        if(stem.match(/[tdszß]$/)&&(pronounId==='du'||pronounId==='er')){
+          fb+=isEn?'⚠️ <strong>Pronunciation rule!</strong> Because the stem ends in a sibilant or dental ('+stem.slice(-1)+'), an extra <strong>-e-</strong> is inserted before the ending for easier pronunciation. This is a phonetic rule, not a grammatical exception.':'⚠️ <strong>Regra de pronúncia!</strong> Como o radical termina em sibilante ou dental ('+stem.slice(-1)+'), um <strong>-e-</strong> extra é inserido antes da terminação para facilitar a pronúncia. Esta é uma regra fonética, não uma exceção gramatical.';
+        }else{
+          fb+=isEn?'The verb <strong>"'+infinitive+'"</strong> is regular. For "'+pronounLabel+'", remove "-en" and add the standard ending. The form "'+correctForm+'" follows the predictable -en verb pattern.':'O verbo <strong>"'+infinitive+'"</strong> é regular. Para "'+pronounLabel+'", remova "-en" e adicione a terminação padrão. A forma "'+correctForm+'" segue o padrão previsível dos verbos em -en.';
+        }
+      }
+    }
+    fb+='</div>';
+    
+    fb+='<div style="padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);margin-bottom:8px">';
+    fb+='<div style="font-weight:600;color:var(--primary);margin-bottom:4px;font-size:.85rem">📋 '+(isEn?'Full conjugation of "'+infinitive+'":':'Conjugação completa de "'+infinitive+'":')+'</div>';
+    fb+='<div style="font-size:.82rem;color:var(--text2);line-height:1.7">'+verb.conj.map((f,i)=>(i===idx?'<strong style="color:var(--primary)">':'<span>')+PRONOUNS[i].label+' '+f+(i===idx?'</strong>':'</span>')).join('<br>')+'</div>';
+    fb+='</div>';
+    
+    if(verb.example){
+      fb+='<div style="margin-top:8px;padding:10px 14px;background:var(--bg2);border-radius:8px;border-left:3px solid var(--accent)"><div style="font-weight:600;color:var(--accent2);margin-bottom:2px;font-size:.8rem">💬 '+(isEn?'Example in context:':'Exemplo em contexto:')+'</div><div style="font-size:.85rem"><strong style="color:var(--text)">'+verb.example.de+'</strong><br><span style="color:var(--text3)">'+(verb.example.pt||'')+'</span></div></div>';
+    }
+    
+    fb+='<div style="margin-top:10px;padding:10px 14px;background:rgba(225,112,85,0.06);border-radius:8px;border-left:3px solid var(--error)"><div style="font-weight:600;color:var(--error);margin-bottom:2px;font-size:.82rem">🧠 '+(isEn?'How to never miss this again:':'Como nunca mais errar isso:')+'</div><div style="color:var(--text2);font-size:.82rem">'+(isEn?'Write the correct form <strong>"'+correctForm+'"</strong> 3 times by hand. Then create a simple sentence using it: <em>'+pronounLabel+' '+correctForm+' ...</em>. The physical act of writing + contextual use creates stronger memory than just reading.':'Escreva a forma correta <strong>"'+correctForm+'"</strong> 3 vezes à mão. Depois crie uma frase simples usando-a: <em>'+pronounLabel+' '+correctForm+' ...</em>. O ato físico de escrever + uso contextual cria memória mais forte que apenas ler.')+'</div></div>';
+  }
+  
+  return fb;
+}
+
+function renderConjugationTrainer(chId){
+  const container=$('#conj-trainer-'+chId);
+  if(!container)return;
+  const verbs=getChapterVerbs(chId);
+  if(verbs.length===0){container.style.display='none';return}
+  const isEn=state.lang==='en';
+  let html='<h3>⚡ '+(isEn?'Verb Conjugation Trainer':'Treinador de Conjugação Verbal')+'</h3>';
+  html+='<p class="conj-sub">'+(isEn?'Conjugate all verbs from this chapter in the present tense. Complete all fields to master the patterns.': 'Conjugue todos os verbos deste capítulo no presente. Complete todos os campos para dominar os padrões.')+'</p>';
+  
+  // Mastery bar
+  html+='<div class="conj-section-header"><div class="conj-mastery">'+(isEn?'Chapter mastery: ':'Domínio do capítulo: ')+'<span id="conj-mastery-pct-'+chId+'">0%</span></div><div class="conj-mastery-bar"><span id="conj-mastery-bar-'+chId+'" style="width:0%"></span></div></div>';
+  
+  verbs.forEach((verb,vIdx)=>{
+    const vId='conj-'+chId+'-'+vIdx;
+    html+='<div class="conj-verb-card" id="'+vId+'">';
+    html+='<div class="conj-verb-header">';
+    html+='<span class="conj-verb-name">'+verb.infinitive+'</span>';
+    html+='<span class="conj-verb-meaning">('+(verb.meaning[isEn?'en':'pt'])+')</span>';
+    const typeClass=verb.type==='irregular'?'irregular':(verb.type==='modal'?'modal':(verb.type==='separable'?'separable':(verb.type==='auxiliary'?'irregular':'regular')));
+    html+='<span class="conj-verb-type '+typeClass+'">'+verb.type+'</span>';
+    html+='<span class="conj-progress">'+(isEn?'Done: ':'Feito: ')+'<span id="'+vId+'-done">0</span>/6 <span class="mini-bar"><span id="'+vId+'-minibar" style="width:0%"></span></span></span>';
+    html+='</div>';
+    
+    PRONOUNS.forEach((pronoun,pIdx)=>{
+      html+='<div class="conj-row">';
+      html+='<span class="conj-pronoun">'+pronoun.label+'</span>';
+      html+='<span class="conj-arrow">→</span>';
+      html+='<input type="text" id="'+vId+'-'+pronoun.id+'" placeholder="'+(isEn?'conjugate...':'conjugue...')+'" onkeydown="if(event.key===\'Enter\')checkConjugation('+chId+','+vIdx+')">';
+      html+='<button class="conj-hint-btn" id="'+vId+'-hint-'+pronoun.id+'" onclick="showConjHint('+chId+','+vIdx+',\''+pronoun.id+'\')" title="'+(isEn?'Hint for '+pronoun.label:'Dica para '+pronoun.label)+'">?</button>';
+      html+='<span class="conj-hint-text" id="'+vId+'-hinttext-'+pronoun.id+'"></span>';
+      html+='<span class="conj-status" id="'+vId+'-status-'+pronoun.id+'"></span>';
+      html+='</div>';
+    });
+    
+    html+='<div class="conj-actions">';
+    html+='<button class="btn btn-primary btn-sm" onclick="checkConjugation('+chId+','+vIdx+')">✅ '+(isEn?'Check All':'Verificar Todos')+'</button>';
+    html+='<button class="btn btn-outline btn-sm" onclick="resetConjugation('+chId+','+vIdx+')">🔄 '+(isEn?'Reset':'Resetar')+'</button>';
+    html+='</div>';
+    html+='<div class="conj-fb" id="'+vId+'-fb"></div>';
+    html+=generateVerbDeepDive(verb,chId,vIdx,isEn);
+    html+='</div>';
+  });
+  
+  container.innerHTML=html;
+  updateConjMastery(chId);
+}
+
+function showConjHint(chId,vIdx,pronounId){
+  const verbs=getChapterVerbs(chId);
+  if(!verbs[vIdx])return;
+  const verb=verbs[vIdx];
+  const isEn=state.lang==='en';
+  const vId='conj-'+chId+'-'+vIdx;
+  const hintBtn=$('#'+vId+'-hint-'+pronounId);
+  const hintText=$('#'+vId+'-hinttext-'+pronounId);
+  if(!hintBtn||!hintText)return;
+  if(hintBtn.classList.contains('used'))return;
+  const hint=getConjHint(verb,pronounId,isEn);
+  hintBtn.classList.add('used');
+  hintText.textContent=hint;
+  hintText.classList.add('show');
+  setTimeout(()=>{
+    hintText.classList.remove('show');
+    hintBtn.classList.remove('used');
+  },8000);
+}
+
+function checkConjugation(chId,vIdx){
+  const verbs=getChapterVerbs(chId);
+  if(!verbs[vIdx])return;
+  const verb=verbs[vIdx];
+  const isEn=state.lang==='en';
+  const vId='conj-'+chId+'-'+vIdx;
+  const fb=$('#'+vId+'-fb');
+  let correctCount=0,totalCount=0;
+  let feedbackHtml='';
+  
+  PRONOUNS.forEach((pronoun,pIdx)=>{
+    const input=$('#'+vId+'-'+pronoun.id);
+    const status=$('#'+vId+'-status-'+pronoun.id);
+    if(!input)return;
+    const val=input.value.trim();
+    const correctForm=verb.conj[pIdx];
+    const isCorrect=val.toLowerCase().trim()===correctForm.toLowerCase().trim();
+    totalCount++;
+    if(isCorrect){correctCount++;input.className='correct';if(status)status.textContent='✅'}
+    else{input.className='wrong';if(status)status.textContent='❌'}
+    
+    if(val!==''){
+      feedbackHtml+='<div style="padding:8px 12px;margin-bottom:6px;background:'+(isCorrect?'rgba(0,184,148,0.06)':'rgba(225,112,85,0.06)')+';border-radius:8px;border-left:3px solid '+(isCorrect?'var(--success)':'var(--error)')+'">';
+      feedbackHtml+=buildConjFeedback(verb,pronoun.id,val,isCorrect,isEn);
+      feedbackHtml+='</div>';
+    }
+  });
+  
+  if(correctCount===totalCount&&totalCount===6){
+    fb.className='conj-fb show success';
+    fb.innerHTML='<div style="font-weight:700;color:var(--success);font-size:1rem;margin-bottom:8px">🎉 '+(isEn?'Perfect! You mastered "'+verb.infinitive+'"!':'Perfeito! Você dominou "'+verb.infinitive+'"!')+'</div>'+feedbackHtml+
+      '<div style="margin-top:10px;padding:12px 16px;background:rgba(0,184,148,0.08);border-radius:8px;text-align:center;font-weight:600;color:var(--success)">🏆 '+(isEn?'All 6 forms correct! This verb is now in your active vocabulary.':'Todas as 6 formas corretas! Este verbo agora está no seu vocabulário ativo.')+'</div>';
+  }else{
+    fb.className='conj-fb show error';
+    fb.innerHTML='<div style="font-weight:700;color:var(--text);font-size:1rem;margin-bottom:8px">📊 '+(isEn?'Result: '+correctCount+'/'+totalCount+' correct':'Resultado: '+correctCount+'/'+totalCount+' corretos')+'</div>'+feedbackHtml;
+    if(correctCount<totalCount){
+      fb.innerHTML+='<div style="margin-top:10px;padding:12px 16px;background:rgba(225,112,85,0.08);border-radius:8px;text-align:center;font-weight:600;color:var(--error)">💪 '+(isEn?'Review the incorrect forms above, then try again. Every error is a learning opportunity!':'Revise as formas incorretas acima, depois tente novamente. Cada erro é uma oportunidade de aprendizado!')+'</div>';
+    }
+  }
+  
+  // Update progress
+  updateConjProgress(chId,vIdx,correctCount,totalCount);
+  updateConjMastery(chId);
+}
+
+function updateConjProgress(chId,vIdx,correct,total){
+  const vId='conj-'+chId+'-'+vIdx;
+  const doneEl=$('#'+vId+'-done');
+  const minibar=$('#'+vId+'-minibar');
+  if(doneEl)doneEl.textContent=correct;
+  if(minibar)minibar.style.width=(correct/total*100)+'%';
+}
+
+function updateConjMastery(chId){
+  const verbs=getChapterVerbs(chId);
+  if(verbs.length===0)return;
+  let totalCorrect=0,totalFields=0;
+  verbs.forEach((verb,vIdx)=>{
+    const vId='conj-'+chId+'-'+vIdx;
+    PRONOUNS.forEach(pronoun=>{
+      const input=$('#'+vId+'-'+pronoun.id);
+      if(input&&input.classList.contains('correct'))totalCorrect++;
+      if(input)totalFields++;
+    });
+  });
+  const pct=totalFields>0?Math.round(totalCorrect/totalFields*100):0;
+  const pctEl=$('#conj-mastery-pct-'+chId);
+  const barEl=$('#conj-mastery-bar-'+chId);
+  if(pctEl)pctEl.textContent=pct+'%';
+  if(barEl)barEl.style.width=pct+'%';
+}
+
+function resetConjugation(chId,vIdx){
+  const verbs=getChapterVerbs(chId);
+  if(!verbs[vIdx])return;
+  const vId='conj-'+chId+'-'+vIdx;
+  PRONOUNS.forEach(pronoun=>{
+    const input=$('#'+vId+'-'+pronoun.id);
+    const status=$('#'+vId+'-status-'+pronoun.id);
+    if(input){input.value='';input.className=''}
+    if(status)status.textContent='';
+  });
+  const fb=$('#'+vId+'-fb');
+  if(fb){fb.className='conj-fb';fb.innerHTML=''}
+  updateConjProgress(chId,vIdx,0,6);
+  updateConjMastery(chId);
+}
+
+// ========== END VERB CONJUGATION TRAINER ==========
+
 // Setup
 function setup(){
   loadState();
@@ -2318,6 +3056,31 @@ $('#import-file').onchange=function(e){
   reader.readAsText(file);
   e.target.value='';
 };
+
+$('#unlock-input').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    if(this.value.trim()==='Leandro67'){
+      CHAPTERS.forEach(c=>{
+        if(!state.progress[c.id])state.progress[c.id]={};
+        state.progress[c.id].testPassed=true;
+        state.progress[c.id].exercisesDone=99;
+        state.completed[c.id]=true;
+      });
+      saveState();
+      renderChapters();
+      updateAll();
+      this.value='';
+      this.classList.add('unlocked');
+      toast('Todos os capítulos desbloqueados e completados!','success');
+      setTimeout(()=>this.classList.remove('unlocked'),2000);
+    }else{
+      this.value='';
+      this.style.animation='none';
+      this.offsetHeight;
+      this.style.animation='shake .3s ease';
+    }
+  }
+});
 
 document.addEventListener('DOMContentLoaded',setup);
 </script>
