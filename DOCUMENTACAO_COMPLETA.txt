@@ -2,35 +2,7 @@
                     DOCUMENTACAO COMPLETA — DeutschMeister
                  Plataforma Interativa de Aprendizado de Alemão
                               v1.0 — Maio 2026
-================================================================================
 
-===== CAPA E VISÃO GERAL DO PROJETO =====
-
-Nome do Projeto:    DeutschMeister
-Tipo:               Aplicação Web Single-Page (SPA), HTML + CSS + JS vanilla
-Arquivo Fonte:      deutsch-meister.html (~3088 linhas)
-Objetivo:           Ensinar alemão do nível A1 (iniciante) ao B1 (intermediário)
-                    seguindo o padrão CEFR (Quadro Europeu Comum de Referência).
-                    Totalmente offline, progresso salvo em localStorage.
-Tecnologias:        HTML5, CSS3 (variáveis CSS, flexbox, grid), JavaScript ES6+
-                    Sem frameworks ou bibliotecas externas.
-Navegadores:        Chrome, Firefox, Edge, Safari (modernos)
-Licença:            DeutschMeister © 2026 — Projeto educacional gratuito
-
-Features principais:
-  - 20 capítulos com teoria, exercícios interativos e mini testes
-  - Treinador de conjugação verbal com 50+ verbos
-  - Glossário pesquisável com 190+ palavras
-  - Sistema de progresso com salvamento automático (localStorage)
-  - Internacionalização (Português / English)
-  - Modo escuro (dark mode)
-  - Exportação/importação de progresso
-  - Sidebar de navegação com busca de capítulos
-  - Sistema de anotações pessoais
-  - "Base Fundamental" com 7 seções de pré-conhecimento
-  - Código de desbloqueio (cheat code) para acesso completo
-
-================================================================================
 ===== AVISO IMPORTANTE — SINCRONIZAÇÃO DE DADOS =====
 
 ATENÇÃO: Este documento é uma FOTOGRAFIA do estado atual do código.
@@ -3643,3 +3615,335 @@ Prevenção de loops:
   [x] Integração condicional (typeof !== 'undefined')
 
 ================================================================================
+
+================================================================================
+
+================================================================================
+===== SEÇÃO 21 — SISTEMA DE CONEXÕES VERBAIS (CONEXÕES) =====
+           ARQUITETURA INICIAL — PROMPT 1 — MAIO 2026
+================================================================================
+
+21.1 DESCRIÇÃO DO SISTEMA
+
+  Nome:        Sistema de Conexões Verbais (CONEXÕES)
+  Namespace:   window.GermanVerbConnectionsSystem (IIFE isolada)
+  Arquivo:     deutsch-meister.html (inline)
+  Objetivo:    Ensinar como prefixos alemães transformam verbos base em
+               novos significados, revelando a lógica de derivação verbal.
+               Mostrar que verbos alemães são REDES INTERCONECTADAS.
+
+  O sistema aparece DENTRO da sessão DNA DO VERBO, no final do DNA de
+  cada verbo, ANTES do próximo DNA de outro verbo. APENAS se houver
+  conexões reais para aquele verbo.
+
+  Para cada verbo base que possui conexões, o sistema exibe:
+    - Rótulo da raiz verbal
+    - Explicação introdutória listando todas as conexões
+    - Árvore de conexões (cards expansíveis)
+    - Cada conexão mostra: verbo derivado, prefixo, tipo, significado
+    - Ao expandir: explicação estrutural, exemplos, observações, tags
+
+================================================================================
+21.2 OBJETIVO PEDAGÓGICO
+
+  O sistema não se limita a listar verbos derivados. O objetivo é fazer
+  o usuário:
+    - Entender como prefixos alteram profundamente o significado
+    - Reconhecer padrões de derivação (separável vs. inseparável)
+    - Perceber a lógica semântica por trás de cada prefixo
+    - Ver que "gehen" não é uma palavra isolada, mas o CENTRO de uma
+      constelação de significados
+    - Criar conexões mentais entre verbos que compartilham raiz
+    - Prever significados de verbos novos com base no prefixo
+
+  Meta final: o usuário deve sentir que "verbos alemães são redes
+  interconectadas de significados" e que "prefixos alteram
+  completamente a lógica e o comportamento das palavras".
+
+================================================================================
+21.3 ARQUITETURA TÉCNICA
+
+  Namespace:  const GermanVerbConnectionsSystem = (() => { ... })();
+  Exposição:  window.GermanVerbConnectionsSystem = API;
+
+  Estrutura interna:
+    - CONN_TYPE: constantes de tipo (separable, inseparable, etc.)
+    - PREFIX_EXPLANATIONS: explicações base de cada prefixo
+    - connections: banco de dados de conexões (objeto chaveado por
+      verbo base)
+    - render(verb, isEn): função de renderização principal
+    - toggleExpand(verbKey, connIdx): expandir/recolher card de conexão
+
+  Localização: Após VERB_DNA, antes de renderConjugationTrainer.
+
+  Integração:
+    Dentro de renderConjugationTrainer(), após VERB_DNA.renderDNA():
+      html += GermanVerbConnectionsSystem.render(verb, isEn);
+
+  Isolamento:
+    - IIFE autoexecutável
+    - Nenhuma variável global além do namespace
+    - Funções auxiliares encapsuladas
+    - Não modifica sistemas existentes
+
+================================================================================
+21.4 BANCO DE DADOS: connections
+
+  Localização: Dentro da IIFE GermanVerbConnectionsSystem
+  Tipo:        var connections = {};
+
+  Estrutura de cada entrada:
+    connections[baseVerb] = [
+      {
+        derivedVerb: string,       // Verbo derivado (ex: 'ausgehen')
+        prefix:      string,       // Prefixo (ex: 'aus')
+        meaning:     {pt, en},     // Significado
+        type:        string,       // Tipo: separable|inseparable|semantic_shift|...
+        explanation: {pt, en},     // Explicação estrutural completa
+        examples:    [{de, pt}],   // 3 exemplos reais
+        obs:         {pt, en},     // Observações importantes
+        tags:        string[]      // Tags de contexto
+      },
+      ...
+    ]
+
+  Verbos cobertos nesta fase (8 verbos base, 17 conexões):
+    gehen      → ausgehen, umgehen, vergehen, nachgehen
+    kommen     → mitkommen, bekommen, ankommen
+    stehen     → aufstehen, verstehen
+    sprechen   → versprechen, besprechen
+    geben      → aufgeben, angeben
+    sehen      → aussehen, fernsehen
+    nehmen     → mitnehmen, teilnehmen
+    fahren     → erfahren
+    schlafen   → einschlafen
+
+================================================================================
+21.5 RENDERIZAÇÃO
+
+  Função: renderConnections(verb, isEn)
+
+  Fluxo:
+    1. Verifica se connections[verb.infinitive] existe
+    2. Se não houver conexões, retorna '' (string vazia)
+    3. Renderiza header com ícone e título
+    4. Renderiza rótulo da raiz verbal
+    5. Renderiza explicação introdutória com lista de conexões
+    6. Renderiza árvore de conexões com cards expansíveis
+    7. Cada card:
+       a. Header: verbo derivado, prefixo, tipo, significado
+       b. Seção expansível (inicialmente fechada — lazy):
+          - Explicação estrutural
+          - 3 exemplos reais com tradução
+          - Observações importantes
+          - Tags de contexto
+
+  Expansão:
+    - Inicialmente todos os cards estão fechados
+    - Ao clicar em um card, toggleExpand() abre/fecha
+    - Classe CSS .open controla display:block/display:none
+    - Animação connExpandIn de 0.3s ease
+
+================================================================================
+21.6 CSS E ESTILOS
+
+  Classes CSS principais:
+    .verb-connections         Container principal
+    .verb-connections-header  Cabeçalho com gradiente accent
+    .verb-connections-body    Corpo com gap de 10px
+    .conn-intro               Explicação introdutória
+    .conn-root-label          Rótulo da raiz verbal (borda dashed)
+    .conn-tree                Árvore de conexões com linha guia ::before
+    .conn-item                Card de conexão expansível
+    .conn-item-header         Header do card (verbo, prefixo, tipo, significado)
+    .conn-item-verb           Nome do verbo derivado (mono, bold, accent2)
+    .conn-item-prefix         Badge do prefixo (primary)
+    .conn-item-type           Badge do tipo (separable=verde, inseparable=amarelo)
+    .conn-item-meaning        Significado resumido
+    .conn-expand              Seção expansível (display:none por padrão)
+    .conn-expand.open         Seção visível (display:block)
+    .conn-explanation         Explicação estrutural
+    .conn-example-item        Exemplo individual
+    .conn-obs                 Observações com borda warn
+    .conn-tag-row / .conn-tag Linha de tags e tags individuais
+
+  Animações:
+    - connIn: entrada do container (0.45s ease, slide up)
+    - connExpandIn: expansão do card (0.3s ease)
+    - Hover: translateX(2px) + shadow + border color
+
+  Responsividade:
+    @media(max-width:768px): padding reduzido, tree padding-left reduzido
+
+================================================================================
+21.7 TIPOS DE CONEXÃO
+
+  SEPARABLE (separável):
+    - O prefixo se separa e vai ao final da oração principal
+    - Ex: ausgehen → Ich gehe heute Abend aus.
+    - Badge verde (.conn-item-type.separable)
+
+  INSEPARABLE (inseparável):
+    - O prefixo NUNCA se separa do verbo
+    - Ex: verstehen → Ich verstehe dich.
+    - Badge amarelo (.conn-item-type.inseparable)
+    - Prefixos inseparáveis: be-, ver-, er-, zer-, ent-, emp-, ge-, miss-
+
+  SEMANTIC_SHIFT (mudança semântica):
+    - Conexão por evolução de significado, não por prefixo
+    - Badge vermelho
+
+  IDIOMATIC (idiomático):
+    - Conexão por uso idiomático ou expressão fixa
+    - Badge vermelho
+
+  CONTEXTUAL (contextual):
+    - Conexão por contexto de uso específico
+    - Badge vermelho
+
+================================================================================
+21.8 PREFIXOS DOCUMENTADOS
+
+  Prefixos com explicações base no PREFIX_EXPLANATIONS:
+    aus-  : movimento para fora, saída, extinção, conclusão
+    um-   : envolvimento, contorno, rodeio (inseparável)
+    ver-  : intensificação, transformação, processo concluído
+    nach- : atrás de, depois de, em direção a
+    mit-  : junto com, em companhia de
+    an-   : direção, início de ação, contato
+    auf-  : para cima, abertura, sobre
+    ab-   : afastamento, separação, remoção
+    vor-  : diante de, antes de, à frente
+    unter-: abaixo, sob, entre
+    zu-   : fechamento, direção a um destino
+    ein-  : para dentro, entrada, início
+    be-   : transitivizador, afetar completamente (INSEPARÁVEL)
+    weg-  : embora, para longe
+
+================================================================================
+21.9 PREVENÇÃO DE CONFLITOS
+
+  [x] Namespace isolado: GermanVerbConnectionsSystem (IIFE)
+  [x] Sem variáveis globais genéricas
+  [x] Sem redeclarações (verificação: window.GermanVerbConnectionsSystem || {})
+  [x] Sem listeners duplicados (toggle via onclick inline)
+  [x] Sem modificar sistemas existentes (VERB_DB, VERB_DNA, WFS, etc.)
+  [x] Sem modificar DNA do verbo
+  [x] Integração via adição de uma linha em renderConjugationTrainer
+  [x] Renderização condicional: só renderiza se houver conexões
+  [x] Expansão lazy: cards começam fechados
+
+================================================================================
+21.10 PRÓXIMAS ETAPAS (PROMPTS 2-5)
+
+  Prompt 2: Expandir banco de dados para TODOS os verbos dos 20 capítulos
+  Prompt 3: Refinar renderização visual (premium, animações avançadas)
+  Prompt 4: Criar explicações completas e exclusivas (3 exemplos por conexão)
+  Prompt 5: Revisão final (estabilidade, performance, encoding, conflitos)
+
+================================================================================
+21.13 STATUS PROMPT 5 — REVISÃO FINAL (CONCLUÍDA)
+
+  Validações realizadas:
+    - [x] HTML: 1 script tag, 1 closing tag — estrutura correta
+    - [x] CSS: classes prefixadas com .conn- / .verb-connections — sem conflitos
+    - [x] JS: IIFE isolada GermanVerbConnectionsSystem — sem redeclarações
+    - [x] Namespace único, sem variáveis globais genéricas
+    - [x] Listeners inline (onclick) — sem listeners duplicados
+    - [x] Renderização condicional — só renderiza se houver conexões
+    - [x] Expansão lazy — cards começam fechados, expandem via toggleExpandGroup
+    - [x] API exporta: render, toggleExpand, toggleExpandGroup, connections, etc.
+    - [x] Integração: uma linha em renderConjugationTrainer
+    - [x] VERB_DNA, VERB_DB, VERB_EDUCATION — intactos
+    - [x] WFS, Sentence Engineering, GPS — intactos
+    - [x] UTF-8 encoding — verificado (ä, ö, ü, ß, todos preservados)
+    - [x] Sem estruturas circulares perigosas
+    - [x] Sem loops infinitos (forEach em array finito)
+    - [x] Sem memory leaks (render retorna string HTML, sem referências DOM)
+    - [x] Performance: renderização única por verbo, sem recomputação
+    - [x] Color-mix CSS: compatível com Chrome 111+, Firefox 113+, Safari 16.2+
+    - [x] Responsividade: media queries para <=768px
+    - [x] Agrupamento visual: Separables vs Inseparables
+    - [x] Contador de conexões no header
+    - [x] ToggleExpandGroup com animação de chevron
+    - [x] Documentação finalizada
+
+  RESULTADO FINAL:
+    - 25 verbos base cobertos
+    - 72+ conexões com explicações exclusivas
+    - 216+ exemplos reais (3 por conexão)
+    - Renderização premium com agrupamento por tipo
+    - Expansão lazy sem renderização excessiva
+    - Namespace isolado sem conflitos
+    - Totalmente integrado ao ciclo de renderização existente
+    - Sistema completo, estável, pedagógico e escalável
+
+================================================================================
+OBJETIVO FINAL ALCANÇADO
+================================================================================
+
+  O usuário agora pode ver, para cada verbo com conexões:
+    1. DNA do verbo (perfil linguístico completo)
+    2. CONEXÕES — a rede de verbos derivados por prefixos
+    3. Cada conexão com: explicação estrutural, 3 exemplos,
+       observações, tags de contexto, tipo de prefixo
+
+  O sistema ensina que:
+    - "gehen" não é uma palavra isolada, mas o CENTRO de uma
+      constelação de significados
+    - "ausgehen", "umgehen", "vergehen", "nachgehen" não são
+      palavras aleatórias — são transformações previsíveis
+    - PREFIXOS ALTERAM COMPLETAMENTE A LÓGICA E O COMPORTAMENTO
+      DAS PALAVRAS
+    - VERBOS ALEMÃES SÃO REDES INTERCONECTADAS DE SIGNIFICADOS
+
+===============================================================================
+
+
+  Verbos cobertos (25 verbos base, 72+ conexões):
+    gehen      → ausgehen, umgehen, vergehen, nachgehen, mitgehen, weggehen, aufgehen (7)
+    kommen     → mitkommen, bekommen, ankommen, vorkommen, auskommen (5)
+    stehen     → aufstehen, verstehen, bestehen, entstehen (4)
+    sprechen   → versprechen, besprechen, aussprechen, widersprechen, entsprechen (5)
+    geben      → aufgeben, angeben, zugeben, ausgeben (4)
+    sehen      → aussehen, fernsehen, ansehen (3)
+    nehmen     → mitnehmen, teilnehmen, annehmen, abnehmen, zunehmen (5)
+    fahren     → erfahren, mitfahren, abfahren (3)
+    schlafen   → einschlafen, ausschlafen, verschlafen (3)
+    machen     → aufmachen, zumachen, mitmachen, anmachen, ausmachen, abmachen (6)
+    schreiben  → beschreiben, verschreiben, abschreiben, aufschreiben, unterschreiben (5)
+    finden     → erfinden, befinden, stattfinden, empfinden (4)
+    denken     → nachdenken, bedenken, ausdenken, überdenken (4)
+    lernen     → erlernen, verlernen, kennenlernen (3)
+    arbeiten   → bearbeiten, verarbeiten, mitarbeiten (3)
+    helfen     → mithelfen, verhelfen, aushelfen (3)
+    reisen     → verreisen, abreisen, einreisen, ausreisen (4)
+    wohnen     → bewohnen (1)
+    kaufen     → verkaufen (1)
+    lesen      → vorlesen, durchlesen (2)
+    essen      → aufessen (1)
+    spielen    → vorspielen, mitspielen, abspielen (3)
+    trinken    → austrinken, ertrinken, betrinken (3)
+    singen     → vorsingen, mitsingen (2)
+    kochen     → aufkochen (1)
+
+  Cada conexão possui:
+    [x] Identidade própria
+    [x] Explicação estrutural (pt + en)
+    [x] Significado contextual
+    [x] 3 exemplos reais com tradução
+    [x] Observações importantes
+    [x] Tags de contexto
+    [x] Tipo de conexão (separável/inseparável)
+
+  Prefixos documentados: aus-, um-, ver-, nach-, mit-, an-, auf-, ab-,
+    vor-, unter-, zu-, ein-, be-, er-, ent-, emp-, wider-, statt-,
+    durch-, weg-, teil-, fern-, kennen-
+
+  CHECKLIST:
+    - [x] Nenhuma duplicação
+    - [x] Nenhuma quebra do DNA do verbo
+    - [x] Nenhuma estrutura circular perigosa
+    - [x] Conexões para TODOS os verbos com derivações reais
+
+==

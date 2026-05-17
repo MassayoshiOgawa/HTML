@@ -463,6 +463,83 @@ i{font-style:normal}
 .verb-dna-example-item .ex-pt{color:var(--text3);font-size:.7rem}
 @media(max-width:768px){.verb-dna-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.verb-dna-grid{grid-template-columns:1fr}}
+/* ===== VERB CONNECTIONS SYSTEM (CONEXÕES) — Premium Visual Rendering ===== */
+.verb-connections{margin-top:14px;background:linear-gradient(170deg,var(--bg) 0%,color-mix(in srgb,var(--accent2) 3%,var(--bg2)) 100%);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;animation:connIn .5s ease;position:relative}
+.verb-connections::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--primary));opacity:.8}
+@keyframes connIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.verb-connections-header{display:flex;align-items:center;gap:10px;padding:16px 18px 14px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,color-mix(in srgb,var(--accent2) 6%,transparent) 0%,transparent 100%)}
+.verb-connections-header .conn-icon{font-size:1.4rem;flex-shrink:0;filter:grayscale(0);animation:connPulse 2s ease-in-out infinite}
+@keyframes connPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.verb-connections-header .conn-title{font-size:.95rem;font-weight:700;color:var(--accent2);letter-spacing:-0.2px}
+.verb-connections-header .conn-sub{font-size:.72rem;color:var(--text3)}
+.verb-connections-header .conn-count{padding:3px 10px;border-radius:16px;font-size:.68rem;font-weight:700;background:var(--accent2);color:#fff;margin-left:auto}
+.verb-connections-body{padding:14px 18px 18px;display:flex;flex-direction:column;gap:12px}
+.conn-intro{font-size:.8rem;color:var(--text2);line-height:1.6;padding:10px 14px;background:color-mix(in srgb,var(--accent2) 4%,var(--bg));border-radius:var(--radius-sm);border-left:3px solid var(--accent);margin-bottom:2px}
+.conn-intro strong{color:var(--accent2)}
+.conn-root-label{padding:8px 14px;background:linear-gradient(135deg,var(--bg2),var(--bg));border:2px dashed var(--accent2);border-radius:var(--radius-sm);font-size:.84rem;font-weight:700;color:var(--text);display:inline-flex;align-items:center;gap:8px;margin-bottom:2px;font-family:var(--mono);transition:all .2s}
+.conn-root-label:hover{border-color:var(--accent);box-shadow:0 2px 12px color-mix(in srgb,var(--accent2) 15%,transparent)}
+.conn-root-label .root-icon{font-size:.95rem}
+.conn-root-meaning{font-weight:400;color:var(--text3);font-family:var(--sans);font-size:.72rem;margin-left:4px}
+/* Section grouping headers */
+.conn-section-hd{padding:8px 12px;margin:6px 0 2px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.conn-section-hd .sec-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.conn-section-hd .sec-dot.sep{background:var(--success)}
+.conn-section-hd .sec-dot.insep{background:#b8860b}
+/* Tree with premium guides */
+.conn-tree{display:flex;flex-direction:column;gap:6px;position:relative;padding-left:22px}
+.conn-tree::before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--accent2) 0%,var(--border) 50%,var(--accent2) 100%);border-radius:1px}
+/* Connection card */
+.conn-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;transition:all .25s;position:relative;cursor:pointer;overflow:hidden}
+.conn-item::before{content:'';position:absolute;left:-15px;top:16px;width:8px;height:2px;background:var(--border);border-radius:1px;transition:background .25s}
+.conn-item:hover{border-color:var(--accent);box-shadow:0 3px 16px color-mix(in srgb,var(--accent2) 10%,transparent);transform:translateX(3px)}
+.conn-item:hover::before{background:var(--accent2)}
+.conn-item.sep-card{border-left:3px solid var(--success)}
+.conn-item.ins-card{border-left:3px solid #b8860b}
+.conn-item-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.conn-item-verb{font-family:var(--mono);font-weight:700;color:var(--accent2);font-size:.9rem;letter-spacing:-0.2px}
+.conn-item-arrow{color:var(--text3);font-size:.6rem;font-weight:300;margin:0 1px;opacity:.7}
+.conn-item-prefix{padding:2px 9px;border-radius:12px;font-size:.66rem;font-weight:700;background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);font-family:var(--mono);letter-spacing:.3px}
+.conn-item-meaning{font-size:.76rem;color:var(--text3);margin-left:auto;text-align:right;font-style:italic}
+.conn-item-type-badge{padding:2px 8px;border-radius:10px;font-size:.6rem;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.conn-item-type-badge.sep{background:color-mix(in srgb,var(--success) 15%,transparent);color:var(--success)}
+.conn-item-type-badge.ins{background:color-mix(in srgb,#b8860b 15%,transparent);color:#b8860b}
+.conn-item-type-badge.other{background:color-mix(in srgb,var(--error) 12%,transparent);color:var(--error)}
+/* Expand chevron */
+.conn-item-chevron{font-size:.65rem;color:var(--text3);transition:transform .25s;flex-shrink:0;margin-left:4px}
+.conn-item.open-item .conn-item-chevron{transform:rotate(180deg)}
+/* Expandable content */
+.conn-expand{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);animation:connExpandIn .35s ease;overflow:hidden}
+.conn-expand.open{display:block}
+@keyframes connExpandIn{from{opacity:0;max-height:0;transform:translateY(-8px)}to{opacity:1;max-height:1200px;transform:translateY(0)}}
+.conn-explanation{font-size:.77rem;color:var(--text2);line-height:1.6;margin-bottom:10px;padding:10px 14px;background:color-mix(in srgb,var(--accent2) 4%,var(--bg));border-radius:var(--radius-sm)}
+.conn-explanation strong{color:var(--accent2)}
+/* Examples with numbering */
+.conn-examples{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.conn-example-item{padding:7px 12px;background:var(--bg);border-radius:6px;font-size:.75rem;color:var(--text2);border-left:3px solid var(--accent);line-height:1.45;transition:all .15s;position:relative}
+.conn-example-item:hover{background:color-mix(in srgb,var(--accent) 5%,var(--bg));border-left-color:var(--accent2)}
+.conn-example-item .ex-de{font-weight:600;color:var(--text)}
+.conn-example-item .ex-pt{color:var(--text3);font-size:.69rem;margin-top:1px}
+.conn-example-item .ex-num{position:absolute;left:-22px;top:8px;width:16px;height:16px;border-radius:50%;background:var(--accent2);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+/* Observations box */
+.conn-obs{font-size:.73rem;color:var(--text2);line-height:1.55;margin-top:6px;padding:8px 12px;background:color-mix(in srgb,var(--warn) 6%,var(--bg));border-radius:6px;border-left:2px solid var(--warn)}
+.conn-obs strong{color:var(--warn)}
+/* Tags */
+.conn-tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.conn-tag{padding:3px 10px;border-radius:12px;font-size:.63rem;font-weight:600;background:color-mix(in srgb,var(--accent2) 10%,var(--bg));color:var(--accent2);letter-spacing:.2px;transition:all .15s}
+.conn-tag:hover{background:var(--accent2);color:#fff;cursor:default}
+/* Prefix info box */
+.conn-prefix-info{margin:8px 0 12px;padding:10px 14px;background:color-mix(in srgb,var(--primary) 4%,var(--bg));border-radius:var(--radius-sm);border:1px dashed color-mix(in srgb,var(--primary) 25%,transparent);font-size:.73rem;color:var(--text2);line-height:1.55}
+.conn-prefix-info strong{color:var(--primary)}
+/* Responsive */
+@media(max-width:768px){
+  .verb-connections-body{padding:10px 12px}
+  .conn-tree{padding-left:16px}
+  .conn-item{padding:9px 10px}
+  .conn-item-verb{font-size:.82rem}
+  .conn-item-meaning{font-size:.7rem}
+  .conn-item-header{gap:5px}
+  .conn-example-item .ex-num{left:-17px;font-size:.55rem;width:14px;height:14px}
+}
 /* ===== WORD FAMILIES SYSTEM (WFS) — Premium Visual Rendering ===== */
 .wfs-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;margin-bottom:24px;transition:all var(--transition);position:relative}
 .wfs-section:hover{box-shadow:var(--shadow);border-color:var(--primary)}
@@ -3704,6 +3781,400 @@ var renderDNA=function(verb,isEn){
 return {dna:dna,renderDNA:renderDNA};
 })();
 
+// ========== VERB CONNECTIONS SYSTEM (CONEXÕES) ==========
+const GermanVerbConnectionsSystem=(()=>{
+  'use strict';
+
+  // Connection types
+  const CONN_TYPE={
+    SEPARABLE:'separable',
+    INSEPARABLE:'inseparable',
+    SEMANTIC_SHIFT:'semantic_shift',
+    IDIOMATIC:'idiomatic',
+    CONTEXTUAL:'contextual'
+  };
+
+  const TYPE_LABEL_PT={
+    separable:'Separável',
+    inseparable:'Inseparável',
+    semantic_shift:'Mudança semântica',
+    idiomatic:'Idiomático',
+    contextual:'Contextual'
+  };
+
+  const TYPE_LABEL_EN={
+    separable:'Separable',
+    inseparable:'Inseparable',
+    semantic_shift:'Semantic shift',
+    idiomatic:'Idiomatic',
+    contextual:'Contextual'
+  };
+
+  // Prefix explanations (for future deep expansion)
+  const PREFIX_EXPLANATIONS={
+    'aus':{pt:'<strong>aus-</strong> indica movimento para fora, saída, extinção ou conclusão. Transforma a ação em "de dentro para fora" ou "até o fim".',en:'<strong>aus-</strong> indicates movement outward, exit, extinction, or completion. Transforms the action into "from inside to outside" or "until the end".'},
+    'um':{pt:'<strong>um-</strong> (inseparável) indica envolvimento, contorno ou rodeio. Diferente do "um-" separável que significa "em volta/troca".',en:'<strong>um-</strong> (inseparable) indicates surrounding, bypassing, or circumventing. Different from separable "um-" which means "around/exchange".'},
+    'ver':{pt:'<strong>ver-</strong> é um prefixo inseparável que intensifica, transforma ou indica processo concluído. Frequentemente adiciona nuance de "completamente" ou "de forma errada".',en:'<strong>ver-</strong> is an inseparable prefix that intensifies, transforms, or indicates a completed process. Often adds nuance of "completely" or "in a wrong way".'},
+    'nach':{pt:'<strong>nach-</strong> indica "atrás de", "depois de", "em direção a". Sugere seguir algo, verificar posteriormente ou repetir.',en:'<strong>nach-</strong> indicates "behind", "after", "towards". Suggests following something, checking later, or repeating.'},
+    'mit':{pt:'<strong>mit-</strong> significa "junto com", "em companhia de". Indica participação conjunta ou acompanhamento.',en:'<strong>mit-</strong> means "along with", "in company of". Indicates joint participation or accompaniment.'},
+    'an':{pt:'<strong>an-</strong> indica direção, início de ação ou contato. Sugere "em direção a" ou "ligado a".',en:'<strong>an-</strong> indicates direction, beginning of action, or contact. Suggests "towards" or "attached to".'},
+    'auf':{pt:'<strong>auf-</strong> significa "para cima", "abertura" ou "sobre". Indica elevação, início súbito ou colocação sobre algo.',en:'<strong>auf-</strong> means "upward", "opening", or "on top of". Indicates elevation, sudden start, or placing upon something.'},
+    'ab':{pt:'<strong>ab-</strong> indica afastamento, separação, remoção ou diminuição. Sugere "para longe de" ou "para baixo".',en:'<strong>ab-</strong> indicates removal, separation, distance, or decrease. Suggests "away from" or "downward".'},
+    'vor':{pt:'<strong>vor-</strong> significa "diante de", "antes de", "à frente". Indica anterioridade espacial ou temporal.',en:'<strong>vor-</strong> means "in front of", "before", "ahead". Indicates spatial or temporal anteriority.'},
+    'unter':{pt:'<strong>unter-</strong> indica "abaixo", "sob", "entre". Sugere posição inferior ou ação de subordinação.',en:'<strong>unter-</strong> indicates "below", "under", "among". Suggests inferior position or subordination action.'},
+    'zu':{pt:'<strong>zu-</strong> indica fechamento, direção a um destino ou adição. Sugere "em direção a" ou "fechar-se".',en:'<strong>zu-</strong> indicates closing, direction towards a destination, or addition. Suggests "towards" or "closing up".'},
+    'ein':{pt:'<strong>ein-</strong> significa "para dentro", "entrada", "início". Indica movimento para o interior ou começo de estado.',en:'<strong>ein-</strong> means "into", "entry", "beginning". Indicates movement inward or start of a state.'},
+    'be':{pt:'<strong>be-</strong> é um prefixo INSEPARÁVEL que torna o verbo transitivo, direcionando a ação a um objeto. Frequentemente adiciona nuance de "afetar completamente".',en:'<strong>be-</strong> is an INSEPARABLE prefix that makes the verb transitive, directing the action to an object. Often adds nuance of "completely affecting".'},
+    'weg':{pt:'<strong>weg-</strong> significa "embora", "para longe". Indica remoção ou afastamento.',en:'<strong>weg-</strong> means "away", "off". Indicates removal or distancing.'}
+  };
+
+  // ===== CONNECTIONS DATABASE =====
+  // Structure: { baseVerb: [ { derivedVerb, prefix, meaning:{pt,en}, type, explanation:{pt,en}, examples:[{de,pt}], obs:{pt,en}, tags:[] } ] }
+  var connections={};
+
+  // gehen family
+  connections.gehen=[
+    {derivedVerb:'ausgehen',prefix:'aus',meaning:{pt:'sair (lazer)',en:'go out (leisure)'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'O prefixo <strong>aus-</strong> ("para fora") transforma "ir" em "sair". Literalmente: "ir para fora". <strong>ausgehen</strong> refere-se especificamente a sair para lazer — bares, restaurantes, festas. Não se usa para "sair de casa" genericamente.',en:'The prefix <strong>aus-</strong> ("out") transforms "go" into "go out". Literally: "go outward". <strong>ausgehen</strong> refers specifically to going out for leisure — bars, restaurants, parties. It is not used for "leaving the house" generically.'},examples:[{de:'Am Freitag gehen wir aus.',pt:'Na sexta-feira saímos (para lazer).'},{de:'Gehst du heute Abend aus?',pt:'Você sai hoje à noite?'},{de:'Das Licht ist ausgegangen.',pt:'A luz se apagou.'}],obs:{pt:'"ausgehen" também significa "apagar-se" (luz, fogo) e "esgotar-se" (estoque). O Partizip II é "ausgegangen" (sein).',en:'"ausgehen" also means "go out" (light, fire) and "run out" (stock). Partizip II: "ausgegangen" (sein).'},tags:['lazer','social','cotidiano']},
+    {derivedVerb:'umgehen',prefix:'um',meaning:{pt:'contornar/evitar/lidar',en:'bypass/avoid/deal with'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'O prefixo INSEPARÁVEL <strong>um-</strong> cria o sentido de "dar a volta". <strong>umgehen</strong> pode significar: 1) contornar um obstáculo (físico ou abstrato), 2) evitar um assunto, 3) lidar com algo (mit etwas umgehen). ATENÇÃO: "umgehen" inseparável NÃO separa o prefixo.',en:'The INSEPARABLE prefix <strong>um-</strong> creates the sense of "going around". <strong>umgehen</strong> can mean: 1) bypass an obstacle (physical or abstract), 2) avoid a topic, 3) deal with something (mit etwas umgehen). NOTE: Inseparable "umgehen" does NOT split the prefix.'},examples:[{de:'Wir müssen das Problem umgehen.',pt:'Precisamos contornar o problema.'},{de:'Er kann gut mit Stress umgehen.',pt:'Ele sabe lidar bem com estresse.'},{de:'Sie umging die Frage geschickt.',pt:'Ela contornou a pergunta habilmente.'}],obs:{pt:'O "umgehen" separável (ex: "Ich gehe um die Ecke um") significa "dar a volta" fisicamente. São dois verbos diferentes!',en:'Separable "umgehen" (e.g., "Ich gehe um die Ecke um") means "walk around" physically. They are two different verbs!'},tags:['abstrato','estratégia','social']},
+    {derivedVerb:'vergehen',prefix:'ver',meaning:{pt:'passar (tempo)/desaparecer',en:'pass (time)/fade away'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'O prefixo INSEPARÁVEL <strong>ver-</strong> adiciona a ideia de "completamente" ou "até o fim". <strong>vergehen</strong> é o "passar" do tempo — algo que se esvai completamente. Também significa "desaparecer" (dor, raiva) e "extinguir-se".',en:'The INSEPARABLE prefix <strong>ver-</strong> adds the idea of "completely" or "until the end". <strong>vergehen</strong> is the "passing" of time — something that completely fades away. Also means "disappear" (pain, anger) and "to perish".'},examples:[{de:'Die Zeit vergeht so schnell.',pt:'O tempo passa tão rápido.'},{de:'Der Schmerz wird vergehen.',pt:'A dor vai passar.'},{de:'Mir ist der Appetit vergangen.',pt:'Me perdeu o apetite.'}],obs:{pt:'"vergehen" usa "sein" no Perfekt: "Die Zeit ist vergangen". "sich vergehen" (reflexivo) significa "cometer uma ofensa/delito".',en:'"vergehen" uses "sein" in Perfekt: "Die Zeit ist vergangen". "sich vergehen" (reflexive) means "commit an offense".'},tags:['tempo','emoções','abstrato']},
+    {derivedVerb:'nachgehen',prefix:'nach',meaning:{pt:'seguir/investigar',en:'follow/investigate'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'O prefixo <strong>nach-</strong> ("atrás de/depois") cria "ir atrás de". <strong>nachgehen</strong> significa: 1) seguir alguém fisicamente, 2) investigar algo (seguir uma pista), 3) dedicar-se a uma atividade (einem Hobby nachgehen). A ideia central é "perseguir/ir atrás".',en:'The prefix <strong>nach-</strong> ("behind/after") creates "go after". <strong>nachgehen</strong> means: 1) follow someone physically, 2) investigate something (follow a lead), 3) pursue an activity (einem Hobby nachgehen). The core idea is "pursue/go after".'},examples:[{de:'Gehst du dem Geräusch nach?',pt:'Você vai atrás do barulho?'},{de:'Die Polizei geht einem Hinweis nach.',pt:'A polícia investiga uma pista.'},{de:'Ich gehe meinem Hobby nach.',pt:'Dedico-me ao meu hobby.'}],obs:{pt:'"nachgehen" rege DATIVO: "einer Sache nachgehen". O Partizip II é "nachgegangen" (sein).',en:'"nachgehen" governs DATIVE: "einer Sache nachgehen". Partizip II: "nachgegangen" (sein).'},tags:['investigação','persistência','hobbies']}
+  ];
+
+  // kommen family
+  connections.kommen=[
+    {derivedVerb:'mitkommen',prefix:'mit',meaning:{pt:'vir junto/acompanhar',en:'come along'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>mit-</strong> ("junto com") + "kommen" = "vir junto". Um dos verbos separáveis mais usados no dia a dia. A pergunta "Kommst du mit?" é extremamente frequente em alemão.',en:'<strong>mit-</strong> ("along with") + "kommen" = "come along". One of the most used separable verbs in daily life. The question "Kommst du mit?" is extremely frequent in German.'},examples:[{de:'Kommst du mit ins Kino?',pt:'Você vem junto ao cinema?'},{de:'Ich komme gerne mit.',pt:'Eu vou junto com prazer.'},{de:'Er ist mitgekommen.',pt:'Ele veio junto.'}],obs:{pt:'Perfekt: "mitgekommen" (sein). "mitkommen" é sempre intransitivo.',en:'Perfekt: "mitgekommen" (sein). "mitkommen" is always intransitive.'},tags:['social','convites','cotidiano']},
+    {derivedVerb:'bekommen',prefix:'be',meaning:{pt:'receber',en:'receive/get'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>be-</strong> (prefixo INSEPARÁVEL) transforma "vir" em "receber". Literalmente: "vir a ter". O prefixo be- torna o verbo transitivo — "bekommen" SEMPRE exige um objeto direto (Akkusativ). É um dos verbos mais importantes para iniciantes.',en:'<strong>be-</strong> (INSEPARABLE prefix) transforms "come" into "receive". Literally: "come to have". The prefix be- makes the verb transitive — "bekommen" ALWAYS requires a direct object (Akkusativ). One of the most important verbs for beginners.'},examples:[{de:'Ich bekomme einen Brief.',pt:'Recebo uma carta.'},{de:'Hast du das Geld bekommen?',pt:'Você recebeu o dinheiro?'},{de:'Was bekommen Sie?',pt:'O que o senhor(a) vai querer?'}],obs:{pt:'NÃO confundir "bekommen" (receber) com "werden" (tornar-se)! "bekommen" NÃO significa "tornar-se".',en:'Do NOT confuse "bekommen" (receive) with "werden" (become)! "bekommen" does NOT mean "become".'},tags:['transações','pedidos','essencial']},
+    {derivedVerb:'ankommen',prefix:'an',meaning:{pt:'chegar',en:'arrive'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>an-</strong> ("em direção a") + "kommen" = "chegar". O prefixo indica a conclusão do movimento de vinda. "ankommen" é o verbo padrão para "chegar a um destino". Rege preposições como "in" (cidade/país), "an" (ponto específico).',en:'<strong>an-</strong> ("towards") + "kommen" = "arrive". The prefix indicates the completion of the coming movement. "ankommen" is the standard verb for "arrive at a destination". Governs prepositions like "in" (city/country), "an" (specific point).'},examples:[{de:'Wann kommst du an?',pt:'Quando você chega?'},{de:'Der Zug kommt um 8 Uhr an.',pt:'O trem chega às 8h.'},{de:'Wir sind gut angekommen.',pt:'Chegamos bem.'}],obs:{pt:'Perfekt: "angekommen" (sein). "Es kommt darauf an" = "depende" (expressão idiomática).',en:'Perfekt: "angekommen" (sein). "Es kommt darauf an" = "it depends" (idiomatic expression).'},tags:['viagem','transporte','cotidiano']}
+  ];
+
+  // stehen family
+  connections.stehen=[
+    {derivedVerb:'aufstehen',prefix:'auf',meaning:{pt:'levantar-se',en:'get up/stand up'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>auf-</strong> ("para cima") + "stehen" = "levantar-se". O prefixo indica o movimento vertical ascendente. É o verbo da rotina matinal por excelência.',en:'<strong>auf-</strong> ("upward") + "stehen" = "get up". The prefix indicates the vertical ascending movement. It is the morning routine verb par excellence.'},examples:[{de:'Ich stehe um 7 Uhr auf.',pt:'Eu me levanto às 7h.'},{de:'Steh auf! Es ist spät.',pt:'Levanta! Está tarde.'},{de:'Bist du schon aufgestanden?',pt:'Você já se levantou?'}],obs:{pt:'Perfekt: "aufgestanden" (sein). O ge- fica ENTRE prefixo e radical.',en:'Perfekt: "aufgestanden" (sein). The ge- goes BETWEEN prefix and stem.'},tags:['rotina','manhã','cotidiano']},
+    {derivedVerb:'verstehen',prefix:'ver',meaning:{pt:'entender/compreender',en:'understand'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ver-</strong> (prefixo INSEPARÁVEL) transforma "stehen" (estar de pé) em "entender". A evolução semântica: "ficar diante de algo até compreender" → "entender". É o verbo de compreensão mais importante do alemão.',en:'<strong>ver-</strong> (INSEPARABLE prefix) transforms "stehen" (stand) into "understand". The semantic evolution: "stand before something until grasping it" → "understand". The most important comprehension verb in German.'},examples:[{de:'Verstehst du mich?',pt:'Você me entende?'},{de:'Ich verstehe nicht.',pt:'Não entendo.'},{de:'Hast du die Frage verstanden?',pt:'Você entendeu a pergunta?'}],obs:{pt:'"verstehen" é um dos verbos mais importantes. "Das versteht sich von selbst" = "isso é óbvio".',en:'"verstehen" is one of the most important verbs. "Das versteht sich von selbst" = "that goes without saying".'},tags:['comunicação','essencial','aprendizado']}
+  ];
+
+  // sprechen family
+  connections.sprechen=[
+    {derivedVerb:'versprechen',prefix:'ver',meaning:{pt:'prometer',en:'promise'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ver-</strong> transforma "falar" em "prometer". A palavra que se fala "completamente" se torna um compromisso. Também pode significar "dizer errado" ("sich versprechen" = cometer um lapso de fala).',en:'<strong>ver-</strong> transforms "speak" into "promise". The word spoken "completely" becomes a commitment. Can also mean "misspeak" ("sich versprechen" = make a slip of the tongue).'},examples:[{de:'Ich verspreche es dir.',pt:'Eu te prometo.'},{de:'Er hat mir versprochen zu kommen.',pt:'Ele me prometeu vir.'},{de:'Versprichst du das?',pt:'Você promete isso?'}],obs:{pt:'"sich versprechen" (reflexivo) = errar ao falar/trocar palavras.',en:'"sich versprechen" (reflexive) = to misspeak/mix up words.'},tags:['compromisso','comunicação','social']},
+    {derivedVerb:'besprechen',prefix:'be',meaning:{pt:'discutir/debater',en:'discuss/debate'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>be-</strong> direciona o "falar" para um objeto específico. "besprechen" = falar SOBRE algo de forma estruturada. É o verbo de reuniões e debates.',en:'<strong>be-</strong> directs "speak" to a specific object. "besprechen" = talk ABOUT something in a structured way. The verb of meetings and debates.'},examples:[{de:'Wir müssen das Problem besprechen.',pt:'Precisamos discutir o problema.'},{de:'Hast du das mit dem Chef besprochen?',pt:'Você discutiu isso com o chefe?'},{de:'Das besprechen wir morgen.',pt:'Discutimos isso amanhã.'}],obs:{pt:'"besprechen" rege Akkusativ (o tópico discutido).',en:'"besprechen" governs Akkusativ (the discussed topic).'},tags:['reuniões','trabalho','debates']}
+  ];
+
+  // geben family
+  connections.geben=[
+    {derivedVerb:'aufgeben',prefix:'auf',meaning:{pt:'desistir/entregar',en:'give up/submit'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>auf-</strong> ("sobre/para cima") + "geben" = "entregar para cima" → "desistir" ou "entregar". Pode significar render-se, abandonar, ou submeter algo (um trabalho, uma encomenda).',en:'<strong>auf-</strong> ("on/upward") + "geben" = "give up" → "give up" or "submit". Can mean surrender, abandon, or submit something (an assignment, a package).'},examples:[{de:'Gib nicht auf!',pt:'Não desista!'},{de:'Er hat seine Arbeit aufgegeben.',pt:'Ele entregou seu trabalho.'},{de:'Ich gebe die Hoffnung nicht auf.',pt:'Não desisto da esperança.'}],obs:{pt:'"aufgeben" + Akkusativ. Partizip II: "aufgegeben".',en:'"aufgeben" + Akkusativ. Partizip II: "aufgegeben".'},tags:['persistência','trabalho','emoções']},
+    {derivedVerb:'angeben',prefix:'an',meaning:{pt:'indicar/exibir-se',en:'indicate/show off'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>an-</strong> + "geben" cria dois sentidos distintos: 1) indicar/declarar informações (nome, endereço, fonte), 2) "exibir-se/gabar-se" em contexto social. O contexto determina qual significado.',en:'<strong>an-</strong> + "geben" creates two distinct meanings: 1) indicate/declare information (name, address, source), 2) "show off/boast" in social context. Context determines which meaning.'},examples:[{de:'Bitte geben Sie Ihren Namen an.',pt:'Por favor, indique seu nome.'},{de:'Er gibt immer mit seinem Auto an.',pt:'Ele sempre se exibe com seu carro.'},{de:'Gib bitte die Quelle an.',pt:'Por favor, indique a fonte.'}],obs:{pt:'Sentido 1 é formal (formulários). Sentido 2 ("sich angeben") é coloquial e frequentemente negativo.',en:'Meaning 1 is formal (forms). Meaning 2 ("sich angeben") is colloquial and often negative.'},tags:['formal','social','informação']}
+  ];
+
+  // sehen family
+  connections.sehen=[
+    {derivedVerb:'aussehen',prefix:'aus',meaning:{pt:'parecer (aparência)',en:'look (appearance)'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>aus-</strong> ("de dentro para fora") + "sehen" = "ter a aparência de". Literalmente: "ver-se de dentro para fora". "aussehen" descreve como algo ou alguém parece visualmente.',en:'<strong>aus-</strong> ("from inside to outside") + "sehen" = "look like". Literally: "to be seen from inside out". "aussehen" describes how something or someone appears visually.'},examples:[{de:'Du siehst gut aus.',pt:'Você está bem (aparência).'},{de:'Wie sieht das aus?',pt:'Como isso parece?'},{de:'Es sieht nach Regen aus.',pt:'Parece que vai chover.'}],obs:{pt:'Sempre separável. "aussehen nach" + Dativ = parecer que algo vai acontecer.',en:'Always separable. "aussehen nach" + Dativ = look like something is going to happen.'},tags:['aparência','cotidiano','descrições']},
+    {derivedVerb:'fernsehen',prefix:'fern',meaning:{pt:'assistir TV',en:'watch TV'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>fern-</strong> ("distante/longe") + "sehen" = "ver à distância" → "assistir televisão". Um composto que se tornou verbo separável. "fern" não é um prefixo típico, mas uma palavra composta.',en:'<strong>fern-</strong> ("far/distant") + "sehen" = "see from afar" → "watch television". A compound that became a separable verb. "fern" is not a typical prefix but a compound word.'},examples:[{de:'Siehst du gern fern?',pt:'Você gosta de ver TV?'},{de:'Wir sehen abends fern.',pt:'Assistimos TV à noite.'},{de:'Ich habe gestern ferngesehen.',pt:'Assisti TV ontem.'}],obs:{pt:'Partizip II: "ferngesehen". O ge- fica NO MEIO do composto.',en:'Partizip II: "ferngesehen". The ge- goes IN THE MIDDLE of the compound.'},tags:['lazer','mídia','cotidiano']}
+  ];
+
+  // nehmen family
+  connections.nehmen=[
+    {derivedVerb:'mitnehmen',prefix:'mit',meaning:{pt:'levar junto',en:'take along'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>mit-</strong> ("junto") + "nehmen" = "levar consigo". Um dos verbos separáveis mais usados. "mitnehmen" implica carregar ou transportar algo/alguém junto.',en:'<strong>mit-</strong> ("along") + "nehmen" = "take along". One of the most used separable verbs. "mitnehmen" implies carrying or transporting something/someone along.'},examples:[{de:'Nimmst du einen Regenschirm mit?',pt:'Você leva um guarda-chuva?'},{de:'Kannst du mich mitnehmen?',pt:'Você pode me levar?'},{de:'Ich habe das Buch mitgenommen.',pt:'Eu levei o livro comigo.'}],obs:{pt:'Partizip II: "mitgenommen". Aplica-se a objetos e pessoas.',en:'Partizip II: "mitgenommen". Applies to objects and people.'},tags:['transporte','cotidiano','social']},
+    {derivedVerb:'teilnehmen',prefix:'teil',meaning:{pt:'participar',en:'participate'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>teil-</strong> ("parte") + "nehmen" = "tomar parte" → "participar". Literalmente: "tomar uma parte de algo". "teilnehmen" rege a preposição "an" + Dativ.',en:'<strong>teil-</strong> ("part") + "nehmen" = "take part" → "participate". Literally: "take a part of something". "teilnehmen" governs the preposition "an" + Dativ.'},examples:[{de:'Nimmst du an der Besprechung teil?',pt:'Você participa da reunião?'},{de:'Alle haben teilgenommen.',pt:'Todos participaram.'},{de:'Ich möchte am Kurs teilnehmen.',pt:'Gostaria de participar do curso.'}],obs:{pt:'"teilnehmen an" + Dativ. Partizip II: "teilgenommen".',en:'"teilnehmen an" + Dativ. Partizip II: "teilgenommen".'},tags:['eventos','trabalho','educação']}
+  ];
+
+  // fahren family
+  connections.fahren=[
+    {derivedVerb:'erfahren',prefix:'er',meaning:{pt:'descobrir/saber',en:'find out/learn'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>er-</strong> (prefixo INSEPARÁVEL) transforma "viajar/ir" em "descobrir". A evolução: "viajar até chegar ao conhecimento" → "descobrir". Indica obtenção de informação através de experiência.',en:'<strong>er-</strong> (INSEPARABLE prefix) transforms "travel/go" into "find out". The evolution: "travel until reaching knowledge" → "discover". Indicates gaining information through experience.'},examples:[{de:'Ich habe es gerade erfahren.',pt:'Acabei de descobrir.'},{de:'Er hat viel in seinem Leben erfahren.',pt:'Ele viveu/experimentou muito na vida.'},{de:'Woher hast du das erfahren?',pt:'Como você soube disso?'}],obs:{pt:'"erfahren" também é adjetivo: "erfahren" = experiente. Partizip II: "erfahren" (sem ge-).',en:'"erfahren" is also an adjective: "erfahren" = experienced. Partizip II: "erfahren" (no ge-).'},tags:['informação','experiência','descoberta']}
+  ];
+
+  // schlafen family
+  connections.schlafen=[
+    {derivedVerb:'einschlafen',prefix:'ein',meaning:{pt:'adormecer',en:'fall asleep'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>ein-</strong> ("para dentro") + "schlafen" = "cair no sono". O prefixo indica a transição da vigília para o sono — "entrar no estado de dormir".',en:'<strong>ein-</strong> ("into") + "schlafen" = "fall asleep". The prefix indicates the transition from wakefulness to sleep — "enter the sleeping state".'},examples:[{de:'Ich bin um 10 Uhr eingeschlafen.',pt:'Adormeci às 10h.'},{de:'Das Kind schläft langsam ein.',pt:'A criança está adormecendo.'},{de:'Bist du schon eingeschlafen?',pt:'Você já adormeceu?'}],obs:{pt:'Perfekt: "eingeschlafen" (sein). "einschlafen" descreve o processo de adormecer, não o estado de dormir.',en:'Perfekt: "eingeschlafen" (sein). "einschlafen" describes the process of falling asleep, not the state of sleeping.'},tags:['sono','rotina','cotidiano']}
+  ];
+
+  // machen family
+  connections.machen=[
+    {derivedVerb:'aufmachen',prefix:'auf',meaning:{pt:'abrir',en:'open'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>auf-</strong> ("para cima/abertura") + "machen" = "abrir". "aufmachen" é o verbo cotidiano para abrir portas, janelas, pacotes. Em contextos formais, "öffnen" é preferido.',en:'<strong>auf-</strong> ("upward/opening") + "machen" = "open". "aufmachen" is the everyday verb for opening doors, windows, packages. In formal contexts, "öffnen" is preferred.'},examples:[{de:'Mach bitte die Tür auf.',pt:'Abra a porta, por favor.'},{de:'Ich mache das Fenster auf.',pt:'Abro a janela.'},{de:'Hast du das Geschenk aufgemacht?',pt:'Você abriu o presente?'}],obs:{pt:'Partizip II: "aufgemacht". Mais coloquial que "öffnen".',en:'Partizip II: "aufgemacht". More colloquial than "öffnen".'},tags:['cotidiano','casa','ações']},
+    {derivedVerb:'zumachen',prefix:'zu',meaning:{pt:'fechar',en:'close'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>zu-</strong> ("fechamento") + "machen" = "fechar". O oposto direto de "aufmachen". Usado para portas, janelas, livros, olhos. "zu" indica o movimento de fechar.',en:'<strong>zu-</strong> ("closed") + "machen" = "close". The direct opposite of "aufmachen". Used for doors, windows, books, eyes. "zu" indicates the closing movement.'},examples:[{de:'Mach die Tür zu!',pt:'Fecha a porta!'},{de:'Er macht die Augen zu.',pt:'Ele fecha os olhos.'},{de:'Ich habe das Buch zugemacht.',pt:'Fechei o livro.'}],obs:{pt:'Partizip II: "zugemacht". Mais coloquial que "schließen".',en:'Partizip II: "zugemacht". More colloquial than "schließen".'},tags:['cotidiano','casa','ações']},
+    {derivedVerb:'mitmachen',prefix:'mit',meaning:{pt:'participar',en:'participate/take part'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>mit-</strong> ("junto") + "machen" = "fazer junto" → "participar". Usado para participar de atividades, eventos, cursos. Mais informal que "teilnehmen".',en:'<strong>mit-</strong> ("along") + "machen" = "do along" → "participate". Used for participating in activities, events, courses. More informal than "teilnehmen".'},examples:[{de:'Machst du bei dem Spiel mit?',pt:'Você participa do jogo?'},{de:'Alle machen mit.',pt:'Todos participam.'},{de:'Ich möchte bei dem Projekt mitmachen.',pt:'Gostaria de participar do projeto.'}],obs:{pt:'"mitmachen bei" + Dativ. Partizip II: "mitgemacht".',en:'"mitmachen bei" + Dativ. Partizip II: "mitgemacht".'},tags:['social','eventos','colaboração']},
+    {derivedVerb:'anmachen',prefix:'an',meaning:{pt:'acender/ligar/pautar',en:'turn on/hit on'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>an-</strong> ("ligar/contato") + "machen" = "ligar/acender". Usado para luzes, TV, rádio. ATENÇÃO: coloquialmente também significa "dar em cima de alguém" — cuidado com o contexto!',en:'<strong>an-</strong> ("on/contact") + "machen" = "turn on". Used for lights, TV, radio. WARNING: colloquially also means "hit on someone" — be careful with context!'},examples:[{de:'Mach bitte das Licht an.',pt:'Acende a luz, por favor.'},{de:'Ich mache den Fernseher an.',pt:'Ligo a televisão.'},{de:'Er hat sie im Club angemacht.',pt:'Ele deu em cima dela na boate.'}],obs:{pt:'Para aparelhos eletrônicos, "einschalten" é mais formal. Partizip II: "angemacht".',en:'For electronic devices, "einschalten" is more formal. Partizip II: "angemacht".'},tags:['tecnologia','cotidiano','coloquial']},
+    {derivedVerb:'ausmachen',prefix:'aus',meaning:{pt:'desligar/apagar/combinar/constituir',en:'turn off/agree/constitute'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>aus-</strong> ("desligar") + "machen" = múltiplos sentidos: 1) desligar/apagar, 2) combinar/acordar ("Wir machen einen Termin aus"), 3) constituir/representar ("Das macht den Unterschied aus"). É um verbo camaleão.',en:'<strong>aus-</strong> ("off") + "machen" = multiple meanings: 1) turn off, 2) agree/arrange ("Wir machen einen Termin aus"), 3) constitute/make up ("Das macht den Unterschied aus"). A chameleon verb.'},examples:[{de:'Mach das Licht aus!',pt:'Apaga a luz!'},{de:'Wir haben einen Termin ausgemacht.',pt:'Combinamos um horário.'},{de:'Das macht den Unterschied aus.',pt:'Isso faz a diferença.'}],obs:{pt:'Três significados COMPLETAMENTE diferentes no mesmo verbo. O contexto determina.',en:'Three COMPLETELY different meanings in the same verb. Context determines.'},tags:['tecnologia','combinações','abstrato']},
+    {derivedVerb:'abmachen',prefix:'ab',meaning:{pt:'combinar/acertar',en:'agree/arrange'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>ab-</strong> ("desprender/finalizar") + "machen" = "combinar/acertar". Similar a "ausmachen" no sentido de combinar. "abmachen" tem nuance de "resolver definitivamente".',en:'<strong>ab-</strong> ("detach/finalize") + "machen" = "agree/settle". Similar to "ausmachen" in the sense of arranging. "abmachen" has the nuance of "settling definitively".'},examples:[{de:'Das haben wir so abgemacht.',pt:'Combinamos assim.'},{de:'Wir müssen noch die Details abmachen.',pt:'Ainda precisamos acertar os detalhes.'},{de:'Ist das abgemacht?',pt:'Está combinado?'}],obs:{pt:'Partizip II: "abgemacht". Mais informal que "vereinbaren".',en:'Partizip II: "abgemacht". More informal than "vereinbaren".'},tags:['combinações','acordos','social']}
+  ];
+
+  // schreiben family
+  connections.schreiben=[
+    {derivedVerb:'beschreiben',prefix:'be',meaning:{pt:'descrever',en:'describe'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>be-</strong> (prefixo INSEPARÁVEL) transforma "escrever" em "descrever". O prefixo direciona a escrita para um objeto: escrever SOBRE algo. "beschreiben" + Akkusativ.',en:'<strong>be-</strong> (INSEPARABLE prefix) transforms "write" into "describe". The prefix directs the writing to an object: write ABOUT something. "beschreiben" + Akkusativ.'},examples:[{de:'Kannst du den Mann beschreiben?',pt:'Você pode descrever o homem?'},{de:'Das ist schwer zu beschreiben.',pt:'Isso é difícil de descrever.'},{de:'Sie hat das Bild beschrieben.',pt:'Ela descreveu a imagem.'}],obs:{pt:'Partizip II: "beschrieben" (sem ge-). Sempre inseparável.',en:'Partizip II: "beschrieben" (no ge-). Always inseparable.'},tags:['comunicação','descrição','essencial']},
+    {derivedVerb:'verschreiben',prefix:'ver',meaning:{pt:'prescrever/errar ao escrever',en:'prescribe/miswrite'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ver-</strong> transforma "escrever" em dois sentidos: 1) prescrever (medicamento), 2) "sich verschreiben" = errar ao escrever. O contexto médico ou reflexivo determina o significado.',en:'<strong>ver-</strong> transforms "write" into two meanings: 1) prescribe (medication), 2) "sich verschreiben" = make a writing mistake. The medical or reflexive context determines the meaning.'},examples:[{de:'Der Arzt verschreibt Medikamente.',pt:'O médico prescreve medicamentos.'},{de:'Ich habe mich verschrieben.',pt:'Eu errei ao escrever.'},{de:'Was hat er dir verschrieben?',pt:'O que ele te prescreveu?'}],obs:{pt:'"sich verschreiben" = errar ao digitar/escrever. "verschreiben" + Dativ (pessoa) + Akkusativ (remédio).',en:'"sich verschreiben" = to mistype/miswrite. "verschreiben" + Dativ (person) + Akkusativ (medicine).'},tags:['medicina','escrita','erros']},
+    {derivedVerb:'abschreiben',prefix:'ab',meaning:{pt:'copiar/deduzir',en:'copy/write off'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>ab-</strong> ("separar/retirar") + "schreiben" = "copiar" ou "dar como perdido". 1) copiar texto de alguém (cola na escola), 2) depreciar/dar baixa contábil (steuerlich abschreiben).',en:'<strong>ab-</strong> ("separate/remove") + "schreiben" = "copy" or "write off". 1) copy text from someone (cheating at school), 2) depreciate for tax purposes (steuerlich abschreiben).'},examples:[{de:'Er hat die Hausaufgaben abgeschrieben.',pt:'Ele copiou os deveres de casa.'},{de:'Schreib nicht bei mir ab!',pt:'Não copia de mim!'},{de:'Das kann man von der Steuer abschreiben.',pt:'Isso pode ser deduzido do imposto.'}],obs:{pt:'Dois mundos completamente diferentes: escola (cola) e finanças (dedução fiscal).',en:'Two completely different worlds: school (cheating) and finance (tax deduction).'},tags:['escola','finanças','cotidiano']},
+    {derivedVerb:'aufschreiben',prefix:'auf',meaning:{pt:'anotar/escrever',en:'write down/note'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>auf-</strong> ("sobre") + "schreiben" = "anotar". A ideia é escrever SOBRE um papel. "aufschreiben" é o verbo para anotações rápidas — listas, recados, ideias.',en:'<strong>auf-</strong> ("on") + "schreiben" = "write down". The idea is to write ON paper. "aufschreiben" is the verb for quick notes — lists, messages, ideas.'},examples:[{de:'Schreib dir das auf!',pt:'Anota isso!'},{de:'Ich schreibe mir die Adresse auf.',pt:'Anoto o endereço.'},{de:'Hast du die Nummer aufgeschrieben?',pt:'Você anotou o número?'}],obs:{pt:'Partizip II: "aufgeschrieben". Sempre separável.',en:'Partizip II: "aufgeschrieben". Always separable.'},tags:['organização','cotidiano','estudo']},
+    {derivedVerb:'unterschreiben',prefix:'unter',meaning:{pt:'assinar',en:'sign'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>unter-</strong> ("abaixo") + "schreiben" = "escrever abaixo" → "assinar". Literalmente: colocar a assinatura abaixo do texto. Verbo essencial para documentos e contratos.',en:'<strong>unter-</strong> ("below") + "schreiben" = "write below" → "sign". Literally: put the signature below the text. Essential verb for documents and contracts.'},examples:[{de:'Bitte unterschreiben Sie hier.',pt:'Por favor, assine aqui.'},{de:'Ich habe den Vertrag unterschrieben.',pt:'Assinei o contrato.'},{de:'Wer hat das unterschrieben?',pt:'Quem assinou isso?'}],obs:{pt:'Partizip II: "unterschrieben". O ge- fica ENTRE prefixo e radical.',en:'Partizip II: "unterschrieben". The ge- goes BETWEEN prefix and stem.'},tags:['documentos','formal','trabalho']}
+  ];
+
+  // finden family
+  connections.finden=[
+    {derivedVerb:'erfinden',prefix:'er',meaning:{pt:'inventar',en:'invent'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>er-</strong> (prefixo INSEPARÁVEL) transforma "encontrar" em "inventar". A evolução: "encontrar algo que não existia" → "criar/inventar". "erfinden" é o verbo da criatividade e inovação.',en:'<strong>er-</strong> (INSEPARABLE prefix) transforms "find" into "invent". The evolution: "find something that did not exist" → "create/invent". "erfinden" is the verb of creativity and innovation.'},examples:[{de:'Wer hat das Telefon erfunden?',pt:'Quem inventou o telefone?'},{de:'Das musst du nicht erfinden.',pt:'Não precisas inventar isso.'},{de:'Die Geschichte ist erfunden.',pt:'A história é inventada.'}],obs:{pt:'Partizip II: "erfunden" (sem ge-). "der Erfinder" = o inventor.',en:'Partizip II: "erfunden" (no ge-). "der Erfinder" = the inventor.'},tags:['criatividade','inovação','tecnologia']},
+    {derivedVerb:'befinden',prefix:'be',meaning:{pt:'encontrar-se/localizar-se',en:'be located/feel'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>be-</strong> + "finden" cria "befinden" — "encontrar-se" em dois sentidos: 1) estar localizado ("sich befinden"), 2) avaliar/julgar ("über etwas befinden"). O reflexivo é o uso mais comum.',en:'<strong>be-</strong> + "finden" creates "befinden" — "find oneself" in two senses: 1) be located ("sich befinden"), 2) judge/evaluate ("über etwas befinden"). The reflexive is the most common use.'},examples:[{de:'Wo befindet sich die Toilette?',pt:'Onde fica o banheiro?'},{de:'Ich befinde mich im Urlaub.',pt:'Encontro-me de férias.'},{de:'Das Gericht hat befunden.',pt:'O tribunal decidiu.'}],obs:{pt:'"sich befinden" é formal para "estar". Partizip II: "befunden" (sem ge-).',en:'"sich befinden" is formal for "to be". Partizip II: "befunden" (no ge-).'},tags:['localização','formal','estado']},
+    {derivedVerb:'stattfinden',prefix:'statt',meaning:{pt:'acontecer/ocorrer',en:'take place/occur'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>statt-</strong> ("lugar") + "finden" = "encontrar lugar" → "acontecer". Um verbo composto de altíssima frequência. "stattfinden" é usado para eventos, reuniões, concertos. Perfekt: "hat stattgefunden".',en:'<strong>statt-</strong> ("place") + "finden" = "find place" → "take place". An extremely high-frequency compound verb. "stattfinden" is used for events, meetings, concerts. Perfekt: "hat stattgefunden".'},examples:[{de:'Wann findet das Konzert statt?',pt:'Quando acontece o concerto?'},{de:'Die Besprechung findet morgen statt.',pt:'A reunião acontece amanhã.'},{de:'Hat das Spiel stattgefunden?',pt:'O jogo aconteceu?'}],obs:{pt:'SEMPRE separável. O "ge-" do Partizip fica NO MEIO: stattGEfunden.',en:'ALWAYS separable. The "ge-" of Partizip goes IN THE MIDDLE: stattGEfunden.'},tags:['eventos','organização','cotidiano']},
+    {derivedVerb:'empfinden',prefix:'emp',meaning:{pt:'sentir/perceber',en:'feel/perceive'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>emp-</strong> (prefixo INSEPARÁVEL) transforma "encontrar" em "sentir". "empfinden" expressa sentimentos profundos ou percepções. Mais intenso que "fühlen".',en:'<strong>emp-</strong> (INSEPARABLE prefix) transforms "find" into "feel". "empfinden" expresses deep feelings or perceptions. More intense than "fühlen".'},examples:[{de:'Ich empfinde Freude.',pt:'Sinto alegria.'},{de:'Was empfindest du für sie?',pt:'O que sentes por ela?'},{de:'Er hat Mitleid empfunden.',pt:'Ele sentiu compaixão.'}],obs:{pt:'Partizip II: "empfunden". Mais formal e poético que "fühlen".',en:'Partizip II: "empfunden". More formal and poetic than "fühlen".'},tags:['emoções','psicologia','formal']}
+  ];
+
+  // denken family
+  connections.denken=[
+    {derivedVerb:'nachdenken',prefix:'nach',meaning:{pt:'refletir/pensar sobre',en:'reflect/think about'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>nach-</strong> ("atrás/depois") + "denken" = "pensar depois/refletir". "nachdenken" implica reflexão profunda e prolongada. É o pensamento que vem DEPOIS da primeira impressão.',en:'<strong>nach-</strong> ("after") + "denken" = "think after/reflect". "nachdenken" implies deep, prolonged reflection. It is the thinking that comes AFTER the first impression.'},examples:[{de:'Ich muss darüber nachdenken.',pt:'Preciso refletir sobre isso.'},{de:'Denk mal nach!',pt:'Pensa bem!'},{de:'Hast du lange nachgedacht?',pt:'Você pensou muito?'}],obs:{pt:'"nachdenken über" + Akkusativ. Partizip II: "nachgedacht".',en:'"nachdenken über" + Akkusativ. Partizip II: "nachgedacht".'},tags:['reflexão','decisões','filosofia']},
+    {derivedVerb:'bedenken',prefix:'be',meaning:{pt:'considerar/ponderar',en:'consider/ponder'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>be-</strong> + "denken" = "pensar sobre completamente" → "considerar". "bedenken" é pensar em todos os aspectos de algo antes de decidir. Mais formal que "nachdenken".',en:'<strong>be-</strong> + "denken" = "think about completely" → "consider". "bedenken" is thinking about all aspects of something before deciding. More formal than "nachdenken".'},examples:[{de:'Bedenke die Folgen!',pt:'Considera as consequências!'},{de:'Das muss gut bedacht werden.',pt:'Isso precisa ser bem considerado.'},{de:'Hast du alle Risiken bedacht?',pt:'Consideraste todos os riscos?'}],obs:{pt:'Partizip II: "bedacht" (sem ge-).',en:'Partizip II: "bedacht" (no ge-).'},tags:['decisões','análise','formal']},
+    {derivedVerb:'ausdenken',prefix:'aus',meaning:{pt:'inventar/imaginar',en:'think up/imagine'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>aus-</strong> ("de dentro para fora") + "denken" = "pensar para fora" → "inventar/imaginar". "sich ausdenken" é imaginar, criar mentalmente algo novo — uma desculpa, um plano, uma história.',en:'<strong>aus-</strong> ("from inside out") + "denken" = "think outward" → "make up/imagine". "sich ausdenken" is to imagine, mentally create something new — an excuse, a plan, a story.'},examples:[{de:'Das hast du dir ausgedacht!',pt:'Inventaste isso!'},{de:'Denk dir eine Geschichte aus.',pt:'Inventa uma história.'},{de:'Was hast du dir ausgedacht?',pt:'O que imaginaste?'}],obs:{pt:'Quase sempre reflexivo: "sich (Dativ) etwas ausdenken".',en:'Almost always reflexive: "sich (Dativ) etwas ausdenken".'},tags:['criatividade','imaginação','cotidiano']},
+    {derivedVerb:'überdenken',prefix:'über',meaning:{pt:'repensar/reconsiderar',en:'rethink/reconsider'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>über-</strong> ("sobre/além") + "denken" = "pensar além" → "repensar". "überdenken" é revisitar um pensamento ou decisão, reconsiderar com mais profundidade.',en:'<strong>über-</strong> ("over/beyond") + "denken" = "think beyond" → "rethink". "überdenken" is revisiting a thought or decision, reconsidering with more depth.'},examples:[{de:'Ich muss meine Entscheidung überdenken.',pt:'Preciso reconsiderar minha decisão.'},{de:'Überdenk das nochmal.',pt:'Repensa nisso mais uma vez.'},{de:'Er hat seinen Plan überdacht.',pt:'Ele reconsiderou seu plano.'}],obs:{pt:'Partizip II: "überdacht" (sem ge-). Prefixo inseparável.',en:'Partizip II: "überdacht" (no ge-). Inseparable prefix.'},tags:['decisões','mudança','reflexão']}
+  ];
+
+  // lernen family
+  connections.lernen=[
+    {derivedVerb:'erlernen',prefix:'er',meaning:{pt:'aprender (dominar)',en:'learn (master)'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>er-</strong> (prefixo INSEPARÁVEL) intensifica "aprender" para "dominar/aprender completamente". "erlernen" implica domínio completo — aprender algo até o fim. Mais forte que "lernen".',en:'<strong>er-</strong> (INSEPARABLE prefix) intensifies "learn" into "master/learn completely". "erlernen" implies complete mastery — learning something thoroughly. Stronger than "lernen".'},examples:[{de:'Ich möchte Deutsch erlernen.',pt:'Quero dominar o alemão.'},{de:'Sie hat das Handwerk erlernt.',pt:'Ela dominou o ofício.'},{de:'Das muss man richtig erlernen.',pt:'Isso precisa ser aprendido corretamente.'}],obs:{pt:'Partizip II: "erlernt" (sem ge-). Implica resultado completo.',en:'Partizip II: "erlernt" (no ge-). Implies complete result.'},tags:['educação','domínio','aprimoramento']},
+    {derivedVerb:'verlernen',prefix:'ver',meaning:{pt:'desaprender/esquecer',en:'unlearn/forget'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ver-</strong> transforma "aprender" em "desaprender". O prefixo indica uma ação negativa ou reversa. "verlernen" é perder uma habilidade por falta de prática.',en:'<strong>ver-</strong> transforms "learn" into "unlearn". The prefix indicates a negative or reverse action. "verlernen" is losing a skill through lack of practice.'},examples:[{de:'Ich habe das Klavierspielen verlernt.',pt:'Desaprendi a tocar piano.'},{de:'Sprachen verlernt man schnell.',pt:'Línguas se desaprendem rápido.'},{de:'Das verlernt man nie.',pt:'Isso nunca se desaprende.'}],obs:{pt:'Partizip II: "verlernt" (sem ge-).',en:'Partizip II: "verlernt" (no ge-).'},tags:['esquecimento','habilidades','prática']},
+    {derivedVerb:'kennenlernen',prefix:'kennen',meaning:{pt:'conhecer (pessoa)',en:'get to know/meet'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>kennen-</strong> ("conhecer") + "lernen" = "aprender a conhecer" → "conhecer alguém". Um composto único que combina dois verbos. SEMPRE usado para primeiro encontro com pessoas.',en:'<strong>kennen-</strong> ("know") + "lernen" = "learn to know" → "meet/get to know". A unique compound combining two verbs. ALWAYS used for first meetings with people.'},examples:[{de:'Freut mich, dich kennenzulernen.',pt:'Prazer em te conhecer.'},{de:'Wir haben uns letztes Jahr kennengelernt.',pt:'Nós nos conhecemos ano passado.'},{de:'Ich möchte deine Eltern kennenlernen.',pt:'Gostaria de conhecer teus pais.'}],obs:{pt:'Partizip II: "kennengelernt". O ge- fica NO MEIO do composto.',en:'Partizip II: "kennengelernt". The ge- goes IN THE MIDDLE of the compound.'},tags:['social','apresentações','essencial']}
+  ];
+
+  // arbeiten family
+  connections.arbeiten=[
+    {derivedVerb:'bearbeiten',prefix:'be',meaning:{pt:'processar/editar/trabalhar em',en:'process/edit/work on'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>be-</strong> transforma "trabalhar" em "trabalhar SOBRE algo". "bearbeiten" é processar, editar, modificar algo sistematicamente — um documento, arquivo, material.',en:'<strong>be-</strong> transforms "work" into "work ON something". "bearbeiten" is to process, edit, modify something systematically — a document, file, material.'},examples:[{de:'Ich bearbeite die Datei.',pt:'Estou editando o arquivo.'},{de:'Wer bearbeitet den Antrag?',pt:'Quem está processando o requerimento?'},{de:'Das Material wird bearbeitet.',pt:'O material está sendo processado.'}],obs:{pt:'Partizip II: "bearbeitet" (sem ge-). Muito usado em contexto profissional.',en:'Partizip II: "bearbeitet" (no ge-). Very used in professional context.'},tags:['trabalho','escritório','tecnologia']},
+    {derivedVerb:'verarbeiten',prefix:'ver',meaning:{pt:'processar/transformar/digerir',en:'process/transform/digest'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ver-</strong> + "arbeiten" = "transformar pelo trabalho". "verarbeiten" é processar matéria-prima em produto, ou digerir psicologicamente uma experiência. Implica transformação completa.',en:'<strong>ver-</strong> + "arbeiten" = "transform through work". "verarbeiten" is to process raw material into product, or to psychologically digest an experience. Implies complete transformation.'},examples:[{de:'Die Fabrik verarbeitet Holz.',pt:'A fábrica processa madeira.'},{de:'Ich muss das erst verarbeiten.',pt:'Preciso primeiro digerir isso.'},{de:'Sie hat den Verlust noch nicht verarbeitet.',pt:'Ela ainda não processou a perda.'}],obs:{pt:'Significado físico (indústria) e psicológico (emoções). Partizip: "verarbeitet".',en:'Physical meaning (industry) and psychological (emotions). Partizip: "verarbeitet".'},tags:['indústria','psicologia','transformação']},
+    {derivedVerb:'mitarbeiten',prefix:'mit',meaning:{pt:'colaborar/cooperar',en:'collaborate/cooperate'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>mit-</strong> ("junto") + "arbeiten" = "trabalhar junto" → "colaborar". "mitarbeiten" é contribuir em um projeto coletivo. Usado em contexto profissional e voluntário.',en:'<strong>mit-</strong> ("along") + "arbeiten" = "work along" → "collaborate". "mitarbeiten" is to contribute to a collective project. Used in professional and volunteer contexts.'},examples:[{de:'Er arbeitet an dem Projekt mit.',pt:'Ele colabora no projeto.'},{de:'Wir arbeiten gerne mit.',pt:'Colaboramos com prazer.'},{de:'Hast du bei der Studie mitgearbeitet?',pt:'Você colaborou no estudo?'}],obs:{pt:'"mitarbeiten an" + Dativ. Partizip II: "mitgearbeitet".',en:'"mitarbeiten an" + Dativ. Partizip II: "mitgearbeitet".'},tags:['trabalho','equipe','colaboração']}
+  ];
+
+  // helfen family
+  connections.helfen=[
+    {derivedVerb:'mithelfen',prefix:'mit',meaning:{pt:'ajudar junto',en:'help out/pitch in'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>mit-</strong> ("junto") + "helfen" = "ajudar junto". "mithelfen" implica juntar-se a outros para ajudar. Mais específico que "helfen" — sugere colaboração em grupo.',en:'<strong>mit-</strong> ("along") + "helfen" = "help along". "mithelfen" implies joining others to help. More specific than "helfen" — suggests group collaboration.'},examples:[{de:'Kannst du morgen mithelfen?',pt:'Podes ajudar amanhã?'},{de:'Alle haben mitgeholfen.',pt:'Todos ajudaram.'},{de:'Er hilft beim Umzug mit.',pt:'Ele ajuda na mudança.'}],obs:{pt:'"mithelfen bei" + Dativ. Também rege Dativ para pessoa.',en:'"mithelfen bei" + Dativ. Also governs Dative for person.'},tags:['colaboração','grupo','ações']},
+    {derivedVerb:'verhelfen',prefix:'ver',meaning:{pt:'ajudar a conseguir',en:'help obtain'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ver-</strong> + "helfen" = "ajudar a obter". "verhelfen" é ajudar alguém a CONSEGUIR algo. Rege "zu" + Dativ: "jemandem zu etwas verhelfen".',en:'<strong>ver-</strong> + "helfen" = "help obtain". "verhelfen" is to help someone GET something. Governs "zu" + Dativ: "jemandem zu etwas verhelfen".'},examples:[{de:'Er hat mir zum Erfolg verholfen.',pt:'Ele me ajudou a ter sucesso.'},{de:'Ich verhelfe dir zu deinem Recht.',pt:'Ajudo-te a obter teu direito.'},{de:'Wer hat ihm zu der Stelle verholfen?',pt:'Quem o ajudou a conseguir o cargo?'}],obs:{pt:'"jemandem zu etwas verhelfen". Partizip II: "verholfen" (sem ge-).',en:'"jemandem zu etwas verhelfen". Partizip II: "verholfen" (no ge-).'},tags:['conquista','objetivos','apoio']},
+    {derivedVerb:'aushelfen',prefix:'aus',meaning:{pt:'socorrer/ajudar temporariamente',en:'help out temporarily'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>aus-</strong> ("para fora/saída") + "helfen" = "ajudar a sair de uma situação". "aushelfen" é prestar ajuda pontual, geralmente temporária — cobrir uma falta, emprestar algo.',en:'<strong>aus-</strong> ("out") + "helfen" = "help out of a situation". "aushelfen" is to provide temporary help — cover a shortage, lend something.'},examples:[{de:'Kannst du mir mit 20 € aushelfen?',pt:'Podes me socorrer com 20€?'},{de:'Er hilft im Restaurant aus.',pt:'Ele ajuda no restaurante (temporariamente).'},{de:'Ich springe ein und helfe aus.',pt:'Eu entro e ajudo.'}],obs:{pt:'"aushelfen mit" + Dativ. Partizip II: "ausgeholfen".',en:'"aushelfen mit" + Dativ. Partizip II: "ausgeholfen".'},tags:['socorro','temporário','cotidiano']}
+  ];
+
+  // reisen family
+  connections.reisen=[
+    {derivedVerb:'verreisen',prefix:'ver',meaning:{pt:'viajar (partir)',en:'go away/go on a trip'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ver-</strong> + "reisen" = "partir em viagem". "verreisen" enfatiza o ato de SAIR para viajar. Diferente de "reisen" que descreve o ato contínuo de viajar.',en:'<strong>ver-</strong> + "reisen" = "go away on a trip". "verreisen" emphasizes the act of LEAVING to travel. Different from "reisen" which describes the continuous act of traveling.'},examples:[{de:'Wir verreisen morgen.',pt:'Partimos em viagem amanhã.'},{de:'Bist du oft verreist?',pt:'Viajas frequentemente?'},{de:'Er ist geschäftlich verreist.',pt:'Ele viajou a negócios.'}],obs:{pt:'Perfekt: "verreist" (sein, sem ge-).',en:'Perfekt: "verreist" (sein, no ge-).'},tags:['viagem','partida','férias']},
+    {derivedVerb:'abreisen',prefix:'ab',meaning:{pt:'partir (viagem)',en:'depart/leave'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>ab-</strong> ("afastamento") + "reisen" = "partir". "abreisen" é o momento exato da partida. Mais formal que "losfahren". Usado em estações de trem e aeroportos.',en:'<strong>ab-</strong> ("away") + "reisen" = "depart". "abreisen" is the exact moment of departure. More formal than "losfahren". Used at train stations and airports.'},examples:[{de:'Wann reist du ab?',pt:'Quando partes?'},{de:'Der Zug reist um 9 Uhr ab.',pt:'O trem parte às 9h.'},{de:'Sie ist gestern abgereist.',pt:'Ela partiu ontem.'}],obs:{pt:'Perfekt: "abgereist" (sein).',en:'Perfekt: "abgereist" (sein).'},tags:['transporte','partida','formal']},
+    {derivedVerb:'einreisen',prefix:'ein',meaning:{pt:'entrar (num país)',en:'enter (a country)'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>ein-</strong> ("para dentro") + "reisen" = "entrar em um país". "einreisen" é o verbo de imigração e controle de fronteiras. Usado em aeroportos e alfândegas.',en:'<strong>ein-</strong> ("into") + "reisen" = "enter a country". "einreisen" is the verb of immigration and border control. Used at airports and customs.'},examples:[{de:'Wann sind Sie eingereist?',pt:'Quando o senhor entrou no país?'},{de:'Man braucht ein Visum um einzureisen.',pt:'Precisa-se de visto para entrar.'},{de:'Er ist illegal eingereist.',pt:'Ele entrou ilegalmente.'}],obs:{pt:'Perfekt: "eingereist" (sein). Oposto: "ausreisen" (sair do país).',en:'Perfekt: "eingereist" (sein). Opposite: "ausreisen" (leave the country).'},tags:['fronteira','visto','formal']},
+    {derivedVerb:'ausreisen',prefix:'aus',meaning:{pt:'sair (de um país)',en:'leave (a country)'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>aus-</strong> ("para fora") + "reisen" = "sair de um país". "ausreisen" é o contrário de "einreisen". Usado em contexto de emigração e controle de fronteiras.',en:'<strong>aus-</strong> ("out") + "reisen" = "leave a country". "ausreisen" is the opposite of "einreisen". Used in emigration and border control contexts.'},examples:[{de:'Er musste das Land ausreisen.',pt:'Ele teve que sair do país.'},{de:'Wann reisen Sie aus?',pt:'Quando o senhor sai do país?'},{de:'Sie ist gestern ausgereist.',pt:'Ela saiu do país ontem.'}],obs:{pt:'Perfekt: "ausgereist" (sein).',en:'Perfekt: "ausgereist" (sein).'},tags:['fronteira','emigração','formal']}
+  ];
+
+  // wohnen family
+  connections.wohnen=[
+    {derivedVerb:'bewohnen',prefix:'be',meaning:{pt:'habitar/morar em',en:'inhabit/live in'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>be-</strong> torna "wohnen" transitivo: "bewohnen" + Akkusativ. Enquanto "wohnen" precisa de preposição ("wohnen in"), "bewohnen" recebe o objeto direto. Mais formal.',en:'<strong>be-</strong> makes "wohnen" transitive: "bewohnen" + Akkusativ. While "wohnen" needs a preposition ("wohnen in"), "bewohnen" takes a direct object. More formal.'},examples:[{de:'Wer bewohnt dieses Haus?',pt:'Quem habita esta casa?'},{de:'Die Insel wird von 200 Menschen bewohnt.',pt:'A ilha é habitada por 200 pessoas.'},{de:'Das Zimmer ist nicht bewohnt.',pt:'O quarto não está habitado.'}],obs:{pt:'Partizip II: "bewohnt" (sem ge-). Mais formal e técnico.',en:'Partizip II: "bewohnt" (no ge-). More formal and technical.'},tags:['moradia','formal','descrições']}
+  ];
+
+  // kaufen family
+  connections.kaufen=[
+    {derivedVerb:'verkaufen',prefix:'ver',meaning:{pt:'vender',en:'sell'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ver-</strong> + "kaufen" = "vender". O prefixo reverte a direção da transação. Enquanto "kaufen" é adquirir, "verkaufen" é transferir a posse. Um dos verbos comerciais mais importantes.',en:'<strong>ver-</strong> + "kaufen" = "sell". The prefix reverses the transaction direction. While "kaufen" is to acquire, "verkaufen" is to transfer ownership. One of the most important commercial verbs.'},examples:[{de:'Er verkauft sein Auto.',pt:'Ele vende seu carro.'},{de:'Was verkaufen Sie?',pt:'O que o senhor vende?'},{de:'Das Haus wurde verkauft.',pt:'A casa foi vendida.'}],obs:{pt:'Partizip II: "verkauft" (sem ge-). "ausverkauft" = esgotado.',en:'Partizip II: "verkauft" (no ge-). "ausverkauft" = sold out.'},tags:['comércio','transações','essencial']}
+  ];
+
+  // lesen family
+  connections.lesen=[
+    {derivedVerb:'vorlesen',prefix:'vor',meaning:{pt:'ler em voz alta',en:'read aloud'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>vor-</strong> ("diante de") + "lesen" = "ler em voz alta para alguém". "vorlesen" é ler para uma audiência — pais para filhos, professor para alunos, apresentações.',en:'<strong>vor-</strong> ("in front of") + "lesen" = "read aloud to someone". "vorlesen" is reading to an audience — parents to children, teacher to students, presentations.'},examples:[{de:'Liest du mir eine Geschichte vor?',pt:'Lês uma história para mim?'},{de:'Die Lehrerin liest den Text vor.',pt:'A professora lê o texto em voz alta.'},{de:'Er hat das Gedicht vorgelesen.',pt:'Ele leu o poema em voz alta.'}],obs:{pt:'"vorlesen" + Dativ (para quem). Partizip II: "vorgelesen".',en:'"vorlesen" + Dativ (to whom). Partizip II: "vorgelesen".'},tags:['leitura','educação','apresentações']},
+    {derivedVerb:'durchlesen',prefix:'durch',meaning:{pt:'ler completamente',en:'read through'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>durch-</strong> ("através") + "lesen" = "ler do início ao fim". "durchlesen" implica leitura completa, sem pular partes. Para documentos e contratos.',en:'<strong>durch-</strong> ("through") + "lesen" = "read from start to finish". "durchlesen" implies complete reading, without skipping parts. For documents and contracts.'},examples:[{de:'Lies den Vertrag gut durch.',pt:'Lê o contrato com atenção.'},{de:'Ich habe den Bericht durchgelesen.',pt:'Li o relatório completamente.'},{de:'Hast du die E-Mail durchgelesen?',pt:'Leste o e-mail completamente?'}],obs:{pt:'Partizip II: "durchgelesen".',en:'Partizip II: "durchgelesen".'},tags:['documentos','leitura','atenção']}
+  ];
+
+  // essen family
+  connections.essen=[
+    {derivedVerb:'aufessen',prefix:'auf',meaning:{pt:'comer tudo',en:'eat up/finish eating'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>auf-</strong> ("completamente/cima") + "essen" = "comer até acabar". "aufessen" é comer TODO o conteúdo do prato. Implica conclusão — não sobra nada.',en:'<strong>auf-</strong> ("completely/up") + "essen" = "eat up". "aufessen" is to eat ALL the content of the plate. Implies completion — nothing left.'},examples:[{de:'Iss deinen Teller auf!',pt:'Come tudo do prato!'},{de:'Er hat alles aufgegessen.',pt:'Ele comeu tudo.'},{de:'Kannst du das aufessen?',pt:'Consegues comer tudo isso?'}],obs:{pt:'Partizip II: "aufgegessen". ge- ENTRE prefixo e radical.',en:'Partizip II: "aufgegessen". ge- BETWEEN prefix and stem.'},tags:['alimentação','família','cotidiano']}
+  ];
+
+  // spielen family
+  connections.spielen=[
+    {derivedVerb:'vorspielen',prefix:'vor',meaning:{pt:'tocar/apresentar (música)',en:'play/perform (music)'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>vor-</strong> ("diante de") + "spielen" = "tocar/apresentar para alguém". "vorspielen" é tocar um instrumento ou encenar algo diante de uma audiência.',en:'<strong>vor-</strong> ("in front of") + "spielen" = "play/perform for someone". "vorspielen" is to play an instrument or act something in front of an audience.'},examples:[{de:'Spiel uns etwas vor!',pt:'Toca algo para nós!'},{de:'Sie hat ein Lied vorgespielt.',pt:'Ela tocou uma música.'},{de:'Er spielt eine Szene vor.',pt:'Ele encena uma cena.'}],obs:{pt:'"vorspielen" + Dativ (para quem). Partizip II: "vorgespielt".',en:'"vorspielen" + Dativ (to whom). Partizip II: "vorgespielt".'},tags:['música','apresentações','arte']},
+    {derivedVerb:'mitspielen',prefix:'mit',meaning:{pt:'jogar junto/participar',en:'play along/join in'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>mit-</strong> ("junto") + "spielen" = "jogar junto/participar". "mitspielen" é participar de um jogo, esporte ou atividade lúdica em grupo.',en:'<strong>mit-</strong> ("along") + "spielen" = "play along/join in". "mitspielen" is to participate in a game, sport, or group playful activity.'},examples:[{de:'Spielst du Fußball mit?',pt:'Jogas futebol conosco?'},{de:'Kann ich mitspielen?',pt:'Posso jogar junto?'},{de:'Sie hat nicht mitgespielt.',pt:'Ela não participou.'}],obs:{pt:'Partizip II: "mitgespielt".',en:'Partizip II: "mitgespielt".'},tags:['jogos','esportes','social']},
+    {derivedVerb:'abspielen',prefix:'ab',meaning:{pt:'reproduzir/tocar (áudio)',en:'play (audio)/reproduce'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>ab-</strong> ("separar/extrair") + "spielen" = "reproduzir". "abspielen" é especificamente para reproduzir mídia — música, vídeo, gravação. Diferente de "spielen" que cobre mais sentidos.',en:'<strong>ab-</strong> ("separate/extract") + "spielen" = "play back". "abspielen" is specifically for reproducing media — music, video, recording. Different from "spielen" which covers more meanings.'},examples:[{de:'Spiel das Video ab.',pt:'Reproduz o vídeo.'},{de:'Kannst du die Musik abspielen?',pt:'Consegues tocar a música?'},{de:'Die Datei wurde abgespielt.',pt:'O arquivo foi reproduzido.'}],obs:{pt:'Tecnicamente específico para mídia. Partizip II: "abgespielt".',en:'Technically specific for media. Partizip II: "abgespielt".'},tags:['tecnologia','mídia','áudio']}
+  ];
+
+  // trinken family
+  connections.trinken=[
+    {derivedVerb:'austrinken',prefix:'aus',meaning:{pt:'beber até o fim',en:'drink up/finish drinking'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>aus-</strong> ("até o fim") + "trinken" = "beber completamente". "austrinken" é esvaziar o copo — beber até a última gota. Implica conclusão total.',en:'<strong>aus-</strong> ("until the end") + "trinken" = "drink up". "austrinken" is to empty the glass — drink to the last drop. Implies total completion.'},examples:[{de:'Trink dein Glas aus.',pt:'Bebe teu copo até o fim.'},{de:'Er hat die Flasche ausgetrunken.',pt:'Ele bebeu a garrafa inteira.'},{de:'Darf ich austrinken?',pt:'Posso terminar de beber?'}],obs:{pt:'Partizip II: "ausgetrunken". ge- ENTRE prefixo e radical.',en:'Partizip II: "ausgetrunken". ge- BETWEEN prefix and stem.'},tags:['bebidas','conclusão','cotidiano']},
+    {derivedVerb:'ertrinken',prefix:'er',meaning:{pt:'afogar-se',en:'drown'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>er-</strong> + "trinken" = "beber até a morte" → "afogar-se". Uma evolução semântica dramática: de beber líquido a ser submerso por ele. Perfekt com "sein".',en:'<strong>er-</strong> + "trinken" = "drink to death" → "drown". A dramatic semantic evolution: from drinking liquid to being submerged by it. Perfekt with "sein".'},examples:[{de:'Er ist im See ertrunken.',pt:'Ele se afogou no lago.'},{de:'Fast wäre ich ertrunken.',pt:'Quase me afoguei.'},{de:'Sie konnte gerade noch gerettet werden.',pt:'Ela pôde ser salva por pouco.'}],obs:{pt:'Perfekt: "ertrunken" (sein). NUNCA use para "beber demais" — isso é "sich betrinken".',en:'Perfekt: "ertrunken" (sein). NEVER use for "drink too much" — that is "sich betrinken".'},tags:['perigo','água','emergência']},
+    {derivedVerb:'betrinken',prefix:'be',meaning:{pt:'embebedar-se',en:'get drunk'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>be-</strong> + "trinken" = "beber completamente" → "embebedar-se". "sich betrinken" (reflexivo) é beber álcool em excesso. O prefixo intensifica a ação até o estado de embriaguez.',en:'<strong>be-</strong> + "trinken" = "drink completely" → "get drunk". "sich betrinken" (reflexive) is to drink alcohol excessively. The prefix intensifies the action to the state of drunkenness.'},examples:[{de:'Er hat sich gestern betrunken.',pt:'Ele se embebedou ontem.'},{de:'Betrink dich nicht.',pt:'Não te embebedes.'},{de:'Sie war völlig betrunken.',pt:'Ela estava completamente bêbada.'}],obs:{pt:'Reflexivo: "sich betrinken". "betrunken" é o adjetivo: bêbado.',en:'Reflexive: "sich betrinken". "betrunken" is the adjective: drunk.'},tags:['álcool','social','estado']}
+  ];
+
+  // singen family
+  connections.singen=[
+    {derivedVerb:'vorsingen',prefix:'vor',meaning:{pt:'cantar para alguém',en:'sing for someone'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>vor-</strong> ("diante de") + "singen" = "cantar para uma audiência". "vorsingen" é apresentar uma canção para alguém — em teste, aula ou sarau.',en:'<strong>vor-</strong> ("in front of") + "singen" = "sing for an audience". "vorsingen" is to present a song to someone — in audition, class, or performance.'},examples:[{de:'Sing uns etwas vor!',pt:'Canta algo para nós!'},{de:'Sie hat beim Casting vorgesungen.',pt:'Ela cantou na audição.'},{de:'Er singt ein Lied vor.',pt:'Ele canta uma música.'}],obs:{pt:'"vorsingen" + Dativ (para quem). Partizip II: "vorgesungen".',en:'"vorsingen" + Dativ (to whom). Partizip II: "vorgesungen".'},tags:['música','apresentações','arte']},
+    {derivedVerb:'mitsingen',prefix:'mit',meaning:{pt:'cantar junto',en:'sing along'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>mit-</strong> ("junto") + "singen" = "cantar junto". "mitsingen" é participar de um canto coletivo — coral, show, festa. Simples e direto.',en:'<strong>mit-</strong> ("along") + "singen" = "sing along". "mitsingen" is to participate in group singing — choir, concert, party. Simple and direct.'},examples:[{de:'Sing mit!',pt:'Canta junto!'},{de:'Alle haben mitgesungen.',pt:'Todos cantaram junto.'},{de:'Kennst du den Text? Dann sing mit!',pt:'Conheces a letra? Então canta junto!'}],obs:{pt:'Partizip II: "mitgesungen".',en:'Partizip II: "mitgesungen".'},tags:['música','social','grupo']}
+  ];
+
+  // kochen family
+  connections.kochen=[
+    {derivedVerb:'aufkochen',prefix:'auf',meaning:{pt:'ferver/levar à fervura',en:'bring to a boil'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>auf-</strong> ("para cima") + "kochen" = "fazer ferver". "aufkochen" é levar um líquido ao ponto de fervura. O prefixo captura o momento em que a água "sobe" com as bolhas.',en:'<strong>auf-</strong> ("upward") + "kochen" = "bring to a boil". "aufkochen" is to bring a liquid to the boiling point. The prefix captures the moment water "rises" with bubbles.'},examples:[{de:'Koch das Wasser auf.',pt:'Ferve a água.'},{de:'Die Suppe muss kurz aufkochen.',pt:'A sopa precisa ferver rapidamente.'},{de:'Lass die Milch aufkochen.',pt:'Deixa o leite ferver.'}],obs:{pt:'Partizip II: "aufgekocht".',en:'Partizip II: "aufgekocht".'},tags:['culinária','cozinha','preparo']}
+  ];
+
+  // gehen — expanded
+  connections.gehen.push(
+    {derivedVerb:'mitgehen',prefix:'mit',meaning:{pt:'ir junto',en:'go along'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>mit-</strong> ("junto") + "gehen" = "ir junto/acompanhar". Mais informal que "mitkommen". Usado para acompanhar alguém a algum lugar.',en:'<strong>mit-</strong> ("along") + "gehen" = "go along". More informal than "mitkommen". Used to accompany someone somewhere.'},examples:[{de:'Gehst du mit ins Kino?',pt:'Vais junto ao cinema?'},{de:'Ich gehe ein Stück mit.',pt:'Vou junto um trecho.'},{de:'Er ist mitgegangen.',pt:'Ele foi junto.'}],obs:{pt:'Perfekt: "mitgegangen" (sein).',en:'Perfekt: "mitgegangen" (sein).'},tags:['social','companhia','cotidiano']},
+    {derivedVerb:'weggehen',prefix:'weg',meaning:{pt:'ir embora',en:'go away/leave'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>weg-</strong> ("embora/longe") + "gehen" = "ir embora". "weggehen" é deixar um lugar. Pode ser físico ou figurado ("über etwas weggehen" = ignorar algo).',en:'<strong>weg-</strong> ("away") + "gehen" = "go away". "weggehen" is to leave a place. Can be physical or figurative ("über etwas weggehen" = ignore something).'},examples:[{de:'Geh nicht weg!',pt:'Não vás embora!'},{de:'Er ist einfach weggegangen.',pt:'Ele simplesmente foi embora.'},{de:'Wann gehst du weg?',pt:'Quando vais embora?'}],obs:{pt:'Perfekt: "weggegangen" (sein).',en:'Perfekt: "weggegangen" (sein).'},tags:['partida','movimento','cotidiano']},
+    {derivedVerb:'aufgehen',prefix:'auf',meaning:{pt:'abrir-se/nascer (sol)/surgir',en:'open/rise (sun)/come up'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>auf-</strong> ("para cima/abertura") + "gehen" = "abrir-se/surgir". O sol "aufgeht" (nasce), uma porta "aufgeht" (abre), uma ideia "geht auf" (surge).',en:'<strong>auf-</strong> ("upward/opening") + "gehen" = "open/rise". The sun "geht auf" (rises), a door "geht auf" (opens), an idea "geht auf" (emerges).'},examples:[{de:'Die Sonne geht um 6 Uhr auf.',pt:'O sol nasce às 6h.'},{de:'Die Tür geht von selbst auf.',pt:'A porta se abre sozinha.'},{de:'Mir geht ein Licht auf!',pt:'Caiu a ficha!'}],obs:{pt:'"Mir geht ein Licht auf" = expressão idiomática: "entendi!". Perfekt: "aufgegangen" (sein).',en:'"Mir geht ein Licht auf" = idiomatic: "I got it!". Perfekt: "aufgegangen" (sein).'},tags:['natureza','ideias','cotidiano']}
+  );
+
+  // kommen — expanded
+  connections.kommen.push(
+    {derivedVerb:'vorkommen',prefix:'vor',meaning:{pt:'acontecer/ocorrer/parecer',en:'occur/happen/seem'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>vor-</strong> ("diante de") + "kommen" = "vir à frente" → "ocorrer". "vorkommen" tem dois sentidos principais: 1) acontecer/ocorrer, 2) parecer ("Das kommt mir bekannt vor").',en:'<strong>vor-</strong> ("before") + "kommen" = "come forward" → "occur". "vorkommen" has two main meanings: 1) occur/happen, 2) seem ("Das kommt mir bekannt vor").'},examples:[{de:'So etwas kommt oft vor.',pt:'Isso acontece com frequência.'},{de:'Das kommt mir seltsam vor.',pt:'Isso me parece estranho.'},{de:'Ist das schon mal vorgekommen?',pt:'Isso já aconteceu antes?'}],obs:{pt:'Perfekt: "vorgekommen" (sein).',en:'Perfekt: "vorgekommen" (sein).'},tags:['ocorrências','percepção','cotidiano']},
+    {derivedVerb:'auskommen',prefix:'aus',meaning:{pt:'dar-se bem/entender-se/ser suficiente',en:'get along/be enough'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>aus-</strong> + "kommen" = "sair-se bem". "auskommen" tem dois sentidos: 1) relacionar-se bem ("mit jemandem auskommen"), 2) ser suficiente ("mit dem Geld auskommen").',en:'<strong>aus-</strong> + "kommen" = "get by". "auskommen" has two meanings: 1) get along well ("mit jemandem auskommen"), 2) be sufficient/manage ("mit dem Geld auskommen").'},examples:[{de:'Wir kommen gut miteinander aus.',pt:'Nós nos damos bem.'},{de:'Kommst du mit dem Gehalt aus?',pt:'Consegues viver com o salário?'},{de:'Ich komme ohne Auto aus.',pt:'Eu me viro sem carro.'}],obs:{pt:'Perfekt: "ausgekommen" (sein).',en:'Perfekt: "ausgekommen" (sein).'},tags:['relacionamentos','finanças','cotidiano']}
+  );
+
+  // stehen — expanded
+  connections.stehen.push(
+    {derivedVerb:'bestehen',prefix:'be',meaning:{pt:'existir/passar (prova)/insistir',en:'exist/pass (exam)/insist'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>be-</strong> + "stehen" = múltiplos sentidos: 1) existir ("Das Problem besteht"), 2) passar em prova ("eine Prüfung bestehen"), 3) consistir em ("bestehen aus").',en:'<strong>be-</strong> + "stehen" = multiple meanings: 1) exist ("Das Problem besteht"), 2) pass an exam ("eine Prüfung bestehen"), 3) consist of ("bestehen aus").'},examples:[{de:'Es besteht kein Zweifel.',pt:'Não há dúvida.'},{de:'Hat er die Prüfung bestanden?',pt:'Ele passou na prova?'},{de:'Das Team besteht aus 5 Leuten.',pt:'A equipe consiste em 5 pessoas.'}],obs:{pt:'Partizip II: "bestanden" (sem ge-).',en:'Partizip II: "bestanden" (no ge-).'},tags:['existência','educação','formal']},
+    {derivedVerb:'entstehen',prefix:'ent',meaning:{pt:'surgir/originar-se',en:'arise/originate'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ent-</strong> + "stehen" = "surgir". "entstehen" descreve o momento em que algo começa a existir. Usado para ideias, problemas, obras de arte, fenômenos.',en:'<strong>ent-</strong> + "stehen" = "arise". "entstehen" describes the moment something begins to exist. Used for ideas, problems, artworks, phenomena.'},examples:[{de:'Wie ist das Problem entstanden?',pt:'Como surgiu o problema?'},{de:'Es entstehen neue Arbeitsplätze.',pt:'Surgem novos postos de trabalho.'},{de:'Daraus ist eine Freundschaft entstanden.',pt:'Daí surgiu uma amizade.'}],obs:{pt:'Perfekt: "entstanden" (sein, sem ge-).',en:'Perfekt: "entstanden" (sein, no ge-).'},tags:['origem','criação','processos']}
+  );
+
+  // sprechen — expanded
+  connections.sprechen.push(
+    {derivedVerb:'aussprechen',prefix:'aus',meaning:{pt:'pronunciar/expressar',en:'pronounce/express'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>aus-</strong> ("para fora") + "sprechen" = "falar para fora" → "pronunciar/expressar". "aussprechen" é articular sons ou expressar algo abertamente.',en:'<strong>aus-</strong> ("out") + "sprechen" = "speak out" → "pronounce/express". "aussprechen" is to articulate sounds or express something openly.'},examples:[{de:'Wie spricht man das aus?',pt:'Como se pronuncia isso?'},{de:'Sprich deine Gedanken aus.',pt:'Expressa teus pensamentos.'},{de:'Ich möchte meinen Dank aussprechen.',pt:'Gostaria de expressar minha gratidão.'}],obs:{pt:'Partizip II: "ausgesprochen". Também significa "declaradamente".',en:'Partizip II: "ausgesprochen". Also means "decidedly/expressly".'},tags:['pronúncia','comunicação','expressão']},
+    {derivedVerb:'widersprechen',prefix:'wider',meaning:{pt:'contradizer',en:'contradict'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>wider-</strong> ("contra") + "sprechen" = "falar contra" → "contradizer". Rege DATIVO: "jemandem widersprechen". O oposto direto de "zustimmen" (concordar).',en:'<strong>wider-</strong> ("against") + "sprechen" = "speak against" → "contradict". Governs DATIVE: "jemandem widersprechen". The direct opposite of "zustimmen" (agree).'},examples:[{de:'Ich muss Ihnen widersprechen.',pt:'Preciso contradizê-lo.'},{de:'Er widerspricht sich ständig.',pt:'Ele se contradiz constantemente.'},{de:'Da kann ich nicht widersprechen.',pt:'Nisso não posso contradizer.'}],obs:{pt:'Partizip II: "widersprochen" (sem ge-).',en:'Partizip II: "widersprochen" (no ge-).'},tags:['debate','argumentação','formal']},
+    {derivedVerb:'entsprechen',prefix:'ent',meaning:{pt:'corresponder a/atender a',en:'correspond to/meet'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ent-</strong> + "sprechen" = "corresponder". "entsprechen" é estar de acordo com expectativas, normas ou requisitos. Rege DATIVO.',en:'<strong>ent-</strong> + "sprechen" = "correspond". "entsprechen" is to be in accordance with expectations, norms, or requirements. Governs DATIVE.'},examples:[{de:'Das entspricht nicht der Wahrheit.',pt:'Isso não corresponde à verdade.'},{de:'Entspricht das Ihren Vorstellungen?',pt:'Isso corresponde às suas expectativas?'},{de:'Die Ware entspricht der Beschreibung.',pt:'A mercadoria corresponde à descrição.'}],obs:{pt:'Partizip II: "entsprochen" (sem ge-). Rege DATIVO.',en:'Partizip II: "entsprochen" (no ge-). Governs DATIVE.'},tags:['expectativas','conformidade','formal']}
+  );
+
+  // geben — expanded
+  connections.geben.push(
+    {derivedVerb:'zugeben',prefix:'zu',meaning:{pt:'admitir/confessar',en:'admit/confess'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>zu-</strong> ("adicionar/reconhecer") + "geben" = "admitir". "zugeben" é reconhecer algo, geralmente negativo — um erro, falha, sentimento. Implica honestidade.',en:'<strong>zu-</strong> ("add/acknowledge") + "geben" = "admit". "zugeben" is to acknowledge something, usually negative — an error, failure, feeling. Implies honesty.'},examples:[{de:'Ich muss zugeben, dass ich falsch lag.',pt:'Devo admitir que estava errado.'},{de:'Er gab den Fehler zu.',pt:'Ele admitiu o erro.'},{de:'Das gebe ich zu.',pt:'Isso eu admito.'}],obs:{pt:'Partizip II: "zugegeben".',en:'Partizip II: "zugegeben".'},tags:['honestidade','erros','comunicação']},
+    {derivedVerb:'ausgeben',prefix:'aus',meaning:{pt:'gastar/emitir/fingir ser',en:'spend/issue/pretend'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>aus-</strong> ("para fora") + "geben" = múltiplos sentidos: 1) gastar dinheiro, 2) emitir documento, 3) "sich ausgeben als" = fazer-se passar por.',en:'<strong>aus-</strong> ("out") + "geben" = multiple meanings: 1) spend money, 2) issue a document, 3) "sich ausgeben als" = pretend to be/pose as.'},examples:[{de:'Ich gebe zu viel Geld aus.',pt:'Gasto dinheiro demais.'},{de:'Pässe werden hier ausgegeben.',pt:'Passaportes são emitidos aqui.'},{de:'Er gab sich als Arzt aus.',pt:'Ele se fez passar por médico.'}],obs:{pt:'Três contextos completamente diferentes. Partizip: "ausgegeben".',en:'Three completely different contexts. Partizip: "ausgegeben".'},tags:['dinheiro','documentos','identidade']}
+  );
+
+  // sehen — expanded
+  connections.sehen.push(
+    {derivedVerb:'ansehen',prefix:'an',meaning:{pt:'olhar/considerar',en:'look at/regard'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>an-</strong> ("em direção a") + "sehen" = "olhar para". "ansehen" é dirigir o olhar para algo com atenção. Também: "jemanden als etwas ansehen" = considerar alguém como algo.',en:'<strong>an-</strong> ("towards") + "sehen" = "look at". "ansehen" is to direct the gaze to something with attention. Also: "jemanden als etwas ansehen" = regard someone as something.'},examples:[{de:'Sieh mich an!',pt:'Olha para mim!'},{de:'Ich sehe das anders an.',pt:'Vejo isso de forma diferente.'},{de:'Er wird als Experte angesehen.',pt:'Ele é considerado um especialista.'}],obs:{pt:'Partizip II: "angesehen". "angesehen" também é adjetivo: respeitado.',en:'Partizip II: "angesehen". "angesehen" is also an adjective: respected.'},tags:['percepção','atenção','social']}
+  );
+
+  // nehmen — expanded
+  connections.nehmen.push(
+    {derivedVerb:'annehmen',prefix:'an',meaning:{pt:'aceitar/supor/adotar',en:'accept/assume/adopt'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>an-</strong> + "nehmen" = múltiplos sentidos: 1) aceitar oferta/presente, 2) supor/assumir ("Ich nehme an..."), 3) adotar (costume, nome). Um verbo camaleão de alta frequência.',en:'<strong>an-</strong> + "nehmen" = multiple meanings: 1) accept an offer/gift, 2) suppose/assume ("Ich nehme an..."), 3) adopt (custom, name). A high-frequency chameleon verb.'},examples:[{de:'Nimmst du das Geschenk an?',pt:'Aceitas o presente?'},{de:'Ich nehme an, er kommt später.',pt:'Suponho que ele venha mais tarde.'},{de:'Sie hat einen neuen Namen angenommen.',pt:'Ela adotou um novo nome.'}],obs:{pt:'Partizip II: "angenommen".',en:'Partizip II: "angenommen".'},tags:['aceitação','suposição','versátil']},
+    {derivedVerb:'abnehmen',prefix:'ab',meaning:{pt:'emagrecer/retirar/diminuir',en:'lose weight/remove/decrease'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>ab-</strong> ("retirar/diminuir") + "nehmen" = três sentidos: 1) emagrecer (perder peso), 2) retirar/tirar (chapéu, telefone), 3) diminuir (lua, intensidade).',en:'<strong>ab-</strong> ("remove/decrease") + "nehmen" = three meanings: 1) lose weight, 2) remove/take off, 3) decrease (moon, intensity).'},examples:[{de:'Ich habe 5 Kilo abgenommen.',pt:'Emagreci 5 quilos.'},{de:'Nimm den Hut ab!',pt:'Tira o chapéu!'},{de:'Der Mond nimmt ab.',pt:'A lua está minguando.'}],obs:{pt:'Partizip II: "abgenommen". Oposto: "zunehmen" (engordar/aumentar).',en:'Partizip II: "abgenommen". Opposite: "zunehmen" (gain weight/increase).'},tags:['saúde','ações','mudança']},
+    {derivedVerb:'zunehmen',prefix:'zu',meaning:{pt:'engordar/aumentar',en:'gain weight/increase'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>zu-</strong> ("adição") + "nehmen" = "engordar/aumentar". Oposto direto de "abnehmen". Pode ser peso corporal ou qualquer aumento quantitativo.',en:'<strong>zu-</strong> ("addition") + "nehmen" = "gain weight/increase". Direct opposite of "abnehmen". Can be body weight or any quantitative increase.'},examples:[{de:'Ich habe im Urlaub zugenommen.',pt:'Engordei nas férias.'},{de:'Der Verkehr nimmt zu.',pt:'O trânsito está aumentando.'},{de:'Die Spannung nimmt zu.',pt:'A tensão aumenta.'}],obs:{pt:'Partizip II: "zugenommen".',en:'Partizip II: "zugenommen".'},tags:['saúde','mudança','quantidade']}
+  );
+
+  // fahren — expanded
+  connections.fahren.push(
+    {derivedVerb:'mitfahren',prefix:'mit',meaning:{pt:'ir junto (de veículo)',en:'ride along/go with'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>mit-</strong> ("junto") + "fahren" = "ir de carona/junto". "mitfahren" é acompanhar alguém em um veículo. Muito usado para caronas e viagens em grupo.',en:'<strong>mit-</strong> ("along") + "fahren" = "ride along". "mitfahren" is to accompany someone in a vehicle. Very used for carpooling and group trips.'},examples:[{de:'Kann ich mitfahren?',pt:'Posso ir de carona?'},{de:'Er ist mit uns mitgefahren.',pt:'Ele foi junto conosco.'},{de:'Fährst du mit dem Bus mit?',pt:'Vais junto de ônibus?'}],obs:{pt:'Perfekt: "mitgefahren" (sein).',en:'Perfekt: "mitgefahren" (sein).'},tags:['transporte','carona','social']},
+    {derivedVerb:'abfahren',prefix:'ab',meaning:{pt:'partir/sair (veículo)',en:'depart/leave (vehicle)'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>ab-</strong> ("afastamento") + "fahren" = "partir". "abfahren" é o momento exato em que um veículo sai. Usado para trens, ônibus, navios.',en:'<strong>ab-</strong> ("away") + "fahren" = "depart". "abfahren" is the exact moment a vehicle leaves. Used for trains, buses, ships.'},examples:[{de:'Der Zug fährt um 9 Uhr ab.',pt:'O trem parte às 9h.'},{de:'Wann fahren wir ab?',pt:'Quando partimos?'},{de:'Der Bus ist schon abgefahren.',pt:'O ônibus já partiu.'}],obs:{pt:'Perfekt: "abgefahren" (sein). Também: "abgefahren" = gíria para "louco/incrível".',en:'Perfekt: "abgefahren" (sein). Also: "abgefahren" = slang for "crazy/awesome".'},tags:['transporte','partida','horários']}
+  );
+
+  // schlafen — expanded
+  connections.schlafen.push(
+    {derivedVerb:'ausschlafen',prefix:'aus',meaning:{pt:'dormir até tarde',en:'sleep in'},type:CONN_TYPE.SEPARABLE,explanation:{pt:'<strong>aus-</strong> ("até o fim/completamente") + "schlafen" = "dormir até acordar naturalmente". "ausschlafen" é dormir sem despertador, até o corpo decidir que já dormiu o suficiente.',en:'<strong>aus-</strong> ("until the end/completely") + "schlafen" = "sleep until naturally awake". "ausschlafen" is to sleep without an alarm, until the body decides it has slept enough.'},examples:[{de:'Am Wochenende schlafe ich aus.',pt:'No fim de semana durmo até tarde.'},{de:'Hast du gut ausgeschlafen?',pt:'Dormiste bem (até acordar naturalmente)?'},{de:'Lass mich ausschlafen!',pt:'Deixa-me dormir!'}],obs:{pt:'Partizip II: "ausgeschlafen". "ausgeschlafen" também é adjetivo: bem descansado.',en:'Partizip II: "ausgeschlafen". "ausgeschlafen" is also an adjective: well-rested.'},tags:['sono','descanso','fim de semana']},
+    {derivedVerb:'verschlafen',prefix:'ver',meaning:{pt:'dormir demais/perder a hora',en:'oversleep'},type:CONN_TYPE.INSEPARABLE,explanation:{pt:'<strong>ver-</strong> + "schlafen" = "dormir além da conta". "verschlafen" é dormir além do horário previsto e perder compromissos. O prefixo indica excesso com consequência negativa.',en:'<strong>ver-</strong> + "schlafen" = "sleep too much". "verschlafen" is to sleep past the planned time and miss appointments. The prefix indicates excess with negative consequence.'},examples:[{de:'Ich habe verschlafen!',pt:'Perdi a hora!'},{de:'Er verschläft jeden Morgen.',pt:'Ele perde a hora toda manhã.'},{de:'Hast du schon mal verschlafen?',pt:'Já perdeste a hora alguma vez?'}],obs:{pt:'Partizip II: "verschlafen" (sem ge-).',en:'Partizip II: "verschlafen" (no ge-).'},tags:['sono','atrasos','rotina']}
+  );
+
+  // ===== RENDER FUNCTION =====
+  var renderConnections=function(verb,isEn){
+    var key=verb.infinitive;
+    var conns=connections[key];
+    if(!conns||conns.length===0)return'';
+
+    // Group by type
+    var separable=[],inseparable=[],other=[];
+    conns.forEach(function(c){
+      if(c.type===CONN_TYPE.SEPARABLE)separable.push(c);
+      else if(c.type===CONN_TYPE.INSEPARABLE)inseparable.push(c);
+      else other.push(c);
+    });
+
+    var h='';
+    h+='<div class="verb-connections">';
+    h+='<div class="verb-connections-header"><span class="conn-icon">🔗</span><div><div class="conn-title">'+(isEn?'CONNECTIONS — ':'CONEXÕES — ')+key+'</div><div class="conn-sub">'+(isEn?'Discover how prefixes transform this verb':'Descubra como prefixos transformam este verbo')+'</div></div><span class="conn-count">'+conns.length+'</span></div>';
+    h+='<div class="verb-connections-body">';
+
+    // Root verb label
+    h+='<div class="conn-root-label"><span class="root-icon">🌱</span>'+key+'<span class="conn-root-meaning">'+(verb.meaning?(verb.meaning[isEn?'en':'pt']):'')+'</span></div>';
+
+    // Intro explanation
+    var prefixList=conns.map(function(conn){return '<strong>'+conn.derivedVerb+'</strong> ('+conn.prefix+'-)';}).join(', ');
+    h+='<div class="conn-intro">'+(isEn?'The verb <strong>'+key+'</strong> generates <strong>'+conns.length+'</strong> connected verbs through prefixes: '+prefixList+'. Each prefix radically alters the meaning and use.':'O verbo <strong>'+key+'</strong> gera <strong>'+conns.length+'</strong> verbos conectados através de prefixos: '+prefixList+'. Cada prefixo altera radicalmente o significado e o uso.')+'</div>';
+
+    // Render grouped connections
+    var renderGroup=function(group,sectionLabel,sectionDotClass,cardClass){
+      if(group.length===0)return'';
+      var gh='';
+      gh+='<div class="conn-section-hd"><span class="sec-dot '+sectionDotClass+'"></span>'+sectionLabel+' <span style="font-weight:400;color:var(--text3);font-size:.65rem">('+group.length+')</span></div>';
+      gh+='<div class="conn-tree">';
+      group.forEach(function(conn,gi){
+        var typeLabel=isEn?TYPE_LABEL_EN[conn.type]:TYPE_LABEL_PT[conn.type];
+        var typeBadgeClass=conn.type===CONN_TYPE.SEPARABLE?'sep':(conn.type===CONN_TYPE.INSEPARABLE?'ins':'other');
+        gh+='<div class="conn-item '+cardClass+'" id="conn-'+key+'-'+gi+'-g" onclick="GermanVerbConnectionsSystem.toggleExpandGroup(\''+key+'\','+gi+')">';
+        gh+='<div class="conn-item-header">';
+        gh+='<span class="conn-item-verb">'+conn.derivedVerb+'</span>';
+        gh+='<span class="conn-item-arrow">←</span>';
+        gh+='<span class="conn-item-prefix">'+conn.prefix+'-</span>';
+        gh+='<span class="conn-item-type-badge '+typeBadgeClass+'">'+typeLabel+'</span>';
+        gh+='<span class="conn-item-meaning">'+conn.meaning[isEn?'en':'pt']+'</span>';
+        gh+='<span class="conn-item-chevron">▼</span>';
+        gh+='</div>';
+        gh+='<div class="conn-expand" id="conn-expand-g-'+key+'-'+gi+'">';
+        gh+='<div class="conn-explanation">'+conn.explanation[isEn?'en':'pt']+'</div>';
+        if(conn.examples&&conn.examples.length>0){
+          gh+='<div class="conn-examples">';
+          conn.examples.forEach(function(ex,exi){
+            gh+='<div class="conn-example-item"><div class="ex-de">'+ex.de+'</div><div class="ex-pt">'+ex.pt+'</div></div>';
+          });
+          gh+='</div>';
+        }
+        if(conn.obs){
+          gh+='<div class="conn-obs">💡 <strong>'+(isEn?'Note:':'Nota:')+'</strong> '+conn.obs[isEn?'en':'pt']+'</div>';
+        }
+        if(conn.tags&&conn.tags.length>0){
+          gh+='<div class="conn-tag-row">';
+          conn.tags.forEach(function(tag){gh+='<span class="conn-tag">'+tag+'</span>';});
+          gh+='</div>';
+        }
+        gh+='</div>';
+        gh+='</div>';
+      });
+      gh+='</div>';
+      return gh;
+    };
+
+    // Render separable group
+    h+=renderGroup(separable,
+      isEn?'📤 SEPARABLE — Prefix goes to the END':'📤 SEPARÁVEIS — Prefixo vai ao FINAL',
+      'sep','sep-card');
+
+    // Render inseparable group
+    h+=renderGroup(inseparable,
+      isEn?'📥 INSEPARABLE — Prefix NEVER splits':'📥 INSEPARÁVEIS — Prefixo NUNCA se separa',
+      'ins','ins-card');
+
+    // Render other group
+    h+=renderGroup(other,
+      isEn?'🔀 OTHER CONNECTIONS':'🔀 OUTRAS CONEXÕES',
+      '','other-card');
+
+    h+='</div></div>';
+    return h;
+  };
+
+  // Toggle expand for grouped connections
+  var toggleExpandGroup=function(verbKey,connIdx){
+    var expandEl=document.getElementById('conn-expand-g-'+verbKey+'-'+connIdx);
+    var itemEl=document.getElementById('conn-'+verbKey+'-'+connIdx+'-g');
+    if(!expandEl)return;
+    if(expandEl.classList.contains('open')){
+      expandEl.classList.remove('open');
+      if(itemEl)itemEl.classList.remove('open-item');
+    }else{
+      expandEl.classList.add('open');
+      if(itemEl)itemEl.classList.add('open-item');
+    }
+  };
+
+  // Legacy toggle (kept for compatibility if any old IDs exist)
+  var toggleExpand=function(verbKey,connIdx){
+    var expandEl=document.getElementById('conn-expand-'+verbKey+'-'+connIdx);
+    if(!expandEl)return toggleExpandGroup(verbKey,connIdx);
+    if(expandEl.classList.contains('open')){expandEl.classList.remove('open')}else{expandEl.classList.add('open')}
+  };
+
+  var API={
+    render:renderConnections,
+    toggleExpand:toggleExpand,
+    toggleExpandGroup:toggleExpandGroup,
+    connections:connections,
+    CONN_TYPE:CONN_TYPE,
+    PREFIX_EXPLANATIONS:PREFIX_EXPLANATIONS
+  };
+
+  window.GermanVerbConnectionsSystem=API;
+  return API;
+})();
+// ========== END VERB CONNECTIONS SYSTEM ==========
+
 function renderConjugationTrainer(chId){
   const container=$('#conj-trainer-'+chId);
   if(!container)return;
@@ -3745,6 +4216,7 @@ function renderConjugationTrainer(chId){
     html+='<div class="conj-fb" id="'+vId+'-fb"></div>';
     html+=generateVerbDeepDive(verb,chId,vIdx,isEn);
     html+=VERB_DNA.renderDNA(verb,isEn);
+    html+=GermanVerbConnectionsSystem.render(verb,isEn);
     html+='</div>';
   });
   
