@@ -4080,15 +4080,17 @@ const GermanVerbConnectionsSystem=(()=>{
     h+='<div class="conn-intro">'+(isEn?'The verb <strong>'+key+'</strong> generates <strong>'+conns.length+'</strong> connected verbs through prefixes: '+prefixList+'. Each prefix radically alters the meaning and use.':'O verbo <strong>'+key+'</strong> gera <strong>'+conns.length+'</strong> verbos conectados através de prefixos: '+prefixList+'. Cada prefixo altera radicalmente o significado e o uso.')+'</div>';
 
     // Render grouped connections
+    var globalIdx=0;
     var renderGroup=function(group,sectionLabel,sectionDotClass,cardClass){
       if(group.length===0)return'';
       var gh='';
       gh+='<div class="conn-section-hd"><span class="sec-dot '+sectionDotClass+'"></span>'+sectionLabel+' <span style="font-weight:400;color:var(--text3);font-size:.65rem">('+group.length+')</span></div>';
       gh+='<div class="conn-tree">';
       group.forEach(function(conn,gi){
+        var idx=globalIdx++;
         var typeLabel=isEn?TYPE_LABEL_EN[conn.type]:TYPE_LABEL_PT[conn.type];
         var typeBadgeClass=conn.type===CONN_TYPE.SEPARABLE?'sep':(conn.type===CONN_TYPE.INSEPARABLE?'ins':'other');
-        gh+='<div class="conn-item '+cardClass+'" id="conn-'+key+'-'+gi+'-g" onclick="GermanVerbConnectionsSystem.toggleExpandGroup(\''+key+'\','+gi+')">';
+        gh+='<div class="conn-item '+cardClass+'" id="conn-'+key+'-'+idx+'-g" onclick="GermanVerbConnectionsSystem.toggleExpandGroup(\''+key+'\','+idx+')">';
         gh+='<div class="conn-item-header">';
         gh+='<span class="conn-item-verb">'+conn.derivedVerb+'</span>';
         gh+='<span class="conn-item-arrow">←</span>';
@@ -4097,7 +4099,7 @@ const GermanVerbConnectionsSystem=(()=>{
         gh+='<span class="conn-item-meaning">'+conn.meaning[isEn?'en':'pt']+'</span>';
         gh+='<span class="conn-item-chevron">▼</span>';
         gh+='</div>';
-        gh+='<div class="conn-expand" id="conn-expand-g-'+key+'-'+gi+'">';
+        gh+='<div class="conn-expand" id="conn-expand-g-'+key+'-'+idx+'">';
         gh+='<div class="conn-explanation">'+conn.explanation[isEn?'en':'pt']+'</div>';
         if(conn.examples&&conn.examples.length>0){
           gh+='<div class="conn-examples">';
