@@ -463,6 +463,54 @@ i{font-style:normal}
 .verb-dna-example-item .ex-pt{color:var(--text3);font-size:.7rem}
 @media(max-width:768px){.verb-dna-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.verb-dna-grid{grid-template-columns:1fr}}
+/* ===== WORD ENGINEERING SYSTEM (ENGENHARIA DA PALAVRA) ===== */
+.word-eng{margin-top:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;border-left:3px solid var(--accent);animation:weIn .4s ease}
+@keyframes weIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.word-eng-header{padding:10px 14px;background:color-mix(in srgb,var(--accent) 6%,var(--bg));border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.word-eng-header .we-icon{font-size:1rem;flex-shrink:0}
+.word-eng-header .we-title{font-size:.82rem;font-weight:700;color:var(--accent2);letter-spacing:-0.2px}
+.word-eng-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.we-decomp{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 12px;background:var(--bg);border-radius:6px;font-family:var(--mono);font-size:.82rem}
+.we-decomp-part{padding:5px 12px;border-radius:6px;font-weight:700;font-size:.82rem;transition:all .2s}
+.we-decomp-part.prefix{background:color-mix(in srgb,var(--primary) 10%,transparent);color:var(--primary);border:1px solid color-mix(in srgb,var(--primary) 25%,transparent)}
+.we-decomp-part.root{background:color-mix(in srgb,var(--accent2) 10%,transparent);color:var(--accent2);border:1px solid color-mix(in srgb,var(--accent2) 25%,transparent)}
+.we-decomp-part.suffix{background:color-mix(in srgb,var(--warn) 10%,transparent);color:#b8860b;border:1px solid color-mix(in srgb,#b8860b 25%,transparent)}
+.we-decomp-plus{color:var(--text3);font-weight:300;font-size:.9rem}
+.we-decomp-equals{color:var(--text3);font-size:.8rem;margin:0 2px}
+.we-part-explanation{font-size:.74rem;color:var(--text2);line-height:1.55;margin-top:2px}
+.we-part-explanation strong{color:var(--text)}
+.we-part-row{display:flex;gap:8px;flex-direction:column;padding:8px 12px;background:var(--bg);border-radius:6px;border-left:3px solid var(--accent)}
+.we-part-row .we-part-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.we-part-row .we-part-label.pre{color:var(--primary)}
+.we-part-row .we-part-label.rt{color:var(--accent2)}
+.we-part-row .we-part-text{font-size:.76rem;color:var(--text2);line-height:1.55}
+.we-result{padding:10px 14px;background:color-mix(in srgb,var(--success) 6%,var(--bg));border-radius:6px;border-left:3px solid var(--success);font-size:.78rem;color:var(--text);line-height:1.55}
+.we-result strong{color:var(--success)}
+.we-related{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.we-related-tag{padding:3px 10px;border-radius:10px;font-size:.65rem;font-weight:600;background:color-mix(in srgb,var(--accent2) 8%,transparent);color:var(--accent2);cursor:default;transition:all .15s}
+.we-related-tag:hover{background:var(--accent2);color:#fff}
+.we-expand-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:.68rem;font-weight:600;color:var(--accent2);cursor:pointer;background:transparent;border:1px solid color-mix(in srgb,var(--accent2) 20%,transparent);transition:all .2s}
+.we-expand-btn:hover{background:color-mix(in srgb,var(--accent2) 10%,transparent)}
+.we-expand-content{display:none;margin-top:8px;animation:weExpand .3s ease}
+.we-expand-content.open{display:block}
+@keyframes weExpand{from{opacity:0;max-height:0}to{opacity:1;max-height:600px}}
+.we-pattern-note{padding:8px 12px;background:color-mix(in srgb,var(--primary) 4%,var(--bg));border-radius:6px;font-size:.72rem;color:var(--text3);line-height:1.5}
+.we-pattern-note strong{color:var(--primary)}
+@media(max-width:768px){.word-eng-body{padding:10px}.we-decomp{font-size:.76rem;gap:4px}.we-decomp-part{padding:4px 8px;font-size:.76rem}}
+/* Word Engineering premium extras */
+.we-family-badge{padding:2px 8px;border-radius:10px;font-size:.62rem;font-weight:700;background:color-mix(in srgb,var(--accent2) 12%,transparent);color:var(--accent2);font-family:var(--mono);letter-spacing:.5px;margin-left:auto}
+.we-decomp-result{font-weight:800;color:var(--success);font-family:var(--mono);font-size:.85rem}
+.we-parts-container{display:flex;flex-direction:column;gap:4px}
+.we-expandable{background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:all .2s}
+.we-expandable:hover{border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
+.we-expand-header{padding:8px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:.74rem;user-select:none;transition:background .15s}
+.we-expand-header:hover{background:color-mix(in srgb,var(--accent) 4%,var(--bg))}
+.we-chevron{font-size:.6rem;color:var(--text3);transition:transform .25s}
+.we-chevron.open{transform:rotate(180deg)}
+.we-expand-content{display:none;padding:0 12px 10px;font-size:.74rem;color:var(--text2);line-height:1.55;animation:weExpand .3s ease}
+.we-expand-content.open{display:block}
+.we-related-section{margin-top:4px}
+.we-related-label{font-size:.68rem;font-weight:600;color:var(--text3);display:block;margin-bottom:6px}
 /* ===== VERB CONNECTIONS SYSTEM (CONEXÕES) — Premium Visual Rendering ===== */
 .verb-connections{margin-top:14px;background:linear-gradient(170deg,var(--bg) 0%,color-mix(in srgb,var(--accent2) 3%,var(--bg2)) 100%);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;animation:connIn .5s ease;position:relative}
 .verb-connections::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--primary));opacity:.8}
@@ -2263,7 +2311,7 @@ function applyLang(){
   document.documentElement.lang=state.lang==='en'?'en':'pt-BR';
   renderChapters();renderTOC();renderSidebar();renderGlossCats();renderGlossary();
 }
-let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{}};
+let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null};
 function loadState(){try{const r=localStorage.getItem('deutschmeister_state');if(r){const p=JSON.parse(r);state={...state,...p}}}catch(e){}}
 function saveState(){try{localStorage.setItem('deutschmeister_state',JSON.stringify(state))}catch(e){}}
 function $(s,c){return(c||document).querySelector(s)}
@@ -3774,6 +3822,8 @@ var renderDNA=function(verb,isEn){
   }
   // Linguistic notes
   h+='<div class="verb-dna-insight explanation"><strong>📝 Observações Linguísticas:</strong> '+d.linguisticNotes+'</div>';
+  // Word Engineering
+  h+=GermanWordEngineeringSystem.render(verb,isEn);
   h+='</div></div>';
   return h;
 };
@@ -4177,6 +4227,149 @@ const GermanVerbConnectionsSystem=(()=>{
 })();
 // ========== END VERB CONNECTIONS SYSTEM ==========
 
+// ========== WORD ENGINEERING SYSTEM (ENGENHARIA DA PALAVRA) ==========
+const GermanWordEngineeringSystem=(()=>{
+  'use strict';
+
+  // Engineering data — word decomposition
+  // Structure: { prefix, root, suffix, compound, explanation:{pt,en}, related:string[], parts:{pt:{...},en:{...}} }
+  var engineering={};
+
+  // ===== PREFIXED VERBS — decomposition into prefix + root =====
+  engineering.aufstehen={prefix:'auf',root:'stehen',explanation:{pt:'<strong>auf-</strong> ("para cima") + <strong>stehen</strong> ("estar em pé") = "levantar-se". O prefixo indica movimento vertical ascendente. É um verbo separável: em orações principais, "auf" vai para o FINAL.',en:'<strong>auf-</strong> ("upward") + <strong>stehen</strong> ("stand") = "get up". The prefix indicates vertical upward movement. Separable verb: in main clauses, "auf" goes to the END.'},parts:{pt:{prefix:'Prefixo separável que indica "para cima", "abertura" ou "início súbito". Aparece também em: aufmachen (abrir), aufgehen (nascer/surgir), aufgeben (desistir).',root:'Raiz germânica *standan ("ficar de pé, permanecer"). Parente do inglês "stand". A mesma raiz aparece em: verstehen (entender), bestehen (existir/passar), entstehen (surgir).'},en:{prefix:'Separable prefix meaning "upward", "opening", or "sudden start". Also found in: aufmachen (open), aufgehen (rise/emerge), aufgeben (give up).',root:'Germanic root *standan ("stand, remain"). Related to English "stand". Same root in: verstehen (understand), bestehen (exist/pass), entstehen (arise).'}},related:['aufmachen','aufgehen','aufgeben','bestehen','verstehen','entstehen']};
+  engineering.einkaufen={prefix:'ein',root:'kaufen',explanation:{pt:'<strong>ein-</strong> ("para dentro") + <strong>kaufen</strong> ("comprar") = "fazer compras/abastecer-se". O prefixo transforma "comprar" em "trazer para dentro".',en:'<strong>ein-</strong> ("into") + <strong>kaufen</strong> ("buy") = "go shopping/stock up". The prefix transforms "buy" into "bring in".'},parts:{pt:{prefix:'Prefixo separável que indica "para dentro", "entrada" ou "início". Também em: einschlafen (adormecer), einreisen (entrar no país), einladen (convidar).',root:'Raiz do verbo "comprar/adquirir". A mesma raiz em: verkaufen (vender), Kaufhaus (loja de departamentos), verkäuflich (à venda).'},en:{prefix:'Separable prefix meaning "into", "entry", or "beginning". Also in: einschlafen (fall asleep), einreisen (enter a country), einladen (invite).',root:'Root of "buy/acquire". Same root in: verkaufen (sell), Kaufhaus (department store), verkäuflich (for sale).'}},related:['kaufen','verkaufen','einschlafen','einreisen']};
+  engineering.anrufen={prefix:'an',root:'rufen',explanation:{pt:'<strong>an-</strong> ("em direção a") + <strong>rufen</strong> ("chamar/gritar") = "telefonar". Evolução: "gritar na direção de alguém" → "chamar por telefone".',en:'<strong>an-</strong> ("towards") + <strong>rufen</strong> ("call/shout") = "call (phone)". Evolution: "shout towards someone" → "call by phone".'},parts:{pt:{prefix:'Prefixo separável de direção: "em direção a", "junto a", "início de contato". Também em: ankommen (chegar), ansehen (olhar), anmachen (acender/ligar).',root:'Raiz germânica *hrōpan ("gritar, clamar"). A mesma raiz em: zurufen (gritar para), ausrufen (proclamar/exclamar), der Ruf (a chamada/reputação).'},en:{prefix:'Separable directional prefix: "towards", "at", "beginning of contact". Also in: ankommen (arrive), ansehen (look at), anmachen (turn on).',root:'Germanic root *hrōpan ("shout, cry out"). Same root in: zurufen (shout to), ausrufen (proclaim/exclaim), der Ruf (the call/reputation).'}},related:['ankommen','ansehen','ausrufen','zurufen']};
+  engineering.mitkommen={prefix:'mit',root:'kommen',explanation:{pt:'<strong>mit-</strong> ("junto/com") + <strong>kommen</strong> ("vir") = "vir junto/acompanhar". Um dos verbos separáveis mais usados no dia a dia.',en:'<strong>mit-</strong> ("along/with") + <strong>kommen</strong> ("come") = "come along". One of the most used separable verbs in daily life.'},parts:{pt:{prefix:'Prefixo separável de companhia: "junto", "com", "em conjunto". Também em: mitmachen (participar), mitnehmen (levar junto), mitspielen (jogar junto).',root:'Raiz germânica *kweman ("vir, chegar"). Parente do inglês "come". A mesma raiz em: bekommen (receber), ankommen (chegar), willkommen (bem-vindo).'},en:{prefix:'Separable prefix of company: "along", "with", "together". Also in: mitmachen (participate), mitnehmen (take along), mitspielen (play along).',root:'Germanic root *kweman ("come, arrive"). Related to English "come". Same root in: bekommen (receive), ankommen (arrive), willkommen (welcome).'}},related:['bekommen','ankommen','mitmachen','mitnehmen']};
+  engineering.aufmachen={prefix:'auf',root:'machen',explanation:{pt:'<strong>auf-</strong> ("para cima/abertura") + <strong>machen</strong> ("fazer") = "abrir". O verbo "fazer" com o prefixo de abertura cria o verbo cotidiano para abrir.',en:'<strong>auf-</strong> ("upward/opening") + <strong>machen</strong> ("do/make") = "open". The verb "make" with the opening prefix creates the everyday verb for opening.'},parts:{pt:{prefix:'Mesmo prefixo de aufstehen: indica abertura ou movimento para cima. O par aufmachen/zumachen é um dos pares de opostos mais didáticos do alemão.',root:'Raiz germânica *makōn ("fazer, construir"). O verbo mais versátil do alemão. A mesma raiz em: zumachen (fechar), mitmachen (participar), ausmachen (desligar/combinar).'},en:{prefix:'Same prefix as aufstehen: indicates opening or upward movement. The pair aufmachen/zumachen is one of the most didactic opposite pairs in German.',root:'Germanic root *makōn ("make, build"). The most versatile German verb. Same root in: zumachen (close), mitmachen (participate), ausmachen (turn off/agree).'}},related:['zumachen','mitmachen','ausmachen','anmachen']};
+  engineering.zumachen={prefix:'zu',root:'machen',explanation:{pt:'<strong>zu-</strong> ("fechamento") + <strong>machen</strong> ("fazer") = "fechar". Oposto direto de aufmachen. O prefixo "zu" indica o estado fechado.',en:'<strong>zu-</strong> ("closed") + <strong>machen</strong> ("do/make") = "close". Direct opposite of aufmachen. The prefix "zu" indicates the closed state.'},parts:{pt:{prefix:'Prefixo separável que indica fechamento ou direção a um destino. Também em: zugeben (admitir), zunehmen (aumentar/engordar), Zukunft (futuro — literalmente "vinda para").',root:'A mesma raiz versátil de machen. O par auf/zumachen demonstra perfeitamente como prefixos criam opostos em alemão: auf (aberto) ↔ zu (fechado).'},en:{prefix:'Separable prefix indicating closing or direction to a destination. Also in: zugeben (admit), zunehmen (increase/gain weight), Zukunft (future — literally "coming to").',root:'The same versatile machen root. The pair auf/zumachen perfectly demonstrates how prefixes create opposites in German: auf (open) ↔ zu (closed).'}},related:['aufmachen','zugeben','zunehmen','abmachen']};
+  engineering.besuchen={prefix:'be',root:'suchen',explanation:{pt:'<strong>be-</strong> (prefixo INSEPARÁVEL) + <strong>suchen</strong> ("procurar/buscar") = "visitar". O prefixo be- direciona a busca para um objeto. Literalmente: "ir buscar alguém" → "visitar".',en:'<strong>be-</strong> (INSEPARABLE prefix) + <strong>suchen</strong> ("search/seek") = "visit". The prefix be- directs the search to an object. Literally: "go seek someone" → "visit".'},parts:{pt:{prefix:'Prefixo INSEPARÁVEL que torna o verbo transitivo. NUNCA se separa. Também em: bekommen (receber), besprechen (discutir), beschreiben (descrever). Sem "ge-" no Partizip II.',root:'Raiz germânica *sōkjan ("procurar, buscar"). Parente do inglês "seek". A mesma raiz em: versuchen (tentar), aussuchen (escolher), die Suche (a busca).'},en:{prefix:'INSEPARABLE prefix that makes the verb transitive. NEVER splits. Also in: bekommen (receive), besprechen (discuss), beschreiben (describe). No "ge-" in Partizip II.',root:'Germanic root *sōkjan ("seek, search"). Related to English "seek". Same root in: versuchen (try), aussuchen (choose), die Suche (the search).'}},related:['bekommen','besprechen','beschreiben','versuchen','aussuchen']};
+
+  // ===== BASE VERBS — root explanation with related words =====
+  engineering.sprechen={root:'sprech',rootFamily:'SPRECH/SPRACH',explanation:{pt:'A raiz <strong>SPRECH-</strong> (do proto-germânico *sprekaną) é uma das raízes mais produtivas do alemão. Gera verbos, substantivos e adjetivos por prefixação e derivação.',en:'The root <strong>SPRECH-</strong> (from Proto-Germanic *sprekaną) is one of the most productive roots in German. It generates verbs, nouns, and adjectives through prefixation and derivation.'},parts:{pt:{root:'Raiz proto-germânica *sprekaną ("falar, fazer barulho"). Parente do inglês "speak". A alternância vocálica e→a (sprechen→sprach→gesprochen) é típica dos verbos fortes da classe IV.'},en:{root:'Proto-Germanic root *sprekaną ("speak, make noise"). Related to English "speak". The vowel alternation e→a (sprechen→sprach→gesprochen) is typical of Class IV strong verbs.'}},related:['besprechen','versprechen','Sprache','sprachlos','Aussprache','entsprechen','widersprechen']};
+  engineering.stehen={root:'steh',rootFamily:'STEH/STAND',explanation:{pt:'A raiz <strong>STEH-</strong> (proto-germânico *standaną) é um dos pilares da derivação alemã. Com diferentes prefixos, gera verbos com significados radicalmente distintos.',en:'The root <strong>STEH-</strong> (Proto-Germanic *standaną) is one of the pillars of German derivation. With different prefixes, it generates verbs with radically different meanings.'},parts:{pt:{root:'Raiz germânica *standaną ("ficar de pé, permanecer"). Parente do inglês "stand" e do latim "stare". Extremamente produtiva: gera dezenas de verbos prefixados com sentidos abstratos.'},en:{root:'Germanic root *standaną ("stand, remain"). Related to English "stand" and Latin "stare". Extremely productive: generates dozens of prefixed verbs with abstract meanings.'}},related:['verstehen','bestehen','entstehen','aufstehen','ausstehen','vorstehen']};
+  engineering.gehen={root:'geh',rootFamily:'GEH/GANG',explanation:{pt:'A raiz <strong>GEH-</strong> (proto-germânico *ganganą) tem duas formas: "geh-" (presente) e "gang-" (passado/Partizip). Essa dualidade é um resquício do sistema de ablaut germânico.',en:'The root <strong>GEH-</strong> (Proto-Germanic *ganganą) has two forms: "geh-" (present) and "gang-" (past/Partizip). This duality is a remnant of the Germanic ablaut system.'},parts:{pt:{root:'Raiz indo-europeia *ǵʰeh₁- ("ir, deixar, abandonar"). O alemão preserva duas formas da mesma raiz: geh- (presente) e gang- (passado) — como se fossem duas palavras diferentes que se fundiram.'},en:{root:'Indo-European root *ǵʰeh₁- ("go, leave, abandon"). German preserves two forms of the same root: geh- (present) and gang- (past) — as if two different words merged.'}},related:['ausgehen','umgehen','vergehen','nachgehen','aufgehen','mitgehen','der Gang']};
+  engineering.kommen={root:'komm',rootFamily:'KOMM/KUNFT',explanation:{pt:'A raiz <strong>KOMM-</strong> (proto-germânico *kwemaną) gera verbos de movimento e também substantivos abstratos. A alternância kom-/kun- é herança do ablaut.',en:'The root <strong>KOMM-</strong> (Proto-Germanic *kwemaną) generates movement verbs and also abstract nouns. The kom-/kun- alternation is an ablaut inheritance.'},parts:{pt:{root:'Raiz germânica *kwemaną ("vir, chegar"). Parente do inglês "come". A forma "Kunft" (vinda) aparece em Zukunft (futuro), Ankunft (chegada), Herkunft (origem).'},en:{root:'Germanic root *kwemaną ("come, arrive"). Related to English "come". The form "Kunft" (coming) appears in Zukunft (future), Ankunft (arrival), Herkunft (origin).'}},related:['bekommen','ankommen','mitkommen','Zukunft','Ankunft','Herkunft']};
+  engineering.sehen={root:'seh',rootFamily:'SEH/SICHT',explanation:{pt:'A raiz <strong>SEH-</strong> alterna com a forma <strong>SICHT-</strong> (de *sihtiz). Essa dupla raiz é comum em verbos fortes germânicos: uma forma para presente, outra para derivações nominais.',en:'The root <strong>SEH-</strong> alternates with the form <strong>SICHT-</strong> (from *sihtiz). This double root is common in Germanic strong verbs: one form for present, another for nominal derivations.'},parts:{pt:{root:'Raiz germânica *sehwaną ("ver, perceber"). A forma "Sicht" gera substantivos: Ansicht (visão/opinião), Aussicht (vista/perspectiva), Absicht (intenção). A raiz verbal "seh-" gera verbos prefixados.'},en:{root:'Germanic root *sehwaną ("see, perceive"). The form "Sicht" generates nouns: Ansicht (view/opinion), Aussicht (outlook), Absicht (intention). The verbal root "seh-" generates prefixed verbs.'}},related:['aussehen','ansehen','fernsehen','die Sicht','die Ansicht','die Aussicht']};
+  engineering.geben={root:'geb',rootFamily:'GEB/GIB/GAB',explanation:{pt:'A raiz <strong>GEB-</strong> apresenta três formas: geb- (presente), gib- (2ª/3ª singular), gab- (passado). Um verbo bitransitivo que rege DATIVO + ACUSATIVO.',en:'The root <strong>GEB-</strong> has three forms: geb- (present), gib- (2nd/3rd singular), gab- (past). A bitransitive verb governing DATIVE + ACCUSATIVE.'},parts:{pt:{root:'Raiz indo-europeia *gʰabʰ- ("dar, receber"). A expressão "es gibt" (há/existe) usa o verbo "dar" para expressar existência — um padrão típico de línguas germânicas.'},en:{root:'Indo-European root *gʰabʰ- ("give, receive"). The expression "es gibt" (there is/are) uses the verb "give" to express existence — a typical Germanic language pattern.'}},related:['aufgeben','angeben','zugeben','ausgeben','die Gabe','die Aufgabe']};
+  engineering.nehmen={root:'nehm',rootFamily:'NEHM/NIMM/NAHM',explanation:{pt:'A raiz <strong>NEHM-</strong> é uma das mais transformadas do alemão: nehm → nimm (singular) → nahm (passado) → genommen (Partizip). Quatro formas diferentes da mesma raiz.',en:'The root <strong>NEHM-</strong> is one of the most transformed in German: nehm → nimm (singular) → nahm (past) → genommen (Partizip). Four different forms of the same root.'},parts:{pt:{root:'Raiz germânica *nemaną ("tomar, pegar"). Extremamente produtiva com prefixos: mitnehmen, teilnehmen, annehmen, abnehmen, zunehmen, unternehmen. Cada prefixo cria um verbo totalmente novo.'},en:{root:'Germanic root *nemaną ("take, grasp"). Extremely productive with prefixes: mitnehmen (take along), teilnehmen (participate), annehmen (accept), abnehmen (lose weight), zunehmen (gain weight), unternehmen (undertake).'}},related:['mitnehmen','teilnehmen','annehmen','abnehmen','zunehmen','unternehmen']};
+  engineering.fahren={root:'fahr',rootFamily:'FAHR/FUHR',explanation:{pt:'A raiz <strong>FAHR-</strong> pertence à família a→ä (classe VI de verbos fortes): fahren → du fährst. A alternância vocálica no singular é marca registrada desta classe.',en:'The root <strong>FAHR-</strong> belongs to the a→ä family (Class VI strong verbs): fahren → du fährst. The vowel alternation in singular is the hallmark of this class.'},parts:{pt:{root:'Raiz germânica *faraną ("viajar, ir, mover-se"). Parente do inglês "fare" (viajar) e "ferry" (balsa). O Partizip "gefahren" preserva o "a" original.'},en:{root:'Germanic root *faraną ("travel, go, move"). Related to English "fare" (travel) and "ferry". The Partizip "gefahren" preserves the original "a".'}},related:['erfahren','mitfahren','abfahren','die Fahrt','die Gefahr','die Erfahrung']};
+  engineering.machen={root:'mach',explanation:{pt:'A raiz <strong>MACH-</strong> (germânico *makōn) é o verbo mais versátil do alemão. Funciona como "coringa" que substitui dezenas de verbos específicos e gera inúmeros compostos com prefixos.',en:'The root <strong>MACH-</strong> (Germanic *makōn) is the most versatile German verb. It works as a "wildcard" replacing dozens of specific verbs and generating numerous prefix compounds.'},parts:{pt:{root:'Raiz germânica *makōn ("fazer, construir, preparar"). Parente do inglês "make". Com prefixos, gera uma família extensa: aufmachen (abrir), zumachen (fechar), mitmachen (participar), ausmachen (desligar/combinar/constituir).'},en:{root:'Germanic root *makōn ("make, build, prepare"). Related to English "make". With prefixes, generates an extensive family: aufmachen (open), zumachen (close), mitmachen (participate), ausmachen (turn off/agree/constitute).'}},related:['aufmachen','zumachen','mitmachen','ausmachen','anmachen','abmachen']};
+  engineering.schreiben={root:'schreib',rootFamily:'SCHREIB/SCHRIEB',explanation:{pt:'A raiz <strong>SCHREIB-</strong> (do latim *skrībaną, "riscar, escrever") compartilha origem com o português "escrever". O Partizip "geschrieben" mostra o padrão ei→ie (classe I forte).',en:'The root <strong>SCHREIB-</strong> (from Latin *skrībaną, "scratch, write") shares origin with Portuguese "escrever". The Partizip "geschrieben" shows the ei→ie pattern (Class I strong).'},parts:{pt:{root:'Raiz latina *skrībaną ("escrever, riscar"). A mesma raiz em português (escrever), inglês (scribe), francês (écrire). O alemão antigo adotou a palavra dos romanos e a germanizou.'},en:{root:'Latin root *skrībaną ("write, scratch"). Same root in Portuguese (escrever), English (scribe), French (écrire). Old German adopted the word from the Romans and germanicized it.'}},related:['beschreiben','verschreiben','abschreiben','unterschreiben','die Schrift','schriftlich']};
+  engineering.finden={root:'find',rootFamily:'FIND/FUND',explanation:{pt:'A raiz <strong>FIND-</strong> tem Partizip "gefunden" (i→u, classe III forte). O verbo cobre tanto "encontrar" (físico) quanto "achar" (opinião).',en:'The root <strong>FIND-</strong> has Partizip "gefunden" (i→u, Class III strong). The verb covers both "find" (physical) and "think/consider" (opinion).'},parts:{pt:{root:'Raiz germânica *finþaną ("encontrar, descobrir"). Parente do inglês "find". A raiz "fund" aparece em: erfinden (inventar), empfinden (sentir), der Fund (achado/descoberta).'},en:{root:'Germanic root *finþaną ("find, discover"). Related to English "find". The "fund" root appears in: erfinden (invent), empfinden (feel), der Fund (finding/discovery).'}},related:['erfinden','empfinden','befinden','stattfinden','der Fund']};
+  engineering.denken={root:'denk',rootFamily:'DENK/DACHT',explanation:{pt:'A raiz <strong>DENK-</strong> tem passado "dachte" e Partizip "gedacht" (irregular). A transformação -nk- → -cht- é um fenômeno histórico do alto alemão.',en:'The root <strong>DENK-</strong> has past "dachte" and Partizip "gedacht" (irregular). The -nk- → -cht- transformation is a historical Old High German phenomenon.'},parts:{pt:{root:'Raiz germânica *þankjaną ("pensar, agradecer"). Parente do inglês "think" e "thank". A conexão pensar-agradecer: "pensar em alguém" → "ser grato". Em alemão: denken (pensar) e danken (agradecer).'},en:{root:'Germanic root *þankjaną ("think, thank"). Related to English "think" and "thank". The think-thank connection: "think of someone" → "be grateful". In German: denken (think) and danken (thank).'}},related:['nachdenken','bedenken','ausdenken','der Gedanke','das Denkmal','danken']};
+  engineering.arbeiten={root:'arbeit',explanation:{pt:'A raiz <strong>ARBEIT-</strong> (germânico *arbaidiz) originalmente significava "sofrimento, labuta". Hoje é o termo neutro para trabalho. O radical dental (-t) exige -e- extra antes de -st e -t.',en:'The root <strong>ARBEIT-</strong> (Germanic *arbaidiz) originally meant "suffering, toil". Today it is the neutral term for work. The dental stem (-t) requires extra -e- before -st and -t.'},parts:{pt:{root:'Raiz germânica *arbaidiz ("labuta, sofrimento, esforço"). A evolução de "sofrimento" para "trabalho" é paralela ao latim "labor" (trabalho/sofrimento) e ao francês "travail" (originalmente "tortura").'},en:{root:'Germanic root *arbaidiz ("toil, suffering, effort"). The evolution from "suffering" to "work" parallels Latin "labor" (work/suffering) and French "travail" (originally "torture").'}},related:['bearbeiten','verarbeiten','mitarbeiten','die Arbeit','der Arbeiter']};
+  engineering.helfen={root:'helf',rootFamily:'HELF/HILF',explanation:{pt:'A raiz <strong>HELF-</strong> sofre mudança e→i (classe III forte): helfen → du hilfst. IMPORTANTE: rege DATIVO — um dos exemplos mais didáticos de regência verbal alemã.',en:'The root <strong>HELF-</strong> undergoes e→i change (Class III strong): helfen → du hilfst. IMPORTANT: governs DATIVE — one of the most didactic examples of German verb governance.'},parts:{pt:{root:'Raiz germânica *helpaną ("ajudar, socorrer"). Parente do inglês "help". A regência dativa (ich helfe DEM Mann) é uma das características que distinguem o alemão das línguas românicas.'},en:{root:'Germanic root *helpaną ("help, aid"). Related to English "help". The dative governance (ich helfe DEM Mann) is one of the characteristics that distinguish German from Romance languages.'}},related:['mithelfen','verhelfen','aushelfen','die Hilfe','hilflos']};
+  engineering.lernen={root:'lern',rootFamily:'LERN/LEHR',explanation:{pt:'A raiz <strong>LERN-</strong> compartilha origem com "lehren" (ensinar). Originalmente, aprender e ensinar eram vistos como dois lados da mesma moeda — a mesma raiz germânica *liznōną.',en:'The root <strong>LERN-</strong> shares origin with "lehren" (teach). Originally, learning and teaching were seen as two sides of the same coin — the same Germanic root *liznōną.'},parts:{pt:{root:'Raiz germânica *liznōną ("seguir uma trilha de conhecimento"). Parente do inglês "learn". A mesma raiz em: lehren (ensinar), der Lehrer (professor), die Lehre (ensinamento/doutrina).'},en:{root:'Germanic root *liznōną ("follow a trail of knowledge"). Related to English "learn". Same root in: lehren (teach), der Lehrer (teacher), die Lehre (teaching/doctrine).'}},related:['erlernen','verlernen','kennenlernen','lehren','der Lehrer','die Lehre']};
+  engineering.schlafen={root:'schlaf',rootFamily:'SCHLAF/SCHLIEF',explanation:{pt:'A raiz <strong>SCHLAF-</strong> pertence à família a→ä: schlafen → du schläfst (classe VII forte). A mesma mudança vocálica de fahren e tragen.',en:'The root <strong>SCHLAF-</strong> belongs to the a→ä family: schlafen → du schläfst (Class VII strong). The same vowel change as fahren and tragen.'},parts:{pt:{root:'Raiz germânica *slēpaną ("dormir"). Parente do inglês "sleep". A mudança a→ä no singular (du schläfst) é 100% consistente em toda a família de verbos fortes com "a" no radical.'},en:{root:'Germanic root *slēpaną ("sleep"). Related to English "sleep". The a→ä change in singular (du schläfst) is 100% consistent across the entire family of strong verbs with "a" in the stem.'}},related:['einschlafen','ausschlafen','verschlafen','der Schlaf']};
+  engineering.trinken={root:'trink',rootFamily:'TRINK/TRUNK',explanation:{pt:'A raiz <strong>TRINK-</strong> tem Partizip "getrunken" (i→u, classe III forte). O mesmo padrão de finden (gefunden) e singen (gesungen).',en:'The root <strong>TRINK-</strong> has Partizip "getrunken" (i→u, Class III strong). Same pattern as finden (gefunden) and singen (gesungen).'},parts:{pt:{root:'Raiz germânica *drinkaną ("beber"). Parente do inglês "drink". A alternância i→u no Partizip é um marcador da classe III de verbos fortes: trinken→getrunken, singen→gesungen, finden→gefunden.'},en:{root:'Germanic root *drinkaną ("drink"). Related to English "drink". The i→u alternation in Partizip is a marker of Class III strong verbs: trinken→getrunken, singen→gesungen, finden→gefunden.'}},related:['austrinken','ertrinken','betrinken','der Trunk','trinkbar']};
+  engineering.essen={root:'ess',rootFamily:'ESS/ASS',explanation:{pt:'A raiz <strong>ESS-</strong> sofre mudança e→i com fusão: ess + st → isst. O radical já termina em "ss", então a terminação se funde sem adição de consoante extra.',en:'The root <strong>ESS-</strong> undergoes e→i with fusion: ess + st → isst. The stem already ends in "ss", so the ending merges without extra consonants.'},parts:{pt:{root:'Raiz indo-europeia *h₁ed- ("comer"). Parente do inglês "eat" e do latim "edere". A forma "isst" (come) é resultado de assimilação histórica: *it-ti → *is-ti → isst.'},en:{root:'Indo-European root *h₁ed- ("eat"). Related to English "eat" and Latin "edere". The form "isst" (eats) results from historical assimilation: *it-ti → *is-ti → isst.'}},related:['aufessen','fressen','das Essen','essbar']};
+  engineering.lesen={root:'les',rootFamily:'LES/LAS',explanation:{pt:'A raiz <strong>LES-</strong> tem mudança e→ie (mais rara que e→i): lesen → du liest. O "s" intervocálico soa como /z/ em "lese" e como /s/ em "liest".',en:'The root <strong>LES-</strong> has e→ie change (rarer than e→i): lesen → du liest. The intervocalic "s" sounds like /z/ in "lese" and like /s/ in "liest".'},parts:{pt:{root:'Raiz germânica *lesaną ("coletar, reunir, ler"). Originalmente significava "colher/coletar" — ler era "colher informações escritas". A evolução semântica é paralela ao latim "legere" (ler/colher).'},en:{root:'Germanic root *lesaną ("collect, gather, read"). Originally meant "gather/collect" — reading was "gathering written information". The semantic evolution parallels Latin "legere" (read/gather).'}},related:['vorlesen','durchlesen','die Lese','lesbar']};
+  engineering.kaufen={root:'kauf',explanation:{pt:'A raiz <strong>KAUF-</strong> (do latim *caupo, "comerciante") foi emprestada do latim pelos germânicos através do comércio romano. Hoje é a raiz central do vocabulário comercial alemão.',en:'The root <strong>KAUF-</strong> (from Latin *caupo, "merchant") was borrowed from Latin by Germanic peoples through Roman trade. Today it is the central root of German commercial vocabulary.'},parts:{pt:{root:'Raiz latina *caupo ("comerciante, taberneiro"). Emprestada pelos germânicos há ~2000 anos. A mesma raiz em: verkaufen (vender), einkaufen (fazer compras), der Kauf (a compra), das Kaufhaus (loja de departamentos).'},en:{root:'Latin root *caupo ("merchant, innkeeper"). Borrowed by Germanic peoples ~2000 years ago. Same root in: verkaufen (sell), einkaufen (shop), der Kauf (purchase), das Kaufhaus (department store).'}},related:['verkaufen','einkaufen','der Kauf','das Kaufhaus']};
+  engineering.spielen={root:'spiel',explanation:{pt:'A raiz <strong>SPIEL-</strong> (germânico *spilōną) cobre três conceitos que em português são palavras diferentes: jogar, brincar E tocar (instrumento).',en:'The root <strong>SPIEL-</strong> (Germanic *spilōną) covers three concepts that are different words in Portuguese: play (game), play (child), AND play (instrument).'},parts:{pt:{root:'Raiz germânica *spilōną ("dançar, pular, brincar"). A evolução de "dançar" para "jogar/brincar/tocar" mostra como o alemão unificou atividades lúdicas sob um único verbo. Com prefixos: vorspielen (tocar/apresentar), mitspielen (jogar junto), abspielen (reproduzir).'},en:{root:'Germanic root *spilōną ("dance, jump, play"). The evolution from "dance" to "play/perform" shows how German unified playful activities under a single verb. With prefixes: vorspielen (perform), mitspielen (play along), abspielen (play back).'}},related:['vorspielen','mitspielen','abspielen','das Spiel']};
+  engineering.singen={root:'sing',rootFamily:'SING/SANG',explanation:{pt:'A raiz <strong>SING-</strong> tem Partizip "gesungen" (i→u, classe III forte). Mesmo padrão de trinken e finden.',en:'The root <strong>SING-</strong> has Partizip "gesungen" (i→u, Class III strong). Same pattern as trinken and finden.'},parts:{pt:{root:'Raiz germânica *singwaną ("cantar, entoar"). Parente do inglês "sing". A classe III forte (i→a→u) é uma das mais numerosas: singen→sang→gesungen, trinken→trank→getrunken, springen→sprang→gesprungen.'},en:{root:'Germanic root *singwaną ("sing, chant"). Related to English "sing". Class III strong (i→a→u) is one of the most numerous: singen→sang→gesungen, trinken→trank→getrunken, springen→sprang→gesprungen.'}},related:['vorsingen','mitsingen','der Gesang']};
+  engineering.tragen={root:'trag',rootFamily:'TRAG/TRÄG',explanation:{pt:'A raiz <strong>TRAG-</strong> pertence à família a→ä (classe VI): tragen → du trägst. A mesma classe de fahren e schlafen. Significa tanto "carregar" quanto "vestir".',en:'The root <strong>TRAG-</strong> belongs to the a→ä family (Class VI): tragen → du trägst. Same class as fahren and schlafen. Means both "carry" and "wear".'},parts:{pt:{root:'Raiz germânica *draganą ("puxar, arrastar, carregar"). Parente do inglês "drag" e "draw". A evolução "arrastar" → "carregar" → "vestir" mostra como o significado se expandiu.'},en:{root:'Germanic root *draganą ("pull, drag, carry"). Related to English "drag" and "draw". The evolution "drag" → "carry" → "wear" shows how the meaning expanded.'}},related:['vertragen','ertragen','beitragen','der Träger']};
+  engineering.wohnen={root:'wohn',explanation:{pt:'A raiz <strong>WOHN-</strong> (germânico *wunēn) originalmente significava "estar contente, estar acostumado". A conexão: morar é estar em um lugar onde se está contente.',en:'The root <strong>WOHN-</strong> (Germanic *wunēn) originally meant "be content, be accustomed". The connection: to dwell is to be in a place where one is content.'},parts:{pt:{root:'Raiz germânica *wunēn ("estar acostumado, estar contente"). A evolução semântica: "estar contente em um lugar" → "habitar". A mesma raiz em: die Wohnung (apartamento), bewohnen (habitar), wohnlich (aconchegante).'},en:{root:'Germanic root *wunēn ("be accustomed, be content"). Semantic evolution: "be content in a place" → "dwell". Same root in: die Wohnung (apartment), bewohnen (inhabit), wohnlich (cozy).'}},related:['bewohnen','die Wohnung','das Wohnzimmer']};
+  engineering.reisen={root:'reis',explanation:{pt:'A raiz <strong>REIS-</strong> (germânico *reisaną) significa "levantar-se, erguer-se" — viajar era originalmente "levantar-se e partir". Hoje é o verbo de viagem por excelência.',en:'The root <strong>REIS-</strong> (Germanic *reisaną) means "rise, get up" — traveling was originally "rising up and departing". Today it is the verb of travel par excellence.'},parts:{pt:{root:'Raiz germânica *reisaną ("levantar-se, erguer-se, partir"). Parente do inglês "rise" e "raise". Com prefixos, cobre todos os aspectos de viagem: verreisen (partir em viagem), abreisen (partir), einreisen (entrar no país).'},en:{root:'Germanic root *reisaną ("rise, get up, depart"). Related to English "rise" and "raise". With prefixes, covers all aspects of travel: verreisen (go on a trip), abreisen (depart), einreisen (enter a country).'}},related:['verreisen','abreisen','einreisen','ausreisen','die Reise']};
+  engineering.wissen={root:'wiss',rootFamily:'WISS/WUSST',explanation:{pt:'A raiz <strong>WISS-</strong> tem comportamento híbrido: singular como modal (ich weiß, sem terminação), plural como verbo normal (wir wissen). Usa ß no singular.',en:'The root <strong>WISS-</strong> has hybrid behavior: singular modal-like (ich weiß, no ending), plural normal verb (wir wissen). Uses ß in singular.'},parts:{pt:{root:'Raiz indo-europeia *weyd- ("ver, saber"). A conexão ver→saber é universal: "eu vi" → "eu sei". A mesma raiz em sânscrito "veda" (conhecimento), latim "videre" (ver), inglês "wise" e "wit".'},en:{root:'Indo-European root *weyd- ("see, know"). The see→know connection is universal: "I have seen" → "I know". Same root in Sanskrit "veda" (knowledge), Latin "videre" (see), English "wise" and "wit".'}},related:['das Wissen','die Wissenschaft','gewiss','bewusst']};
+  engineering.werden={root:'werd',rootFamily:'WERD/WURD/WORD',explanation:{pt:'A raiz <strong>WERD-</strong> é uma das mais importantes do alemão: 3 funções (verbo pleno, auxiliar de futuro, auxiliar de passiva). Supletivo: as formas vêm de raízes diferentes.',en:'The root <strong>WERD-</strong> is one of the most important in German: 3 functions (full verb, future auxiliary, passive auxiliary). Suppletive: forms come from different roots.'},parts:{pt:{root:'Raiz germânica *werþaną ("tornar-se, vir a ser"). O verbo mais polivalente do alemão: Er wird Arzt (torna-se médico), Ich werde reisen (viajarei), Der Brief wird geschrieben (a carta é escrita).'},en:{root:'Germanic root *werþaną ("become, come to be"). The most polyvalent German verb: Er wird Arzt (becomes a doctor), Ich werde reisen (I will travel), Der Brief wird geschrieben (the letter is being written).'}},related:['die Zukunft','die Gegenwart','geworden']};
+  engineering.kochen={root:'koch',explanation:{pt:'A raiz <strong>KOCH-</strong> (do latim *coquus, "cozinheiro") entrou no alemão via latim. É uma das palavras mais transparentes para falantes de português.',en:'The root <strong>KOCH-</strong> (from Latin *coquus, "cook") entered German via Latin. It is one of the most transparent words for Portuguese speakers.'},parts:{pt:{root:'Raiz latina *coquere ("cozinhar, ferver"). Parente do português "cozinhar" e do inglês "cook". O radical é regular e gera: der Koch (cozinheiro), die Küche (cozinha), aufkochen (ferver).'},en:{root:'Latin root *coquere ("cook, boil"). Related to Portuguese "cozinhar" and English "cook". The stem is regular and generates: der Koch (cook), die Küche (kitchen), aufkochen (bring to a boil).'}},related:['aufkochen','der Koch','die Küche']};
+  engineering.heißen={root:'heiß',explanation:{pt:'A raiz <strong>HEISS-</strong> tem dois sentidos: "chamar-se" e "significar". O radical termina em ß → du heißt (não "heißst").',en:'The root <strong>HEISS-</strong> has two meanings: "be called" and "mean". The stem ends in ß → du heißt (not "heißst").'},parts:{pt:{root:'Raiz germânica *haitaną ("chamar, nomear, ordenar"). Parente do inglês arcaico "hight" (chamado). A evolução: "dar ordem/nome" → "chamar-se". Relacionado a "heiß" (quente) — originalmente "invocar com intensidade".'},en:{root:'Germanic root *haitaną ("call, name, command"). Related to archaic English "hight" (called). The evolution: "give command/name" → "be called". Related to "heiß" (hot) — originally "invoke with intensity".'}},related:['die Heizung','heiß','verheißen']};
+  engineering.backen={root:'back',rootFamily:'BACK/BÄCK',explanation:{pt:'A raiz <strong>BACK-</strong> é um verbo misto: aceita "du backst" (regular) OU "du bäckst" (com trema). Raro caso de opcionalidade na conjugação alemã.',en:'The root <strong>BACK-</strong> is a mixed verb: accepts "du backst" (regular) OR "du bäckst" (with umlaut). Rare case of optionality in German conjugation.'},parts:{pt:{root:'Raiz germânica *bakaną ("assar, cozinhar no forno"). Parente do inglês "bake". A opcionalidade backst/bäckst é um resquício da transição do sistema forte para o fraco — o verbo está "no meio do caminho".'},en:{root:'Germanic root *bakaną ("bake, cook in oven"). Related to English "bake". The backst/bäckst optionality is a remnant of the transition from strong to weak system — the verb is "midway".'}},related:['der Bäcker','die Bäckerei','gebacken']};
+
+  // ===== SUFFIX-BASED DERIVATIONS =====
+  engineering.studieren={root:'studier',suffix:'ier',explanation:{pt:'A raiz <strong>STUDIER-</strong> + sufixo <strong>-ieren</strong> (do latim/francês). Verbos em -ieren NÃO recebem "ge-" no Partizip II e são sempre regulares.',en:'The root <strong>STUDIER-</strong> + suffix <strong>-ieren</strong> (from Latin/French). -ieren verbs do NOT get "ge-" in Partizip II and are always regular.'},parts:{pt:{prefix:'',root:'Raiz latina *studēre ("aplicar-se, dedicar-se"). A mesma raiz em português "estudar", inglês "study".',suffix:'Sufixo -ieren: marca verbos de origem latina/francesa. Regra fixa: SEM "ge-" no Partizip (studiert, não "gestudiert"). Também em: telefonieren, funktionieren, marschieren.'},en:{prefix:'',root:'Latin root *studēre ("apply oneself, dedicate"). Same root in Portuguese "estudar", English "study".',suffix:'Suffix -ieren: marks verbs of Latin/French origin. Fixed rule: NO "ge-" in Partizip (studiert, not "gestudiert"). Also in: telefonieren, funktionieren, marschieren.'}},related:['studieren','telefonieren','funktionieren']};
+
+  // Helper: render decomposition for a verb
+  var renderWordEngineering=function(verb,isEn){
+    var key=verb.infinitive;
+    var data=engineering[key];
+    if(!data)return'';
+
+    var h='';
+    h+='<div class="word-eng">';
+    h+='<div class="word-eng-header"><span class="we-icon">⚙️</span><span class="we-title">'+(isEn?'WORD ENGINEERING — ':'ENGENHARIA DA PALAVRA — ')+key+'</span>';
+    if(data.rootFamily)h+='<span class="we-family-badge">'+data.rootFamily+'</span>';
+    h+='</div>';
+    h+='<div class="word-eng-body">';
+
+    // Decomposition visual — premium block
+    h+='<div class="we-decomp">';
+    if(data.prefix){
+      h+='<span class="we-decomp-part prefix">'+data.prefix+'-</span>';
+      h+='<span class="we-decomp-plus">+</span>';
+    }
+    h+='<span class="we-decomp-part root">'+(data.root||key)+'</span>';
+    if(data.suffix){
+      h+='<span class="we-decomp-plus">+</span>';
+      h+='<span class="we-decomp-part suffix">-'+data.suffix+'</span>';
+    }
+    if(data.prefix||data.suffix){
+      h+='<span class="we-decomp-equals">=</span>';
+      h+='<span class="we-decomp-result">'+key+'</span>';
+    }
+    h+='</div>';
+
+    // Result explanation — always visible
+    if(data.explanation){
+      h+='<div class="we-result">'+(isEn?'<strong>Logic:</strong> ':'<strong>Lógica:</strong> ')+(data.explanation[isEn?'en':'pt']||'')+'</div>';
+    }
+
+    // Expandable part analysis
+    h+='<div class="we-parts-container">';
+
+    // Prefix expandable
+    if(data.prefix&&data.parts){
+      var preInfo=data.parts[isEn?'en':'pt']||{};
+      h+='<div class="we-expandable">';
+      h+='<div class="we-expand-header" onclick="var c=this.nextElementSibling;c.classList.toggle(\'open\');this.querySelector(\'.we-chevron\').classList.toggle(\'open\')"><span class="we-part-label pre">'+(isEn?'PREFIX':'PREFIXO')+': <strong>'+data.prefix+'-</strong></span><span class="we-chevron">▼</span></div>';
+      h+='<div class="we-expand-content"><div class="we-part-text">'+(preInfo.prefix||'')+'</div></div>';
+      h+='</div>';
+    }
+
+    // Root expandable
+    if(data.parts){
+      var rootInfo=data.parts[isEn?'en':'pt']||{};
+      h+='<div class="we-expandable">';
+      h+='<div class="we-expand-header" onclick="var c=this.nextElementSibling;c.classList.toggle(\'open\');this.querySelector(\'.we-chevron\').classList.toggle(\'open\')"><span class="we-part-label rt">'+(isEn?'ROOT':'RAIZ')+': <strong>'+(data.root||key)+'</strong></span><span class="we-chevron">▼</span></div>';
+      h+='<div class="we-expand-content"><div class="we-part-text">'+(rootInfo.root||'')+'</div></div>';
+      h+='</div>';
+    }
+
+    // Suffix expandable
+    if(data.suffix&&data.parts){
+      var sufInfo=data.parts[isEn?'en':'pt']||{};
+      h+='<div class="we-expandable">';
+      h+='<div class="we-expand-header" onclick="var c=this.nextElementSibling;c.classList.toggle(\'open\');this.querySelector(\'.we-chevron\').classList.toggle(\'open\')"><span class="we-part-label" style="color:#b8860b">'+(isEn?'SUFFIX':'SUFIXO')+': <strong>-'+data.suffix+'</strong></span><span class="we-chevron">▼</span></div>';
+      h+='<div class="we-expand-content"><div class="we-part-text">'+(sufInfo.suffix||'')+'</div></div>';
+      h+='</div>';
+    }
+
+    h+='</div>';
+
+    // Related words as tag cloud
+    if(data.related&&data.related.length>0){
+      h+='<div class="we-related-section"><span class="we-related-label">'+(isEn?'Related words sharing this root:':'Palavras relacionadas que compartilham esta raiz:')+'</span>';
+      h+='<div class="we-related">';
+      data.related.forEach(function(r){
+        h+='<span class="we-related-tag">'+r+'</span>';
+      });
+      h+='</div></div>';
+    }
+
+    h+='</div></div>';
+    return h;
+  };
+
+  var API={
+    render:renderWordEngineering,
+    engineering:engineering
+  };
+
+  window.GermanWordEngineeringSystem=API;
+  return API;
+})();
+// ========== END WORD ENGINEERING SYSTEM ==========
+
 function renderConjugationTrainer(chId){
   const container=$('#conj-trainer-'+chId);
   if(!container)return;
@@ -4340,12 +4533,87 @@ function resetConjugation(chId,vIdx){
 const GPS={skills:{verbs:{regular:0,irregular:0,modal:0,separable:0,auxiliary:0},grammar:{wordOrder:0,conjugation:0,articles:0,cases:{nom:0,acc:0,dat:0},tenses:0,sentenceStructure:0},vocabulary:{total:0,categories:{}},patterns:{vowelChange:0,separablePrefix:0,modalStructure:0,v2Rule:0,subordinateClause:0,caseSystem:0,articleGender:0},overall:0},memory:{},history:[],rank:{level:1,title:'Iniciante',xp:0,nextXP:100},weaknesses:[],strengths:[],profile:{vocabRate:0,grammarRate:0,patternRate:0,consistency:0},lastSave:0};
 
 function initGPS(){
-  try{const r=localStorage.getItem('deutschmeister_evo');if(r){const p=JSON.parse(r);GPS.skills=p.skills||GPS.skills;GPS.memory=p.memory||{};GPS.history=p.history||[];GPS.rank=p.rank||GPS.rank;GPS.profile=p.profile||GPS.profile;GPS.lastSave=p.lastSave||0};
-  // Apply memory decay
-  const now=Date.now();const decayDays=(now-GPS.lastSave)/(1000*60*60*24);if(decayDays>0.5&&GPS.lastSave>0){applyMemoryDecay(decayDays)};
-  GPS.lastSave=now}catch(e){}
+  try{
+    // 1. Try loading from centralized state.evo first
+    var evoData=null;
+    if(state.evo){
+      evoData=state.evo;
+    }else{
+      // 2. Fall back: migrate from old separate localStorage key
+      var r=localStorage.getItem('deutschmeister_evo');
+      if(r){evoData=JSON.parse(r);localStorage.removeItem('deutschmeister_evo')}
+    }
+    // 3. Apply loaded data or keep defaults
+    if(evoData){
+      GPS.skills=evoData.skills||GPS.skills;
+      GPS.memory=evoData.memory||{};
+      GPS.history=evoData.history||[];
+      GPS.rank=evoData.rank||GPS.rank;
+      GPS.profile=evoData.profile||GPS.profile;
+      GPS.lastSave=evoData.lastSave||0;
+    }
+    // 4. Apply memory decay for inactive periods
+    var now=Date.now();var decayDays=(now-GPS.lastSave)/(1000*60*60*24);
+    if(decayDays>0.5&&GPS.lastSave>0){applyMemoryDecay(decayDays)}
+    GPS.lastSave=now;
+    // 5. Save to centralized state
+    state.evo=getEvoSnapshot();
+    saveState();
+  }catch(e){}
 }
-function saveGPS(){try{GPS.lastSave=Date.now();localStorage.setItem('deutschmeister_evo',JSON.stringify({skills:GPS.skills,memory:GPS.memory,history:GPS.history,rank:GPS.rank,profile:GPS.profile,lastSave:GPS.lastSave}))}catch(e){}}
+
+// Snapshot the full GPS state for centralized persistence
+function getEvoSnapshot(){
+  return {
+    skills:GPS.skills,
+    memory:GPS.memory,
+    history:GPS.history,
+    rank:GPS.rank,
+    profile:GPS.profile,
+    lastSave:GPS.lastSave,
+    weaknesses:GPS.weaknesses,
+    strengths:GPS.strengths
+  };
+}
+
+// Save GPS to centralized state and persist
+function saveGPS(){
+  try{
+    GPS.lastSave=Date.now();
+    state.evo=getEvoSnapshot();
+    saveState();
+  }catch(e){}
+}
+
+// Completely reset ALL evolution data
+function resetGPS(){
+  GPS.skills={verbs:{regular:0,irregular:0,modal:0,separable:0,auxiliary:0},grammar:{wordOrder:0,conjugation:0,articles:0,cases:{nom:0,acc:0,dat:0},tenses:0,sentenceStructure:0},vocabulary:{total:0,categories:{}},patterns:{vowelChange:0,separablePrefix:0,modalStructure:0,v2Rule:0,subordinateClause:0,caseSystem:0,articleGender:0},overall:0};
+  GPS.memory={};
+  GPS.history=[];
+  GPS.rank={level:1,title:'Iniciante',xp:0,nextXP:100};
+  GPS.weaknesses=[];
+  GPS.strengths=[];
+  GPS.profile={vocabRate:0,grammarRate:0,patternRate:0,consistency:0};
+  GPS.lastSave=Date.now();
+  state.evo=null;
+}
+
+// Sync GPS from state.evo after import
+function syncGPSFromState(){
+  try{
+    if(!state.evo)return;
+    var evo=state.evo;
+    GPS.skills=evo.skills||GPS.skills;
+    GPS.memory=evo.memory||{};
+    GPS.history=evo.history||[];
+    GPS.rank=evo.rank||GPS.rank;
+    GPS.profile=evo.profile||GPS.profile;
+    GPS.lastSave=evo.lastSave||Date.now();
+    GPS.weaknesses=evo.weaknesses||[];
+    GPS.strengths=evo.strengths||[];
+    state.evo=getEvoSnapshot();
+  }catch(e){}
+}
 
 // MEMORY DECAY - skills fade if not practiced
 function applyMemoryDecay(days){
@@ -5955,7 +6223,9 @@ function setup(){
   $('#reset-btn').onclick=function(){
     if(confirm(_t('reset.confirm'))){
       localStorage.removeItem('deutschmeister_state');
-      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{}};
+      localStorage.removeItem('deutschmeister_evo');
+      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null};
+      resetGPS();
       applyLang();
       if(notes)notes.value='';
       updateAll();toast(_t('toast.reset'),'info');
@@ -6001,6 +6271,11 @@ $('#import-file').onchange=function(e){
       const data=JSON.parse(ev.target.result);
       if(!data.state||!data.state.progress){toast(_t('toast.importError'),'error');return}
       state=data.state;
+      // Ensure state has all required fields (migration for old exports)
+      if(!state.wfsExplored)state.wfsExplored={};
+      if(!state.wfsPatterns)state.wfsPatterns={};
+      if(!state.evo)state.evo=null;
+      syncGPSFromState();
       saveState();
       applyLang();
       const notes=$('#notes-area');if(notes)notes.value=state.notes||'';
