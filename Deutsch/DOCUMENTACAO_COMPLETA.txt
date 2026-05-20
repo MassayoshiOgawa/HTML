@@ -1,13 +1,14 @@
 ================================================================================
-               DOCUMENTACAO COMPLETA — DeutschMeister v3.0
+               DOCUMENTACAO COMPLETA — DeutschMeister v3.2
             Plataforma Interativa de Aprendizado de Alemão
-    Documentação Técnica — Maio 2026 (Arquitetura Multimodo)
+  Documentação Técnica — Maio 2026 (Navegação do Modo Música)
 ================================================================================
 
-  Arquivo Fonte:  deutsch-meister.html (~6852 linhas, ~1.076.641 caracteres)
+  Arquivo Fonte:  deutsch-meister.html (~7217 linhas, ~1.2M caracteres)
   Tipo:           SPA (Single Page Application) — HTML + CSS + JS vanilla
   Objetivo:       Ensinar alemão A1→B1 seguindo padrão CEFR
   Arquitetura:    MULTIMODO — 9 modos/guias com sidebar dinâmica adaptativa
+                  Modo Música implementado com lobby premium e detail view
   Persistência:   localStorage (chave única: deutschmeister_state)
   Idiomas:        Português (pt) / English (en)
   Navegadores:    Chrome, Firefox, Edge, Safari (modernos)
@@ -46,6 +47,10 @@
   28. EVENT LISTENERS
   29. INCONSISTÊNCIAS DETECTADAS
   30. MELHORIAS FUTURAS POSSÍVEIS
+  31. ARQUITETURA MULTIMODO — SISTEMA DE MODOS/GUIAS
+  32. MODO MÚSICA — LOBBY MUSICAL PREMIUM
+  33. NAVEGAÇÃO DO MODO MÚSICA — SISTEMA DE RETORNO
+  34. CATÁLOGO MUSICAL — ESTRUTURA E EXPANSÃO
 
 ================================================================================
   1. VISÃO GERAL E ARQUITETURA
@@ -172,6 +177,13 @@
       weaknesses:  [],       // áreas com ≤25%
       strengths:   [],       // áreas com ≥65%
       lastSave:    number    // timestamp
+    },
+    currentMode:   'chapters', // Modo ativo (multimodo)
+    viewState:     {},         // { scrollPositions: { [mode]: int } }
+    musicState:    {           // Estado do Modo Música
+      currentSong: null,       // ID da última música aberta
+      currentView: 'lobby',    // 'lobby' | 'detail'
+      lobbyScrollY: 0          // Posição de scroll do lobby
     }
   };
 
@@ -974,11 +986,18 @@
      - window.GermanWordEngineeringSystem = { render, engineering }
      - 38 verbos com decomposição morfológica
 
-  5. DeutschMeisterWordFamilies (linha ~5019)
-     - window.DeutschMeisterWordFamilies = { render, expandNode, registerFamily, getDB, getFamily, getFamilyCount, trackFamilyViewed, trackPatternRecognized, getFamilyProgress, getPatternStats, getExploredFamilies, ... }
-     - ~1200 linhas, 10 famílias, 106+ membros
-     - Sistema de grafo interno (WFS_GRAPH)
-     - Cache com chave composta (chId + lang)
+   5. DeutschMeisterWordFamilies (linha ~5019)
+      - window.DeutschMeisterWordFamilies = { render, expandNode, registerFamily, getDB, getFamily, getFamilyCount, trackFamilyViewed, trackPatternRecognized, getFamilyProgress, getPatternStats, getExploredFamilies, ... }
+      - ~1200 linhas, 10 famílias, 106+ membros
+      - Sistema de grafo interno (WFS_GRAPH)
+      - Cache com chave composta (chId + lang)
+
+   6. GermanMusicCore (linha ~6771)
+      - window.GermanMusicMode = { showSong, showLobby, getSongs, getSongById, init, SONGS }
+      - Gerencia o Modo Música: lobby de cards + detail view individual
+      - 2 músicas implementadas (ex-freundin, kein problem por luu)
+      - Persistência integrada via state.musicState
+      - Sidebar dinâmica com lista de músicas
 
 ================================================================================
   28. EVENT LISTENERS
@@ -1130,7 +1149,7 @@
   | Modo           | Ícone | View Container        | Status              |
   |----------------|-------|-----------------------|---------------------|
   | chapters       | 📚    | #mode-chapters        | COMPLETO (original) |
-  | music          | 🎵    | #mode-music           | HUB (placeholder)   |
+  | music          | 🎵    | #mode-music           | LOBBY MUSICAL       |
   | exercises      | 🧠    | #mode-exercises       | HUB (placeholder)   |
   | vocabulary     | 📖    | #mode-vocabulary      | HUB (placeholder)   |
   | evolution      | 🧬    | #mode-evolution       | HUB (placeholder)   |
@@ -1212,7 +1231,7 @@
 
   Cada container de modo tem seu próprio conteúdo:
     - chapters:    #sidebar-search + #sidebar-list (lista de capítulos)
-    - music:       #sidebar-music-list (playlists por gênero)
+    - music:       #sidebar-music-list (músicas disponíveis)
     - vocabulary:  #sidebar-vocab-list (categorias do glossário)
     - exercises:   #sidebar-exercises-list (tipos de exercício)
     - evolution:   #sidebar-evo-list (métricas)
@@ -1298,27 +1317,508 @@
     4. Sidebar mostra botões + conteúdo do modo ativo
     5. Scroll é restaurado para a posição salva
 
-  Troca para Música:
-    1. Scroll do modo chapters é salvo
-    2. View chapters faz fade out
-    3. View music faz fade in
-    4. Sidebar mostra playlists por gênero
-    5. Scroll vai para o topo (ou posição salva de music)
-    6. state.currentMode = 'music' é persistido
+   Troca para Música:
+     1. Scroll do modo chapters é salvo
+     2. View chapters faz fade out
+     3. View music faz fade in
+     4. GermanMusicCore.onModeEnter() restaura último estado (lobby ou música)
+     5. Sidebar mostra lista de músicas com nome + artista
+     6. Se usuário estava vendo uma música, detail view é restaurada
+     7. Scroll vai para o topo
+     8. state.currentMode = 'music' + musicState são persistidos
 
-  Volta para Capítulos:
-    1. View music faz fade out
-    2. View chapters faz fade in
-    3. Sidebar volta a mostrar lista de capítulos
-    4. Scroll restaura posição exata onde o usuário estava
-    5. Tudo continua EXATAMENTE como antes
+   Volta para Capítulos:
+     1. View music faz fade out
+     2. View chapters faz fade in
+     3. Sidebar volta a mostrar lista de capítulos
+     4. Scroll restaura posição exata onde o usuário estava
+     5. Tudo continua EXATAMENTE como antes
+
+=================================================================================
+   32. MODO MÚSICA — LOBBY MUSICAL PREMIUM
+================================================================================
+
+   32.1 VISÃO GERAL
+   ----------------------------------------------------------------------------
+   O Modo Música é uma ÁREA VISUAL PREMIUM DE APRENDIZADO MUSICAL integrada
+   ao sistema multimodo. O usuário navega por um lobby de músicas com cards
+   visuais, entra na página individual de cada música e visualiza a letra
+   completa.
+
+   Arquitetura: GermanMusicCore (IIFE isolado, sem poluir escopo global)
+   Namespace: window.GermanMusicMode (compatibilidade externa)
+   Container pai: #mode-music (mode-view do sistema multimodo)
+
+   32.2 ESTRUTURA DE VIEWS INTERNAS
+   ----------------------------------------------------------------------------
+   O Modo Música possui DUAS sub-views dentro do container #mode-music:
+
+   | View          | Container ID      | Descrição                          |
+   |---------------|-------------------|------------------------------------|
+   | Lobby         | #music-lobby      | Grid de cards das músicas          |
+   | Detail        | #music-detail     | Página individual da música        |
+
+   Apenas UMA sub-view fica visível por vez (display:block vs display:none).
+   A troca entre lobby e detail NÃO aciona o GermanModeCore — é uma transição
+   interna sem reload ou recriação de DOM.
+
+   32.3 FLUXO DE NAVEGAÇÃO
+   ----------------------------------------------------------------------------
+   1. Usuário entra no Modo Música (sidebar → botão 🎵 Música)
+   2. GermanModeCore.switchMode('music') → ativa #mode-music
+   3. _onModeActivated('music') → GermanMusicCore.onModeEnter()
+   4. onModeEnter() verifica estado persistido (musicState)
+      - Se currentView === 'detail' e currentSong válido → restaura detail
+      - Senão → renderiza lobby
+   5. Sidebar é populada com lista de músicas
+
+   No Lobby:
+     - Grid de cards (cada card: thumbnail, título, artista, badge nível, duração)
+     - Hover: play button aparece, glow sutil, elevação elegante
+     - Clique em card → showSong(id)
+
+   Na Detail View:
+     - Botão "← Voltar" para retornar ao lobby
+     - Capa grande da música (thumbnail do YouTube)
+     - Título e artista
+     - Tags de categoria
+     - Link para YouTube
+     - Letra completa em blocos (Strophe/Refrain/Bridge)
+     - Versos do refrão destacados em cor primária
+
+   32.4 MÚSICA IMPLEMENTADA (1 música)
+   ----------------------------------------------------------------------------
+   | ID                    | Título                | Artista       | Nível | Duração |
+   |-----------------------|-----------------------|---------------|-------|---------|
+   | ein-schiff-wird-kommen| Ein Schiff wird kommen| Lale Andersen | A2/B1 | 3:12    |
+
+   Dados da música:
+     - id: identificador único
+     - title: título da música
+     - artist: artista
+     - youtubeId: ID do vídeo no YouTube (iHaGxmJj3-k)
+     - thumbnail: URL da capa (hqdefault do YouTube)
+     - duration: duração estimada
+     - level: nível CEFR recomendado
+     - tags: ['Sehnsucht','Liebe','Hafen','Meer']
+     - lyrics: array de blocos líricos
+       - type: 'verse' | 'chorus'
+       - label: nome do bloco (Strophe 1, Strophe 2, Refrain)
+       - lines: array de versos
+
+   A música "Ein Schiff wird kommen" é uma versão alemã do clássico
+   "Ta Paidia tou Peiraia" (Never on Sunday), imortalizada por
+   Lale Andersen. A letra fala sobre uma garota do porto de Piräus
+   que espera seu amor chegar de navio.
+
+   32.5 GERMAN MUSIC CORE — CONTROLADOR DO MODO MÚSICA
+   ----------------------------------------------------------------------------
+   Namespace: GermanMusicCore (IIFE)
+
+   Funções principais:
+     - getSongs()               — Retorna array de músicas
+     - getSongById(id)          — Retorna uma música específica
+     - renderLobby()            — Renderiza o grid de cards no lobby
+     - showSong(id)             — Exibe a view individual da música
+     - showLobby()              — Retorna ao lobby (via botão voltar)
+     - init()                   — Inicializa o módulo (idempotente)
+     - onModeEnter()            — Chamado ao entrar no modo música
+     - _renderSidebarSongs()    — Popula a sidebar com as músicas
+     - _getState() / _saveState() / _loadState() — Persistência
+   
+   API pública (window.GermanMusicMode):
+     - showSong(id)             — Acessível via onclick inline
+     - showLobby()              — Acessível via onclick inline (botão voltar)
+     - getSongs()               — Consulta externa
+     - getSongById(id)          — Consulta externa
+     - SONGS                    — Dados brutos das músicas
+     - init()                   — Inicialização explícita
+
+   32.6 PERSISTÊNCIA DO MODO MÚSICA
+   ----------------------------------------------------------------------------
+   Campos no state global:
+     - state.musicState.currentSong  — ID da última música aberta (ou null)
+     - state.musicState.currentView  — 'lobby' ou 'detail'
+
+   Fluxo de persistência:
+     1. renderLobby() salva: currentSong=null, currentView='lobby'
+     2. showSong(id) salva: currentSong=id, currentView='detail'
+     3. _saveState() chama saveState() para persistir no localStorage
+     4. onModeEnter() restaura o último estado via _loadState()
+
+   Comportamento ao recarregar a página:
+     - Se o usuário estava vendo uma música → detail view é restaurada
+     - Se estava no lobby → lobby é restaurado
+     - O estado é integrado ao save central (deutschmeister_state)
+
+   32.7 CSS — IDENTIDADE VISUAL DO MODO MÚSICA
+   ----------------------------------------------------------------------------
+   Classes principais:
+     .music-lobby-header       — Cabeçalho do lobby (ícone pulsante, título, subtítulo)
+     .music-lobby-grid         — Grid responsivo de cards (auto-fill, minmax 280px)
+     .music-card               — Card de música (thumb + info + efeitos hover)
+     .music-card-thumb         — Área da capa (aspect-ratio 16:9)
+     .music-card-thumb-overlay — Gradiente overlay na capa
+     .music-card-play          — Botão play circular (aparece no hover)
+     .music-card-info          — Área de informações (título, artista, meta)
+     .music-card-badge         — Badge de nível (A1, A1/A2)
+     .music-card-glow          — Efeito glow no hover
+     .music-detail-hero        — Área superior da detail (capa + info)
+     .music-detail-cover       — Capa grande (220x220, arredondada)
+     .music-detail-tag         — Tags de categoria
+     .music-detail-youtube     — Link para YouTube
+     .music-lyrics             — Container da letra
+     .music-lyrics-block       — Bloco de versos (Strophe/Refrain/Bridge)
+     .music-lyrics-label       — Rótulo do bloco (ex: "Strophe 1")
+     .music-lyrics-line        — Verso individual
+     .music-lyrics-line.chorus — Verso do refrão (destacado em cor primária)
+     .music-back-btn           — Botão de voltar ao lobby
+     .sidebar-music-song       — Item de música na sidebar
+
+   Animações:
+     @keyframes musicPulse      — Ícone do lobby pulsa suavemente
+     @keyframes musicDetailIn   — Detail view faz fade-in + slide-up
+
+   Responsividade:
+     - Desktop: grid de 2-3 colunas
+     - Tablet (<768px): 1 coluna, hero da detail empilhado, capa reduzida
+     - Mobile (<480px): cards compactos, capa ainda menor
+
+   32.8 INTEGRAÇÃO COM O SISTEMA MULTIMODO
+   ----------------------------------------------------------------------------
+   O GermanMusicCore foi integrado ao GermanModeCore através de:
+
+   1. _onModeActivated('music'):
+      - Chama GermanMusicCore.onModeEnter()
+      - Restaura último estado (lobby ou detail view)
+      - Atualiza sidebar com lista de músicas
+
+   2. _renderMusicSidebar():
+      - Delega para GermanMusicCore._renderSidebarSongs()
+      - Popula #sidebar-music-list com nome + artista
+
+   3. _renderModeSidebarContent('music'):
+      - Chama _renderMusicSidebar() via switch case
+
+   4. init() (GermanModeCore):
+      - Agora chama _onModeActivated(currentMode) para inicializar
+        corretamente modos não-chapters na carga inicial
+
+   32.9 ESCALABILIDADE E EXPANSÃO FUTURA
+   ----------------------------------------------------------------------------
+   A arquitetura foi projetada para expansão futura:
+
+   Expansões previstas (NÃO implementadas nesta versão):
+     - Tradução sincronizada da letra
+     - Modo Karaokê (linha por linha com áudio)
+     - Exercícios musicais (gap-fill, ordenação de versos)
+     - Palavras clicáveis (vocabulário da música)
+     - Engenharia da frase aplicada à letra
+     - Replay de trechos específicos
+     - Análise estrutural da composição
+     - Tracking de progresso musical
+
+   Para adicionar uma nova música:
+     1. Adicionar entrada ao array SONGS no GermanMusicCore
+     2. Fornecer thumbnail, youtubeId, lyrics
+     3. NENHUMA outra modificação necessária
+     4. Cards, detail view, sidebar são gerados automaticamente
+
+   Para adicionar uma nova sub-view (ex: exercícios musicais):
+     1. Criar container dentro de #mode-music
+     2. Adicionar função de renderização ao GermanMusicCore
+     3. Atualizar onModeEnter() para nova rota interna
+     4. NENHUMA modificação no GermanModeCore necessária
+
+   32.10 PERFORMANCE E ISOLAMENTO
+   ----------------------------------------------------------------------------
+   - GermanMusicCore é um IIFE: NENHUMA variável global (exceto window.GermanMusicMode)
+   - Sem listeners duplicados (o back button listener é reatribuído a cada render)
+   - Views internas usam display:none → sem renderização do browser
+   - Cards usam event delegation via onclick inline (seguro com namespace)
+   - DOM mínimo: apenas 2 músicas produzem ~15 elementos DOM cada
+   - Sem loops, sem setInterval, sem renderizações infinitas
+   - O módulo é completamente autocontido e NÃO afeta outros modos
+
+   32.11 REGRAS DE SEGURANÇA (REDECLARAÇÃO)
+   ----------------------------------------------------------------------------
+   - NÃO declarar variáveis globais genéricas
+   - NÃO sobrescrever funções do GermanModeCore
+   - NÃO duplicar listeners de modo
+   - NÃO quebrar sidebar de capítulos
+   - NÃO quebrar save/load/export/import
+   - NÃO quebrar scroll persistence
+   - NÃO quebrar dark mode ou i18n
+   - Usar SEMPRE: window.GermanMusicMode || {} antes de atribuir
 
 ================================================================================
+   33. NAVEGAÇÃO DO MODO MÚSICA — SISTEMA DE RETORNO
+================================================================================
+
+   33.1 VISÃO GERAL
+   ----------------------------------------------------------------------------
+   O Modo Música implementa um sistema profissional de navegação entre duas
+   sub-views: Lobby e Detail. A navegação é gerenciada por transições CSS
+   animadas com preservação completa de estado, sem recarregar a página
+   ou destruir o DOM.
+
+   Objetivo: simular a experiência de navegação de um aplicativo real de
+   música, onde o usuário navega entre telas com transições suaves.
+
+   33.2 ARQUITETURA DE NAVEGAÇÃO INTERNA
+   ----------------------------------------------------------------------------
+   O GermanMusicCore gerencia duas sub-views dentro de #mode-music:
+
+   #music-lobby:
+     - Grid de cards das músicas
+     - Renderizado UMA ÚNICA VEZ (_lobbyRendered = true)
+     - Nunca destruído — apenas ocultado/mostrado via CSS
+
+   #music-detail:
+     - Página individual da música com capa, tags, letra
+     - Conteúdo renderizado sob demanda (render cache via data-song-id)
+     - Botão de voltar fixo (HTML estático, listener reatribuído)
+
+   33.3 FLUXO DE NAVEGAÇÃO LOBBy → DETAIL
+   ----------------------------------------------------------------------------
+   1. Usuário clica em um card de música (onclick → showSong)
+   2. _lobbyScrollY = window.scrollY (salva posição do scroll do lobby)
+   3. Lobby recebe classe music-lobby-exit → animação de saída (26s)
+   4. Conteúdo da detail é renderizado (se data-song-id diferente)
+   5. Back button recebe onclick → GermanMusicMode.showLobby()
+   6. setTimeout 280ms:
+      a. lobby.style.display = 'none' + remove exit class
+      b. detail.style.display = 'block' + music-detail-visible → animação de entrada
+      c. window.scrollTo(0, 0)
+
+   33.4 FLUXO DE NAVEGAÇÃO DETAIL → LOBBy (BOTÃO VOLTAR)
+   ----------------------------------------------------------------------------
+   1. Usuário clica no botão "← Voltar ao Lobby"
+   2. Detail recebe classe music-detail-exit → animação de saída (28s)
+   3. Lobby.style.display = 'block' + music-lobby-enter → animação de entrada
+   4. setTimeout 280ms:
+      a. detail.style.display = 'none' + remove exit class
+      b. lobby remove enter class
+      c. window.scrollTo(0, _lobbyScrollY) — restaura posição exata do lobby
+   5. Sidebar é re-renderizada (GermanModeCore.renderModeSidebar)
+
+   33.5 BOTÃO DE VOLTAR — DESIGN E FUNCIONAMENTO
+   ----------------------------------------------------------------------------
+   POSIÇÃO: O botão fica NO FINAL da view da música, ABAIXO da letra,
+   dentro de uma seção .music-back-section centralizada.
+
+   HTML (renderizado dinamicamente dentro de #music-detail-content):
+     <div class="music-back-section">
+       <button id="music-back-btn" class="music-back-btn">
+         <span class="back-arrow">←</span> Voltar ao Catálogo
+       </button>
+     </div>
+
+   CSS:
+     .music-back-section: text-align:center, padding 32px 0 48px
+     .music-back-btn:
+       - display inline-flex com gap 10px, padding 14px 28px
+       - border-radius 14px, border 1.5px solid var(--border)
+       - background var(--bg2), box-shadow sutil
+       - transition: all .25s cubic-bezier(.4,0,.2,1)
+
+   Hover:
+     - background var(--primary3), color var(--primary)
+     - border-color var(--primary)
+     - transform: translateY(-2px) + box-shadow ampliado
+     - seta (.back-arrow) desliza 4px para esquerda (translateX)
+
+   Active (click):
+     - transform: translateY(0) scale(.97) — feedback tátil
+
+   Listener:
+     - Reatribuído após cada renderização (showSong / onModeEnter)
+     - onclick = function(){ GermanMusicMode.showLobby(); }
+     - Usa propriedade DOM (sobrescreve, nunca acumula)
+
+   Por que no final:
+     - O usuário lê a letra completa naturalmente
+     - Ao terminar, o botão está logo ali, visível
+     - Fluxo natural: capa → título → letra → voltar
+
+   33.6 PRESERVAÇÃO DE ESTADO
+   ----------------------------------------------------------------------------
+   Variáveis de estado no GermanMusicCore:
+     _currentView          — 'lobby' | 'detail'
+     _currentSongId        — ID da música atual (ou null)
+     _lobbyScrollY         — posição de scroll do lobby (salva ao sair)
+     _lobbyRendered        — flag: cards já foram renderizados
+
+   Persistência (state.musicState):
+     currentSong            — ID da última música aberta
+     currentView            — 'lobby' | 'detail'
+     lobbyScrollY           — posição de scroll do lobby
+
+   Salvamento:
+     - showSong(id)          → salva _lobbyScrollY (se vindo do lobby)
+     - renderLobby()         → salva _currentView='lobby', _currentSongId=null
+     - showLobby()           → salva _currentView='lobby', _currentSongId=null
+     - _saveState()          → persiste no localStorage via saveState()
+
+   Restauração (onModeEnter):
+     - _loadState() restaura _currentView, _currentSongId, _lobbyScrollY
+     - Se currentView='detail' + currentSong válido → restaura detail view
+     - Senão → mostra lobby
+
+   33.7 ANIMAÇÕES DE TRANSIÇÃO
+   ----------------------------------------------------------------------------
+   Classes CSS de animação (todas @keyframes):
+
+   Entrada do Lobby:
+     .music-lobby-enter → musicLobbyIn (3s)
+     from: opacity:0, translateY(8px) → to: opacity:1, translateY(0)
+
+   Saída do Lobby:
+     .music-lobby-exit → musicLobbyOut (26s)
+     from: opacity:1, translateY(0) → to: opacity:0, translateY(-8px)
+
+   Entrada da Detail:
+     .music-detail-visible → musicDetailIn (4s)
+     from: opacity:0, translateY(16px) → to: opacity:1, translateY(0)
+
+   Saída da Detail:
+     .music-detail-exit → musicDetailOut (28s)
+     from: opacity:1, translateY(0) → to: opacity:0, translateY(8px)
+
+   Todas as animações usam animation-fill-mode: forwards para manter
+   o estado final após a conclusão.
+
+   33.8 CACHE DE RENDERIZAÇÃO
+   ----------------------------------------------------------------------------
+   Para evitar renderizações duplicadas ao clicar na mesma música:
+
+   - #music-detail-content possui atributo data-song-id
+   - showSong() verifica: contentEl.getAttribute('data-song-id') !== id
+   - Se a música já está renderizada → pula innerHTML, apenas mostra detail
+   - Se música diferente → renderiza novo conteúdo e atualiza data-song-id
+
+   Benefícios:
+     - Evita flicker ao reabrir a mesma música
+     - Preserva estado de scroll da letra (se aplicável)
+     - Reduz operações de DOM desnecessárias
+
+   33.9 PREVENÇÃO DE CONFLITOS E DUPLICAÇÕES
+   ----------------------------------------------------------------------------
+   Regras implementadas:
+
+   1. NENHUM addEventListener para o back button — usa onclick (sobrescreve)
+   2. _lobbyRendered impede re-renderização do grid de cards
+   3. data-song-id impede re-renderização do conteúdo da detail
+   4. _initialized impede dupla inicialização do módulo
+   5. Variáveis internas no escopo do IIFE (não globais)
+   6. window.GermanMusicMode apenas com as funções essenciais
+
+   33.10 COMPATIBILIDADE COM O SISTEMA MULTIMODO
+   ----------------------------------------------------------------------------
+   A navegação interna (lobby ↔ detail) NÃO interage com o GermanModeCore:
+     - GermanModeCore gerencia a troca ENTRE modos (chapters, music, etc.)
+     - GermanMusicCore gerencia a troca DENTRO do modo música
+     - Transições internas usam display + animation, não afetam outros modos
+     - Scroll do modo música é gerenciado separadamente pelo GermanModeCore
+
+   Ao trocar de modo (ex: music → chapters):
+     - GermanModeCore.saveScrollPosition('music') salva window.scrollY
+     - GermanModeCore.restoreScrollPosition('music') restaura ao voltar
+     - GermanMusicCore.onModeEnter() restaura estado interno
+     - _lobbyScrollY persiste no state.musicState (cross-mode)
+
+   33.11 PERFORMANCE
+   ----------------------------------------------------------------------------
+   - Lobby cards renderizados 1x (nunca destruídos)
+   - Detail content com cache por song ID
+   - Transições via CSS (GPU accelerated: opacity + transform)
+   - Sem setInterval, sem requestAnimationFrame desnecessário
+   - setTimeout de 280ms apenas para sincronizar animações
+   - Nenhum listener duplicado
+
+   33.12 RESPONSIVIDADE
+   ----------------------------------------------------------------------------
+   O botão de voltar é responsivo:
+     - Desktop: tamanho normal, margem 24px superior
+     - Tablet (<768px): mesmo comportamento (botão inline-flex)
+     - Mobile (<480px): padding adapta-se naturalmente
+   Nenhum breakpoint específico necessário para o botão de voltar.
+
+===============================================================================
                           FIM DA DOCUMENTAÇÃO
 ================================================================================
 
   Esta documentação foi gerada por auditoria completa do HTML
   e reflete o estado real do sistema DeutschMeister em Maio 2026
-  COM a nova arquitetura multimodo.
+  COM a nova arquitetura multimodo, Modo Música implementado
+  e sistema profissional de navegação interna.
 
-  Versão da documentação: 3.0 (arquitetura multimodo)
+  Versão da documentação: 3.3 (catálogo musical reestruturado)
+
+================================================================================
+   34. CATÁLOGO MUSICAL — ESTRUTURA E EXPANSÃO
+================================================================================
+
+   34.1 VISÃO GERAL
+   ----------------------------------------------------------------------------
+   O Catálogo Musical é o lobby do Modo Música — a primeira tela que o
+   usuário vê ao entrar no modo. Ele exibe cards visuais das músicas
+   disponíveis em um grid responsivo.
+
+   Atualmente: 1 música (Ein Schiff wird kommen por Lale Andersen)
+   Expansão futura: múltiplas músicas organizadas por nível/tema
+
+   34.2 ESTRUTURA DO CATÁLOGO
+   ----------------------------------------------------------------------------
+   HTML:
+     <div id="music-lobby">
+       <div class="music-lobby-header">
+         <div class="music-lobby-icon">🎵</div>
+         <h2 class="music-lobby-title">Música & Aprendizado</h2>
+         <p class="music-lobby-sub">Aprenda alemão através de músicas autênticas</p>
+       </div>
+       <div id="music-lobby-grid" class="music-lobby-grid">
+         <!-- Cards gerados dinamicamente por _buildLobbyCards() -->
+       </div>
+     </div>
+
+   O grid usa CSS Grid com auto-fill e minmax(280px, 1fr), adaptando-se
+   automaticamente ao número de músicas.
+
+   34.3 CARD DE MÚSICA
+   ----------------------------------------------------------------------------
+   Cada card (.music-card) contém:
+     - .music-card-thumb: capa da música (thumbnail YouTube, aspect-ratio 16:9)
+     - .music-card-thumb-overlay: gradiente overlay na capa
+     - .music-card-play: ícone play circular (surge no hover)
+     - .music-card-info: título, artista, badge de nível, duração
+     - .music-card-glow: efeito glow no hover
+
+   Interações:
+     - Hover: card eleva (translateY -4px), glow, play button aparece
+     - Click: chama GermanMusicMode.showSong(id) → navega para detail view
+     - onerror na img: fallback para ícone 🎵
+
+   34.4 RENDERIZAÇÃO DO CATÁLOGO
+   ----------------------------------------------------------------------------
+   _buildLobbyCards():
+     - Chamada UMA única vez (_lobbyRendered = true)
+     - Gera innerHTML do #music-lobby-grid
+     - Nunca destruído — ao voltar da detail view, apenas re-exibido
+
+   renderLobby():
+     - Chamada na entrada inicial do modo música
+     - Gerencia animação de entrada (music-lobby-enter)
+
+   showLobby():
+     - Chamada pelo botão de voltar
+     - Gerencia animação de saída da detail + entrada do lobby
+     - Restaura scroll position (_lobbyScrollY)
+
+   34.5 EXPANSÃO DO CATÁLOGO
+   ----------------------------------------------------------------------------
+   Para adicionar uma nova música:
+     1. Adicionar entrada ao array SONGS no GermanMusicCore
+     2. Fornecer: id, title, artist, youtubeId, thumbnail, duration,
+        level, tags, lyrics
+     3. NENHUMA outra modificação necessária

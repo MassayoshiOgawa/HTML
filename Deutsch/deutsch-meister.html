@@ -765,6 +765,100 @@ i{font-style:normal}
   .mode-btn{padding:5px 7px;font-size:.7rem;gap:3px}
   .mode-btn .mode-icon{font-size:.8rem}
 }
+/* ===== MUSIC MODE — PREMIUM LOBBY & DETAIL VIEW ===== */
+/* Lobby Header */
+.music-lobby-header{text-align:center;padding:60px 24px 32px}
+.music-lobby-icon{font-size:3.2rem;margin-bottom:12px;animation:musicPulse 3s ease-in-out infinite}
+.music-lobby-title{font-size:1.8rem;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-0.3px}
+.music-lobby-sub{color:var(--text2);font-size:.95rem;max-width:460px;margin:0 auto}
+@keyframes musicPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+/* Lobby Grid */
+.music-lobby-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:960px;margin:0 auto;padding:0 24px 60px}
+/* Song Card */
+.music-card{position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.music-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.12);border-color:var(--primary2)}
+.music-card:active{transform:translateY(-1px);transition:all .1s}
+.music-card-thumb{position:relative;width:100%;aspect-ratio:16/9;background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.music-card-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.music-card:hover .music-card-thumb img{transform:scale(1.06)}
+.music-card-thumb-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.35) 0%,transparent 50%);transition:opacity .3s}
+.music-card:hover .music-card-thumb-overlay{opacity:.7}
+.music-card-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.85);width:48px;height:48px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);box-shadow:0 4px 20px rgba(108,92,231,.4);pointer-events:none}
+.music-card:hover .music-card-play{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.music-card-play::after{content:'';display:block;width:0;height:0;border-style:solid;border-width:8px 0 8px 14px;border-color:transparent transparent transparent #fff;margin-left:3px}
+.music-card-info{padding:16px 18px;display:flex;flex-direction:column;gap:3px;flex:1}
+.music-card-title{font-size:1.05rem;font-weight:700;color:var(--text);letter-spacing:-0.2px;line-height:1.3}
+.music-card-artist{font-size:.82rem;color:var(--text2);font-weight:500}
+.music-card-meta{display:flex;align-items:center;gap:8px;margin-top:6px}
+.music-card-badge{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;padding:3px 8px;border-radius:20px;background:var(--primary3);color:var(--primary);font-weight:600;letter-spacing:.3px}
+.music-card-duration{font-size:.7rem;color:var(--text3)}
+.music-card-glow{position:absolute;inset:-1px;border-radius:16px;opacity:0;transition:opacity .4s;pointer-events:none;z-index:-1;background:linear-gradient(135deg,var(--primary),var(--accent));filter:blur(12px)}
+.music-card:hover .music-card-glow{opacity:.12}
+/* Detail View */
+#music-detail{max-width:900px;margin:0 auto;padding:0 24px 60px}
+#music-detail.music-detail-visible{animation:musicDetailIn .4s ease forwards}
+@keyframes musicDetailIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+#music-detail.music-detail-exit{animation:musicDetailOut .28s ease forwards}
+@keyframes musicDetailOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}}
+/* Lobby transitions */
+#music-lobby.music-lobby-enter{animation:musicLobbyIn .3s ease forwards}
+@keyframes musicLobbyIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#music-lobby.music-lobby-exit{animation:musicLobbyOut .26s ease forwards}
+@keyframes musicLobbyOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-8px)}}
+/* Back button section (below lyrics) */
+.music-back-section{text-align:center;padding:32px 0 48px}
+.music-back-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border:none;border-radius:14px;background:var(--bg2);color:var(--text);font-size:.9rem;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .25s cubic-bezier(.4,0,.2,1);border:1.5px solid var(--border);letter-spacing:-0.1px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.music-back-btn:hover{background:var(--primary3);color:var(--primary);border-color:var(--primary);transform:translateY(-2px);box-shadow:0 4px 16px rgba(108,92,231,.15)}
+.music-back-btn:active{transform:translateY(0) scale(.97);transition:all .1s}
+.music-back-btn .back-arrow{display:inline-block;font-size:1.1rem;transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.music-back-btn:hover .back-arrow{transform:translateX(-4px)}
+.music-detail-hero{display:flex;gap:28px;align-items:center;margin-top:40px;margin-bottom:32px;flex-wrap:wrap}
+.music-detail-cover{width:220px;height:220px;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.18);flex-shrink:0;background:var(--bg3)}
+.music-detail-cover img{width:100%;height:100%;object-fit:cover}
+.music-detail-info{flex:1;min-width:200px}
+.music-detail-info .music-detail-title{font-size:1.7rem;font-weight:800;color:var(--text);margin-bottom:4px;letter-spacing:-0.4px}
+.music-detail-info .music-detail-artist{font-size:1rem;color:var(--text2);font-weight:500;margin-bottom:14px}
+.music-detail-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.music-detail-tag{font-size:.72rem;padding:5px 12px;border-radius:20px;background:var(--bg3);color:var(--text2);font-weight:500;border:1px solid var(--border)}
+.music-detail-youtube{margin-top:18px;display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;background:#f2f2f2;color:#222;font-size:.8rem;font-weight:600;text-decoration:none;transition:all .2s;font-family:var(--font)}
+.music-detail-youtube:hover{background:#e0e0e0;transform:translateY(-1px)}
+/* Lyrics */
+.music-lyrics-section{margin-top:8px}
+.music-lyrics-title{font-size:.75rem;text-transform:uppercase;letter-spacing:3px;color:var(--text3);margin-bottom:18px;font-weight:700}
+.music-lyrics{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px 28px}
+.music-lyrics-block{margin-bottom:22px}
+.music-lyrics-block:last-child{margin-bottom:0}
+.music-lyrics-label{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent);font-weight:700;margin-bottom:10px;display:block}
+.music-lyrics-line{font-size:.95rem;line-height:2;color:var(--text);padding:1px 0;transition:background .2s;border-radius:4px}
+.music-lyrics-line:hover{background:var(--primary3)}
+.music-lyrics-line.chorus{color:var(--primary);font-weight:600}
+/* Sidebar music song items */
+.sidebar-music-song{display:flex;align-items:center;gap:9px;padding:9px 16px;color:var(--text2);font-size:.8rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.sidebar-music-song:hover{background:var(--primary3);color:var(--primary)}
+.sidebar-music-song .song-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.sidebar-music-song .song-artist{font-size:.7rem;color:var(--text3);margin-left:auto}
+/* Responsive music */
+@media(max-width:768px){
+  .music-lobby-grid{grid-template-columns:1fr;padding:0 16px 40px}
+  .music-lobby-header{padding:40px 16px 24px}
+  .music-lobby-title{font-size:1.4rem}
+  .music-detail-hero{flex-direction:column;align-items:center;text-align:center;gap:18px}
+  .music-detail-cover{width:180px;height:180px}
+  .music-detail-info .music-detail-title{font-size:1.35rem}
+  .music-detail-tags{justify-content:center}
+  .music-lyrics{padding:22px 16px}
+  .music-lyrics-line{font-size:.88rem}
+  .music-back-section{padding:24px 0 40px}
+  .music-back-btn{padding:12px 22px;font-size:.82rem}
+}
+@media(max-width:480px){
+  .music-lobby-grid{padding:0 10px 32px}
+  .music-card-info{padding:12px 14px}
+  .music-card-title{font-size:.95rem}
+  .music-detail-cover{width:150px;height:150px}
+  .music-back-section{padding:18px 0 32px}
+  .music-back-btn{padding:10px 18px;font-size:.78rem}
+}
 </style>
 </head>
 <body>
@@ -806,7 +900,7 @@ i{font-style:normal}
 <div id="sidebar-list"></div>
 </div>
 <div id="sidebar-music-content">
-<div id="sidebar-section-title">🎵 Playlists</div>
+<div id="sidebar-section-title">🎵 Músicas</div>
 <div id="sidebar-music-list"></div>
 </div>
 <div id="sidebar-vocabulary-content">
@@ -1041,19 +1135,19 @@ i{font-style:normal}
 
 <!-- ===== MODO: MÚSICA ===== -->
 <div id="mode-music" class="mode-view">
-<div class="mode-hub">
-<div class="mode-hub-icon">🎵</div>
-<h2>Música & Aprendizado</h2>
-<p>Aprenda alemão através de músicas autênticas, playlists curadas e exercícios de escuta com ritmo.</p>
-<div class="mode-hub-grid">
-<div class="mode-hub-card"><div class="card-icon">🎸</div><h4>Playlists Curadas</h4><p>Músicas organizadas por nível e tema gramatical</p></div>
-<div class="mode-hub-card"><div class="card-icon">📝</div><h4>Letras Interativas</h4><p>Acompanhe a letra com tradução sincronizada</p></div>
-<div class="mode-hub-card"><div class="card-icon">🎤</div><h4>Karaokê Alemão</h4><p>Cante junto e pratique a pronúncia</p></div>
-<div class="mode-hub-card"><div class="card-icon">🧩</div><h4>Gap-Fill Musical</h4><p>Complete as palavras que faltam nas músicas</p></div>
-<div class="mode-hub-card"><div class="card-icon">🎼</div><h4>Ritmo Gramatical</h4><p>Aprenda padrões gramaticais com ritmo musical</p></div>
-<div class="mode-hub-card"><div class="card-icon">📻</div><h4>Rádio Alemã</h4><p>Estações recomendadas para imersão passiva</p></div>
-</div>
-</div>
+  <!-- MUSIC LOBBY -->
+  <div id="music-lobby">
+    <div class="music-lobby-header">
+      <div class="music-lobby-icon">🎵</div>
+      <h2 class="music-lobby-title">Música & Aprendizado</h2>
+      <p class="music-lobby-sub">Aprenda alemão através de músicas autênticas</p>
+    </div>
+    <div id="music-lobby-grid" class="music-lobby-grid"></div>
+  </div>
+  <!-- MUSIC DETAIL -->
+  <div id="music-detail" style="display:none">
+    <div id="music-detail-content"></div>
+  </div>
 </div><!-- /#mode-music -->
 
 <!-- ===== MODO: EXERCÍCIOS DE PALAVRAS ===== -->
@@ -2518,7 +2612,7 @@ function applyLang(){
   renderChapters();renderTOC();renderSidebar();renderGlossCats();renderGlossary();
   if(typeof GermanModeCore !== 'undefined') GermanModeCore.renderModeSidebar();
 }
-let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{}};
+let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'}};
 function loadState(){try{const r=localStorage.getItem('deutschmeister_state');if(r){const p=JSON.parse(r);state={...state,...p}}}catch(e){}}
 function saveState(){try{localStorage.setItem('deutschmeister_state',JSON.stringify(state))}catch(e){}}
 function $(s,c){return(c||document).querySelector(s)}
@@ -6392,7 +6486,7 @@ window.GermanModeHub = window.GermanModeHub || {};
 const GermanModeCore = (() => {
   const MODE_DEFS = {
     chapters:     { id:'chapters',     icon:'📚', name:'Capítulos',     viewId:'mode-chapters',     sidebarId:'sidebar-chapters-content',    sidebarTitle:'Capítulos' },
-    music:        { id:'music',        icon:'🎵', name:'Música',         viewId:'mode-music',        sidebarId:'sidebar-music-content',       sidebarTitle:'Playlists' },
+    music:        { id:'music',        icon:'🎵', name:'Música',         viewId:'mode-music',        sidebarId:'sidebar-music-content',       sidebarTitle:'Músicas' },
     exercises:    { id:'exercises',    icon:'🧠', name:'Exercícios',    viewId:'mode-exercises',    sidebarId:'sidebar-exercises-content',   sidebarTitle:'Foco' },
     vocabulary:   { id:'vocabulary',   icon:'📖', name:'Vocabulário',   viewId:'mode-vocabulary',   sidebarId:'sidebar-vocabulary-content',  sidebarTitle:'Categorias' },
     evolution:    { id:'evolution',    icon:'🧬', name:'Evolução',      viewId:'mode-evolution',    sidebarId:'sidebar-evolution-content',   sidebarTitle:'Métricas' },
@@ -6495,6 +6589,11 @@ const GermanModeCore = (() => {
       if(typeof renderGlossCats === 'function') renderGlossCats();
       if(typeof renderGlossary === 'function') renderGlossary();
     }
+    if(mode === 'music'){
+      if(typeof GermanMusicCore !== 'undefined' && typeof GermanMusicCore.onModeEnter === 'function'){
+        GermanMusicCore.onModeEnter();
+      }
+    }
     if(mode !== 'chapters'){
       const evo = document.getElementById('evo-dashboard');
       if(evo) evo.style.display = 'none';
@@ -6542,21 +6641,9 @@ const GermanModeCore = (() => {
   }
 
   function _renderMusicSidebar(){
-    const list = document.getElementById('sidebar-music-list');
-    if(!list) return;
-    const items = [
-      {icon:'🎸',name:'Rock Alemão',desc:'12 faixas'},
-      {icon:'🎹',name:'Pop Alemão',desc:'8 faixas'},
-      {icon:'🎻',name:'Clássico Alemão',desc:'6 faixas'},
-      {icon:'🎤',name:'Hip-Hop Alemão',desc:'5 faixas'},
-      {icon:'🪗',name:'Folk & Tradicional',desc:'7 faixas'},
-      {icon:'🎼',name:'Trilhas Sonoras',desc:'4 faixas'},
-      {icon:'🎧',name:'Indie Alemão',desc:'9 faixas'},
-      {icon:'📻',name:'Rádios Recomendadas',desc:'5 estações'}
-    ];
-    list.innerHTML = items.map(item =>
-      '<div class="sidebar-music-item"><span class="music-dot"></span><span>'+item.icon+' '+item.name+'</span><span style="margin-left:auto;font-size:.7rem;color:var(--text3)">'+item.desc+'</span></div>'
-    ).join('');
+    if(typeof GermanMusicCore !== 'undefined' && typeof GermanMusicCore._renderSidebarSongs === 'function'){
+      GermanMusicCore._renderSidebarSongs();
+    }
   }
 
   function _renderVocabSidebar(){
@@ -6659,6 +6746,7 @@ const GermanModeCore = (() => {
     if(titleEl) titleEl.textContent = MODE_DEFS[currentMode].icon + ' ' + MODE_DEFS[currentMode].sidebarTitle;
 
     _renderModeSidebarContent(currentMode);
+    _onModeActivated(currentMode);
 
     if(!_initialized){
       _initialized = true;
@@ -6695,6 +6783,343 @@ const GermanModeCore = (() => {
     updateAllModeButtons
   };
 })();
+
+// ===== GERMAN MUSIC MODE — LOBBY & DETAIL VIEW =====
+window.GermanMusicMode = window.GermanMusicMode || {};
+const GermanMusicCore = (() => {
+  const SONGS = [
+    {
+      id: 'ein-schiff-wird-kommen',
+      title: 'Ein Schiff wird kommen',
+      artist: 'Lale Andersen',
+      youtubeId: 'iHaGxmJj3-k',
+      thumbnail: 'https://i.ytimg.com/vi/iHaGxmJj3-k/hqdefault.jpg',
+      duration: '3:12',
+      level: 'A2/B1',
+      tags: ['Sehnsucht','Liebe','Hafen','Meer'],
+      lyrics: [
+        {type:'verse',label:'Strophe 1',lines:[
+          'Ich bin ein Mädchen aus Piräus',
+          'Und liebe den Hafen, die Schiffe und das Meer',
+          'Ich lieb das Lachen der Matrosen, ich lieb jeden Kuss',
+          'Der nach Salz schmeckt und nach Teer',
+          'Wie alle Mädchen in Piräus',
+          'So stehe ich Abend für Abend hier am Kai',
+          'Und warte auf die fremden Schiffe',
+          'Aus Hongkong, aus Java, aus Chile und Shanghai'
+        ]},
+        {type:'chorus',label:'Refrain',lines:[
+          'Ein Schiff wird kommen und das bringt mir den einen',
+          'Den ich so lieb, wie keinen und der mich glücklich macht',
+          'Ein Schiff wird kommen und meinen Traum erfüllen',
+          'Und meine Sehnsucht stillen, die Sehnsucht mancher Nacht'
+        ]},
+        {type:'verse',label:'Strophe 2',lines:[
+          'Und jetzt bist du da',
+          'Und ich halt dich in meinen Armen',
+          'Geb mir noch einen Zug aus deiner Zigarette',
+          'Schau unter unserem Fenster, der Hafen mit den bunten Lichtern',
+          'Da drüben in der Bar, aus der die Musik herüberkommt',
+          'Hab ich in den letzten Monaten jede Nacht gesessen',
+          'Und mit fremden Matrosen getanzt',
+          'Und hab doch nur an das eine gedacht'
+        ]},
+        {type:'chorus',label:'Refrain',lines:[
+          'Ein Schiff wird kommen und das bringt mir den einen',
+          'Den ich so lieb, wie keinen und der mich glücklich macht',
+          'Ein Schiff wird kommen und meinen Traum erfüllen',
+          'Und meine Sehnsucht stillen, die Sehnsucht mancher Nacht'
+        ]}
+      ]
+    }
+  ];
+
+  let _currentView = 'lobby';
+  let _currentSongId = null;
+  let _initialized = false;
+  let _lobbyRendered = false;
+  let _lobbyScrollY = 0;
+
+  function _getState(){
+    if(typeof state !== 'undefined' && state){
+      if(!state.musicState) state.musicState = {currentSong:null,currentView:'lobby'};
+      return state.musicState;
+    }
+    return {currentSong:null,currentView:'lobby'};
+  }
+
+  function _saveState(){
+    if(typeof state !== 'undefined' && state){
+      state.musicState = {currentSong:_currentSongId,currentView:_currentView,lobbyScrollY:_lobbyScrollY};
+      if(typeof saveState === 'function') saveState();
+    }
+  }
+
+  function _loadState(){
+    const ms = _getState();
+    _currentSongId = ms.currentSong || null;
+    _currentView = ms.currentView || 'lobby';
+    _lobbyScrollY = ms.lobbyScrollY || 0;
+  }
+
+  function getSongs(){ return SONGS; }
+
+  function getSongById(id){ return SONGS.find(s => s.id === id); }
+
+  function _buildLobbyCards(){
+    const grid = document.getElementById('music-lobby-grid');
+    if(!grid) return;
+    grid.innerHTML = SONGS.map(song => (
+      '<div class="music-card" data-song-id="'+song.id+'" onclick="GermanMusicMode.showSong(\''+song.id+'\')">'+
+        '<div class="music-card-glow"></div>'+
+        '<div class="music-card-thumb">'+
+          '<img src="'+song.thumbnail+'" alt="'+song.title+'" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<div style=\\\'font-size:2.5rem;color:var(--text3)\\\'>🎵</div>\'">'+
+          '<div class="music-card-thumb-overlay"></div>'+
+          '<div class="music-card-play"></div>'+
+        '</div>'+
+        '<div class="music-card-info">'+
+          '<div class="music-card-title">'+song.title+'</div>'+
+          '<div class="music-card-artist">'+song.artist+'</div>'+
+          '<div class="music-card-meta">'+
+            '<span class="music-card-badge">'+song.level+'</span>'+
+            '<span class="music-card-duration">'+song.duration+'</span>'+
+          '</div>'+
+        '</div>'+
+      '</div>'
+    )).join('');
+    _lobbyRendered = true;
+  }
+
+  function renderLobby(){
+    _currentView = 'lobby';
+    _currentSongId = null;
+    _saveState();
+
+    const lobby = document.getElementById('music-lobby');
+    const detail = document.getElementById('music-detail');
+    if(!lobby || !detail) return;
+
+    detail.classList.remove('music-detail-visible');
+    detail.classList.add('music-detail-exit');
+
+    if(!_lobbyRendered){
+      _buildLobbyCards();
+    }
+
+    lobby.style.display = 'block';
+    lobby.classList.remove('music-lobby-exit');
+    lobby.classList.add('music-lobby-enter');
+
+    setTimeout(function(){
+      detail.style.display = 'none';
+      detail.classList.remove('music-detail-exit');
+      lobby.classList.remove('music-lobby-enter');
+    }, 300);
+
+    window.scrollTo(0, _lobbyScrollY);
+  }
+
+  function showSong(id){
+    var song = getSongById(id);
+    if(!song) return;
+
+    if(_currentView === 'lobby'){
+      _lobbyScrollY = window.scrollY;
+    }
+    _currentView = 'detail';
+    _currentSongId = id;
+    _saveState();
+
+    var lobby = document.getElementById('music-lobby');
+    var detail = document.getElementById('music-detail');
+    if(!lobby || !detail) return;
+
+    var contentEl = document.getElementById('music-detail-content');
+    if(!contentEl) return;
+
+    lobby.classList.add('music-lobby-exit');
+
+    if(contentEl.getAttribute('data-song-id') !== id){
+      var lyricsHTML = song.lyrics.map(function(block){
+        var cls = block.type === 'chorus' ? 'music-lyrics-line chorus' : 'music-lyrics-line';
+        var label = block.label ? '<span class="music-lyrics-label">'+block.label+'</span>' : '';
+        var lines = block.lines.map(function(l){ return '<div class="'+cls+'">'+l+'</div>'; }).join('');
+        return '<div class="music-lyrics-block">'+label+lines+'</div>';
+      }).join('');
+
+      contentEl.setAttribute('data-song-id', id);
+      contentEl.innerHTML = 
+        '<div class="music-detail-hero">'+
+          '<div class="music-detail-cover">'+
+            '<img src="'+song.thumbnail+'" alt="'+song.title+'" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<div style=\\\'font-size:4rem;display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3)\\\'>🎵</div>\'">'+
+          '</div>'+
+          '<div class="music-detail-info">'+
+            '<div class="music-detail-title">'+song.title+'</div>'+
+            '<div class="music-detail-artist">'+song.artist+'</div>'+
+            '<div class="music-detail-tags">'+
+              song.tags.map(function(t){ return '<span class="music-detail-tag">'+t+'</span>'; }).join('')+
+            '</div>'+
+            '<a class="music-detail-youtube" href="https://www.youtube.com/watch?v='+song.youtubeId+'" target="_blank" rel="noopener">▶ Auf YouTube ansehen</a>'+
+          '</div>'+
+        '</div>'+
+        '<div class="music-lyrics-section">'+
+          '<div class="music-lyrics-title">Songtext / Letra</div>'+
+          '<div class="music-lyrics">'+lyricsHTML+'</div>'+
+        '</div>'+
+        '<div class="music-back-section">'+
+          '<button id="music-back-btn" class="music-back-btn"><span class="back-arrow">←</span> Voltar ao Catálogo</button>'+
+        '</div>';
+    }
+
+    var backBtn = document.getElementById('music-back-btn');
+    if(backBtn){
+      backBtn.onclick = function(){ GermanMusicMode.showLobby(); };
+    }
+
+    setTimeout(function(){
+      lobby.style.display = 'none';
+      lobby.classList.remove('music-lobby-exit');
+      detail.style.display = 'block';
+      detail.classList.add('music-detail-visible');
+      window.scrollTo(0,0);
+    }, 280);
+  }
+
+  function showLobby(){
+    _currentView = 'lobby';
+    _currentSongId = null;
+    _saveState();
+
+    if(!_lobbyRendered){
+      _buildLobbyCards();
+    }
+
+    var lobby = document.getElementById('music-lobby');
+    var detail = document.getElementById('music-detail');
+    if(!lobby || !detail) return;
+
+    detail.classList.remove('music-detail-visible');
+    detail.classList.add('music-detail-exit');
+
+    lobby.style.display = 'block';
+    lobby.classList.add('music-lobby-enter');
+
+    setTimeout(function(){
+      detail.style.display = 'none';
+      detail.classList.remove('music-detail-exit');
+      lobby.classList.remove('music-lobby-enter');
+      window.scrollTo(0, _lobbyScrollY);
+    }, 280);
+
+    if(typeof GermanModeCore !== 'undefined') GermanModeCore.renderModeSidebar();
+  }
+
+  function init(){
+    if(_initialized) return;
+    _initialized = true;
+    _loadState();
+
+    const modeView = document.getElementById('mode-music');
+    if(!modeView) return;
+
+    // Listen for mode activation via attribute observer as fallback
+    // Primary init happens through GermanModeCore._onModeActivated
+  }
+
+  function onModeEnter(){
+    _loadState();
+    var ms = _getState();
+
+    if(!_lobbyRendered){
+      _buildLobbyCards();
+    }
+
+    if(ms.currentView === 'detail' && ms.currentSong && getSongById(ms.currentSong)){
+      var song = getSongById(ms.currentSong);
+      var lobbyEl = document.getElementById('music-lobby');
+      var detailEl = document.getElementById('music-detail');
+      var contentEl = document.getElementById('music-detail-content');
+
+      if(lobbyEl) lobbyEl.style.display = 'none';
+      if(detailEl){ detailEl.style.display = 'block'; detailEl.classList.add('music-detail-visible'); }
+
+      if(contentEl && song && contentEl.getAttribute('data-song-id') !== ms.currentSong){
+        var lyricsHTML = song.lyrics.map(function(block){
+          var cls = block.type === 'chorus' ? 'music-lyrics-line chorus' : 'music-lyrics-line';
+          var label = block.label ? '<span class="music-lyrics-label">'+block.label+'</span>' : '';
+          var lines = block.lines.map(function(l){ return '<div class="'+cls+'">'+l+'</div>'; }).join('');
+          return '<div class="music-lyrics-block">'+label+lines+'</div>';
+        }).join('');
+        contentEl.setAttribute('data-song-id', ms.currentSong);
+        contentEl.innerHTML = 
+          '<div class="music-detail-hero">'+
+            '<div class="music-detail-cover">'+
+              '<img src="'+song.thumbnail+'" alt="'+song.title+'" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<div style=\\\'font-size:4rem;display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3)\\\'>🎵</div>\'">'+
+            '</div>'+
+            '<div class="music-detail-info">'+
+              '<div class="music-detail-title">'+song.title+'</div>'+
+              '<div class="music-detail-artist">'+song.artist+'</div>'+
+              '<div class="music-detail-tags">'+
+                song.tags.map(function(t){ return '<span class="music-detail-tag">'+t+'</span>'; }).join('')+
+              '</div>'+
+              '<a class="music-detail-youtube" href="https://www.youtube.com/watch?v='+song.youtubeId+'" target="_blank" rel="noopener">▶ Auf YouTube ansehen</a>'+
+            '</div>'+
+          '</div>'+
+          '<div class="music-lyrics-section">'+
+            '<div class="music-lyrics-title">Songtext / Letra</div>'+
+            '<div class="music-lyrics">'+lyricsHTML+'</div>'+
+          '</div>'+
+          '<div class="music-back-section">'+
+            '<button id="music-back-btn" class="music-back-btn"><span class="back-arrow">←</span> Voltar ao Catálogo</button>'+
+          '</div>';
+      }
+
+      var backBtn = document.getElementById('music-back-btn');
+      if(backBtn){
+        backBtn.onclick = function(){ GermanMusicMode.showLobby(); };
+      }
+      window.scrollTo(0,0);
+    } else {
+      renderLobby();
+    }
+
+    _renderSidebarSongs();
+  }
+
+  function _renderSidebarSongs(){
+    const list = document.getElementById('sidebar-music-list');
+    if(!list) return;
+
+    list.innerHTML = SONGS.map(song =>
+      '<div class="sidebar-music-song" onclick="GermanMusicMode.showSong(\''+song.id+'\')">'+
+        '<span class="song-dot"></span>'+
+        '<span>'+song.title+'</span>'+
+        '<span class="song-artist">'+song.artist+'</span>'+
+      '</div>'
+    ).join('');
+  }
+
+  return {
+    SONGS,
+    getSongs,
+    getSongById,
+    renderLobby,
+    showSong,
+    showLobby,
+    init,
+    onModeEnter,
+    _renderSidebarSongs
+  };
+})();
+window.GermanMusicMode = window.GermanMusicMode || {};
+Object.assign(window.GermanMusicMode, {
+  showSong: GermanMusicCore.showSong,
+  showLobby: GermanMusicCore.showLobby,
+  getSongs: GermanMusicCore.getSongs,
+  getSongById: GermanMusicCore.getSongById,
+  init: GermanMusicCore.init,
+  SONGS: GermanMusicCore.SONGS
+});
 
 function setup(){
   loadState();
@@ -6743,7 +7168,7 @@ function setup(){
     if(confirm(_t('reset.confirm'))){
       localStorage.removeItem('deutschmeister_state');
       localStorage.removeItem('deutschmeister_evo');
-      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{}};
+      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'}};
       resetGPS();
       applyLang();
       GermanModeCore.init();
@@ -6808,7 +7233,7 @@ $('#import-file').onchange=function(e){
       if(!state.wfsPatterns)state.wfsPatterns={};
       if(!state.evo)state.evo=null;
       if(!state.currentMode)state.currentMode='chapters';
-      if(!state.viewState)state.viewState={};
+      if(!state.viewState)state.viewState={};if(!state.musicState)state.musicState={currentSong:null,currentView:'lobby',lobbyScrollY:0};
       syncGPSFromState();
       saveState();
       applyLang();
