@@ -1,12 +1,13 @@
 ================================================================================
-               DOCUMENTACAO COMPLETA — DeutschMeister v2.0
+               DOCUMENTACAO COMPLETA — DeutschMeister v3.0
             Plataforma Interativa de Aprendizado de Alemão
-         Documentação Técnica de Auditoria — Maio 2026
+    Documentação Técnica — Maio 2026 (Arquitetura Multimodo)
 ================================================================================
 
-  Arquivo Fonte:  deutsch-meister.html (~6323 linhas, ~1.048.823 caracteres)
+  Arquivo Fonte:  deutsch-meister.html (~6852 linhas, ~1.076.641 caracteres)
   Tipo:           SPA (Single Page Application) — HTML + CSS + JS vanilla
   Objetivo:       Ensinar alemão A1→B1 seguindo padrão CEFR
+  Arquitetura:    MULTIMODO — 9 modos/guias com sidebar dinâmica adaptativa
   Persistência:   localStorage (chave única: deutschmeister_state)
   Idiomas:        Português (pt) / English (en)
   Navegadores:    Chrome, Firefox, Edge, Safari (modernos)
@@ -1104,10 +1105,220 @@
       capítulo entrar no viewport)
 
 ================================================================================
-                         FIM DA DOCUMENTAÇÃO
+   DeutschMeister v2.0 → Agora com ARQUITETURA MULTIMODO (Maio 2026)
 ================================================================================
 
-  Esta documentação foi gerada por auditoria completa do HTML (6323 linhas)
-  e reflete o estado real do sistema DeutschMeister em Maio 2026.
+================================================================================
+  31. ARQUITETURA MULTIMODO — SISTEMA DE MODOS/GUIAS
+================================================================================
 
-  Versão da documentação: 2.0 (auditoria completa)
+  31.1 VISÃO GERAL
+  ----------------------------------------------------------------------------
+  O site evoluiu de uma página contínua de capítulos para uma PLATAFORMA
+  MULTIMODO com 9 modos/guias principais acessíveis pela sidebar.
+
+  A sidebar esquerda tornou-se um HUB PRINCIPAL DE NAVEGAÇÃO GLOBAL com
+  DOIS NÍVEIS:
+    - NÍVEL 1: Botões de modos globais (Capítulos, Música, Exercícios, etc.)
+    - NÍVEL 2: Conteúdo dinâmico específico do modo ativo
+
+  A sidebar se ADAPTA ao modo atual — mostrando capítulos quando em modo
+  Capítulos, playlists quando em Música, categorias quando em Vocabulário, etc.
+
+  31.2 MODOS DISPONÍVEIS
+  ----------------------------------------------------------------------------
+  | Modo           | Ícone | View Container        | Status              |
+  |----------------|-------|-----------------------|---------------------|
+  | chapters       | 📚    | #mode-chapters        | COMPLETO (original) |
+  | music          | 🎵    | #mode-music           | HUB (placeholder)   |
+  | exercises      | 🧠    | #mode-exercises       | HUB (placeholder)   |
+  | vocabulary     | 📖    | #mode-vocabulary      | HUB (placeholder)   |
+  | evolution      | 🧬    | #mode-evolution       | HUB (placeholder)   |
+  | review         | 🔥    | #mode-review          | HUB (placeholder)   |
+  | engineering    | 🏗️    | #mode-engineering     | HUB (placeholder)   |
+  | listening      | 🎧    | #mode-listening       | HUB (placeholder)   |
+  | conversation   | 💬    | #mode-conversation    | HUB (placeholder)   |
+
+  31.3 ARQUITETURA DE VIEWS
+  ----------------------------------------------------------------------------
+  O conteúdo da página é organizado em VIEW CONTAINERS:
+
+  <div id="mode-content">
+    <div id="mode-chapters" class="mode-view active"> ... </div>
+    <div id="mode-music" class="mode-view"> ... </div>
+    <div id="mode-exercises" class="mode-view"> ... </div>
+    <div id="mode-vocabulary" class="mode-view"> ... </div>
+    ... (demais modos)
+  </div>
+
+  REGRA FUNDAMENTAL: Somente UMA view pode estar ativa por vez.
+  Views inativas recebem display:none via CSS (.mode-view).
+  A view ativa recebe a classe .active → display:block.
+
+  Ao trocar de modo, o conteúdo antigo é OCULTADO (não destruído),
+  preservando estado, scroll e progresso.
+
+  31.4 GERMAN MODE CORE — CONTROLADOR GLOBAL
+  ----------------------------------------------------------------------------
+  Namespace: GermanModeCore (IIFE)
+
+  Funções principais:
+    - switchMode(mode)     — Troca o modo ativo com transição animada
+    - getCurrentMode()     — Retorna o modo atual
+    - init()               — Inicializa o sistema na carga da página
+    - renderModeSidebar()  — Renderiza sidebar específica do modo
+    - saveModeScroll()     — Persiste posição de scroll do modo atual
+    - saveScrollPosition() — Salva posição de scroll
+    - restoreScrollPosition() — Restaura posição de scroll
+    - updateAllModeButtons()  — Atualiza estado visual dos botões
+
+  O sistema é ISOLADO (IIFE), sem poluir o escopo global.
+  Namespace de backup: window.GermanModeHub (para compatibilidade futura).
+
+  31.5 FLUXO DE TROCA DE MODO
+  ----------------------------------------------------------------------------
+  1. Usuário clica em botão de modo na sidebar
+  2. GermanModeCore.switchMode('music') é chamado
+  3. Salva posição de scroll do modo atual (chapters)
+  4. View atual (#mode-chapters) recebe classe .exiting → fade out
+  5. Sidebar content do modo antigo é ocultada
+  6. currentMode é atualizado para 'music'
+  7. Nova view (#mode-music) recebe classe .active → fade in
+  8. Sidebar content do novo modo é exibida
+  9. Botões de modo são atualizados (active-mode no selecionado)
+  10. Título da sidebar é atualizado (ícone + nome do modo)
+  11. Scroll do novo modo é restaurado
+  12. Estado é persistido (state.currentMode + state.viewState)
+
+  31.6 SIDEBAR DINÂMICA — DOIS NÍVEIS
+  ----------------------------------------------------------------------------
+  Estrutura HTML:
+  <aside id="sidebar">
+    <div id="sidebar-header">
+      <h2 id="sidebar-mode-title">📚 Capítulos</h2>
+      <span id="sidebar-close">✕</span>
+    </div>
+    <div id="sidebar-mode-nav">
+      <button class="mode-btn" data-mode="chapters">📚 Capítulos</button>
+      <button class="mode-btn" data-mode="music">🎵 Música</button>
+      ... (9 botões)
+    </div>
+    <div id="sidebar-mode-content">
+      <div id="sidebar-chapters-content" class="active"> ... </div>
+      <div id="sidebar-music-content"> ... </div>
+      ... (um container por modo)
+    </div>
+  </aside>
+
+  Cada container de modo tem seu próprio conteúdo:
+    - chapters:    #sidebar-search + #sidebar-list (lista de capítulos)
+    - music:       #sidebar-music-list (playlists por gênero)
+    - vocabulary:  #sidebar-vocab-list (categorias do glossário)
+    - exercises:   #sidebar-exercises-list (tipos de exercício)
+    - evolution:   #sidebar-evo-list (métricas)
+    - review:      #sidebar-review-list (opções de revisão)
+    - engineering, listening, conversation: usam sidebar de capítulos
+
+  31.7 SISTEMA DE ESTADO E PERSISTÊNCIA
+  ----------------------------------------------------------------------------
+  Campos adicionados ao objeto 'state' global:
+    - currentMode: 'chapters'     — Modo ativo (persistido)
+    - viewState: {}               — Estado de views incluindo scrollPositions
+
+  Persistência:
+    - localStorage['deutschmeister_state'] — JSON completo do state
+    - saveState() é chamada após cada troca de modo
+    - loadState() restaura o modo ativo na inicialização
+    - Scroll é salvo via debounce (500ms) e no beforeunload
+
+  31.8 TRANSIÇÕES E ANIMAÇÕES
+  ----------------------------------------------------------------------------
+  - Transição de view: opacity + translateY (0.35s ease)
+  - View saindo: classe .exiting → opacity:0, translateY(-8px)
+  - View entrando: classe .active → opacity:1, translateY(0)
+  - Botões de modo: transição de cor e box-shadow (0.2s)
+  - Botão ativo: fundo primário, texto branco, sombra sutil
+  - Sem exageros — animações são leves e performáticas
+
+  31.9 ESCALABILIDADE
+  ----------------------------------------------------------------------------
+  Para adicionar um novo modo:
+  1. Adicionar entrada ao MODE_DEFS no GermanModeCore
+  2. Criar o container .mode-view no HTML
+  3. Criar o container de sidebar-content no HTML
+  4. Adicionar botão .mode-btn no #sidebar-mode-nav
+  5. Implementar a função _renderXXXSidebar() (se necessário)
+  6. O conteúdo do modo pode ser populado sob demanda
+
+  NÃO é necessário:
+    - Modificar o sistema de modo existente
+    - Alterar outros modos
+    - Reescrever lógica global
+    - Criar novos arquivos HTML
+
+  31.10 COMPATIBILIDADE
+  ----------------------------------------------------------------------------
+  O sistema de modos NÃO quebra nenhum sistema existente:
+    - Capítulos: continuam funcionando idênticos no modo chapters
+    - Exercícios: checkMulti, checkTranslate, checkOrder intactos
+    - Mini testes: submitMiniTest intacto
+    - Revisões: getReviewContent intacta
+    - DNA do Verbo: VERB_DNA.renderDNA() intacto
+    - Conexões Verbais: GermanVerbConnectionsSystem.render() intacto
+    - Engenharia da Palavra: GermanWordEngineeringSystem.render() intacto
+    - Famílias de Palavras: DeutschMeisterWordFamilies.render() intacto
+    - GPS/Evolution: initGPS(), syncGPSFromState() intactos
+    - Save/Import/Export: completamente funcionais
+    - Dark mode: funciona em todos os modos
+    - i18n: funciona em todos os modos
+
+  31.11 INTEGRAÇÃO COM SAVE CENTRALIZADO
+  ----------------------------------------------------------------------------
+  - state.currentMode: salvo e restaurado automaticamente
+  - state.viewState.scrollPositions: posições de scroll por modo
+  - Export inclui modo atual (compatível com versões antigas)
+  - Import migra campos ausentes automaticamente
+  - Reset limpa o modo para 'chapters'
+
+  31.12 PERFORMANCE
+  ----------------------------------------------------------------------------
+  - Views inativas têm display:none — sem renderização do browser
+  - Conteúdo de capítulos é renderizado apenas no modo chapters
+  - Hubs placeholder não contêm processamento pesado
+  - GermanModeCore usa timeouts mínimos (35-50ms) só para animação
+  - Scroll listener usa debounce de 500ms para evitar saves excessivos
+  - Sem loops, sem listeners infinitos, sem renderizações duplicadas
+
+  31.13 FLUXO VISUAL DO USUÁRIO
+  ----------------------------------------------------------------------------
+  Carga inicial:
+    1. loadState() restaura currentMode do localStorage
+    2. applyLang() renderiza chapters, TOC, sidebar, glossário
+    3. GermanModeCore.init() ativa a view do modo salvo
+    4. Sidebar mostra botões + conteúdo do modo ativo
+    5. Scroll é restaurado para a posição salva
+
+  Troca para Música:
+    1. Scroll do modo chapters é salvo
+    2. View chapters faz fade out
+    3. View music faz fade in
+    4. Sidebar mostra playlists por gênero
+    5. Scroll vai para o topo (ou posição salva de music)
+    6. state.currentMode = 'music' é persistido
+
+  Volta para Capítulos:
+    1. View music faz fade out
+    2. View chapters faz fade in
+    3. Sidebar volta a mostrar lista de capítulos
+    4. Scroll restaura posição exata onde o usuário estava
+    5. Tudo continua EXATAMENTE como antes
+
+================================================================================
+                          FIM DA DOCUMENTAÇÃO
+================================================================================
+
+  Esta documentação foi gerada por auditoria completa do HTML
+  e reflete o estado real do sistema DeutschMeister em Maio 2026
+  COM a nova arquitetura multimodo.
+
+  Versão da documentação: 3.0 (arquitetura multimodo)

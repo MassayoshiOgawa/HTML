@@ -719,6 +719,52 @@ i{font-style:normal}
   .wfs-member-card-body{padding:10px 12px 10px 16px}
   .wfs-member-card-footer{padding:6px 12px 8px 16px}
 }
+/* ===== MULTI-MODE SYSTEM — CSS ===== */
+#mode-content{position:relative;min-height:100vh}
+.mode-view{display:none;opacity:0;transition:opacity 0.35s ease,transform 0.35s ease;transform:translateY(8px)}
+.mode-view.active{display:block;opacity:1;transform:translateY(0)}
+.mode-view.exiting{opacity:0;transform:translateY(-8px);pointer-events:none}
+/* Sidebar mode navigation */
+#sidebar-mode-nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;border-bottom:1px solid var(--border)}
+.mode-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:.75rem;font-family:var(--font);cursor:pointer;transition:all .2s;white-space:nowrap;font-weight:500}
+.mode-btn:hover{background:var(--primary3);color:var(--primary);border-color:var(--primary)}
+.mode-btn.active-mode{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:700;box-shadow:0 2px 8px rgba(108,92,231,0.3)}
+.mode-btn .mode-icon{font-size:.9rem;line-height:1}
+#sidebar-section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--text3);padding:12px 20px 6px;font-weight:700}
+/* Mode placeholder hub */
+.mode-hub{padding:80px 24px;max-width:900px;margin:0 auto;text-align:center}
+.mode-hub-icon{font-size:3.5rem;margin-bottom:16px}
+.mode-hub h2{font-size:1.8rem;font-weight:800;margin-bottom:8px;color:var(--primary)}
+.mode-hub p{color:var(--text2);font-size:1rem;max-width:500px;margin:0 auto 24px}
+.mode-hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-width:700px;margin:0 auto}
+.mode-hub-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;transition:all .2s;cursor:default}
+.mode-hub-card:hover{border-color:var(--primary);box-shadow:var(--shadow)}
+.mode-hub-card .card-icon{font-size:1.5rem;margin-bottom:8px}
+.mode-hub-card h4{font-size:.9rem;font-weight:700;margin-bottom:4px;color:var(--text)}
+.mode-hub-card p{font-size:.75rem;color:var(--text3);margin:0}
+/* Mode-aware sidebar sections */
+#sidebar-mode-content{flex:1;display:flex;flex-direction:column;overflow-y:auto}
+#sidebar-chapters-content,#sidebar-music-content,#sidebar-vocabulary-content,#sidebar-exercises-content,#sidebar-evolution-content,#sidebar-review-content{display:none;flex-direction:column;flex:1}
+#sidebar-chapters-content.active,#sidebar-music-content.active,#sidebar-vocabulary-content.active,#sidebar-exercises-content.active,#sidebar-evolution-content.active,#sidebar-review-content.active{display:flex}
+/* Sidebar music list */
+.sidebar-music-item{display:flex;align-items:center;gap:8px;padding:8px 16px;color:var(--text2);font-size:.8rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.sidebar-music-item:hover{background:var(--primary3);color:var(--primary)}
+.sidebar-music-item .music-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+/* Sidebar simple link items */
+.sidebar-link-item{display:flex;align-items:center;gap:8px;padding:8px 16px;color:var(--text2);font-size:.8rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.sidebar-link-item:hover{background:var(--primary3);color:var(--primary)}
+.sidebar-link-item .link-icon{font-size:.85rem;flex-shrink:0}
+/* Mode transition keyframes */
+@keyframes modeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes modeSlideOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-12px)}}
+.mode-view.anim-in{animation:modeSlideIn .35s ease forwards}
+.mode-view.anim-out{animation:modeSlideOut .25s ease forwards}
+/* Responsive mode buttons */
+@media(max-width:768px){
+  #sidebar-mode-nav{gap:3px;padding:6px 8px}
+  .mode-btn{padding:5px 7px;font-size:.7rem;gap:3px}
+  .mode-btn .mode-icon{font-size:.8rem}
+}
 </style>
 </head>
 <body>
@@ -742,10 +788,48 @@ i{font-style:normal}
 <button class="navbar-btn" id="settings-btn" data-i18n-aria="nav.settings" aria-label="Configurações">⚙️</button>
 </nav>
 <aside id="sidebar">
-<div id="sidebar-header"><h2 data-i18n="sidebar.title">📚 Capítulos</h2><span id="sidebar-close">✕</span></div>
+<div id="sidebar-header"><h2 id="sidebar-mode-title" data-i18n="sidebar.title">📚 Capítulos</h2><span id="sidebar-close">✕</span></div>
+<div id="sidebar-mode-nav">
+<button class="mode-btn active-mode" data-mode="chapters"><span class="mode-icon">📚</span> Capítulos</button>
+<button class="mode-btn" data-mode="music"><span class="mode-icon">🎵</span> Música</button>
+<button class="mode-btn" data-mode="exercises"><span class="mode-icon">🧠</span> Exercícios</button>
+<button class="mode-btn" data-mode="vocabulary"><span class="mode-icon">📖</span> Vocabulário</button>
+<button class="mode-btn" data-mode="evolution"><span class="mode-icon">🧬</span> Evolução</button>
+<button class="mode-btn" data-mode="review"><span class="mode-icon">🔥</span> Revisão</button>
+<button class="mode-btn" data-mode="engineering"><span class="mode-icon">🏗️</span> Engenharia</button>
+<button class="mode-btn" data-mode="listening"><span class="mode-icon">🎧</span> Escuta</button>
+<button class="mode-btn" data-mode="conversation"><span class="mode-icon">💬</span> Conversação</button>
+</div>
+<div id="sidebar-mode-content">
+<div id="sidebar-chapters-content" class="active">
 <input type="text" id="sidebar-search" data-i18n-placeholder="sidebar.search" placeholder="Buscar capítulos...">
 <div id="sidebar-list"></div>
+</div>
+<div id="sidebar-music-content">
+<div id="sidebar-section-title">🎵 Playlists</div>
+<div id="sidebar-music-list"></div>
+</div>
+<div id="sidebar-vocabulary-content">
+<div id="sidebar-section-title">📖 Categorias</div>
+<div id="sidebar-vocab-list"></div>
+</div>
+<div id="sidebar-exercises-content">
+<div id="sidebar-section-title">🧠 Foco</div>
+<div id="sidebar-exercises-list"></div>
+</div>
+<div id="sidebar-evolution-content">
+<div id="sidebar-section-title">🧬 Métricas</div>
+<div id="sidebar-evo-list"></div>
+</div>
+<div id="sidebar-review-content">
+<div id="sidebar-section-title">🔥 Revisão</div>
+<div id="sidebar-review-list"></div>
+</div>
+</div>
 </aside>
+<div id="mode-content">
+<!-- ===== MODO: CAPÍTULOS ===== -->
+<div id="mode-chapters" class="mode-view active">
 <section id="cover">
 <div class="cover-badge" data-i18n="cover.badge">🌟 Curso Completo A1 → B1</div>
 <h1 class="cover-title" data-i18n="cover.title">Domine o <span>Alemão</span></h1>
@@ -943,12 +1027,6 @@ i{font-style:normal}
 </section>
 
 <div id="chapters-container"></div>
-<section id="glossary" class="section">
-<div class="section-header"><div class="section-tag" data-i18n="glossary.tag">Vocabulário</div><h2 class="section-title" data-i18n="glossary.title">Glossário completo</h2><p class="section-desc" data-i18n="glossary.desc">Pesquise, favorite e revise todas as palavras aprendidas durante o curso.</p></div>
-<div class="gloss-cats" id="gloss-cats"></div>
-<div class="gloss-search"><input type="text" id="gloss-search-input" data-i18n-placeholder="glossary.search" placeholder="Buscar palavra em alemão ou português..."></div>
-<div class="gloss-list" id="gloss-list"></div>
-</section>
 <section id="notes-section" class="section">
 <div class="section-header"><div class="section-tag" data-i18n="notes.tag">Anotações</div><h2 class="section-title" data-i18n="notes.title">Suas anotações pessoais</h2><p class="section-desc" data-i18n="notes.desc">Escreva suas próprias observações, exemplos ou dúvidas. Salvamos automaticamente.</p></div>
 <textarea id="notes-area" data-i18n-placeholder="notes.placeholder" placeholder="Digite suas anotações aqui..."></textarea>
@@ -959,6 +1037,134 @@ i{font-style:normal}
 <div class="cover-stats" style="margin-bottom:24px"><div class="cover-stat"><div class="cover-stat-num" id="final-completed">0</div><div class="cover-stat-label" data-i18n="conclusion.chaptersLabel">Capítulos</div></div><div class="cover-stat"><div class="cover-stat-num" id="final-pct">0%</div><div class="cover-stat-label" data-i18n="conclusion.progressLabel">Progresso</div></div></div>
 <div class="cover-actions"><button class="btn btn-primary" onclick="scrollToSection('cover')" data-i18n="conclusion.homeBtn">🏠 Voltar ao início</button><button class="btn btn-outline" onclick="exportProgress()" data-i18n="conclusion.exportBtn">📤 Exportar certificado</button></div>
 </section>
+</div><!-- /#mode-chapters -->
+
+<!-- ===== MODO: MÚSICA ===== -->
+<div id="mode-music" class="mode-view">
+<div class="mode-hub">
+<div class="mode-hub-icon">🎵</div>
+<h2>Música & Aprendizado</h2>
+<p>Aprenda alemão através de músicas autênticas, playlists curadas e exercícios de escuta com ritmo.</p>
+<div class="mode-hub-grid">
+<div class="mode-hub-card"><div class="card-icon">🎸</div><h4>Playlists Curadas</h4><p>Músicas organizadas por nível e tema gramatical</p></div>
+<div class="mode-hub-card"><div class="card-icon">📝</div><h4>Letras Interativas</h4><p>Acompanhe a letra com tradução sincronizada</p></div>
+<div class="mode-hub-card"><div class="card-icon">🎤</div><h4>Karaokê Alemão</h4><p>Cante junto e pratique a pronúncia</p></div>
+<div class="mode-hub-card"><div class="card-icon">🧩</div><h4>Gap-Fill Musical</h4><p>Complete as palavras que faltam nas músicas</p></div>
+<div class="mode-hub-card"><div class="card-icon">🎼</div><h4>Ritmo Gramatical</h4><p>Aprenda padrões gramaticais com ritmo musical</p></div>
+<div class="mode-hub-card"><div class="card-icon">📻</div><h4>Rádio Alemã</h4><p>Estações recomendadas para imersão passiva</p></div>
+</div>
+</div>
+</div><!-- /#mode-music -->
+
+<!-- ===== MODO: EXERCÍCIOS DE PALAVRAS ===== -->
+<div id="mode-exercises" class="mode-view">
+<div class="mode-hub">
+<div class="mode-hub-icon">🧠</div>
+<h2>Exercícios de Palavras</h2>
+<p>Pratique vocabulário com exercícios focados: flashcards, quiz de gêneros, ordem de palavras e mais.</p>
+<div class="mode-hub-grid">
+<div class="mode-hub-card"><div class="card-icon">🃏</div><h4>Flashcards</h4><p>Revisão espaçada de vocabulário por nível</p></div>
+<div class="mode-hub-card"><div class="card-icon">⚧️</div><h4>Quiz de Gêneros</h4><p>Acerte der/die/das para cada substantivo</p></div>
+<div class="mode-hub-card"><div class="card-icon">🔀</div><h4>Ordem de Palavras</h4><p>Monte frases alemãs na ordem correta</p></div>
+<div class="mode-hub-card"><div class="card-icon">🔤</div><h4>Spelling Bee</h4><p>Soletre palavras alemãs corretamente</p></div>
+<div class="mode-hub-card"><div class="card-icon">🎯</div><h4>Desafios Diários</h4><p>Exercícios novos todos os dias</p></div>
+<div class="mode-hub-card"><div class="card-icon">📊</div><h4>Estatísticas</h4><p>Acompanhe seu desempenho por categoria</p></div>
+</div>
+</div>
+</div><!-- /#mode-exercises -->
+
+<!-- ===== MODO: VOCABULÁRIO ===== -->
+<div id="mode-vocabulary" class="mode-view">
+<section id="glossary" class="section">
+<div class="section-header"><div class="section-tag" data-i18n="glossary.tag">Vocabulário</div><h2 class="section-title" data-i18n="glossary.title">Glossário completo</h2><p class="section-desc" data-i18n="glossary.desc">Pesquise, favorite e revise todas as palavras aprendidas durante o curso.</p></div>
+<div class="gloss-cats" id="gloss-cats"></div>
+<div class="gloss-search"><input type="text" id="gloss-search-input" data-i18n-placeholder="glossary.search" placeholder="Buscar palavra em alemão ou português..."></div>
+<div class="gloss-list" id="gloss-list"></div>
+</section>
+</div><!-- /#mode-vocabulary -->
+
+<!-- ===== MODO: EVOLUÇÃO ===== -->
+<div id="mode-evolution" class="mode-view">
+<div class="mode-hub">
+<div class="mode-hub-icon">🧬</div>
+<h2>Evolução do Aprendizado</h2>
+<p>Acompanhe seu domínio real do alemão com métricas detalhadas, gráficos de progresso e análise de pontos fortes e fracos.</p>
+<div class="mode-hub-grid">
+<div class="mode-hub-card"><div class="card-icon">📈</div><h4>Dashboard GPS</h4><p>Visão completa da sua evolução por área</p></div>
+<div class="mode-hub-card"><div class="card-icon">🎯</div><h4>Precisão por Tópico</h4><p>Veja onde você acerta mais e onde precisa melhorar</p></div>
+<div class="mode-hub-card"><div class="card-icon">⏱️</div><h4>Linha do Tempo</h4><p>Sua jornada de aprendizado dia após dia</p></div>
+<div class="mode-hub-card"><div class="card-icon">🏆</div><h4>Conquistas</h4><p>Medalhas e marcos alcançados</p></div>
+</div>
+</div>
+</div><!-- /#mode-evolution -->
+
+<!-- ===== MODO: REVISÃO INTELIGENTE ===== -->
+<div id="mode-review" class="mode-view">
+<div class="mode-hub">
+<div class="mode-hub-icon">🔥</div>
+<h2>Revisão Inteligente</h2>
+<p>O sistema identifica o que você mais errou e cria revisões personalizadas com foco nos seus pontos fracos.</p>
+<div class="mode-hub-grid">
+<div class="mode-hub-card"><div class="card-icon">🎯</div><h4>Revisão Adaptativa</h4><p>O algoritmo prioriza o que você mais precisa revisar</p></div>
+<div class="mode-hub-card"><div class="card-icon">📝</div><h4>Erros Frequentes</h4><p>Lista dos seus erros mais comuns com correções</p></div>
+<div class="mode-hub-card"><div class="card-icon">🔄</div><h4>Spaced Repetition</h4><p>Revisão em intervalos otimizados para memória</p></div>
+<div class="mode-hub-card"><div class="card-icon">📋</div><h4>Checklists de Revisão</h4><p>Resumos por capítulo para revisão rápida</p></div>
+</div>
+</div>
+</div><!-- /#mode-review -->
+
+<!-- ===== MODO: ENGENHARIA DA PALAVRA ===== -->
+<div id="mode-engineering" class="mode-view">
+<div class="mode-hub">
+<div class="mode-hub-icon">🏗️</div>
+<h2>Engenharia da Palavra</h2>
+<p>Desmonte palavras alemãs como um engenheiro: prefixos, sufixos, raízes e famílias de palavras.</p>
+<div class="mode-hub-grid">
+<div class="mode-hub-card"><div class="card-icon">🧬</div><h4>DNA do Verbo</h4><p>Perfil linguístico completo de cada verbo alemão</p></div>
+<div class="mode-hub-card"><div class="card-icon">🔗</div><h4>Conexões Verbais</h4><p>Rede de verbos conectados por prefixos</p></div>
+<div class="mode-hub-card"><div class="card-icon">🔨</div><h4>Decomposição</h4><p>Análise morfológica: prefixo+raiz+sufixo</p></div>
+<div class="mode-hub-card"><div class="card-icon">🌳</div><h4>Famílias de Palavras</h4><p>Árvores de derivação por raiz comum</p></div>
+<div class="mode-hub-card"><div class="card-icon">📐</div><h4>Engenharia da Frase</h4><p>Análise estrutural completa de frases</p></div>
+<div class="mode-hub-card"><div class="card-icon">🏷️</div><h4>Padrões Morfológicos</h4><p>Reconhecimento de padrões em palavras alemãs</p></div>
+</div>
+</div>
+</div><!-- /#mode-engineering -->
+
+<!-- ===== MODO: ESCUTA ===== -->
+<div id="mode-listening" class="mode-view">
+<div class="mode-hub">
+<div class="mode-hub-icon">🎧</div>
+<h2>Escuta Ativa</h2>
+<p>Treine sua compreensão auditiva com áudios graduados, diálogos naturais e exercícios de escuta focada.</p>
+<div class="mode-hub-grid">
+<div class="mode-hub-card"><div class="card-icon">🗣️</div><h4>Diálogos do Dia a Dia</h4><p>Conversas reais em velocidade natural</p></div>
+<div class="mode-hub-card"><div class="card-icon">📻</div><h4>Notícias Simplificadas</h4><p>Notícias em alemão para aprendizes</p></div>
+<div class="mode-hub-card"><div class="card-icon">🎙️</div><h4>Podcasts Graduados</h4><p>Conteúdo em áudio por nível CEFR</p></div>
+<div class="mode-hub-card"><div class="card-icon">✍️</div><h4>Ditado Alemão</h4><p>Escreva o que você ouve — melhore ortografia e escuta</p></div>
+<div class="mode-hub-card"><div class="card-icon">🔊</div><h4>Sons do Alemão</h4><p>Diferencie sons parecidos: ü/u, ö/o, ä/e, ch/r</p></div>
+<div class="mode-hub-card"><div class="card-icon">🎬</div><h4>Cenas de Filmes</h4><p>Trechos de filmes alemães com legendas interativas</p></div>
+</div>
+</div>
+</div><!-- /#mode-listening -->
+
+<!-- ===== MODO: CONVERSAÇÃO ===== -->
+<div id="mode-conversation" class="mode-view">
+<div class="mode-hub">
+<div class="mode-hub-icon">💬</div>
+<h2>Conversação</h2>
+<p>Pratique situações reais de conversação com diálogos interativos, role-play guiado e frases prontas para usar.</p>
+<div class="mode-hub-grid">
+<div class="mode-hub-card"><div class="card-icon">🏪</div><h4>Situações Reais</h4><p>No restaurante, no hotel, na farmácia, no trabalho</p></div>
+<div class="mode-hub-card"><div class="card-icon">🎭</div><h4>Role-Play Guiado</h4><p>Simulações de conversas com respostas guiadas</p></div>
+<div class="mode-hub-card"><div class="card-icon">💭</div><h4>Frases Prontas</h4><p>Expressões essenciais para cada situação</p></div>
+<div class="mode-hub-card"><div class="card-icon">🔄</div><h4>Perguntas & Respostas</h4><p>Treino de padrões de pergunta e resposta</p></div>
+<div class="mode-hub-card"><div class="card-icon">🗣️</div><h4>Shadowing</h4><p>Repetição imediata para fluência e pronúncia</p></div>
+<div class="mode-hub-card"><div class="card-icon">📞</div><h4>Conversas Telefônicas</h4><p>Linguagem e etiqueta para telefonemas em alemão</p></div>
+</div>
+</div>
+</div><!-- /#mode-conversation -->
+
+</div><!-- /#mode-content -->
 <div id="footer-text" style="text-align:center;padding:24px;color:var(--text3);font-size:.8rem;border-top:1px solid var(--border)" data-i18n="footer">DeutschMeister © 2026 — Feito com 💜 para aprendizes de alemão</div>
 <script>
 const CHAPTERS=[
@@ -2310,13 +2516,14 @@ function applyLang(){
   if(langToggle)langToggle.checked=state.lang==='en';
   document.documentElement.lang=state.lang==='en'?'en':'pt-BR';
   renderChapters();renderTOC();renderSidebar();renderGlossCats();renderGlossary();
+  if(typeof GermanModeCore !== 'undefined') GermanModeCore.renderModeSidebar();
 }
-let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null};
+let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{}};
 function loadState(){try{const r=localStorage.getItem('deutschmeister_state');if(r){const p=JSON.parse(r);state={...state,...p}}}catch(e){}}
 function saveState(){try{localStorage.setItem('deutschmeister_state',JSON.stringify(state))}catch(e){}}
 function $(s,c){return(c||document).querySelector(s)}
 function $$(s,c){return Array.from((c||document).querySelectorAll(s))}
-function scrollToSection(id){const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})}
+function scrollToSection(id){const e=document.getElementById(id);if(!e)return;if(GermanModeCore.getCurrentMode()!=='chapters'){GermanModeCore.switchMode('chapters');setTimeout(()=>{e.scrollIntoView({behavior:'smooth',block:'start'})},400)}else{e.scrollIntoView({behavior:'smooth',block:'start'})}}
 function normalize(s){return s.toLowerCase().trim().replace(/[.,!?;:]/g,'').replace(/\s+/g,' ')}
 function isSimilar(u,a){if(Array.isArray(a))return a.some(x=>normalize(u)===normalize(x));return normalize(u)===normalize(a)}
 function toast(msg,t){const c=$('#toast-container');const d=document.createElement('div');d.className='toast '+(t||'info');d.textContent=msg;c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .3s';setTimeout(()=>d.remove(),300)},3000)}
@@ -2855,7 +3062,7 @@ function renderTOC(){
     else if(unlocked){statusLabel=_t('toc.available');statusClass='active'}
     else{statusLabel=_t('toc.locked');statusClass='locked-status'}
     card.innerHTML='<span class="num">'+_t('toc.chapter')+' '+ch.id+' — '+ch.level+'</span><h3>'+ch.title+'</h3><p>'+chDesc+'</p><span class="status '+statusClass+'">'+statusLabel+'</span>';
-    if(unlocked)card.onclick=()=>scrollToSection('ch-'+ch.id);
+    if(unlocked)card.onclick=()=>{if(GermanModeCore.getCurrentMode()!=='chapters'){GermanModeCore.switchMode('chapters');setTimeout(()=>{scrollToSection('ch-'+ch.id)},400)}else{scrollToSection('ch-'+ch.id)}};
     grid.appendChild(card);
   });
 }
@@ -3158,7 +3365,7 @@ function renderSidebar(){
     const dotClass=completed?'done':(unlocked?'active-dot':'');
     const short=isEn&&ch.shortEn?ch.shortEn:ch.short;
     item.innerHTML='<span class="dot '+dotClass+'"></span><span>'+short+'</span><span class="level-badge">'+ch.level+'</span>';
-    if(unlocked)item.onclick=()=>{scrollToSection('ch-'+ch.id);closeSidebar()};
+    if(unlocked)item.onclick=()=>{if(GermanModeCore.getCurrentMode()!=='chapters'){GermanModeCore.switchMode('chapters');setTimeout(()=>{scrollToSection('ch-'+ch.id)},400)}else{scrollToSection('ch-'+ch.id)};closeSidebar()};
     else item.style.opacity='.4';
     list.appendChild(item);
   });
@@ -6180,11 +6387,321 @@ const DeutschMeisterWordFamilies=(()=>{
   return API;
 })();
 
+// ===== GERMAN MODE CORE — MULTI-MODE ARCHITECTURE =====
+window.GermanModeHub = window.GermanModeHub || {};
+const GermanModeCore = (() => {
+  const MODE_DEFS = {
+    chapters:     { id:'chapters',     icon:'📚', name:'Capítulos',     viewId:'mode-chapters',     sidebarId:'sidebar-chapters-content',    sidebarTitle:'Capítulos' },
+    music:        { id:'music',        icon:'🎵', name:'Música',         viewId:'mode-music',        sidebarId:'sidebar-music-content',       sidebarTitle:'Playlists' },
+    exercises:    { id:'exercises',    icon:'🧠', name:'Exercícios',    viewId:'mode-exercises',    sidebarId:'sidebar-exercises-content',   sidebarTitle:'Foco' },
+    vocabulary:   { id:'vocabulary',   icon:'📖', name:'Vocabulário',   viewId:'mode-vocabulary',   sidebarId:'sidebar-vocabulary-content',  sidebarTitle:'Categorias' },
+    evolution:    { id:'evolution',    icon:'🧬', name:'Evolução',      viewId:'mode-evolution',    sidebarId:'sidebar-evolution-content',   sidebarTitle:'Métricas' },
+    review:       { id:'review',       icon:'🔥', name:'Revisão',       viewId:'mode-review',       sidebarId:'sidebar-review-content',      sidebarTitle:'Revisão' },
+    engineering:  { id:'engineering',  icon:'🏗️', name:'Engenharia',    viewId:'mode-engineering',  sidebarId:'sidebar-chapters-content',    sidebarTitle:'Engenharia' },
+    listening:    { id:'listening',    icon:'🎧', name:'Escuta',        viewId:'mode-listening',    sidebarId:'sidebar-chapters-content',    sidebarTitle:'Escuta' },
+    conversation: { id:'conversation', icon:'💬', name:'Conversação',   viewId:'mode-conversation', sidebarId:'sidebar-chapters-content',    sidebarTitle:'Conversação' }
+  };
+
+  let currentMode = 'chapters';
+  let previousMode = null;
+  let transitioning = false;
+
+  function getCurrentMode(){ return currentMode; }
+
+  function switchMode(mode){
+    if(transitioning) return;
+    if(mode === currentMode) return;
+    if(!MODE_DEFS[mode]) return;
+
+    transitioning = true;
+    previousMode = currentMode;
+
+    if(typeof saveScrollPosition === 'function') saveScrollPosition(currentMode);
+
+    const oldView = document.getElementById(MODE_DEFS[currentMode].viewId);
+    if(oldView){
+      oldView.classList.add('exiting');
+      setTimeout(() => {
+        oldView.classList.remove('active');
+        oldView.classList.remove('exiting');
+      }, 340);
+    }
+
+    const oldSidebar = document.getElementById(MODE_DEFS[currentMode].sidebarId);
+    if(oldSidebar) oldSidebar.classList.remove('active');
+
+    currentMode = mode;
+    const newView = document.getElementById(MODE_DEFS[currentMode].viewId);
+    if(!newView){ currentMode = previousMode; transitioning = false; return; }
+
+    setTimeout(() => {
+      newView.classList.add('active');
+      if(typeof restoreScrollPosition === 'function') restoreScrollPosition(currentMode);
+      else window.scrollTo(0, 0);
+
+      _updateSidebarUI();
+      _renderModeSidebarContent(currentMode);
+
+      updateAllModeButtons(currentMode);
+
+      const titleEl = document.getElementById('sidebar-mode-title');
+      if(titleEl) titleEl.textContent = MODE_DEFS[currentMode].icon + ' ' + MODE_DEFS[currentMode].sidebarTitle;
+
+      _onModeActivated(currentMode);
+      _persistModeState();
+      transitioning = false;
+    }, 370);
+  }
+
+  function updateAllModeButtons(activeMode){
+    const all = document.querySelectorAll('.mode-btn');
+    all.forEach(btn => {
+      btn.classList.toggle('active-mode', btn.dataset.mode === activeMode);
+    });
+  }
+
+  let _scrollPositions = {};
+
+  function saveScrollPosition(mode){
+    _scrollPositions[mode] = window.scrollY;
+    if(typeof state !== 'undefined' && state && state.viewState){
+      if(!state.viewState.scrollPositions) state.viewState.scrollPositions = {};
+      state.viewState.scrollPositions[mode] = window.scrollY;
+    }
+  }
+
+  function restoreScrollPosition(mode){
+    if(_scrollPositions[mode] !== undefined){
+      window.scrollTo(0, _scrollPositions[mode]);
+    } else if(typeof state !== 'undefined' && state && state.viewState && state.viewState.scrollPositions && state.viewState.scrollPositions[mode] !== undefined){
+      window.scrollTo(0, state.viewState.scrollPositions[mode]);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }
+
+  function _updateSidebarUI(){
+    const allSidebarContents = document.querySelectorAll('#sidebar-mode-content > div');
+    allSidebarContents.forEach(div => div.classList.remove('active'));
+    const target = document.getElementById(MODE_DEFS[currentMode].sidebarId);
+    if(target) target.classList.add('active');
+
+    const searchInput = document.getElementById('sidebar-search');
+    if(searchInput) searchInput.style.display = (currentMode === 'chapters') ? 'block' : 'none';
+  }
+
+  function _onModeActivated(mode){
+    if(mode === 'vocabulary'){
+      if(typeof renderGlossCats === 'function') renderGlossCats();
+      if(typeof renderGlossary === 'function') renderGlossary();
+    }
+    if(mode !== 'chapters'){
+      const evo = document.getElementById('evo-dashboard');
+      if(evo) evo.style.display = 'none';
+    }
+    if(typeof updateAll === 'function') updateAll();
+  }
+
+  function _renderModeSidebarContent(mode){
+    switch(mode){
+      case 'chapters':
+        if(typeof renderSidebar === 'function') renderSidebar();
+        break;
+      case 'music':
+        _renderMusicSidebar();
+        break;
+      case 'vocabulary':
+        _renderVocabSidebar();
+        break;
+      case 'exercises':
+        _renderExercisesSidebar();
+        break;
+      case 'evolution':
+        _renderEvoSidebar();
+        break;
+      case 'review':
+        _renderReviewSidebar();
+        break;
+      case 'engineering':
+        _renderEngineeringSidebar();
+        break;
+      case 'listening':
+        _renderListeningSidebar();
+        break;
+      case 'conversation':
+        _renderConversationSidebar();
+        break;
+      default:
+        _renderPlaceholderSidebar('Conteúdo em desenvolvimento');
+    }
+  }
+
+  function _renderPlaceholderSidebar(msg){
+    const list = document.getElementById('sidebar-list');
+    if(list) list.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:.8rem;text-align:center">'+msg+'</div>';
+  }
+
+  function _renderMusicSidebar(){
+    const list = document.getElementById('sidebar-music-list');
+    if(!list) return;
+    const items = [
+      {icon:'🎸',name:'Rock Alemão',desc:'12 faixas'},
+      {icon:'🎹',name:'Pop Alemão',desc:'8 faixas'},
+      {icon:'🎻',name:'Clássico Alemão',desc:'6 faixas'},
+      {icon:'🎤',name:'Hip-Hop Alemão',desc:'5 faixas'},
+      {icon:'🪗',name:'Folk & Tradicional',desc:'7 faixas'},
+      {icon:'🎼',name:'Trilhas Sonoras',desc:'4 faixas'},
+      {icon:'🎧',name:'Indie Alemão',desc:'9 faixas'},
+      {icon:'📻',name:'Rádios Recomendadas',desc:'5 estações'}
+    ];
+    list.innerHTML = items.map(item =>
+      '<div class="sidebar-music-item"><span class="music-dot"></span><span>'+item.icon+' '+item.name+'</span><span style="margin-left:auto;font-size:.7rem;color:var(--text3)">'+item.desc+'</span></div>'
+    ).join('');
+  }
+
+  function _renderVocabSidebar(){
+    const list = document.getElementById('sidebar-vocab-list');
+    if(!list) return;
+    const cats = ['all','Saudações','Cortesia','Básico','Apresentação','Números','Artigos','Substantivos','Verbos','Cores','Adjetivos','Família','Possessivos','Direções','Transporte','Gramática','Modais','Preposições','Trabalho','Saúde','Sociedade'];
+    list.innerHTML = cats.map(cat =>
+      '<div class="sidebar-link-item" onclick="if(typeof filterGloss===\'function\'){filterGloss(\''+cat+'\');}if(typeof GermanModeCore!==\'undefined\'){GermanModeCore.switchMode(\'vocabulary\');}"><span class="link-icon">📌</span><span>'+cat+'</span></div>'
+    ).join('');
+  }
+
+  function _renderExercisesSidebar(){
+    const list = document.getElementById('sidebar-exercises-list');
+    if(!list) return;
+    const items = [
+      {icon:'🃏',name:'Flashcards',id:'flashcards'},
+      {icon:'⚧️',name:'Quiz de Gêneros',id:'gender-quiz'},
+      {icon:'🔀',name:'Ordem de Palavras',id:'word-order'},
+      {icon:'🔤',name:'Spelling Bee',id:'spelling'},
+      {icon:'🎯',name:'Desafios Diários',id:'daily'},
+      {icon:'📊',name:'Estatísticas',id:'stats'}
+    ];
+    list.innerHTML = items.map(item =>
+      '<div class="sidebar-link-item"><span class="link-icon">'+item.icon+'</span><span>'+item.name+'</span></div>'
+    ).join('');
+  }
+
+  function _renderEvoSidebar(){
+    const list = document.getElementById('sidebar-evo-list');
+    if(!list) return;
+    const items = [
+      {icon:'📈',name:'Dashboard GPS'},
+      {icon:'🎯',name:'Precisão por Tópico'},
+      {icon:'⏱️',name:'Linha do Tempo'},
+      {icon:'🏆',name:'Conquistas'}
+    ];
+    list.innerHTML = items.map(item =>
+      '<div class="sidebar-link-item"><span class="link-icon">'+item.icon+'</span><span>'+item.name+'</span></div>'
+    ).join('');
+  }
+
+  function _renderReviewSidebar(){
+    const list = document.getElementById('sidebar-review-list');
+    if(!list) return;
+    const items = [
+      {icon:'🎯',name:'Revisão Adaptativa'},
+      {icon:'📝',name:'Erros Frequentes'},
+      {icon:'🔄',name:'Spaced Repetition'},
+      {icon:'📋',name:'Checklists'}
+    ];
+    list.innerHTML = items.map(item =>
+      '<div class="sidebar-link-item"><span class="link-icon">'+item.icon+'</span><span>'+item.name+'</span></div>'
+    ).join('');
+  }
+
+  function _renderEngineeringSidebar(){
+    _renderChaptersDefaultForMode();
+  }
+
+  function _renderListeningSidebar(){
+    _renderChaptersDefaultForMode();
+  }
+
+  function _renderConversationSidebar(){
+    _renderChaptersDefaultForMode();
+  }
+
+  function _renderChaptersDefaultForMode(){
+    if(typeof renderSidebar === 'function') renderSidebar();
+  }
+
+  function _persistModeState(){
+    if(typeof state !== 'undefined' && state){
+      state.currentMode = currentMode;
+      if(typeof saveState === 'function') saveState();
+    }
+  }
+
+  let _initialized = false;
+
+  function init(){
+    if(typeof state !== 'undefined' && state){
+      if(state.currentMode && MODE_DEFS[state.currentMode]){
+        currentMode = state.currentMode;
+      }
+      if(state.viewState && state.viewState.scrollPositions){
+        _scrollPositions = {...state.viewState.scrollPositions};
+      }
+    }
+    // Deactivate ALL mode views, then activate only the current one
+    const allViews = document.querySelectorAll('.mode-view');
+    allViews.forEach(v => { v.classList.remove('active'); v.classList.remove('exiting'); });
+    const modeView = document.getElementById(MODE_DEFS[currentMode].viewId);
+    if(modeView) modeView.classList.add('active');
+
+    _updateSidebarUI();
+    updateAllModeButtons(currentMode);
+
+    const titleEl = document.getElementById('sidebar-mode-title');
+    if(titleEl) titleEl.textContent = MODE_DEFS[currentMode].icon + ' ' + MODE_DEFS[currentMode].sidebarTitle;
+
+    _renderModeSidebarContent(currentMode);
+
+    if(!_initialized){
+      _initialized = true;
+      const modeButtons = document.querySelectorAll('.mode-btn');
+      modeButtons.forEach(btn => {
+        btn.addEventListener('click', function(){
+          switchMode(this.dataset.mode);
+          if(window.innerWidth < 768){
+            if(typeof closeSidebar === 'function') closeSidebar();
+          }
+        });
+      });
+    }
+  }
+
+  function renderModeSidebar(){
+    _renderModeSidebarContent(currentMode);
+  }
+
+  function saveModeScroll(){
+    saveScrollPosition(currentMode);
+    _persistModeState();
+  }
+
+  return {
+    MODE_DEFS,
+    switchMode,
+    getCurrentMode,
+    init,
+    renderModeSidebar,
+    saveModeScroll,
+    saveScrollPosition,
+    restoreScrollPosition,
+    updateAllModeButtons
+  };
+})();
+
 function setup(){
   loadState();
   initGPS();
   if(state.darkMode)document.documentElement.setAttribute('data-theme','dark');
   applyLang();
+  GermanModeCore.init();
   const notes=$('#notes-area');
   if(notes){notes.value=state.notes||'';notes.oninput=function(){state.notes=this.value;saveState()}}
   
@@ -6211,7 +6728,9 @@ function setup(){
   $('#settings-overlay').onclick=()=>{$('#settings-panel').classList.remove('open');$('#settings-overlay').classList.remove('open')};
   
   // Sidebar search
-  $('#sidebar-search').oninput=renderSidebar;
+  $('#sidebar-search').oninput=function(){
+    if(GermanModeCore.getCurrentMode()==='chapters') renderSidebar();
+  };
   
   // Glossary search
   $('#gloss-search-input').oninput=renderGlossary;
@@ -6224,13 +6743,26 @@ function setup(){
     if(confirm(_t('reset.confirm'))){
       localStorage.removeItem('deutschmeister_state');
       localStorage.removeItem('deutschmeister_evo');
-      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null};
+      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{}};
       resetGPS();
       applyLang();
+      GermanModeCore.init();
       if(notes)notes.value='';
       updateAll();toast(_t('toast.reset'),'info');
     }
   };
+
+  // Scroll persistence — save on unload and on mode-appropriate scroll
+  let _modeScrollTimer = null;
+  window.addEventListener('scroll', function(){
+    if(_modeScrollTimer) clearTimeout(_modeScrollTimer);
+    _modeScrollTimer = setTimeout(function(){
+      GermanModeCore.saveModeScroll();
+    }, 500);
+  }, {passive:true});
+  window.addEventListener('beforeunload', function(){
+    GermanModeCore.saveModeScroll();
+  });
   
   // Keyboard shortcuts
   document.addEventListener('keydown',e=>{
@@ -6275,9 +6807,12 @@ $('#import-file').onchange=function(e){
       if(!state.wfsExplored)state.wfsExplored={};
       if(!state.wfsPatterns)state.wfsPatterns={};
       if(!state.evo)state.evo=null;
+      if(!state.currentMode)state.currentMode='chapters';
+      if(!state.viewState)state.viewState={};
       syncGPSFromState();
       saveState();
       applyLang();
+      GermanModeCore.init();
       const notes=$('#notes-area');if(notes)notes.value=state.notes||'';
       if(state.darkMode)document.documentElement.setAttribute('data-theme','dark');
       else document.documentElement.removeAttribute('data-theme');
