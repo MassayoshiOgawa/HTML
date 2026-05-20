@@ -1134,7 +1134,7 @@
   31.1 VISÃO GERAL
   ----------------------------------------------------------------------------
   O site evoluiu de uma página contínua de capítulos para uma PLATAFORMA
-  MULTIMODO com 9 modos/guias principais acessíveis pela sidebar.
+  MULTIMODO com 6 modos/guias ativos acessíveis pela sidebar.
 
   A sidebar esquerda tornou-se um HUB PRINCIPAL DE NAVEGAÇÃO GLOBAL com
   DOIS NÍVEIS:
@@ -1146,17 +1146,14 @@
 
   31.2 MODOS DISPONÍVEIS
   ----------------------------------------------------------------------------
-  | Modo           | Ícone | View Container        | Status              |
-  |----------------|-------|-----------------------|---------------------|
-  | chapters       | 📚    | #mode-chapters        | COMPLETO (original) |
-  | music          | 🎵    | #mode-music           | LOBBY MUSICAL       |
-  | exercises      | 🧠    | #mode-exercises       | HUB (placeholder)   |
-  | vocabulary     | 📖    | #mode-vocabulary      | HUB (placeholder)   |
-  | evolution      | 🧬    | #mode-evolution       | HUB (placeholder)   |
-  | review         | 🔥    | #mode-review          | HUB (placeholder)   |
-  | engineering    | 🏗️    | #mode-engineering     | HUB (placeholder)   |
-  | listening      | 🎧    | #mode-listening       | HUB (placeholder)   |
-  | conversation   | 💬    | #mode-conversation    | HUB (placeholder)   |
+   | Modo           | Ícone | View Container        | Status              |
+   |----------------|-------|-----------------------|---------------------|
+   | chapters       | 📚    | #mode-chapters        | COMPLETO (original) |
+   | music          | 🎵    | #mode-music           | LOBBY MUSICAL       |
+   | exercises      | 🧠    | #mode-exercises       | HUB (placeholder)   |
+   | vocabulary     | 📖    | #mode-vocabulary      | HUB (placeholder)   |
+   | evolution      | 🧬    | #mode-evolution       | HUB (placeholder)   |
+   | conversation   | 💬    | #mode-conversation    | HUB (placeholder)   |
 
   31.3 ARQUITETURA DE VIEWS
   ----------------------------------------------------------------------------
@@ -1220,7 +1217,7 @@
     <div id="sidebar-mode-nav">
       <button class="mode-btn" data-mode="chapters">📚 Capítulos</button>
       <button class="mode-btn" data-mode="music">🎵 Música</button>
-      ... (9 botões)
+      ... (6 botões)
     </div>
     <div id="sidebar-mode-content">
       <div id="sidebar-chapters-content" class="active"> ... </div>
@@ -1235,8 +1232,7 @@
     - vocabulary:  #sidebar-vocab-list (categorias do glossário)
     - exercises:   #sidebar-exercises-list (tipos de exercício)
     - evolution:   #sidebar-evo-list (métricas)
-    - review:      #sidebar-review-list (opções de revisão)
-    - engineering, listening, conversation: usam sidebar de capítulos
+    - conversation: usa sidebar de capítulos
 
   31.7 SISTEMA DE ESTADO E PERSISTÊNCIA
   ----------------------------------------------------------------------------
