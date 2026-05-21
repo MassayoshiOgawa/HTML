@@ -1,0 +1,361 @@
+================================================================================
+MEGA PROMPT - CORRECAO HOTBAR (TECLA R) + BARRA DE PROGRESSO CIRCULAR
+================================================================================
+
+INSTRUCAO PARA IA: EXECUTE TODAS AS TAREFAS ABAIXO IMEDIATAMENTE,
+SEM FAZER PERGUNTAS, SEM CRIAR ARQUIVOS DESNECESSARIOS.
+
+================================================================================
+1. REGRAS GLOBAIS (NAO VIOLAR)
+================================================================================
+
+1.1 - A IA DEVE APENAS EDITAR ARQUIVOS HTML E DE TEXTO. NAO CRIE NEM ALTERE
+      ARQUIVOS DE OUTRAS LINGUAGENS (JAVA, PYTHON, C++, C, ETC).
+1.2 - A IA SO DEVE CRIAR NOVOS DOCUMENTOS SE EXPLICITAMENTE PEDIDO NESTE PROMPT.
+1.3 - TODA ALTERACAO NO CODIGO HTML DEVE SER REGISTRADA NA Documentacao_Completa.txt
+      DE FORMA PROFISSIONAL, LIMPA E BEM ESTRUTURADA (EM PORTUGUES).
+1.4 - O ARQUIVO SummonGame.html DEVE PERMANECER SINGLE-FILE (HTML + CSS + JS).
+1.5 - ZERO DEPENDENCIAS EXTERNAS. BIBLIOTECAS PADRAO DO NAVEGADOR APENAS.
+1.6 - SEGUIR AS CONVENCOES DE CODIGO EXISTENTES NO ARQUIVO (ESTILO, NOMENCLATURA).
+1.7 - CODIGO RESPONSIVO, ESCALAVEL E PROFISSIONAL.
+1.8 - NAO CRIE ARQUIVOS EM INGLES. USE PORTUGUES PARA MENSAGENS, TEXTOS E DOCS.
+
+================================================================================
+2. ARQUIVOS ENVOLVIDOS
+================================================================================
+
+2.1 - SummonGame.html
+        Localizacao: SummonGame/SummonGame.html (relativo a raiz do projeto)
+        Arquivo principal com todo o codigo.
+
+2.2 - Documentacao_Completa.txt
+        Localizacao: SummonGame/Documentacao_Completa.txt (mesmo diretorio)
+        Documentacao tecnica que DEVE ser atualizada com as alteracoes.
+
+================================================================================
+3. CONTEXTO - LEIA AMBOS OS ARQUIVOS ANTES DE COMECAR
+================================================================================
+
+ANTES DE FAZER QUALQUER ALTERACAO, LEIA COMPLETAMENTE:
+  - SummonGame.html (entenda toda a estrutura)
+  - Documentacao_Completa.txt (entenda o changelog, secoes afetadas)
+
+================================================================================
+4. TAREFA 1 - CORRIGIR HOTBAR (BUG DA TECLA R)
+================================================================================
+
+4.1 - DESCRICAO DO PROBLEMA:
+      Atualmente, no metodo Player.update(), o codigo usa keysJustPressed[kb.use]
+      para ciclar o slot da hotbar IMEDIATAMENTE ao pressionar R. Como a tecla
+      continua pressionada (hold), keys[kb.use] fica true e o timer de uso comeca
+      no slot que ACABOU DE SER CICLADO (slot errado).
+
+      COMPORTAMENTO ATUAL (ERRADO):
+        Keydown R -> keysJustPressed -> cicla slot -> hold comeca no slot ciclado
+        Resultado: em vez de usar o item equipado, cicla pro proximo e usa esse
+
+      COMPORTAMENTO DESEJADO:
+        Tap R (pressionar e soltar rapido): cicla para o proximo slot nao vazio
+        Hold R (segurar por >= 1 segundo): usa o item ATUALMENTE equipado SEM ciclar
+
+4.2 - IMPLEMENTACAO DA SOLUCAO:
+
+      a) ADICIONAR NOVO ATRIBUTO no construtor do Player (apos this.using = false):
+           this.useTapPending = false;
+         Mantenha this.useTimer e this.using existentes.
+
+      b) SUBSTITUIR O BLOCO DE CODIGO EM Player.update() (linhas ~749-770):
+         BLOCO ANTIGO (a remover):
+           // Hotbar: cycle slot on tap, hold to use
+           if (keysJustPressed[kb.use]) {
+             keysJustPressed[kb.use] = false;
+             let next = this.selectedSlot;
+             let tries = 0;
+             do { next = (next + 1) % 5; tries++; }
+             while (tries < 5 && !this.inventory[next]);
+             this.selectedSlot = next;
+             this.useTimer = 0;
+             this.using = false;
+           }
+           if (keys[kb.use] && this.inventory[this.selectedSlot] && !this.using) {
+             this.useTimer += dt;
+             if (this.useTimer >= 1) {
+               game.useItem(this);
+               this.useTimer = 0;
+             }
+           }
+           if (!keys[kb.use]) { this.useTimer = 0; this.using = false; }
+
+         BLOCO NOVO:
+           // Hotbar: tap to cycle, hold to use
+           if (keysJustPressed[kb.use]) {
+             keysJustPressed[kb.use] = false;
+             this.useTapPending = true;
+             this.useTimer = 0;
+           }
+
+           if (keys[kb.use]) {
+             if (this.useTapPending) {
+               // Ainda em fase de deteccao tap vs hold
+               this.useTimer += dt;
+               if (this.useTimer >= 0.3) {
+                 this.useTapPending = false; // Confirmado: hold
+                 this.useTimer = 0; // Reset para usar o timer de item
+               }
+             } else if (this.inventory[this.selectedSlot]) {
+               // Hold confirmado: usar item equipado
+               this.useTimer += dt;
+               if (this.useTimer >= 1) {
+                 game.useItem(this);
+                 this.useTimer = 0;
+               }
+             }
+           }
+
+           if (!keys[kb.use]) {
+             if (this.useTapPending) {
+               // Tap detectado (solteu antes de 0.3s): ciclar slot
+               let next = this.selectedSlot;
+               let tries = 0;
+               do {
+                 next = (next + 1) % 5;
+                 tries++;
+               } while (tries < 5 && !this.inventory[next]);
+               this.selectedSlot = next;
+             }
+             this.useTapPending = false;
+             this.useTimer = 0;
+             this.using = false;
+           }
+
+      c) EXPLICACAO DO FUNCIONAMENTO:
+         - Ao pressionar R: marca useTapPending = true, nao cicla ainda
+         - Enquanto segura R:
+           * Se ainda esta em fase de deteccao (< 0.3s): incrementa useTimer
+           * Se passar de 0.3s: confirma hold (useTapPending = false),
+             reseta useTimer, comeca a contar para usar o item (1s)
+           * Nota: usa VARIAVEL UNICA this.useTimer para ambos os propositos
+             (deteccao e uso), pois sao mutuamente exclusivos no tempo
+         - Ao soltar R:
+           * Se ainda esta pendente (useTapPending true): foi um TAP, cicla slot
+           * Senao: foi um HOLD, item ja foi usado (ou nao), nao cicla
+         - Vantagem: o slot NUNCA e ciclado durante hold, resolvendo o bug
+
+================================================================================
+5. TAREFA 2 - BARRA DE PROGRESSO CIRCULAR (SUBSTITUIR BARRA HORIZONTAL DA HOTBAR)
+================================================================================
+
+5.1 - REMOVER A BARRA HORIZONTAL CIANO DA HOTBAR HUD:
+
+      No metodo updateHotbarHUD(), existem DOIS blocos que desenham uma barra
+      de progresso horizontal quando p.useTimer > 0.
+
+      a) BLOCO VERTICAL (linhas ~3200-3205):
+         if (p.useTimer > 0) {
+           const pct = Math.min(100, (p.useTimer / 1) * 100);
+           html += '<div style="width:' + barWidth + 'px;height:' + barHeight ...
+           html += '<div style="height:100%;width:' + pct + '%;background:#4fc3f7 ...
+         }
+         REMOVER ESTE BLOCO INTEIRO (contagem regressiva).
+         NOTA: Remover APENAS o bloco if (p.useTimer > 0) { ... } com suas divs.
+         NAO remover o restante do codigo.
+
+      b) BLOCO HORIZONTAL (linhas ~3227-3232):
+         if (p.useTimer > 0) {
+           const pct = Math.min(100, (p.useTimer / 1) * 100);
+           html += '<div style="width:' + barWidth + 'px;height:' + barHeight ...
+           html += '<div style="height:100%;width:' + pct + '%;background:#4fc3f7 ...
+         }
+         REMOVER ESTE BLOCO INTEIRO (contagem regressiva).
+         MESMA REGRA: remover apenas o if (p.useTimer > 0) { ... }.
+
+5.2 - ADICIONAR NOVO METODO renderUseProgressCircle(ctx) NA CLASSE Game:
+
+      ADICIONAR o novo metodo na classe Game, de preferencia logo APOS o metodo
+      renderInteractionCircle(ctx) existente (antes do fechamento da classe Game).
+
+      ESPECIFICACOES DO METODO:
+
+      a) ASSINATURA:
+           renderUseProgressCircle(ctx)
+         NOTA: nao recebe parametros adicionais, usa this.players e this.camX/Y.
+
+      b) LOGICA:
+         - Itera sobre todos os jogadores vivos (this.players)
+         - Para cada jogador p:
+           * Se p.useTimer <= 0: pula (nao esta segurando R)
+           * Se p.useTimer > 0: desenha circulo de progresso
+
+      c) POSICAO:
+         - 1 tile (TILE_SIZE = 32px) a DIREITA do centro do jogador
+         - worldX = p.px + TILE_SIZE (direita)
+         - worldY = p.py (mesma altura)
+         - screenX = worldX - this.camX
+         - screenY = worldY - this.camY
+         - Se screenX/screenY estiver fora do canvas (margem 50px), pular
+
+      d) DESENHO DO CIRCULO (MESMO ESTILO DO renderInteractionCircle, MAS BRANCO):
+         const circleRadius = TILE_SIZE * 0.4;
+         const lineWidth = circleRadius * 2 * 0.15;
+         const progress = Math.min(1, Math.max(0, p.useTimer / 1));
+         const startAngle = -Math.PI / 2;
+         const endAngle = startAngle + Math.PI * 2 * progress;
+
+         // Circulo de fundo (escuro semi-transparente)
+         ctx.beginPath();
+         ctx.arc(screenX, screenY, circleRadius, 0, Math.PI * 2);
+         ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+         ctx.lineWidth = lineWidth + 2;
+         ctx.stroke();
+
+         // Circulo interno de fundo
+         ctx.beginPath();
+         ctx.arc(screenX, screenY, circleRadius, 0, Math.PI * 2);
+         ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+         ctx.lineWidth = lineWidth;
+         ctx.stroke();
+
+         // Arco de progresso (BRANCO PURO, sem gradiente)
+         if (progress > 0) {
+           ctx.beginPath();
+           ctx.arc(screenX, screenY, circleRadius, startAngle, endAngle);
+           ctx.strokeStyle = '#ffffff';
+           ctx.lineWidth = lineWidth;
+           ctx.lineCap = 'round';
+           ctx.stroke();
+           ctx.lineCap = 'butt';
+         }
+
+      e) CHAMADA NO RENDER:
+         No metodo Game.render(), ADICIONAR a chamada:
+           this.renderUseProgressCircle(ctx);
+         IMEDIATAMENTE APOS a chamada de:
+           this.renderInteractionCircle(ctx);
+         (por volta da linha ~2547)
+
+      f) NOTA IMPORTANTE:
+         - NAO reutilizar o metodo renderInteractionCircle para este proposito
+         - Criar metodo SEPARADO (renderUseProgressCircle) para manter
+           separacao de responsabilidades
+         - NAO usar gradiente de cores (Game.progressColor) - usar BRANCO #ffffff
+         - Sempre verificar frustum culling (se esta visivel na tela)
+
+================================================================================
+6. TAREFA 3 - ATUALIZAR DOCUMENTACAO (Documentacao_Completa.txt)
+================================================================================
+
+6.1 - ADICIONAR NOVA ENTRADA NO CHANGELOG:
+      Abrir Documentacao_Completa.txt e adicionar uma nova secao de changelog
+      ANTES da linha "FIM DA DOCUMENTACAO".
+
+      Usar o formato padrao ja existente no documento:
+
+      ===============================================================================
+      CHANGELOG - MAIO 2026 (CORRECAO HOTBAR TECLA R + BARRA CIRCULAR DE PROGRESSO)
+      ===============================================================================
+
+      ALTERACAO X - CORRECAO DO SISTEMA DE USO DE ITEM (TECLA R)
+
+         PROBLEMA: Ao segurar a tecla R (use), o slot da hotbar era ciclado
+         imediatamente (via keysJustPressed) para o proximo item, e entao o
+         novo item (ciclando) comecava a ser usado. O comportamento correto
+         seria usar o item atualmente equipado sem ciclar.
+
+         SOLUCAO: Implementado sistema de deteccao tap vs hold.
+         - Tap (pressionar e soltar em < 0.3s): cicla para o proximo slot nao vazio
+         - Hold (segurar por >= 1s): usa o item atualmente equipado SEM ciclar
+         - A deteccao usa uma propriedade useTapPending no Player
+         - O ciclo so ocorre no keyup (ao soltar a tecla), nunca no keydown
+
+         MUDANCAS NO CODIGO:
+           a) Player — NOVO ATRIBUTO:
+              useTapPending (boolean): true enquanto aguarda confirmacao tap/hold
+              Inicializado como false no construtor.
+
+           b) Player.update() — SUBSTITUIDO bloco de hotbar (tap + hold):
+              - keysJustPressed[kb.use]: define useTapPending=true, nao cicla
+              - keys[kb.use] com useTapPending: incrementa useTimer ate 0.3s
+              - Se useTimer >= 0.3: confirma hold (useTapPending=false, useTimer=0)
+              - keys[kb.use] SEM useTapPending: useTimer conta ate 1s para usar item
+              - !keys[kb.use] com useTapPending: TAP confirmado, cicla slot
+              - !keys[kb.use] sem useTapPending: HOLD, apenas reseta timers
+
+           c) BENEFICIO: Slot nunca e ciclado durante hold, resolvendo o bug.
+
+      ALTERACAO Y - SUBSTITUICAO DA BARRA DE PROGRESSO POR CIRCULO BRANCO
+
+         PROBLEMA: A barra de progresso horizontal (cor #4fc3f7 ciano) exibida
+         ao lado dos slots da hotbar durante o uso de item era pouco visivel
+         e ficava distante do personagem, dificultando o feedback visual.
+
+         SOLUCAO: Barra horizontal removida da hotbar HUD. Substituida por
+         um circulo de progresso branco desenhado no Canvas, posicionado
+         1 tile (32px) a direita do jogador, acompanhando seu movimento.
+
+         MUDANCAS NO CODIGO:
+           a) updateHotbarHUD() — BLOCO REMOVIDO (duas ocorrencias):
+              Bloco if (p.useTimer > 0) { ... } removido do layout vertical
+              e do layout horizontal. A barra ciano nao e mais renderizada na hotbar.
+
+           b) Game — NOVO METODO renderUseProgressCircle(ctx):
+              Desenha circulo oco branco com arco de progresso no Canvas.
+              Parametros: mesmo raio e espessura do renderInteractionCircle.
+              Diferenca: usa cor branca solida (#ffffff) em vez de gradiente.
+              Posicao: 32px a direita do centro do jogador (p.px + TILE_SIZE).
+              Aparece apenas quando jogador esta com useTimer > 0 (segurando R).
+              Suporta multiplayer: desenha para cada jogador segurando R.
+              Inclui frustum culling (fora da tela = nao desenha).
+
+           c) Game.render() — ADICIONADO:
+              Chamada a this.renderUseProgressCircle(ctx) apos
+              this.renderInteractionCircle(ctx) na pipeline de renderizacao.
+
+         ASPECTO VISUAL:
+           Circulo externo: rgba(255,255,255,0.2)
+           Circulo interno: rgba(255,255,255,0.3)
+           Arco de progresso: #ffffff (branco puro)
+           Preenchimento: sentido horario a partir do topo (12 horas)
+           Tamanho: TILE_SIZE * 0.4 de raio
+
+6.2 - ATUALIZAR SECOES AFETADAS:
+      No final do documento, apos a insercao do changelog, criar uma secao
+      "ATUALIZACAO DAS SECOES AFETADAS" listando quais secoes foram modificadas
+      (seguindo o formato ja existente no documento):
+
+      SECAO 12 (MAQUINA DE ESTADOS DO MONSTRO) — NOTA:
+        Nenhuma alteracao.
+
+      SECAO 21 (SISTEMA DE HUD) — ATUALIZADA:
+        updateHotbarHUD(): barra de progresso horizontal removida dos layouts
+        vertical e horizontal. Substituida por renderUseProgressCircle no Canvas.
+
+      SECAO 22 (SISTEMA DE INTERACAO) — ATUALIZADA:
+        Player.update(): logica de hotbar reescrita com deteccao tap vs hold.
+        Novas propriedades: useTapPending.
+
+      SECAO 30 (ORDEM DE RENDERIZACAO) — ATUALIZADA:
+        render(): nova chamada renderUseProgressCircle(ctx) apos
+        renderInteractionCircle(ctx). Pipeline: particles -> interactionCircle
+        -> useProgressCircle -> night -> debug.
+
+      SECAO 31 (FLUXO DE GAMEPLAY) — NOTA:
+        Fluxo de uso de item alterado: tap para ciclar, hold para usar.
+        Mantido tempo de 1 segundo para ativar o item.
+
+================================================================================
+7. VERIFICACAO POS-IMPLEMENTACAO
+================================================================================
+
+7.1 - Testar se ao segurar R por 1s, o item equipado e usado SEM ciclar o slot
+7.2 - Testar se ao pressionar e soltar R rapidamente, o slot cicla corretamente
+7.3 - Testar se a barra horizontal ciano NAO aparece mais na hotbar
+7.4 - Testar se o circulo branco aparece a direita do jogador ao segurar R
+7.5 - Testar se o circulo acompanha o movimento do jogador
+7.6 - Testar se a barra horizontal nao aparece tanto no layout horizontal quanto vertical
+7.7 - Testar em multiplayer (se aplicavel)
+7.8 - Verificar se renderInteractionCircle (artefato/altar) continua funcionando
+7.9 - Verificar se nada mais quebrou no jogo
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================
