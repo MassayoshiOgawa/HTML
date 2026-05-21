@@ -909,15 +909,17 @@ ESCALONAMENTO DO MONSTRO:
 
 Ativado/desativado com F1 (toggle game.debugMode).
 
-EFEITOS QUANDO ATIVO:
-  1. Visibilidade total: todos visibilityGrid = 2
-  2. Telhado desativado: computeRoofAlpha() retorna 0
-  3. Grid de tiles: bordas rgba(255,255,255,0.1) em cada tile
-  4. Waypoints visiveis: retangulo amarelo + texto 'U'
-  5. Estado IA visivel: texto rosa com estado do monstro
-  6. Cone de visao: arco 180 graus vermelho semi-transparente
-  7. FPS: 1000/(performance.now() - lastTime + 0.001)
-  8. Posicao do player: coordenadas de tile
+   EFEITOS QUANDO ATIVO:
+   1. Visibilidade total: todos visibilityGrid = 2
+   2. Telhado desativado: computeRoofAlpha() retorna 0
+   3. Grid de tiles: bordas rgba(255,255,255,0.1) em cada tile
+   4. Waypoints visiveis: retangulo amarelo + texto 'U'
+   5. Estado IA visivel: texto rosa com estado do monstro
+   6. Cone de visao frontal: arco 120 graus vermelho semi-transparente
+   7. Zona de deteccao traseira: setor laranja 45px de raio, 126 graus
+      atras do monstro (area onde canDetectBehind detecta o jogador)
+   8. FPS: 1000/(performance.now() - lastTime + 0.001)
+   9. Posicao do player: coordenadas de tile
 
 CORRECAO DE BUG (ALTERACAO RECENTE):
   Ao desativar debug, tiles com age=0 e visibilityGrid=2 ficavam
@@ -1503,8 +1505,194 @@ ESTRUTURA PARA NOVOS MAPAS:
   - O (walls) - para delimitar areas
   - W (furniture) - opcional, obstaculos internos
   - C (floor) e G (grass) - para areas internas/externas
+
+===============================================================================
+CHANGELOG - MAIO 2026 (SISTEMA DE MENSAGEM SEQUENCIAL AO SUMMONAR MONSTRO)
 ================================================================================
-FIM DA DOCUMENTACAO
+
+ALTERACAO 20 - SISTEMA DE MENSAGEM SEQUENCIAL AO SUMMONAR MONSTRO
+
+   PROBLEMA: Ao summonar um monstro, o jogo exibia uma unica mensagem
+   em ingles ("heard you. Run.") com informações de round/speed bonus
+   no centro da tela por 3 segundos. Nao havia separacao entre o nome
+   do monstro e sua descricao, e a descricao nunca era exibida.
+
+   SOLUCAO: Implementado sistema de duas fases sequenciais: (1) Fase 1
+   no centro da tela — "<Nome> ouviu voce. Corra." por 2 segundos;
+   (2) Fase 2 acima da hotbar — descricao do monstro por 3 segundos.
+   Mensagens normais (showMessage) continuam funcionando sem bloqueio
+   e tiveram sua fonte aumentada em 20% (24px -> 29px).
+
+   MUDANCAS NO CODIGO:
+     a) CSS — NOVO ELEMENTO #summon-desc:
+        Posicionado acima da hotbar (bottom: 80px), centralizado,
+        fonte 18px, com transicao de opacidade (classe .show).
+
+     b) CSS — #message font-size alterado de 24px para 29px (+20%).
+
+     c) HTML — Novo elemento <div id="summon-desc"> adicionado ao
+        <body> apos o elemento #message.
+
+     d) Game — NOVAS PROPRIEDADES no constructor e reset em loadMap():
+        summonPhase ('' | 'name' | 'desc'): estado da sequencia
+        summonPhaseTimer: contagem regressiva da fase atual
+        summonPhaseMessage: texto da fase 1 (nome do monstro)
+        monsterDesc: texto da fase 2 (descricao do monstro)
+
+     e) Game — REMOVIDAS propriedades legadas:
+        monsterTypeMessage, monsterTypeMsgTimer (substituidas pelo
+        novo sistema).
+
+     f) Game.spawnMonster() MODIFICADO:
+        Removeu bloco antigo monsterTypeMessage/monsterTypeMsgTimer.
+        Adicionou novo bloco: summonPhase = 'name', summonPhaseTimer
+        = 2.0, summonPhaseMessage = nome + ' ouviu voce. Corra.',
+        monsterDesc = mt.desc, showMessage() para exibir no centro.
+
+     g) Game.update() MODIFICADO:
+        Removeu bloco "Monster type message" (monsterTypeMsgTimer).
+        Adicionou bloco "Summon phase sequencial" com controle das
+        duas fases via summonPhaseTimer.
+
+     h) Game — NOVOS METODOS:
+        showSummonDesc(text): exibe texto no elemento #summon-desc
+        hideSummonDesc(): esconde o elemento #summon-desc
+
+     i) updateHUD() MODIFICADO:
+        Removido bloco que inseria monsterTypeMessage no elemento
+        #message durante o update da HUD (linha ~3025).
+
+     j) Game.render() — NENHUMA ALTERACAO necessaria (ambos os
+        elementos sao DOM, controlados via CSS/JS).
+
+================================================================================
+
+================================================================================
+SECAO 51 — SISTEMA DE MENSAGEM SEQUENCIAL AO SUMMONAR MONSTRO
+================================================================================
+
+51.1 — CONCEITO
+
+   Ao summonar um monstro (apos completar ritual no altar), o jogo
+   exibe uma sequencia de duas fases de mensagem para informar o
+   jogador sobre o tipo de monstro que foi invocado:
+
+   FASE 1 (2s, centro da tela):
+     Exibe "<Nome> ouviu voce. Corra." no elemento #message (DOM).
+     Usa o sistema existente showMessage() para exibir o texto.
+
+   FASE 2 (3s, acima da hotbar):
+     Exibe a descricao do monstro (mt.desc) no novo elemento
+     #summon-desc, posicionado acima da barra de itens (hotbar).
+     Nao bloqueia mensagens normais (showMessage).
+
+   A transicao entre fases e automatica e controlada por
+   summonPhase e summonPhaseTimer no Game.update().
+
+51.2 — ESTRUTURA DE DADOS
+
+   Game.summonPhase: string ('' | 'name' | 'desc')
+     Estado atual da sequencia. '' = inativo, 'name' = exibindo
+     nome no centro, 'desc' = exibindo descricao acima da hotbar.
+
+   Game.summonPhaseTimer: number (segundos)
+     Contagem regressiva da fase atual. Decrementado por dt
+     em Game.update().
+
+   Game.summonPhaseMessage: string
+     Texto da fase 1 (ex: "Glitch ouviu voce. Corra.").
+
+   Game.monsterDesc: string
+     Texto da fase 2 (ex: "It appears from unpredictable locations
+     and moves unnaturally fast.").
+
+51.3 — ELEMENTOS DOM ENVOLVIDOS
+
+   #message (existente):
+     Centro da tela (top: 50%, left: 50%, transform: translate(-50%,-50%)).
+     Fonte: 29px (aumentada de 24px, +20%).
+     Usado pela fase 1 e por todas as mensagens normais do jogo.
+
+   #summon-desc (novo):
+     Acima da hotbar (bottom: 80px, left: 50%, transform: translateX(-50%)).
+     Fonte: 18px, cor: #fff.
+     Usado exclusivamente pela fase 2 (descricao do monstro).
+
+51.4 — FLUXO COMPLETO
+
+   1. Player completa interacao no altar -> summonDelay = 3
+   2. Durante summonDelay: "Summoning ritual begins..." (showMessage)
+   3. summonDelay chega a 0 -> spawnMonster() chamado
+   4. spawnMonster() define summonPhase = 'name',  summonPhaseTimer = 2.0,
+      summonPhaseMessage = nome + ' ouviu voce. Corra.',
+      monsterDesc = mt.desc, showMessage(summonPhaseMessage)
+   5. Game.update() decrementa summonPhaseTimer
+   6. Quando summonPhaseTimer <= 0 (2s):
+      summonPhase = 'desc', summonPhaseTimer = 3.0,
+      showMessage('') limpa centro, showSummonDesc(monsterDesc) exibe
+      descricao acima da hotbar
+   7. Game.update() decrementa summonPhaseTimer novamente
+   8. Quando summonPhaseTimer <= 0 (3s):
+      summonPhase = '', hideSummonDesc() esconde descricao,
+      monsterDesc = '', summonPhaseMessage = '' limpos
+   9. Sistema em repouso ate o proximo summon
+
+51.5 — COEXISTENCIA COM MENSAGENS NORMAIS
+
+   Durante a fase 2, mensagens normais (showMessage) continuam
+   funcionando normalmente no centro da tela. O elemento #summon-desc
+   e um elemento DOM separado e nao interfere com o #message.
+
+   Exemplo: Durante os 3s da descricao, o jogador coleta um artefato.
+   "Artifact collected! (1/3)" aparece no centro, enquanto a descricao
+   permanece visivel acima da hotbar.
+
+51.6 — ESCALABILIDADE
+
+   Para adicionar uma nova fase:
+     1. Adicionar novo valor a summonPhase (ex: 'warning')
+     2. Em Game.update(), adicionar nova condicao no if/else
+     3. Criar novo elemento DOM se necessario
+     4. Definir timer e transicao
+
+   Para modificar textos:
+     Alterar spawnMonster() onde summonPhaseMessage e monsterDesc
+     sao definidos.
+
+   Para modificar duracoes:
+     Alterar summonPhaseTimer = 2.0 e summonPhaseTimer = 3.0 em
+     spawnMonster() e Game.update().
+
+51.7 — INICIALIZACAO E RESET
+
+   Construtor: summonPhase = '', summonPhaseTimer = 0,
+   summonPhaseMessage = '', monsterDesc = ''
+
+   loadMap(): mesmo reset. Garante que ao reiniciar o jogo ou
+   carregar novo mapa, nenhuma mensagem residual permaneca.
+
+================================================================================
+
+================================================================================
+ATUALIZACAO DAS SECOES AFETADAS
+================================================================================
+
+SECAO 4 (FLUXO COMPLETO DO GAME LOOP) — ATUALIZADA:
+   Ordem de atualizacao (update) agora inclui:
+     - Summon phase sequencial (controle das fases 1 e 2 de mensagem
+       apos spawn do monstro)
+   O bloco antigo "Monster type message" foi removido e substituido.
+
+SECAO 5 (SISTEMA DE RENDERIZACAO) — NOTA:
+   Nenhuma alteracao no pipeline de renderizacao canvas. Os novos
+   elementos (#summon-desc) sao DOM puro e gerenciados via CSS/JS,
+   fora do render loop do canvas.
+
+SECAO 6 (ELEMENTOS DOM) — ATUALIZADA:
+   Novo elemento: #summon-desc — exibe descricao do monstro acima
+   da hotbar durante a fase 2 da sequencia de summon.
+    Elemento #message: font-size alterado de 24px para 29px.
+
 ================================================================================
 
 ================================================================================
@@ -2298,8 +2486,694 @@ ALTERACAO 16 - SISTEMA DE RANDOM SPAWN + NOVO MONSTRO GLITCH
     Glitch: speed * 1.3 (30% mais rapido)
     Outros: speed * 1.0 (normal)
 
-  DEBUG MODE (F1):
-    Mostra tiles m com quadrado verde e label 'm'
-    Mostra info do monstro: nome, speedMod, randomSpawn
+   DEBUG MODE (F1):
+     Mostra tiles m com quadrado verde e label 'm'
+     Mostra info do monstro: nome, speedMod, randomSpawn
 
 ================================================================================
+CHANGELOG - MAIO 2026 (DETECCAO TRASEIRA NO DEBUG)
+================================================================================
+
+ALTERACAO 17 - EXIBIR RAIO DE DETECCAO TRASEIRA DO MONSTRO NO MODO DEBUG
+
+   PROBLEMA: O monstro possui um sistema de deteccao traseira
+   (canDetectBehind) que detecta o jogador quando ele esta muito proximo
+   por tras (45px, angulo > 0.65*PI do facing). Porem, esta area nao era
+   exibida visualmente no modo debug (F1), ao contrario do cone de visao
+   frontal (renderVisionCone) que sempre foi visivel em debug.
+
+   SOLUCAO: Estendido o metodo MonsterEntity.renderVisionCone() para
+   tambem desenhar a zona de deteccao traseira apos o cone frontal.
+
+   DETALHES DA IMPLEMENTACAO:
+     - Adicionado desenho de setor traseiro logo apos o cone frontal,
+       dentro do mesmo metodo renderVisionCone()
+     - Raio: 45 pixels (mesmo valor de canDetectBehind)
+     - Arco: de facingAngle + PI*0.65 ate facingAngle - PI*0.65,
+       percorrido no sentido horario (default), que passa pelo lado
+       traseiro do monstro (arco de ~126 graus)
+     - Preenchimento: rgba(255, 165, 0, 0.15) - laranja semi-transparente
+     - Contorno: rgba(255, 165, 0, 0.5) - laranja mais opaco, 1px
+     - Mesmas condicoes do cone frontal: so aparece se this.alive e
+       game.debugMode (F1 ativo)
+
+   ARQUIVO MODIFICADO: SummonGame.html
+   METODO ALTERADO: MonsterEntity.renderVisionCone() (~linha 1262)
+
+================================================================================
+CHANGELOG - MAIO 2026 (SISTEMA DE PORTAS DUPLAS ADJACENTES)
+================================================================================
+
+ALTERACAO 18 - SISTEMA DE PORTAS DUPLAS ADJACENTES (DOUBLE DOOR)
+
+   PROBLEMA: Portas eram entidades individuais independentes. Nao era
+   possivel abrir duas portas adjacentes simultaneamente com um unico
+   clique. Visualmente, portas lado a lado pareciam duas portas separadas
+   em vez de uma entrada maior.
+
+   SOLUCAO: Implementado sistema de agrupamento automatico de portas
+   ortogonalmente adjacentes. Portas lado a lado (cima, baixo, esquerda,
+   direita — NAO diagonal) formam um grupo onde todas abrem/fecham
+   simultaneamente e sao renderizadas como uma unica porta maior.
+
+   MUDANCAS NO CODIGO:
+
+     a) DoorEntity — NOVOS ATRIBUTOS:
+        - groupMembers: array de DoorEntity do mesmo grupo, ou null
+        - hasGroup(): metodo que retorna true se a porta pertence a um grupo
+
+     b) DoorEntity.toggle(skipPropagation) — MODIFICADO (linha ~608):
+        - Aceita parametro opcional skipPropagation
+        - Quando chamado sem skipPropagation (ou false), propaga toggle()
+          para todos os membros do grupo
+        - skipPropagation=true usado internamente para evitar loop infinito
+
+     c) DoorEntity.forceOpen() — MODIFICADO (linha ~614):
+        - Propaga forceOpen() para todos os membros do grupo antes de
+          abrir a si propria
+        - Usa toggle(true) para abrir sem re-propagar
+
+     d) Game.loadMap() — NOVA LOGICA (apos linha ~1376):
+        - Constroi mapa de posicoes (doorByPos) para O(1) lookup
+        - Executa BFS/flood-fill para detectar grupos de portas
+          ortogonalmente conectadas (4 direcoes: cima, baixo, esq, dir)
+        - Atribui groupMembers para cada porta em componentes com 2+ portas
+        - Portas isoladas (sem vizinhas ortogonais) nao recebem grupo
+
+     e) Game.renderDoors() — REESCRITO (linha ~2611):
+        - Usa Set para rastrear grupos ja renderizados
+        - Para cada grupo: calcula bounding box (minX, minY, maxX, maxY)
+        - Renderiza UMA unica porta grande ocupando todo o bounding box
+        - Animacao: grupos horizontais abrem verticalmente (porta "sobe"),
+          grupos verticais abrem horizontalmente (porta desliza)
+        - Adiciona puxador dourado centralizado na porta fechada
+        - Proximity check usa centro do bounding box com alcance expandido
+        - Portas sem grupo: renderizacao original mantida
+
+     f) Game.renderTiles() — MODIFICADO (linha ~2436):
+        - Caso 'd': portas com grupo usam INTERIOR_COLOR como cor base
+          (a renderizacao visual fica a cargo de renderDoors)
+        - Door indicator: portas agrupadas pulam o desenho do indicador
+          individual
+
+     g) Game.computeRoofAlpha() — MODIFICADO (linha ~1727):
+        - Para portas agrupadas: calcula distancia do player ao bounding box
+          do grupo, em vez de ao tile individual
+        - Distancia de Manhattan ate a borda mais proxima do bounding box
+
+     h) Game.renderRoof() — MODIFICADO (linha ~2565):
+        - Para portas agrupadas: verifica se tile esta perto do bounding box
+          do grupo (expansao de 2 tiles em cada direcao)
+        - Melhora a transicao do telhado perto de entradas grandes
+
+   SISTEMAS QUE FUNCIONAM SEM MODIFICACAO:
+     - MonsterEntity.canMoveTo(): ja usa door.solid individual
+     - MonsterEntity.hasLineOfSight(): ja usa door.solid individual
+     - Player.canMoveTo(): ja usa door.solid individual
+     - Game.findPath(): tile 'd' ja e transitavel
+     - Game.hasLineOfSight(): ja verifica door.solid
+     - Game.pushOut(): ja itera sobre todas as portas solidas
+     - Player.checkInteraction(): encontra a DoorEntity mais proxima, e
+       toggle() ja propaga para o grupo
+     - MonsterEntity.checkNearbyDoors(): forceOpen() ja propaga
+
+================================================================================
+
+================================================================================
+SECAO 49 — SISTEMA DE PORTAS DUPLAS (DOUBLE DOOR)
+================================================================================
+
+49.1 — CONCEITO
+
+   Quando duas ou mais portas (tile 'd') estao ortogonalmente adjacentes
+   (cima, baixo, esquerda, direita), elas automaticamente formam um GRUPO
+   de portas. O grupo funciona como uma unica porta maior:
+
+   - Interagir com qualquer porta do grupo abre/fecha TODAS as portas
+   - Visualmente, o grupo e renderizado como uma unica porta grande
+     no bounding box do grupo
+   - O monstro ao abrir uma porta do grupo, abre todas
+   - A colisao respeita o estado sincronizado (todas abertas ou todas
+     fechadas)
+
+   DIAGONAL NAO CONTA: Duas portas na diagonal (ex: (x,y) e (x+1,y+1))
+   NAO formam grupo. Apenas vizinhanca nas 4 direcoes ortogonais.
+
+49.2 — ESTRUTURA DE DADOS
+
+   DoorEntity.groupMembers: DoorEntity[] | null
+     Array contendo TODAS as DoorEntity do mesmo grupo (incluindo a
+     propria). null significa que a porta nao pertence a grupo nenhum.
+     Exemplo: se portas A, B, C sao um grupo, entao:
+       A.groupMembers = [A, B, C]
+       B.groupMembers = [A, B, C]
+       C.groupMembers = [A, B, C]
+
+   DoorEntity.hasGroup(): boolean
+     Retorna true se groupMembers nao for null e tiver length > 0.
+
+49.3 — ALGORITMO DE AGRUPAMENTO (FLOOD-FILL)
+
+   Executado uma vez em Game.loadMap() apos criar todas as DoorEntity.
+
+   PASSO 1: Constroi mapa de posicoes (doorByPos) para O(1) lookup:
+     doorByPos["tileX,tileY"] = DoorEntity
+
+   PASSO 2: Para cada porta nao visitada, executa BFS:
+     - Fila inicializada com a porta atual
+     - Para cada porta na fila, verifica 4 vizinhos ortogonais
+     - Se vizinho e uma porta (existe em doorByPos) e nao foi visitado,
+       adiciona a fila
+     - Ao final, component contem todas as portas do componente conexo
+
+   PASSO 3: Se component.length >= 2 (tem pelo menos 2 portas):
+     - Para cada porta no componente: door.groupMembers = component
+     - Portas isoladas (component.length < 2): groupMembers = null
+
+   COMPLEXIDADE: O(N) onde N = numero de portas no mapa.
+   Executado apenas em loadMap(), nao por frame.
+
+49.4 — PROPAGACAO DE TOGGLE
+
+   DoorEntity.toggle(skipPropagation):
+     - Se skipPropagation for false E groupMembers existir:
+       Itera sobre groupMembers e chama member.toggle(true) em cada
+       membro (exceto this)
+     - Executa a logica normal: inverte open, inicia animacao
+
+   DoorEntity.forceOpen():
+     - Se groupMembers existir:
+       Itera sobre groupMembers e chama member.toggle(true) em cada
+       membro fechado e nao-animando (exceto this)
+     - Chama toggle(true) em si propria
+
+   Garantia: Todas as portas do grupo comecam a animacao no mesmo frame,
+   mantendo-se sincronizadas visualmente.
+
+49.5 — RENDERIZACAO DE GRUPO
+
+   Game.renderDoors() detecta grupos e renderiza uma unica porta grande:
+
+   BOUNDING BOX:
+     minX = min(tileX dos membros)
+     maxX = max(tileX dos membros)
+     minY = min(tileY dos membros)
+     maxY = max(tileY dos membros)
+     Largura = (maxX - minX + 1) * TILE_SIZE
+     Altura = (maxY - minY + 1) * TILE_SIZE
+
+   FUNDO:
+     INTERIOR_COLOR preenchendo todo o bounding box
+
+   PORTA FECHADA:
+     Grupo horizontal (width > height):
+       - Porta ocupa 85% da largura, 70% da altura
+       - Centralizada no bounding box
+       - Puxador dourado no centro
+     Grupo vertical (height > width):
+       - Porta ocupa 70% da largura, 85% da altura
+     Grupo quadrado (width == height, ex: 2x2):
+       - Porta ocupa 80% da largura, 80% da altura
+
+   ANIMACAO:
+     Grupo horizontal: animProgress controla ALTURA (porta "sobe")
+       doorH = altura * 0.7 * progress
+       A porta encolhe de baixo para cima
+     Grupo vertical: animProgress controla LARGURA (porta desliza)
+       doorW = largura * 0.7 * progress
+       A porta encolhe da direita para a esquerda
+
+   PROXIMIDADE:
+     Alcance base de 160px + metade da maior dimensao do grupo
+     Garante que portas grandes sejam visiveis mesmo quando o centro
+     esta alem do raio de visao noturno
+
+49.6 — TELHADO E GRUPOS DE PORTAS
+
+   computeRoofAlpha():
+     Para portas agrupadas abertas, calcula distancia do player ate
+     a borda mais proxima do bounding box do grupo (Manhattan).
+     Se a distancia euclidiana para a borda < 3 tiles, reduz alpha.
+
+   renderRoof():
+     Para portas agrupadas abertas, tiles dentro do bounding box
+     expandido (+2 tiles em cada direcao) recebem roofAlpha * 0.3
+     em vez de roofAlpha * 0.85.
+
+   Isso garante que entradas grandes (como portas duplas) tenham
+   areas de transicao de telhado proporcionais ao seu tamanho.
+
+49.7 — COMPORTAMENTO DO MONSTRO
+
+   MonsterEntity.checkNearbyDoors():
+     Quando o monstro chega perto de uma porta fechada que pertence a
+     um grupo, forceOpen() propaga para todas as portas do grupo.
+     Todas as portas do grupo abrem simultaneamente.
+
+   Pathfinding (findPath):
+     Tiles 'd' sao considerados transitaveis (sem verificacao de
+     solid). O BFS de pathfinding nao precisa de modificacao.
+
+   Colisao (canMoveTo):
+     Cada porta individual mantem seu getter solid(). Como todas as
+     portas do grupo abrem/fecham juntas, a colisao e consistente.
+
+================================================================================
+
+================================================================================
+ATUALIZACAO DAS SECOES AFETADAS
+================================================================================
+
+SECAO 9 (SISTEMA DE PORTAS) — ATUALIZADA:
+
+   DoorEntity — NOVOS ATRIBUTOS:
+     groupMembers: DoorEntity[] | null — portas do mesmo grupo
+     hasGroup(): boolean — true se pertence a um grupo
+
+   DoorEntity.toggle(skipPropagation) — MODIFICADO:
+     Propaga toggle para todos os membros do grupo, a menos que
+     skipPropagation seja true.
+
+   DoorEntity.forceOpen() — MODIFICADO:
+     Propaga abertura para todos os membros do grupo.
+
+   SOLID GETTER (inalterado):
+     return !this.open && !this.animating
+     Funciona individualmente por porta. Consistencia mantida
+     pelo toggle/forceOpen sincronizados.
+
+SECAO 29 (ORDEM DE ATUALIZACAO) — ATUALIZADA:
+   Nenhuma mudanca na ordem de atualizacao. A propagacao de toggle
+   ocorre dentro do proprio metodo, sem efeitos colaterais na ordem.
+
+SECAO 30 (ORDEM DE RENDERIZACAO) — ATUALIZADA:
+   renderDoors() agora renderiza portas agrupadas como entidades unicas,
+   com bounding box expandido, mantendo a mesma posicao na pipeline de
+   render (sobre o lightmap, antes de players/monsters).
+
+================================================================================
+CHANGELOG - MAIO 2026 (SISTEMA DE BASE DINAMICA PARA TILES ESPECIAIS)
+================================================================================
+
+ALTERACAO 19 - SISTEMA DE BASE DINAMICA PARA TILES ESPECIAIS (F, U, m)
+
+   PROBLEMA: Tiles F (Artifact Spawn), U (Waypoint) e m (Random Monster
+   Spawn) eram sempre tratados como piso interno (C), independente de
+   estarem em areas externas de grama. Isso causava inconsistencias
+   visuais e de gameplay: o tile era renderizado com cor de chao interno,
+   o roof desaparecia e a visao era total mesmo quando o tile estava em
+   uma area externa de grama.
+
+   SOLUCAO: Implementado sistema de resolucao dinamica de base para tiles
+   especiais. Um novo array baseTileResolved[][] e populado em loadMap()
+   com o resultado da analise dos 8 vizinhos de cada tile F/U/m.
+   O sistema e usado por 5 subsistemas: renderizacao, autotile, roof,
+   visao e cache de bordas.
+
+   MUDANCAS NO CODIGO:
+     a) Game — NOVA PROPRIEDADE:
+        baseTileResolved[mapHeight][mapWidth]: matriz de chars ('C' ou 'G'
+        para tiles F/U/m, ou o proprio tile original para os demais).
+        Inicializada como array vazio no constructor.
+
+     b) Game — NOVO METODO resolveBaseTile(x, y):
+        Analisa 8 vizinhos (Moore) de F/U/m. Conta tiles C (floor) e
+        G (grass). Portas (d) contam como C. Outros tiles (O, W, A,
+        P, M, S, T) sao ignorados. Retorna 'C' se floorCount >=
+        grassCount, senao 'G'. Para tiles nao-F/U/m, retorna o tile
+        original.
+
+     c) Game — NOVO METODO getEffectiveTile(x, y):
+        Retorna baseTileResolved[y][x] se existir, senao tiles[y][x].
+        Helper central usado por todos os subsistemas.
+
+     d) Game.loadMap() — NOVA SECAO:
+        Apos carregar tiles e antes de buildAutotileCache(), popula
+        baseTileResolved[][] chamando resolveBaseTile() para cada tile.
+
+     e) Game.buildAutotileCache() — REESCRITO:
+        isFloor() removido. Em vez disso, para cada tile obtem o
+        tile resolvido de baseTileResolved. Edge mask calculada
+        comparando vizinhos com mesmo tipo resolvido (C vs C, G vs G).
+        Tiles nao-C e nao-G recebem edgeMask = 0.
+
+     f) Game.renderTiles() — MODIFICADO:
+        Switch case: F, U, m separados de P, M, S, T e usam cor
+        baseada em baseTileResolved (GRASS_COLOR ou INTERIOR_COLOR).
+        Autotiling: variavel effTile calculada para F/U/m. Floor
+        autotiling aplicado se effTile === 'C' ou tile e P/M/S/T.
+        Grass autotiling aplicado se effTile === 'G'.
+        Waypoint marking e artifact glow mantidos independentes.
+
+     g) Game.computeRoofAlpha() — MODIFICADO:
+        Usa getEffectiveTile() para decidir se player esta dentro/fora.
+
+     h) Game.updateVisionRanges() — MODIFICADO:
+        Usa getEffectiveTile() para decidir indoor/outdoor range.
+
+     i) Game.renderRoof() — MODIFICADO:
+        Usa getEffectiveTile() para decidir se tile recebe roof overlay.
+
+================================================================================
+
+================================================================================
+SECAO 50 — SISTEMA DE BASE DINAMICA PARA TILES ESPECIAIS (F, U, m)
+================================================================================
+
+50.1 — CONCEITO
+
+   Tiles especiais F (Artifact Spawn), U (Waypoint) e m (Random Monster
+   Spawn) sao posicionados no mapa ASCII, mas podem estar em areas de
+   grama (exterior) ou de chao (interior). Anteriormente, todos eram
+   tratados como INTERIOR_COLOR fixo. Agora, o sistema analisa os 8
+   vizinhos de cada tile F/U/m e decide dinamicamente se o tile deve
+   ser tratado como chao (C) ou grama (G).
+
+   Esta decisao afeta:
+   - Renderizacao visual (cor e autotiling)
+   - Roof system (player dentro/fora)
+   - Visao do player (indoor/outdoor range)
+   - Edge mask no autotile cache
+
+   DIAGONAIS SAO INCLUIDAS: A analise considera os 8 vizinhos (Moore
+   neighborhood), incluindo diagonais, para maior precisao.
+
+50.2 — ESTRUTURA DE DADOS
+
+   Game.baseTileResolved[mapHeight][mapWidth]: string
+     Array 2D populado uma vez em loadMap().
+     Para tiles F, U, m: contem 'C' ou 'G' (resultado da resolucao).
+     Para todos os outros tiles: contem o proprio tile original
+     (this.tiles[y][x]).
+
+50.3 — ALGORITMO DE RESOLUCAO
+
+   Game.resolveBaseTile(x, y):
+     1. Se tile nao for F, U ou m: retorna o proprio tile
+     2. Para cada um dos 8 vizinhos (dx=-1..1, dy=-1..1, skip centro):
+        - Se vizinho for 'C': floorCount++
+        - Se vizinho for 'G': grassCount++
+        - Se vizinho for 'd' (porta): floorCount++ (porta = ambiente interno)
+        - Outros tiles (O, W, A, P, M, S, T, F, U, m): ignorados
+     3. Retorna 'C' se floorCount >= grassCount, senao 'G'
+
+   COMPLEXIDADE: O(1) por tile (8 vizinhos fixos).
+   Executado O(W*H) vezes em loadMap() (uma vez).
+
+50.4 — USO NOS SUBSISTEMAS
+
+   Game.getEffectiveTile(x, y):
+     Helper central. Retorna baseTileResolved[y][x] se existir,
+     senao tiles[y][x]. Usado por todos os subsistemas.
+
+   buildAutotileCache():
+     Para cada tile, obtem tile resolvido de baseTileResolved.
+     Se nao for 'C' nem 'G': edgeMask = 0 (sem autotiling).
+     Para cada vizinho, compara com tile resolvido para determinar
+     borda (mascara de bits: 1=cima, 2=baixo, 4=esq, 8=dir).
+
+   renderTiles():
+     Cor base: F/U/m usam baseTileResolved para escolher entre
+     GRASS_COLOR e INTERIOR_COLOR.
+     Autotiling: variavel effTile (tile efetivo) determina qual
+     bloco de autotiling aplicar (floor ou grass).
+     Marcacoes (waypoint, artifact glow): independentes do tile
+     resolvido (sempre desenhadas em cima).
+
+   computeRoofAlpha():
+     Player sobre F/U/m resolvido como 'C': considerado dentro
+     (roofAlpha = 0). Resolvido como 'G': considerado fora.
+
+   updateVisionRanges():
+     Player sobre F/U/m resolvido como 'C': indoorRange.
+     Resolvido como 'G': outdoorRange (160px).
+
+   renderRoof():
+     F/U/m resolvido como 'C': recebe roof overlay.
+     Resolvido como 'G': ignorado (exterior).
+
+50.5 — ESCALABILIDADE
+
+   Para adicionar novo tile especial (ex: 'X'):
+     1. Em resolveBaseTile(): adicionar 'X' ao if
+        (if (tile !== 'F' && tile !== 'U' && tile !== 'm' && tile !== 'X') return tile;)
+     2. Se 'X' precisar de cor dinamica em renderTiles:
+        Adicionar case no switch baseado no exemplo de F/U/m.
+     3. Nada mais precisa ser modificado.
+
+   Para mudar a logica de resolucao:
+     Modificar apenas resolveBaseTile(). O resto consome o resultado.
+
+50.6 — TILES NAO AFETADOS
+
+   P (Player Spawn), M (Monster Spawn), S (Shop), T (Trash):
+     Continuam como INTERIOR_COLOR fixo (floor).
+     Nao passam por resolucao dinamica.
+     Podem ser adicionados futuramente ao escopo se necessario.
+
+   A (Altar), W (Furniture), O (Wall), d (Door):
+     Comportamento inalterado.
+
+================================================================================
+
+================================================================================
+ATUALIZACAO DAS SECOES AFETADAS
+================================================================================
+
+SECAO 8 (ESTRUTURA DO MAPA) — ATUALIZADA:
+
+   Tiles F, U, m agora tem comportamento visual dinamico:
+   - F (Artifact Spawn): cor e textura baseadas na vizinhanca
+   - U (Waypoint): cor e textura baseadas na vizinhanca
+   - m (Random Monster Spawn): cor e textura baseadas na vizinhanca
+   Marcacoes visuais (glow para F, circulo para U) continuam sendo
+   desenhadas independentemente da base resolvida.
+
+SECAO 17 (SISTEMA DE DIA/NOITE) — NOTA:
+   Nenhuma alteracao necessaria. A visao indoor/outdoor ja e
+   gerenciada por updateVisionRanges() que agora usa getEffectiveTile().
+
+SECAO 18 (SISTEMA DE TELHADO) — ATUALIZADA:
+   computeRoofAlpha() e renderRoof() usam getEffectiveTile() para
+   determinar se um tile e interior ou exterior.
+   Tiles F/U/m em area de grama sao agora considerados exterior.
+
+SECAO 47 (SISTEMA DE AUTOTILING VISUAL) — ATUALIZADA:
+   buildAutotileCache() substituiu isFloor() hardcoded por logica
+   baseada em baseTileResolved. Edge mask agora reflete a transicao
+   real entre tipos resolvidos, nao entre tiles brutos.
+
+
+================================================================================
+CHANGELOG - MAIO 2026 (TRES MELHORIAS: DOUBLE DOOR, NERF MONSTRO, UI CIRCULAR)
+================================================================================
+
+ALTERACAO 21 — TRES MELHORIAS: DOUBLE DOOR VISIVEL, NERF MONSTRO, UI CIRCULAR
+
+   A) DOUBLE DOOR SEMPRE VISIVEL:
+
+   PROBLEMA: Portas em grupo (double doors) renderizavam INTERIOR_COLOR
+   em renderTiles(), ficando com aparencia de chao e invisiveis quando
+   o player estava longe. Portas simples usavam DOOR_CLOSED_COLOR e
+   sempre eram visiveis.
+
+   SOLUCAO: Alterado renderTiles() para usar DOOR_CLOSED_COLOR em
+   portas agrupadas (hasGroup()). O renderDoors() ja sobrepoe
+   INTERIOR_COLOR + barras de porta quando o player esta perto,
+   mantendo o rendering detalhado identico ao comportamento anterior.
+
+   B) NERF NO MONSTRO (VISAO):
+
+   PROBLEMA: Monstro com range de visao de 195 e cone de 60 graus.
+
+   SOLUCAO: canSeePlayer() ajustado:
+     - Range maximo: 195 -> 250 pixels (aumentado)
+     - Cone de visao: Math.PI/3 (60°) -> Math.PI/3 * 0.85 (~51°, -15%)
+
+   C) UI CIRCULAR DE PROGRESSO:
+
+   PROBLEMA: Barra de progresso horizontal (DOM #interaction-bar)
+   ficava no canto inferior da tela, longe do alvo da interacao,
+   dificultando a visualizacao em multiplayer.
+
+   SOLUCAO: Nova UI circular desenhada no Canvas sobre o artefato
+   ou altar durante a interacao. Circulo oco com gradiente vermelho
+   (0%) -> verde (100%) no sentido horario. Barra DOM substituida,
+   label de texto mantido.
+
+   MUDANCAS NO CODIGO:
+     a) renderTiles() — case 'd' grouped door: DOOR_CLOSED_COLOR
+     b) canSeePlayer() — maxDist 195->250, cone * 0.85
+     c) NOVO METODO renderInteractionCircle(ctx) — desenha circulo
+        de progresso no canvas sobre o alvo da interacao
+     d) render() — adicionada chamada a renderInteractionCircle
+        apos renderParticles()
+     e) renderInteractionBar() — barra horizontal removida,
+        mantido apenas label de texto para prompts
+     f) CSS — #interaction-bar permanece display:none por padrao
+     g) Circulo: TILE_SIZE * 0.4 de raio, linha 15% do diametro,
+        gradiente conico vermelho->verde no sentido horario
+
+================================================================================
+
+================================================================================
+SECAO 52 — SISTEMA DE PORTA DUPLA SEMPRE VISIVEL
+================================================================================
+
+52.1 — CONCEITO
+
+   Portas agrupadas (grouped doors — portas duplas adjacentes que abrem
+   em conjunto) agora renderizam DOOR_CLOSED_COLOR diretamente em
+   renderTiles(), exatamente como portas individuais. Isso garante que
+   sejam sempre visiveis a distancia, independentemente da proximidade
+   do player.
+
+52.2 — FUNCIONAMENTO
+
+   renderTiles() — case 'd':
+     Se door.hasGroup() === true: fillStyle = DOOR_CLOSED_COLOR
+     Senao: fillStyle = (door.open ? DOOR_OPEN_COLOR : DOOR_CLOSED_COLOR)
+
+   renderDoors() — sem alteracoes:
+     Quando o player esta perto (doorRange 160px + dims do grupo):
+     preenche INTERIOR_COLOR + barras de porta sobre todo o grupo.
+     Isso sobrepoe o DOOR_CLOSED_COLOR desenhado em renderTiles,
+     resultando no mesmo visual detalhado de antes.
+
+52.3 — ESCALABILIDADE
+
+   Nenhuma. A alteracao e pontual (1 linha em renderTiles) e nao
+   afeta outros sistemas.
+
+================================================================================
+
+================================================================================
+SECAO 53 — AJUSTE DE VISAO DO MONSTRO (RANGE E CONE)
+================================================================================
+
+53.1 — CONCEITO
+
+   A visao do monstro foi ajustada para aumentar o alcance (range)
+   e diminuir o angulo do cone de visao, tornando o comportamento
+   mais previsivel e balanceado.
+
+53.2 — VALORES
+
+   MonsterEntity.canSeePlayer():
+     Range maximo: 250 pixels (era 195)
+     Cone de visao: Math.PI/3 * 0.85 ≈ 0.89 rad ≈ 51 graus (era 60°)
+     O cone so e aplicado quando dist > 50 pixels (curta distancia
+     permite visao periferica total, mantido)
+
+53.3 — CODIGO
+
+   Linha 1007: if (dist > 250) return false;
+   Linha 1012: if (Math.abs(diff) > (Math.PI / 3) * 0.85 && dist > 50)
+
+   canDetectBehind() mantido inalterado (deteccao traseira a curta
+   distancia).
+
+================================================================================
+
+================================================================================
+SECAO 54 — UI CIRCULAR DE PROGRESSO DE INTERACAO
+================================================================================
+
+54.1 — CONCEITO
+
+   Durante interacoes que requerem progresso (coletar artefato 1.5s,
+   summonar no altar 4s), um circulo oco e desenhado no Canvas
+   diretamente sobre o alvo. O arco do circulo preenche no sentido
+   horario com gradiente de vermelho (0%) para verde (100%),
+   mostrando visualmente o progresso.
+
+54.2 — ESTRUTURA
+
+   renderInteractionCircle(ctx):
+     - Verifica this.interactDisplay (tipo artifact ou altar)
+     - Encontra o player interagindo (p.interacting && p.interactTarget)
+     - Calcula posicao mundo -> tela (sx, sy) do alvo
+     - Desenha circulo de fundo cinza (rgba 255,255,255,0.2)
+     - Desenha arco de progresso com gradiente conico
+
+   Parametros do circulo:
+     circleRadius: TILE_SIZE * 0.4 (12.8px)
+     lineWidth: circleRadius * 2 * 0.15 (~3.84px, 15% do diametro)
+     startAngle: -Math.PI / 2 (topo, 12 horas)
+     gradiente: vermelho (0.0) -> amarelo (0.5) -> verde (1.0)
+     createConicGradient(-PI/2, sx, sy)
+
+54.3 — POSICIONAMENTO NO RENDER
+
+   render() pipeline:
+     ...
+     this.renderParticles(ctx);
+     this.renderInteractionCircle(ctx);   // NOVO
+     this.renderNight(ctx);
+     ...
+
+   O circulo e desenhado dentro do espaco da camera (antes de
+   ctx.restore()), portanto segue coordenadas do mundo e se move
+   com a camera. E desenhado apos particulas e antes do night
+   overlay, ficando visivel sobre artefatos e tiles.
+
+54.4 — INTERACAO COM DOM
+
+   renderInteractionBar() foi modificado para:
+     - Forcar #interaction-bar.style.display = 'none' (barra removida)
+     - Manter #interaction-label com textos de prompt:
+       "Hold key to summon/collect/open"
+       "Summoning.../Collecting.../Opening/Closing..."
+
+   A barra de progresso DOM foi totalmente substituida pelo circulo
+   Canvas. Apenas o label de texto permanece.
+
+54.5 — ESCALABILIDADE
+
+   Para adicionar suporte a novos tipos de interacao:
+     1. Em renderInteractionCircle, adicionar tipo ao if inicial
+     2. Adicionar mapeamento de posicao (worldX, worldY) para o
+        novo tipo de alvo
+     3. Ajustar duration no updateInteraction() se necessario
+
+   Para modificar aparencia:
+     Alterar circleRadius, lineWidth, cores do gradiente
+     (todos definidos como constantes locais na funcao)
+
+================================================================================
+
+================================================================================
+ATUALIZACAO DAS SECOES AFETADAS
+================================================================================
+
+SECAO 3 (PIPELINE DE INICIALIZACAO) — NOTA:
+   Nenhuma alteracao na inicializacao. Novas propriedades nao foram
+   adicionadas ao constructor.
+
+SECAO 4 (FLUXO DO GAME LOOP) — ATUALIZADA:
+   Ordem de renderizacao atualizada:
+     - renderInteractionCircle (novo, apos renderParticles)
+     - renderInteractionBar: barra DOM substituida por circulo canvas
+
+SECAO 5 (SISTEMA DE RENDERIZACAO) — ATUALIZADA:
+   Nova camada: circulo de progresso de interacao (canvas).
+   Desenhado sobre particulas, antes do night overlay.
+
+SECAO 6 (ELEMENTOS DOM) — ATUALIZADA:
+   #interaction-bar: agora permanentemente oculta (display:none).
+   Substituida pelo circulo Canvas renderInteractionCircle.
+
+SECAO 9 (SISTEMA DE PORTAS) — ATUALIZADA:
+   Portas duplas (grouped doors) agora renderizam DOOR_CLOSED_COLOR
+   em renderTiles(), igual portas simples.
+
+SECAO 14 (MONSTER ENTITY) — ATUALIZADA:
+   canSeePlayer(): range 250, cone Math.PI/3 * 0.85 (~51°).
+
+SECAO 22 (SISTEMA DE INTERACAO PLAYER) — ATUALIZADA:
+   UI de progresso substituida: barra DOM -> circulo canvas.
+   Label de texto mantido via #interaction-label.
+
+================================================================================
+FIM DA DOCUMENTACAO
+=================================================================================

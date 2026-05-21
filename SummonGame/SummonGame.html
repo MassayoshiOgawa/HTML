@@ -175,7 +175,7 @@ canvas {
   left: 50%;
   transform: translate(-50%, -50%);
   color: #fff;
-  font-size: 24px;
+  font-size: 29px; /* 20% maior */
   z-index: 10;
   text-align: center;
   pointer-events: none;
@@ -184,6 +184,22 @@ canvas {
   transition: opacity 0.3s;
 }
 #message.show { opacity: 1; }
+#summon-desc {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 18px;
+  z-index: 10;
+  text-align: center;
+  pointer-events: none;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 6px rgba(0,0,0,0.9);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+#summon-desc.show { opacity: 1; }
 #player-count-selector {
   display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
 }
@@ -272,6 +288,7 @@ canvas {
     </div>
   </div>
   <div id="message"></div>
+   <div id="summon-desc"></div>
    <div id="class-select" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:30; flex-direction:column; align-items:center; justify-content:center; gap:20px; color:#ccc; font-family:'Courier New',monospace;">
      <h2 style="color:#fff; margin:0;">Summon Game</h2>
      <div id="difficulty-selector">
@@ -482,7 +499,7 @@ const DEFAULT_MAP = [
 'OCCUFCCOCCCCdCCCCCPCCCCCCCOGGGGGGGO',
 'OCCCCCCOCCCCOCCCCCCCCCCCCCOGGGGGGGO',
 'OCmCCCCOCCCCOOOOOOOdOOOOOOOGGGGGGGO',
-'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGWGGO',
+'OCCCCCCdCCCCCCCCCCCCCCCCCCOGGGGWGGO',
 'OCCCCCCdCCCmCCCCCCCCCCCCCCdGGGGWGGO',
 'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGWGGO',
 'OOOOOOOOOOOOOOOOOdOOOOOOOOOGGGGWGGO',
@@ -588,7 +605,9 @@ class DoorEntity {
     this.debounceTimer = 0;
     this.animProgress = 0;
     this.cooldown = false;
+    this.groupMembers = null;
   }
+  hasGroup() { return this.groupMembers !== null && this.groupMembers.length > 0; }
   update(dt) {
     if (this.animating) {
       this.animTimer += dt;
@@ -605,14 +624,28 @@ class DoorEntity {
       if (this.debounceTimer <= 0) this.debounceTimer = 0;
     }
   }
-  toggle() {
+  toggle(skipPropagation) {
     if (this.animating || this.debounceTimer > 0) return;
+    if (!skipPropagation && this.groupMembers) {
+      for (let i = 0; i < this.groupMembers.length; i++) {
+        const member = this.groupMembers[i];
+        if (member !== this) member.toggle(true);
+      }
+    }
     this.open = !this.open;
     this.animating = true;
     this.animTimer = 0;
   }
   forceOpen() {
-    if (!this.open && !this.animating) this.toggle();
+    if (!this.open && !this.animating) {
+      if (this.groupMembers) {
+        for (let i = 0; i < this.groupMembers.length; i++) {
+          const member = this.groupMembers[i];
+          if (member !== this && !member.open && !member.animating) member.toggle(true);
+        }
+      }
+      this.toggle(true);
+    }
   }
   get solid() { return !this.open && !this.animating; }
 }
@@ -971,12 +1004,12 @@ class MonsterEntity {
     const dx = player.px - this.px;
     const dy = player.py - this.py;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist > 195) return false;
+    if (dist > 250) return false;
     const angle = Math.atan2(dy, dx);
     let diff = angle - this.facingAngle;
     while (diff > Math.PI) diff -= Math.PI * 2;
     while (diff < -Math.PI) diff += Math.PI * 2;
-    if (Math.abs(diff) > Math.PI / 3 && dist > 50) return false;
+    if (Math.abs(diff) > (Math.PI / 3) * 0.85 && dist > 50) return false;
     return this.hasLineOfSight(this.px, this.py, player.px, player.py);
   }
 
@@ -1264,12 +1297,24 @@ class MonsterEntity {
     const rx = this.px - game.camX;
     const ry = this.py - game.camY;
     const r = 195;
+    // Front vision cone
     ctx.strokeStyle = 'rgba(255,0,0,0.3)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(rx, ry, r, this.facingAngle - Math.PI / 3, this.facingAngle + Math.PI / 3);
     ctx.lineTo(rx, ry);
     ctx.closePath();
+    ctx.stroke();
+    // Rear detection zone (45px range, 126 deg sector behind monster)
+    const rearR = 45;
+    ctx.fillStyle = 'rgba(255, 165, 0, 0.15)';
+    ctx.beginPath();
+    ctx.arc(rx, ry, rearR, this.facingAngle + Math.PI * 0.65, this.facingAngle - Math.PI * 0.65);
+    ctx.lineTo(rx, ry);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 165, 0, 0.5)';
+    ctx.lineWidth = 1;
     ctx.stroke();
   }
 }
@@ -1296,8 +1341,10 @@ class Game {
     this.playerClasses = ['none', 'none', 'none', 'none'];
     this.activeMonsters = [];
     this.monsterSpawnType = 'normal';
-    this.monsterTypeMessage = '';
-    this.monsterTypeMsgTimer = 0;
+    this.summonPhase = '';
+    this.summonPhaseTimer = 0;
+    this.summonPhaseMessage = '';
+    this.monsterDesc = '';
     this.particles = [];
     this.camX = 0; this.camY = 0;
     this.camScale = 1;
@@ -1332,6 +1379,7 @@ class Game {
     this.playerVisionRange = [];
     this.tileVariation = [];
     this.tileEdgeMask = [];
+    this.baseTileResolved = [];
   }
 
   static tileHash(x, y) {
@@ -1340,12 +1388,82 @@ class Game {
     return ((h >>> 0) % 1000) / 1000;
   }
 
+  static progressColor(t) {
+    const r = Math.min(255, Math.max(0, Math.round(t < 0.5 ? 255 : 255 * (1 - t) * 2)));
+    const g = Math.min(255, Math.max(0, Math.round(t < 0.5 ? 255 * t * 2 : 255)));
+    const b = 0;
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  resolveBaseTile(x, y) {
+    const tile = this.tiles[y][x];
+    if (tile !== 'F' && tile !== 'U' && tile !== 'm') return tile;
+    let floorCount = 0;
+    let grassCount = 0;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || nx >= this.mapWidth || ny < 0 || ny >= this.mapHeight) continue;
+        const neighborTile = this.tiles[ny][nx];
+        if (neighborTile === 'C') floorCount++;
+        else if (neighborTile === 'G') grassCount++;
+        else if (neighborTile === 'd') floorCount++; // door = indoor
+      }
+    }
+    return floorCount >= grassCount ? 'C' : 'G';
+  }
+
+  getEffectiveTile(x, y) {
+    if (this.baseTileResolved[y] && this.baseTileResolved[y][x] !== undefined) {
+      return this.baseTileResolved[y][x];
+    }
+    return this.tiles[y][x];
+  }
+
   loadMap(mapData) {
     if (!mapData) return;
     this.tiles = mapData.tiles;
     this.mapWidth = mapData.width;
     this.mapHeight = mapData.height;
     this.doorEntities = mapData.doors.map(d => new DoorEntity(d.x, d.y));
+    // Build door position lookup for group detection
+    let doorByPos = {};
+    for (let di = 0; di < this.doorEntities.length; di++) {
+      let d = this.doorEntities[di];
+      doorByPos[d.tileX + ',' + d.tileY] = d;
+    }
+    // Flood-fill to find orthogonally connected door groups
+    let visited = {};
+    for (let di2 = 0; di2 < this.doorEntities.length; di2++) {
+      let startDoor = this.doorEntities[di2];
+      let key = startDoor.tileX + ',' + startDoor.tileY;
+      if (visited[key]) continue;
+      let component = [];
+      let queue = [startDoor];
+      visited[key] = true;
+      while (queue.length > 0) {
+        let current = queue.shift();
+        component.push(current);
+        let dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+        for (let di3 = 0; di3 < dirs.length; di3++) {
+          let nx = current.tileX + dirs[di3][0];
+          let ny = current.tileY + dirs[di3][1];
+          let nkey = nx + ',' + ny;
+          let neighbor = doorByPos[nkey];
+          if (neighbor && !visited[nkey]) {
+            visited[nkey] = true;
+            queue.push(neighbor);
+          }
+        }
+      }
+      // Assign groupMembers if component has 2+ doors
+      if (component.length >= 2) {
+        for (let ci = 0; ci < component.length; ci++) {
+          component[ci].groupMembers = component;
+        }
+      }
+    }
     this.artifactEntities = [];
     this.waypoints = mapData.waypoints;
     this.altarPos = mapData.altarPos;
@@ -1406,8 +1524,10 @@ class Game {
     // Clear monsters
     this.activeMonsters = [];
     this.monsterSpawnType = 'normal';
-    this.monsterTypeMessage = '';
-    this.monsterTypeMsgTimer = 0;
+    this.summonPhase = '';
+    this.summonPhaseTimer = 0;
+    this.summonPhaseMessage = '';
+    this.monsterDesc = '';
     // Reset state
     this.summonCount = 0;
     this.roundNumber = 0;
@@ -1421,6 +1541,14 @@ class Game {
     this.summonDelay = 0;
     this.particles = [];
     this.traps = [];
+    // Resolve base tile type for special markers (F, U, m)
+    this.baseTileResolved = new Array(this.mapHeight);
+    for (let y = 0; y < this.mapHeight; y++) {
+      this.baseTileResolved[y] = new Array(this.mapWidth);
+      for (let x = 0; x < this.mapWidth; x++) {
+        this.baseTileResolved[y][x] = this.resolveBaseTile(x, y);
+      }
+    }
     this.buildAutotileCache();
     this.initShops();
     this.setDifficulty();
@@ -1471,20 +1599,33 @@ class Game {
     const h = this.mapHeight, w = this.mapWidth;
     this.tileVariation = new Array(h);
     this.tileEdgeMask = new Array(h);
-    const isFloor = t => t === 'C' || t === 'U' || t === 'F' || t === 'P' || t === 'M' || t === 'S' || t === 'T' || t === 'm';
     for (let y = 0; y < h; y++) {
       this.tileVariation[y] = new Float32Array(w);
       this.tileEdgeMask[y] = new Int8Array(w);
       for (let x = 0; x < w; x++) {
         this.tileVariation[y][x] = Game.tileHash(x, y);
-        const tile = this.tiles[y][x];
-        if (tile !== 'G' && !isFloor(tile)) { this.tileEdgeMask[y][x] = 0; continue; }
+        const resolved = this.baseTileResolved[y] ? this.baseTileResolved[y][x] : this.tiles[y][x];
+        if (resolved !== 'C' && resolved !== 'G') {
+          this.tileEdgeMask[y][x] = 0;
+          continue;
+        }
         let mask = 0;
-        const match = isFloor(tile) ? isFloor : t => t === 'G';
-        if (y > 0 && !match(this.tiles[y - 1][x])) mask |= 1;
-        if (y < h - 1 && !match(this.tiles[y + 1][x])) mask |= 2;
-        if (x > 0 && !match(this.tiles[y][x - 1])) mask |= 4;
-        if (x < w - 1 && !match(this.tiles[y][x + 1])) mask |= 8;
+        if (y > 0) {
+          const up = this.baseTileResolved[y - 1] ? this.baseTileResolved[y - 1][x] : this.tiles[y - 1][x];
+          if (up !== resolved) mask |= 1;
+        }
+        if (y < h - 1) {
+          const down = this.baseTileResolved[y + 1] ? this.baseTileResolved[y + 1][x] : this.tiles[y + 1][x];
+          if (down !== resolved) mask |= 2;
+        }
+        if (x > 0) {
+          const left = this.baseTileResolved[y] ? this.baseTileResolved[y][x - 1] : this.tiles[y][x - 1];
+          if (left !== resolved) mask |= 4;
+        }
+        if (x < w - 1) {
+          const right = this.baseTileResolved[y] ? this.baseTileResolved[y][x + 1] : this.tiles[y][x + 1];
+          if (right !== resolved) mask |= 8;
+        }
         this.tileEdgeMask[y][x] = mask;
       }
     }
@@ -1622,8 +1763,24 @@ class Game {
     }
     // Update message
     if (this.messageTimer > 0) { this.messageTimer -= dt; if (this.messageTimer <= 0) this.showMessage(''); }
-    // Monster type message
-    if (this.monsterTypeMsgTimer > 0) { this.monsterTypeMsgTimer -= dt; if (this.monsterTypeMsgTimer <= 0) this.monsterTypeMessage = ''; }
+    // Summon phase sequencial
+    if (this.summonPhase === 'name') {
+      this.summonPhaseTimer -= dt;
+      if (this.summonPhaseTimer <= 0) {
+        this.summonPhase = 'desc';
+        this.summonPhaseTimer = 3.0;
+        this.showMessage('');
+        this.showSummonDesc(this.monsterDesc);
+      }
+    } else if (this.summonPhase === 'desc') {
+      this.summonPhaseTimer -= dt;
+      if (this.summonPhaseTimer <= 0) {
+        this.summonPhase = '';
+        this.hideSummonDesc();
+        this.monsterDesc = '';
+        this.summonPhaseMessage = '';
+      }
+    }
     // Day/night transition
     const anyMonsterAlive = this.activeMonsters.some(m => m.alive);
     this.targetRoofAlpha = this.computeRoofAlpha();
@@ -1667,19 +1824,39 @@ class Game {
       const pty = pl.tileY;
       const tile = (pty >= 0 && pty < this.mapHeight && pt >= 0 && pt < this.mapWidth)
         ? this.tiles[pty][pt] : 'G';
-      if (tile !== 'G' && tile !== 'O') return 0;
+      const effectiveTile = (pty >= 0 && pty < this.mapHeight && pt >= 0 && pt < this.mapWidth)
+        ? (this.baseTileResolved[pty] ? this.baseTileResolved[pty][pt] : tile) : 'G';
+      if (effectiveTile !== 'G' && effectiveTile !== 'O') return 0;
     }
     // All alive players outside - check near open doors
     for (const pl of this.players) {
       if (!pl.alive) continue;
       const pt = pl.tileX;
       const pty = pl.tileY;
-      for (const door of this.doorEntities) {
+      for (let di = 0; di < this.doorEntities.length; di++) {
+        const door = this.doorEntities[di];
         if (!door.open && !door.animating) continue;
-        const dx = door.tileX - pt;
-        const dy = door.tileY - pty;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 3) return Math.max(0, (dist - 1) / 2);
+        if (door.hasGroup()) {
+          // For grouped doors, check distance to group bounding box
+          const members = door.groupMembers;
+          let gMinX = Infinity, gMaxX = -Infinity, gMinY = Infinity, gMaxY = -Infinity;
+          for (let gi = 0; gi < members.length; gi++) {
+            if (members[gi].tileX < gMinX) gMinX = members[gi].tileX;
+            if (members[gi].tileX > gMaxX) gMaxX = members[gi].tileX;
+            if (members[gi].tileY < gMinY) gMinY = members[gi].tileY;
+            if (members[gi].tileY > gMaxY) gMaxY = members[gi].tileY;
+          }
+          // Manhattan distance to nearest edge of bounding box
+          const ddx = pt < gMinX ? gMinX - pt : (pt > gMaxX ? pt - gMaxX : 0);
+          const ddy = pty < gMinY ? gMinY - pty : (pty > gMaxY ? pty - gMaxY : 0);
+          const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+          if (dist < 3) return Math.max(0, (dist - 1) / 2);
+        } else {
+          const dx = door.tileX - pt;
+          const dy = door.tileY - pty;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 3) return Math.max(0, (dist - 1) / 2);
+        }
       }
     }
     return 1;
@@ -1891,8 +2068,9 @@ class Game {
       if (tx < 0 || ty < 0 || tx >= this.mapWidth || ty >= this.mapHeight) {
         target = outdoorRange;
       } else {
-        const tile = this.tiles[ty][tx];
-        target = (tile === 'G' || tile === 'O') ? outdoorRange : indoorRange;
+        const rawTile = this.tiles[ty][tx];
+        const effectiveTile = this.baseTileResolved[ty] ? this.baseTileResolved[ty][tx] : rawTile;
+        target = (effectiveTile === 'G' || effectiveTile === 'O') ? outdoorRange : indoorRange;
       }
       if (this.playerVisionRange[i] === undefined) this.playerVisionRange[i] = target;
       this.playerVisionRange[i] += (target - this.playerVisionRange[i]) * Math.min(dt * lerpSpeed, 1);
@@ -2048,9 +2226,11 @@ class Game {
     const typeKey = weightedRandom(MonsterTypes);
     const mt = MonsterTypes[typeKey];
     this.monsterSpawnType = typeKey;
-    const speedBonus = this.getSpeedBonusPercent();
-    this.monsterTypeMessage = mt.name + ' heard you. Run. (Round ' + this.roundNumber + ' +' + speedBonus + '% spd)';
-    this.monsterTypeMsgTimer = 3.0;
+    this.summonPhase = 'name';
+    this.summonPhaseTimer = 2.0;
+    this.summonPhaseMessage = mt.name + ' ouviu voce. Corra.';
+    this.monsterDesc = mt.desc;
+    this.showMessage(this.summonPhaseMessage);
     const spd = this.getMonsterSpeed() * (mt.speedMod || 1);
     this.selectArtifactsForRound();
     // Determine spawn position
@@ -2279,6 +2459,18 @@ class Game {
     else el.classList.remove('show');
   }
 
+  showSummonDesc(text) {
+    const el = document.getElementById('summon-desc');
+    el.textContent = text;
+    if (text) el.classList.add('show');
+    else el.classList.remove('show');
+  }
+
+  hideSummonDesc() {
+    const el = document.getElementById('summon-desc');
+    el.classList.remove('show');
+  }
+
   openMapEditor() {
     const panel = document.getElementById('map-editor-panel');
     panel.classList.add('open');
@@ -2345,6 +2537,8 @@ class Game {
     for (const p of this.players) p.render(ctx, this);
     for (const m of this.activeMonsters) m.render(ctx, this);
     this.renderParticles(ctx);
+    // Interaction progress circle (canvas)
+    this.renderInteractionCircle(ctx);
     // Night overlay
     this.renderNight(ctx);
     // Debug
@@ -2370,19 +2564,32 @@ class Game {
           case 'G': color = GRASS_COLOR; break;
           case 'd': {
             const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
-            color = (door && door.open) ? DOOR_OPEN_COLOR : DOOR_CLOSED_COLOR;
+            if (door && door.hasGroup()) {
+              color = DOOR_CLOSED_COLOR;
+            } else {
+              color = (door && door.open) ? DOOR_OPEN_COLOR : DOOR_CLOSED_COLOR;
+            }
             break;
           }
           case 'A': color = ALTAR_COLOR; break;
-          case 'P': case 'M': case 'F': case 'U': color = INTERIOR_COLOR; break;
+          case 'P': case 'M': color = INTERIOR_COLOR; break;
+          case 'F': case 'U': case 'm': {
+            const resolved = this.baseTileResolved[y] ? this.baseTileResolved[y][x] : 'C';
+            color = (resolved === 'G') ? GRASS_COLOR : INTERIOR_COLOR;
+            break;
+          }
           case 'W': color = FURNITURE_COLOR; break;
-          case 'S': case 'T': case 'm': color = INTERIOR_COLOR; break;
+          case 'S': case 'T': color = INTERIOR_COLOR; break;
         }
         ctx.fillStyle = color;
         ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
 
-        // Autotiling: floor variations (C, U, F on floor)
-        if (tile === 'C' || tile === 'U' || tile === 'F' || tile === 'P' || tile === 'M' || tile === 'S' || tile === 'T' || tile === 'm') {
+        const effTile = (tile === 'F' || tile === 'U' || tile === 'm')
+          ? (this.baseTileResolved[y] ? this.baseTileResolved[y][x] : 'C')
+          : tile;
+
+        // Autotiling: floor variations (C, P, M, S, T + F/U/m resolved as C)
+        if (effTile === 'C' || tile === 'P' || tile === 'M' || tile === 'S' || tile === 'T') {
           const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
           const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
           // Subtle plank lines
@@ -2399,23 +2606,10 @@ class Game {
             if (mask & 4) ctx.fillRect(sx, sy, 2, TILE_SIZE);
             if (mask & 8) ctx.fillRect(sx + TILE_SIZE - 2, sy, 2, TILE_SIZE);
           }
-          // Waypoint marking
-          if (tile === 'U') {
-            ctx.fillStyle = 'rgba(0,0,0,0.08)';
-            ctx.fillRect(sx + 4, sy + 4, TILE_SIZE - 8, TILE_SIZE - 8);
-            ctx.fillStyle = 'rgba(0,0,0,0.04)';
-            ctx.beginPath();
-            ctx.arc(sx + TILE_SIZE / 2, sy + TILE_SIZE / 2, TILE_SIZE * 0.22, 0, Math.PI * 2);
-            ctx.fill();
-          }
-          // Artifact glow on floor
-          if (tile === 'F') {
-            ctx.fillStyle = 'rgba(0,255,255,0.03)';
-            ctx.fillRect(sx + 6, sy + 6, TILE_SIZE - 12, TILE_SIZE - 12);
-          }
         }
 
-        if (tile === 'G') {
+        // Grass autotiling (G tiles + F/U/m resolved as G)
+        if (effTile === 'G') {
           const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
           const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
           // Color variation: shift hue slightly
@@ -2442,6 +2636,20 @@ class Game {
           }
         }
 
+        // Waypoint/artifact overlay marks (drawn on top of grass/floor)
+        if (tile === 'U') {
+          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          ctx.fillRect(sx + 4, sy + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+          ctx.fillStyle = 'rgba(0,0,0,0.04)';
+          ctx.beginPath();
+          ctx.arc(sx + TILE_SIZE / 2, sy + TILE_SIZE / 2, TILE_SIZE * 0.22, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        if (tile === 'F') {
+          ctx.fillStyle = 'rgba(0,255,255,0.03)';
+          ctx.fillRect(sx + 6, sy + 6, TILE_SIZE - 12, TILE_SIZE - 12);
+        }
+
         // Grid lines in debug
         if (this.debugMode) {
           ctx.strokeStyle = 'rgba(255,255,255,0.1)';
@@ -2457,11 +2665,12 @@ class Game {
         // Draw door indicator
         if (tile === 'd') {
           const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
-          if (door && !door.open) {
+          if (door && door.hasGroup()) {
+            // Grouped doors are rendered by renderDoors, skip individual indicator
+          } else if (door && !door.open) {
             ctx.fillStyle = '#8b6914';
             ctx.fillRect(sx + TILE_SIZE * 0.1, sy + TILE_SIZE * 0.1, TILE_SIZE * 0.8, TILE_SIZE * 0.8);
-          }
-          if (door && door.animating) {
+          } else if (door && door.animating) {
             const progress = door.animProgress;
             ctx.fillStyle = '#8b6914';
             const barW = TILE_SIZE * 0.8 * progress;
@@ -2498,17 +2707,33 @@ class Game {
     ctx.fillStyle = `rgba(30,20,15,${alpha * 0.85})`;
     for (let y = 0; y < this.mapHeight; y++) {
       for (let x = 0; x < this.mapWidth; x++) {
-        const tile = this.tiles[y][x];
-        if (tile === 'G' || tile === 'O') continue; // Exterior
+        const rawTile = this.tiles[y][x];
+        const effectiveTile = this.baseTileResolved[y] ? this.baseTileResolved[y][x] : rawTile;
+        if (effectiveTile === 'G' || effectiveTile === 'O') continue; // Exterior
         const sx = x * TILE_SIZE - this.camX;
         const sy = y * TILE_SIZE - this.camY;
         // Check if near open door
         let nearOpenDoor = false;
-        for (const door of this.doorEntities) {
+        for (let di = 0; di < this.doorEntities.length; di++) {
+          const door = this.doorEntities[di];
           if (!door.open && !door.animating) continue;
-          const dx = door.tileX - x;
-          const dy = door.tileY - y;
-          if (Math.abs(dx) <= 2 && Math.abs(dy) <= 2 && door.open) nearOpenDoor = true;
+          if (door.hasGroup()) {
+            // For grouped doors, check if tile is near the group bounding box
+            const members = door.groupMembers;
+            let gMinX = Infinity, gMaxX = -Infinity, gMinY = Infinity, gMaxY = -Infinity;
+            for (let gi = 0; gi < members.length; gi++) {
+              if (members[gi].tileX < gMinX) gMinX = members[gi].tileX;
+              if (members[gi].tileX > gMaxX) gMaxX = members[gi].tileX;
+              if (members[gi].tileY < gMinY) gMinY = members[gi].tileY;
+              if (members[gi].tileY > gMaxY) gMaxY = members[gi].tileY;
+            }
+            if (x >= gMinX - 2 && x <= gMaxX + 2 && y >= gMinY - 2 && y <= gMaxY + 2 && door.open) nearOpenDoor = true;
+          } else {
+            const dx = door.tileX - x;
+            const dy = door.tileY - y;
+            if (Math.abs(dx) <= 2 && Math.abs(dy) <= 2 && door.open) nearOpenDoor = true;
+          }
+          if (nearOpenDoor) break;
         }
         if (nearOpenDoor) {
           ctx.fillStyle = `rgba(30,20,15,${alpha * 0.3})`;
@@ -2545,15 +2770,96 @@ class Game {
 
   renderDoors(ctx) {
     const ts = TILE_SIZE;
-    const doorRange = 160; // same as night visibility range (5 tiles)
-    for (const door of this.doorEntities) {
+    const doorRange = 160;
+    const renderedGroups = new Set();
+    for (let di = 0; di < this.doorEntities.length; di++) {
+      const door = this.doorEntities[di];
+      // Grouped doors: render entire group once using the first door in the group
+      if (door.groupMembers) {
+        if (renderedGroups.has(door)) continue;
+        for (let gi = 0; gi < door.groupMembers.length; gi++) {
+          renderedGroups.add(door.groupMembers[gi]);
+        }
+        // Compute group bounding box
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (let gi = 0; gi < door.groupMembers.length; gi++) {
+          const gm = door.groupMembers[gi];
+          if (gm.tileX < minX) minX = gm.tileX;
+          if (gm.tileY < minY) minY = gm.tileY;
+          if (gm.tileX > maxX) maxX = gm.tileX;
+          if (gm.tileY > maxY) maxY = gm.tileY;
+        }
+        const gw = maxX - minX + 1;
+        const gh = maxY - minY + 1;
+        const gsx = minX * ts - this.camX;
+        const gsy = minY * ts - this.camY;
+        const gsw = gw * ts;
+        const gsh = gh * ts;
+        if (gsx + gsw < -50 || gsx > this.canvas.width + 50 || gsy + gsh < -50 || gsy > this.canvas.height + 50) continue;
+        // Proximity check using group center
+        const gcx = minX * ts + gsw / 2;
+        const gcy = minY * ts + gsh / 2;
+        let nearGroup = false;
+        for (let pi = 0; pi < this.players.length; pi++) {
+          const pl = this.players[pi];
+          if (!pl.alive) continue;
+          const pdx = pl.px - gcx;
+          const pdy = pl.py - gcy;
+          if (Math.sqrt(pdx * pdx + pdy * pdy) < doorRange + Math.max(gsw, gsh) * 0.5) { nearGroup = true; break; }
+        }
+        if (!nearGroup) continue;
+        // Fill background for all tiles in the group
+        ctx.fillStyle = INTERIOR_COLOR;
+        ctx.fillRect(gsx, gsy, gsw, gsh);
+        // Determine primary door state (use first door's state - all sync via toggle)
+        const primary = door.groupMembers[0];
+        const anyClosed = primary.open === false && primary.animating === false;
+        const anyAnimating = primary.animating;
+        const progress = primary.animProgress;
+        const isHorizontal = gw > gh;
+        if (anyAnimating) {
+          ctx.fillStyle = DOOR_CLOSED_COLOR;
+          if (isHorizontal) {
+            // Horizontal group: door slides up (height shrinks)
+            const doorH = gsh * 0.7 * progress;
+            const doorY = gsy + gsh * 0.15;
+            ctx.fillRect(gsx + gsw * 0.075, doorY, gsw * 0.85, doorH);
+          } else {
+            // Vertical group: door slides to the side (width shrinks)
+            const doorW = gsw * 0.7 * progress;
+            const doorX = gsx + gsw * 0.15;
+            ctx.fillRect(doorX, gsy + gsh * 0.075, doorW, gsh * 0.85);
+          }
+        } else if (anyClosed) {
+          ctx.fillStyle = DOOR_CLOSED_COLOR;
+          if (isHorizontal) {
+            const doorH = gsh * 0.7;
+            const doorY = gsy + gsh * 0.15;
+            ctx.fillRect(gsx + gsw * 0.075, doorY, gsw * 0.85, doorH);
+          } else {
+            const doorW = gsw * 0.7;
+            const doorX = gsx + gsw * 0.15;
+            ctx.fillRect(doorX, gsy + gsh * 0.075, doorW, gsh * 0.85);
+          }
+        }
+        // Door handle (only when closed)
+        if (anyClosed) {
+          ctx.fillStyle = '#ffd700';
+          ctx.beginPath();
+          ctx.arc(gcx - this.camX, gcy - this.camY, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        continue;
+      }
+      // Single door (no group) - original rendering
       const sx = door.tileX * ts - this.camX;
       const sy = door.tileY * ts - this.camY;
       if (sx + ts < -50 || sx > this.canvas.width + 50 || sy + ts < -50 || sy > this.canvas.height + 50) continue;
       const dx = door.tileX * ts + ts / 2;
       const dy = door.tileY * ts + ts / 2;
       let near = false;
-      for (const pl of this.players) {
+      for (let pi = 0; pi < this.players.length; pi++) {
+        const pl = this.players[pi];
         if (!pl.alive) continue;
         const pdx = pl.px - dx;
         const pdy = pl.py - dy;
@@ -2649,42 +2955,92 @@ class Game {
   }
 
   renderInteractionBar() {
-    const bar = document.getElementById('interaction-bar');
-    const fill = document.getElementById('interaction-fill');
     const label = document.getElementById('interaction-label');
-    // Find first player that is interacting
-    let interactingPlayer = null;
+    // Always hide the horizontal bar - replaced by canvas circle
+    document.getElementById('interaction-bar').style.display = 'none';
+    // Check if any player has interactTarget
+    let hasTarget = false;
+    let promptType = '';
     for (const p of this.players) {
-      if (p.interacting && p.interactTarget) { interactingPlayer = p; break; }
-    }
-    if (interactingPlayer && this.interactDisplay) {
-      bar.style.display = 'block';
-      label.style.display = 'block';
-      const pct = Math.min(100, (interactingPlayer.interactTimer / this.interactDuration) * 100);
-      fill.style.width = pct + '%';
-      if (this.interactDisplay.type === 'door') label.textContent = 'Opening/Closing...';
-      else if (this.interactDisplay.type === 'altar') label.textContent = 'Summoning...';
-      else if (this.interactDisplay.type === 'artifact') label.textContent = 'Collecting...';
-    } else {
-      bar.style.display = 'none';
-      // Check if any player has interactTarget
-      let hasTarget = false;
-      let promptType = '';
-      for (const p of this.players) {
-        if (p.interactTarget && !p.interacting) {
-          hasTarget = true;
-          promptType = p.interactType;
-          break;
-        }
+      if (p.interactTarget && !p.interacting) {
+        hasTarget = true;
+        promptType = p.interactType;
+        break;
       }
-      if (hasTarget) {
+    }
+    if (hasTarget) {
+      label.style.display = 'block';
+      if (promptType === 'door') label.textContent = 'Hold key to open/close';
+      else if (promptType === 'altar') label.textContent = 'Hold key to summon';
+      else if (promptType === 'artifact') label.textContent = 'Hold key to collect';
+    } else {
+      // Check if interacting to show active label
+      let interactingPlayer = null;
+      for (const p of this.players) {
+        if (p.interacting && p.interactTarget) { interactingPlayer = p; break; }
+      }
+      if (interactingPlayer && this.interactDisplay) {
         label.style.display = 'block';
-        if (promptType === 'door') label.textContent = 'Hold key to open/close';
-        else if (promptType === 'altar') label.textContent = 'Hold key to summon';
-        else if (promptType === 'artifact') label.textContent = 'Hold key to collect';
+        if (this.interactDisplay.type === 'door') label.textContent = 'Opening/Closing...';
+        else if (this.interactDisplay.type === 'altar') label.textContent = 'Summoning...';
+        else if (this.interactDisplay.type === 'artifact') label.textContent = 'Collecting...';
       } else {
         label.style.display = 'none';
       }
+    }
+  }
+
+  renderInteractionCircle(ctx) {
+    if (!this.interactDisplay) return;
+    const data = this.interactDisplay;
+    const type = data.type;
+    if (type !== 'artifact' && type !== 'altar') return;
+    if (this.interactDuration <= 0) return;
+    let interactingPlayer = null;
+    for (const p of this.players) {
+      if (p.interacting && p.interactTarget && p.interactType === type) {
+        interactingPlayer = p; break;
+      }
+    }
+    if (!interactingPlayer) return;
+    const target = data.target;
+    let worldX, worldY;
+    if (type === 'artifact') {
+      worldX = target.tileX * TILE_SIZE + TILE_SIZE / 2;
+      worldY = target.tileY * TILE_SIZE + TILE_SIZE / 2;
+    } else if (type === 'altar') {
+      worldX = this.altarPos.x * TILE_SIZE + TILE_SIZE / 2;
+      worldY = this.altarPos.y * TILE_SIZE + TILE_SIZE / 2;
+    } else {
+      worldX = target.x * TILE_SIZE + TILE_SIZE / 2;
+      worldY = target.y * TILE_SIZE + TILE_SIZE / 2;
+    }
+    const sx = worldX - this.camX;
+    const sy = worldY - this.camY;
+    if (sx < -50 || sx > this.canvas.width + 50 || sy < -50 || sy > this.canvas.height + 50) return;
+    const circleRadius = TILE_SIZE * 0.4;
+    const lineWidth = circleRadius * 2 * 0.15;
+    const progress = Math.min(1, Math.max(0, interactingPlayer.interactTimer / this.interactDuration));
+    const startAngle = -Math.PI / 2;
+    const endAngle = startAngle + Math.PI * 2 * progress;
+    ctx.beginPath();
+    ctx.arc(sx, sy, circleRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = lineWidth + 2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(sx, sy, circleRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+    if (progress > 0) {
+      ctx.beginPath();
+      ctx.arc(sx, sy, circleRadius, startAngle, endAngle);
+      ctx.strokeStyle = Game.progressColor(progress);
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.lineCap = 'butt';
     }
   }
 }
@@ -2776,11 +3132,6 @@ function updateHUD(game) {
   html += 'Coins: ' + game.currency + '<br>';
   html += 'Estado: ' + night;
   hud.innerHTML = html;
-  if (game.monsterTypeMsgTimer > 0 && game.messageTimer <= 0) {
-    const msg = document.getElementById('message');
-    msg.textContent = game.monsterTypeMessage;
-    msg.classList.add('show');
-  }
 }
 
 function updateAbilityHUD(game) {
