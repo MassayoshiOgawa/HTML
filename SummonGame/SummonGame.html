@@ -1883,7 +1883,7 @@ class Game {
   buildVisibilityPolygon(player) {
     const baseRange = this.isNight ? 160 : 384;
     const playerRange = this.playerVisionRange[player.playerIndex] || baseRange;
-    const maxDist = this.isNight ? Math.min(playerRange, 160) : playerRange;
+    const maxDist = playerRange;
     const numRays = this.isNight ? 360 : 220;
     const points = [];
     for (let i = 0; i < numRays; i++) {
