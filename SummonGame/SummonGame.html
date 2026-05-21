@@ -360,15 +360,15 @@ const DEFAULT_KEYBINDS = [
 const Items = {
   beartrap: {
     name: 'Bear Trap', price: 5, desc: 'Stuns monster for 1 second', stun: 1,
-    icon: 'T', color: '#888', trapColor: '#666', trapRadius: 6
+    icon: 'T', color: '#888', trapColor: '#666', trapRadius: 12
   },
   landmine: {
     name: 'Land Mine', price: 10, desc: 'Stuns monster for 3 seconds', stun: 3,
-    icon: 'M', color: '#c44', trapColor: '#a22', trapRadius: 8
+    icon: 'M', color: '#c44', trapColor: '#a22', trapRadius: 12
   },
   crucifix: {
     name: 'Crucifix', price: 15, desc: 'Stuns monster for 7 seconds', stun: 7,
-    icon: '+', color: '#cc0', trapColor: '#aa0', trapRadius: 10
+    icon: '+', color: '#cc0', trapColor: '#aa0', trapRadius: 12
   }
 };
 
@@ -1861,7 +1861,7 @@ class Game {
   }
 
   updateVisionRanges(dt) {
-    const indoorRange = 384; // 12 tiles
+    const indoorRange = Math.sqrt(this.mapWidth * this.mapWidth + this.mapHeight * this.mapHeight) * TILE_SIZE;
     const outdoorRange = 160; // 5 tiles
     const lerpSpeed = 3;
     for (let i = 0; i < this.players.length; i++) {
@@ -2171,6 +2171,7 @@ class Game {
   renderTraps(ctx) {
     for (const t of this.traps) {
       if (!t.active) continue;
+      if (!this.isPointVisible(t.x, t.y)) continue;
       const sx = t.x - this.camX;
       const sy = t.y - this.camY;
       if (sx < -50 || sx > this.canvas.width + 50 || sy < -50 || sy > this.canvas.height + 50) continue;
@@ -2303,17 +2304,17 @@ class Game {
     this.renderArtifacts(ctx);
     // Draw roof overlay
     this.renderRoof(ctx);
-    // Draw traps on floor
-    this.renderTraps(ctx);
-    // Draw shops and trash bins on floor
-    this.renderShops(ctx);
-    this.renderTrashBins(ctx);
     // Raycast lightmap (replaces old fog)
     const lightmap = this.buildLightmap();
     ctx.drawImage(lightmap, 0, 0);
-    // Doors on top of lightmap (always lit)
+    // Doors on top of lightmap (always lit when near player)
     this.renderDoors(ctx);
-    // Draw entities on top of doors
+    // Traps on top of doors (with visibility check)
+    this.renderTraps(ctx);
+    // Shops and trash bins on top of lightmap
+    this.renderShops(ctx);
+    this.renderTrashBins(ctx);
+    // Draw entities on top
     for (const p of this.players) p.render(ctx, this);
     for (const m of this.activeMonsters) m.render(ctx, this);
     this.renderParticles(ctx);
