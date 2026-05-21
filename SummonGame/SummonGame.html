@@ -1626,7 +1626,7 @@ class Game {
       const ty = Math.floor(y / TILE_SIZE);
       if (tx < 0 || ty < 0 || tx >= this.mapWidth || ty >= this.mapHeight) break;
       const tile = this.tiles[ty][tx];
-      if (tile === 'O' || tile === 'W') {
+      if (tile === 'O') {
         x -= dx * step;
         y -= dy * step;
         break;
