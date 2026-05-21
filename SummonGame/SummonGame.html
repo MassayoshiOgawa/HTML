@@ -289,7 +289,7 @@ canvas {
      <div id="player-setup-desc" style="min-height:20px; color:#aaa; font-size:14px; text-align:center; max-width:400px;"></div>
      <button id="btn-start-game" style="background:#2a2a3e; border:1px solid #4fc3f7; color:#fff; padding:10px 30px; cursor:pointer; font-family:'Courier New',monospace; font-size:16px; border-radius:4px;">Start Game</button>
    </div>
-   <div id="ability-hud" style="position:absolute; bottom:10px; right:10px; z-index:10; color:#ccc; font-size:12px; font-family:'Courier New',monospace; text-align:right; pointer-events:none;">
+   <div id="ability-hud" style="position:absolute; bottom:10px; left:10px; z-index:10; color:#ccc; font-size:12px; font-family:'Courier New',monospace; text-align:left; pointer-events:none;">
      <div id="ability-name" style="color:#888;"></div>
      <div style="width:120px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; margin-top:2px;">
        <div id="ability-bar" style="height:100%; background:rgba(255,60,60,0.6); border-radius:3px; width:100%; transition:width 0.1s;"></div>
@@ -327,7 +327,8 @@ const LEGEND_COLORS = {
   'U': '#dddd00',
   'W': '#666666',
   'S': '#ff8800',
-  'T': '#888888'
+  'T': '#888888',
+  'm': '#ff6600'
 };
 
 const LEGEND_LABELS = {
@@ -342,7 +343,8 @@ const LEGEND_LABELS = {
   'U': 'Waypoint',
   'W': 'ShortWall',
   'S': 'Shop',
-  'T': 'Trash'
+  'T': 'Trash',
+  'm': 'Random Monster Spawn'
 };
 
 const MAX_PLAYERS = 4;
@@ -378,33 +380,51 @@ const Items = {
 const MonsterTypes = {
   normal: {
     name: 'Monster',
-    desc: 'Standard behavior',
+    desc: 'A persistent creature that hunts relentlessly.',
     weight: 1,
     chaseLoseTime: 1.0,
     searchDuration: 2.0,
     spawnCount: 1,
     color: '#aa33cc',
-    strokeColor: '#661188'
+    strokeColor: '#661188',
+    speedMod: 1.0,
+    randomSpawn: false
   },
   blueman: {
     name: 'Blue Man',
-    desc: 'Never forgets your scent',
+    desc: 'It remembers your location far longer than normal.',
     weight: 1,
     chaseLoseTime: 2.0,
     searchDuration: 4.0,
     spawnCount: 1,
     color: '#3388ff',
-    strokeColor: '#1155cc'
+    strokeColor: '#1155cc',
+    speedMod: 1.0,
+    randomSpawn: false
   },
   twins: {
     name: 'Twins',
-    desc: 'Double the terror',
+    desc: 'Two minds. Two hunters. Two separate intelligences.',
     weight: 1,
     chaseLoseTime: 1.0,
     searchDuration: 2.0,
     spawnCount: 2,
     color: '#cc3333',
-    strokeColor: '#881111'
+    strokeColor: '#881111',
+    speedMod: 1.0,
+    randomSpawn: false
+  },
+  glitch: {
+    name: 'Glitch',
+    desc: 'It appears from unpredictable locations and moves unnaturally fast.',
+    weight: 1,
+    chaseLoseTime: 1.0,
+    searchDuration: 2.0,
+    spawnCount: 1,
+    color: '#33ff33',
+    strokeColor: '#119911',
+    speedMod: 1.3,
+    randomSpawn: true
   }
 };
 
@@ -456,20 +476,20 @@ const DEFAULT_MAP = [
 'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO',
 'OCWCCFCOCCFCOFCCTCCACCCCUCOGGFGGGGO',
 'OCCCUCCdCCCCOSCCCCCMCCCCCCOGGGGGUGO',
-'OCCCCCCOCCCCOSCCCCCCCCCCWCOGGGGGGGO',
+'OmCCCCCOCCCCOSCCCCCCCCCCWCOGGGGGmGO',
 'OOOOOOOOCCCCOSCCCCCCCCCCWCOGGGGGGGO',
 'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGO',
 'OCCUFCCOCCCCdCCCCCPCCCCCCCOGGGGGGGO',
 'OCCCCCCOCCCCOCCCCCCCCCCCCCOGGGGGGGO',
-'OCCCCCCOCCCCOOOOOOOdOOOOOOOGGGGGGGO',
+'OCmCCCCOCCCCOOOOOOOdOOOOOOOGGGGGGGO',
 'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGWGGO',
-'OCCCCCCdCCCCCCCCCCCCCCCCCCdGGGGWGGO',
+'OCCCCCCdCCCmCCCCCCCCCCCCCCdGGGGWGGO',
 'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGWGGO',
 'OOOOOOOOOOOOOOOOOdOOOOOOOOOGGGGWGGO',
-'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGWGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGGGGGmGGWGGO',
 'OGGGGGGGGGGGGGFGUGGGGGGGGGGGGGGWGGO',
-'OGGGGGGGGGGGGGGGGGGGGGGGWWWWWWWWGGO',
-'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+'OGGGGGGmGGGGGGGGGGGGGGGGWWWWWWWWGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGmGO',
 'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
 'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'
 ];
@@ -494,38 +514,40 @@ function parseMap(text) {
   for (let i = 0; i < cleanLines.length; i++) {
     while (cleanLines[i].length < cols) cleanLines[i] += 'G';
   }
-   const validChars = new Set(['O','C','G','d','A','P','M','F','U','W','S','T']);
+   const validChars = new Set(['O','C','G','d','A','P','M','F','U','W','S','T','m']);
   const tiles = [];
   const doors = [];
-  const artifacts = [];
-  const waypoints = [];
-  let altarPos = null;
-  let playerSpawn = null;
-  let monsterSpawn = null;
-  for (let y = 0; y < cleanLines.length; y++) {
-    const row = [];
-    for (let x = 0; x < cleanLines[y].length; x++) {
-      const ch = cleanLines[y][x];
-      if (!validChars.has(ch)) {
-        console.warn('Invalid char:', ch, 'at', x, y);
-        row.push('C');
-        continue;
-      }
-      row.push(ch);
-      if (ch === 'd') doors.push({ x, y });
-      if (ch === 'F') artifacts.push({ x, y });
-      if (ch === 'U') waypoints.push({ x, y });
-      if (ch === 'A') altarPos = { x, y };
-      if (ch === 'P') playerSpawn = { x, y };
-      if (ch === 'M') monsterSpawn = { x, y };
-    }
-    tiles.push(row);
-  }
-  return {
-    tiles, doors, artifacts, waypoints,
-    altarPos, playerSpawn, monsterSpawn,
-    width: cols, height: cleanLines.length
-  };
+   const artifacts = [];
+   const waypoints = [];
+   const randomSpawns = [];
+   let altarPos = null;
+   let playerSpawn = null;
+   let monsterSpawn = null;
+   for (let y = 0; y < cleanLines.length; y++) {
+     const row = [];
+     for (let x = 0; x < cleanLines[y].length; x++) {
+       const ch = cleanLines[y][x];
+       if (!validChars.has(ch)) {
+         console.warn('Invalid char:', ch, 'at', x, y);
+         row.push('C');
+         continue;
+       }
+       row.push(ch);
+       if (ch === 'd') doors.push({ x, y });
+       if (ch === 'F') artifacts.push({ x, y });
+       if (ch === 'U') waypoints.push({ x, y });
+       if (ch === 'A') altarPos = { x, y };
+       if (ch === 'P') playerSpawn = { x, y };
+       if (ch === 'M') monsterSpawn = { x, y };
+       if (ch === 'm') randomSpawns.push({ x, y });
+     }
+     tiles.push(row);
+   }
+   return {
+     tiles, doors, artifacts, waypoints, randomSpawns,
+     altarPos, playerSpawn, monsterSpawn,
+     width: cols, height: cleanLines.length
+   };
 }
 
 // ============================================================
@@ -1287,6 +1309,7 @@ class Game {
     this.currency = 0;
     this.traps = [];
     this.shopItems = [];
+    this.randomMonsterSpawnPoints = [];
     this.nightTransition = 0;
     this.isNight = false;
     this.roofAlpha = 1;
@@ -1329,6 +1352,7 @@ class Game {
     this.playerSpawn = mapData.playerSpawn || { x: 1, y: 1 };
     this.monsterSpawn = mapData.monsterSpawn || mapData.altarPos || { x: 2, y: 2 };
     this.artifactEntities = [];
+    this.randomMonsterSpawnPoints = mapData.randomSpawns || [];
     // Collect all F tile positions for dynamic spawn (artifacts spawn on monster summon)
     this.artifactFPoints = [];
     for (let y = 0; y < this.mapHeight; y++) {
@@ -1447,7 +1471,7 @@ class Game {
     const h = this.mapHeight, w = this.mapWidth;
     this.tileVariation = new Array(h);
     this.tileEdgeMask = new Array(h);
-    const isFloor = t => t === 'C' || t === 'U' || t === 'F' || t === 'P' || t === 'M' || t === 'S' || t === 'T';
+    const isFloor = t => t === 'C' || t === 'U' || t === 'F' || t === 'P' || t === 'M' || t === 'S' || t === 'T' || t === 'm';
     for (let y = 0; y < h; y++) {
       this.tileVariation[y] = new Float32Array(w);
       this.tileEdgeMask[y] = new Int8Array(w);
@@ -2027,13 +2051,21 @@ class Game {
     const speedBonus = this.getSpeedBonusPercent();
     this.monsterTypeMessage = mt.name + ' heard you. Run. (Round ' + this.roundNumber + ' +' + speedBonus + '% spd)';
     this.monsterTypeMsgTimer = 3.0;
-    const spd = this.getMonsterSpeed();
+    const spd = this.getMonsterSpeed() * (mt.speedMod || 1);
     this.selectArtifactsForRound();
+    // Determine spawn position
+    let spawnX = this.monsterSpawn.x;
+    let spawnY = this.monsterSpawn.y;
+    if (mt.randomSpawn && this.randomMonsterSpawnPoints.length > 0) {
+      const rp = this.randomMonsterSpawnPoints[Math.floor(Math.random() * this.randomMonsterSpawnPoints.length)];
+      spawnX = rp.x;
+      spawnY = rp.y;
+    }
     for (let i = 0; i < mt.spawnCount; i++) {
       const ox = i > 0 ? (Math.random() - 0.5) * 2 : 0;
       const oy = i > 0 ? (Math.random() - 0.5) * 2 : 0;
-      const stx = Math.round(this.monsterSpawn.x + ox);
-      const sty = Math.round(this.monsterSpawn.y + oy);
+      const stx = Math.round(spawnX + ox);
+      const sty = Math.round(spawnY + oy);
       const m = new MonsterEntity(
         Math.max(0, Math.min(this.mapWidth - 1, stx)),
         Math.max(0, Math.min(this.mapHeight - 1, sty)),
@@ -2344,14 +2376,13 @@ class Game {
           case 'A': color = ALTAR_COLOR; break;
           case 'P': case 'M': case 'F': case 'U': color = INTERIOR_COLOR; break;
           case 'W': color = FURNITURE_COLOR; break;
-          case 'S': color = INTERIOR_COLOR; break;
-          case 'T': color = INTERIOR_COLOR; break;
+          case 'S': case 'T': case 'm': color = INTERIOR_COLOR; break;
         }
         ctx.fillStyle = color;
         ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
 
         // Autotiling: floor variations (C, U, F on floor)
-        if (tile === 'C' || tile === 'U' || tile === 'F' || tile === 'P' || tile === 'M' || tile === 'S' || tile === 'T') {
+        if (tile === 'C' || tile === 'U' || tile === 'F' || tile === 'P' || tile === 'M' || tile === 'S' || tile === 'T' || tile === 'm') {
           const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
           const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
           // Subtle plank lines
@@ -2590,6 +2621,21 @@ class Game {
     const totalRays = this.visibilityPolygons.reduce((s, vp) => s + vp.points.length, 0);
     ctx.fillText('Rays: ' + totalRays + ' | Diff: ' + this.difficulty + ' | Rnd: ' + this.roundNumber + ' | Spd:+' + this.getSpeedBonusPercent() + '%', 10, this.canvas.height - 30);
     ctx.fillText('Traps: ' + this.traps.length + ' | Shops: ' + this.shopItems.filter(s => !s.sold).length + ' | Cash: ' + this.currency, 10, this.canvas.height - 15);
+    // Random spawn points
+    for (const rp of this.randomMonsterSpawnPoints) {
+      const sx = rp.x * TILE_SIZE + TILE_SIZE / 2 - this.camX;
+      const sy = rp.y * TILE_SIZE + TILE_SIZE / 2 - this.camY;
+      ctx.strokeStyle = '#0f0';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(sx - 6, sy - 6, 12, 12);
+      ctx.fillStyle = '#0f0';
+      ctx.fillText('m', sx + 8, sy + 4);
+    }
+    // Monster type info
+    const mt = MonsterTypes[this.monsterSpawnType];
+    if (mt) {
+      ctx.fillText('Monster: ' + mt.name + ' | SpdMod: ' + (mt.speedMod || 1).toFixed(1) + 'x | RndSpawn: ' + mt.randomSpawn, 10, this.canvas.height - 60);
+    }
   }
 
   renderMessage(ctx) {
@@ -2747,7 +2793,7 @@ function updateAbilityHUD(game) {
     if (!cls || cls.cooldown === 0) continue;
     anyAbility = true;
     const color = ['#4488ff','#ff8844','#44ff44','#ff44ff'][p.playerIndex] || '#ccc';
-    html += '<div style="text-align:right; margin-bottom:4px;">';
+    html += '<div style="text-align:left; margin-bottom:4px;">';
     html += '<span style="color:' + color + '">' + p.name + '</span> ';
     html += cls.abilityName + ' [' + p.keybinds.ability.toUpperCase() + '] ';
     if (p.abilityActive) {
@@ -2774,21 +2820,20 @@ function updateHotbarHUD(game) {
   for (const p of game.players) {
     if (!p.alive) continue;
     const color = ['#4488ff','#ff8844','#44ff44','#ff44ff'][p.playerIndex] || '#ccc';
-    html += '<div style="display:flex;gap:3px;align-items:center;margin-right:12px;">';
-    html += '<span style="color:' + color + ';font-size:9px;min-width:20px;">' + p.name.substring(0, 3) + '</span>';
+    html += '<div style="display:flex;gap:8px;align-items:center;margin-right:30px;">';
+    html += '<span style="color:' + color + ';font-size:23px;min-width:50px;">' + p.name.substring(0, 3) + '</span>';
     for (let i = 0; i < 5; i++) {
       const item = p.inventory[i];
       const selected = i === p.selectedSlot;
       const it = item ? Items[item] : null;
-      html += '<div style="width:22px;height:22px;background:' + (selected ? '#2a2a3e' : '#111') + ';border:1px solid ' + (selected ? '#4fc3f7' : '#333') + ';border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:11px;color:' + (it ? it.color : '#333') + ';">';
+      html += '<div style="width:55px;height:55px;background:' + (selected ? '#2a2a3e' : '#111') + ';border:1px solid ' + (selected ? '#4fc3f7' : '#333') + ';border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:' + (it ? it.color : '#333') + ';">';
       html += it ? it.icon : '-';
       html += '</div>';
     }
-    // Use progress
     if (p.useTimer > 0) {
       const pct = Math.min(100, (p.useTimer / 1) * 100);
-      html += '<div style="width:20px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-left:4px;">';
-      html += '<div style="height:100%;width:' + pct + '%;background:#4fc3f7;border-radius:2px;transition:width 0.05s;"></div>';
+      html += '<div style="width:50px;height:10px;background:rgba(255,255,255,0.1);border-radius:5px;margin-left:10px;">';
+      html += '<div style="height:100%;width:' + pct + '%;background:#4fc3f7;border-radius:5px;transition:width 0.05s;"></div>';
       html += '</div>';
     }
     html += '</div>';

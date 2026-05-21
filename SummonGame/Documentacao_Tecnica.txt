@@ -2256,3 +2256,50 @@ ALTERACAO 15 - SISTEMA DE ITENS, TRAPS, SHOP E ECONOMIA
     Mostra: Traps ativos, Shops nao vendidos, Currency
 
 ================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (RANDOM MONSTER SPAWN / GLITCH)
+================================================================================
+
+ALTERACAO 16 - SISTEMA DE RANDOM SPAWN + NOVO MONSTRO GLITCH
+
+  NOVO TILE ASCII: m = Random Monster Spawn Point
+    Parseado junto com os demais tiles
+    Armazenado em Game.randomMonsterSpawnPoints[]
+
+  MONSTER TYPES EXPANDIDOS:
+    Todos os monstros agora possuem:
+      - desc: descricao completa (antes era curta)
+      - speedMod: multiplicador de velocidade (default 1.0)
+      - randomSpawn: boolean, se true spawna em tile m aleatorio
+
+    NOVO MONSTRO: Glitch
+      Descricao: "It appears from unpredictable locations and moves unnaturally fast."
+      randomSpawn: true (spawna em tile m aleatorio)
+      speedMod: 1.3 (+30% velocidade)
+      Cor: verde (#33ff33/#119911)
+      Comportamento IA: identico ao Monster normal
+      Peso: 1 (mesma chance dos outros)
+
+  REGRAS DE SPAWN:
+    Se monster.randomSpawn === true E existem tiles m no mapa:
+      Escolhe um ponto m aleatorio como spawn
+    Senao: fallback para monsterSpawn padrao (tile M ou altarPos)
+    Validacao: apenas tiles m validos (dentro do mapa, nao paredes)
+
+  DESCRICOES ATUALIZADAS:
+    Monster:   "A persistent creature that hunts relentlessly."
+    Blue Man:  "It remembers your location far longer than normal."
+    Twins:     "Two minds. Two hunters. Two separate intelligences."
+    Glitch:    "It appears from unpredictable locations and moves unnaturally fast."
+
+  VELOCIDADE:
+    Formula final: getMonsterSpeed() * speedMod
+    Glitch: speed * 1.3 (30% mais rapido)
+    Outros: speed * 1.0 (normal)
+
+  DEBUG MODE (F1):
+    Mostra tiles m com quadrado verde e label 'm'
+    Mostra info do monstro: nome, speedMod, randomSpawn
+
+================================================================================
