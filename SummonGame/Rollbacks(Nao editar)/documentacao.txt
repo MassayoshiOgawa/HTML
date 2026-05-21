@@ -3011,12 +3011,179 @@ ALTERACAO 21 — TRES MELHORIAS: DOUBLE DOOR VISIVEL, NERF MONSTRO, UI CIRCULAR
      e) renderInteractionBar() — barra horizontal removida,
         mantido apenas label de texto para prompts
      f) CSS — #interaction-bar permanece display:none por padrao
-     g) Circulo: TILE_SIZE * 0.4 de raio, linha 15% do diametro,
+      g) Circulo: TILE_SIZE * 0.4 de raio, linha 15% do diametro,
         gradiente conico vermelho->verde no sentido horario
 
 ================================================================================
 
 ================================================================================
+CHANGELOG - MAIO 2026 (SISTEMA DE HOTBAR RESPONSIVO)
+================================================================================
+
+ALTERACAO 22 — SISTEMA DE HOTBAR RESPONSIVO COM CONTROLE DE TAMANHO E LAYOUT
+
+   PROBLEMA: A hotbar de itens (updateHotbarHUD) usava tamanhos fixos
+   (55x55px slots, 28px fonte, gap 8px) e posicao centralizada fixa
+   (left:50%, transform:translateX(-50%)). Nao havia controle de tamanho
+   ou layout, impossibilitando ajustes visuais para diferentes numeros
+   de jogadores ou preferencias. Em modo multiplayer, as hotbars de
+   todos os jogadores ficavam lado a lado sem dimensionamento dinamico.
+
+   SOLUCAO: Implementado sistema de hotbar responsivo e escalavel com:
+
+     A) DIMENSIONAMENTO PORCENTUAL POR JOGADOR:
+        Cada hotbar ocupa (100% / numJogadoresVivos) * (hotbarSize/100)
+        da largura do container #hotbar-hud.
+        hotbarSize=100, 1 jogador → 100% * 1.0 = 100% (overflow, 25% visivel
+        com justify-content:center). hotbarSize=100, 4 jogadores → 25% cada,
+        totalizando 100%.
+
+     B) CONTROLES DE TAMANHO NO PAINEL:
+        Botoes [-] e [+] com valor numerico no #settings-panel.
+        Faixa: 50 a 200, incremento ±10. Afeta TODAS as hotbars.
+        Slots, fontes e barra de uso escalam proporcionalmente.
+
+     C) TOGGLE DE LAYOUT HORIZONTAL/VERTICAL:
+        Botao "Layout: Horizontal/Vertical" alterna entre:
+        - horizontal (padrao): flex row, centralizado, gap 8px
+        - vertical: flex column, canto inferior esquerdo, max-width 300px,
+          slots e fontes reduzidos fixos
+
+     D) RESET AUTOMATICO:
+        hotbarSize=100, hotbarLayout='horizontal' em loadMap() e restart().
+
+     E) CONFLITO ABILITY-HUD RESOLVIDO:
+        No layout vertical, #ability-hud e reposicionada para
+        top:50px (evita sobreposicao com hotbar em bottom:10px).
+
+   MUDANCAS NO CODIGO:
+
+     a) Game constructor — NOVAS PROPRIEDADES:
+        this.hotbarSize = 100 (inteiro, faixa 50-200, step 10)
+        this.hotbarLayout = 'horizontal' (string, 'horizontal'|'vertical')
+
+     b) Game.loadMap() e Game.restart() — RESET adicionado:
+        this.hotbarSize = 100; this.hotbarLayout = 'horizontal';
+
+     c) CSS — NOVAS REGRAS #hotbar-hud:
+        Estilo padrao horizontal (flex row, center, width:100%, padding 0 20px)
+        Classe .vertical (flex column, left:10px, max-width:300px, padding 0)
+
+     d) HTML — ELEMENTO #hotbar-hud LIMPO:
+        Style inline removido do elemento HTML. CSS transferido para <style>.
+
+     e) HTML — #settings-panel MODIFICADO:
+        Adicionados: div com botoes [-] [valor] [+], botao toggle de layout.
+        Ordem: Restart, Map Editor, Hotbar Size controls, Layout toggle,
+        Hotkey Config, Close.
+
+     f) updateHotbarHUD(game) — REFATORADO COMPLETAMENTE:
+        - Aplica classe CSS .vertical via classList.toggle()
+        - Reposiciona #ability-hud no layout vertical (top:50px)
+        - Calcula dimensoes dinamicas: slotSize, fontSizeSlot, fontSizeName,
+          barWidth, barHeight baseados em isVertical e game.hotbarSize
+        - Gera hotbar com width percentual por jogador (horizontal) ou 100%
+          (vertical)
+        - Mantem todo o design visual: cores, bordas, icones, highlight
+
+     g) DOMContentLoaded — NOVOS EVENT LISTENERS:
+        btn-hotbar-minus: decrementa hotbarSize (min 50), atualiza HUD
+        btn-hotbar-plus: incrementa hotbarSize (max 200), atualiza HUD
+        btn-hotbar-layout: toggle horizontal/vertical, atualiza HUD
+
+     h) settings-btn listener — MODIFICADO:
+        Ao abrir painel, sincroniza valor numerico e texto do botao
+        de layout com o estado atual de game.hotbarSize e game.hotbarLayout.
+
+   REGRAS DE DIMENSIONAMENTO:
+     slotSize = isVertical ? 36 : clamp(55 * hotbarSize/100, 24, 80)
+     fontSizeSlot = isVertical ? 20 : clamp(28 * hotbarSize/100, 14, 40)
+     fontSizeName = isVertical ? 16 : clamp(23 * hotbarSize/100, 10, 30)
+     barWidth = isVertical ? 40 : clamp(50 * hotbarSize/100, 20, 80)
+      barHeight = isVertical ? 6 : clamp(10 * hotbarSize/100, 4, 14)
+
+================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (MENSAGEM DE INTERACAO POR JOGADOR NA HOTBAR)
+================================================================================
+
+ALTERACAO 23 — MENSAGEM DE INTERACAO INDIVIDUAL POR JOGADOR NA HOTBAR
+
+   PROBLEMA: A mensagem de interacao era exibida em um unico elemento
+   global (#interaction-label) no centro-inferior da tela, igual para
+   todos os jogadores. Em modo multiplayer, nao era possivel saber qual
+   jogador estava perto de qual alvo, e a mensagem usava texto generico
+   ("Hold key to summon") em ingles, sem a tecla real configurada.
+
+   SOLUCAO: A mensagem de interacao agora e renderizada DENTRO da hotbar
+   de cada jogador, individualmente. Cada jogador ve sua propria mensagem
+   acima de sua hotbar (layout horizontal) ou ao lado direito (layout
+   vertical). O texto usa a tecla real configurada (p.keybinds.interact)
+   e esta em portugues com o nome do alvo.
+
+   MUDANCAS NO CODIGO:
+
+     a) updateHotbarHUD(game) — MODIFICADO:
+        - Adicionada funcao interna getInteractionText(p) que gera o
+          texto de interacao baseado em p.interactTarget, p.interactType,
+          p.interacting, e p.keybinds.interact
+        - Layout HORIZONTAL: a hotbar agora usa flex-direction:column
+          no div principal. A mensagem fica ACIMA dos slots, como uma
+          linha adicional no topo, alinhada com os slots
+        - Layout VERTICAL: a mensagem fica a DIREITA da coluna de slots,
+          centralizada verticalmente (flex-direction:row com align-items:center)
+        - Mensagem so aparece se o jogador tem um interactTarget;
+          se !p.interactTarget, nenhuma mensagem e renderizada
+
+     b) getInteractionText(p) — NOVA FUNCAO INTERNA:
+        - Extrai a tecla real: p.keybinds.interact.toUpperCase()
+        - Se p.interacting && p.interactType !== 'door': texto de progresso
+        - Senao: texto de prompt com a tecla e nome do alvo
+        - Tipos suportados: door, altar, artifact, shop, trash
+        - Para shop: usa Items[p.interactTarget.itemKey].name
+        - Para trash: usa texto fixo "vender o item equipado"
+
+     c) renderInteractionBar() — SIMPLIFICADO:
+        - Metodo esvaziado (mantido para compatibilidade, chamado em render())
+        - A logica antiga que atualizava #interaction-label foi removida
+
+     d) HTML — ELEMENTOS REMOVIDOS:
+        - #interaction-label: div removida do <body>
+        - #interaction-bar e #interaction-fill: divs removidas do <body>
+
+     e) CSS — REGRAS REMOVIDAS:
+        - #interaction-bar, #interaction-fill, #interaction-label:
+          todas as regras CSS removidas do bloco <style>
+
+     f) renderInteractionCircle() — SEM ALTERACOES:
+        - O circulo de progresso no Canvas continua funcionando normalmente
+
+   TEXTOS POR TIPO (PROMPT):
+     door:     "Pressione {TECLA} para abrir/fechar a Porta"
+     altar:    "Pressione {TECLA} para invocar no Altar"
+     artifact: "Pressione {TECLA} para coletar o Artefato"
+     shop:     "Pressione {TECLA} para comprar {NOME_DO_ITEM}"
+     trash:    "Pressione {TECLA} para vender o item equipado"
+
+   TEXTOS POR TIPO (PROGRESSO, enquanto segura a tecla):
+     altar:    "Invocando no Altar\u2026"
+     artifact: "Coletando Artefato\u2026"
+     shop:     "Comprando {NOME_DO_ITEM}\u2026"
+     trash:    "Vendendo item equipado\u2026"
+     (door nao tem progresso pois e toggle instantaneo)
+
+   ESTILO VISUAL DA MENSAGEM:
+     background: rgba(0,0,0,0.7); border-radius: 4px;
+     padding: 4px 8px; font-size: 11px;
+     font-family: 'Courier New', monospace; color: #fff;
+     pointer-events: none; white-space: nowrap;
+     Layout horizontal: text-align: center (alinhada com slots)
+     Layout vertical: sem text-align (alinhamento padrao left)
+
+================================================================================
+
+===============================================================================
 SECAO 52 — SISTEMA DE PORTA DUPLA SEMPRE VISIVEL
 ================================================================================
 
@@ -3143,37 +3310,425 @@ SECAO 54 — UI CIRCULAR DE PROGRESSO DE INTERACAO
 ================================================================================
 
 ================================================================================
+SECAO 55 — SISTEMA DE HOTBAR RESPONSIVO COM CONTROLE DE TAMANHO E LAYOUT
+================================================================================
+
+55.1 — CONCEITO
+
+   O sistema de hotbar do inventario foi refatorado para ser responsivo
+   (adapta-se ao tamanho da tela e numero de jogadores) e controlavel
+   pelo usuario (tamanho e layout configuraveis no painel de settings).
+
+   Cada hotbar de jogador ocupa uma fracao da largura do container
+   #hotbar-hud, calculada como:
+     largura% = (100% / numJogadoresVivos) * (hotbarSize / 100)
+
+   Exemplos (hotbarSize=100):
+     - 1 jogador: hotbar ocupa 100% do container (overflow; centralizada
+       via justify-content:center, ~25% visivel)
+     - 2 jogadores: cada hotbar ocupa 50%
+     - 3 jogadores: cada hotbar ocupa 33.3%
+     - 4 jogadores: cada hotbar ocupa 25%
+
+   O sistema suporta dois modos de layout:
+     'horizontal': hotbars lado a lado (flex row), centralizadas, padrao
+     'vertical': hotbars empilhadas (flex column), canto inferior esquerdo
+
+55.2 — ESTRUTURA DE DADOS
+
+   NOVAS PROPRIEDADES NA CLASSE Game:
+
+   Game.hotbarSize: Number (inteiro)
+     Valor padrao: 100
+     Significado: percentual do tamanho base de cada hotbar
+     Faixa: 50 a 200 (clampado nos botoes do painel)
+     Incremento: ±10 por clique nos botoes [-]/[+]
+     Afeta: largura da hotbar, tamanho dos slots, fontes, barra de uso
+     Reset: 100 em loadMap() e restart()
+
+   Game.hotbarLayout: String ('horizontal' | 'vertical')
+     Valor padrao: 'horizontal'
+     Significado: modo de disposicao das hotbars
+     'horizontal': flex row, justify-content center, width 100%
+     'vertical': flex column, align-items flex-start, max-width 300px
+     Alternancia: botao toggle no painel de settings
+     Reset: 'horizontal' em loadMap() e restart()
+
+55.3 — DIMENSIONAMENTO (FORMULAS)
+
+   VARIAVEIS DE ENTRADA:
+     numPlayers = game.players.filter(p => p.alive).length
+     isVertical = (game.hotbarLayout === 'vertical')
+
+   DIMENSOES HORIZONTAIS (dinamicas, proporcionais a hotbarSize):
+     slotSize      = clamp(55 * hotbarSize / 100, 24, 80) px
+     fontSizeSlot  = clamp(28 * hotbarSize / 100, 14, 40) px
+     fontSizeName  = clamp(23 * hotbarSize / 100, 10, 30) px
+     barWidth      = clamp(50 * hotbarSize / 100, 20, 80) px
+     barHeight     = clamp(10 * hotbarSize / 100, 4, 14) px
+     hotbarWidth%  = (100 / numPlayers) * (hotbarSize / 100)
+     slotGap        = 8 px
+
+   DIMENSOES VERTICAIS (fixas, reduzidas):
+     slotSize      = 36 px
+     fontSizeSlot  = 20 px
+     fontSizeName  = 16 px
+     barWidth      = 40 px
+     barHeight     = 6 px
+     hotbarWidth%  = 100% (ocupa toda largura do container vertical)
+     slotGap        = 4 px
+
+   A funcao clamp(valor, min, max) e implementada via:
+     Math.max(min, Math.min(max, Math.floor(valor)))
+
+55.4 — LAYOUT HORIZONTAL
+
+   CSS do container #hotbar-hud (estado padrao, sem classe .vertical):
+     position: absolute; bottom: 10px; left: 0; width: 100%;
+     display: flex; flex-direction: row; justify-content: center;
+     align-items: flex-end; gap: 8px; padding: 0 20px;
+     pointer-events: none; box-sizing: border-box;
+
+   Cada hotbar de jogador:
+     - Display: flex, row, gap dinamico, align-items center
+     - Width: hotbarWidthPercent% (calculado por JS)
+     - Nome abreviado (3 chars) + 5 slots + barra de uso
+     - Margin-right: 30px (espacamento entre hotbars de jogadores diferentes)
+
+   COMPORTAMENTO RESPONSIVO:
+     - O container ocupa 100% da tela (width:100%), herdando do
+       #game-container que ocupa 100vw × 100vh.
+     - As hotbars internas usam % relativa ao container, entao
+       redimensionam automaticamente com a janela.
+     - justify-content: center centraliza no caso de 1 jogador
+       (hotbar menor que 100% visivel).
+     - padding: 0 20px evita colar nas bordas da tela.
+
+55.5 — LAYOUT VERTICAL
+
+   CSS do container #hotbar-hud.vertical:
+     left: 10px; width: auto; max-width: 300px;
+     flex-direction: column; align-items: flex-start;
+     gap: 4px; padding: 0;
+
+   Cada hotbar de jogador:
+     - Width: 100% (do container, max 300px)
+     - Slots e fonte reduzidos (valores fixos, nao escalam)
+     - Sem margin-right (desnecessario em coluna)
+     - Empilhadas de cima para baixo (flex-direction: column)
+
+   CONFLITO COM #ability-hud:
+     Ambos os elementos usam position:absolute com bottom:10px; left:10px.
+     Para evitar sobreposicao no layout vertical, updateHotbarHUD()
+     reposiciona #ability-hud:
+       abilityHud.style.bottom = 'auto';
+       abilityHud.style.top = '50px';
+     No layout horizontal, restaura:
+       abilityHud.style.bottom = '10px';
+       abilityHud.style.top = 'auto';
+
+55.6 — CONTROLES NO PAINEL DE CONFIGURACOES
+
+   HTML adicionado ao #settings-panel (entre Map Editor e Hotkey Config):
+
+     DIV com display:flex contendo:
+       - Label "Hotbar Size:" (cor #aaa, 13px)
+       - Botao [-] (btn-hotbar-minus, 28×28px, fonte 16px)
+       - Span com valor numerico (hotbar-size-value, cor #4fc3f7, 16px)
+       - Botao [+] (btn-hotbar-plus, 28×28px, fonte 16px)
+
+     Botao toggle de layout (btn-hotbar-layout):
+       - Texto: "Layout: Horizontal" ou "Layout: Vertical"
+       - Classe: herda estilo padrao de botoes do painel
+
+   EVENT LISTENERS (DOMContentLoaded):
+
+     btn-hotbar-minus.click:
+       game.hotbarSize = Math.max(50, game.hotbarSize - 10)
+       Atualiza hotbar-size-value.textContent
+       Chama updateHotbarHUD(game)
+
+     btn-hotbar-plus.click:
+       game.hotbarSize = Math.min(200, game.hotbarSize + 10)
+       Atualiza hotbar-size-value.textContent
+       Chama updateHotbarHUD(game)
+
+     btn-hotbar-layout.click:
+       Alterna game.hotbarLayout entre 'horizontal' e 'vertical'
+       Atualiza texto do proprio botao
+       Chama updateHotbarHUD(game)
+
+   SINCRONIZACAO AO ABRIR PAINEL:
+     No listener do #settings-btn, apos buildHotkeyConfig():
+       Sincroniza hotbar-size-value com game.hotbarSize
+       Sincroniza btn-hotbar-layout com game.hotbarLayout
+
+55.7 — RESET E PERSISTENCIA
+
+   - NAO ha persistencia entre sessoes (nao usa localStorage).
+   - loadMap(): define hotbarSize = 100, hotbarLayout = 'horizontal'.
+   - restart(): define hotbarSize = 100, hotbarLayout = 'horizontal',
+     depois chama loadMap() (que tambem reseta, redundancia segura).
+   - Ao aplicar mapa via editor (applyMapFromEditor → loadMap): reset
+     automatico via loadMap().
+   - Ao iniciar novo jogo (start → loadMap): reset automatico.
+
+55.8 — ESCALABILIDADE
+
+   Para suportar mais jogadores (MAX_PLAYERS > 4):
+     - Nenhuma alteracao necessaria no codigo da hotbar.
+     - A formula width: (100/numPlayers) * (hotbarSize/100)% funciona
+       para qualquer numero de jogadores.
+     - Os tamanhos minimos de slot (24px) garantem que 8 jogadores com
+       hotbarSize=100 ainda sejam legiveis (8 * 100/8 * 1.0 = 100%,
+       cada hotbar com 12.5% da tela, slots ~27px com hotbarSize=50).
+     - Basta alterar MAX_PLAYERS = 8 e ajustar DEFAULT_KEYBINDS.
+
+   Para adicionar novo modo de layout (ex: 'grid'):
+     1. Adicionar valor ao CSS (#hotbar-hud.grid { ... })
+     2. Em updateHotbarHUD, adicionar condicao para o novo modo
+     3. No botao toggle, adicionar terceiro estado ou novo botao
+     4. Atualizar documentacao
+
+   Para alterar a faixa de tamanho:
+     Modificar os valores 50 e 200 nos event listeners dos botoes
+     [-] e [+]. Tambem ajustar os limites de clamp nas formulas
+     de slotSize, fontSizeSlot, etc.
+
+55.9 — CODIGO (PRINCIPAIS ALTERACOES)
+
+   CONSTRUCTOR Game (adicao apos baseTileResolved):
+     this.hotbarSize = 100;
+     this.hotbarLayout = 'horizontal';
+
+   LOADMAP (adicao apos showMessage('')):
+     this.hotbarSize = 100;
+     this.hotbarLayout = 'horizontal';
+
+   RESTART (adicao apos currency = 0):
+     this.hotbarSize = 100;
+     this.hotbarLayout = 'horizontal';
+
+   CSS (adicao antes de </style>):
+     #hotbar-hud { ... }           // estilo horizontal padrao
+     #hotbar-hud.vertical { ... }  // override para vertical
+
+   UPDATEHOTBARHUD (refatoracao completa):
+     - container.classList.toggle('vertical', ...)
+     - Reposiciona ability-hud no modo vertical
+     - Filtra jogadores vivos
+     - Calcula dimensoes (isVertical vs proporcional)
+     - Gera HTML com innerHTML (mesmo padrao visual)
+     - Aplica ao container
+
+   EVENT LISTENERS:
+     - btn-hotbar-minus: decremento com clamp minimo 50
+     - btn-hotbar-plus: incremento com clamp maximo 200
+     - btn-hotbar-layout: toggle horizontal/vertical
+      - settings-btn: sincroniza controles ao abrir painel
+
+================================================================================
+
+================================================================================
+SECAO 56 — MENSAGEM DE INTERACAO INDIVIDUAL POR JOGADOR NA HOTBAR
+================================================================================
+
+56.1 — CONCEITO
+
+   As mensagens de interacao ("Pressione W para invocar no Altar",
+   "Invocando no Altar...") agora sao exibidas individualmente na hotbar
+   de cada jogador, em vez de um unico elemento global centralizado.
+
+   Cada jogador ve sua PROPRIA mensagem de interacao:
+   - Acima dos slots da hotbar (layout horizontal)
+   - Ao lado direito da coluna de slots (layout vertical)
+   - A mensagem so aparece se o jogador tem um interactTarget
+   - O texto usa a tecla real configurada para aquele jogador
+     (p.keybinds.interact), ex: "Pressione W para..."
+   - Se o jogador estiver segurando a tecla (p.interacting),
+     mostra o texto de progresso em vez do prompt
+
+   Em modo multiplayer, jogadores diferentes podem ver mensagens
+   diferentes simultaneamente, cada um em sua propria hotbar.
+
+56.2 — ESTRUTURA DA FUNCAO getInteractionText
+
+   Funcao interna definida dentro de updateHotbarHUD(game):
+
+   function getInteractionText(p) {
+     if (!p.interactTarget) return null;
+     const key = p.keybinds.interact.toUpperCase();
+
+     // Textos de PROGRESSO (enquanto segura a tecla)
+     if (p.interacting && p.interactType !== 'door') {
+       switch (p.interactType) {
+         case 'altar':    return 'Invocando no Altar\u2026';
+         case 'artifact': return 'Coletando Artefato\u2026';
+         case 'shop':     return 'Comprando ' + Items[p.interactTarget.itemKey].name + '\u2026';
+         case 'trash':    return 'Vendendo item equipado\u2026';
+       }
+     }
+
+     // Textos de PROMPT (perto do alvo, sem segurar tecla)
+     switch (p.interactType) {
+       case 'door':     return 'Pressione ' + key + ' para abrir/fechar a Porta';
+       case 'altar':    return 'Pressione ' + key + ' para invocar no Altar';
+       case 'artifact': return 'Pressione ' + key + ' para coletar o Artefato';
+       case 'shop':     return 'Pressione ' + key + ' para comprar ' + Items[p.interactTarget.itemKey].name;
+       case 'trash':    return 'Pressione ' + key + ' para vender o item equipado';
+     }
+     return null;
+   }
+
+56.3 — LAYOUT HORIZONTAL (PADRAO)
+
+   Estrutura do HTML gerado para cada jogador:
+
+   <div style="flex-direction:column; gap:4px; align-items:center; ...">
+     <!-- MENSAGEM (se p.interactTarget) -->
+     <div style="background:rgba(0,0,0,0.7); border-radius:4px;
+          padding:4px 8px; font-size:11px; ...">
+       Pressione W para invocar no Altar
+     </div>
+     <!-- LINHA DA HOTBAR -->
+     <div style="display:flex; gap:...; align-items:center;">
+       [P2] [slot] [slot] [slot] [slot] [slot] [||||]
+     </div>
+   </div>
+
+   A mensagem fica ACIMA da linha de slots, centralizada
+   (text-align:center), com o mesmo fundo escuro semi-transparente.
+
+56.4 — LAYOUT VERTICAL
+
+   Estrutura do HTML gerado para cada jogador:
+
+   <div style="flex-direction:row; gap:8px; align-items:center; width:100%;">
+     <!-- COLUNA DA HOTBAR -->
+     <div style="flex-direction:column; gap:4px; align-items:center;">
+       [P2]
+       [slot]
+       [slot]
+       ...
+     </div>
+     <!-- MENSAGEM (se p.interactTarget), LADO DIREITO -->
+     <div style="background:rgba(0,0,0,0.7); border-radius:4px;
+          padding:4px 8px; font-size:11px; ...">
+       Pressione Shift para invocar no Altar
+     </div>
+   </div>
+
+   A mensagem fica a DIREITA da coluna de slots, centralizada
+   verticalmente (align-items:center no flex row).
+
+56.5 — ESTILO VISUAL DA MENSAGEM
+
+   - background: rgba(0,0,0,0.7) — fundo escuro semi-transparente
+   - border-radius: 4px — bordas suavemente arredondadas
+   - padding: 4px 8px — espacamento interno compacto
+   - font-size: 11px — texto pequeno, legivel
+   - font-family: 'Courier New', monospace — fonte do jogo
+   - color: #fff — texto branco
+   - pointer-events: none — nao interfere em cliques
+   - white-space: nowrap — evita quebra de linha
+
+   Layout horizontal: adicionalmente text-align: center
+   Layout vertical: sem text-align extra (alinhamento padrao)
+
+56.6 — ELEMENTOS REMOVIDOS
+
+   HTML REMOVIDO:
+     <div id="interaction-label"></div>
+     <div id="interaction-bar"><div id="interaction-fill"></div></div>
+
+   CSS REMOVIDO:
+     #interaction-bar { ... } e #interaction-fill { ... }
+     #interaction-label { ... }
+
+   MOTIVO: A mensagem agora e renderizada inline no innerHTML de
+   cada hotbar, tornando os elementos globais obsoletos.
+
+56.7 — FUNCAO renderInteractionBar SIMPLIFICADA
+
+   Antes: ~35 linhas de logica para atualizar #interaction-label
+   com prompts e textos de progresso globais.
+
+   Depois: metodo vazio (corpo {}). Mantido para compatibilidade
+   com a chamada existente em render(). Nao causa erro, nao faz nada.
+   Pode ser removido futuramente se a chamada em render() for removida.
+
+56.8 — ESCALABILIDADE
+
+   Para adicionar um novo tipo de interacao (ex: 'chest'):
+     1. Em Player.checkInteraction, definir p.interactTarget e
+        p.interactType = 'chest'
+     2. Em getInteractionText, adicionar case 'chest' nos dois blocos
+        (prompt e progresso)
+     3. Nenhuma alteracao necessaria no layout ou estrutura HTML
+
+   Para modificar o estilo da mensagem:
+     Alterar os valores inline no HTML gerado em updateHotbarHUD
+     (background, border-radius, padding, font-size, color)
+
+   Para suportar mais jogadores (MAX_PLAYERS > 4):
+     Nenhuma alteracao necessaria. A mensagem e gerada por jogador
+     independentemente do numero total de jogadores.
+
+================================================================================
+
+===============================================================================
 ATUALIZACAO DAS SECOES AFETADAS
 ================================================================================
 
-SECAO 3 (PIPELINE DE INICIALIZACAO) — NOTA:
-   Nenhuma alteracao na inicializacao. Novas propriedades nao foram
-   adicionadas ao constructor.
+SECAO 3 (PIPELINE DE INICIALIZACAO) — ATUALIZADA:
+   Novas propriedades Game.hotbarSize e Game.hotbarLayout adicionadas
+   ao constructor e resetadas em loadMap() e restart().
 
 SECAO 4 (FLUXO DO GAME LOOP) — ATUALIZADA:
-   Ordem de renderizacao atualizada:
-     - renderInteractionCircle (novo, apos renderParticles)
-     - renderInteractionBar: barra DOM substituida por circulo canvas
+   renderInteractionBar() agora e metodo vazio. A mensagem de interacao
+   foi movida para updateHotbarHUD, renderizada por jogador na hotbar.
 
-SECAO 5 (SISTEMA DE RENDERIZACAO) — ATUALIZADA:
-   Nova camada: circulo de progresso de interacao (canvas).
-   Desenhado sobre particulas, antes do night overlay.
+SECAO 5 (SISTEMA DE RENDERIZACAO) — NOTA:
+   Nenhuma alteracao no pipeline canvas. Mensagens sao DOM puro,
+   renderizadas via innerHTML em updateHotbarHUD.
 
 SECAO 6 (ELEMENTOS DOM) — ATUALIZADA:
-   #interaction-bar: agora permanentemente oculta (display:none).
-   Substituida pelo circulo Canvas renderInteractionCircle.
+   #hotbar-hud: style inline removido, CSS transferido para <style>
+   com suporte a classe .vertical para layout alternativo.
+   #settings-panel: novos elementos (btn-hotbar-minus, hotbar-size-value,
+   btn-hotbar-plus, btn-hotbar-layout).
+   #ability-hud: reposicionado dinamicamente no layout vertical
+   (top:50px) para evitar conflito com hotbar.
+   #interaction-label e #interaction-bar: ELEMENTOS REMOVIDOS do HTML.
+   Mensagem de interacao agora e inline em cada hotbar de jogador.
 
-SECAO 9 (SISTEMA DE PORTAS) — ATUALIZADA:
-   Portas duplas (grouped doors) agora renderizam DOOR_CLOSED_COLOR
-   em renderTiles(), igual portas simples.
-
-SECAO 14 (MONSTER ENTITY) — ATUALIZADA:
-   canSeePlayer(): range 250, cone Math.PI/3 * 0.85 (~51°).
+SECAO 21 (SISTEMA DE HUD) — ATUALIZADA:
+   updateHotbarHUD refatorado: suporte a dimensionamento dinamico
+   (hotbarSize) e dois layouts (horizontal/vertical). Slots e fontes
+   escalam proporcionalmente. Mensagem de interacao individual por
+   jogador renderizada ACIMA (horizontal) ou ao LADO (vertical) da hotbar.
 
 SECAO 22 (SISTEMA DE INTERACAO PLAYER) — ATUALIZADA:
-   UI de progresso substituida: barra DOM -> circulo canvas.
-   Label de texto mantido via #interaction-label.
+   UI de mensagem global substituida por mensagens individuais na hotbar
+   de cada jogador. Circulo de progresso Canvas (renderInteractionCircle)
+   mantido inalterado. renderInteractionBar simplificado para metodo vazio.
+
+SECAO 25 (SISTEMA DE DEBUG) — NOTA:
+   Nenhuma alteracao.
+
+SECAO 38 (FLUXO DE EVENTOS) — ATUALIZADA:
+   Novos cliques: btn-hotbar-minus, btn-hotbar-plus (ajustam tamanho)
+   e btn-hotbar-layout (alterna horizontal/vertical).
+   settings-btn modificado para sincronizar controles ao abrir painel.
+
+SECAO 45 (MULTIPLAYER) — ATUALIZADA:
+   Hotbar agora dimensiona dinamicamente por numero de jogadores vivos.
+   Formula: width% = (100/numPlayers) * (hotbarSize/100).
+   Layout vertical suporta ate 4+ jogadores empilhados.
+   MAX_PLAYERS expansivel sem alterar codigo da hotbar.
+   Mensagem de interacao individual por jogador: cada jogador ve sua
+   propria mensagem na sua propria hotbar.
 
 ================================================================================
 FIM DA DOCUMENTACAO
-=================================================================================
+================================================================================
