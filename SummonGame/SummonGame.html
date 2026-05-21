@@ -412,25 +412,25 @@ const PlayerClasses = {
 // DEFAULT MAP
 // ============================================================
 const DEFAULT_MAP = [
-'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO',
-'OCWCCFCOCCFCOFCCCCCACCCCUCOGGFGGGGGGO',
-'OCCUCCCdCCCCOCCCCCCMCCCCCCOGGGGGGUGGO',
-'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGGGO',
-'OOOOOOOOCCCCOCCCCCCCCCCCWCOGGGGGGGGGO',
-'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGGGO',
-'OCCUFCCOCCCCdCCCCCPCCCCCCCOGGGGGGGGGO',
-'OCCCCCCOCCCCOCCCCCCCCCCCCCOGGGGGGGGGO',
-'OCCCCCCOCCCCOOOOOOOdOOOOOOOGGGGGGGGGO',
-'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGGWGGGO',
-'OCCCCCCdCCCCCCCCCCCCCCCCCCdGGGGGWGGGO',
-'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGGWGGGO',
-'OOOOOOOOOOOOOOOOOdOOOOOOOOOGGGGGWGGGO',
-'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGWGGGO',
-'OGGGGGGGGGGGGGFGUGGGGGGGGGGGGGGGWGGGO',
-'OGGGGGGGGGGGGGGGGGGGGGGGWWWWWWWWWGGGO',
-'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
-'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
-'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'
+'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO',
+'OCWCCFCOCCFCOFCCCCCACCCCUCOGGFGGGGO',
+'OCCCUCCdCCCCOCCCCCCMCCCCCCOGGGGGUGO',
+'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGO',
+'OOOOOOOOCCCCOCCCCCCCCCCCWCOGGGGGGGO',
+'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGO',
+'OCCUFCCOCCCCdCCCCCPCCCCCCCOGGGGGGGO',
+'OCCCCCCOCCCCOCCCCCCCCCCCCCOGGGGGGGO',
+'OCCCCCCOCCCCOOOOOOOdOOOOOOOGGGGGGGO',
+'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGWGGO',
+'OCCCCCCdCCCCCCCCCCCCCCCCCCdGGGGWGGO',
+'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGWGGO',
+'OOOOOOOOOOOOOOOOOdOOOOOOOOOGGGGWGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGWGGO',
+'OGGGGGGGGGGGGGFGUGGGGGGGGGGGGGGWGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGWWWWWWWWGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'
 ];
 
 // ============================================================
@@ -726,13 +726,7 @@ class Player {
   render(ctx, game) {
     if (!this.alive) return;
     if (this.invulnTimer > 0 && Math.floor(this.invulnTimer * 10) % 2 === 0) return;
-    // Visibility check (same as monster)
-    if (!game.debugMode) {
-      const mtx = Math.floor(this.px / TILE_SIZE);
-      const mty = Math.floor(this.py / TILE_SIZE);
-      const vis = game.visibilityGrid[mty] && game.visibilityGrid[mty][mtx];
-      if (!vis || vis < 2) return;
-    }
+    if (!game.debugMode && !game.isPointVisible(this.px, this.py)) return;
     const sx = this.px - game.camX;
     const sy = this.py - game.camY;
     const playerColors = ['#4488ff', '#ff8844', '#44ff44', '#ff44ff'];
@@ -1087,20 +1081,10 @@ class MonsterEntity {
 
   render(ctx, game) {
     if (!this.alive) return;
-    if (!game.debugMode) {
-      const mtx = Math.floor(this.px / TILE_SIZE);
-      const mty = Math.floor(this.py / TILE_SIZE);
-      const vis = game.visibilityGrid[mty] && game.visibilityGrid[mty][mtx];
-      const oracleReveal = game.players.some(p => p.playerClass === 'oracle' && p.abilityActive);
-      if (!vis || vis < 2) {
-        if (!oracleReveal) {
-          return;
-        }
-      }
-    }
+    const oracleReveal = game.players.some(p => p.playerClass === 'oracle' && p.abilityActive);
+    if (!game.debugMode && !oracleReveal && !game.isPointVisible(this.px, this.py)) return;
     const rx = this.px - game.camX;
     const ry = this.py - game.camY;
-    const oracleReveal = game.players.some(p => p.playerClass === 'oracle' && p.abilityActive);
     if (oracleReveal) {
       ctx.fillStyle = 'rgba(255,255,0,0.25)';
       ctx.beginPath();
@@ -1200,6 +1184,8 @@ class Game {
     this.messageTimer = 0;
     this.interactDisplay = null;
     this.interactDuration = 0;
+    this.lightmapCanvas = null;
+    this.visibilityPolygons = [];
   }
 
   loadMap(mapData) {
@@ -1429,8 +1415,6 @@ class Game {
     this.checkGameState();
     // Camera
     this.updateCamera();
-    // Visibility
-    this.updateVisibility();
     // Update HUD
     updateHUD(this);
     updateAbilityHUD(this);
@@ -1627,6 +1611,125 @@ class Game {
     return null;
   }
 
+  // ============================================================
+  // RAYCAST LIGHTING SYSTEM
+  // ============================================================
+  castRay(px, py, dx, dy, maxDist) {
+    const step = 3;
+    let x = px, y = py;
+    let dist = 0;
+    while (dist < maxDist) {
+      dist += step;
+      x += dx * step;
+      y += dy * step;
+      const tx = Math.floor(x / TILE_SIZE);
+      const ty = Math.floor(y / TILE_SIZE);
+      if (tx < 0 || ty < 0 || tx >= this.mapWidth || ty >= this.mapHeight) break;
+      const tile = this.tiles[ty][tx];
+      if (tile === 'O' || tile === 'W') {
+        x -= dx * step;
+        y -= dy * step;
+        break;
+      }
+      if (tile === 'd') {
+        const door = this.doorEntities.find(d => d.tileX === tx && d.tileY === ty);
+        if (!door || door.solid) {
+          x -= dx * step;
+          y -= dy * step;
+          break;
+        }
+      }
+    }
+    return { x, y };
+  }
+
+  buildVisibilityPolygon(player) {
+    const maxDist = this.isNight ? 160 : 384;
+    const numRays = this.isNight ? 360 : 220;
+    const points = [];
+    for (let i = 0; i < numRays; i++) {
+      const angle = (i / numRays) * Math.PI * 2;
+      const dx = Math.cos(angle);
+      const dy = Math.sin(angle);
+      const hit = this.castRay(player.px, player.py, dx, dy, maxDist);
+      points.push(hit);
+    }
+    // Add slight jitter offset for softer edges
+    for (let i = 0; i < points.length; i++) {
+      const a = (i / numRays) * Math.PI * 2;
+      const jitter = 2 + Math.sin(i * 7.3) * 1.5;
+      points[i] = {
+        x: points[i].x + Math.cos(a) * jitter,
+        y: points[i].y + Math.sin(a) * jitter
+      };
+    }
+    return points;
+  }
+
+  buildLightmap() {
+    const W = this.canvas.width;
+    const H = this.canvas.height;
+    if (!this.lightmapCanvas || this.lightmapCanvas.width !== W || this.lightmapCanvas.height !== H) {
+      this.lightmapCanvas = document.createElement('canvas');
+      this.lightmapCanvas.width = W;
+      this.lightmapCanvas.height = H;
+    }
+    const lctx = this.lightmapCanvas.getContext('2d');
+    const nightAlpha = 0.55 + this.nightTransition * 0.15;
+    lctx.clearRect(0, 0, W, H);
+    // Fill entire map with darkness
+    lctx.fillStyle = 'rgba(0,0,0,' + nightAlpha + ')';
+    lctx.fillRect(0, 0, W, H);
+
+    this.visibilityPolygons = [];
+    for (const pl of this.players) {
+      if (!pl.alive) continue;
+      const points = this.buildVisibilityPolygon(pl);
+      if (points.length < 3) continue;
+      this.visibilityPolygons.push({ player: pl, points: points });
+      const sx = pl.px - this.camX;
+      const sy = pl.py - this.camY;
+      lctx.save();
+      lctx.beginPath();
+      lctx.moveTo(points[0].x - this.camX, points[0].y - this.camY);
+      for (let i = 1; i < points.length; i++) {
+        lctx.lineTo(points[i].x - this.camX, points[i].y - this.camY);
+      }
+      lctx.closePath();
+      lctx.clip();
+      // Erase darkness inside polygon using destination-out
+      lctx.globalCompositeOperation = 'destination-out';
+      const maxR = this.isNight ? 160 : 384;
+      const grad = lctx.createRadialGradient(sx, sy, 0, sx, sy, maxR);
+      grad.addColorStop(0, 'rgba(0,0,0,1)');
+      grad.addColorStop(0.25, 'rgba(0,0,0,0.85)');
+      grad.addColorStop(0.5, 'rgba(0,0,0,0.55)');
+      grad.addColorStop(0.75, 'rgba(0,0,0,0.2)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.0)');
+      lctx.fillStyle = grad;
+      lctx.fillRect(0, 0, W, H);
+      lctx.restore();
+    }
+    return this.lightmapCanvas;
+  }
+
+  isPointVisible(px, py) {
+    if (this.debugMode) return true;
+    for (const vp of this.visibilityPolygons) {
+      const pts = vp.points;
+      let inside = false;
+      for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+        const xi = pts[i].x, yi = pts[i].y;
+        const xj = pts[j].x, yj = pts[j].y;
+        if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
+          inside = !inside;
+        }
+      }
+      if (inside) return true;
+    }
+    return false;
+  }
+
   checkGameState() {
     if (this.activeMonsters.length === 0 || this.activeMonsters.every(m => !m.alive)) return;
     let allCollected = true;
@@ -1796,9 +1899,10 @@ class Game {
     this.renderArtifacts(ctx);
     // Draw roof overlay
     this.renderRoof(ctx);
-    // Fog overlay
-    this.renderFog(ctx);
-    // Doors on top of fog (always lit)
+    // Raycast lightmap (replaces old fog)
+    const lightmap = this.buildLightmap();
+    ctx.drawImage(lightmap, 0, 0);
+    // Doors on top of lightmap (always lit)
     this.renderDoors(ctx);
     // Draw entities on top of doors
     for (const p of this.players) p.render(ctx, this);
@@ -1938,23 +2042,29 @@ class Game {
 
   renderDoors(ctx) {
     const ts = TILE_SIZE;
+    const doorRange = 160; // same as night visibility range (5 tiles)
     for (const door of this.doorEntities) {
       const sx = door.tileX * ts - this.camX;
       const sy = door.tileY * ts - this.camY;
       if (sx + ts < -50 || sx > this.canvas.width + 50 || sy + ts < -50 || sy > this.canvas.height + 50) continue;
-      // Floor background
+      const dx = door.tileX * ts + ts / 2;
+      const dy = door.tileY * ts + ts / 2;
+      let near = false;
+      for (const pl of this.players) {
+        if (!pl.alive) continue;
+        const pdx = pl.px - dx;
+        const pdy = pl.py - dy;
+        if (Math.sqrt(pdx * pdx + pdy * pdy) < doorRange) { near = true; break; }
+      }
+      if (!near) continue;
       ctx.fillStyle = INTERIOR_COLOR;
       ctx.fillRect(sx, sy, ts, ts);
-      // Door marker
       if (door.animating) {
         ctx.fillStyle = DOOR_CLOSED_COLOR;
         ctx.fillRect(sx + ts * 0.1, sy + ts * 0.1, ts * 0.8 * door.animProgress, ts * 0.8);
       } else if (!door.open) {
         ctx.fillStyle = DOOR_CLOSED_COLOR;
         ctx.fillRect(sx + ts * 0.1, sy + ts * 0.1, ts * 0.8, ts * 0.8);
-        // Shine highlight
-        ctx.fillStyle = 'rgba(255,255,200,0.15)';
-        ctx.fillRect(sx, sy, ts, ts);
       }
     }
   }
@@ -2003,6 +2113,43 @@ class Game {
       ctx.fillText(p.name + ' Tile: ' + p.tileX + ',' + p.tileY + ' HP:' + p.hp + ' Class:' + p.playerClass, 10, yOff);
       yOff -= 15;
     }
+    // Raycast visibility polygons (debug)
+    for (const vp of this.visibilityPolygons) {
+      const pts = vp.points;
+      if (pts.length < 3) continue;
+      // Draw polygon outline
+      ctx.strokeStyle = 'rgba(255,255,0,0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x - this.camX, pts[0].y - this.camY);
+      for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].x - this.camX, pts[i].y - this.camY);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      // Draw ray endpoints
+      const step = Math.max(1, Math.floor(pts.length / 36));
+      ctx.fillStyle = 'rgba(255,255,0,0.5)';
+      for (let i = 0; i < pts.length; i += step) {
+        const rx = pts[i].x - this.camX;
+        const ry = pts[i].y - this.camY;
+        ctx.fillRect(rx - 1, ry - 1, 3, 3);
+      }
+      // Draw rays from player to endpoints
+      ctx.strokeStyle = 'rgba(255,255,0,0.12)';
+      ctx.lineWidth = 0.5;
+      const px = vp.player.px - this.camX;
+      const py = vp.player.py - this.camY;
+      for (let i = 0; i < pts.length; i += step) {
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(pts[i].x - this.camX, pts[i].y - this.camY);
+        ctx.stroke();
+      }
+    }
+    // Raycast perf info
+    const totalRays = this.visibilityPolygons.reduce((s, vp) => s + vp.points.length, 0);
+    ctx.fillText('Rays: ' + totalRays, 10, this.canvas.height - 30);
   }
 
   renderMessage(ctx) {

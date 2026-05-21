@@ -1848,3 +1848,144 @@ SECAO 45 - SISTEMA DE MULTIPLAYER LOCAL
     Escape cancela rebinding
 
 ================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (RAYCAST LIGHTING SYSTEM)
+================================================================================
+
+ALTERACAO 10 - SISTEMA DE ILUMINACAO DINAMICA POR RAYCAST
+
+  SUBSTITUICAO DO FOG OF WAR:
+    Sistema antigo: visibilityGrid[][] com valores 0/1/2 + renderFog()
+    com retangulos pretos semi-transparentes por tile. Iluminacao
+    baseada em grid, sem sombras continuas.
+
+    Sistema novo: raycasting radial 360 graus + lightmap canvas
+    com visibilidade poligonal continua. Sombras reais bloqueadas
+    por paredes e portas fechadas.
+
+  ARQUITETURA DO NOVO SISTEMA:
+    Game.castRay(px, py, dx, dy, maxDist):
+      Raycast DDA com step de 3 pixels
+      Avanca ate encontrar parede (O/W) ou porta fechada (d solid)
+      Retorna ponto de colisao {x, y} no espaco do mundo
+
+    Game.buildVisibilityPolygon(player):
+      Emite 220 raios (dia) ou 360 raios (noite) em circulo completo
+      Alcance: 384px (dia) / 160px (noite)
+      Aplica jitter (2px + senoidal) nos pontos finais para bordas suaves
+      Retorna array de pontos {x, y} formando poligono de visibilidade
+
+    Game.buildLightmap():
+      Canvas offscreen (lightmapCanvas) do tamanho do canvas do jogo
+      Preenche com escuridao (alpha variavel por dia/noite)
+      Para cada jogador vivo:
+        - Clip pela visibilidade poligonal (ctx.clip())
+        - Gradiente radial: transparente no centro, escuro nas bordas
+        - Glow suave ao redor do jogador (destination-out)
+      Retorna o canvas para ser desenhado sobre o jogo
+
+    Game.isPointVisible(px, py):
+      Point-in-polygon test (even-odd rule) contra todos os poligonos
+      de visibilidade dos jogadores vivos
+      Retorna true se (px, py) esta dentro de qualquer poligono
+
+  RENDER PIPELINE (NOVA ORDEM):
+    1. Background + Tiles + Artifacts + Roof
+    2. buildLightmap() -> drawImage sobre o canvas
+    3. renderDoors() (sempre visiveis, sobre a escuridao)
+    4. Players + Monsters + Particles (com isPointVisible check)
+    5. renderNight() (vignette atmosferico)
+    6. renderDebug() (raios, poligonos, FPS)
+
+  MATEMATICA DOS RAYCASTS:
+    Ray: (px + cos(angle)*t, py + sin(angle)*t) para t em [0, maxDist]
+    Step: 3 pixels por iteracao
+    Tile check: floor(x/TILE_SIZE), floor(y/TILE_SIZE)
+    Bloqueio: tile === 'O' || tile === 'W' || (tile === 'd' && door.solid)
+    Ao detectar bloqueio: retrocede um step (x -= dx*step, y -= dy*step)
+    Resultado: coordenadas continuas do ponto de impacto
+
+  POINT-IN-POLYGON (EVEN-ODD RULE):
+    Para cada aresta (pts[i], pts[j]) do poligono:
+      Se a aresta cruza a linha horizontal em py:
+        intersecao = (xj - xi) * (py - yi) / (yj - yi) + xi
+        Se px < intersecao: inverte flag inside
+    Otimizacao: O(N) por verificacao, N = 220-360 pontos
+
+  PERFORMANCE:
+    Por frame (1 jogador, dia):
+      - 220 raycasts * ~64 steps = ~14,080 tile checks
+      - buildLightmap: 1 clearRect + 1 fillRect + clip + gradiente
+      - isPointVisible: N/A (nao chamado se jogador visivel no proprio poligono)
+    Por frame (2 jogadores, dia):
+      - 440 raycasts * ~64 steps = ~28,160 tile checks
+    Por frame (1 jogador, noite):
+      - 360 raycasts * ~27 steps = ~9,720 tile checks
+    LightmapCache: canvas offscreen reutilizado, recriado apenas se
+    dimensoes mudarem (mudanca de mapa)
+
+  OTIMIZACOES:
+    - Step de 3px reduz ~3x comparado a step de 1px
+    - Canvas offscreen reutilizado entre frames
+    - Menos raios durante o dia (220 vs 360)
+    - Raycasts sao puramente locais, sem alocacao de arrays grandes
+    - isPointVisible so chamado para entidades (monstros, players)
+      que estao proximas da camera
+
+  DETALHES DO LIGHTMAP:
+    nightAlpha = 0.88 + nightTransition * 0.07
+      Dia:   alpha = 0.88 (escuridao base)
+      Noite: alpha = 0.95 (mais escuro)
+    Gradiente radial por jogador:
+      0%:     transparente (centro iluminado)
+      35%:    transparente (area bem iluminada)
+      70%:    alpha 0.4 (transicao)
+      100%:   alpha 0.88 (borda escura)
+    Glow: destination-out com gradiente pequeno (12% do raio max)
+      Suaviza a transicao no centro do poligono
+
+  ENTITY VISIBILITY:
+    MonsterEntity.render(): retorna cedo se !isPointVisible(px, py)
+      Exceto: debug mode OU Oracle com Reveal Monster ativo
+    Player.render(): retorna cedo se !isPointVisible(px, py)
+      Exceto: debug mode
+    Oracle Reveal: mostra monstro com highlight amarelo mesmo
+      fora da area iluminada
+
+  MULTIPLAYER LIGHTING:
+    buildLightmap() processa TODOS os jogadores vivos
+    Cada jogador contribui com seu poligono de visibilidade
+    isPointVisible() verifica TODOS os poligonos (uniao)
+    Resultado: area iluminada = uniao das visoes de todos
+
+  DEBUG MODE (F1):
+    Desenha outline do poligono de visibilidade (amarelo semi-transp)
+    Pontos de colisao dos raycasts (quadrados amarelos a cada ~10 raios)
+    Linhas dos raycasts do jogador ate os endpoints
+    Contador de raios totais no canto inferior
+    isPointVisible sempre retorna true (mapa totalmente visivel)
+
+  IMPACTO NOS SISTEMAS EXISTENTES:
+    updateVisibility(): removido do game loop (nao mais necessario)
+      Metodo mantido no codigo para referencia, mas nao chamado
+    renderFog(): removido do render pipeline
+      Substituido por buildLightmap() + ctx.drawImage()
+    visibilityGrid[][]: ainda inicializado em loadMap(), nao mais usado
+      Mantido para compatibilidade com codigo legado
+      isPointVisible() substitui todas as consultas de visibilidade
+    MonsterEntity.hasLineOfSight(): mantido para deteccao da IA
+      (independente do sistema de iluminacao visual)
+
+  COMPATIBILIDADE MANTIDA:
+    IA do monstro (FSM Patrol/Chase/Search): inalterada
+    Portas: renderizadas sobre o lightmap (sempre visiveis)
+    Artefatos: coletaveis normalmente
+    Altar: funcionalidade mantida
+    Classes (Oracle/Scout): Oracle revela monstro via isPointVisible bypass
+    Multiplayer: uniao de visoes mantida
+    Camera/zoom: lightmap alinhado ao mundo via ctx transform
+    Particulas: renderizadas sobre o lightmap
+    Roof system: anterior ao lightmap, coberto pela escuridao
+
+================================================================================
