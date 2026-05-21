@@ -1,0 +1,373 @@
+================================================================================
+MEGA PROMPT - ADICIONAR NOVOS ITENS, SISTEMA DE RARIDADES E DISPLAY DE SHOP
+================================================================================
+
+ARQUIVO ALVO: SummonGame.html (mesmo diretorio deste prompt)
+DOCUMENTACAO: Documentacao_Completa.txt (mesmo diretorio deste prompt)
+
+INSTRUCOES GLOBAIS:
+- Faca TODAS as alteracoes necessarias no arquivo SummonGame.html.
+- NAO crie nenhum arquivo novo (NÃO crie .css, .js, .py, .java, .cpp, .c, ou qualquer outro arquivo separado). Tudo deve permanecer no unico arquivo SummonGame.html.
+- NAO crie documentacao adicional, READMEs, ou arquivos de configuracao.
+- Ao finalizar cada alteracao no codigo HTML, ATUALIZE a Documentacao_Completa.txt com as mudancas feitas, de forma profissional, limpa e bem estruturada (secao CHANGELOG + novas secoes SECAO conforme o padrao ja existente no documento).
+- Siga o estilo de codigo existente: JavaScript puro sem dependencias, Canvas 2D, sem frameworks, sem TypeScript.
+- Mantenha a compatibilidade com o sistema existente (multiplayer, classes, economia, shops, traps, etc.).
+- O prompt deve ser executado COMPLETAMENTE, sem pular etapas.
+- Implemente TUDO agora, sem deixar para depois, sem "TODO" ou "FUTURE WORK".
+
+================================================================================
+1. DEFINICAO DOS NOVOS ITENS (Objeto Items)
+================================================================================
+
+Modifique o objeto Items para incluir TODOS os itens abaixo. A estrutura de cada item deve seguir o padrao existente (name, price, desc, icon, color) mas com NOVOS CAMPOS:
+
+Cada item agora deve ter:
+- name: string (nome em ingles, igual aos existentes)
+- price: number (preco em coins)
+- desc: string (descricao curta)
+- icon: string (caractere unicode ou letra para exibir no inventario/shop)
+- color: string (cor CSS hex)
+- rarity: string ('common' | 'rare' | 'super_rare')
+- type: string ('trap' | 'consumable')
+- giveOnRoundEnd: boolean (true = pode ser dado como recompensa ao fim do round, false = nao)
+- E campos especificos por tipo:
+  * Se type === 'trap': stun (number), trapColor (string), trapRadius (number)
+  * Se type === 'consumable': effect (object com propriedades especificas)
+
+ITENS COMPLETOS:
+
+1. beartrap (JA EXISTE - apenas ATUALIZAR):
+   name: 'Bear Trap', price: 5, desc: 'Stuns monster for 1 second',
+   icon: 'T', color: '#888', rarity: 'common', type: 'trap',
+   giveOnRoundEnd: true,
+   stun: 1, trapColor: '#666', trapRadius: 12
+
+2. landmine (JA EXISTE - apenas ATUALIZAR):
+   name: 'Land Mine', price: 10, desc: 'Stuns monster for 3 seconds',
+   icon: 'M', color: '#c44', rarity: 'rare', type: 'trap',
+   giveOnRoundEnd: true,
+   stun: 3, trapColor: '#a22', trapRadius: 12
+
+3. crucifix (JA EXISTE - apenas ATUALIZAR):
+   name: 'Crucifix', price: 15, desc: 'Stuns monster for 7 seconds',
+   icon: '+', color: '#cc0', rarity: 'super_rare', type: 'trap',
+   giveOnRoundEnd: true,
+   stun: 7, trapColor: '#aa0', trapRadius: 12
+
+4. bloxy_cola (NOVO):
+   name: 'Bloxy Cola', price: 5, desc: 'Increases speed by 1.25x for 5 seconds',
+   icon: 'C', color: '#ff4444', rarity: 'common', type: 'consumable',
+   giveOnRoundEnd: true,
+   effect: { type: 'speed', multiplier: 1.25, duration: 5 }
+
+5. cake (NOVO):
+   name: 'Cake', price: 15, desc: 'Grants 5 seconds of invulnerability',
+   icon: 'K', color: '#ff88ff', rarity: 'super_rare', type: 'consumable',
+   giveOnRoundEnd: true,
+   effect: { type: 'invuln', duration: 5 }
+
+6. witches_brew (NOVO):
+   name: 'Witches Brew', price: 10, desc: 'Increases speed by 1.6x for 8 seconds',
+   icon: 'B', color: '#44ff44', rarity: 'rare', type: 'consumable',
+   giveOnRoundEnd: true,
+   effect: { type: 'speed', multiplier: 1.6, duration: 8 }
+
+7. medkit (NOVO):
+   name: 'Medkit', price: 10, desc: 'Heals 50 HP (cannot exceed max HP)',
+   icon: '+', color: '#ff4444', rarity: 'rare', type: 'consumable',
+   giveOnRoundEnd: false,
+   effect: { type: 'heal', amount: 50 }
+
+8. apple (NOVO):
+   name: 'Apple', price: 7, desc: 'Heals 10 HP (cannot exceed max HP)',
+   icon: 'A', color: '#44ff44', rarity: 'common', type: 'consumable',
+   giveOnRoundEnd: false,
+   effect: { type: 'heal', amount: 10 }
+
+================================================================================
+2. SISTEMA DE RARIDADES E RECOMPENSA DE ROUND
+================================================================================
+
+2.1 - DEFINICAO DE RARIDADES
+Crie um objeto Rarities (no mesmo padrao de Items e PlayerClasses):
+Rarities = {
+  common:    { name: 'Common', dropChance: 0.45 },
+  rare:      { name: 'Rare',   dropChance: 0.35 },
+  super_rare: { name: 'Super Rare', dropChance: 0.20 }
+}
+
+2.2 - FUNCAO weightedRandomRarity()
+Crie uma funcao que seleciona uma raridade baseada nas chances:
+- Soma total: 0.45 + 0.35 + 0.20 = 1.0 (100%)
+- random * 1.0, subtrai pesos: se <= 0 retorna common, senao subtrai rare, se <= 0 retorna rare, senao retorna super_rare
+- Similar a weightedRandom() ja existente para tipos de monstro
+
+2.3 - RECOMPENSA DE ROUND (modificar checkGameState)
+No bloco onde o jogador recebe item ao completar o round (dentro de checkGameState, onde esta o codigo "Round reward: random item to all players"):
+
+O sistema ATUAL faz:
+  const keys = Object.keys(Items);
+  const key = keys[Math.floor(Math.random() * keys.length)];
+
+SUBSTITUIR por:
+  1. Filtrar Items para pegar apenas itens com giveOnRoundEnd === true
+  2. Escolher uma raridade usando weightedRandomRarity()
+  3. Filtrar os itens elegiveis (giveOnRoundEnd === true) que tem aquela raridade
+  4. Se nao houver itens na raridade sorteada, fazer fallback: tentar raridade imediatamente inferior (rare -> common, super_rare -> rare -> common)
+  5. Se ainda assim nao houver itens, pegar qualquer item elegivel
+  6. Escolher um item aleatorio da lista filtrada
+  7. Dar esse item ao jogador (como ja faz: p.addToInventory(key))
+
+Mensagem de recompensa deve incluir a raridade:
+  "P1 received Bear Trap (Common)!"
+
+2.4 - SISTEMA DE GEM (CRIAR FUNCAO getRandomItemByRarity)
+Crie uma funcao utilitaria:
+  function getRandomItemByRarity(game)
+  - Sorteia raridade com weightedRandomRarity()
+  - Filtra itens elegiveis da raridade sorteada
+  - Se lista vazia, fallback para proxima raridade inferior
+  - Retorna a key do item sorteado (string)
+
+================================================================================
+3. SISTEMA DE USO DE ITENS CONSUMIVEIS
+================================================================================
+
+3.1 - MODIFICAR Game.useItem(player)
+Atualmente useItem() so funciona para traps (itens com .stun). Precisa ser expandido para consumiveis.
+
+Nova logica de useItem():
+  1. Pega o item equipado do player (player.getEquippedItem())
+  2. Se nao tem item, retorna
+  3. Verifica o Items[item].type:
+     
+     a) Se type === 'trap' (comportamento ATUAL, inalterado):
+        - Cria trap na posicao do player com os parametros do item
+        - Remove item do inventario
+        - Mostra mensagem "Player placed ItemName"
+     
+     b) Se type === 'consumable':
+        - Aplica o efeito (veja 3.2)
+        - Remove item do inventario (player.removeEquipped())
+        - Mostra mensagem "Player used ItemName"
+
+3.2 - APLICACAO DE EFEITOS (criar metodo applyItemEffect)
+Crie Game.applyItemEffect(player, itemKey):
+
+  const effect = Items[itemKey].effect;
+  switch (effect.type):
+  
+    case 'speed':
+      - Se player.speedItemTimer && player.speedItemTimer > 0 E a duracao do novo efeito for MAIOR que o tempo restante do atual OU o multiplicador for MAIOR: substitui (ou renova)
+      - REGRA: "maior valor vence" - se o novo item tem multiplicador maior que o atual, substitui. Se tem multiplicador igual ou menor, mantem o atual (sobrescreve com o novo se quiser).
+      - Simplificando: sempre aplica o novo efeito (sobrescreve qualquer speed boost anterior de item)
+      - Salva o speed original do player antes de modificar: let originalSpeed = player.baseSpeed
+      - player.speed = player.baseSpeed * effect.multiplier
+      - Cria/Armazena timers:
+        * player.speedItemTimer = effect.duration (temporizador que decrementa com dt)
+        * player.speedItemMult = effect.multiplier
+      - IMPORTANTE: NAO afeta a habilidade Scout (scout tem sua propria logica de speed). O item speed e o scout speed sao independentes. A regra "maior valor vence" se aplica quando ambos estao ativos: Math.max(player.baseSpeed * scoutMult (se ativo), player.baseSpeed * itemMult (se ativo)). Ou simplificando: a cada frame, recalcula speed baseado nos modificadores ativos.
+      - Em Player.update(), a cada frame, recalcular speed assim:
+        let spd = baseSpeed;
+        if (abilityActive && playerClass === 'scout') spd *= 1.5;
+        if (speedItemTimer > 0) spd = Math.max(spd, baseSpeed * speedItemMult); // "maior valor vence"
+        this.speed = spd;
+        - Decrementar speedItemTimer com dt, se <= 0: speedItemTimer = 0 (volta ao normal no proximo frame)
+      
+    case 'invuln':
+      - Define player.invulnTimer = effect.duration (5 segundos)
+      - NAO acumula (se ja esta invulneravel, simplesmente reseta o timer para 5s)
+      - Mensagem: "Player is now invulnerable for X seconds!"
+    
+    case 'heal':
+      - player.hp = Math.min(player.maxHp, player.hp + effect.amount)
+      - Mostra mensagem: "Player healed X HP!"
+
+3.3 - NOVAS PROPRIEDADES NO PLAYER
+Adicionar no construtor de Player:
+  this.speedItemTimer = 0;
+  this.speedItemMult = 1;
+
+Resetar em loadMap() (quando cria novo player): ja vai ser resetado pelo construtor.
+
+3.4 - REMOCAO DE ITEM
+A remocao ja existe: player.removeEquiped(). Para consumiveis, chamar player.removeEquipped() apos usar.
+
+================================================================================
+4. DISPLAY DE NOME + PRECO NO SHOP (CANVAS)
+================================================================================
+
+4.1 - MODIFICAR Game.renderShops(ctx)
+Atualmente renderShops() desenha: pedestal + icone + preco em cima.
+
+ADICIONAR: um tile adicional a DIREITA de cada tile S (shop) que exibe o nome do item e o preco.
+
+DETALHES:
+- Desenhar um retangulo/tile ao lado direito de cada shop (x = shop.x + 1, y = shop.y)
+- Altura: TILE_SIZE (mesmo de um tile)
+- Largura: suficiente para caber o texto (calcular dinamicamente ou usar valor fixo como TILE_SIZE * 2.5)
+- Fundo: rgba(0,0,0,0.75) com borda 1px rgba(255,255,255,0.3)
+- Conteudo:
+  * Linha 1: nome do item (fonte 9px, cor = it.color)
+  * Linha 2: preco em coins + raridade (fonte 8px, ex: "10g [Rare]")
+- Posicao: x = (shop.x + 1) * TILE_SIZE + TILE_SIZE/2 - camX, y = shop.y * TILE_SIZE + TILE_SIZE/2 - camY
+- Corner radius: 3px
+- O tile de nome+preco so aparece se o shop nao estiver sold (nao vendido) e se o monstro estiver morto (mesma condicao do renderShops atual)
+- Deve ser desenhado ANTES dos players/monsters, mas DEPOIS do lightmap (para ficar visivel)
+- IMPORTANTE: o nome do item no tile deve ser o nome real do item (Items[shop.itemKey].name), NAO o itemKey
+
+4.2 - Ajuste de posicao:
+O tile deve ser desenhado considerando as coordenadas do mundo convertidas para tela (subtraindo camX/camY).
+Incluir frustum culling (pular se fora da tela com margem).
+
+================================================================================
+5. ACOES ADICIONAIS NO CHECKGAMESTATE
+================================================================================
+
+5.1 - PARA TODOS OS JOGADORES:
+Quando o round termina (monstro morre, artefatos todos coletados), limpar efeitos de item ativos nos jogadores:
+  for (const p of this.players) {
+    p.speedItemTimer = 0;
+    p.speedItemMult = 1;
+    // Recalcular speed normal (sem item boost)
+    let spd = p.baseSpeed;
+    if (p.abilityActive && p.playerClass === 'scout') spd *= 1.5;
+    p.speed = spd;
+  }
+
+Isso evita que efeitos de item persistam entre rounds.
+
+================================================================================
+6. INTERACAO MENSAGEM DE SHOP
+================================================================================
+
+6.1 - ATUALIZAR getInteractionText (dentro de updateHotbarHUD)
+O texto de prompt para shop ja existe:
+  "Pressione {key} para comprar {nome_do_item}"
+Isso ja esta implementado. Nao precisa modificar.
+
+Mas verifique se esta funcionando corretamente com os novos itens (deve funcionar automaticamente pois usa Items[].name).
+
+================================================================================
+7. SISTEMA DE ECONOMIA (SEM ALTERACOES)
+================================================================================
+
+- Os precos ja estao definidos em cada item
+- A funcao buyFromShop ja usa Items[].price
+- A funcao sellItem ja usa Items[].price
+- Nada precisa ser alterado na economia basica
+
+================================================================================
+8. VERIFICACOES E CONSISTENCIA
+================================================================================
+
+8.1 - Player.update() - RECALCULAR SPEED A CADA FRAME:
+Adicionar a logica de calculo de speed por frame:
+  // Calcular speed base + modificadores
+  let spd = this.baseSpeed;
+  if (this.abilityActive && this.playerClass === 'scout') spd *= 1.5;
+  if (this.speedItemTimer > 0) {
+    this.speedItemTimer -= dt;
+    if (this.speedItemTimer <= 0) {
+      this.speedItemTimer = 0;
+      this.speedItemMult = 1;
+    } else {
+      // "Maior valor vence"
+      spd = Math.max(spd, this.baseSpeed * this.speedItemMult);
+    }
+  }
+  this.speed = spd;
+
+IMPORTANTE: isso substitui o codigo atual que faz:
+  if (this.abilityActive) {
+    this.abilityTimer -= dt;
+    if (this.abilityTimer <= 0) {
+      this.abilityActive = false;
+      if (this.playerClass === 'scout') this.speed = this.baseSpeed;
+    }
+  }
+
+Mover a logica de reset do scout para dentro do novo bloco de calculo, ou manter separado mas garantindo que funcione corretamente.
+
+MELHOR ABORDAGEM: manter o codigo existente do scout (abilityActive/abilityTimer) que reseta a velocidade quando expira, e ADICIONAR o novo bloco DEPOIS que recalcula o speed final:
+  
+  // Manter codigo existente do scout:
+  if (this.abilityActive) {
+    this.abilityTimer -= dt;
+    if (this.abilityTimer <= 0) {
+      this.abilityActive = false;
+      // NOTA: nao resetar speed aqui, deixar o calculo abaixo resolver
+    }
+  }
+  
+  // NOVO: recalcular speed
+  let finalSpeed = this.baseSpeed;
+  if (this.abilityActive && this.playerClass === 'scout') finalSpeed *= 1.5;
+  if (this.speedItemTimer > 0) {
+    this.speedItemTimer -= dt;
+    if (this.speedItemTimer <= 0) {
+      this.speedItemTimer = 0;
+      this.speedItemMult = 1;
+    } else {
+      finalSpeed = Math.max(finalSpeed, this.baseSpeed * this.speedItemMult);
+    }
+  }
+  this.speed = finalSpeed;
+
+8.2 - INIT SHOPS:
+O initShops() atual ja faz:
+  const keys = Object.keys(Items);
+  const key = keys[Math.floor(Math.random() * keys.length)];
+Isso continua funcionando. Nao precisa alterar (todos os itens, incluindo os novos, podem aparecer nas lojas).
+
+8.3 - RESTOCK SHOPS:
+Mesma logica. Nao precisa alterar.
+
+================================================================================
+9. TESTE DE CONSISTENCIA
+================================================================================
+
+Apos implementar tudo, verifique:
+- Itens consumiveis aparecem nas lojas (initShops, restockShops)
+- Itens com giveOnRoundEnd=false (medkit, apple) NAO sao dados como recompensa de round
+- Itens com giveOnRoundEnd=true (todos os outros) podem ser dados como recompensa
+- Ao usar Bloxy Cola ou Witches Brew: speed aumenta, timer aparece
+- Ao usar Cake: invulnTimer = 5 (personagem piscando)
+- Ao usar Medkit/Apple: HP aumenta, sem exceder maxHp
+- Round reward usa raridade para sortear item
+- Tela de shop mostra placa com nome+preco ao lado direito
+- getInteractionText continua funcionando: "Pressione E para comprar Medkit"
+
+================================================================================
+10. DOCUMENTACAO
+================================================================================
+
+Ao finalizar TODAS as alteracoes no SummonGame.html, abrir Documentacao_Completa.txt e adicionar ao final:
+
+10.1 - NOVA ENTRADA NO CHANGELOG:
+  CHANGELOG - MAIO 2026 (NOVOS ITENS, RARIDADES, DISPLAY DE SHOP)
+  
+  Descrever:
+  - Quais itens foram adicionados (Bloxy Cola, Cake, Witches Brew, Medkit, Apple)
+  - Quais itens foram modificados (Bear Trap, Land Mine, Crucifix com raridades e precos)
+  - Sistema de raridades (common 45%, rare 35%, super_rare 20%)
+  - Sistema de recompensa de round baseado em raridade
+  - Sistema de uso de consumiveis (hold R, efeitos: speed, invuln, heal)
+  - Display de nome+preco no shop (tile a direita)
+  - Regra "maior valor vence" para speed items + scout
+  - Cake: invulnerabilidade 5s, reset ao usar novamente
+
+10.2 - NOVA SECAO (ex: SECAO 58 - SISTEMA DE ITENS E RARIDADES):
+  Documentar:
+  - Estrutura do objeto Items com novos campos (rarity, type, giveOnRoundEnd, effect)
+  - Estrutura do objeto Rarities
+  - Funcao weightedRandomRarity()
+  - Funcao getRandomItemByRarity()
+  - Fluxo de uso de consumiveis (hold -> useItem -> applyItemEffect)
+  - Display de shop (posicao, estilo, conteudo)
+  - Regra de speed: maior valor vence
+  - Propriedades do Player: speedItemTimer, speedItemMult
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================
