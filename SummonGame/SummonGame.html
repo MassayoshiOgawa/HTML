@@ -1328,11 +1328,8 @@ class Game {
     this.altarPos = mapData.altarPos;
     this.playerSpawn = mapData.playerSpawn || { x: 1, y: 1 };
     this.monsterSpawn = mapData.monsterSpawn || mapData.altarPos || { x: 2, y: 2 };
-    // Spawn artifacts
-    for (const pos of mapData.artifacts) {
-      this.artifactEntities.push(new ArtifactEntity(pos.x, pos.y));
-    }
-    // Collect all F tile positions for dynamic spawn
+    this.artifactEntities = [];
+    // Collect all F tile positions for dynamic spawn (artifacts spawn on monster summon)
     this.artifactFPoints = [];
     for (let y = 0; y < this.mapHeight; y++) {
       for (let x = 0; x < this.mapWidth; x++) {
@@ -1343,8 +1340,6 @@ class Game {
     this.artifactCount = this.difficulty === 'easy' ? 3 : (this.difficulty === 'medium' ? 4 : 5);
     if (this.artifactFPoints.length < this.artifactCount) this.artifactCount = this.artifactFPoints.length;
     if (this.artifactCount === 0) this.artifactCount = 3;
-    // Ensure we have the right number of artifact entities
-    this.selectArtifactsForRound();
     // Visibility
     this.visibilityGrid = [];
     this.visibilityAge = [];
@@ -2003,7 +1998,6 @@ class Game {
         }
       }
       this.restockShops();
-      this.selectArtifactsForRound();
     }
   }
 
@@ -2034,6 +2028,7 @@ class Game {
     this.monsterTypeMessage = mt.name + ' heard you. Run. (Round ' + this.roundNumber + ' +' + speedBonus + '% spd)';
     this.monsterTypeMsgTimer = 3.0;
     const spd = this.getMonsterSpeed();
+    this.selectArtifactsForRound();
     for (let i = 0; i < mt.spawnCount; i++) {
       const ox = i > 0 ? (Math.random() - 0.5) * 2 : 0;
       const oy = i > 0 ? (Math.random() - 0.5) * 2 : 0;
