@@ -1760,3 +1760,91 @@ SECAO 44 - SISTEMA DE TIPOS DE MONSTRO
     Mostra "Class: [nome da classe]" (No Class/Oracle/Scout)
 
 ================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (MULTIPLAYER LOCAL)
+================================================================================
+
+ALTERACAO 9 - SISTEMA DE MULTIPLAYER LOCAL (1-2 JOGADORES)
+
+  ARQUITETURA PREPARADA PARA ATE 4 JOGADORES:
+    - Game.players[]: array de objetos Player (substitui game.player unico)
+    - Game.playerCount: numero de jogadores ativos (default 1, maximo 2 atual)
+    - Game.playerNames[]: nomes configurados na selecao
+    - Game.playerClasses[]: classes escolhidas por jogador
+    - MAX_PLAYERS = 4: constante para expansao futura
+    - DEFAULT_KEYBINDS[0..3]: keybinds separados por jogador
+
+  PLAYER CLASS (REFATORADA):
+    Novo construtor: Player(tileX, tileY, playerIndex, name, playerClass)
+    Atributos adicionais:
+      - playerIndex: indice 0-3 no array game.players
+      - name: string exibida acima do personagem e no HUD
+      - keybinds: { up, down, left, right, interact, ability }
+    Metodo takeDamage(dmg, game): recebe game para spawn de particulas
+    Metodo render(ctx, game): cores diferentes por playerIndex, renderiza nome acima
+    Metodo update(dt, game): usa this.keybinds em vez de teclas hardcoded WASD
+
+  SELETOR DE PLAYERS:
+    Na tela inicial (#class-select):
+      - Botoes +/- para selecionar 1 ou 2 jogadores
+    Para cada jogador:
+      - Painel independente (.player-setup-panel)
+      - Campo de nome (input text, max 12 caracteres)
+      - Icones de classe (clique para selecionar)
+
+  NOMES ACIMA DOS PERSONAGENS:
+    Player.render(): renderiza nome em fonte monospace 10px
+    Centralizado acima do circulo do jogador
+
+  HP INDIVIDUAL E MORTE:
+    Cada jogador possui HP proprio (100 max)
+    Se um jogador morre: continua morto, os outros continuam jogando
+    Quando todos artefatos sao coletados:
+      - TODOS os jogadores mortos revivem com HP cheio no spawn
+      - InvulnTimer de 1.5s aplicado
+
+  COLISAO ENTRE PLAYERS:
+    Players NAO colidem entre si - podem atravessar uns aos outros
+
+================================================================================
+
+SECAO 45 - SISTEMA DE MULTIPLAYER LOCAL
+
+  Game.players: Player[] - array escalavel de 1 a MAX_PLAYERS (4)
+
+  KEYBINDS POR JOGADOR (DEFAULT_KEYBINDS):
+    P1: WASD + E + F
+    P2: Arrow Keys + Shift + /
+    P3: IJKL + U + O
+    P4: Numpad 8456 + 0 + 1
+
+  CAMERA DINAMICA:
+    Bounding box de todos jogadores vivos
+    camScale ajusta para enquadrar todos com padding
+    Render usa ctx.scale centrado no canvas
+
+  FOG OF WAR COMPARTILHADO:
+    Raycasting executado para cada jogador vivo
+    visibilityGrid = uniao (OR) das visoes individuais
+    Oracle Reveal: funciona se qualquer Oracle tiver habilidade ativa
+
+  MONSTER AI:
+    findNearestPlayer() retorna jogador vivo mais proximo
+    canSeePlayer(), canDetectBehind(), updateChase(), updateSearch() usam nearest
+    Ataque: verifica distancia para o jogador mais proximo
+
+  HUD:
+    Linha por jogador com cor, nome, HP, classe, status DEAD
+    Habilidade HUD mostra status (Active/CD/Ready) por jogador
+
+  REVIVE SYSTEM:
+    Vitoria (todos artefatos) -> revive todos jogadores mortos no spawn
+
+  HOTKEY CONFIG:
+    buildHotkeyConfig() renderiza botoes por acao/jogador
+    Clique em botao -> proxima tecla define novo keybind
+    finalizeRebinding() atualiza player.keybinds e limpa keys antigos
+    Escape cancela rebinding
+
+================================================================================
