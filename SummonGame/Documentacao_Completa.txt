@@ -3179,7 +3179,76 @@ ALTERACAO 23 — MENSAGEM DE INTERACAO INDIVIDUAL POR JOGADOR NA HOTBAR
      font-family: 'Courier New', monospace; color: #fff;
      pointer-events: none; white-space: nowrap;
      Layout horizontal: text-align: center (alinhada com slots)
-     Layout vertical: sem text-align (alinhamento padrao left)
+      Layout vertical: sem text-align (alinhamento padrao left)
+
+================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (CORRECAO HOTBAR TECLA R + BARRA CIRCULAR DE PROGRESSO)
+================================================================================
+
+ALTERACAO 24 — CORRECAO DO SISTEMA DE USO DE ITEM (TECLA R)
+
+   PROBLEMA: Ao segurar a tecla R (use), o slot da hotbar era ciclado
+   imediatamente (via keysJustPressed) para o proximo item, e entao o
+   novo item (ciclando) comecava a ser usado. O comportamento correto
+   seria usar o item atualmente equipado sem ciclar.
+
+   SOLUCAO: Implementado sistema de deteccao tap vs hold.
+   - Tap (pressionar e soltar em < 0.3s): cicla para o proximo slot
+   - Hold (segurar por >= 1s): usa o item equipado SEM ciclar
+   - A deteccao usa uma propriedade useTapPending no Player
+   - O ciclo so ocorre no keyup (ao soltar a tecla), nunca no keydown
+
+   MUDANCAS NO CODIGO:
+     a) Player — NOVO ATRIBUTO:
+        useTapPending (boolean): true enquanto aguarda confirmacao tap/hold.
+        Inicializado como false no construtor.
+
+     b) Player.update() — SUBSTITUIDO bloco de hotbar (tap + hold):
+        - keysJustPressed[kb.use]: define useTapPending=true, nao cicla
+        - keys[kb.use] com useTapPending: incrementa useTimer ate 0.3s
+        - Se useTimer >= 0.3: confirma hold (useTapPending=false, useTimer=0)
+        - keys[kb.use] SEM useTapPending: useTimer conta ate 1s para usar item
+        - !keys[kb.use] com useTapPending: TAP confirmado, cicla slot
+        - !keys[kb.use] sem useTapPending: HOLD, apenas reseta timers
+
+     c) BENEFICIO: Slot nunca e ciclado durante hold, resolvendo o bug.
+
+ALTERACAO 24-B — SUBSTITUICAO DA BARRA DE PROGRESSO POR CIRCULO BRANCO
+
+   PROBLEMA: A barra de progresso horizontal (cor #4fc3f7 ciano) exibida
+   ao lado dos slots da hotbar durante o uso de item era pouco visivel e
+   ficava distante do personagem, dificultando o feedback visual.
+
+   SOLUCAO: Barra horizontal removida da hotbar HUD. Substituida por
+   um circulo de progresso branco desenhado no Canvas, posicionado
+   1 tile (32px) a direita do jogador, acompanhando seu movimento.
+
+   MUDANCAS NO CODIGO:
+     a) updateHotbarHUD() — BLOCO REMOVIDO (duas ocorrencias):
+        Bloco if (p.useTimer > 0) { ... } removido do layout vertical
+        e do layout horizontal. A barra ciano nao e mais renderizada.
+
+     b) Game — NOVO METODO renderUseProgressCircle(ctx):
+        Desenha circulo oco branco com arco de progresso no Canvas.
+        Parametros: mesmo raio e espessura do renderInteractionCircle.
+        Diferenca: usa cor branca solida (#ffffff) em vez de gradiente.
+        Posicao: 32px a direita do centro do jogador (p.px + TILE_SIZE).
+        Aparece apenas quando jogador esta com useTimer > 0 (segurando R).
+        Suporta multiplayer: desenha para cada jogador segurando R.
+        Inclui frustum culling (fora da tela = nao desenha).
+
+     c) Game.render() — ADICIONADO:
+        Chamada a this.renderUseProgressCircle(ctx) apos
+        this.renderInteractionCircle(ctx) na pipeline de renderizacao.
+
+   ASPECTO VISUAL:
+     Circulo externo: rgba(255,255,255,0.2)
+     Circulo interno: rgba(255,255,255,0.3)
+     Arco de progresso: #ffffff (branco puro)
+     Preenchimento: sentido horario a partir do topo (12 horas)
+     Tamanho: TILE_SIZE * 0.4 de raio
 
 ================================================================================
 
@@ -3672,7 +3741,139 @@ SECAO 56 — MENSAGEM DE INTERACAO INDIVIDUAL POR JOGADOR NA HOTBAR
 
    Para suportar mais jogadores (MAX_PLAYERS > 4):
      Nenhuma alteracao necessaria. A mensagem e gerada por jogador
-     independentemente do numero total de jogadores.
+      independentemente do numero total de jogadores.
+
+================================================================================
+
+================================================================================
+SECAO 57 — CORRECAO DO SISTEMA DE USO DE ITEM (TECLA R) + BARRA DE PROGRESSO CIRCULAR
+================================================================================
+
+57.1 — CONCEITO
+
+   O sistema de uso de item da hotbar (tecla R/use) foi refatorado para
+   corrigir um bug onde o slot era ciclado durante o hold, fazendo com que
+   o item errado fosse usado. Agora, o sistema distingue claramente entre:
+
+   - TAP (pressionar e soltar em < 0.3 segundos): cicla para o proximo
+     slot nao vazio
+   - HOLD (segurar por >= 1 segundo): usa o item ATUALMENTE equipado,
+     SEM ciclar o slot
+
+   Adicionalmente, a barra de progresso horizontal ciano que aparecia
+   ao lado dos slots na hotbar foi removida e substituida por um
+   circulo de progresso branco desenhado no Canvas, posicionado
+   a direita do personagem.
+
+57.2 — ESTRUTURA DE DADOS (Player.useTapPending)
+
+   Player.useTapPending: Boolean
+     Valor padrao: false
+     Inicializado no construtor e resetado em loadMap() (via new Player)
+     Significado: true = a tecla R foi pressionada e ainda nao se sabe
+     se sera um tap ou um hold. Enquanto true, o useTimer conta ate 0.3s.
+     Se soltar antes de 0.3s: confirmado como TAP → cicla slot.
+     Se passar de 0.3s segurando: confirmado como HOLD → usa item.
+
+57.3 — FLUXO COMPLETO TAP VS HOLD
+
+   ESTADO 1 — REPOUSO (useTapPending = false, useTimer = 0):
+     Jogador nao esta pressionando R. Nenhum comportamento ativo.
+
+   ESTADO 2 — KEYDOWN R (keysJustPressed[kb.use] = true):
+     Define useTapPending = true, useTimer = 0.
+     NAO cicla o slot neste momento.
+
+   ESTADO 3 — DETECCAO (keys[kb.use] = true, useTapPending = true):
+     useTimer += dt (conta ate 0.3 segundos).
+     Enquanto useTimer < 0.3: ainda em deteccao, nao sabe se e tap ou hold.
+     Se useTimer >= 0.3: CONFIRMA HOLD.
+       Define useTapPending = false, useTimer = 0.
+       A partir daqui, useTimer conta ate 1s para ativar o item.
+
+   ESTADO 4 — USO DO ITEM (keys[kb.use] = true, useTapPending = false,
+             inventory[selectedSlot] tem item):
+     useTimer += dt (conta ate 1 segundo).
+     Se useTimer >= 1: chama game.useItem(player), reseta useTimer = 0.
+     O slot NAO muda durante este estado.
+
+   ESTADO 5 — KEYUP R (!keys[kb.use]):
+     Se useTapPending = true: foi um TAP.
+       Cicla selectedSlot para o proximo slot nao vazio.
+       Reseta useTapPending = false, useTimer = 0.
+     Se useTapPending = false: foi um HOLD (ou nao havia item).
+       Reseta useTapPending = false (ja era false), useTimer = 0.
+
+57.4 — BARRA DE PROGRESSO CIRCULAR (renderUseProgressCircle)
+
+   NOVO METODO na classe Game:
+     renderUseProgressCircle(ctx)
+
+   LOGICA:
+     - Itera sobre todos os jogadores vivos
+     - Se p.useTimer <= 0: pula
+     - Calcula posicao: 1 tile (TILE_SIZE = 32px) a direita do centro
+       do jogador (p.px + TILE_SIZE, p.py)
+     - Converte para coordenadas de tela (subtrai camX/camY)
+     - Frustum culling: pula se fora do canvas (margem 50px)
+     - Desenha circulo oco com arco de progresso branco
+
+   PARAMETROS DO CIRCULO:
+     circleRadius: TILE_SIZE * 0.4 (12.8px)
+     lineWidth: circleRadius * 2 * 0.15 (~3.84px)
+     startAngle: -Math.PI / 2 (topo, 12 horas)
+     progress: p.useTimer / 1 (0 a 1)
+
+   APARENCIA:
+     Circulo externo (fundo): rgba(255,255,255,0.2), lineWidth + 2
+     Circulo interno (fundo): rgba(255,255,255,0.3), lineWidth
+     Arco de progresso: #ffffff (branco puro), lineWidth, lineCap round
+
+57.5 — POSICIONAMENTO NO RENDER
+
+   render() pipeline atualizada:
+     ...
+     this.renderParticles(ctx);
+     this.renderInteractionCircle(ctx);   // circulo de interacao
+     this.renderUseProgressCircle(ctx);   // NOVO: circulo de uso de item
+     this.renderNight(ctx);
+     ...
+
+   O circulo e desenhado no mesmo espaco de coordenadas do mundo
+   (antes de ctx.restore()), portanto acompanha o movimento do
+   jogador e a camera.
+
+57.6 — REMOCAO DA BARRA HORIZONTAL
+
+   updateHotbarHUD() — REMOVIDO de AMBOS os layouts:
+     Vertical: bloco if (p.useTimer > 0) { barra ciano horizontal }
+     Horizontal: bloco if (p.useTimer > 0) { barra ciano horizontal }
+
+   A barra de progresso horizontal (DOM, ciano #4fc3f7) nao e mais
+   renderizada em nenhum layout. O feedback visual agora e exclusivamente
+   o circulo branco no Canvas.
+
+57.7 — COMPORTAMENTO MULTIPLAYER
+
+   - Cada jogador tem seu proprio useTapPending e useTimer independentes
+   - Dois jogadores podem segurar R simultaneamente e cada um ve seu
+     proprio circulo de progresso a direita do seu personagem
+   - O sistema e thread-safe (single-threaded JS, sem concorrencia)
+
+57.8 — ESCALABILIDADE
+
+   Para alterar a duracao do hold (1s para usar item):
+     Modificar o valor 1 nas comparacoes useTimer >= 1 em Player.update()
+     e p.useTimer / 1 em renderUseProgressCircle
+
+   Para alterar o threshold tap vs hold (0.3s):
+     Modificar o valor 0.3 na comparacao useTimer >= 0.3
+
+   Para alterar a aparencia do circulo:
+     Modificar circleRadius, lineWidth, cores em renderUseProgressCircle
+
+   Para alterar a posicao do circulo:
+     Modificar worldX = p.px + TILE_SIZE e worldY = p.py
 
 ================================================================================
 
@@ -3681,53 +3882,54 @@ ATUALIZACAO DAS SECOES AFETADAS
 ================================================================================
 
 SECAO 3 (PIPELINE DE INICIALIZACAO) — ATUALIZADA:
-   Novas propriedades Game.hotbarSize e Game.hotbarLayout adicionadas
-   ao constructor e resetadas em loadMap() e restart().
+   Novas propriedades: Game.hotbarSize, Game.hotbarLayout.
+   Player.useTapPending inicializado como false no construtor.
 
 SECAO 4 (FLUXO DO GAME LOOP) — ATUALIZADA:
-   renderInteractionBar() agora e metodo vazio. A mensagem de interacao
-   foi movida para updateHotbarHUD, renderizada por jogador na hotbar.
+   Render pipeline: renderUseProgressCircle(ctx) adicionado apos
+   renderInteractionCircle(ctx) e antes de renderNight(ctx).
+   renderInteractionBar() agora e metodo vazio.
 
-SECAO 5 (SISTEMA DE RENDERIZACAO) — NOTA:
-   Nenhuma alteracao no pipeline canvas. Mensagens sao DOM puro,
-   renderizadas via innerHTML em updateHotbarHUD.
+SECAO 5 (SISTEMA DE RENDERIZACAO) — ATUALIZADA:
+   Nova camada Canvas: circulo de progresso de uso de item
+   (renderUseProgressCircle). Desenhado sobre particulas e circulo
+   de interacao, antes do night overlay.
 
 SECAO 6 (ELEMENTOS DOM) — ATUALIZADA:
-   #hotbar-hud: style inline removido, CSS transferido para <style>
-   com suporte a classe .vertical para layout alternativo.
-   #settings-panel: novos elementos (btn-hotbar-minus, hotbar-size-value,
-   btn-hotbar-plus, btn-hotbar-layout).
-   #ability-hud: reposicionado dinamicamente no layout vertical
-   (top:50px) para evitar conflito com hotbar.
-   #interaction-label e #interaction-bar: ELEMENTOS REMOVIDOS do HTML.
-   Mensagem de interacao agora e inline em cada hotbar de jogador.
+   #hotbar-hud: CSS com suporte a classe .vertical.
+   #settings-panel: novos botoes (hotbar size/layout).
+   #ability-hud: reposicionado no layout vertical.
+   #interaction-label e #interaction-bar: ELEMENTOS REMOVIDOS.
+   Barra de progresso ciano (DOM na hotbar): REMOVIDA de ambos layouts.
 
-SECAO 21 (SISTEMA DE HUD) — ATUALIZADA:
-   updateHotbarHUD refatorado: suporte a dimensionamento dinamico
-   (hotbarSize) e dois layouts (horizontal/vertical). Slots e fontes
-   escalam proporcionalmente. Mensagem de interacao individual por
-   jogador renderizada ACIMA (horizontal) ou ao LADO (vertical) da hotbar.
-
-SECAO 22 (SISTEMA DE INTERACAO PLAYER) — ATUALIZADA:
-   UI de mensagem global substituida por mensagens individuais na hotbar
-   de cada jogador. Circulo de progresso Canvas (renderInteractionCircle)
-   mantido inalterado. renderInteractionBar simplificado para metodo vazio.
-
-SECAO 25 (SISTEMA DE DEBUG) — NOTA:
+SECAO 12 (MAQUINA DE ESTADOS DO MONSTRO) — NOTA:
    Nenhuma alteracao.
 
+SECAO 21 (SISTEMA DE HUD) — ATUALIZADA:
+   updateHotbarHUD: barra de progresso horizontal removida. Mensagem
+   de interacao individual por jogador. Dimensoes dinamicas por
+   hotbarSize e modo de layout.
+
+SECAO 22 (SISTEMA DE INTERACAO PLAYER) — ATUALIZADA:
+   Player.update(): sistema de uso de item reescrito com deteccao
+   tap vs hold. Nova propriedade: useTapPending.
+   Circulo de progresso Canvas (renderInteractionCircle) mantido.
+   Circulo de uso de item (renderUseProgressCircle) adicionado.
+
+SECAO 30 (ORDEM DE RENDERIZACAO) — ATUALIZADA:
+   Pipeline: particles -> interactionCircle -> useProgressCircle ->
+   night -> debug. Duas novas camadas Canvas adicionadas.
+
+SECAO 31 (FLUXO DE GAMEPLAY) — ATUALIZADA:
+   Uso de item: tap (< 0.3s) cicla slot, hold (>= 1s) usa item.
+   Feedback visual: circulo branco a direita do personagem.
+
 SECAO 38 (FLUXO DE EVENTOS) — ATUALIZADA:
-   Novos cliques: btn-hotbar-minus, btn-hotbar-plus (ajustam tamanho)
-   e btn-hotbar-layout (alterna horizontal/vertical).
-   settings-btn modificado para sincronizar controles ao abrir painel.
+   Novos cliques: btn-hotbar-minus, btn-hotbar-plus, btn-hotbar-layout.
 
 SECAO 45 (MULTIPLAYER) — ATUALIZADA:
-   Hotbar agora dimensiona dinamicamente por numero de jogadores vivos.
-   Formula: width% = (100/numPlayers) * (hotbarSize/100).
-   Layout vertical suporta ate 4+ jogadores empilhados.
-   MAX_PLAYERS expansivel sem alterar codigo da hotbar.
-   Mensagem de interacao individual por jogador: cada jogador ve sua
-   propria mensagem na sua propria hotbar.
+   Hotbar dimensiona dinamicamente. Mensagem de interacao individual.
+   Circulo de uso de item por jogador (cada um ve o seu).
 
 ================================================================================
 FIM DA DOCUMENTACAO
