@@ -235,6 +235,15 @@ canvas {
   font-size: 11px; text-align: center; z-index: 11; color: #fff;
   text-shadow: 0 0 4px rgba(0,0,0,0.9);
 }
+#difficulty-selector { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+#difficulty-selector button {
+  background: #1a1a2e; border: 1px solid #444; color: #888;
+  padding: 6px 14px; cursor: pointer; font-family: 'Courier New', monospace;
+  font-size: 13px; border-radius: 4px; transition: all 0.2s;
+}
+#difficulty-selector button:hover { border-color: #888; color: #ccc; }
+#difficulty-selector button.selected { border-color: #4fc3f7; color: #fff; background: #2a2a3e; }
+#difficulty-selector label { color: #aaa; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -265,6 +274,12 @@ canvas {
   <div id="message"></div>
    <div id="class-select" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:30; flex-direction:column; align-items:center; justify-content:center; gap:20px; color:#ccc; font-family:'Courier New',monospace;">
      <h2 style="color:#fff; margin:0;">Summon Game</h2>
+     <div id="difficulty-selector">
+       <label>Difficulty:</label>
+       <button data-diff="easy">Easy</button>
+       <button data-diff="medium">Medium</button>
+       <button data-diff="hard">Hard</button>
+     </div>
      <div id="player-count-selector">
        <button id="btn-player-minus">-</button>
        <span id="player-count-label">1 Player</span>
@@ -413,10 +428,10 @@ const PlayerClasses = {
 // ============================================================
 const DEFAULT_MAP = [
 'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO',
-'OCWCCFCOCCFCOFCCCCCACCCCUCOGGFGGGGO',
-'OCCCUCCdCCCCOCCCCCCMCCCCCCOGGGGGUGO',
-'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGO',
-'OOOOOOOOCCCCOCCCCCCCCCCCWCOGGGGGGGO',
+'OCWCCFCOCCFCOFCCTCCACCCCUCOGGFGGGGO',
+'OCCCUCCdCCCCOSCCCCCMCCCCCCOGGGGGUGO',
+'OCCCCCCOCCCCOSCCCCCCCCCCWCOGGGGGGGO',
+'OOOOOOOOCCCCOSCCCCCCCCCCWCOGGGGGGGO',
 'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGO',
 'OCCUFCCOCCCCdCCCCCPCCCCCCCOGGGGGGGO',
 'OCCCCCCOCCCCOCCCCCCCCCCCCCOGGGGGGGO',
@@ -1166,7 +1181,10 @@ class Game {
     this.camX = 0; this.camY = 0;
     this.camScale = 1;
     this.summonCount = 0;
+    this.roundNumber = 0;
     this.difficulty = 'easy';
+    this.baseMonsterSpeed = 70;
+    this.artifactFPoints = [];
     this.nightTransition = 0;
     this.isNight = false;
     this.roofAlpha = 1;
@@ -1186,6 +1204,15 @@ class Game {
     this.interactDuration = 0;
     this.lightmapCanvas = null;
     this.visibilityPolygons = [];
+    this.playerVisionRange = [];
+    this.tileVariation = [];
+    this.tileEdgeMask = [];
+  }
+
+  static tileHash(x, y) {
+    let h = (x * 374761393 + y * 668265263) ^ 0x5bf03635;
+    h = ((h >> 16) ^ h) * 0x45d9f3b;
+    return ((h >>> 0) % 1000) / 1000;
   }
 
   loadMap(mapData) {
@@ -1203,13 +1230,19 @@ class Game {
     for (const pos of mapData.artifacts) {
       this.artifactEntities.push(new ArtifactEntity(pos.x, pos.y));
     }
-    // Count initial artifacts
-    this.artifactCount = this.artifactEntities.length;
+    // Collect all F tile positions for dynamic spawn
+    this.artifactFPoints = [];
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        if (this.tiles[y][x] === 'F') this.artifactFPoints.push({ x, y });
+      }
+    }
+    // Set artifact count from selected difficulty
+    this.artifactCount = this.difficulty === 'easy' ? 3 : (this.difficulty === 'medium' ? 4 : 5);
+    if (this.artifactFPoints.length < this.artifactCount) this.artifactCount = this.artifactFPoints.length;
     if (this.artifactCount === 0) this.artifactCount = 3;
-    // Difficulty
-    if (this.artifactCount <= 3) this.difficulty = 'easy';
-    else if (this.artifactCount <= 4) this.difficulty = 'medium';
-    else this.difficulty = 'hard';
+    // Ensure we have the right number of artifact entities
+    this.selectArtifactsForRound();
     // Visibility
     this.visibilityGrid = [];
     this.visibilityAge = [];
@@ -1252,6 +1285,7 @@ class Game {
     this.monsterTypeMsgTimer = 0;
     // Reset state
     this.summonCount = 0;
+    this.roundNumber = 0;
     this.collectedArtifacts = 0;
     this.isNight = false;
     this.nightTransition = 0;
@@ -1261,15 +1295,72 @@ class Game {
     this.summonTimer = 0;
     this.summonDelay = 0;
     this.particles = [];
+    this.buildAutotileCache();
     this.setDifficulty();
     updateMapEditor(this);
     this.showMessage('');
+  }
+
+  selectArtifactsForRound() {
+    // Select N unique random F points for this round
+    const needed = this.artifactCount;
+    const pool = [...this.artifactFPoints];
+    const selected = [];
+    while (selected.length < needed && pool.length > 0) {
+      const idx = Math.floor(Math.random() * pool.length);
+      selected.push(pool[idx]);
+      pool.splice(idx, 1);
+    }
+    // Reset all existing entities
+    for (const art of this.artifactEntities) art.collected = false;
+    // Ensure we have exactly needed entities at the right positions
+    this.artifactEntities = [];
+    for (const sp of selected) {
+      this.artifactEntities.push(new ArtifactEntity(sp.x, sp.y));
+    }
+  }
+
+  getMonsterSpeed() {
+    let bonus = 0;
+    if (this.difficulty === 'easy') bonus = 5;
+    else if (this.difficulty === 'medium') bonus = 10;
+    else bonus = 20;
+    return this.baseMonsterSpeed * (1 + bonus * this.roundNumber / 100);
+  }
+
+  getSpeedBonusPercent() {
+    if (this.difficulty === 'easy') return this.roundNumber * 5;
+    else if (this.difficulty === 'medium') return this.roundNumber * 10;
+    else return this.roundNumber * 20;
   }
 
   setDifficulty() {
     if (this.artifactCount <= 3) this.difficulty = 'easy';
     else if (this.artifactCount <= 4) this.difficulty = 'medium';
     else this.difficulty = 'hard';
+  }
+
+  buildAutotileCache() {
+    const h = this.mapHeight, w = this.mapWidth;
+    this.tileVariation = new Array(h);
+    this.tileEdgeMask = new Array(h);
+    const isFloor = t => t === 'C' || t === 'U' || t === 'F' || t === 'P' || t === 'M';
+    for (let y = 0; y < h; y++) {
+      this.tileVariation[y] = new Float32Array(w);
+      this.tileEdgeMask[y] = new Int8Array(w);
+      for (let x = 0; x < w; x++) {
+        this.tileVariation[y][x] = Game.tileHash(x, y);
+        const tile = this.tiles[y][x];
+        if (tile !== 'G' && !isFloor(tile)) { this.tileEdgeMask[y][x] = 0; continue; }
+        let mask = 0;
+        const match = isFloor(tile) ? isFloor : t => t === 'G';
+        if (y > 0 && !match(this.tiles[y - 1][x])) mask |= 1;
+        if (y < h - 1 && !match(this.tiles[y + 1][x])) mask |= 2;
+        if (x > 0 && !match(this.tiles[y][x - 1])) mask |= 4;
+        if (x < w - 1 && !match(this.tiles[y][x + 1])) mask |= 8;
+        this.tileEdgeMask[y][x] = mask;
+      }
+    }
   }
 
   restart() {
@@ -1296,6 +1387,17 @@ class Game {
     label.textContent = this.playerCount + ' Player' + (this.playerCount > 1 ? 's' : '');
     minusBtn.disabled = (this.playerCount <= 1);
     plusBtn.disabled = (this.playerCount >= 2);
+
+    // Difficulty selector
+    const diffBtns = document.querySelectorAll('#difficulty-selector button');
+    diffBtns.forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.diff === this.difficulty);
+      btn.onclick = () => {
+        this.difficulty = btn.dataset.diff;
+        diffBtns.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      };
+    });
 
     const buildPanels = () => {
       container.innerHTML = '';
@@ -1413,6 +1515,8 @@ class Game {
     }
     // Check game state
     this.checkGameState();
+    // Update player vision ranges (indoor/outdoor)
+    this.updateVisionRanges(dt);
     // Camera
     this.updateCamera();
     // Update HUD
@@ -1643,8 +1747,30 @@ class Game {
     return { x, y };
   }
 
+  updateVisionRanges(dt) {
+    const indoorRange = 384; // 12 tiles
+    const outdoorRange = 160; // 5 tiles
+    const lerpSpeed = 3;
+    for (let i = 0; i < this.players.length; i++) {
+      const p = this.players[i];
+      if (!p.alive) { this.playerVisionRange[i] = outdoorRange; continue; }
+      const tx = p.tileX, ty = p.tileY;
+      let target;
+      if (tx < 0 || ty < 0 || tx >= this.mapWidth || ty >= this.mapHeight) {
+        target = outdoorRange;
+      } else {
+        const tile = this.tiles[ty][tx];
+        target = (tile === 'G' || tile === 'O') ? outdoorRange : indoorRange;
+      }
+      if (this.playerVisionRange[i] === undefined) this.playerVisionRange[i] = target;
+      this.playerVisionRange[i] += (target - this.playerVisionRange[i]) * Math.min(dt * lerpSpeed, 1);
+    }
+  }
+
   buildVisibilityPolygon(player) {
-    const maxDist = this.isNight ? 160 : 384;
+    const baseRange = this.isNight ? 160 : 384;
+    const playerRange = this.playerVisionRange[player.playerIndex] || baseRange;
+    const maxDist = this.isNight ? Math.min(playerRange, 160) : playerRange;
     const numRays = this.isNight ? 360 : 220;
     const points = [];
     for (let i = 0; i < numRays; i++) {
@@ -1654,7 +1780,6 @@ class Game {
       const hit = this.castRay(player.px, player.py, dx, dy, maxDist);
       points.push(hit);
     }
-    // Add slight jitter offset for softer edges
     for (let i = 0; i < points.length; i++) {
       const a = (i / numRays) * Math.PI * 2;
       const jitter = 2 + Math.sin(i * 7.3) * 1.5;
@@ -1699,7 +1824,7 @@ class Game {
       lctx.clip();
       // Erase darkness inside polygon using destination-out
       lctx.globalCompositeOperation = 'destination-out';
-      const maxR = this.isNight ? 160 : 384;
+      const maxR = this.playerVisionRange[pl.playerIndex] || (this.isNight ? 160 : 384);
       const grad = lctx.createRadialGradient(sx, sy, 0, sx, sy, maxR);
       grad.addColorStop(0, 'rgba(0,0,0,1)');
       grad.addColorStop(0.25, 'rgba(0,0,0,0.85)');
@@ -1742,7 +1867,6 @@ class Game {
       this.summoning = false;
       this.collectedArtifacts = 0;
       this.isNight = false;
-      // Revive all dead players
       for (const p of this.players) {
         if (!p.alive) {
           p.alive = true;
@@ -1754,8 +1878,8 @@ class Game {
           p.invulnTimer = 1.5;
         }
       }
-      this.showMessage('All artifacts collected! Monster defeated!');
-      this.respawnArtifacts();
+      this.showMessage('Round ' + this.roundNumber + ' complete! Monster defeated!');
+      this.selectArtifactsForRound();
     }
   }
 
@@ -1778,12 +1902,14 @@ class Game {
 
   spawnMonster() {
     this.summonCount++;
+    this.roundNumber++;
     const typeKey = weightedRandom(MonsterTypes);
     const mt = MonsterTypes[typeKey];
     this.monsterSpawnType = typeKey;
-    this.monsterTypeMessage = mt.name + ' heard you. Run.';
+    const speedBonus = this.getSpeedBonusPercent();
+    this.monsterTypeMessage = mt.name + ' heard you. Run. (Round ' + this.roundNumber + ' +' + speedBonus + '% spd)';
     this.monsterTypeMsgTimer = 3.0;
-    const spd = 70 + (this.summonCount - 1) * 10;
+    const spd = this.getMonsterSpeed();
     for (let i = 0; i < mt.spawnCount; i++) {
       const ox = i > 0 ? (Math.random() - 0.5) * 2 : 0;
       const oy = i > 0 ? (Math.random() - 0.5) * 2 : 0;
@@ -1937,19 +2063,84 @@ class Game {
             break;
           }
           case 'A': color = ALTAR_COLOR; break;
-          case 'P': color = INTERIOR_COLOR; break;
-          case 'M': color = INTERIOR_COLOR; break;
-          case 'F': color = INTERIOR_COLOR; break;
-          case 'U': color = INTERIOR_COLOR; break;
+          case 'P': case 'M': case 'F': case 'U': color = INTERIOR_COLOR; break;
           case 'W': color = FURNITURE_COLOR; break;
         }
         ctx.fillStyle = color;
         ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+
+        // Autotiling: floor variations (C, U, F on floor)
+        if (tile === 'C' || tile === 'U' || tile === 'F' || tile === 'P' || tile === 'M') {
+          const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
+          const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
+          // Subtle plank lines
+          ctx.fillStyle = 'rgba(0,0,0,0.04)';
+          const plankOff = (v * 6) | 0;
+          for (let py = plankOff; py < TILE_SIZE; py += 6) {
+            ctx.fillRect(sx, sy + py, TILE_SIZE, 1);
+          }
+          // Edge darkening near different tile types
+          if (mask) {
+            ctx.fillStyle = 'rgba(0,0,0,0.06)';
+            if (mask & 1) ctx.fillRect(sx, sy, TILE_SIZE, 2);
+            if (mask & 2) ctx.fillRect(sx, sy + TILE_SIZE - 2, TILE_SIZE, 2);
+            if (mask & 4) ctx.fillRect(sx, sy, 2, TILE_SIZE);
+            if (mask & 8) ctx.fillRect(sx + TILE_SIZE - 2, sy, 2, TILE_SIZE);
+          }
+          // Waypoint marking
+          if (tile === 'U') {
+            ctx.fillStyle = 'rgba(0,0,0,0.08)';
+            ctx.fillRect(sx + 4, sy + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+            ctx.fillStyle = 'rgba(0,0,0,0.04)';
+            ctx.beginPath();
+            ctx.arc(sx + TILE_SIZE / 2, sy + TILE_SIZE / 2, TILE_SIZE * 0.22, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          // Artifact glow on floor
+          if (tile === 'F') {
+            ctx.fillStyle = 'rgba(0,255,255,0.03)';
+            ctx.fillRect(sx + 6, sy + 6, TILE_SIZE - 12, TILE_SIZE - 12);
+          }
+        }
+
+        if (tile === 'G') {
+          const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
+          const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
+          // Color variation: shift hue slightly
+          const r = 58 + (v - 0.5) * 14;
+          const g = 122 + (v - 0.5) * 20;
+          const b = 42 + (v - 0.5) * 10;
+          ctx.fillStyle = 'rgb(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ')';
+          ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+          // Subtle grass blade details
+          ctx.fillStyle = 'rgba(255,255,255,0.02)';
+          const detailCount = 3 + ((v * 10) | 0) % 4;
+          for (let i = 0; i < detailCount; i++) {
+            const dx = sx + 4 + ((Game.tileHash(x * 3 + i, y * 3) * (TILE_SIZE - 8)) | 0);
+            const dy = sy + 4 + ((Game.tileHash(x * 5 + i, y * 5 + 1) * (TILE_SIZE - 8)) | 0);
+            ctx.fillRect(dx, dy, 2, 2);
+          }
+          // Edge transition near different tile types
+          if (mask) {
+            ctx.fillStyle = 'rgba(0,0,0,0.04)';
+            if (mask & 1) ctx.fillRect(sx, sy, TILE_SIZE, 2);
+            if (mask & 2) ctx.fillRect(sx, sy + TILE_SIZE - 2, TILE_SIZE, 2);
+            if (mask & 4) ctx.fillRect(sx, sy, 2, TILE_SIZE);
+            if (mask & 8) ctx.fillRect(sx + TILE_SIZE - 2, sy, 2, TILE_SIZE);
+          }
+        }
+
         // Grid lines in debug
         if (this.debugMode) {
           ctx.strokeStyle = 'rgba(255,255,255,0.1)';
           ctx.lineWidth = 0.5;
           ctx.strokeRect(sx, sy, TILE_SIZE, TILE_SIZE);
+          if (tile === 'G' || tile === 'C') {
+            ctx.fillStyle = '#0f0';
+            ctx.font = '7px monospace';
+            const m = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
+            ctx.fillText(m.toString(16), sx + 2, sy + 10);
+          }
         }
         // Draw door indicator
         if (tile === 'd') {
@@ -2110,46 +2301,13 @@ class Game {
     // Player info
     let yOff = this.canvas.height - 45;
     for (const p of this.players) {
-      ctx.fillText(p.name + ' Tile: ' + p.tileX + ',' + p.tileY + ' HP:' + p.hp + ' Class:' + p.playerClass, 10, yOff);
+      const vr = this.playerVisionRange[p.playerIndex] || 0;
+      ctx.fillText(p.name + ' Tile: ' + p.tileX + ',' + p.tileY + ' HP:' + p.hp + ' Class:' + p.playerClass + ' VisRng:' + (vr | 0), 10, yOff);
       yOff -= 15;
-    }
-    // Raycast visibility polygons (debug)
-    for (const vp of this.visibilityPolygons) {
-      const pts = vp.points;
-      if (pts.length < 3) continue;
-      // Draw polygon outline
-      ctx.strokeStyle = 'rgba(255,255,0,0.4)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x - this.camX, pts[0].y - this.camY);
-      for (let i = 1; i < pts.length; i++) {
-        ctx.lineTo(pts[i].x - this.camX, pts[i].y - this.camY);
-      }
-      ctx.closePath();
-      ctx.stroke();
-      // Draw ray endpoints
-      const step = Math.max(1, Math.floor(pts.length / 36));
-      ctx.fillStyle = 'rgba(255,255,0,0.5)';
-      for (let i = 0; i < pts.length; i += step) {
-        const rx = pts[i].x - this.camX;
-        const ry = pts[i].y - this.camY;
-        ctx.fillRect(rx - 1, ry - 1, 3, 3);
-      }
-      // Draw rays from player to endpoints
-      ctx.strokeStyle = 'rgba(255,255,0,0.12)';
-      ctx.lineWidth = 0.5;
-      const px = vp.player.px - this.camX;
-      const py = vp.player.py - this.camY;
-      for (let i = 0; i < pts.length; i += step) {
-        ctx.beginPath();
-        ctx.moveTo(px, py);
-        ctx.lineTo(pts[i].x - this.camX, pts[i].y - this.camY);
-        ctx.stroke();
-      }
     }
     // Raycast perf info
     const totalRays = this.visibilityPolygons.reduce((s, vp) => s + vp.points.length, 0);
-    ctx.fillText('Rays: ' + totalRays, 10, this.canvas.height - 30);
+    ctx.fillText('Rays: ' + totalRays + ' | Diff: ' + this.difficulty + ' | Rnd: ' + this.roundNumber + ' | Spd:+' + this.getSpeedBonusPercent() + '%', 10, this.canvas.height - 30);
   }
 
   renderMessage(ctx) {
@@ -2284,9 +2442,9 @@ function updateHUD(game) {
     html += (p.alive ? '' : 'DEAD ') + '<br>';
   }
   html += 'Monster: ' + mtName + '<br>';
-  html += 'Dificuldade: ' + game.difficulty + '<br>';
+  html += 'Difficulty: ' + game.difficulty + ' | Round: ' + game.roundNumber + '<br>';
   html += 'Artefatos: ' + game.collectedArtifacts + '/' + game.artifactCount + '<br>';
-  html += 'Summons: ' + game.summonCount + '<br>';
+  html += 'Speed Bonus: +' + game.getSpeedBonusPercent() + '%<br>';
   html += 'Estado: ' + night;
   hud.innerHTML = html;
   if (game.monsterTypeMsgTimer > 0 && game.messageTimer <= 0) {

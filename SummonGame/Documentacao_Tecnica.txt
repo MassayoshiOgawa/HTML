@@ -1989,3 +1989,186 @@ ALTERACAO 10 - SISTEMA DE ILUMINACAO DINAMICA POR RAYCAST
     Roof system: anterior ao lightmap, coberto pela escuridao
 
 ================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (CORRECOES ILUMINACAO / AUTOTILING)
+================================================================================
+
+ALTERACAO 11 - CORRECAO DO LIGHTMAP (DESTINATION-OUT)
+
+  PROBLEMA: buildLightmap() usava source-over para desenhar gradiente de
+  escuridao dentro do poligono. A borda do gradiente (alpha 0.65) era mais
+  clara que a escuridao base (alpha 0.70), criando um anel visivel onde
+  areas alem do raycast pareciam mais claras.
+
+  SOLUCAO: Refatorado para destination-out:
+    1. Preenche lightmap inteiro com escuridao base
+    2. Para cada player, CLIP pelo poligono de visibilidade
+    3. Usa destination-out para APAGAR escuridao (nao desenhar)
+    4. Gradiente radial: alpha 1 no centro (apaga 100%), alpha 0 na borda
+    5. Transicao suave: sem descontinuidade entre poligono e area escura
+
+  Novos valores de escuridao:
+    Base: 0.55 (dia) + nightTransition * 0.15 → 0.70 (noite)
+    Gradiente: 5 stops (0%, 25%, 50%, 75%, 100%)
+    Centro: alpha 1 (totalmente apagado = claro)
+    25%: alpha 0.85 (bem iluminado)
+    50%: alpha 0.55 (meia-luz)
+    75%: alpha 0.2 (quase escuro)
+    100%: alpha 0 (mesmo que base, sem transicao visivel)
+
+  MULTIPLAYER UNION: destination-out naturalmente unifica iluminacao.
+  Se dois players iluminam a mesma area, ambos apagam escuridao,
+  resultando em area mais clara (comportamento correto de uniao).
+
+ALTERACAO 12 - PORTAS COM ILUMINACAO POR PROXIMIDADE
+
+  PROBLEMA: Portas usavam isPointVisible() (raycast poligonal) para
+  decidir visibilidade. Raycast nem sempre alcanca portas distantes.
+
+  SOLUCAO: renderDoors() agora verifica distancia euclidiana ate qualquer
+  player vivo. Alcance fixo de 160px (5 tiles = raio de visao noturno).
+  Se nenhum player estiver dentro do raio, porta permanece escura.
+
+ALTERACAO 13 - DIFERENCIACAO SHORTWALL (W) PLAYER VS MONSTRO
+
+  ShortWall (W = furniture/obstaculo interno):
+    - Bloqueia movimento: SIM (Player.canMoveTo, MonsterEntity.canMoveTo, findPath)
+    - Bloqueia visao do player: NAO (castRay ignora W, player enxerga atraves)
+    - Bloqueia visao do monstro: SIM (MonsterEntity.hasLineOfSight bloqueia W)
+    - Game.hasLineOfSight: NAO bloqueia W (usado para grid de visibilidade)
+
+================================================================================
+
+SECAO 47 - SISTEMA DE AUTOTILING VISUAL
+
+  47.1 - CONCEITO
+
+    Sistema procedural que analisa vizinhanca de cada tile para gerar
+    variacoes visuais. Elimina aparencia de grid repetitivo sem alterar
+    colisao ou gameplay. Totalmente canvas-based, sem assets externos.
+
+  47.2 - CACHE DE AUTOTILING
+
+    tileVariation[height][width]: Float [0-1]
+      Valor pseudo-aleatorio por tile baseado em hash da posicao
+      Formula: ((x * 374761393 + y * 668265263) ^ 0x5bf03635) % 1000 / 1000
+      Consistente entre frames (hash, nao Math.random)
+
+    tileEdgeMask[height][width]: Int (bitmask 4 bits)
+      Bit 0 (1): vizinho acima e de tipo diferente
+      Bit 1 (2): vizinho abaixo e de tipo diferente
+      Bit 2 (4): vizinho esquerda e de tipo diferente
+      Bit 3 (8): vizinho direita e de tipo diferente
+      Calculado uma vez em loadMap() para grass (G) e floor (C)
+
+  47.3 - VARIACOES DE GRAMA (G)
+
+    Cor base: #3a7a2a (verde)
+    Variacao por hash: desloca matiz em +/- 8%, saturação em +/- 5%
+    Borda contra floor (C) ou wall (O): escurece levemente
+    Detalhes: pequenos pontos/linhas em tons variados de verde
+    Waypoints (U): sub-tile com tom levemente mais escuro (trilha)
+
+  47.4 - VARIACOES DE CHAO (C)
+
+    Cor base: #c4a67a (bege madeira)
+    Variacao por hash: desloca brilho em +/- 4%
+    Linhas de tabua: finas linhas horizontais com offset aleatorio
+    Artefatos (F): leve brilho refletido no chao abaixo
+    Waypoints (U): tom levemente mais desgastado
+
+  47.5 - ALGORITMO DE HASH
+
+    function tileHash(x, y):
+      h = (x * 374761393 + y * 668265263) ^ 0x5bf03635
+      h = ((h >> 16) ^ h) * 0x45d9f3b
+      return (h >>> 0) % 1000 / 1000
+
+    Vantagens:
+      - Deterministico (mesmo valor todo frame para mesma posicao)
+      - Nao requer armazenamento alem do cache inicial
+      - Boa distribuicao pseudo-aleatoria
+
+  47.6 - RENDERIZACAO
+
+    renderTiles(ctx):
+      Para cada tile, alem da cor base:
+        - Aplica variacao de cor por tileVariation[y][x]
+        - Se tileEdgeMask indica borda: desenha transicao sutil
+        - Se tile === 'U' (waypoint): desenha marcacao no chao
+        - Se tile === 'F' (artefact): desenha area marcada no chao
+      Tudo feito com fillRect e fillStyle, sem operacoes caras
+
+  47.7 - PERFORMANCE
+
+    tileVariation e tileEdgeMask: arrays Float32Array/Int8Array
+    Calculados UMA vez em loadMap() (O(W*H))
+    Nao recalculados por frame
+    renderTiles: operacoes extras minimas (apenas ajuste de cor)
+    Impacto: < 2% do tempo de frame
+
+  47.8 - DEBUG MODE (F1)
+
+    Exibe informacao de autotiling:
+      - Edge mask value em cada tile
+      - Tipo de variacao aplicada
+      - Hash value do tile
+
+================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (SISTEMA DE DIFICULDADE / ROUNDS / VISAO INDOOR)
+================================================================================
+
+ALTERACAO 14 - SISTEMA DE DIFICULDADE PROFISSIONAL
+
+  SUBSTITUICAO DO SISTEMA ANTIGO:
+    Antes: dificuldade determinada automaticamente pelo numero de tiles F
+    no mapa (<=3 easy, 4 medium, >=5 hard). Nao havia progressao por round.
+
+    Novo: dificuldade selecionada pelo jogador na tela inicial (Easy/Medium/Hard).
+    Sistema de rounds com escalonamento progressivo de velocidade do monstro.
+
+  SELETOR DE DIFICULDADE:
+    Botoes Easy / Medium / Hard na tela de selecao (#difficulty-selector)
+    Destaque visual no botao selecionado (borda #4fc3f7)
+    Armazenado em Game.difficulty
+
+  REGRAS POR DIFICULDADE:
+    EASY:   3 artefatos/round, +5% velocidade/round
+    MEDIUM: 4 artefatos/round, +10% velocidade/round
+    HARD:   5 artefatos/round, +20% velocidade/round
+    Velocidade base: 70. Crescimento LINEAR, nao exponencial.
+
+  FORMULA: speed = baseMonsterSpeed * (1 + bonus * roundNumber / 100)
+    bonus = easy?5 : medium?10 : 20
+
+  SISTEMA DE ROUNDS:
+    Game.roundNumber incrementado a cada spawn do monstro
+    Resetado para 0 em loadMap/restart
+    Exibido no HUD e mensagem de spawn
+
+  SELECAO DE ARTEFATOS:
+    artifactFPoints[]: todas posicoes F do mapa
+    selectArtifactsForRound(): seleciona N posicoes unicas aleatorias
+    Cria ArtifactEntity apenas nas posicoes escolhidas
+    Sem duplicatas, sem sobreposicao
+
+================================================================================
+
+SECAO 48 - SISTEMA DE VISAO INDOOR / OUTDOOR
+
+  Player dentro (tile C/P/M/F/U): visao maxima (384px / 12 tiles)
+  Player fora (tile G/O): visao reduzida (160px / 5 tiles)
+  Noite: maxRange = min(playerRange, 160)
+
+  updateVisionRanges(dt):
+    Verifica tile atual de cada player vivo
+    Interpolacao suave: lerp speed 3/s
+
+  buildVisibilityPolygon: usa playerVisionRange[playerIndex]
+  buildLightmap: gradiente radial usa maxR por player
+  Multiplayer: cada player com visionRange independente
+
+================================================================================
