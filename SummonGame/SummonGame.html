@@ -289,13 +289,17 @@ canvas {
      <div id="player-setup-desc" style="min-height:20px; color:#aaa; font-size:14px; text-align:center; max-width:400px;"></div>
      <button id="btn-start-game" style="background:#2a2a3e; border:1px solid #4fc3f7; color:#fff; padding:10px 30px; cursor:pointer; font-family:'Courier New',monospace; font-size:16px; border-radius:4px;">Start Game</button>
    </div>
-  <div id="ability-hud" style="position:absolute; bottom:10px; right:10px; z-index:10; color:#ccc; font-size:12px; font-family:'Courier New',monospace; text-align:right; pointer-events:none;">
-    <div id="ability-name" style="color:#888;"></div>
-    <div style="width:120px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; margin-top:2px;">
-      <div id="ability-bar" style="height:100%; background:rgba(255,60,60,0.6); border-radius:3px; width:100%; transition:width 0.1s;"></div>
-    </div>
-    <div id="ability-text" style="color:#666; font-size:10px;"></div>
-  </div>
+   <div id="ability-hud" style="position:absolute; bottom:10px; right:10px; z-index:10; color:#ccc; font-size:12px; font-family:'Courier New',monospace; text-align:right; pointer-events:none;">
+     <div id="ability-name" style="color:#888;"></div>
+     <div style="width:120px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; margin-top:2px;">
+       <div id="ability-bar" style="height:100%; background:rgba(255,60,60,0.6); border-radius:3px; width:100%; transition:width 0.1s;"></div>
+     </div>
+     <div id="ability-text" style="color:#666; font-size:10px;"></div>
+   </div>
+   <div id="hotbar-hud" style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); z-index:10; display:flex; gap:4px; pointer-events:none;"></div>
+   <div id="use-progress" style="position:absolute; bottom:55px; left:50%; transform:translateX(-50%); z-index:10; display:none; pointer-events:none;">
+     <canvas id="use-progress-canvas" width="40" height="40" style="display:block;"></canvas>
+   </div>
 </div>
 
 <script>
@@ -321,7 +325,9 @@ const LEGEND_COLORS = {
   'M': '#aa33cc',
   'F': '#00cccc',
   'U': '#dddd00',
-  'W': '#666666'
+  'W': '#666666',
+  'S': '#ff8800',
+  'T': '#888888'
 };
 
 const LEGEND_LABELS = {
@@ -334,17 +340,37 @@ const LEGEND_LABELS = {
   'M': 'Monster Spawn',
   'F': 'Artifact',
   'U': 'Waypoint',
-  'W': 'ShortWall'
+  'W': 'ShortWall',
+  'S': 'Shop',
+  'T': 'Trash'
 };
 
 const MAX_PLAYERS = 4;
 
 const DEFAULT_KEYBINDS = [
-  { up: 'w', down: 's', left: 'a', right: 'd', interact: 'e', ability: 'f' },
-  { up: 'arrowup', down: 'arrowdown', left: 'arrowleft', right: 'arrowright', interact: 'shift', ability: '/' },
-  { up: 'i', down: 'k', left: 'j', right: 'l', interact: 'u', ability: 'o' },
-  { up: 'numpad8', down: 'numpad5', left: 'numpad4', right: 'numpad6', interact: 'numpad0', ability: 'numpad1' }
+  { up: 'w', down: 's', left: 'a', right: 'd', interact: 'e', ability: 'f', use: 'r' },
+  { up: 'arrowup', down: 'arrowdown', left: 'arrowleft', right: 'arrowright', interact: 'shift', ability: '/', use: '.' },
+  { up: 'i', down: 'k', left: 'j', right: 'l', interact: 'u', ability: 'o', use: 'p' },
+  { up: 'numpad8', down: 'numpad5', left: 'numpad4', right: 'numpad6', interact: 'numpad0', ability: 'numpad1', use: 'numpad2' }
 ];
+
+// ============================================================
+// ITEMS
+// ============================================================
+const Items = {
+  beartrap: {
+    name: 'Bear Trap', price: 5, desc: 'Stuns monster for 1 second', stun: 1,
+    icon: 'T', color: '#888', trapColor: '#666', trapRadius: 6
+  },
+  landmine: {
+    name: 'Land Mine', price: 10, desc: 'Stuns monster for 3 seconds', stun: 3,
+    icon: 'M', color: '#c44', trapColor: '#a22', trapRadius: 8
+  },
+  crucifix: {
+    name: 'Crucifix', price: 15, desc: 'Stuns monster for 7 seconds', stun: 7,
+    icon: '+', color: '#cc0', trapColor: '#aa0', trapRadius: 10
+  }
+};
 
 // ============================================================
 // MONSTER TYPES
@@ -468,7 +494,7 @@ function parseMap(text) {
   for (let i = 0; i < cleanLines.length; i++) {
     while (cleanLines[i].length < cols) cleanLines[i] += 'G';
   }
-  const validChars = new Set(['O','C','G','d','A','P','M','F','U','W']);
+   const validChars = new Set(['O','C','G','d','A','P','M','F','U','W','S','T']);
   const tiles = [];
   const doors = [];
   const artifacts = [];
@@ -623,6 +649,10 @@ class Player {
     this.abilityActive = false;
     this.abilityTimer = 0;
     this.keybinds = { ...DEFAULT_KEYBINDS[this.playerIndex] };
+    this.inventory = [null, null, null, null, null];
+    this.selectedSlot = 0;
+    this.useTimer = 0;
+    this.using = false;
   }
 
   update(dt, game) {
@@ -660,7 +690,40 @@ class Player {
       game.updateInteraction(this);
     }
     if (!keys[kb.interact]) { this.interacting = false; this.interactTimer = 0; }
+    // Hotbar: cycle slot on tap, hold to use
+    if (keysJustPressed[kb.use]) {
+      // Tap R: cycle slot (skip empty)
+      keysJustPressed[kb.use] = false;
+      let next = this.selectedSlot;
+      let tries = 0;
+      do {
+        next = (next + 1) % 5;
+        tries++;
+      } while (tries < 5 && !this.inventory[next]);
+      this.selectedSlot = next;
+      this.useTimer = 0;
+      this.using = false;
+    }
+    // Hold R to use item
+    if (keys[kb.use] && this.inventory[this.selectedSlot] && !this.using) {
+      this.useTimer += dt;
+      if (this.useTimer >= 1) {
+        game.useItem(this);
+        this.useTimer = 0;
+      }
+    }
+    if (!keys[kb.use]) { this.useTimer = 0; this.using = false; }
   }
+
+  hasSpace() { return this.inventory.some(s => !s); }
+  addToInventory(item) {
+    for (let i = 0; i < 5; i++) {
+      if (!this.inventory[i]) { this.inventory[i] = item; return true; }
+    }
+    return false;
+  }
+  getEquippedItem() { return this.inventory[this.selectedSlot]; }
+  removeEquipped() { this.inventory[this.selectedSlot] = null; }
 
   canMoveTo(px, py, game) {
     const margin = 4;
@@ -717,6 +780,36 @@ class Player {
         bestDist = dist;
         this.interactTarget = art;
         this.interactType = 'artifact';
+      }
+    }
+    // Check shops (only when monster dead)
+    if (game.activeMonsters.every(m => !m.alive)) {
+      for (const shop of game.shopItems) {
+        if (shop.sold) continue;
+        const dx = shop.x + 0.5 - this.px / TILE_SIZE;
+        const dy = shop.y + 0.5 - this.py / TILE_SIZE;
+        const dist = Math.sqrt(dx * dx + dy * dy) * TILE_SIZE;
+        if (dist < bestDist) {
+          bestDist = dist;
+          this.interactTarget = shop;
+          this.interactType = 'shop';
+        }
+      }
+    }
+    // Check trash bins (only when monster dead)
+    if (game.activeMonsters.every(m => !m.alive)) {
+      for (let y = 0; y < game.mapHeight; y++) {
+        for (let x = 0; x < game.mapWidth; x++) {
+          if (game.tiles[y][x] !== 'T') continue;
+          const dx = x + 0.5 - this.px / TILE_SIZE;
+          const dy = y + 0.5 - this.py / TILE_SIZE;
+          const dist = Math.sqrt(dx * dx + dy * dy) * TILE_SIZE;
+          if (dist < bestDist) {
+            bestDist = dist;
+            this.interactTarget = { x, y };
+            this.interactType = 'trash';
+          }
+        }
       }
     }
   }
@@ -803,6 +896,7 @@ class MonsterEntity {
     this.bodyColor = mt.color;
     this.bodyStroke = mt.strokeColor;
     this.name = mt.name;
+    this.stunTimer = 0;
   }
 
   spawn() {
@@ -933,6 +1027,11 @@ class MonsterEntity {
 
   update(dt) {
     if (!this.alive) return;
+    if (this.stunTimer > 0) {
+      this.stunTimer -= dt;
+      if (this.stunTimer <= 0) this.stunTimer = 0;
+      return;
+    }
     if (this.attackCooldown > 0) this.attackCooldown -= dt;
     this.checkNearbyDoors(dt);
     switch (this.state) {
@@ -1185,6 +1284,9 @@ class Game {
     this.difficulty = 'easy';
     this.baseMonsterSpeed = 70;
     this.artifactFPoints = [];
+    this.currency = 0;
+    this.traps = [];
+    this.shopItems = [];
     this.nightTransition = 0;
     this.isNight = false;
     this.roofAlpha = 1;
@@ -1276,6 +1378,10 @@ class Game {
       p.abilityActive = false;
       p.abilityTimer = 0;
       if (p.playerClass === 'scout') p.speed = p.baseSpeed;
+      p.inventory = [null, null, null, null, null];
+      p.selectedSlot = 0;
+      p.useTimer = 0;
+      p.using = false;
       this.players.push(p);
     }
     // Clear monsters
@@ -1295,7 +1401,9 @@ class Game {
     this.summonTimer = 0;
     this.summonDelay = 0;
     this.particles = [];
+    this.traps = [];
     this.buildAutotileCache();
+    this.initShops();
     this.setDifficulty();
     updateMapEditor(this);
     this.showMessage('');
@@ -1344,7 +1452,7 @@ class Game {
     const h = this.mapHeight, w = this.mapWidth;
     this.tileVariation = new Array(h);
     this.tileEdgeMask = new Array(h);
-    const isFloor = t => t === 'C' || t === 'U' || t === 'F' || t === 'P' || t === 'M';
+    const isFloor = t => t === 'C' || t === 'U' || t === 'F' || t === 'P' || t === 'M' || t === 'S' || t === 'T';
     for (let y = 0; y < h; y++) {
       this.tileVariation[y] = new Float32Array(w);
       this.tileEdgeMask[y] = new Int8Array(w);
@@ -1366,6 +1474,8 @@ class Game {
   restart() {
     this.summoning = false;
     this.activeMonsters = [];
+    this.traps = [];
+    this.currency = 0;
     this.loadMap(parseMap(DEFAULT_MAP.join('\n')));
     this.showClassSelection();
   }
@@ -1482,6 +1592,8 @@ class Game {
     for (const p of this.players) p.update(dt, this);
     // Update monsters
     for (const m of this.activeMonsters) m.update(dt);
+    // Update traps
+    this.updateTraps(dt);
     // Update artifacts
     for (const art of this.artifactEntities) art.update(dt);
     // Update particles
@@ -1522,6 +1634,7 @@ class Game {
     // Update HUD
     updateHUD(this);
     updateAbilityHUD(this);
+    updateHotbarHUD(this);
     // Consume justPressed
     for (const k in keysJustPressed) keysJustPressed[k] = false;
   }
@@ -1879,6 +1992,17 @@ class Game {
         }
       }
       this.showMessage('Round ' + this.roundNumber + ' complete! Monster defeated!');
+      // Round reward: random item to all players
+      const keys = Object.keys(Items);
+      for (const p of this.players) {
+        if (!p.alive) continue;
+        if (p.hasSpace()) {
+          const key = keys[Math.floor(Math.random() * keys.length)];
+          p.addToInventory(key);
+          this.showMessage(p.name + ' received ' + Items[key].name + '!');
+        }
+      }
+      this.restockShops();
       this.selectArtifactsForRound();
     }
   }
@@ -1961,6 +2085,160 @@ class Game {
         this.showMessage('Summoning ritual begins...');
       }
       else if (type === 'artifact') this.collectArtifact(target);
+      else if (type === 'shop') {
+        this.buyFromShop(player, target);
+      }
+      else if (type === 'trash') {
+        this.sellItem(player);
+      }
+    }
+  }
+
+  useItem(player) {
+    const item = player.getEquippedItem();
+    if (!item) return;
+    const it = Items[item];
+    if (!it || !it.stun) return;
+    this.traps.push({ x: player.px, y: player.py, item: item, active: true, stun: it.stun, trapColor: it.trapColor, trapRadius: it.trapRadius });
+    player.removeEquipped();
+    this.showMessage(player.name + ' placed ' + it.name);
+  }
+
+  buyFromShop(player, shopData) {
+    if (!shopData || shopData.sold) return;
+    if (!player.hasSpace()) { this.showMessage(player.name + "'s inventory is full."); return; }
+    if (this.currency < shopData.price) { this.showMessage('Not enough money (' + this.currency + ' coins).'); return; }
+    this.currency -= shopData.price;
+    player.addToInventory(shopData.itemKey);
+    shopData.sold = true;
+    this.showMessage(player.name + ' bought ' + Items[shopData.itemKey].name);
+  }
+
+  sellItem(player) {
+    const item = player.getEquippedItem();
+    if (!item) { this.showMessage(player.name + ' has no item to sell.'); return; }
+    const price = Items[item].price;
+    this.currency += price;
+    player.removeEquipped();
+    this.showMessage(player.name + ' sold ' + Items[item].name + ' for ' + price + ' coins.');
+  }
+
+  initShops() {
+    this.shopItems = [];
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        if (this.tiles[y][x] !== 'S') continue;
+        const keys = Object.keys(Items);
+        const key = keys[Math.floor(Math.random() * keys.length)];
+        this.shopItems.push({
+          x, y, itemKey: key, price: Items[key].price, sold: false,
+          worldX: x * TILE_SIZE + TILE_SIZE / 2,
+          worldY: y * TILE_SIZE + TILE_SIZE / 2
+        });
+      }
+    }
+  }
+
+  restockShops() {
+    for (const shop of this.shopItems) {
+      shop.sold = false;
+      const keys = Object.keys(Items);
+      const key = keys[Math.floor(Math.random() * keys.length)];
+      shop.itemKey = key;
+      shop.price = Items[key].price;
+    }
+  }
+
+  updateTraps(dt) {
+    for (const m of this.activeMonsters) {
+      if (!m.alive || m.stunTimer > 0) continue;
+      for (let i = this.traps.length - 1; i >= 0; i--) {
+        const t = this.traps[i];
+        if (!t.active) continue;
+        const dx = m.px - t.x;
+        const dy = m.py - t.y;
+        if (Math.sqrt(dx * dx + dy * dy) < TILE_SIZE * 0.5) {
+          m.stunTimer = t.stun;
+          t.active = false;
+          this.traps.splice(i, 1);
+          this.showMessage(Items[t.item].name + ' triggered! Monster stunned ' + t.stun + 's');
+          break;
+        }
+      }
+    }
+  }
+
+  renderTraps(ctx) {
+    for (const t of this.traps) {
+      if (!t.active) continue;
+      const sx = t.x - this.camX;
+      const sy = t.y - this.camY;
+      if (sx < -50 || sx > this.canvas.width + 50 || sy < -50 || sy > this.canvas.height + 50) continue;
+      ctx.fillStyle = t.trapColor;
+      ctx.beginPath();
+      ctx.arc(sx, sy, t.trapRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+      // Cross mark
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sx - 3, sy);
+      ctx.lineTo(sx + 3, sy);
+      ctx.moveTo(sx, sy - 3);
+      ctx.lineTo(sx, sy + 3);
+      ctx.stroke();
+    }
+  }
+
+  renderShops(ctx) {
+    if (this.activeMonsters.some(m => m.alive)) return;
+    for (const shop of this.shopItems) {
+      if (shop.sold) continue;
+      const sx = shop.worldX - this.camX;
+      const sy = shop.worldY - this.camY;
+      if (sx < -50 || sx > this.canvas.width + 50 || sy < -50 || sy > this.canvas.height + 50) continue;
+      const it = Items[shop.itemKey];
+      // Pedestal
+      ctx.fillStyle = '#3a3030';
+      ctx.fillRect(sx - 10, sy - 10, 20, 20);
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(sx - 10, sy - 10, 20, 20);
+      // Item icon
+      ctx.fillStyle = it.color;
+      ctx.font = 'bold 14px "Courier New", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(it.icon, sx, sy + 5);
+      ctx.textAlign = 'start';
+      // Price
+      ctx.fillStyle = '#ff0';
+      ctx.font = '9px "Courier New", monospace';
+      ctx.fillText(it.price + 'g', sx - 8, sy - 14);
+    }
+  }
+
+  renderTrashBins(ctx) {
+    if (this.activeMonsters.some(m => m.alive)) return;
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        if (this.tiles[y][x] !== 'T') continue;
+        const sx = x * TILE_SIZE + TILE_SIZE / 2 - this.camX;
+        const sy = y * TILE_SIZE + TILE_SIZE / 2 - this.camY;
+        if (sx < -50 || sx > this.canvas.width + 50 || sy < -50 || sy > this.canvas.height + 50) continue;
+        ctx.fillStyle = '#555';
+        ctx.fillRect(sx - 8, sy - 10, 16, 20);
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(sx - 8, sy - 10, 16, 20);
+        ctx.fillStyle = '#aaa';
+        ctx.font = '9px "Courier New", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('$', sx, sy + 3);
+        ctx.textAlign = 'start';
+      }
     }
   }
 
@@ -2025,6 +2303,11 @@ class Game {
     this.renderArtifacts(ctx);
     // Draw roof overlay
     this.renderRoof(ctx);
+    // Draw traps on floor
+    this.renderTraps(ctx);
+    // Draw shops and trash bins on floor
+    this.renderShops(ctx);
+    this.renderTrashBins(ctx);
     // Raycast lightmap (replaces old fog)
     const lightmap = this.buildLightmap();
     ctx.drawImage(lightmap, 0, 0);
@@ -2065,12 +2348,14 @@ class Game {
           case 'A': color = ALTAR_COLOR; break;
           case 'P': case 'M': case 'F': case 'U': color = INTERIOR_COLOR; break;
           case 'W': color = FURNITURE_COLOR; break;
+          case 'S': color = INTERIOR_COLOR; break;
+          case 'T': color = INTERIOR_COLOR; break;
         }
         ctx.fillStyle = color;
         ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
 
         // Autotiling: floor variations (C, U, F on floor)
-        if (tile === 'C' || tile === 'U' || tile === 'F' || tile === 'P' || tile === 'M') {
+        if (tile === 'C' || tile === 'U' || tile === 'F' || tile === 'P' || tile === 'M' || tile === 'S' || tile === 'T') {
           const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
           const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
           // Subtle plank lines
@@ -2308,6 +2593,7 @@ class Game {
     // Raycast perf info
     const totalRays = this.visibilityPolygons.reduce((s, vp) => s + vp.points.length, 0);
     ctx.fillText('Rays: ' + totalRays + ' | Diff: ' + this.difficulty + ' | Rnd: ' + this.roundNumber + ' | Spd:+' + this.getSpeedBonusPercent() + '%', 10, this.canvas.height - 30);
+    ctx.fillText('Traps: ' + this.traps.length + ' | Shops: ' + this.shopItems.filter(s => !s.sold).length + ' | Cash: ' + this.currency, 10, this.canvas.height - 15);
   }
 
   renderMessage(ctx) {
@@ -2445,6 +2731,7 @@ function updateHUD(game) {
   html += 'Difficulty: ' + game.difficulty + ' | Round: ' + game.roundNumber + '<br>';
   html += 'Artefatos: ' + game.collectedArtifacts + '/' + game.artifactCount + '<br>';
   html += 'Speed Bonus: +' + game.getSpeedBonusPercent() + '%<br>';
+  html += 'Coins: ' + game.currency + '<br>';
   html += 'Estado: ' + night;
   hud.innerHTML = html;
   if (game.monsterTypeMsgTimer > 0 && game.messageTimer <= 0) {
@@ -2484,6 +2771,37 @@ function updateAbilityHUD(game) {
   hud.style.display = 'block';
   hud.innerHTML = html;
 }
+
+function updateHotbarHUD(game) {
+  const container = document.getElementById('hotbar-hud');
+  let html = '';
+  for (const p of game.players) {
+    if (!p.alive) continue;
+    const color = ['#4488ff','#ff8844','#44ff44','#ff44ff'][p.playerIndex] || '#ccc';
+    html += '<div style="display:flex;gap:3px;align-items:center;margin-right:12px;">';
+    html += '<span style="color:' + color + ';font-size:9px;min-width:20px;">' + p.name.substring(0, 3) + '</span>';
+    for (let i = 0; i < 5; i++) {
+      const item = p.inventory[i];
+      const selected = i === p.selectedSlot;
+      const it = item ? Items[item] : null;
+      html += '<div style="width:22px;height:22px;background:' + (selected ? '#2a2a3e' : '#111') + ';border:1px solid ' + (selected ? '#4fc3f7' : '#333') + ';border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:11px;color:' + (it ? it.color : '#333') + ';">';
+      html += it ? it.icon : '-';
+      html += '</div>';
+    }
+    // Use progress
+    if (p.useTimer > 0) {
+      const pct = Math.min(100, (p.useTimer / 1) * 100);
+      html += '<div style="width:20px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-left:4px;">';
+      html += '<div style="height:100%;width:' + pct + '%;background:#4fc3f7;border-radius:2px;transition:width 0.05s;"></div>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function updateHotbarInGame(game) { updateHotbarHUD(game); }
+updateHotbarHUD = updateHotbarHUD;
 
 function updateMapEditor(game) {
   // Build legend
@@ -2531,7 +2849,8 @@ function buildHotkeyConfig(game) {
       { key: 'left', label: 'Move Left' },
       { key: 'right', label: 'Move Right' },
       { key: 'interact', label: 'Interact' },
-      { key: 'ability', label: 'Ability' }
+      { key: 'ability', label: 'Ability' },
+      { key: 'use', label: 'Use/Cycle Item' }
     ];
     for (const act of actions) {
       html += '<div class="hotkey-row">';

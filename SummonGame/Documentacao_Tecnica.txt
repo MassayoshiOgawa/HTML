@@ -2172,3 +2172,87 @@ SECAO 48 - SISTEMA DE VISAO INDOOR / OUTDOOR
   Multiplayer: cada player com visionRange independente
 
 ================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (ITENS / TRAPS / SHOP / ECONOMIA)
+================================================================================
+
+ALTERACAO 15 - SISTEMA DE ITENS, TRAPS, SHOP E ECONOMIA
+
+  NOVOS TILES ASCII:
+    S = Shop Spawn: vende 1 item por round. Desaparece qdo monstro vivo.
+    T = Trash Bin: vende item equipado por valor integral.
+
+  ITEMS (Items = { beartrap, landmine, crucifix }):
+    Bear Trap:  5 coins, stun 1s, cor cinza
+    Land Mine:  10 coins, stun 3s, cor vermelha
+    Crucifix:   15 coins, stun 7s, cor amarela
+
+  ECONOMIA:
+    Game.currency: inteiro compartilhado globalmente (multiplayer)
+    Ganho ao vender item na lixeira (T): valor integral do item
+    Gasto ao comprar item na loja (S): preco do item
+
+  INVENTARIO POR PLAYER:
+    Player.inventory[5]: array de 5 slots (null = vazio)
+    Player.selectedSlot: indice do slot equipado
+    Player.hasSpace(): true se ha slot vazio
+    Player.addToInventory(item): preenche primeiro slot vazio
+    Player.getEquippedItem(): retorna item no slot selecionado
+    Player.removeEquipped(): remove item do slot selecionado
+
+  HOTBAR HUD:
+    updateHotbarHUD(game): renderiza slots com mini-icones
+    Slot selecionado destacado (borda #4fc3f7, fundo #2a2a3e)
+    Slot vazio mostra '-', ocupado mostra icone do item colorido
+    Barra de progresso de uso (hold R) ao lado dos slots
+
+  INPUT:
+    Tecla R (configuravel por keybind 'use'):
+      Tap: cicla slot para direita, pula vazios
+      Hold 1s: usa item equipado (coloca trap)
+    Movimento permitido durante hold
+
+  TRAP SYSTEM:
+    Game.traps[]: cada trap = { x, y, item, active, stun, trapColor, trapRadius }
+    Game.useItem(player): remove item equipado, coloca trap na posicao do player
+    Game.updateTraps(dt): verifica colisao monstro-trap (dist < TILE_SIZE*0.5)
+    Game.renderTraps(ctx): circulo colorido + cruz no centro
+    Trap so ativa se monstro nao estiver stunado
+    Apos ativar: trap removida (active=false, splice do array)
+
+  MONSTER STUN:
+    MonsterEntity.stunTimer: float, duracao restante do stun
+    Durante stun (> 0): update() retorna cedo (IA pausada)
+      Nao se move, nao rotaciona, nao abre portas, nao ataca
+    Stuns NAO acumulam: so primeiro trap ativa
+    Durante stun: monstro ignora outras traps
+    Apos stunTimer <= 0: IA volta ao normal
+
+  SHOP SYSTEM:
+    Game.shopItems[]: cada shop = { x, y, itemKey, price, sold }
+    Game.initShops(): cria shops nos tiles S com item aleatorio
+    Game.restockShops(): reabastece ao fim do round
+    Player.checkInteraction: detecta shops (so qdo monstro morto)
+    Game.buyFromShop(player, shop): verifica espaco, dinheiro, compra
+    Game.renderShops(ctx): pedestal + icone + preco (qdo monstro morto)
+    Shops invisiveis qdo monstro vivo (cobertas pelo lightmap/floor)
+
+  TRASH BIN SYSTEM:
+    Tile T: interagivel qdo monstro morto
+    Game.sellItem(player): vende item equipado, adiciona coins
+    Game.renderTrashBins(ctx): quadrado cinza + $ (qdo monstro morto)
+
+  ROUND REWARDS:
+    Ao fim do round (checkGameState):
+      Para cada player vivo com espaco: item aleatorio
+      Shops reabastecidas (restockShops)
+
+  HOTKEY CONFIG:
+    Adicionado 'Use/Cycle Item' aos keybinds por player
+    P1: R, P2: ., P3: P, P4: Numpad 2
+
+  DEBUG MODE (F1):
+    Mostra: Traps ativos, Shops nao vendidos, Currency
+
+================================================================================
