@@ -1,0 +1,526 @@
+================================================================================
+MEGA PROMPT - SISTEMA DE HOTBAR RESPONSIVO COM CONTROLE DE TAMANHO E LAYOUT
+================================================================================
+
+ATENCAO: Leia TODO o arquivo SummonGame.html e TODO o arquivo
+Documentacao_Completa.txt antes de comecar a implementar. Nao pule nenhuma
+parte. Voce precisa entender a arquitetura completa do jogo.
+
+================================================================================
+1. INSTRUCOES GLOBAIS (LEIA ANTES DE TUDO)
+================================================================================
+
+- Faca TODAS as alteracoes APENAS no arquivo SummonGame.html.
+- Nao crie NENHUM outro arquivo de nenhuma linguagem (nao crie .css, .js,
+  .py, .java, .c, .cpp, .md, .json, .txt, .xml, .yaml, .ts, .rs, .go,
+  .rb, .php, .lua, .sh, .bat, .ps1 — nada). A unica excessao e a
+  documentacao (Documentacao_Completa.txt) que voce deve ATUALIZAR.
+- Nao dependa de bibliotecas externas, frameworks, CDNs ou assets externos.
+- Todo o codigo deve ser HTML + CSS + JavaScript PURO, inline no mesmo
+  arquivo, seguindo o estilo do codigo existente.
+- Ao fazer QUALQUER alteracao no SummonGame.html, voce DEVE registrar a
+  alteracao no Documentacao_Completa.txt em DOIS lugares:
+  a) No CHANGELOG (final do arquivo, como "ALTERACAO 22 — ...")
+  b) Em uma NOVA SECAO numerada (SECAO 55) explicando o sistema em
+     detalhe, com conceito, estrutura de dados, fluxo, codigo, regras e
+     escalabilidade.
+- A documentacao deve ser profissional, limpa, bem estruturada, em
+  portugues. Siga EXATAMENTE o estilo e formato das alteracoes e secoes
+  existentes no Documentacao_Completa.txt (ex: ALTERACAO 20 e SECAO 51).
+- Implemente TUDO AGORA, sem perguntar, sem pedir confirmacao, sem
+  hesitar. Nao escreva "vou fazer" — faca. Nao resuma — implemente.
+
+================================================================================
+2. OBJETIVO PRINCIPAL
+================================================================================
+
+Implementar um sistema de hotbar responsivo e escalavel onde:
+
+  A) Cada hotbar de jogador ocupa, por padrao, 25% da largura do container
+     #hotbar-hud. Com 4 jogadores, 4 hotbars ocupam 100% da largura
+     disponivel. Com 2 jogadores, 2 hotbars ocupam 50%. Com 1 jogador, 1
+     hotbar ocupa 25%. O sistema deve funcionar para qualquer numero de
+     jogadores (1 a MAX_PLAYERS = 4, mas PREPARADO para ate 8 jogadores
+     no futuro sem quebrar — basta alterar MAX_PLAYERS).
+
+  B) Nas configuracoes (#settings-panel), adicionar controles de:
+     - Tamanho: botoes [-] e [+] para aumentar/diminuir o tamanho de TODAS
+       as hotbars simultaneamente. O valor base e 100 (representa 100% do
+       tamanho padrao, que sao os 25%). Cada clique altera em ±10.
+       Minimo: 50, Maximo: 200.
+     - Layout: um botao que alterna entre dois modos:
+       'horizontal' (padrao — todas hotbars lado a lado na mesma linha,
+       centralizadas na parte inferior) e 'vertical' (hotbars empilhadas
+       verticalmente no canto inferior esquerdo).
+
+  C) O sistema deve ser RESPONSIVO (funciona em diferentes tamanhos de
+     tela) e ESCALAVEL (preparado para 4+ jogadores sem quebrar layout).
+
+================================================================================
+3. REQUISITOS DETALHADOS
+================================================================================
+
+3.1 — ESTRUTURA DE DADOS (ADICIONAR AO CONSTRUCTOR DA CLASSE Game)
+
+  Adicionar as seguintes propriedades ao constructor da classe Game
+  (atualmente na linha ~1325, dentro de constructor()):
+
+    this.hotbarSize = 100;
+      Tipo: Number (inteiro).
+      Significado: Tamanho atual da hotbar em percentual do tamanho base.
+      Valor padrao: 100 (100% = cada hotbar ocupa 25% do container).
+      Faixa permitida: 50 a 200 (clampado nos botoes).
+      Incremento/decremento: ±10 por clique.
+      Afeta TODAS as hotbars igualmente.
+      Formula: larguraDaHotbar = (100% / numJogadoresVivos) * (hotbarSize / 100).
+        hotbarSize = 100 → 1 jogador = 25%, 4 jogadores = 100%
+        hotbarSize = 150 → 1 jogador = 37.5%, 4 jogadores = 150% (overflow)
+        hotbarSize = 50  → 1 jogador = 12.5%, 4 jogadores = 50%
+
+    this.hotbarLayout = 'horizontal';
+      Tipo: String.
+      Valores possiveis: 'horizontal' | 'vertical'.
+      'horizontal': hotbars lado a lado, centralizadas, flex-direction: row.
+      'vertical': hotbars empilhadas, canto inferior esquerdo, flex-direction: column.
+      Resetado ao padrao em loadMap() e restart().
+
+  AMBAS as propriedades devem ser RESETADAS para os valores padrao
+  (hotbarSize = 100, hotbarLayout = 'horizontal') em Game.loadMap()
+  (atualmente na linha ~1424) e em Game.restart() (atualmente na
+  linha ~1634). Adicione as linhas de reset apos os resets existentes
+  de summoning, activeMonsters, traps, currency, etc.
+
+  ATENCAO: Em Game.restart(), o metodo chama this.loadMap() internamente,
+  entao o reset em loadMap() ja cobre o restart. Mas por seguranca,
+  adicione em restart() tambem para o caso de loadMap() ser refatorado
+  no futuro.
+
+3.2 — CONTAINER #hotbar-hud (CSS E HTML)
+
+  LOCALIZACAO ATUAL DO ELEMENTO (linha 316):
+    <div id="hotbar-hud" style="position:absolute; bottom:10px; left:50%;
+    transform:translateX(-50%); z-index:10; display:flex; gap:4px;
+    pointer-events:none;"></div>
+
+  O QUE FAZER:
+
+  a) REMOVER o estilo inline do HTML. Deixar o elemento limpo:
+     <div id="hotbar-hud"></div>
+
+  b) ADICIONAR ao bloco <style> (entre as linhas 7 e 263) o seguinte CSS:
+
+     #hotbar-hud {
+       position: absolute;
+       bottom: 10px;
+       left: 0;
+       width: 100%;
+       z-index: 10;
+       display: flex;
+       flex-direction: row;
+       justify-content: center;
+       align-items: flex-end;
+       gap: 8px;
+       padding: 0 20px;
+       pointer-events: none;
+       box-sizing: border-box;
+     }
+     #hotbar-hud.vertical {
+       left: 10px;
+       width: auto;
+       max-width: 300px;
+       flex-direction: column;
+       align-items: flex-start;
+       gap: 4px;
+       padding: 0;
+     }
+
+     NOTA: O CSS acima e o ESTILO PADRAO (horizontal). O layout
+     vertical sera aplicado adicionando a classe CSS "vertical" ao
+     elemento via JavaScript em updateHotbarHUD(), usando:
+       container.classList.toggle('vertical', game.hotbarLayout === 'vertical');
+
+     Isso e mais limpo do que usar style.cssText inline e mantem
+     a separacao de responsabilidades.
+
+3.3 — FUNCAO updateHotbarHUD (REFATORAR COMPLETAMENTE)
+
+  LOCALIZACAO ATUAL: linha ~3168, function updateHotbarHUD(game).
+
+  A funcao DEVE ser refatorada para:
+
+  PASSO 1 — Obter o container e aplicar layout CSS:
+    const container = document.getElementById('hotbar-hud');
+    container.classList.toggle('vertical', game.hotbarLayout === 'vertical');
+
+  PASSO 2 — Contar jogadores vivos:
+    const alivePlayers = game.players.filter(p => p.alive);
+    const numPlayers = alivePlayers.length;
+    if (numPlayers === 0) { container.innerHTML = ''; return; }
+
+  PASSO 3 — Para cada jogador vivo, calcular dimensoes dinamicas:
+
+    Para layout HORIZONTAL:
+      - Largura da hotbar individual (em % do container):
+        widthCalc = (100 / numPlayers) * (game.hotbarSize / 100)
+        Ex: 4 jogadores, hotbarSize=100 → 25% cada → 100% total
+        Ex: 1 jogador, hotbarSize=100 → 100% → overflow (25% visivel)
+        Na pratica, use CSS calc:
+        width: calc((100% / ${numPlayers}) * ${game.hotbarSize / 100})
+        OU, mais simples e robusto:
+        flex: 0 0 calc((100% / ${numPlayers}) * ${game.hotbarSize / 100})
+        OU use porcentagem direta:
+        width: ${(100 / numPlayers) * (game.hotbarSize / 100)}%
+        (sem calc, o JS ja calcula o valor numerico)
+
+      - Tamanho dos slots (5 slots por hotbar):
+        slotSize = Math.max(24, Math.min(80, Math.floor(55 * game.hotbarSize / 100)));
+        (escala proporcional: 100 → 55px, 200 → 110px, 50 → 27px)
+        fontSizeSlot = Math.max(14, Math.min(40, Math.floor(28 * game.hotbarSize / 100)));
+        fontSizeName = Math.max(10, Math.min(30, Math.floor(23 * game.hotbarSize / 100)));
+
+      - A barra de progresso de uso (hold R) tambem escala:
+        barWidth = Math.max(20, Math.min(80, Math.floor(50 * game.hotbarSize / 100)));
+        barHeight = Math.max(4, Math.min(14, Math.floor(10 * game.hotbarSize / 100)));
+
+    Para layout VERTICAL:
+      - Cada hotbar ocupa 100% da largura do container (max-width: 300px).
+      - Slots reduzidos fixos: slotSize = 36, fontSizeSlot = 20, fontSizeName = 16.
+      - Barra de progresso: barWidth = 40, barHeight = 6.
+      - Margin-right entre hotbar e proxima: removida.
+      - Gap entre slots: reduzido para 4px.
+
+  PASSO 4 — Gerar o HTML de cada hotbar (MANTENDO EXATAMENTE o mesmo
+    conteudo visual: nome 3 caracteres + 5 slots + barra de uso):
+
+    Para cada jogador vivo (alivePlayers):
+      html += '<div style="display:flex;gap:' + slotGap + 'px;align-items:center;' +
+        (game.hotbarLayout === 'horizontal' ? 'margin-right:30px;' : '') +
+        'width:' + (game.hotbarLayout === 'horizontal' ? hotbarWidthPercent + '%' : '100%') + ';">';
+
+      // Nome abreviado (3 caracteres) com cor do jogador
+      html += '<span style="color:' + color + ';font-size:' + fontSizeName +
+        'px;min-width:' + (fontSizeName * 2) + 'px;text-align:center;">' +
+        p.name.substring(0, 3) + '</span>';
+
+      // 5 slots de inventario
+      for (let i = 0; i < 5; i++) {
+        const item = p.inventory[i];
+        const selected = i === p.selectedSlot;
+        const it = item ? Items[item] : null;
+        html += '<div style="width:' + slotSize + 'px;height:' + slotSize + 'px;' +
+          'background:' + (selected ? '#2a2a3e' : '#111') + ';' +
+          'border:1px solid ' + (selected ? '#4fc3f7' : '#333') + ';' +
+          'border-radius:' + Math.floor(slotSize * 0.15) + 'px;' +
+          'display:flex;align-items:center;justify-content:center;' +
+          'font-size:' + fontSizeSlot + 'px;color:' + (it ? it.color : '#333') + ';">';
+        html += it ? it.icon : '-';
+        html += '</div>';
+      }
+
+      // Barra de progresso de uso (se segurando R / useTimer > 0)
+      if (p.useTimer > 0) {
+        const pct = Math.min(100, (p.useTimer / 1) * 100);
+        html += '<div style="width:' + barWidth + 'px;height:' + barHeight + 'px;' +
+          'background:rgba(255,255,255,0.1);border-radius:' + Math.floor(barHeight/2) +
+          'px;margin-left:10px;flex-shrink:0;">';
+        html += '<div style="height:100%;width:' + pct + '%;background:#4fc3f7;' +
+          'border-radius:' + Math.floor(barHeight/2) + 'px;transition:width 0.05s;"></div>';
+        html += '</div>';
+      }
+
+      html += '</div>';
+
+  PASSO 5 — Aplicar o HTML ao container:
+    container.innerHTML = html;
+
+  REGRAS IMPORTANTES:
+    - Nao use createElement/appendChild. Mantenha innerHTML como o codigo
+      existente faz.
+    - Nao altere o design dos slots (cores #111/#2a2a3e, bordas #333/#4fc3f7,
+      border-radius, icones coloridos).
+    - Nao altere a logica do inventario, so a renderizacao.
+    - A barra de progresso de uso (hold R) deve continuar funcionando
+      exatamente como antes, apenas com tamanho dinamico.
+    - O nome do jogador deve continuar sendo abreviado para 3 caracteres
+      com .substring(0, 3).
+    - O slot selecionado deve continuar destacado (borda #4fc3f7, fundo #2a2a3e).
+    - Slots vazios devem continuar mostrando '-' em cor #333.
+
+3.4 — PAINEL DE CONFIGURACOES (#settings-panel)
+
+  LOCALIZACAO ATUAL DO HTML DO PAINEL (linhas 272-277):
+    <div id="settings-panel">
+      <button id="btn-restart">Restart Game</button>
+      <button id="btn-map-editor">Map Editor</button>
+      <div id="hotkey-config"></div>
+      <button id="btn-close-settings">Close</button>
+    </div>
+
+  MODIFICAR para (NOVO HTML):
+
+    <div id="settings-panel">
+      <button id="btn-restart">Restart Game</button>
+      <button id="btn-map-editor">Map Editor</button>
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;">
+        <span style="color:#aaa;">Hotbar Size:</span>
+        <button id="btn-hotbar-minus" style="width:28px;height:28px;padding:0;font-size:16px;">-</button>
+        <span id="hotbar-size-value" style="color:#4fc3f7;font-family:'Courier New',monospace;font-size:16px;min-width:32px;text-align:center;">100</span>
+        <button id="btn-hotbar-plus" style="width:28px;height:28px;padding:0;font-size:16px;">+</button>
+      </div>
+      <button id="btn-hotbar-layout">Layout: Horizontal</button>
+      <div id="hotkey-config"></div>
+      <button id="btn-close-settings">Close</button>
+    </div>
+
+  ADICIONAR NO BLOCO DE INICIALIZACAO (DOMContentLoaded, apos a linha ~3329,
+  antes ou depois dos outros addEventListener):
+
+  // Hotbar Size - minus button
+  document.getElementById('btn-hotbar-minus').addEventListener('click', () => {
+    game.hotbarSize = Math.max(50, game.hotbarSize - 10);
+    document.getElementById('hotbar-size-value').textContent = game.hotbarSize;
+    updateHotbarHUD(game);
+  });
+
+  // Hotbar Size - plus button
+  document.getElementById('btn-hotbar-plus').addEventListener('click', () => {
+    game.hotbarSize = Math.min(200, game.hotbarSize + 10);
+    document.getElementById('hotbar-size-value').textContent = game.hotbarSize;
+    updateHotbarHUD(game);
+  });
+
+  // Hotbar Layout - toggle button
+  document.getElementById('btn-hotbar-layout').addEventListener('click', () => {
+    game.hotbarLayout = game.hotbarLayout === 'horizontal' ? 'vertical' : 'horizontal';
+    const layoutBtn = document.getElementById('btn-hotbar-layout');
+    layoutBtn.textContent = 'Layout: ' + (game.hotbarLayout === 'horizontal' ? 'Horizontal' : 'Vertical');
+    updateHotbarHUD(game);
+  });
+
+  NOTA: Ao abrir o settings panel, atualize o texto do botao de layout e
+  o valor do tamanho para refletir o estado atual. Adicione isso ao
+  event listener do #settings-btn (linha ~3297-3303):
+
+  if (panel.classList.contains('open')) {
+    buildHotkeyConfig(game);
+    // Sincronizar controles da hotbar com estado atual
+    document.getElementById('hotbar-size-value').textContent = game.hotbarSize;
+    document.getElementById('btn-hotbar-layout').textContent = 'Layout: ' +
+      (game.hotbarLayout === 'horizontal' ? 'Horizontal' : 'Vertical');
+  }
+
+3.5 — COMPORTAMENTO RESPONSIVO
+
+  - O container #hotbar-hud usa width: 100% e flexbox. Ao redimensionar
+    a janela (window.resize), o layout recalcula automaticamente.
+  - Os slots usam dimensoes calculadas no JavaScript baseadas em
+    game.hotbarSize, que por sua vez geram porcentagens relativas ao
+    container pai. Isso garante responsividade.
+  - Nao use valores FIXOS em pixels para slots no layout horizontal
+    (exceto os limites min/max de slotSize: 24 a 80).
+  - O layout vertical tem max-width: 300px para nao ocupar a tela toda
+    em resolucoes grandes. Em telas muito pequenas (< 400px), o max-width
+    naturalmente limita, e o overflow e tratado pelo flex-wrap implicito
+    (se necessario).
+  - A fonte dos icones escala proporcionalmente: fontSizeSlot = 28 *
+    (hotbarSize / 100), com limites de 14 a 40.
+
+3.6 — INTEGRACAO COM O GAME LOOP
+
+  A funcao updateHotbarHUD(game) ja e chamada a cada frame em
+  Game.update() na linha ~1813:
+    updateHotbarHUD(this);
+  Nenhuma alteracao necessaria aqui. A hotbar sera renderizada com as
+  novas dimensoes a cada frame automaticamente.
+
+3.7 — COMPATIBILIDADE E NAO-REGRESSAO
+
+  - Nao quebre nenhuma funcionalidade existente do jogo.
+  - Nao altere o design visual dos slots (cores, bordas, formato).
+  - Nao remova funcionalidades existentes (barra de progresso de uso,
+    highlight de slot selecionado, icones de itens).
+  - Nao altere o comportamento do jogo (movimento, combate, interacao).
+  - A tecla R (use/cycle) deve continuar funcionando exatamente como antes.
+  - A hotbar deve continuar mostrando nome abreviado (3 caracteres).
+  - A hotbar deve continuar destacando slot selecionado (borda #4fc3f7).
+  - A hotbar deve continuar mostrando '-' para slots vazios.
+  - O elemento #summon-desc (bottom: 80px) nao deve ser afetado.
+  - O elemento #ability-hud (bottom: 10px, left: 10px) nao deve conflitar
+    com a hotbar vertical.
+    VERIFICACAO: A ability-hud fica em bottom:10px; left:10px e a hotbar
+    vertical tambem fica em bottom:10px; left:10px. A ability-hud tem
+    z-index:10, a hotbar-hud tambem. Para evitar conflito visual, mova
+    a #ability-hud para bottom: auto; top: 50px; left: 10px quando o
+    layout for vertical. Ou, alternativamente, mantenha a ability-hud
+    acima da hotbar vertical. A forma mais simples: no layout vertical,
+    a ability-hud ja esta posicionada acima (ela fica em bottom:10px
+    mas com altura fixa ~60px). A hotbar vertical comeca em bottom:10px
+    mas cresce para cima. Como a ability-hud tem altura pequena e a
+    hotbar vertical cresce, pode haver sobreposicao.
+
+    SOLUCAO: No CSS de #ability-hud, quando o layout for vertical,
+    aumentar bottom ou mover para outra posicao. A maneira mais limpa e
+    via JavaScript em updateHotbarHUD: quando layout for 'vertical',
+    definir ability-hud style.bottom = 'auto' e style.top = '50px'.
+    Quando layout for 'horizontal', restaurar para bottom: 10px.
+    ISSO E OBRIGATORIO para evitar conflito visual.
+
+  - O elemento #use-progress (linha 317) tambem fica em bottom:55px.
+    Ele e controlado separadamente e nao deve ser alterado.
+
+3.8 — PERSISTENCIA DE ESTADO
+
+  - As configuracoes de tamanho e layout NAO precisam persistir entre
+    sessoes (nao usar localStorage, nao usar cookies).
+  - Ao restartar o jogo (Game.restart()), os valores devem voltar ao
+    padrao: hotbarSize = 100, hotbarLayout = 'horizontal'.
+  - Ao iniciar um novo jogo via tela de selecao de classe
+    (Game.start() → this.loadMap()), idem.
+  - Ao carregar um mapa via editor (applyMapFromEditor → loadMap), idem.
+  - Se o settings panel estiver aberto durante um restart, os controles
+    devem refletir os valores padrao. Mas como o restart fecha o panel,
+    isso e automatico na proxima abertura.
+
+================================================================================
+4. RESUMO DAS ALTERACOES NO CODIGO (CHECKLIST PARA A IA)
+================================================================================
+
+  [ ] 4.1 — Adicionar this.hotbarSize = 100 e this.hotbarLayout = 'horizontal'
+           ao constructor da classe Game (linha ~1325)
+
+  [ ] 4.2 — Adicionar reset de hotbarSize = 100 e hotbarLayout = 'horizontal'
+           em Game.loadMap() (linha ~1424, apos os resets existentes)
+
+  [ ] 4.3 — Adicionar reset de hotbarSize = 100 e hotbarLayout = 'horizontal'
+           em Game.restart() (linha ~1634, antes de chamar loadMap ou apos)
+
+  [ ] 4.4 — MODIFICAR o CSS: adicionar regras #hotbar-hud e #hotbar-hud.vertical
+           no bloco <style> (entre as linhas 7-263)
+
+  [ ] 4.5 — MODIFICAR o HTML: limpar o style inline do elemento #hotbar-hud
+           (linha 316), deixar apenas <div id="hotbar-hud"></div>
+
+  [ ] 4.6 — MODIFICAR o HTML do #settings-panel (linhas 272-277):
+           adicionar botoes de Hotbar Size (-, valor, +) e Layout toggle
+
+  [ ] 4.7 — REFATORAR a funcao updateHotbarHUD(game) (linha ~3168):
+           implementar calculo dinamico de dimensoes e suporte aos dois layouts
+
+  [ ] 4.8 — ADICIONAR event listeners para os novos botoes no bloco
+           DOMContentLoaded (linha ~3291), apos os listeners existentes
+
+  [ ] 4.9 — MODIFICAR o event listener do #settings-btn (linha ~3297):
+           sincronizar controles da hotbar ao abrir o painel
+
+  [ ] 4.10 — TRATAR conflito ability-hud vs hotbar vertical:
+            em updateHotbarHUD, ajustar posicao da #ability-hud
+
+================================================================================
+5. DOCUMENTACAO OBRIGATORIA
+================================================================================
+
+Apos implementar as alteracoes no SummonGame.html, voce DEVE:
+
+5.1 — Adicionar entrada no CHANGELOG em Documentacao_Completa.txt:
+
+  ALTERACAO 22 — SISTEMA DE HOTBAR RESPONSIVO COM CONTROLE DE TAMANHO E LAYOUT
+
+  Formato: identico as ALTERACOES 20, 18, 17, etc.
+  Descrever:
+  - O que foi feito (sistema de hotbar com 25% por jogador, controles +/-
+    de tamanho, toggle de layout horizontal/vertical).
+  - Mudancas no codigo (Game.hotbarSize, Game.hotbarLayout, CSS do
+    #hotbar-hud, CSS #hotbar-hud.vertical, refatoracao do updateHotbarHUD,
+    adicao de controles no settings panel, ajuste da #ability-hud).
+  - Regras de dimensionamento (25% base, hotbarSize 50-200, step 10).
+  - Regras de layout (horizontal flex row center vs vertical flex column
+    left).
+  - Reset em loadMap/restart.
+  - Solucao do conflito ability-hud vs hotbar vertical.
+
+5.2 — Adicionar NOVA SECAO numerada em Documentacao_Completa.txt:
+
+  SECAO 55 — SISTEMA DE HOTBAR RESPONSIVO
+
+  Estruturar identico as secoes existentes (ex: SECAO 51, SECAO 49):
+  55.1 — Conceito
+  55.2 — Estrutura de Dados (Game.hotbarSize, Game.hotbarLayout)
+  55.3 — Dimensionamento (formula: 25% * hotbarSize/100 / numPlayers)
+  55.4 — Layout Horizontal (flex row, centralizado, responsivo)
+  55.5 — Layout Vertical (flex column, canto inferior esquerdo)
+  55.6 — Controles no Painel de Configuracoes (botoes -/+ e toggle,
+         event listeners)
+  55.7 — Reset e Persistencia (loadMap, restart, nao usa localStorage)
+  55.8 — Conflito com Ability HUD e Solucao (reposicionamento no layout
+         vertical)
+  55.9 — Escalabilidade (como adicionar mais jogadores, alterar faixa de
+         tamanho, adicionar novos modos de layout)
+  55.10 — Codigo (explicacao das principais alteracoes: constructor,
+          loadMap, restart, updateHotbarHUD, event listeners)
+
+5.3 — Atualizar SECOES AFETADAS existentes (NO FINAL da documentacao,
+      como feito nas outras alteracoes — veja o padrao apos SECAO 51):
+
+      - SECAO 6 (ELEMENTOS DOM): #hotbar-hud agora tem CSS dinamico com
+        classe .vertical; #settings-panel tem novos botoes.
+      - SECAO 21 (SISTEMA DE HUD): updateHotbarHUD refatorado para
+        suportar dimensionamento dinamico e dois layouts.
+      - SECAO 38 (FLUXO DE EVENTOS): novos cliques nos botoes
+        btn-hotbar-minus, btn-hotbar-plus, btn-hotbar-layout.
+      - SECAO 45 (MULTIPLAYER): hotbar agora dimensiona dinamicamente
+        por jogador com controle de tamanho.
+
+================================================================================
+6. REGRAS DE QUALIDADE DO CODIGO
+================================================================================
+
+- Siga o estilo existente: sem comentarios (NADA de // ou /* */), nomes
+  de variaveis em camelCase, uso de 'const' e 'let' (nunca 'var'),
+  template literals com crases para HTML (``), aspas simples para strings.
+- Nao crie funcoes ou classes desnecessarias. Reutilize o maximo possivel
+  do codigo existente.
+- Nao use '!important' no CSS.
+- Nao use createElement ou appendChild para a hotbar — mantenha innerHTML
+  como o codigo existente usa.
+- Nao altere a logica de negocio (Game.update, Player.update, inventario,
+  etc.) — apenas a renderizacao da hotbar e os controles do painel.
+- Certifique-se de que o layout horizontal funcione com 1, 2, 3, e 4
+  jogadores. Com 1 jogador e hotbarSize=100, a hotbar ocupa 25% da largura
+  (centralizada via justify-content: center). Com 4 jogadores e
+  hotbarSize=100, as 4 hotbars ocupam 100% da largura.
+- O layout vertical deve funcionar com 1 a 4 jogadores, empilhando de cima
+  para baixo, com max-width: 300px.
+- Teste mentalmente com canvas de 600px de largura: 4 hotbars horizontais
+  com slotSize=24 ainda devem ser legiveis.
+- A barra de progresso de uso (hold R) deve funcionar nos dois layouts,
+  mantendo a mesma logica de p.useTimer / 1 * 100.
+
+================================================================================
+7. VERIFICACAO FINAL (AUTO-CHEcK)
+================================================================================
+
+Apos implementar, verifique mentalmente:
+
+  [ ] O jogo inicia com hotbar horizontal, tamanho 100?
+  [ ] Clicar em [-] reduz o tamanho e atualiza a hotbar imediatamente?
+  [ ] Clicar em [+] aumenta o tamanho e atualiza a hotbar imediatamente?
+  [ ] O valor numerico no painel mostra o tamanho correto?
+  [ ] O tamanho nao vai abaixo de 50 nem acima de 200?
+  [ ] Clicar no botao de layout alterna entre Horizontal e Vertical?
+  [ ] O texto do botao de layout atualiza corretamente?
+  [ ] No layout vertical, as hotbars estao empilhadas no canto inferior
+      esquerdo?
+  [ ] No layout vertical, a ability-hud nao se sobrepoe a hotbar?
+  [ ] Com 1 jogador, a hotbar ocupa 25% da largura (horizontal)?
+  [ ] Com 4 jogadores, as hotbars ocupam 100% da largura (horizontal)?
+  [ ] Os slots ainda mostram icones coloridos e '-' para vazios?
+  [ ] O slot selecionado ainda tem borda #4fc3f7 e fundo #2a2a3e?
+  [ ] A barra de progresso de uso (hold R) ainda aparece e funciona?
+  [ ] Ao dar restart, o tamanho volta para 100 e layout para horizontal?
+  [ ] Ao abrir o settings panel, os controles mostram os valores atuais?
+  [ ] Nenhuma funcionalidade do jogo foi quebrada?
+  [ ] Nenhum outro arquivo foi criado alem da atualizacao da documentacao?
+
+================================================================================
+FIM DO MEGA PROMPT — IMPLEMENTE TUDO AGORA, SEM HESITAR.
+================================================================================

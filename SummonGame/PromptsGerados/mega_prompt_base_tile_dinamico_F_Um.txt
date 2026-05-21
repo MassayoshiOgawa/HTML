@@ -1,0 +1,645 @@
+================================================================================
+MEGA PROMPT - SISTEMA DE BASE DINAMICA PARA TILES ESPECIAIS (F, U, m)
+================================================================================
+
+ID DA IDEIA: DYNAMIC_BASE_TILE_FOR_SPECIAL_MARKERS
+AUTOR: [usuario]
+DATA: Maio 2026
+ARQUIVO ALVO: SummonGame.html (single-file HTML5 Canvas game)
+DOCUMENTACAO DE REFERENCIA: Documentacao_Completa.txt
+
+REGRAS ABSOLUTAS (NAO VIOLAR):
+- A IA NAO pode criar, modificar, ou sugerir ABSOLUTAMENTE NENHUM arquivo em
+  outras linguagens como Java, Python, C++, C, TypeScript, ou qualquer outra.
+- O UNICO arquivo que pode ser modificado e: SummonGame.html
+- A IA NAO deve criar nenhum novo arquivo nem documento, a menos que seja
+  explicitamente solicitado neste prompt.
+- Nenhuma dependencia externa deve ser adicionada (sem npm, sem bibliotecas,
+  sem CDNs, sem frameworks).
+- Codigo deve ser escrito em JavaScript puro (ES5/ES6 compativel com browsers
+  modernos), HTML5 e CSS3.
+- AO FINAL DA IMPLEMENTACAO, TESTAR NO NAVEGADOR para garantir que tudo
+  funciona. Nao e necessario criar testes automatizados.
+- A documentacao (Documentacao_Completa.txt) DEVE ser atualizada com todas as
+  alteracoes feitas no codigo, de forma profissional, limpa e bem estruturada,
+  seguindo o mesmo formato ja existente na documentacao (secoes, changelog,
+  referencias de linha, etc).
+
+
+================================================================================
+1. DESCRICAO DA IDEIA
+================================================================================
+
+No jogo SummonGame, existem tiles especiais que atualmente sao SEMPRE tratados
+como piso interno (floor / INTERIOR_COLOR / 'C'):
+
+  - F = Artifact Spawn
+  - U = Waypoint
+  - m = Random Monster Spawn
+  - (e tambem P, M, S, T, mas estes NAO estao no escopo desta alteracao)
+
+O PROBLEMA: Os tiles F, U, m podem estar localizados em areas externas
+rodeadas por grama (G). Porem, atualmente eles sao SEMPRE renderizados com
+cor e textura de chao interno (INTERIOR_COLOR), e o player ao pisar neles
+e considerado "dentro de casa" (roof desaparece, visao total). Isso e
+inconsistente quando, por exemplo, um artefato (F) esta no meio do jardim.
+
+A SOLUCAO: Implementar um sistema de resolucao DINAMICA de base para os
+tiles F, U, m. A cada loadMap(), analisar os 8 vizinhos (Moore neighborhood)
+de cada tile F/U/m para determinar se visualmente e funcionalmente ele deve
+ser tratado como chao (C/floor) ou como grama (G/grass).
+
+REGRAS DE RESOLUCAO:
+
+  1. Olhar os 8 tiles vizinhos ao redor de F/U/m (dx = -1..1, dy = -1..1,
+     excluindo o proprio tile).
+
+  2. CONTAR apenas tiles 'C' (floor) e tiles 'G' (grass).
+     - Tiles 'd' (porta) contam como 'C' (ambiente interno).
+     - Qualquer outro tile (O, W, A, P, M, S, T, m, F, U) e IGNORADO
+       na contagem (nao conta como C nem G).
+
+  3. Se floorCount >= grassCount:
+       Resolver como 'C' (floor) — tile tratado como interno.
+     Se grassCount > floorCount:
+       Resolver como 'G' (grass) — tile tratado como externo.
+
+  4. Para tiles NORMAIS (C, G, O, d, W, A, P, M, S, T), a resolucao e
+     simplesmente o proprio tile (sem alteracao de comportamento).
+
+IMPACTO EM TODO O SISTEMA:
+  - Visual: F/U/m renderizados com cor e autotiling de grass ou floor
+    dependendo da vizinhanca.
+  - Roof: player sobre F/U/m resolvido como grass fica "fora" (roof ativo).
+  - Visao (visionRange): player sobre F/U/m resolvido como grass tem
+    visao reduzida (outdoorRange = 160px).
+  - Autotile: bordas, variacoes de textura e edge mask usam o tipo resolvido.
+  - Tudo deve ser escalavel: adicionar novos tiles especiais no futuro deve
+    ser trivial (apenas adicionar ao conjunto de tiles especiais).
+
+
+================================================================================
+2. LOCALIZACAO NO CODIGO ATUAL
+================================================================================
+
+ARQUIVO: SummonGame.html (~3193 linhas)
+
+TODOS OS PONTOS QUE PRECISAM SER MODIFICADOS:
+
+2.1 — buildAutotileCache() (linha ~1536)
+    isFloor() hardcoded para incluir F, U, m como floor:
+      const isFloor = t => t === 'C' || t === 'U' || t === 'F' || t === 'P' || t === 'M' || t === 'S' || t === 'T' || t === 'm';
+    Esta funcao precisa usar o tile resolvido, nao o tile bruto.
+
+    Dentro do loop, para tiles F/U/m, isFloor(tile) retorna true mas deveria
+    retornar o resultado dinâmico baseado na resolucao.
+
+2.2 — renderTiles() (linha ~2442)
+    Switch case cores (linha ~2464):
+      case 'P': case 'M': case 'F': case 'U': color = INTERIOR_COLOR; break;
+      case 'S': case 'T': case 'm': color = INTERIOR_COLOR; break;
+    F, U, m precisam usar a cor do tile resolvido (INTERIOR_COLOR ou GRASS_COLOR).
+
+    Autotiling floor variation (linha ~2472):
+      if (tile === 'C' || tile === 'U' || tile === 'F' || tile === 'P' || tile === 'M' || tile === 'S' || tile === 'T' || tile === 'm')
+    F, U, m precisam escolher entre autotiling de floor ou de grass baseado
+    no tile resolvido.
+
+2.3 — computeRoofAlpha() (linha ~1727)
+    Linha ~1735:
+      if (tile !== 'G' && tile !== 'O') return 0;
+    Se o player estiver sobre F/U/m resolvido como grass, deveria retornar
+    sem considerar como "dentro" (nao retornar 0).
+
+2.4 — updateVisionRanges() (linha ~1965)
+    Linha ~1978:
+      target = (tile === 'G' || tile === 'O') ? outdoorRange : indoorRange;
+    Se F/U/m resolvido como grass, deve usar outdoorRange.
+    Se F/U/m resolvido como floor, deve usar indoorRange.
+
+2.5 — renderRoof() (linha ~2583)
+    Linha ~2590:
+      if (tile === 'G' || tile === 'O') continue; // Exterior
+    Tiles F/U/m resolvidos como grass tambem devem ser ignorados pelo roof
+    (sao exterior). Tiles resolvidos como floor recebem roof overlay.
+
+2.6 — loadMap() (linha ~1371)
+    NOVO: apos criar as estruturas, calcular o array baseTileResolved[][].
+    Deve ser chamado antes de buildAutotileCache() (linha ~1489).
+
+
+================================================================================
+3. ESPECIFICACAO TECNICA DA IMPLEMENTACAO
+================================================================================
+
+3.1 — NOVA PROPRIEDADE EM Game
+
+Adicionar ao CONSTRUCTOR da classe Game (por volta da linha ~1362, junto com
+as outras propriedades de arrays):
+
+  this.baseTileResolved = [];
+
+Este array tera as mesmas dimensoes de tiles (mapHeight x mapWidth).
+Cada posicao armazena:
+  - Para tiles F, U, m: o resultado da resolucao ('C' ou 'G')
+  - Para todos os outros tiles: o proprio tile (this.tiles[y][x])
+
+3.2 — NOVO METODO: resolveBaseTile(x, y)
+
+Adicionar como metodo da classe Game (apos loadMap ou antes de buildAutotileCache):
+
+  resolveBaseTile(x, y) {
+    const tile = this.tiles[y][x];
+    // Apenas tiles F, U, m precisam de resolucao dinamica
+    if (tile !== 'F' && tile !== 'U' && tile !== 'm') return tile;
+    let floorCount = 0;
+    let grassCount = 0;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || nx >= this.mapWidth || ny < 0 || ny >= this.mapHeight) continue;
+        const neighborTile = this.tiles[ny][nx];
+        if (neighborTile === 'C') floorCount++;
+        else if (neighborTile === 'G') grassCount++;
+        else if (neighborTile === 'd') floorCount++; // door = ambiente interno
+        // Outros tiles (O, W, A, P, M, S, T, F, U, m) sao ignorados
+      }
+    }
+    return floorCount >= grassCount ? 'C' : 'G';
+  }
+
+3.3 — MODIFICACAO EM loadMap() (linha ~1371)
+
+Apos a linha que chama buildAutotileCache() (antes dela), adicionar:
+
+  // Resolve base tile type for special markers (F, U, m)
+  this.baseTileResolved = new Array(this.mapHeight);
+  for (let y = 0; y < this.mapHeight; y++) {
+    this.baseTileResolved[y] = new Array(this.mapWidth);
+    for (let x = 0; x < this.mapWidth; x++) {
+      this.baseTileResolved[y][x] = this.resolveBaseTile(x, y);
+    }
+  }
+
+Este bloco DEVE vir ANTES de buildAutotileCache() para que o cache de
+autotiling use os tiles resolvidos.
+
+3.4 — NOVO HELPER: getEffectiveTile(x, y)
+
+Este metodo e o CENTRO do sistema escalavel. Ele retorna o tile "efetivo"
+para qualquer posicao, ja considerando a resolucao de tiles especiais.
+
+  getEffectiveTile(x, y) {
+    if (this.baseTileResolved[y] && this.baseTileResolved[y][x] !== undefined) {
+      return this.baseTileResolved[y][x];
+    }
+    return this.tiles[y][x];
+  }
+
+Este metodo deve ser usado em TODOS os lugares que atualmente checam
+this.tiles[y][x] para decisoes de floor/grass (cor, roof, visao, autotile).
+NOTA: this.tiles[y][x] continua sendo usado para logica de colisao e
+pathfinding (O, W, d), que NAO devem ser alterados.
+
+3.5 — MODIFICACAO EM buildAutotileCache() (linha ~1536)
+
+Substituir a funcao interna isFloor:
+
+  const isFloor = t => t === 'C' || t === 'U' || t === 'F' || t === 'P' || t === 'M' || t === 'S' || t === 'T' || t === 'm';
+
+Por uma funcao que usa o tile resolvido em vez do tile bruto. Como
+buildAutotileCache itera sobre cada tile (x, y), usar:
+
+  const resolved = this.getEffectiveTile(x, y);
+  const isFloorTile = resolved === 'C'; // so 'C' e considerado floor
+  const isGrassTile = resolved === 'G'; // so 'G' e considerado grass
+
+OU, alternativamente, modificar o loop para:
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const resolved = this.getEffectiveTile(x, y);
+      const isFloorOrGrass = resolved === 'C' || resolved === 'G';
+      if (!isFloorOrGrass) { this.tileEdgeMask[y][x] = 0; continue; }
+      let mask = 0;
+      const match = (resolved === 'C')
+        ? (nx, ny) => this.getEffectiveTile(nx, ny) !== 'C'
+        : (nx, ny) => this.getEffectiveTile(nx, ny) !== 'G';
+      // ... resto da logica de mascara usando getEffectiveTile nos vizinhos
+    }
+  }
+
+NOTA: A implementacao exata deve substituir isFloor() e os matches por
+chamadas a getEffectiveTile() para consistencia.
+
+3.6 — MODIFICACAO EM renderTiles() (linha ~2442)
+
+a) Switch case (linha ~2464-2466):
+
+   Substituir:
+     case 'P': case 'M': case 'F': case 'U': color = INTERIOR_COLOR; break;
+     case 'S': case 'T': case 'm': color = INTERIOR_COLOR; break;
+
+   Por algo como:
+     case 'F': case 'U': case 'm': {
+       const resolved = this.baseTileResolved[y] ? this.baseTileResolved[y][x] : 'C';
+       color = (resolved === 'G') ? GRASS_COLOR : INTERIOR_COLOR;
+       break;
+     }
+     // P, M, S, T continuam como INTERIOR_COLOR (nao estao no escopo)
+     case 'P': case 'M': case 'S': case 'T': color = INTERIOR_COLOR; break;
+
+b) Autotiling floor variation (linha ~2472):
+
+   O if atual inclui F, U, m como floor:
+     if (tile === 'C' || tile === 'U' || tile === 'F' || ...)
+
+   Substituir para usar o tile resolvido:
+     const effective = this.baseTileResolved[y] ? this.baseTileResolved[y][x] : tile;
+     if (effective === 'C') {
+       // ... autotiling de floor (plank lines, edge mask)
+     } else if (effective === 'G') {
+       // ... autotiling de grass (color variation, grass details, edge mask)
+     }
+
+   NOTA IMPORTANTE: O autotiling de grass e floor tem implementacoes
+   diferentes (grass usa variacao de cor RGB, floor usa plank lines).
+   A logica EXISTENTE para 'G' e para floor ('C', 'U', etc.) ja existe
+   no codigo e deve ser REAPROVEITADA. Apenas a CONDICAO de entrada
+   precisa mudar para usar o tile resolvido.
+
+   Para tiles F, U, m que resolvem como 'C':
+     Renderizar plank lines, edge mask de floor
+   Para tiles F, U, m que resolvem como 'G':
+     Renderizar variacao verde, grass details, edge mask de grass
+
+   DICA: Extrair a logica de autotiling de floor e grass em variaveis/
+   blocos condicionais separados, reutilizando o codigo existente.
+
+c) Waypoint marking e artifact glow (linhas ~2515-2530):
+
+   Atualmente:
+     if (tile === 'U') { ... desenha marcacao de waypoint ... }
+     if (tile === 'F') { ... desenha glow de artefato ... }
+   Estes DEVEM continuar sendo desenhados, independente do tile resolvido.
+   Nao mexer nesses blocos.
+
+3.7 — MODIFICACAO EM computeRoofAlpha() (linha ~1727)
+
+Linha ~1735:
+  const tile = (pty >= 0 && pty < this.mapHeight && pt >= 0 && pt < this.mapWidth)
+    ? this.tiles[pty][pt] : 'G';
+  if (tile !== 'G' && tile !== 'O') return 0;
+
+Substituir para usar tile resolvido:
+  const rawTile = (pty >= 0 && pty < this.mapHeight && pt >= 0 && pt < this.mapWidth)
+    ? this.tiles[pty][pt] : 'G';
+  const effectiveTile = (pty >= 0 && pty < this.mapHeight && pt >= 0 && pt < this.mapWidth)
+    ? (this.baseTileResolved[pty] ? this.baseTileResolved[pty][pt] : rawTile) : 'G';
+  if (effectiveTile !== 'G' && effectiveTile !== 'O') return 0;
+
+Desta forma, se o player estiver sobre F/U/m resolvido como 'G', o roof
+permanece ativo (player considerado fora). Se resolvido como 'C', o roof
+desaparece (player dentro).
+
+3.8 — MODIFICACAO EM updateVisionRanges() (linha ~1965)
+
+Linha ~1977-1978:
+  const tile = this.tiles[ty][tx];
+  target = (tile === 'G' || tile === 'O') ? outdoorRange : indoorRange;
+
+Substituir para usar tile resolvido:
+  const rawTile = this.tiles[ty][tx];
+  const effectiveTile = this.baseTileResolved[ty] ? this.baseTileResolved[ty][tx] : rawTile;
+  target = (effectiveTile === 'G' || effectiveTile === 'O') ? outdoorRange : indoorRange;
+
+3.9 — MODIFICACAO EM renderRoof() (linha ~2583)
+
+Linha ~2589-2590:
+  const tile = this.tiles[y][x];
+  if (tile === 'G' || tile === 'O') continue; // Exterior
+
+Substituir para usar tile resolvido:
+  const rawTile = this.tiles[y][x];
+  const effectiveTile = this.baseTileResolved[y] ? this.baseTileResolved[y][x] : rawTile;
+  if (effectiveTile === 'G' || effectiveTile === 'O') continue; // Exterior
+
+Desta forma, F/U/m resolvido como 'G' nao recebe overlay de roof.
+F/U/m resolvido como 'C' recebe overlay de roof normalmente.
+
+
+================================================================================
+4. REGRAS DE CODIGO E ESTILO
+================================================================================
+
+- Seguir EXATAMENTE o estilo de codigo existente no arquivo SummonGame.html:
+  - Nada de arrow functions (=>) para metodos de classe
+  - Nada de template literals (``) para strings simples (usar concatenacao +)
+    EXCETO nos lugares onde o codigo ja usa template literals (ex: renderRoof
+    usa `rgba(...)`). Manter o estilo onde ja existe.
+  - Nomes de variaveis em ingles (como ja esta no codigo)
+  - Usar let/const, nao var
+  - Usar class/constructor, nao prototypes
+  - Chaves na mesma linha (K&R style)
+
+- Nao adicionar imports, exports, modules, ou bundlers
+- Nao usar bibliotecas externas
+- Nao criar elementos DOM, divs, spans, etc.
+
+- Comentarios: seguir o padrao existente (comentarios EM INGLES,
+  // com espaco, blocos com // ===).
+
+- Toda modificacao DEVE ser registrada no arquivo Documentacao_Completa.txt:
+  - Adicionar entrada no CHANGELOG (formato: ALTERACAO N - TITULO,
+    PROBLEMA, SOLUCAO, MUDANCAS NO CODIGO)
+  - Atualizar secoes afetadas com a nova descricao
+  - Adicionar nova secao numerada (ex: SECAO 50 - SISTEMA DE BASE
+    DINAMICA PARA TILES ESPECIAIS) com documentacao detalhada
+
+- O CODIGO DEVE SER 100% FUNCIONAL IMEDIATAMENTE. Testar mentalmente
+  cada modificacao antes de finalizar. Garantir que:
+  - O array baseTileResolved e populado corretamente em loadMap()
+  - buildAutotileCache() usa o tile resolvido para edge mask
+  - renderTiles() renderiza F/U/m com cor e textura corretas
+  - computeRoofAlpha() / updateVisionRanges() / renderRoof() usam
+    o tile resolvido para decisoes de interno/externo
+
+- NAO alterar a logica de tiles P, M, S, T. Eles continuam como
+  INTERIOR_COLOR fixo (escopo fora desta alteracao).
+
+- NAO alterar colisao, pathfinding ou logica de monstros.
+  O sistema de base resolvida afeta APENAS:
+    a) Renderizacao visual (cor e autotiling)
+    b) Roof system (dentro/fora)
+    c) Visao do player (indoor/outdoor range)
+
+- Nao remover ou modificar a grid de tiles original (this.tiles[][]).
+  O novo array baseTileResolved e um OVERLAY que pode ser consultado
+  quando necessario. Colisao e pathfinding continuam usando this.tiles[][].
+
+
+================================================================================
+5. ESCALABILIDADE E MANUTENCAO
+================================================================================
+
+O sistema foi projetado para ser facilmente escalavel:
+
+  Para ADICIONAR um novo tile especial no futuro (ex: 'X'):
+    1. Adicionar 'X' ao if em resolveBaseTile():
+         if (tile !== 'F' && tile !== 'U' && tile !== 'm' && tile !== 'X') return tile;
+    2. Se 'X' precisar de resolucao baseada em vizinhanca, nada mais
+       precisa ser modificado — o sistema ja consulta baseTileResolved.
+
+  Para mudar a LOGICA de resolucao:
+    Modificar apenas resolveBaseTile(). Tudo o resto consome o resultado.
+
+  Para REMOVER a resolucao de um tile:
+    Remover o tile do if em resolveBaseTile().
+
+
+================================================================================
+6. TESTE E VERIFICACAO
+================================================================================
+
+Apos implementar, testar manualmente no jogo:
+
+TESTE 1 - ARTEFATO EM AREA INTERNA (F rodeado por C):
+  1. No mapa default, tile F esta dentro de casa (rodeado por C)
+  2. Iniciar o jogo e ir ate o tile F
+  3. VERIFICAR: tile F renderizado como INTERIOR_COLOR com plank lines
+  4. VERIFICAR: roof ativo/desativo conforme comportamento interno
+  5. VERIFICAR: visao normal (indoorRange)
+
+TESTE 2 - WAYPOINT EM AREA EXTERNA (modificar mapa para U rodeado por G):
+  1. Usar editor de mapa, colocar U em uma area so de G (grama)
+  2. Iniciar jogo, ir ate o tile U
+  3. VERIFICAR: tile U renderizado como GRASS_COLOR com variacao verde
+  4. VERIFICAR: roof ativo (player fora de casa)
+  5. VERIFICAR: visao reduzida (outdoorRange = 160px)
+
+TESTE 3 - TILE F AO LADO DE PORTA:
+  1. Colocar F ao lado de um d (porta)
+  2. VERIFICAR: porta conta como floor, entao F deve resolver como C
+     mesmo se os outros vizinhos forem G
+
+TESTE 4 - RANDOM MONSTER SPAWN EM GRAMA:
+  1. Olhar tiles m no mapa (ha varios em areas de G)
+  2. VERIFICAR: tiles m em area de G sao renderizados como grass
+  3. VERIFICAR: tiles m em area de C sao renderizados como floor
+
+TESTE 5 - PLAYER SOBRE F/U/m RESOLVIDO COMO GRASS:
+  1. Modificar mapa para colocar F no meio de G
+  2. Ficar em cima do F com o player
+  3. VERIFICAR: roof ativo (player fora), visao reduzida
+
+TESTE 6 - PLAYER SOBRE F/U/m RESOLVIDO COMO FLOOR:
+  1. Ficar em cima de um F que esta em area interna (C)
+  2. VERIFICAR: roof desativado (player dentro), visao normal
+
+TESTE 7 - EDGE MASK CONSISTENTE:
+  1. Ativar F1 (debug mode)
+  2. Observar edge mask (numeros hex nos tiles)
+  3. VERIFICAR: bordas entre F/U/m resolvido como G e tiles vizinhos
+     diferentes (ex: O) tem edge mask apropriada
+  4. VERIFICAR: bordas entre F/U/m resolvido como C e tiles diferentes
+     tem edge mask de floor
+
+TESTE 8 - COLISAO E PATHFINDING INALTERADOS:
+  1. F/U/m NAO devem mudar de comportamento de colisao
+  2. Monstro pode andar sobre F/U/m (como antes)
+  3. Player pode andar sobre F/U/m (como antes)
+
+
+================================================================================
+7. EXEMPLOS DE REFERENCIA (CODIGO ATUAL)
+================================================================================
+
+buildAutotileCache() atual (linha ~1536):
+------------------------------------------------
+  buildAutotileCache() {
+    const h = this.mapHeight, w = this.mapWidth;
+    this.tileVariation = new Array(h);
+    this.tileEdgeMask = new Array(h);
+    const isFloor = t => t === 'C' || t === 'U' || t === 'F' || t === 'P' || t === 'M' || t === 'S' || t === 'T' || t === 'm';
+    for (let y = 0; y < h; y++) {
+      this.tileVariation[y] = new Float32Array(w);
+      this.tileEdgeMask[y] = new Int8Array(w);
+      for (let x = 0; x < w; x++) {
+        this.tileVariation[y][x] = Game.tileHash(x, y);
+        const tile = this.tiles[y][x];
+        if (tile !== 'G' && !isFloor(tile)) { this.tileEdgeMask[y][x] = 0; continue; }
+        let mask = 0;
+        const match = isFloor(tile) ? isFloor : t => t === 'G';
+        if (y > 0 && !match(this.tiles[y - 1][x])) mask |= 1;
+        if (y < h - 1 && !match(this.tiles[y + 1][x])) mask |= 2;
+        if (x > 0 && !match(this.tiles[y][x - 1])) mask |= 4;
+        if (x < w - 1 && !match(this.tiles[y][x + 1])) mask |= 8;
+        this.tileEdgeMask[y][x] = mask;
+      }
+    }
+  }
+
+renderTiles - switch case cores (linha ~2463-2466):
+------------------------------------------------
+  case 'A': color = ALTAR_COLOR; break;
+  case 'P': case 'M': case 'F': case 'U': color = INTERIOR_COLOR; break;
+  case 'W': color = FURNITURE_COLOR; break;
+  case 'S': case 'T': case 'm': color = INTERIOR_COLOR; break;
+
+renderTiles - autotiling floor variation (linha ~2472):
+------------------------------------------------
+  if (tile === 'C' || tile === 'U' || tile === 'F' || tile === 'P' || tile === 'M' || tile === 'S' || tile === 'T' || tile === 'm') {
+    const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
+    const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
+    // ... plank lines, edge darkening, waypoint/artifact markings
+  }
+
+renderTiles - grass variation (linha ~2488):
+------------------------------------------------
+  if (tile === 'G') {
+    const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
+    const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
+    // ... color variation, grass details, edge transition
+  }
+
+computeRoofAlpha (linha ~1727-1750):
+------------------------------------------------
+  computeRoofAlpha() {
+    if (this.debugMode) return 0;
+    for (const pl of this.players) {
+      if (!pl.alive) continue;
+      const pt = pl.tileX;
+      const pty = pl.tileY;
+      const tile = (pty >= 0 && pty < this.mapHeight && pt >= 0 && pt < this.mapWidth)
+        ? this.tiles[pty][pt] : 'G';
+      if (tile !== 'G' && tile !== 'O') return 0;
+    }
+    // ... checks near open doors
+  }
+
+updateVisionRanges (linha ~1965-1983):
+------------------------------------------------
+  updateVisionRanges(dt) {
+    const indoorRange = ...;
+    const outdoorRange = 160;
+    for (let i = 0; i < this.players.length; i++) {
+      const p = this.players[i];
+      if (!p.alive) { this.playerVisionRange[i] = outdoorRange; continue; }
+      const tx = p.tileX, ty = p.tileY;
+      let target;
+      if (tx < 0 || ty < 0 || tx >= this.mapWidth || ty >= this.mapHeight) {
+        target = outdoorRange;
+      } else {
+        const tile = this.tiles[ty][tx];
+        target = (tile === 'G' || tile === 'O') ? outdoorRange : indoorRange;
+      }
+      // ... lerp
+    }
+  }
+
+renderRoof (linha ~2583-2590):
+------------------------------------------------
+  renderRoof(ctx) {
+    if (this.roofAlpha <= 0.01) return;
+    const alpha = this.roofAlpha;
+    ctx.fillStyle = `rgba(30,20,15,${alpha * 0.85})`;
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        const tile = this.tiles[y][x];
+        if (tile === 'G' || tile === 'O') continue; // Exterior
+        // ... render roof overlay
+      }
+    }
+  }
+
+loadMap (linha ~1371, final ~1489-1493):
+------------------------------------------------
+  // ... final de loadMap
+  this.particles = [];
+  this.traps = [];
+  this.buildAutotileCache();
+  this.initShops();
+  this.setDifficulty();
+  updateMapEditor(this);
+  this.showMessage('');
+
+
+================================================================================
+8. ENTREGAVEIS ESPERADOS
+================================================================================
+
+- Unico arquivo de codigo modificado: SummonGame.html
+- Unico arquivo de documentacao modificado: Documentacao_Completa.txt
+- Zero novas dependencias
+- Zero novos arquivos (a menos que explicitamente solicitado)
+- Funcionalidade completa:
+  a) F, U, m resolvem dinamicamente para C ou G baseado nos 8 vizinhos
+  b) Portas (d) contam como C na resolucao
+  c) Tiles resolvidos como G tem visual de grass (cor, textura, edge mask)
+  d) Tiles resolvidos como C tem visual de floor (plank, edge mask)
+  e) Roof system respeita o tile resolvido
+  f) Vision range respeita o tile resolvido
+  g) Sistema escalavel: adicionar novos tiles envolve apenas 1 linha
+
+================================================================================
+9. ESTRUTURA SUGERIDA PARA DOCUMENTACAO (CHANGELOG)
+================================================================================
+
+ALTERACAO 19 - SISTEMA DE BASE DINAMICA PARA TILES ESPECIAIS (F, U, m):
+
+  PROBLEMA: Tiles F (Artifact Spawn), U (Waypoint) e m (Random Monster
+  Spawn) eram sempre tratados como piso interno (C), independente de
+  estarem em areas externas de grama. Isso causava inconsistencias
+  visuais e de gameplay: o tile era renderizado com cor de chao interno,
+  o roof desaparecia e a visao era total mesmo quando o tile estava em
+  uma area externa.
+
+  SOLUCAO: Implementado sistema de resolucao dinamica de base para tiles
+  especiais. Um novo array baseTileResolved[][] e populado em loadMap()
+  com o resultado da analise dos 8 vizinhos de cada tile F/U/m.
+  O sistema e usado por 5 subsistemas: renderizacao, autotile, roof,
+  visao e cache de bordas.
+
+  MUDANCAS NO CODIGO:
+    a) Game — NOVA PROPRIEDADE:
+       baseTileResolved[mapHeight][mapWidth]: matriz de chars ('C' ou 'G'
+       para tiles F/U/m, ou o proprio tile original para os demais)
+
+    b) Game — NOVO METODO resolveBaseTile(x, y):
+       Analisa 8 vizinhos de F/U/m. Conta tiles C (floor) e G (grass).
+       Portas (d) contam como C. Outros tiles sao ignorados.
+       Retorna 'C' se floorCount >= grassCount, senao 'G'.
+
+    c) Game — NOVO METODO getEffectiveTile(x, y):
+       Retorna baseTileResolved[y][x] se existir, senao tiles[y][x].
+       Helper central usado por todos os subsistemas.
+
+    d) Game.loadMap() — NOVA SECAO:
+       Apos carregar tiles, antes de buildAutotileCache(), popula
+       baseTileResolved[][] chamando resolveBaseTile() para cada tile.
+
+    e) Game.buildAutotileCache() — MODIFICADO:
+       isFloor() substituido por logica que usa getEffectiveTile().
+       Edge mask calculada com base no tile resolvido, nao no bruto.
+
+    f) Game.renderTiles() — MODIFICADO:
+       Switch case: F, U, m usam cor baseada em baseTileResolved.
+       Autotiling: F, U, m escolhem entre autotiling de floor ou grass
+       baseado em baseTileResolved.
+
+    g) Game.computeRoofAlpha() — MODIFICADO:
+       Usa getEffectiveTile() para decidir se player esta dentro/fora.
+
+    h) Game.updateVisionRanges() — MODIFICADO:
+       Usa getEffectiveTile() para decidir indoor/outdoor range.
+
+    i) Game.renderRoof() — MODIFICADO:
+       Usa getEffectiveTile() para decidir se tile recebe roof overlay.
+
+  NOVA SECAO: SECAO 50 - SISTEMA DE BASE DINAMICA PARA TILES ESPECIAIS
+    ...
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================

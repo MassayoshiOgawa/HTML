@@ -1,0 +1,439 @@
+================================================================================
+MEGA PROMPT — SISTEMA DE MENSAGEM SEQUENCIAL AO SUMMONAR MONSTRO
+================================================================================
+Arquivo destino: SummonGame.html (HTML + CSS + JavaScript single-file)
+Documentacao: Documentacao_Completa.txt
+Tecnologia: HTML5 Canvas 2D, JavaScript puro, CSS
+Versao do jogo: Single-file HTML5 Canvas game
+================================================================================
+
+INSTRUCOES GERAIS:
+- Nao crie outros documentos, arquivos ou projetos em outras linguagens
+  (Java, Python, C++, C#, etc). Todo o codigo deve ser apenas no arquivo
+  SummonGame.html.
+- Nao crie documentos Markdown (README.md) a menos que seja explicitamente
+  solicitado neste prompt.
+- Ao modificar SummonGame.html, SEMPRE registrar a alteracao na
+  Documentacao_Completa.txt seguindo o formato profissional existente
+  (ALTERACAO N + secao numerada + CHANGELOG).
+- Leia os dois arquivos COMPLETAMENTE antes de comecar a implementar.
+- Implemente a ideia imediatamente, sem questionar ou sugerir alternativas,
+  a menos que encontre um impedimento tecnico grave.
+- Siga as convencoes do codigo existente (estilo, nomenclatura, padroes).
+- Responsivo e escalavel para futuras adicoes ou modificacoes.
+
+================================================================================
+1. DESCRICAO DA IDEIA
+================================================================================
+
+Quando um jogador completa o ritual de summon no altar (tile 'A'), apos o
+delay de 3 segundos (this.summonDelay), o monstro e spawnado via
+spawnMonster(). Atualmente, spawnMonster() ja define uma mensagem unica:
+  this.monsterTypeMessage = mt.name + ' heard you. Run. (Round ...)'
+  this.monsterTypeMsgTimer = 3.0
+
+A nova ideia substitui e MELHORA este sistema com duas fases sequenciais:
+
+FASE 1 (duracao: 2 segundos):
+  Exibir no centro da tela (exatamente onde o elemento #message aparece):
+    "<nome do monstro> ouviu voce. Corra."
+  (sem asteriscos, sem italico, apenas o nome do monstro direto)
+  Esta frase substitui a mensagem "Summoning ritual begins..." existente
+  e a antiga mensagem "heard you. Run.".
+
+FASE 2 (duracao: 3 segundos, inicia automaticamente apos Fase 1):
+  Exibir em cima da barra de itens (hotbar), centralizado horizontalmente,
+  a descricao do monstro (mt.desc).
+  Posicao: acima do #hotbar-hud (que esta a bottom:10px), aproximadamente
+  a bottom:80px, centralizado.
+  A descricao nao deve bloquear as mensagens normais do jogo (showMessage).
+  Mensagens normais continuam aparecendo no centro da tela normalmente,
+  agora com FONTE 20% MAIOR.
+
+COMPORTAMENTO EM MULTIPLAYER:
+  A mensagem e global — todos os jogadores veem as duas fases.
+  Nao depende de qual jogador iniciou o summon.
+
+================================================================================
+2. FLUXO COMPLETO DO NOVO SISTEMA
+================================================================================
+
+Evento: Player completa interacao no altar, summonDelay inicia (3s)
+  -> Durante summonDelay: mensagem normal "Summoning ritual begins..." (existe)
+  -> Quando summonDelay chega a 0: spawnMonster() e chamado
+     spawnMonster() agora deve:
+
+     1. Selecionar tipo de monstro (weightedRandom), incrementar round etc
+     2. this.summonPhase = 'name'        (fase atual: exibindo nome)
+     3. this.summonPhaseTimer = 2.0      (duracao da fase 1)
+     4. this.summonPhaseMessage = mt.name + ' ouviu voce. Corra.'
+        (guardar para ser exibido no centro)
+     5. this.monsterDesc = mt.desc       (guardar descricao para fase 2)
+     6. this.summoning = false           (ritual terminou)
+     7. Spawnar o monstro (codigo existente)
+     8. this.summonCount++, roundNumber++ etc (codigo existente)
+
+Game.update() (a cada frame):
+  Se summonPhase for 'name':
+    decrementar summonPhaseTimer por dt
+    Se summonPhaseTimer <= 0:
+      summonPhase = 'desc'
+      summonPhaseTimer = 3.0
+      (a fase 2 comeca automaticamente)
+  Se summonPhase for 'desc':
+    decrementar summonPhaseTimer por dt
+    Se summonPhaseTimer <= 0:
+      summonPhase = ''     (fim, limpar)
+      summonPhaseMessage = ''
+      monsterDesc = ''
+
+RENDERIZACAO:
+
+  FASE 1 (summonPhase === 'name'):
+    Usar o sistema de mensagem central existente (#message DOM element).
+    Chamar showMessage( summonPhaseMessage ) com duracao de 2 segundos.
+    (showMessage original usa messageTimer = 2.5 — ajustar ou criar
+     logica para que a fase 1 dure exatamente 2 segundos sem conflito)
+
+    IMPORTANTE: A mensagem "ouviu voce. Corra." DEVE substituir a mensagem
+    antiga "mt.name + ' heard you. Run.'" que estava em monsterTypeMessage.
+    O campo this.monsterTypeMessage e this.monsterTypeMsgTimer deixam de
+    existir ou sao substituidos pelo novo sistema sequencial.
+
+  FASE 2 (summonPhase === 'desc'):
+    Novo elemento DOM (criado no <body> junto com os outros elementos):
+    <div id="summon-desc"></div>
+
+    CSS deste elemento:
+      position: absolute
+      bottom: 80px          (acima da hotbar que esta a bottom:10px)
+      left: 50%
+      transform: translateX(-50%)
+      z-index: 10
+      color: #fff
+      font-size: 18px
+      text-align: center
+      pointer-events: none
+      font-family: 'Courier New', monospace
+      text-shadow: 0 0 6px rgba(0,0,0,0.9)
+      opacity: 0 (inicial, transicao via classe 'show')
+      transition: opacity 0.3s
+
+    Controlado via:
+      showSummonDesc(text):
+        el = document.getElementById('summon-desc')
+        el.textContent = text
+        el.classList.add('show')
+      hideSummonDesc():
+        el.classList.remove('show')
+
+  MENSAGENS NORMAIS (showMessage) COM FONTE 20% MAIOR:
+    O elemento #message atual tem font-size: 24px.
+    Alterar para font-size: 28.8px (24 * 1.2 = 28.8, arredondar para 29px).
+    Manter todas as outras propriedades CSS inalteradas.
+    As mensagens normais (coleta de artefato, item comprado, etc) continuam
+    funcionando exatamente como antes, sem serem bloqueadas pela fase 2.
+
+Game.update() — NOVA SECAO:
+  Apos a secao "Monster type message" (ou substituindo-a):
+    if (this.summonPhase === 'name') {
+      this.summonPhaseTimer -= dt;
+      if (this.summonPhaseTimer <= 0) {
+        this.summonPhase = 'desc';
+        this.summonPhaseTimer = 3.0;
+        this.hideSummonDesc(); // garantir que desc anterior sumiu
+        this.showSummonDesc(this.monsterDesc);
+        // Esconder a mensagem central
+        this.showMessage('');
+      }
+    } else if (this.summonPhase === 'desc') {
+      this.summonPhaseTimer -= dt;
+      if (this.summonPhaseTimer <= 0) {
+        this.summonPhase = '';
+        this.hideSummonDesc();
+        this.monsterDesc = '';
+        this.summonPhaseMessage = '';
+      }
+    }
+
+  Quando summonPhase muda de 'name' para 'desc', a mensagem central some
+  (showMessage('')) e a descricao aparece acima da hotbar.
+
+  Enquanto summonPhase esta ativo, o sistema de mensagens normais
+  (showMessage) continua funcional — outras mensagens podem aparecer
+  no centro mesmo durante a fase 2.
+
+================================================================================
+3. ALTERACOES NO CODIGO — DETALHAMENTO TECNICO
+================================================================================
+
+3.1 — NOVAS PROPRIEDADES NO CONSTRUCTOR (class Game):
+  this.summonPhase = '';          // '' | 'name' | 'desc'
+  this.summonPhaseTimer = 0;      // contagem regressiva em segundos
+  this.summonPhaseMessage = '';   // texto da fase 1
+  this.monsterDesc = '';          // texto da fase 2 (mt.desc)
+
+3.2 — spawnMonster() MODIFICADO (substituir a secao de monsterTypeMessage):
+  REMOVER:
+    this.monsterTypeMessage = mt.name + ' heard you. Run. (Round ' + ... + ')';
+    this.monsterTypeMsgTimer = 3.0;
+  ADICIONAR:
+    this.summonPhase = 'name';
+    this.summonPhaseTimer = 2.0;
+    this.summonPhaseMessage = mt.name + ' ouviu voce. Corra.';
+    this.monsterDesc = mt.desc;
+    this.showMessage(this.summonPhaseMessage);
+    (manter todo o resto: summonCount++, roundNumber++, selectArtifacts,
+     spawn posicao, novos MonsterEntity, etc)
+
+3.3 — Game.update() MODIFICADO:
+  REMOVER ou SUBSTITUIR a secao:
+    // Monster type message
+    if (this.monsterTypeMsgTimer > 0) { ... }
+  PELA NOVA SECAO:
+    // Summon phase sequencial
+    if (this.summonPhase === 'name') {
+      this.summonPhaseTimer -= dt;
+      // A mensagem ja foi exibida via showMessage em spawnMonster()
+      // messageTimer do showMessage cuida do auto-dismiss padrao (2.5s)
+      // Mas queremos exatos 2s. Ao inves de usar showMessage, podemos
+      // gerenciar manualmente:
+      if (this.summonPhaseTimer <= 0) {
+        this.summonPhase = 'desc';
+        this.summonPhaseTimer = 3.0;
+        this.showMessage('');  // limpa mensagem central
+        this.showSummonDesc(this.monsterDesc);
+      }
+    } else if (this.summonPhase === 'desc') {
+      this.summonPhaseTimer -= dt;
+      if (this.summonPhaseTimer <= 0) {
+        this.summonPhase = '';
+        this.hideSummonDesc();
+        this.monsterDesc = '';
+        this.summonPhaseMessage = '';
+      }
+    }
+
+  NOTA: A mensagem central ("ouviu voce") e gerenciada manualmente via
+  summonPhaseTimer (2s), nao via messageTimer. showMessage() e chamado
+  apenas para exibir o texto inicial. O auto-dismiss de 2.5s do
+  showMessage() original nao deve interferir — ao fazer a transicao
+  para fase 2, chamamos showMessage('') para limpar.
+
+  ATENCAO: O showMessage() original tem um timer proprio (messageTimer).
+  Para evitar que o messageTimer auto-limpe a mensagem antes dos 2s,
+  modificar showMessage() para aceitar um parametro opcional de duracao
+  OU garantir que a transicao de fase seja feita via summonPhaseTimer
+  independente do messageTimer.
+
+  SOLUCAO RECOMENDADA: Nao usar showMessage() para a fase 1. Em vez
+  disso, controlar o elemento #message manualmente:
+    setMessageText(text):
+      el = document.getElementById('message');
+      el.textContent = text;
+      if (text) el.classList.add('show');
+      else el.classList.remove('show');
+  E no update(), quando summonPhase == 'name', manter o texto visivel
+  sem depender do messageTimer. Ao transicionar para 'desc', limpar.
+
+  (Alternativamente, usar showMessage() mas com um timer proprio no
+  update que chama showMessage('') quando summonPhaseTimer <= 0)
+
+3.4 — NOVOS METODOS:
+  showSummonDesc(text):
+    el = document.getElementById('summon-desc');
+    el.textContent = text;
+    if (text) el.classList.add('show');
+    else el.classList.remove('show');
+  (ou usar a mesma logica de hideSummonDesc separada)
+
+3.5 — loadMap() MODIFICADO (reset):
+  Adicionar no bloco de reset (linha ~1500):
+    this.summonPhase = '';
+    this.summonPhaseTimer = 0;
+    this.summonPhaseMessage = '';
+    this.monsterDesc = '';
+
+3.6 — NOVO ELEMENTO DOM em <body>:
+  Adicionar apos o elemento #message (ou perto do #hotbar-hud):
+    <div id="summon-desc"></div>
+
+3.7 — NOVO CSS no <style>:
+  #summon-desc {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 18px;
+    z-index: 10;
+    text-align: center;
+    pointer-events: none;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 6px rgba(0,0,0,0.9);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  #summon-desc.show { opacity: 1; }
+
+3.8 — AUMENTAR FONTE DAS MENSAGENS NORMAIS (#message):
+  Localizar no CSS:
+    #message { ... font-size: 24px; ... }
+  Alterar para:
+    font-size: 29px;   (24 * 1.2 = 28.8, arredondado para 29)
+
+3.9 — REMOVER MONSTERTYPEMESSAGE LEGADO:
+  Procurar e REMOVER as seguintes referencias (se existirem apos
+  substituicao):
+    - this.monsterTypeMessage
+    - this.monsterTypeMsgTimer
+    - Qualquer referencia a monsterTypeMsgTimer no update()
+    - A secao em updateHUD():
+        if (game.monsterTypeMsgTimer > 0 && game.messageTimer <= 0) { ... }
+      Esta secao em updateHUD() (linha ~3025) deve ser REMOVIDA, pois
+      a nova logica gerencia tudo via summonPhase e o elemento
+      #summon-desc, independente do updateHUD.
+
+    - Em Game constructor: this.monsterTypeMessage, this.monsterTypeMsgTimer
+    - Em loadMap(): reset destas propriedades
+
+    ATENCAO: this.monsterSpawnType ainda e USADO em outros lugares
+    (updateHUD, renderDebug). NAO remover this.monsterSpawnType.
+    Remover apenas monsterTypeMessage e monsterTypeMsgTimer.
+
+3.10 — GAME.RENDER() — NENHUMA ALTERACAO:
+    O render() nao precisa ser alterado. A fase 1 usa o #message DOM
+    (ja gerenciado por renderMessage). A fase 2 usa #summon-desc DOM
+    (gerenciado via showSummonDesc/hideSummonDesc).
+    Nao desenhar no canvas.
+
+================================================================================
+4. ARQUIVOS A MODIFICAR
+================================================================================
+
+1. SummonGame.html (modificacoes no CSS, HTML, e JavaScript)
+2. Documentacao_Completa.txt (registro da alteracao)
+
+NAO crie nenhum outro arquivo.
+
+================================================================================
+5. REGRAS E RESTRICOES
+================================================================================
+
+- Nao adicione dependencias externas ou bibliotecas.
+- Nao altere a logica de jogo existente (movimento, colisao, summon,
+  artefatos, etc) exceto onde especificado.
+- Nao altere o comportamento do monstro ou do spawn.
+- Nao quebre o sistema de mensagens existente (showMessage para outros
+  fins continua funcionando).
+- A fase 2 (descricao) nao pode sumir se alguma mensagem normal aparecer
+  no centro. Elas coexistem em elementos DOM diferentes.
+- Certifique-se de que o timer da fase 2 nao e afetado por pausas ou
+  delays do jogo (dt capped em 0.1s, igual ao resto).
+- Em multiplayer: o summonPhase e unico (compartilhado), todos os players
+  veem a mesma sequencia.
+
+================================================================================
+6. VERIFICACAO DE CONSISTENCIA
+================================================================================
+
+Apos implementar, verifique:
+- [ ] spawnMonster() inicia summonPhase = 'name' corretamente
+- [ ] Mensagem central mostra "Nome ouviu voce. Corra." por 2s
+- [ ] Apos 2s, a mensagem central some
+- [ ] Imediatamente, a descricao aparece acima da hotbar
+- [ ] Descricao fica visivel por 3s e depois some
+- [ ] Mensagens normais (showMessage) funcionam durante a fase 2
+- [ ] Mensagens normais estao com fonte 29px (20% maior)
+- [ ] Nao ha erros no console do navegador
+- [ ] Em restart/loadMap, summonPhase e resetado
+- [ ] Variaveis monsterTypeMessage e monsterTypeMsgTimer foram removidas
+- [ ] updateHUD() nao tem mais a secao monsterTypeMsgTimer
+- [ ] Documentacao_Completa.txt atualizada
+
+================================================================================
+7. COMPORTAMENTOS ESPERADOS (CASOS DE TESTE)
+================================================================================
+
+Cenário 1: Summon normal
+  1. Player interage com altar por 4s
+  2. "Summoning ritual begins..." aparece (existente)
+  3. Apos 3s (summonDelay), monstro spawna
+  4. "Glitch ouviu voce. Corra." aparece no centro da tela por 2s
+  5. A mensagem central some
+  6. "It appears from unpredictable locations and moves unnaturally fast."
+     aparece acima da hotbar por 3s
+  7. Descricao some, jogo continua normalmente
+
+Cenário 2: Mensagem durante fase 2
+  1. Durante os 3s da descricao, coletar um artefato
+  2. "Artifact collected! (1/3)" aparece no centro (fonte 29px)
+  3. A descricao continua visivel acima da hotbar
+  4. Ambas coexistem sem conflito
+
+Cenário 3: Multiplayer
+  1. Qualquer jogador completa o summon
+  2. Ambos os jogadores veem a sequencia completa
+
+Cenário 4: Restart
+  1. Fazer restart durante qualquer fase
+  2. Tudo resetado, nenhum texto residual
+
+================================================================================
+8. DIRETRIZES DE CODIGO
+================================================================================
+
+- Siga as convencoes do codigo existente (nomes de variaveis em camelCase,
+  mesmo estilo de identacao, etc).
+- Nao use frameworks ou bibliotecas.
+- Nao adicione comentarios desnecessarios (o codigo deve ser autoexplicativo
+  com nomes claros).
+- Mantenha a compatibilidade com o sistema de camera existente.
+- Nao modifique a estrutura do canvas ou o pipeline de renderizacao.
+- O novo elemento #summon-desc e DOM puro, nao canvas.
+
+================================================================================
+9. ESTRUTURA SUGERIDA PARA DOCUMENTACAO (CHANGELOG)
+================================================================================
+
+Ao finalizar, adicionar em Documentacao_Completa.txt:
+
+a) No CHANGELOG mais recente (ou criar nova secao de CHANGELOG):
+   ALTERACAO 20 - SISTEMA DE MENSAGEM SEQUENCIAL AO SUMMONAR MONSTRO
+
+   PROBLEMA: A mensagem ao summonar monstro era unica e em ingles
+   ("heard you. Run."), sem descricao do monstro. Nao havia separacao
+   entre nome e descricao, e o posicionamento era sempre no centro.
+
+   SOLUCAO: Implementado sistema de duas fases: (1) nome do monstro
+   em portugues no centro por 2s, (2) descricao acima da hotbar por
+   3s. Mensagens normais ganharam fonte 20% maior e nao sao bloqueadas.
+
+   MUDANCAS NO CODIGO:
+     a) CSS — NOVO ELEMENTO #summon-desc (posicionado acima da hotbar)
+     b) CSS — #message font-size alterado de 24px para 29px
+     c) HTML — Novo elemento <div id="summon-desc">
+     d) Game — NOVAS PROPRIEDADES:
+        summonPhase, summonPhaseTimer, summonPhaseMessage, monsterDesc
+     e) Game — REMOVIDO: monsterTypeMessage, monsterTypeMsgTimer
+     f) Game.spawnMonster() — Substituido sistema antigo pelo novo
+     g) Game.update() — Nova secao de controle de fase sequencial
+     h) Game — NOVOS METODOS: showSummonDesc, hideSummonDesc
+     i) Game.loadMap() — Reset das novas propriedades
+     j) updateHUD() — Removida secao monsterTypeMsgTimer
+
+b) NOVA SECAO numerada (ex: SECAO 51):
+   SECAO 51 — SISTEMA DE MENSAGEM SEQUENCIAL AO SUMMONAR MONSTRO
+
+   51.1 — CONCEITO
+   51.2 — FASES
+   51.3 — ESTRUTURA DE DADOS
+   51.4 — POSICIONAMENTO DOS ELEMENTOS
+   51.5 — ESCALABILIDADE
+
+c) ATUALIZAR secoes afetadas (SECAO 4 — FLUXO DO GAME LOOP, mencionar
+   a nova secao de update para summonPhase).
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================

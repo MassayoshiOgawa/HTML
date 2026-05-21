@@ -1,0 +1,424 @@
+================================================================================
+MEGA PROMPT — TRÊS MELHORIAS: DOUBLE DOOR VISÍVEL, NERF NO MONSTRO, UI CIRCULAR
+================================================================================
+Arquivo destino: SummonGame.html (HTML + CSS + JavaScript single-file)
+Documentacao: Documentacao_Completa.txt
+Tecnologia: HTML5 Canvas 2D, JavaScript puro, CSS
+Versao do jogo: Single-file HTML5 Canvas game
+================================================================================
+
+INSTRUCOES GERAIS:
+- Nao crie outros documentos, arquivos ou projetos em outras linguagens
+  (Java, Python, C++, C#, etc). Todo o codigo deve ser apenas no arquivo
+  SummonGame.html.
+- Nao crie documentos Markdown (README.md) a menos que seja explicitamente
+  solicitado neste prompt.
+- Ao modificar SummonGame.html, SEMPRE registrar a alteracao na
+  Documentacao_Completa.txt seguindo o formato profissional existente
+  (ALTERACAO N + secao numerada + CHANGELOG + atualizacao secoes afetadas).
+- Leia os dois arquivos COMPLETAMENTE antes de comecar a implementar.
+- Implemente a ideia imediatamente, sem questionar ou sugerir alternativas,
+  a menos que encontre um impedimento tecnico grave.
+- Siga as convencoes do codigo existente (estilo, nomenclatura, padroes).
+- Responsivo e escalavel para futuras adicoes ou modificacoes.
+
+================================================================================
+1. DESCRICAO DAS IDEIAS
+================================================================================
+
+IDEA A — DOUBLE DOOR SEMPRE VISIVEL:
+  Portas duplas (grouped doors) atualmente renderizam INTERIOR_COLOR em
+  renderTiles() quando estao em grupo, fazendo com que parecam chao e
+  fiquem invisiveis quando o player esta longe. Portas simples renderizam
+  DOOR_CLOSED_COLOR diretamente em renderTiles(), entao sao sempre
+  visiveis. A correcao e: portas agrupadas tambem devem renderizar
+  DOOR_CLOSED_COLOR em renderTiles().
+
+IDEA B — NERF NO MONSTRO (VISAO):
+  A visao do monstro (canSeePlayer()) atualmente tem:
+    - range maximo: 195 pixels
+    - cone de visao: Math.PI / 3 (60 graus)
+  As novas especificacoes:
+    - range maximo: AUMENTAR (ex: 220 ou 250 pixels)
+    - cone de visao: DIMINUIR em 15% (Math.PI / 3 * 0.85 ≈ 51 graus)
+  Ajustar tambem os valores de canDetectBehind() se aplicavel.
+
+IDEA C — UI CIRCULAR DE PROGRESSO:
+  Substituir a barra de progresso horizontal (elemento DOM #interaction-bar)
+  por um circulo oco desenhado no Canvas, posicionado sobre o artefato ou
+  altar que esta sendo interagido. Conforme o progresso (interactTimer /
+  interactDuration), um arco preenche o circulo com gradiente de vermelho
+  (0%) para verde (100%) no sentido horario.
+
+  Detalhes do circulo:
+    - Tamanho: 90% do tamanho do player (player radius = TILE_SIZE * 0.3,
+      entao circle radius = TILE_SIZE * 0.3 * 0.9 ≈ 8.6px, OU usar um
+      tamanho fixo maior como TILE_SIZE * 0.4 para melhor visibilidade
+      — ver secao 5);
+    - Circulo oco (apenas contorno);
+    - Grossura da linha: 15% do diametro do circulo;
+    - Gradiente: vermelho (angulo inicial) → verde (angulo final),
+      no sentido horario, proporcional ao progresso;
+    - Aparece em cima do artefato/altar assim que o player comeca a
+      interagir (player.interacting = true);
+    - Some quando a interacao termina.
+
+  A UI circular deve usar o mesmo sistema de interacao existente
+  (player.interactTimer, player.interactDuration, game.interactDisplay).
+  O texto de prompt ("Hold key to summon") e o label ("Summoning...")
+  podem permanecer como DOM (elemento #interaction-label) ou ser
+  removidos — usar julgamento para manter o label de texto apenas.
+
+================================================================================
+2. FLUXO COMPLETO — IDEA A: DOUBLE DOOR SEMPRE VISIVEL
+================================================================================
+
+Local: renderTiles() — case 'd':
+
+  CODIGO ATUAL (simplificado):
+    case 'd': {
+      const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
+      if (door && door.hasGroup()) {
+        color = INTERIOR_COLOR;        // <-- PROBLEMA: fica invisivel
+      } else {
+        color = (door && door.open) ? DOOR_OPEN_COLOR : DOOR_CLOSED_COLOR;
+      }
+      break;
+    }
+
+  CODIGO NOVO:
+    case 'd': {
+      const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
+      if (door && door.hasGroup()) {
+        color = DOOR_CLOSED_COLOR;     // <-- CORRIGIDO: sempre visivel
+      } else {
+        color = (door && door.open) ? DOOR_OPEN_COLOR : DOOR_CLOSED_COLOR;
+      }
+      break;
+    }
+
+  NOTA: O renderDoors() ja pinta INTERIOR_COLOR por cima de toda a area
+  do grupo quando o player esta perto. Portanto, mesmo que renderTiles()
+  desenhe DOOR_CLOSED_COLOR, o renderDoors() vai sobrepor com
+  INTERIOR_COLOR + barras de porta quando estiver proximo. O resultado
+  final e identico ao comportamento de portas simples: visivel a
+  distancia, detalhado quando perto.
+
+  NENHUMA outra alteracao e necessaria no renderDoors() ou em qualquer
+  outro lugar.
+
+================================================================================
+3. FLUXO COMPLETO — IDEA B: NERF NO MONSTRO (VISAO)
+================================================================================
+
+Local: MonsterEntity.canSeePlayer()
+
+  CODIGO ATUAL:
+    if (dist > 195) return false;
+    ...
+    if (Math.abs(diff) > Math.PI / 3 && dist > 50) return false;
+
+  CODIGO NOVO:
+    if (dist > 250) return false;           // range AUMENTADO
+    ...
+    if (Math.abs(diff) > (Math.PI / 3) * 0.85 && dist > 50) return false;
+    // cone DIMINUIDO em 15% (Math.PI/3 ≈ 60°, *0.85 ≈ 51°)
+
+  (Os valores exatos podem ser ajustados, mas a ideia e: range maior,
+  cone menor. Use 250 para range se fizer sentido visualmente,
+  ou um valor intermediario como 220.)
+
+  NENHUMA alteracao em canDetectBehind() ou outros metodos, a menos
+  que faca sentido aumentar tambem o range de deteccao traseira.
+
+================================================================================
+4. FLUXO COMPLETO — IDEA C: UI CIRCULAR DE PROGRESSO
+================================================================================
+
+4.1 — REMOVER BARRA DOM EXISTENTE:
+
+  No renderInteractionBar():
+    - Se o player esta interagindo (interactingPlayer && interactDisplay):
+      Nao desenhar mais a barra horizontal.
+      Pode manter o label de texto (interaction-label) ou remove-lo
+      — usar julgamento. O circulo no canvas substitui APENAS a
+      barra de progresso, nao necessariamente o label de texto.
+    - A barra DOM (#interaction-bar) pode permanecer no HTML mas
+      oculta (display:none) permanentemente, OU ser removida.
+    - Simplificacao: deixar display:none fixo via CSS ou marcar
+      como hidden no HTML.
+
+4.2 — NOVO METODO renderInteractionCircle(ctx):
+
+  Adicionar na classe Game, na secao de rendering:
+    renderInteractionCircle(ctx) {
+      // 1. Nao desenhar se nao houver interacao em progresso
+      if (!this.interactDisplay) return;
+      const data = this.interactDisplay;
+      const type = data.type;
+      // So desenhar para tipos que usam progresso (artifact, altar)
+      // (door nao precisa de progresso circular)
+      if (type !== 'artifact' && type !== 'altar') return;
+      // type 'shop' e 'trash' tambem usam interacao? Verificar.
+      // Use os mesmos tipos que existem no codigo.
+
+      // 2. Encontrar o player que esta interagindo
+      let interactingPlayer = null;
+      for (const p of this.players) {
+        if (p.interacting && p.interactTarget) {
+          if (type === 'artifact' && p.interactType === 'artifact') {
+            interactingPlayer = p; break;
+          }
+          if (type === 'altar' && p.interactType === 'altar') {
+            interactingPlayer = p; break;
+          }
+        }
+      }
+      if (!interactingPlayer) return;
+
+      // 3. Posicao do alvo (mundo -> tela)
+      const target = data.target;
+      let worldX, worldY;
+      if (type === 'artifact') {
+        worldX = target.tileX * TILE_SIZE + TILE_SIZE / 2;
+        worldY = target.tileY * TILE_SIZE + TILE_SIZE / 2;
+      } else if (type === 'altar') {
+        worldX = target.x * TILE_SIZE + TILE_SIZE / 2;
+        worldY = target.y * TILE_SIZE + TILE_SIZE / 2;
+      }
+      const sx = worldX - this.camX;
+      const sy = worldY - this.camY;
+
+      // 4. Verificar se esta na tela (culling basico)
+      if (sx < -50 || sx > this.canvas.width + 50 || sy < -50 || sy > this.canvas.height + 50) return;
+
+      // 5. Parametros do circulo
+      const playerRadius = TILE_SIZE * 0.3;
+      const circleRadius = playerRadius * 0.9;   // 90% do player
+      const lineWidth = circleRadius * 2 * 0.15; // 15% do diametro
+      const progress = Math.min(1, Math.max(0, interactingPlayer.interactTimer / this.interactDuration));
+
+      // 6. Gradiente vermelho -> verde no sentido horario
+      // Usar createConicGradient se disponivel, ou arco com multiplas cores
+      const startAngle = -Math.PI / 2;  // comecar do topo (12h)
+      const endAngle = startAngle + Math.PI * 2 * progress;
+
+      // Desenhar fundo do circulo (parte nao preenchida - cinza escuro)
+      ctx.beginPath();
+      ctx.arc(sx, sy, circleRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = lineWidth;
+      ctx.stroke();
+
+      // Desenhar arco de progresso com gradiente
+      if (progress > 0) {
+        ctx.beginPath();
+        ctx.arc(sx, sy, circleRadius, startAngle, endAngle);
+        ctx.strokeStyle = createProgressGradient(ctx, sx, sy, circleRadius, progress);
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.lineCap = 'butt';
+      }
+    }
+
+    helper function createProgressGradient(ctx, cx, cy, radius, progress):
+      // Criar gradiente conico do vermelho (0) ao verde (progresso)
+      // createConicGradient(startAngle, cx, cy)
+      const gradient = ctx.createConicGradient(-Math.PI / 2, cx, cy);
+      gradient.addColorStop(0, '#ff0000');       // vermelho (inicio)
+      gradient.addColorStop(0.5, '#ffff00');     // amarelo (meio)
+      gradient.addColorStop(1, '#00ff00');       // verde (fim)
+      return gradient;
+
+    NOTA: Se createConicGradient nao for suportado no navegador,
+    usar fallback: arco simples com cor interpolada ou multiplos
+    segmentos de arco com cores intermediarias.
+
+4.3 — CHAMAR NOVO METODO NO render():
+
+  Em Game.render() (apos a linha renderInteractionBar(), ou substituindo-a):
+    // Interaction progress circle (canvas)
+    this.renderInteractionCircle(ctx);
+    // Interaction bar (DOM) - manter apenas o label
+    this.renderInteractionBar();
+
+  ATENCAO: renderInteractionBar() ainda gerencia o #interaction-label
+  (textos como "Hold key to summon", "Summoning..."). Nao remover
+  completamente — apenas a barra de progresso e substituida.
+
+4.4 — MODIFICAR renderInteractionBar():
+
+  Dentro de renderInteractionBar():
+    // Mantem o label de texto
+    // Mas nao desenha mais a barra horizontal (#interaction-bar)
+    // Pode fixar: document.getElementById('interaction-bar').style.display = 'none';
+
+  Opcao mais limpa: adicionar no CSS:
+    #interaction-bar { display: none !important; }
+  Ou no codigo JS, no inicio de renderInteractionBar(), forçar:
+    document.getElementById('interaction-bar').style.display = 'none';
+
+4.5 — COMPORTAMENTO DESEJADO:
+
+  - Sem interacao: nada desenhado (nem circulo, nem barra)
+  - Player comeca interagir com artifact ou altar:
+    Circulo aparece em cima do alvo, animando de vermelho a verde
+  - Interacao cancelada (soltou tecla): circulo some
+  - Interacao completa: circulo some, acao executada
+  - Interacao com porta: sem circulo (porta e instantanea/toggle)
+  - Multiplayer: cada player tem seu proprio progresso; o circulo
+    aparece sobre o alvo do player que esta interagindo.
+    Se multiplos players estiverem interagindo com alvos diferentes,
+    o circulo deve aparecer em cada alvo respectivo.
+
+    SIMPLIFICACAO RECOMENDADA: O sistema atual usa apenas UM
+    this.interactDisplay por vez (o ultimo player que comecou
+    a interagir). Manter essa logica. O circulo segue o mesmo
+    display.
+
+================================================================================
+5. DEFINICOES DE TAMANHO DO CIRCULO
+================================================================================
+
+Parametros chave (podem ser alterados futuramente):
+  circleRadius: TILE_SIZE * 0.4  (12.8px — ligeiramente maior que o player
+                para boa visibilidade. Alternativa: TILE_SIZE * 0.3 * 0.9)
+  lineWidth:    circleRadius * 2 * 0.15  (15% do diametro)
+  startAngle:   -Math.PI / 2 (topo, 12 horas)
+  direction:    horario (aumento de angulo)
+
+Estes valores devem ser definidos como constantes no inicio da funcao
+para facil ajuste futuro.
+
+================================================================================
+6. ARQUIVOS A MODIFICAR
+================================================================================
+
+1. SummonGame.html:
+   - CSS: display:none para #interaction-bar
+   - renderTiles() case 'd': grouped doors usam DOOR_CLOSED_COLOR
+   - canSeePlayer(): range maior, cone menor
+   - NOVO METODO: renderInteractionCircle(ctx)
+   - renderInteractionBar(): remover logica da barra, manter label
+   - render(): adicionar chamada renderInteractionCircle
+
+2. Documentacao_Completa.txt:
+   - ALTERACAO 21 (proximo numero disponivel)
+   - Tres secoes (SECAO 52, 53, 54) para cada melhoria
+   - Atualizar secoes afetadas (SECAO de rendering, SECAO do monstro)
+
+NAO crie nenhum outro arquivo.
+
+================================================================================
+7. REGRAS E RESTRICOES
+================================================================================
+
+- Nao adicione dependencias externas ou bibliotecas.
+- Nao altere a logica de jogo existente exceto onde especificado.
+- Nao remova funcionalidades existentes (sistema de interacao, label,
+  renderDoors, etc) — apenas modifique como especificado.
+- O gradiente do circulo deve ser suave (vermelho -> amarelo -> verde).
+- O circulo deve ser desenhado APOS os tiles e artifacts, mas ANTES
+  dos entidades (player/monster) ou APOS — usar julgamento para que
+  fique visivel sobre o artefato/altar.
+  Sugestao: chamar renderInteractionCircle() no fim de render(),
+  apos renderParticles(), para garantir que fique em cima de tudo.
+
+- Em multiplayer: o circulo e do player que esta interagindo.
+  Se a logica existente (interactDisplay = ultimo a interagir) for
+  mantida, apenas um circulo por vez. Isso e aceitavel.
+
+================================================================================
+8. VERIFICACAO DE CONSISTENCIA
+================================================================================
+
+Apos implementar, verifique:
+- [ ] Portas duplas sao visiveis a distancia (cor DOOR_CLOSED_COLOR)
+- [ ] Portas duplas ainda funcionam normalmente quando perto do player
+- [ ] Monstro tem range de visao maior (dist > 195 -> dist > 250)
+- [ ] Monstro tem cone de visao 15% menor (Math.PI/3 * 0.85)
+- [ ] Interagir com artefato mostra circulo sobre ele
+- [ ] Interagir com altar mostra circulo sobre ele
+- [ ] Circulo comeca vermelho (0% progresso)
+- [ ] Circulo termina verde (100% progresso)
+- [ ] Circulo gira no sentido horario
+- [ ] Circulo some quando interacao termina ou e cancelada
+- [ ] Barra horizontal (#interaction-bar) nao aparece mais
+- [ ] Label de texto (#interaction-label) continua funcionando
+- [ ] Nao ha erros no console do navegador
+- [ ] Documentacao_Completa.txt atualizada
+
+================================================================================
+9. DIRETRIZES DE CODIGO
+================================================================================
+
+- Siga as convencoes do codigo existente (camelCase, identacao, etc).
+- Nao use frameworks ou bibliotecas.
+- Nao adicione comentarios desnecessarios.
+- Use constantes para valores numericos (tamanhos, angulos) em vez de
+  hardcoded magic numbers.
+- O metodo renderInteractionCircle() deve ser auto-contido e nao
+  depender de estado externo alem do this.interactDisplay e dos
+  players.
+- Se createConicGradient() nao for suportado, implemente fallback
+  com arcos parciais.
+
+================================================================================
+10. ESTRUTURA SUGERIDA PARA DOCUMENTACAO
+================================================================================
+
+a) ALTERACAO 21 — TRES MELHORIAS: DOUBLE DOOR VISIVEL, NERF MONSTRO, UI CIRCULAR
+
+   PROBLEMA: Portas duplas invisiveis a distancia, monstro com visao
+   muito ampla, barra de progresso horizontal pouco intuitiva.
+
+   SOLUCAO:
+     A) Double doors renderizam DOOR_CLOSED_COLOR em renderTiles
+     B) Monstro: range aumentado, cone reduzido 15%
+     C) Nova UI circular no canvas substitui barra DOM
+
+   MUDANCAS NO CODIGO:
+     a) renderTiles — grouped doors usam DOOR_CLOSED_COLOR
+     b) canSeePlayer — maxDist 195->250, cone Math.PI/3 * 0.85
+     c) CSS — #interaction-bar oculta
+     d) NOVO METODO renderInteractionCircle(ctx)
+     e) renderInteractionBar — barra removida, label mantido
+     f) render() — chamada a renderInteractionCircle
+
+b) SECOES:
+
+   SECAO 52 — SISTEMA DE PORTA DUPLA SEMPRE VISIVEL
+   SECAO 53 — AJUSTE DE VISAO DO MONSTRO (RANGE E CONE)
+   SECAO 54 — UI CIRCULAR DE PROGRESSO DE INTERACAO
+
+c) ATUALIZAR secoes afetadas:
+   SECAO 9 (SISTEMA DE PORTAS) — comportamento de grouped doors
+   SECAO 14 (MONSTER ENTITY) — novos valores de visao
+   SECAO 19 (RENDERIZACAO) — novo metodo renderInteractionCircle
+   SECAO 6 (ELEMENTOS DOM) — #interaction-bar oculta
+
+================================================================================
+11. NOTAS ADICIONAIS
+================================================================================
+
+- A UI circular e UMA RENDERIZACAO NO CANVAS, nao um elemento DOM.
+  Isso permite que ela siga as coordenadas do mundo (artefato/altar)
+  e se mova com a camera, alem de permitir desenho arbitrario
+  (arcos, gradientes, circulos ocos).
+
+- A grossura da linha de 15% foi definida como valor inicial e pode
+  ser alterada futuramente. Deve ser uma constante facil de modificar.
+
+- O progresso do circulo reflete player.interactTimer / interactDuration.
+  Para altar, a duracao e 4 segundos. Para artefato, 1.5 segundos.
+
+- O circulo NAO aparece para interacao com porta (toggle instantaneo).
+
+- Para portas duplas, a cor DOOR_CLOSED_COLOR em renderTiles garante
+  que mesmo sem o renderDoors detalhado, o jogador veja que ha uma
+  porta ali.
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================

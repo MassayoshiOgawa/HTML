@@ -1,0 +1,217 @@
+================================================================================
+MEGA PROMPT - EXIBIR RAIO DE DETECCAO TRASEIRA DO MONSTRO NO MODO DEBUG (F1)
+================================================================================
+
+ID DA IDEIA: MONSTER_REAR_DETECTION_DEBUG_VISION
+AUTOR: [usuario]
+DATA: Maio 2026
+ARQUIVO ALVO: SummonGame.html (single-file HTML5 Canvas game)
+DOCUMENTACAO DE REFERENCIA: Documentacao_Completa.txt
+
+
+REGRA ABSOLUTA (NAO VIOLAR):
+- A IA NAO pode criar, modificar, ou sugerir arquivos em outras linguagens como
+  Java, Python, C++, C, TypeScript, ou qualquer outra.
+- O unico arquivo que pode ser modificado e: SummonGame.html
+- A IA NAO deve criar nenhum novo arquivo nem documento, a menos que seja
+  explicitamente solicitado neste prompt.
+- Nenhuma dependencia externa deve ser adicionada (sem npm, sem bibliotecas,
+  sem CDNs, sem frameworks).
+- Codigo deve ser escrito em JavaScript puro (ES5/ES6 compativel com browsers
+  modernos), HTML5 e CSS3.
+
+
+================================================================================
+1. DESCRICAO DA IDEIA
+================================================================================
+
+Atualmente, quando o modo debug (F1) esta ativo no jogo SummonGame, o jogador
+pode ver o cone de visao frontal do monstro (renderVisionCone), que mostra a
+area de 120 graus (2*PI/3) a frente do monstro com alcance de 195 pixels.
+
+Porem, o monstro tambem possui um sistema de deteccao traseira chamado
+canDetectBehind(), que detecta o jogador quando ele esta muito proximo por
+tras do monstro. Esta area de deteccao traseira NAO e exibida visualmente
+no modo debug, deixando o jogador sem nocao do tamanho real dessa zona de
+risco.
+
+OBJETIVO: Criar um novo metodo de renderizacao (ou estender o existente)
+para exibir visualmente, quando F1 estiver ativo, o raio/area de deteccao
+traseira do monstro, permitindo que o jogador veja claramente o tamanho
+dessa zona de deteccao.
+
+
+================================================================================
+2. LOCALIZACAO NO CODIGO ATUAL
+================================================================================
+
+ARQUIVO: SummonGame.html
+
+METODO EXISTENTE (referencia):
+  MonsterEntity.renderVisionCone(ctx, game) - linha ~1262
+    Desenha o cone de visao frontal:
+    - Raio: 195 pixels
+    - Angulo: facingAngle +/- PI/3 (120 graus total)
+    - Cor: vermelho semi-transparente rgba(255,0,0,0.3)
+
+METODO DE DETECCAO TRASEIRA EXISTENTE (referencia):
+  MonsterEntity.canDetectBehind() - linha ~983
+    Logica de deteccao:
+    - Distancia maxima: 45 pixels do centro do monstro
+    - Angulo: |diferenca entre facingAngle e angleToPlayer| > Math.PI * 0.65
+      (ou seja, aproximadamente 117 graus para cada lado a partir da direcao
+      oposta ao facing, formando um setor traseiro de ~126 graus)
+
+ONDE ADICIONAR O NOVO CODIGO:
+  Dentro do metodo renderVisionCone(ctx, game), ou em um novo metodo
+  separado (ex: renderRearDetectionZone) que seja chamado juntamente com
+  renderVisionCone dentro do bloco de debug em renderDebug().
+
+
+================================================================================
+3. ESPECIFICACAO TECNICA DA IMPLEMENTACAO
+================================================================================
+
+3.1 - O QUE DESENHAR:
+  Um setor circular (tipo "fatia de pizza") atras do monstro representando
+  a area de deteccao traseira, com as seguintes caracteristicas:
+  - Raio: 45 pixels (mesmo valor usado em canDetectBehind)
+  - Arco: de facingAngle + PI*0.65 ate facingAngle - PI*0.65 (percorrendo
+    o lado MAIS LONGO, ou seja, por tras do monstro)
+  - Isso resulta em um setor de aproximadamente 126 graus (2*PI - 2*PI*0.65)
+
+3.2 - VISUAL (APARENCIA):
+  - Cor de preenchimento: rgba(255, 165, 0, 0.15) — laranja claro
+    semi-transparente (diferente do vermelho do cone frontal)
+  - Cor do contorno: rgba(255, 165, 0, 0.5) — laranja mais opaco
+  - Espessura da linha: 1 pixel
+  - Deve ser desenhado como um arc + lineTo para formar um setor fechado,
+    similar ao renderVisionCone() mas com as cores laranja
+
+3.3 - POSICIONAMENTO MATEMATICO:
+  Coordenadas de tela:
+    rx = this.px - game.camX
+    ry = this.py - game.camY
+  Angulos:
+    startAngle = this.facingAngle + Math.PI * 0.65
+    endAngle   = this.facingAngle - Math.PI * 0.65
+  NOTA: No canvas, arcos sao desenhados no sentido horario. Como queremos
+  o arco MAIS LONGO entre startAngle e endAngle, precisamos garantir que
+  o desenho percorra o lado correto. Em canvas 2D, se startAngle > endAngle
+  e usamos counterclockwise=false (sentido horario), o arco vai do maior
+  para o menor passando pelo lado "frente". Para pegar o lado "tras",
+  precisamos usar counterclockwise=true OU inverter a logica.
+  SOLUÇÃO RECOMENDADA: Usar counterclockwise=true no arc():
+    ctx.arc(rx, ry, 45, this.facingAngle + Math.PI * 0.65, this.facingAngle - Math.PI * 0.65, true)
+  Isso fara o arco percorrer de startAngle ate endAngle no sentido
+  anti-horario, que e o lado "traseiro" (o arco mais longo).
+
+3.4 - CONDICOES DE EXIBICAO:
+  - So deve ser desenhado se:
+    a) this.alive === true (monstro esta vivo)
+    b) game.debugMode === true (F1 ativo)
+  - Exatamente as mesmas condicoes do renderVisionCone()
+
+3.5 - METODO RECOMENDADO:
+  OPCAO A (RECOMENDADA): Adicionar o desenho diretamente no final do metodo
+    renderVisionCone() existente, apos o desenho do cone frontal. Assim tudo
+    fica em um unico metodo de debug visual.
+
+  OPCAO B: Criar um metodo separado renderRearZone(ctx, game) e chama-lo
+    em renderDebug() junto com renderVisionCone().
+
+  Escolha a opcao mais limpa e organizada visualmente.
+
+
+================================================================================
+4. REGRAS DE CODIGO E ESTILO
+================================================================================
+
+- Seguir EXATAMENTE o estilo de codigo existente no arquivo SummonGame.html:
+  - Nada de arrow functions (=>) para metodos de classe
+  - Nada de template literals (``) para strings simples (usar concatenacao +)
+  - Variaveis com nomes descritivos em ingles (como ja esta no codigo)
+  - Comentarios em ingles, no estilo // com espaco apos as barras
+  - Usar let/const, nao var
+  - Usar class/constructor, nao prototypes
+
+- Nao adicionar imports, exports, modules, ou bundlers
+- Nao usar bibliotecas externas
+- Nao criar elementos DOM, divs, spans, etc. — Tudo deve ser desenhado
+  no canvas 2D context
+
+- O codigo deve ser 100% funcional e testado mentalmente:
+  - Verificar se os angulos estao corretos
+  - Verificar se a direcao do arco (clockwise vs counterclockwise) produz
+    o setor correto
+  - Verificar sobreposicao com o cone frontal (nao devem se sobrepor)
+
+
+================================================================================
+5. TESTE E VERIFICACAO
+================================================================================
+
+Apos implementar, verificar manualmente no jogo:
+1. Abrir SummonGame.html no navegador
+2. Pressionar F1 para ativar modo debug
+3. Invocar o monstro (interagir com o altar)
+4. Observar: deve aparecer:
+   - Cone vermelho a frente do monstro (ja existente)
+   - Setor laranja atras do monstro (NOVO)
+5. O setor laranja deve ter aproximadamente 45 pixels de raio e estar
+   posicionado exatamente atras da direcao que o monstro esta olhando
+6. Desativar F1: ambos cones devem desaparecer
+
+
+================================================================================
+6. EXEMPLO DE REFERENCIA (CODIGO ATUAL)
+================================================================================
+
+Metodo renderVisionCone() atual (linha ~1262):
+------------------------------------------------
+  renderVisionCone(ctx, game) {
+    if (!this.alive || !game.debugMode) return;
+    const rx = this.px - game.camX;
+    const ry = this.py - game.camY;
+    const r = 195;
+    ctx.strokeStyle = 'rgba(255,0,0,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(rx, ry, r, this.facingAngle - Math.PI / 3, this.facingAngle + Math.PI / 3);
+    ctx.lineTo(rx, ry);
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+Metodo canDetectBehind() (linha ~983):
+------------------------------------------------
+  canDetectBehind() {
+    const player = this.findNearestPlayer();
+    if (!player) return false;
+    const dx = player.px - this.px;
+    const dy = player.py - this.py;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 45) return false;
+    const angleToPlayer = Math.atan2(dy, dx);
+    let diff = angleToPlayer - this.facingAngle;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    if (Math.abs(diff) > Math.PI * 0.65) return true;
+    return false;
+  }
+
+
+================================================================================
+7. ENTREGAVEIS ESPERADOS
+================================================================================
+
+- Unico arquivo modificado: SummonGame.html
+- Codigo adicionado/alterado dentro do metodo renderVisionCone() OU novo
+  metodo chamado em renderDebug()
+- Zero novas dependencias
+- Zero novos arquivos
+- Funcionalidade visivel apenas com F1 ativo
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================

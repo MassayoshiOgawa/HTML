@@ -1,0 +1,602 @@
+================================================================================
+MEGA PROMPT - SISTEMA DE PORTAS DUPLAS ADJACENTES (DOUBLE DOOR)
+================================================================================
+
+ID DA IDEIA: DOUBLE_DOOR_ADJACENT_MERGE
+AUTOR: [usuario]
+DATA: Maio 2026
+ARQUIVO ALVO: SummonGame.html (single-file HTML5 Canvas game)
+DOCUMENTACAO DE REFERENCIA: Documentacao_Completa.txt
+
+REGRAS ABSOLUTAS (NAO VIOLAR):
+- A IA NAO pode criar, modificar, ou sugerir ABSOLUTAMENTE NENHUM arquivo em
+  outras linguagens como Java, Python, C++, C, TypeScript, ou qualquer outra.
+- O UNICO arquivo que pode ser modificado e: SummonGame.html
+- A IA NAO deve criar nenhum novo arquivo nem documento, a menos que seja
+  explicitamente solicitado neste prompt.
+- Nenhuma dependencia externa deve ser adicionada (sem npm, sem bibliotecas,
+  sem CDNs, sem frameworks).
+- Codigo deve ser escrito em JavaScript puro (ES5/ES6 compativel com browsers
+  modernos), HTML5 e CSS3.
+- A documentacao (Documentacao_Completa.txt) DEVE ser atualizada com todas as
+  alteracoes feitas no codigo, de forma profissional, limpa e bem estruturada,
+  seguindo o mesmo formato ja existente na documentacao (secoes, changelog,
+  referencias de linha, etc).
+
+
+================================================================================
+1. DESCRICAO DA IDEIA
+================================================================================
+
+No jogo SummonGame, portas sao entidades individuais representadas pelo tile 'd'
+no mapa ASCII. Cada porta funciona de forma independente: abrir uma porta nao
+afeta as outras.
+
+A IDEA: Quando duas (ou mais) portas estiverem uma ao lado da outra
+ortogonalmente (cima, baixo, esquerda, direita), elas devem se fundir em um
+grupo de "portas duplas". Ao interagir com QUALQUER porta do grupo, TODAS as
+portas do grupo abrem/fecham simultaneamente. Visualmente, o grupo deve ser
+renderizado como uma unica porta MAIOR que ocupa o espaco combinado dos tiles.
+
+DIAGONAL NAO CONTA: Duas portas na diagonal (ex: (x,y) e (x+1,y+1)) NAO formam
+um grupo. Somente vizinhanca ortogonal direta (4 direcoes) e considerada.
+
+O QUE ISSO SIGNIFICA NA PRACTICA:
+- Se houver 2 portas lado a lado na horizontal |d d|, elas formam 1 grupo de 2.
+- Se houver 2 portas lado a lado na vertical (uma em cima da outra), formam
+  1 grupo de 2.
+- Se houver 3 portas em linha |d d d|, TODAS as 3 formam 1 grupo (grupo com
+  mais de 2 portas).
+  MIDDLE door tem vizinha dos dois lados, entao faz parte do mesmo grupo.
+- Se houver 4 portas em quadrado 2x2, TODAS formam 1 grupo (todas sao vizinhas
+  ortogonais de pelo menos uma outra).
+- Se houver 2 portas separadas por parede, NAO formam grupo.
+
+
+================================================================================
+2. LOCALIZACAO NO CODIGO ATUAL
+================================================================================
+
+ARQUIVO: SummonGame.html (~3021 linhas)
+
+CLASSE DoorEntity (linha ~581):
+  constructor(x, y)
+    this.tileX, this.tileY
+    this.open
+    this.animating
+    this.animTimer, this.animDuration (0.4s)
+    this.debounceTimer
+    this.animProgress
+
+  update(dt)              - atualiza animacao e debounce
+  toggle()                - inverte open, inicia animacao
+  forceOpen()             - usado pelo monstro
+  get solid()             - retorna !this.open && !this.animating
+
+METODO Game.loadMap() (linha ~1355):
+  this.doorEntities = mapData.doors.map(d => new DoorEntity(d.x, d.y));
+  E aqui que as portas sao criadas. Logica de agrupamento DEVE ser adicionada
+  APOS a criacao de todas as DoorEntity.
+
+METODO Player.checkInteraction() (linha ~772):
+  Itera sobre game.doorEntities para encontrar a porta mais proxima.
+  A porta encontrada vira player.interactTarget.
+
+METODO Player.update() (linha ~680):
+  keysJustPressed[kb.interact] && interactType === 'door' -> toggle()
+
+METODO Game.updateInteraction() (linha ~2107):
+  Door interaction: target.toggle()
+
+METODO Game.renderDoors() (linha ~2558):
+  Renderiza portas sobre o lightmap. Usa INTERIOR_COLOR como fundo do tile
+  e DOOR_CLOSED_COLOR para a porta fechada.
+  Cada porta e renderizada individualmente como um retangulo no tile.
+
+METODO Game.renderTiles() (linha ~2371):
+  Tambem renderiza portas como tiles base (cor fechada/aberta).
+  Trecho 'd' (linha ~2383): cor do tile base da porta.
+
+METODO MonsterEntity.checkNearbyDoors() (linha ~1081):
+  Monstro abre portas automaticamente ao chegar perto.
+  Itera dx/dy -1..1, encontra door, chama forceOpen().
+
+METODO MonsterEntity.hasLineOfSight() (linha ~998):
+  Verifica se porta esta solida (fechada) para linha de visao.
+
+METODO Player.canMoveTo() (linha ~750):
+  Verifica door.solid para colisao.
+
+METODO Game.findPath() (linha ~1821):
+  BFS pathfinding. Tile 'd' e transitavel (monstro abre portas).
+
+METODO Game.hasLineOfSight() (linha ~1800):
+  Usado pelo sistema de iluminacao. Porta solida bloqueia visao.
+
+METODO Game.pushOut() (linha ~1714):
+  Empurra entidades para fora de portas solidas.
+
+METODO Game.renderRoof() (linha ~2507):
+  Verifica se porta aberta perto para reduzir alpha do telhado.
+
+
+================================================================================
+3. ESPECIFICACAO TECNICA DA IMPLEMENTACAO
+================================================================================
+
+3.1 - MODIFICACOES NA CLASSE DoorEntity
+
+Adicionar ao CONSTRUCTOR:
+  this.group = null;     // referencia ao grupo (ou array de portas do grupo)
+  this.groupId = -1;     // id do grupo (-1 = sem grupo)
+
+OU alternativamente:
+  this.groupMembers = null;  // array de DoorEntity do mesmo grupo, ou null
+
+OBSERVACAO: A escolha entre usar um array estatico global de grupos vs
+propriedades individuais em DoorEntity fica a criterio da implementacao,
+desde que seja possivel, dado um DoorEntity qualquer, obter todas as outras
+DoorEntity do mesmo grupo.
+
+Novo metodo:
+  hasGroup() { return this.groupMembers !== null && this.groupMembers.length > 0; }
+  (ou similar)
+
+Metodo toggle() MODIFICADO:
+  Ao invocar toggle() em uma porta que pertence a um grupo, DEVE chamar
+  toggle() em TODAS as portas do grupo (incluindo ela mesma).
+  CUIDADO: Deve evitar loop infinito! Sugestao:
+    - Adicionar um parametro opcional `skipGroup = false` ao toggle()
+    - toggle() chama toggle(true) nas outras portas do grupo
+    - toggle() com skipGroup=true so executa a logica padrao sem propagar
+
+  Exemplo de logica:
+    toggle(skipPropagation = false) {
+      if (this.animating || this.debounceTimer > 0) return;
+      if (!skipPropagation && this.groupMembers) {
+        for (const member of this.groupMembers) {
+          if (member !== this) member.toggle(true);
+        }
+      }
+      this.open = !this.open;
+      this.animating = true;
+      this.animTimer = 0;
+    }
+
+Metodo forceOpen() MODIFICADO:
+  Deve propagar para todas as portas do grupo tambem.
+  Sugestao: forceOpen() verifica se ha grupo, e chama forceOpen() nos membros.
+
+NOTA: O getter solid() deve refletir o estado individual de cada porta no grupo.
+Cada porta mantem seu proprio estado open/animating independente. O toggle()
+apenas garante que todas comecam a abrir/fechar juntas, mas o estado real de
+cada uma e individual (elas podem estar em momentos ligeiramente diferentes
+da animacao se o codigo for chamado no mesmo frame, o que e aceitavel).
+
+3.2 - LOGICA DE AGRUPAMENTO (GROUP DETECTION)
+
+LOCAL: Dentro de Game.loadMap(), IMEDIATAMENTE apos a linha:
+  this.doorEntities = mapData.doors.map(d => new DoorEntity(d.x, d.y));
+
+Adicionar o codigo de agrupamento:
+
+PASSO 1: Construir mapa de indices
+  Criar uma matriz 2D (mapWidth x mapHeight) inicializada com -1.
+  Para cada DoorEntity em this.doorEntities, armazenar seu indice na matriz
+  na posicao (tileX, tileY).
+
+PASSO 2: Flood-fill / BFS para encontrar grupos ortogonais
+  Para cada door nao visitada, fazer BFS nas 4 direcoes (cima, baixo,
+  esquerda, direita) para encontrar todas as portas ortogonalmente conectadas.
+  Cada componente conexo forma 1 grupo.
+
+PASSO 3: Atribuir grupo
+  Para cada grupo encontrado (componente com 2+ portas):
+    - Atribuir um groupId unico
+    - Para cada porta no grupo, armazenar a lista de todas as outras portas
+      do grupo (groupMembers)
+  Portas isoladas (sem vizinhas ortogonais) nao recebem grupo.
+
+ALGORITMO SUGERIDO (flood-fill simples):
+  visited = {} (conjunto de "x,y")
+  groups = []
+  for each door in doorEntities:
+    key = door.tileX + ',' + door.tileY
+    if key in visited: continue
+    // BFS para encontrar todas portas conectadas ortogonalmente
+    queue = [door]
+    component = []
+    while queue not empty:
+      current = queue.shift()
+      cKey = current.tileX + ',' + current.tileY
+      if cKey in visited: continue
+      visited[cKey] = true
+      component.push(current)
+      // Checa 4 vizinhos
+      for each [dx, dy] in [[0,-1],[0,1],[-1,0],[1,0]]:
+        nx = current.tileX + dx
+        ny = current.tileY + dy
+        neighborDoor = doorEntities.find(d => d.tileX === nx && d.tileY === ny)
+        if neighborDoor:
+          nKey = nx + ',' + ny
+          if nKey not in visited:
+            queue.push(neighborDoor)
+    // Se component tem 2+ portas, e um grupo
+    if component.length >= 2:
+      for each door in component:
+        door.groupMembers = component.filter(d => d !== door)
+        // (ou armazenar o array completo em cada porta)
+
+OBS: Usar um Map ou objeto para acesso O(1) ao vizinho baseado em "x,y".
+
+3.3 - MODIFICACOES NA RENDERIZACAO (renderDoors)
+
+O metodo Game.renderDoors() (linha ~2558) precisa ser modificado para
+renderizar portas agrupadas como uma UNICA porta GRANDE.
+
+LOGICA:
+  Para cada porta em doorEntities:
+    SE porta pertence a um grupo E e a porta "primaria" do grupo
+    (ex: a primeira do grupo no array, ou a de menor tileX + tileY):
+      - Pular (nao renderizar individualmente)
+    SE porta pertence a um grupo E e a porta "primaria":
+      - Calcular bounding box do grupo:
+        minX = min(tileX do grupo), maxX = max(tileX do grupo)
+        minY = min(tileY do grupo), maxY = max(tileY do grupo)
+      - Largura em tiles: (maxX - minX + 1)
+      - Altura em tiles: (maxY - minY + 1)
+      - Renderizar UMA unica porta GRANDE que ocupa todo o espaco do grupo:
+        sx = minX * TILE_SIZE - camX
+        sy = minY * TILE_SIZE - camY
+        sw = (maxX - minX + 1) * TILE_SIZE
+        sh = (maxY - minY + 1) * TILE_SIZE
+      - Fundo: INTERIOR_COLOR preenchendo todo o bounding box
+      - Porta fechada: DOOR_CLOSED_COLOR com margem proporcional:
+        Se grupo horizontal (width > height):
+          portaWidth = sw * 0.85
+          portaHeight = sh * 0.7
+        Se grupo vertical (height > width):
+          portaWidth = sw * 0.7
+          portaHeight = sh * 0.85
+        Senao (quadrado 2x2 etc):
+          portaWidth = sw * 0.8
+          portaHeight = sh * 0.8
+        Centralizar a porta dentro do bounding box
+      - Animacao:
+        Se animating, usar animProgress medio do grupo (media dos progressos)
+        OU usar o progresso da porta primaria para determinar a abertura.
+        A barra de abertura deve crescer da borda inferior para cima (porta
+        de correr/deslizar pra cima) OU do centro para as laterais.
+
+    SE porta NAO pertence a grupo:
+      - Renderizar normalmente (codigo existente)
+
+DETALHES VISUAIS:
+  - Porta dupla horizontal (2 tiles lado a lado):
+    Uma larga porta de 64px de largura, 32px de altura.
+    Moldura mais larga, Unique closed color, puxador centralizado.
+  - Porta dupla vertical (2 tiles empilhados):
+    Uma alta porta de 32px de largura, 64px de altura.
+  - Grupo 2x2 (4 portas em quadrado):
+    Uma grande porta de 64px x 64px.
+
+  ANIMACAO DA PORTA GRANDE:
+    Em vez de animar encolhendo horizontalmente (como a porta individual),
+    a porta grande deve animar de forma diferente:
+    - Abrindo: a porta "sobe" (encurta verticalmente de baixo para cima)
+      ou "desliza" para o lado.
+    - O efeito visual mais dramatico: as duas folhas da porta abrem para
+      fora (cada metade vai para seu lado), mas isso requereria mais
+      complexidade. Para simplificar, usar:
+      - Abrir horizontalmente: do centro para as bordas (as duas metades
+        encolhem para as laterais), ou
+      - Abrir verticalmente: de baixo para cima (a porta sobe)
+    SUGESTAO SIMPLES: Usar o mesmo sistema de animProgress, onde a porta
+    grande encolhe de altura (vertical) OU de largura (horizontal),
+    dependendo da orientacao.
+    - Grupo horizontal (lado a lado): animProgress controla a ALTURA da porta
+      (porta "sobe" como uma porta de garagem)
+    - Grupo vertical (empilhado): animProgress controla a LARGURA da porta
+      (porta desliza para o lado)
+    - Isso da uma sensacao visual diferente e claramente distinguivel de
+      uma porta normal.
+
+3.4 - MODIFICACOES NA RENDERIZACAO (renderTiles)
+
+No metodo Game.renderTiles(), dentro do switch case 'd' (linha ~2383):
+  - Nao precisa de grandes modificacoes, pois o tile base pode continuar
+    sendo renderizado com a cor apropriada.
+  - Se desejar, pode-se pular a renderizacao de tiles 'd' que pertencem a
+    grupos (para nao ter double-rendering), ja que renderDoors() vai
+    desenhar por cima.
+  - OPCIONAL: Em vez de INTERIOR_COLOR, usar uma cor levemente diferente
+    para tiles que fazem parte de grupo de porta dupla, como um tom
+    transitional.
+
+Na seccao de door indicator (linha ~2470):
+  - Pular se a porta pertence a um grupo (deixe renderDoors() cuidar disso).
+
+3.5 - MODIFICACOES NA INTERACAO DO PLAYER
+
+Player.checkInteraction() (linha ~772):
+  - Nao precisa de modificacao. O player ja encontra a DoorEntity mais proxima.
+  - Quando toggle() for chamado na porta encontrada, se ela pertencer a um
+    grupo, todas as portas do grupo serao abertas/fechadas (graças a
+    modificacao no toggle()).
+
+Player.update() -> toque de porta (linha ~706):
+  keysJustPressed[kb.interact] && interactType === 'door' -> toggle()
+  - Nao precisa de modificacao, pois toggle() ja propaga.
+
+Game.updateInteraction() (linha ~2107):
+  target.toggle() -> ja propaga pelo grupo.
+
+3.6 - MODIFICACOES NO MONSTRO
+
+MonsterEntity.checkNearbyDoors() (linha ~1081):
+  Quando encontra uma porta e chama forceOpen(), se a porta pertencer a um
+  grupo, forceOpen() deve abrir todas as portas do grupo.
+  Modificar forceOpen() para propagar (similar ao toggle).
+
+MonsterEntity.hasLineOfSight() (linha ~998):
+  Ja usa door.solid individual. Nao precisa de modificacao.
+
+MonsterEntity.canMoveTo() (linha ~1028):
+  Ja usa door.solid. Nao precisa de modificacao.
+
+Game.findPath() (linha ~1821):
+  Tile 'd' e transitavel. Nao precisa de modificacao.
+
+Game.hasLineOfSight() (linha ~1800):
+  Verifica door.solid. Nao precisa de modificacao.
+
+3.7 - MODIFICACOES NO TELHADO
+
+Game.renderRoof() (linha ~2507):
+  A logica de "nearOpenDoor" verifica cada door individual. Como portas
+  em grupo abrem/fecham juntas, isso ja funciona corretamente.
+  Mas pode-se otimizar: se uma porta do grupo esta aberta, considerar
+  toda a area do grupo como "near open door".
+  OPCIONAL, mas recomendado.
+
+3.8 - MODIFICACOES DE COLISAO (pushEntitiesFromDoors)
+
+Game.pushOut() (linha ~1714):
+  Ja funciona individualmente. Quando portas de um grupo fecham, cada porta
+  individualmente empurra entidades. Isso ja cobre o caso, pois o pushOut
+  varre todas as portas solidas.
+  Nao precisa de modificacao, mas verificar se ha casos onde metade do
+  grupo abre e metade fecha (nao deveria, pois toggle() e sincronizado).
+
+3.9 - INTERACAO (RANGE / DETECCAO)
+
+Player.checkInteraction() calcula distancia ate o centro do tile de cada
+porta individual. Para portas em grupo, isso significa que interagir com
+qualquer tile do grupo funciona (ja que o toggle() propaga).
+
+MELHORIA OPCIONAL: Para grupo de portas, calcular a distancia ate o centro
+do bounding box do grupo (em vez do centro do tile individual). Isso faz
+com que a distancia de interacao seja mais natural para portas grandes.
+
+
+================================================================================
+4. REGRAS DE CODIGO E ESTILO
+================================================================================
+
+- Seguir EXATAMENTE o estilo de codigo existente no arquivo SummonGame.html:
+  - Nada de arrow functions (=>) para metodos de classe
+  - Nada de template literals (``) para strings simples (usar concatenacao +)
+  - Nomes de variaveis em ingles (como ja esta no codigo)
+  - Usar let/const, nao var
+  - Usar class/constructor, nao prototypes
+  - Chaves na mesma linha (K&R style)
+
+- Nao adicionar imports, exports, modules, ou bundlers
+- Nao usar bibliotecas externas
+- Nao criar elementos DOM, divs, spans, etc. — Tudo deve ser desenhado
+  no canvas 2D context (exceto quando ja existe codigo DOM para HUD etc.)
+- Nao modificar a estrutura HTML/CSS a menos que estritamente necessario
+  para a feature
+
+- Comentarios: seguir o padrao existente (comentarios EM INGLES,
+  // com espaco, blocos com // ===).
+
+- Toda modificacao DEVE ser registrada no arquivo Documentacao_Completa.txt:
+  - Adicionar entrada no CHANGELOG (secao apropriada, seguindo o formato
+    existente: ALTERACAO N - TITULO, PROBLEMA, SOLUCAO, MUDANCAS NO CODIGO)
+  - Atualizar secoes afetadas com a nova descricao
+  - Adicionar nova secao numerada (ex: SECAO 49 - SISTEMA DE PORTAS DUPLAS)
+    com documentacao detalhada do sistema
+
+
+================================================================================
+5. TESTE E VERIFICACAO
+================================================================================
+
+Apos implementar, verificar manualmente no jogo:
+
+TESTE 1 - GRUPO HORIZONTAL:
+  1. Usar o editor de mapa para colocar 2 portas lado a lado: |d d|
+  2. Iniciar o jogo e ir ate as portas
+  3. Interagir com a porta da esquerda
+  4. VERIFICAR: ambas abrem simultaneamente
+  5. Interagir com a porta da direita
+  6. VERIFICAR: ambas fecham simultaneamente
+  7. VERIFICAR: visualmente parece uma unica porta larga
+
+TESTE 2 - GRUPO VERTICAL:
+  1. Colocar 2 portas empilhadas:
+     d
+     d
+  2. Mesmo procedimento do Teste 1
+  3. VERIFICAR: ambas abrem/fecham juntas como uma porta alta
+
+TESTE 3 - GRUPO DE 3 PORTAS:
+  1. Colocar 3 portas em linha: |d d d|
+  2. Interagir com a porta do meio
+  3. VERIFICAR: TODAS as 3 abrem/fecham simultaneamente
+
+TESTE 4 - DIAGONAL NAO AGRUPA:
+  1. Colocar 2 portas na diagonal:
+     d.
+     .d
+  2. VERIFICAR: Cada porta funciona individualmente
+  3. VERIFICAR: Nao ha renderizacao de porta grande
+
+TESTE 5 - ISOLADA (SEM GRUPO):
+  1. Colocar 1 porta sozinha
+  2. VERIFICAR: Funciona exatamente como antes (comportamento normal)
+
+TESTE 6 - MONSTRO E PORTA DUPLA:
+  1. Criar grupo de 2 portas
+  2. Invocar monstro
+  3. VERIFICAR: Monstro abre AMBAS as portas do grupo ao se aproximar
+     (forceOpen propaga)
+
+TESTE 7 - FOG OF WAR:
+  1. Portas duplas devem ser visiveis no raio de proximidade (160px)
+     como as portas normais (renderDoors())
+
+TESTE 8 - TELHADO:
+  1. Com grupo de portas aberto, verificar se o telhado reduz alpha
+     corretamente perto da area do grupo
+
+TESTE 9 - COLISAO:
+  1. Ficar em frente a uma porta dupla fechada
+  2. VERIFICAR: Nao e possivel atravessar (ambas solidas = bloqueia)
+  3. Abrir a porta dupla
+  4. VERIFICAR: E possivel passar (ambas nao-solidas = passagem livre)
+
+
+================================================================================
+6. EXEMPLOS DE REFERENCIA (CODIGO ATUAL)
+================================================================================
+
+DoorEntity.toggle() atual (linha ~608):
+------------------------------------------------
+  toggle() {
+    if (this.animating || this.debounceTimer > 0) return;
+    this.open = !this.open;
+    this.animating = true;
+    this.animTimer = 0;
+  }
+
+DoorEntity.forceOpen() atual (linha ~614):
+------------------------------------------------
+  forceOpen() {
+    if (!this.open && !this.animating) this.toggle();
+  }
+
+Game.renderDoors() atual (linha ~2558):
+------------------------------------------------
+  renderDoors(ctx) {
+    const ts = TILE_SIZE;
+    const doorRange = 160;
+    for (const door of this.doorEntities) {
+      const sx = door.tileX * ts - this.camX;
+      const sy = door.tileY * ts - this.camY;
+      if (sx + ts < -50 || sx > this.canvas.width + 50 || sy + ts < -50 || sy > this.canvas.height + 50) continue;
+      const dx = door.tileX * ts + ts / 2;
+      const dy = door.tileY * ts + ts / 2;
+      let near = false;
+      for (const pl of this.players) {
+        if (!pl.alive) continue;
+        const pdx = pl.px - dx;
+        const pdy = pl.py - dy;
+        if (Math.sqrt(pdx * pdx + pdy * pdy) < doorRange) { near = true; break; }
+      }
+      if (!near) continue;
+      ctx.fillStyle = INTERIOR_COLOR;
+      ctx.fillRect(sx, sy, ts, ts);
+      if (door.animating) {
+        ctx.fillStyle = DOOR_CLOSED_COLOR;
+        ctx.fillRect(sx + ts * 0.1, sy + ts * 0.1, ts * 0.8 * door.animProgress, ts * 0.8);
+      } else if (!door.open) {
+        ctx.fillStyle = DOOR_CLOSED_COLOR;
+        ctx.fillRect(sx + ts * 0.1, sy + ts * 0.1, ts * 0.8, ts * 0.8);
+      }
+    }
+  }
+
+DoorEntity na renderTiles (linha ~2383):
+------------------------------------------------
+  case 'd': {
+    const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
+    color = (door && door.open) ? DOOR_OPEN_COLOR : DOOR_CLOSED_COLOR;
+    break;
+  }
+
+Door indicator em renderTiles (linha ~2469):
+------------------------------------------------
+  if (tile === 'd') {
+    const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
+    if (door && !door.open) {
+      ctx.fillStyle = '#8b6914';
+      ctx.fillRect(sx + TILE_SIZE * 0.1, sy + TILE_SIZE * 0.1, TILE_SIZE * 0.8, TILE_SIZE * 0.8);
+    }
+    if (door && door.animating) {
+      const progress = door.animProgress;
+      ctx.fillStyle = '#8b6914';
+      const barW = TILE_SIZE * 0.8 * progress;
+      ctx.fillRect(sx + TILE_SIZE * 0.1, sy + TILE_SIZE * 0.1, barW, TILE_SIZE * 0.8);
+    }
+  }
+
+Game.loadMap() criacao de portas (linha ~1360):
+------------------------------------------------
+  this.doorEntities = mapData.doors.map(d => new DoorEntity(d.x, d.y));
+
+
+================================================================================
+7. ENTREGAVEIS ESPERADOS
+================================================================================
+
+- Unico arquivo de codigo modificado: SummonGame.html
+- Unico arquivo de documentacao modificado: Documentacao_Completa.txt
+- Zero novas dependencias
+- Zero novos arquivos (a menos que explicitamente solicitado)
+- Funcionalidade completa:
+  a) Portas ortogonalmente adjacentes formam grupo automaticamente
+  b) toggle() e forceOpen() propagam para todo o grupo
+  c) Renderizacao como porta grande unificada para o grupo
+  d) Monstro abre grupo inteiro ao se aproximar
+  e) Colisao funcional (porta dupla fechada bloqueia)
+  f) Interacao via tecla E funciona em qualquer tile do grupo
+
+================================================================================
+8. ESTRUTURA SUGERIDA PARA DOCUMENTACAO (CHANGELOG)
+================================================================================
+
+ALTERACAO N - SISTEMA DE PORTAS DUPLAS ADJACENTES:
+
+  PROBLEMA: Portas eram entidades individuais independentes. Nao era
+  possivel abrir duas portas adjacentes simultaneamente com um unico
+  clique. Visualmente, portas lado a lado parecia duas portas separadas
+  em vez de uma entrada maior.
+
+  SOLUCAO: Implementado sistema de agrupamento automatico de portas
+  ortogonalmente adjacentes.
+
+  MUDANCAS NO CODIGO:
+    a) DoorEntity - NOVOS ATRIBUTOS:
+       groupMembers: array de DoorEntity do mesmo grupo, ou null
+    b) DoorEntity.toggle() MODIFICADO:
+       Propaga toggle para todos os membros do grupo
+    c) DoorEntity.forceOpen() MODIFICADO:
+       Propaga forceOpen para todos os membros do grupo
+    d) Game.loadMap() - NOVA LOGICA:
+       Apos criar doorEntities, executa BFS para detectar grupos
+       ortogonais. Atribui groupMembers para cada porta.
+    e) Game.renderDoors() MODIFICADO:
+       Grupos de portas sao renderizados como uma unica porta grande
+       no bounding box do grupo, com animacao diferenciada.
+    f) Game.renderTiles() MODIFICADO:
+       Portas agrupadas pulam renderizacao individual de tile 'd'.
+    ...
+
+  NOVA SECAO: SECAO 49 - SISTEMA DE PORTAS DUPLAS
+    ...
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================
