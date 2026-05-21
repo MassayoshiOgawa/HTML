@@ -262,7 +262,7 @@ const LEGEND_LABELS = {
   'M': 'Monster Spawn',
   'F': 'Artifact',
   'U': 'Waypoint',
-  'W': 'Furniture'
+  'W': 'ShortWall'
 };
 
 // ============================================================
@@ -347,20 +347,21 @@ const PlayerClasses = {
 // ============================================================
 const DEFAULT_MAP = [
 'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO',
-'OCCCCFCOCCFCOFCCCCCACCCCUCOGGFGGGGGGO',
-'OUCCCCCdCCCCOCCCCCCMCCCCCCOGGGGGGUGGO',
+'OCWCCFCOCCFCOFCCCCCACCCCUCOGGFGGGGGGO',
+'OCCUCCCdCCCCOCCCCCCMCCCCCCOGGGGGGUGGO',
 'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGGGO',
 'OOOOOOOOCCCCOCCCCCCCCCCCWCOGGGGGGGGGO',
 'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGGGO',
 'OCCUFCCOCCCCdCCCCCPCCCCCCCOGGGGGGGGGO',
 'OCCCCCCOCCCCOCCCCCCCCCCCCCOGGGGGGGGGO',
 'OCCCCCCOCCCCOOOOOOOdOOOOOOOGGGGGGGGGO',
-'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGGGGGGO',
-'OCCCCCCdCCCCCCCCCCCCCCCCCCdGGGGGGGGGO',
-'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGGGGGGO',
-'OOOOOOOOOOOOOOOOOdOOOOOOOOOGGGGGGGGGO',
-'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
-'OGGGGGGGGGGGGGFGUGGGGGGGGGGGGGGGGGGGO',
+'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGGWGGGO',
+'OCCCCCCdCCCCCCCCCCCCCCCCCCdGGGGGWGGGO',
+'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGGWGGGO',
+'OOOOOOOOOOOOOOOOOdOOOOOOOOOGGGGGWGGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGWGGGO',
+'OGGGGGGGGGGGGGFGUGGGGGGGGGGGGGGGWGGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGWWWWWWWWWGGGO',
 'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
 'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
 'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'
@@ -484,7 +485,7 @@ class DoorEntity {
   forceOpen() {
     if (!this.open && !this.animating) this.toggle();
   }
-  get solid() { return !this.open || this.animating; }
+  get solid() { return !this.open && !this.animating; }
 }
 
 // ============================================================
@@ -617,7 +618,7 @@ class Player {
       }
     }
     // Check altar
-    if (game.altarPos && !game.monster.alive) {
+    if (game.altarPos && game.activeMonsters.every(m => !m.alive)) {
       const dx = game.altarPos.x + 0.5 - this.px / TILE_SIZE;
       const dy = game.altarPos.y + 0.5 - this.py / TILE_SIZE;
       const dist = Math.sqrt(dx * dx + dy * dy) * TILE_SIZE;
@@ -752,12 +753,12 @@ class MonsterEntity {
     const dx = this.game.player.px - this.px;
     const dy = this.game.player.py - this.py;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist > 250) return false;
+    if (dist > 195) return false;
     const angle = Math.atan2(dy, dx);
     let diff = angle - this.facingAngle;
     while (diff > Math.PI) diff -= Math.PI * 2;
     while (diff < -Math.PI) diff += Math.PI * 2;
-    if (Math.abs(diff) > Math.PI / 2 && dist > 50) return false;
+    if (Math.abs(diff) > Math.PI / 3 && dist > 50) return false;
     return this.hasLineOfSight(this.px, this.py, this.game.player.px, this.game.player.py);
   }
 
@@ -795,6 +796,7 @@ class MonsterEntity {
       if (e2 < dx) { err += dx; cy += sy; }
       if (cx >= 0 && cx < this.game.mapWidth && cy >= 0 && cy < this.game.mapHeight) {
         if (tiles[cy][cx] === 'O') return false;
+        if (tiles[cy][cx] === 'W') return false;
         if (tiles[cy][cx] === 'd') {
           const door = this.game.doorEntities.find(d => d.tileX === cx && d.tileY === cy);
           if (!door || door.solid) return false;
@@ -829,14 +831,14 @@ class MonsterEntity {
   update(dt) {
     if (!this.alive) return;
     if (this.attackCooldown > 0) this.attackCooldown -= dt;
-    // Check for doors nearby
     this.checkNearbyDoors(dt);
-    // State machine
     switch (this.state) {
       case 'patrol': this.updatePatrol(dt); break;
       case 'chase': this.updateChase(dt); break;
       case 'search': this.updateSearch(dt); break;
     }
+    this.tileX = Math.floor(this.px / TILE_SIZE);
+    this.tileY = Math.floor(this.py / TILE_SIZE);
     // Attack player
     if (this.alive && this.game.player.alive) {
       const dx = this.game.player.px - this.px;
@@ -934,7 +936,7 @@ class MonsterEntity {
     if (!this.game.player.alive) { this.state = 'patrol'; this.path = null; return; }
     if (!this.canSeePlayer() && !this.canDetectBehind()) {
       this.chaseTimer += dt;
-      if (this.chaseTimer > 1.0) {
+      if (this.chaseTimer > this.chaseLoseTime) {
         this.lastKnownPlayerPos = {
           x: this.game.player.px, y: this.game.player.py
         };
@@ -965,7 +967,7 @@ class MonsterEntity {
       this.state = 'chase'; this.chaseTimer = 0; this.path = null; return;
     }
     this.searchTimer += dt;
-    if (this.searchTimer > 2.0 || !this.lastKnownPlayerPos) {
+    if (this.searchTimer > this.searchDuration || !this.lastKnownPlayerPos) {
       this.state = 'patrol'; this.path = null; return;
     }
     const stx = Math.floor(this.px / TILE_SIZE);
@@ -987,14 +989,32 @@ class MonsterEntity {
 
   render(ctx, game) {
     if (!this.alive) return;
+    // Visibility check using current position
+    if (!game.debugMode) {
+      const mtx = Math.floor(this.px / TILE_SIZE);
+      const mty = Math.floor(this.py / TILE_SIZE);
+      const vis = game.visibilityGrid[mty] && game.visibilityGrid[mty][mtx];
+      if (!vis || vis < 2) {
+        if (!(game.player.playerClass === 'oracle' && game.player.abilityActive)) {
+          return;
+        }
+      }
+    }
     const rx = this.px - game.camX;
     const ry = this.py - game.camY;
+    // Oracle highlight
+    if (game.player.playerClass === 'oracle' && game.player.abilityActive) {
+      ctx.fillStyle = 'rgba(255,255,0,0.25)';
+      ctx.beginPath();
+      ctx.arc(rx, ry, TILE_SIZE * 0.7, 0, Math.PI * 2);
+      ctx.fill();
+    }
     // Body
-    ctx.fillStyle = '#aa33cc';
+    ctx.fillStyle = this.bodyColor;
     ctx.beginPath();
     ctx.arc(rx, ry, TILE_SIZE * 0.38, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#661188';
+    ctx.strokeStyle = this.bodyStroke;
     ctx.lineWidth = 1.5;
     ctx.stroke();
     // Direction indicator
@@ -1025,11 +1045,11 @@ class MonsterEntity {
     if (!this.alive || !game.debugMode) return;
     const rx = this.px - game.camX;
     const ry = this.py - game.camY;
-    const r = 250;
+    const r = 195;
     ctx.strokeStyle = 'rgba(255,0,0,0.3)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(rx, ry, r, this.facingAngle - Math.PI / 2, this.facingAngle + Math.PI / 2);
+    ctx.arc(rx, ry, r, this.facingAngle - Math.PI / 3, this.facingAngle + Math.PI / 3);
     ctx.lineTo(rx, ry);
     ctx.closePath();
     ctx.stroke();
@@ -1053,7 +1073,10 @@ class Game {
     this.playerSpawn = { x: 0, y: 0 };
     this.monsterSpawn = { x: 0, y: 0 };
     this.player = null;
-    this.monster = null;
+    this.activeMonsters = [];
+    this.monsterSpawnType = 'normal';
+    this.monsterTypeMessage = '';
+    this.monsterTypeMsgTimer = 0;
     this.particles = [];
     this.camX = 0; this.camY = 0;
     this.summonCount = 0;
@@ -1109,7 +1132,7 @@ class Game {
     // Resize canvas
     this.canvas.width = this.mapWidth * TILE_SIZE;
     this.canvas.height = this.mapHeight * TILE_SIZE;
-    // Create/place player
+    // Create/reset player
     if (this.player) {
       this.player.px = this.playerSpawn.x * TILE_SIZE + TILE_SIZE / 2;
       this.player.py = this.playerSpawn.y * TILE_SIZE + TILE_SIZE / 2;
@@ -1120,12 +1143,18 @@ class Game {
       this.player.interacting = false;
       this.player.interactTimer = 0;
       this.player.invulnTimer = 0;
+      this.player.abilityCooldown = 0;
+      this.player.abilityActive = false;
+      this.player.abilityTimer = 0;
+      if (this.player.playerClass === 'scout') this.player.speed = this.player.baseSpeed;
     } else {
       this.player = new Player(this.playerSpawn.x, this.playerSpawn.y);
     }
-    // Create monster
-    this.monster = new MonsterEntity(this.monsterSpawn.x, this.monsterSpawn.y, this);
-    this.monster.die();
+    // Clear monsters
+    this.activeMonsters = [];
+    this.monsterSpawnType = 'normal';
+    this.monsterTypeMessage = '';
+    this.monsterTypeMsgTimer = 0;
     // Reset state
     this.summonCount = 0;
     this.collectedArtifacts = 0;
@@ -1150,13 +1179,90 @@ class Game {
 
   restart() {
     this.summoning = false;
+    this.activeMonsters = [];
     this.loadMap(parseMap(DEFAULT_MAP.join('\n')));
+    this.showClassSelectionOnRestart();
   }
 
   start() {
     this.loadMap(parseMap(DEFAULT_MAP.join('\n')));
     this.lastTime = performance.now();
-    this.loop(this.lastTime);
+    this.showClassSelection();
+  }
+
+  showClassSelection() {
+    const sel = document.getElementById('class-select');
+    const opts = document.getElementById('class-options');
+    opts.innerHTML = '';
+    for (const [key, cls] of Object.entries(PlayerClasses)) {
+      const div = document.createElement('div');
+      div.style.cssText = 'width:80px;height:80px;background:#1a1a2e;border:2px solid #444;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:32px;color:#888;transition:all 0.2s;';
+      div.textContent = cls.icon;
+      div.title = cls.name;
+      div.addEventListener('click', () => {
+        document.querySelectorAll('#class-options div').forEach(d => { d.style.borderColor = '#444'; d.style.color = '#888'; });
+        div.style.borderColor = '#4fc3f7';
+        div.style.color = '#fff';
+        document.getElementById('class-desc').textContent = cls.name + ': ' + cls.desc;
+        this.player.playerClass = key;
+      });
+      div.addEventListener('mouseenter', () => {
+        document.getElementById('class-desc').textContent = cls.name + ': ' + cls.desc;
+      });
+      div.addEventListener('mouseleave', () => {
+        const cur = this.player.playerClass;
+        if (PlayerClasses[cur]) {
+          document.getElementById('class-desc').textContent = PlayerClasses[cur].name + ': ' + PlayerClasses[cur].desc;
+        } else {
+          document.getElementById('class-desc').textContent = '';
+        }
+      });
+      opts.appendChild(div);
+    }
+    document.getElementById('class-desc').textContent = '';
+    document.getElementById('btn-start-game').onclick = () => {
+      sel.style.display = 'none';
+      this.loop(this.lastTime);
+    };
+    sel.style.display = 'flex';
+  }
+
+  showClassSelectionOnRestart() {
+    const sel = document.getElementById('class-select');
+    const opts = document.getElementById('class-options');
+    opts.innerHTML = '';
+    for (const [key, cls] of Object.entries(PlayerClasses)) {
+      const div = document.createElement('div');
+      div.style.cssText = 'width:80px;height:80px;background:#1a1a2e;border:2px solid #444;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:32px;color:#888;transition:all 0.2s;';
+      div.textContent = cls.icon;
+      div.title = cls.name;
+      div.addEventListener('click', () => {
+        document.querySelectorAll('#class-options div').forEach(d => { d.style.borderColor = '#444'; d.style.color = '#888'; });
+        div.style.borderColor = '#4fc3f7';
+        div.style.color = '#fff';
+        document.getElementById('class-desc').textContent = cls.name + ': ' + cls.desc;
+        this.player.playerClass = key;
+      });
+      div.addEventListener('mouseenter', () => {
+        document.getElementById('class-desc').textContent = cls.name + ': ' + cls.desc;
+      });
+      div.addEventListener('mouseleave', () => {
+        const cur = this.player.playerClass;
+        if (PlayerClasses[cur]) {
+          document.getElementById('class-desc').textContent = PlayerClasses[cur].name + ': ' + PlayerClasses[cur].desc;
+        } else {
+          document.getElementById('class-desc').textContent = '';
+        }
+      });
+      opts.appendChild(div);
+    }
+    document.getElementById('class-desc').textContent = '';
+    document.getElementById('btn-start-game').onclick = () => {
+      sel.style.display = 'none';
+      this.lastTime = performance.now();
+      this.loop(this.lastTime);
+    };
+    sel.style.display = 'flex';
   }
 
   loop(now) {
@@ -1170,10 +1276,12 @@ class Game {
   update(dt) {
     // Update doors
     for (const door of this.doorEntities) door.update(dt);
+    // Push entities out of solid doors
+    this.pushEntitiesFromDoors();
     // Update player
     this.player.update(dt, this);
-    // Update monster
-    this.monster.update(dt);
+    // Update monsters
+    for (const m of this.activeMonsters) m.update(dt);
     // Update artifacts
     for (const art of this.artifactEntities) art.update(dt);
     // Update particles
@@ -1183,17 +1291,19 @@ class Game {
     }
     // Update message
     if (this.messageTimer > 0) { this.messageTimer -= dt; if (this.messageTimer <= 0) this.showMessage(''); }
+    // Monster type message
+    if (this.monsterTypeMsgTimer > 0) { this.monsterTypeMsgTimer -= dt; if (this.monsterTypeMsgTimer <= 0) this.monsterTypeMessage = ''; }
     // Day/night transition
-    const monsterAlive = this.monster.alive;
+    const anyMonsterAlive = this.activeMonsters.some(m => m.alive);
     this.targetRoofAlpha = this.computeRoofAlpha();
     this.roofAlpha += (this.targetRoofAlpha - this.roofAlpha) * Math.min(dt * 4, 1);
-    if (monsterAlive && !this.isNight) {
+    if (anyMonsterAlive && !this.isNight) {
       this.nightTransition = Math.min(1, this.nightTransition + dt * 0.8);
       if (this.nightTransition >= 1) this.isNight = true;
-    } else if (!monsterAlive && this.isNight) {
+    } else if (!anyMonsterAlive && this.isNight) {
       this.nightTransition = Math.max(0, this.nightTransition - dt * 1.2);
       if (this.nightTransition <= 0) this.isNight = false;
-    } else if (!monsterAlive && !this.isNight && this.nightTransition > 0) {
+    } else if (!anyMonsterAlive && !this.isNight && this.nightTransition > 0) {
       this.nightTransition = Math.max(0, this.nightTransition - dt * 1.2);
     }
     // Summon delay
@@ -1211,6 +1321,9 @@ class Game {
     this.updateVisibility();
     // Update HUD
     updateHUD(this);
+    updateAbilityHUD(this);
+    // Consume justPressed
+    for (const k in keysJustPressed) keysJustPressed[k] = false;
   }
 
   computeRoofAlpha() {
@@ -1229,6 +1342,39 @@ class Game {
       if (dist < 3) return Math.max(0, (dist - 1) / 2); // Partial roof near open door
     }
     return 1;
+  }
+
+  pushEntitiesFromDoors() {
+    for (const door of this.doorEntities) {
+      if (!door.solid) continue;
+      // Check player
+      this.pushOut(this.player, door.tileX, door.tileY);
+      // Check monsters
+      for (const m of this.activeMonsters) {
+        if (!m.alive) continue;
+        this.pushOut(m, door.tileX, door.tileY);
+      }
+    }
+  }
+
+  pushOut(entity, doorTX, doorTY) {
+    const et = Math.floor(entity.px / TILE_SIZE);
+    const ety = Math.floor(entity.py / TILE_SIZE);
+    if (et !== doorTX || ety !== doorTY) return;
+    const dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+    for (const [dx, dy] of dirs) {
+      const nx = doorTX + dx, ny = doorTY + dy;
+      if (nx < 0 || ny < 0 || nx >= this.mapWidth || ny >= this.mapHeight) continue;
+      const tile = this.tiles[ny][nx];
+      if (tile === 'O' || tile === 'W') continue;
+      if (tile === 'd') {
+        const d = this.doorEntities.find(dr => dr.tileX === nx && dr.tileY === ny);
+        if (d && d.solid) continue;
+      }
+      entity.px = nx * TILE_SIZE + TILE_SIZE / 2;
+      entity.py = ny * TILE_SIZE + TILE_SIZE / 2;
+      return;
+    }
   }
 
   updateCamera() {
@@ -1343,17 +1489,18 @@ class Game {
   }
 
   checkGameState() {
-    if (!this.monster.alive) return;
+    if (this.activeMonsters.length === 0 || this.activeMonsters.every(m => !m.alive)) return;
     let allCollected = true;
     for (const art of this.artifactEntities) {
       if (!art.collected) { allCollected = false; break; }
     }
     if (allCollected) {
-      this.monster.die();
+      for (const m of this.activeMonsters) m.die();
+      this.activeMonsters = [];
+      this.summoning = false;
       this.collectedArtifacts = 0;
       this.isNight = false;
       this.showMessage('All artifacts collected! Monster defeated!');
-      // Respawn artifacts
       this.respawnArtifacts();
     }
   }
@@ -1377,9 +1524,26 @@ class Game {
 
   spawnMonster() {
     this.summonCount++;
-    this.monster.speed = 70 + (this.summonCount - 1) * 10;
-    this.monster.spawn();
-    this.showMessage('The monster has been summoned!');
+    const typeKey = weightedRandom(MonsterTypes);
+    const mt = MonsterTypes[typeKey];
+    this.monsterSpawnType = typeKey;
+    this.monsterTypeMessage = mt.name + ' heard you. Run.';
+    this.monsterTypeMsgTimer = 3.0;
+    const spd = 70 + (this.summonCount - 1) * 10;
+    for (let i = 0; i < mt.spawnCount; i++) {
+      const ox = i > 0 ? (Math.random() - 0.5) * 2 : 0;
+      const oy = i > 0 ? (Math.random() - 0.5) * 2 : 0;
+      const stx = Math.round(this.monsterSpawn.x + ox);
+      const sty = Math.round(this.monsterSpawn.y + oy);
+      const m = new MonsterEntity(
+        Math.max(0, Math.min(this.mapWidth - 1, stx)),
+        Math.max(0, Math.min(this.mapHeight - 1, sty)),
+        this, typeKey
+      );
+      m.speed = spd;
+      m.spawn();
+      this.activeMonsters.push(m);
+    }
   }
 
   collectArtifact(art) {
@@ -1478,7 +1642,7 @@ class Game {
     this.renderRoof(ctx);
     // Draw entities
     this.player.render(ctx, this);
-    this.monster.render(ctx, this);
+    for (const m of this.activeMonsters) m.render(ctx, this);
     this.renderParticles(ctx);
     // Fog overlay
     this.renderFog(ctx);
@@ -1639,13 +1803,15 @@ class Game {
       ctx.strokeRect(sx - 4, sy - 4, 8, 8);
       ctx.fillText('U', sx + 6, sy - 6);
     }
-    // Monster state
-    if (this.monster.alive) {
-      const mx = this.monster.px - this.camX;
-      const my = this.monster.py - this.camY;
-      ctx.fillStyle = '#f0f';
-      ctx.fillText(this.monster.state.toUpperCase(), mx + 12, my - 12);
-      this.monster.renderVisionCone(ctx, this);
+    // Monster states
+    for (const m of this.activeMonsters) {
+      if (m.alive) {
+        const mx = m.px - this.camX;
+        const my = m.py - this.camY;
+        ctx.fillStyle = '#f0f';
+        ctx.fillText(m.type.toUpperCase() + ' ' + m.state.toUpperCase(), mx + 12, my - 12);
+        m.renderVisionCone(ctx, this);
+      }
     }
     // FPS
     ctx.fillText('FPS: ' + Math.round(1000 / (performance.now() - this.lastTime + 0.001)), 10, this.canvas.height - 10);
@@ -1693,24 +1859,46 @@ class Game {
 // INPUT HANDLING
 // ============================================================
 const keys = {};
+const keysJustPressed = {};
 window.addEventListener('keydown', e => {
-  keys[e.key.toLowerCase()] = true;
+  const k = e.key.toLowerCase();
+  if (!keys[k]) keysJustPressed[k] = true;
+  keys[k] = true;
   if (e.key === 'F1') {
     e.preventDefault();
     game.debugMode = !game.debugMode;
   }
-  if (e.key.toLowerCase() === 'e' && !game.player.interacting && game.player.interactTarget) {
-    game.player.interacting = true;
-    game.player.interactTimer = 0;
+  if (k === 'f' && game && game.player && game.player.alive) {
+    activateAbility(game);
+  }
+  if (k === 'e' && game && game.player && !game.player.interacting && game.player.interactTarget) {
+    if (game.player.interactType !== 'door') {
+      game.player.interacting = true;
+      game.player.interactTimer = 0;
+    }
   }
 });
 window.addEventListener('keyup', e => {
-  keys[e.key.toLowerCase()] = false;
-  if (e.key.toLowerCase() === 'e') {
+  const k = e.key.toLowerCase();
+  keys[k] = false;
+  if (k === 'e' && game && game.player) {
     game.player.interacting = false;
     game.player.interactTimer = 0;
   }
 });
+
+function activateAbility(game) {
+  const p = game.player;
+  const cls = PlayerClasses[p.playerClass];
+  if (!cls || cls.cooldown === 0) return;
+  if (p.abilityCooldown > 0 || p.abilityActive) return;
+  p.abilityActive = true;
+  p.abilityTimer = cls.duration;
+  p.abilityCooldown = cls.cooldown + cls.duration;
+  if (p.playerClass === 'scout') {
+    p.speed = p.baseSpeed * 1.5;
+  }
+}
 
 // ============================================================
 // UI HANDLERS
@@ -1718,12 +1906,54 @@ window.addEventListener('keyup', e => {
 function updateHUD(game) {
   const hud = document.getElementById('hud');
   const night = game.nightTransition > 0.3 ? 'NIGHT' : 'DAY';
+  const mt = game.monsterSpawnType;
+  const mtName = MonsterTypes[mt] ? MonsterTypes[mt].name : 'None';
+  const clsName = PlayerClasses[game.player.playerClass] ? PlayerClasses[game.player.playerClass].name : 'None';
   hud.innerHTML =
     'HP: ' + game.player.hp + '/' + game.player.maxHp + '<br>' +
+    'Class: ' + clsName + '<br>' +
+    'Monster: ' + mtName + '<br>' +
     'Dificuldade: ' + game.difficulty + '<br>' +
     'Artefatos: ' + game.collectedArtifacts + '/' + game.artifactCount + '<br>' +
     'Summons: ' + game.summonCount + '<br>' +
     'Estado: ' + night;
+  // Monster type message
+  if (game.monsterTypeMsgTimer > 0 && game.messageTimer <= 0) {
+    const msg = document.getElementById('message');
+    msg.textContent = game.monsterTypeMessage;
+    msg.classList.add('show');
+  }
+}
+
+function updateAbilityHUD(game) {
+  const p = game.player;
+  const cls = PlayerClasses[p.playerClass];
+  const nameEl = document.getElementById('ability-name');
+  const bar = document.getElementById('ability-bar');
+  const textEl = document.getElementById('ability-text');
+  const hud = document.getElementById('ability-hud');
+  if (!cls || cls.cooldown === 0) {
+    hud.style.display = 'none';
+    return;
+  }
+  hud.style.display = 'block';
+  nameEl.textContent = cls.abilityName + ' [F]';
+  if (p.abilityActive) {
+    const pct = (p.abilityTimer / cls.duration) * 100;
+    bar.style.width = pct + '%';
+    bar.style.background = 'rgba(255,200,0,0.6)';
+    textEl.textContent = 'Active ' + p.abilityTimer.toFixed(1) + 's';
+  } else if (p.abilityCooldown > 0) {
+    const totalCD = cls.cooldown + cls.duration;
+    const pct = (1 - p.abilityCooldown / totalCD) * 100;
+    bar.style.width = pct + '%';
+    bar.style.background = 'rgba(255,60,60,0.6)';
+    textEl.textContent = 'Cooldown ' + p.abilityCooldown.toFixed(1) + 's';
+  } else {
+    bar.style.width = '100%';
+    bar.style.background = 'rgba(100,255,100,0.5)';
+    textEl.textContent = 'Ready';
+  }
 }
 
 function updateMapEditor(game) {

@@ -7,6 +7,7 @@ Tecnologia: HTML + CSS + JavaScript (zero dependencias externas)
 Linhas totais: 1703
 ================================================================================
 
+
 ================================================================================
 1. VISAO GERAL DA ARQUITETURA
 ================================================================================
@@ -1504,4 +1505,258 @@ ESTRUTURA PARA NOVOS MAPAS:
   - C (floor) e G (grass) - para areas internas/externas
 ================================================================================
 FIM DA DOCUMENTACAO
+================================================================================
+
+================================================================================
+CHANGELOG - ATUALIZACOES MAIO 2026 (CONTINUACAO)
+================================================================================
+
+ALTERACAO 4 - MONSTRO INVISIVEL FORA DO CAMPO DE VISAO
+
+  PROBLEMA: O monstro era sempre visivel, independente do fog of war,
+  reduzindo a tensao do jogo.
+
+  SOLUCAO: MonsterEntity.render() agora verifica visibilityGrid antes
+  de desenhar. Se o tile onde o monstro esta nao tem visibility >= 2
+  (visivel agora), o render retorna sem desenhar.
+
+  EXCECAO: Se o player for Oracle com habilidade Reveal Monster ativa,
+  a verificacao e ignorada e o monstro e desenhado com highlight amarelo.
+
+  CORRECAO DE BUG RELACIONADO: Inicialmente a verificacao usava
+  this.tileX/this.tileY que nunca eram atualizados durante o movimento
+  (apenas this.px/this.py mudavam). Corrigido para calcular mtx/mty
+  a partir de px/py em todo render. Adicionalmente, tileX/tileY sao
+  sincronizados no final de MonsterEntity.update().
+
+ALTERACAO 5 - PORTAS COM UM CLIQUE (INSTANTANEO)
+
+  PROBLEMA: Portas usavam hold E, inconsistente com a mecanica desejada
+  de abrir/fechar instantaneo.
+
+  SOLUCAO: Sistema keysJustPressed rastreia teclas recem-pressionadas
+  no frame atual. Player.update verifica keysJustPressed['e'] com
+  interactType === 'door' para toggle instantaneo.
+
+  Altar (4s) e artefatos (1.5s) continuam usando hold E normalmente.
+
+  keysJustPressed e consumido (setado como false para todas as teclas)
+  no final de Game.update().
+
+ALTERACAO 6 - SISTEMA DE CLASSES JOGAVEIS
+
+  PlayerClasses = {
+    none:   sem habilidade (cooldown 0, duracao 0)
+    oracle: Reveal Monster [F] - revela posicao do monstro atraves
+            de paredes por 5s, cooldown 25s (+5s duracao = 30s total)
+    scout:  Speed Burst [F] - velocidade 1.5x por 6s,
+            cooldown 20s (+6s duracao = 26s total)
+  }
+
+  TELA DE SELECAO:
+    - Exibida ao iniciar (start) e ao reiniciar (restart)
+    - Mostra icones CSS clicaveis para cada classe
+    - Hover/clique mostra nome e descricao
+    - Botao "Start Game" inicia o jogo
+
+  HUD DE HABILIDADE (#ability-hud):
+    - Canto inferior direito
+    - Nome da habilidade + [F]
+    - Barra de cooldown vermelha transparente
+    - Timer numerico (cooldown restante ou duracao ativa)
+    - Verde quando Ready
+
+  ATIVACAO:
+    - Tecla F chama activateAbility(game)
+    - Verifica se cooldown > 0 ou ja ativo (bloqueia spam)
+    - Oracle: destaca monstro com circulo amarelo rgba(255,255,0,0.25)
+    - Scout: player.speed = baseSpeed * 1.5
+
+ALTERACAO 7 - SISTEMA DE TIPOS DE MONSTRO
+
+  MonsterTypes = {
+    normal:  chaseLoseTime=1.0s, searchDuration=2.0s, spawnCount=1,
+             cor #aa33cc/#661188
+    blueman: chaseLoseTime=2.0s, searchDuration=4.0s, spawnCount=1,
+             cor #3388ff/#1155cc ("never forgets your scent")
+    twins:   chaseLoseTime=1.0s, searchDuration=2.0s, spawnCount=2,
+             cor #cc3333/#881111 ("double the terror")
+  }
+
+  WEIGHTED RANDOM:
+    Funcao weightedRandom(types) calcula peso total e escolhe tipo
+    proporcionalmente. Todos tem weight=1 atualmente (mesma chance).
+    Suporta pesos diferentes para raridade futura.
+
+  ARQUITETURA activeMonsters[]:
+    Game.monster (unico) substituido por Game.activeMonsters (array).
+    Todos os sistemas adaptados:
+    - update: for (const m of this.activeMonsters) m.update(dt)
+    - render: for (const m of this.activeMonsters) m.render(ctx, this)
+    - debug: mostra tipo+estado de cada monstro individualmente
+    - checkGameState: todos morrem quando artefatos coletados
+    - anyMonsterAlive: activeMonsters.some(m => m.alive)
+    - spawnMonster: cria mt.spawnCount monstros com offset aleatorio
+    - die(): reseta summoning (movido do MonsterEntity.die para checkGameState)
+
+  MENSAGEM DE TIPO:
+    Ao spawnar: "*Nome* heard you. Run." exibido por 3 segundos
+    So aparece se nenhuma outra mensagem ativa (messageTimer <= 0)
+
+ALTERACAO 8 - VISAO DO MONSTRO REDUZIDA
+
+  Raio de deteccao: 250px -> 162.5px (65% do original)
+  Angulo do cone: 180 graus (PI) -> 120 graus (2*PI/3)
+  Meio-cone: PI/2 -> PI/3
+
+  Afeta: canSeePlayer() (deteccao real) e renderVisionCone() (debug)
+
+ALTERACAO 9 - COLISAO DE PORTA SOMENTE QUANDO FECHADA
+
+  Antes: door.solid = !open || animating
+         (bloqueava durante animacao de abrir/fechar)
+  Depois: door.solid = !open && !animating
+          (so bloqueia quando totalmente fechada e parada)
+
+  Durante a animacao (abrindo ou fechando), a porta e transitavel.
+
+ALTERACAO 10 - EMPURRAR ENTIDADES PARA FORA DE PORTAS
+
+  PROBLEMA: Se o player/monstro estivesse sobre uma porta quando ela
+  fechasse, ficava preso (paralisado) pois a porta se tornava solida.
+
+  SOLUCAO: pushEntitiesFromDoors() executado apos door.update().
+  Para cada porta solida, verifica se player ou algum monstro ativo
+  esta no tile. Se estiver, pushOut() testa os 4 vizinhos cardinais
+  e teleporta a entidade para o centro do primeiro tile livre
+  (sem parede O, furniture W, ou porta solida).
+
+================================================================================
+
+================================================================================
+ATUALIZACAO DAS SECOES AFETADAS
+================================================================================
+
+SECAO 9 (SISTEMA DE PORTAS) - ATUALIZADA:
+
+  solid getter modificado:
+    Antes: return !open || animating
+    Agora: return !open && !animating
+
+  Porta so e solida quando totalmente fechada e sem animacao rodando.
+  Durante abertura ou fechamento, entidades podem atravessar.
+
+  NOVO: pushEntitiesFromDoors() (Game, chamado apos door.update)
+    Para cada porta solida, verifica se player ou monstro ativo esta
+    no tile. Se estiver, empurra para o primeiro vizinho livre
+    (cima, baixo, esquerda, direita) que nao seja O, W, ou porta solida.
+
+SECAO 13 (SISTEMA DE VISAO DO MONSTRO) - ATUALIZADA:
+
+  Raio de deteccao: 162.5 pixels (~5 tiles) [antes: 250px ~7.8 tiles]
+  Angulo do cone: 120 graus (PI/3 para cada lado) [antes: 180 graus]
+
+  Deteccao traseira: mantida em 45 pixels (~1.4 tiles), angulo > 0.65*PI
+
+SECAO 14 (PATHFINDING) - ATUALIZADA:
+
+  Blue Man: chaseLoseTime = 2.0s (dobro), searchDuration = 4.0s (dobro)
+  Configuravel por tipo de monstro via MonsterTypes[type].chaseLoseTime
+  e MonsterTypes[type].searchDuration.
+
+NOVAS SECOES ADICIONAIS:
+
+SECAO 41 - SISTEMA DE INVISIBILIDADE DO MONSTRO
+
+  MonsterEntity.render() verifica o visibilityGrid na posicao atual
+  do monstro (calculada de px/py em todo frame).
+
+  Se visibilityGrid[ty][tx] < 2: retorna sem renderizar
+  Excecao: Oracle com Reveal Monster ativo ignora a verificacao e
+  desenha o monstro com highlight amarelo.
+
+  TileX/TileY sao sincronizados em MonsterEntity.update() apos o
+  movimento para consistencia.
+
+SECAO 42 - SISTEMA DE INTERACAO DE PORTAS (UM CLIQUE)
+
+  Sistema keysJustPressed:
+    keydown: se keys[key] era false, keysJustPressed[key] = true
+    update: Player.update verifica keysJustPressed['e'] para portas
+    Fim do frame: keysJustPressed[k] = false para todas as teclas
+
+  Portas: toggle instantaneo ao pressionar E
+  Altar/artefato: mantem hold E (interacting=true, interactTimer+=dt)
+
+SECAO 43 - SISTEMA DE CLASSES
+
+  PlayerClasses: { none, oracle, scout }
+  Cada classe: name, desc, abilityName, cooldown, duration, icon
+
+  Player atributos novos:
+    playerClass (string), baseSpeed (140), speed (dinamico),
+    abilityCooldown (float), abilityActive (bool), abilityTimer (float)
+
+  HUD de habilidade (#ability-hud): nome, barra, timer
+    Ativo: barra amarela diminuindo
+    Cooldown: barra vermelha preenchendo
+    Ready: barra verde cheia
+
+  Tecla F: activateAbility() - so funciona se !cooldown e !active
+
+  Oracle (Reveal Monster):
+    Cooldown total: 25s + 5s duracao = 30s
+    Durante ativo: circulo amarelo rgba(255,255,0,0.25) ao redor do
+    monstro. Monstro visivel mesmo com visibilityGrid < 2.
+
+  Scout (Speed Burst):
+    Cooldown total: 20s + 6s duracao = 26s
+    Durante ativo: speed = baseSpeed * 1.5
+    Ao expirar: speed = baseSpeed
+
+  Selecao de classe:
+    Tela #class-select com icones CSS clicaveis
+    Exibida em start() e restart()
+    Botao "Start Game" inicia o game loop
+
+SECAO 44 - SISTEMA DE TIPOS DE MONSTRO
+
+  MonsterTypes: { normal, blueman, twins }
+    weight: peso para weightedRandom (todos 1 atualmente)
+    chaseLoseTime: tempo sem ver player para transitar chase->search
+    searchDuration: tempo maximo em search antes de voltar a patrol
+    spawnCount: quantos monstros spawnar
+    color/strokeColor: cores de renderizacao
+
+  Funcao weightedRandom(types):
+    Soma pesos, gera random * totalWeight, subtrai pesos ate <= 0.
+    Retorna a chave do tipo selecionado.
+    Suporta pesos diferentes para raridade.
+
+  Arquitetura activeMonsters[]:
+    Substitui game.monster (unico) por array de MonsterEntity.
+    spawnMonster(): cria mt.spawnCount monstros, cada um com
+    MonsterEntity independente (IA, pathfinding, cooldown proprios).
+
+    Twins: spawna 2 monstros com offset aleatorio de -1 a +1 tiles
+    a partir do monsterSpawn. Cada twin age independentemente.
+
+  Adaptacoes nos sistemas:
+    update:       for (const m of activeMonsters) m.update(dt)
+    render:       for (const m of activeMonsters) m.render(ctx, this)
+    checkGameState: todos activeMonsters morrem (die + clear array)
+    anyMonsterAlive: activeMonsters.some(m => m.alive)
+    altar check:  activeMonsters.every(m => !m.alive)
+    debug:        mostra tipo + estado de cada monstro individual
+    doors pushOut: verifica cada monstro ativo
+
+  Mensagem de spawn:
+    monsterTypeMessage = "*Nome* heard you. Run."
+    monsterTypeMsgTimer = 3.0s
+    Exibida via #message (so se messageTimer <= 0)
+
+  HUD:
+    Mostra "Monster: [nome do tipo atual]" (Normal/Blue Man/Twins)
+    Mostra "Class: [nome da classe]" (No Class/Oracle/Scout)
+
 ================================================================================
