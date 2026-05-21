@@ -1,0 +1,1507 @@
+================================================================================
+DOCUMENTACAO TECNICA COMPLETA - SUMMON GAME
+================================================================================
+Arquivo: SummonGame.html
+Versao: Single-file HTML5 Canvas game
+Tecnologia: HTML + CSS + JavaScript (zero dependencias externas)
+Linhas totais: 1703
+================================================================================
+
+================================================================================
+1. VISAO GERAL DA ARQUITETURA
+================================================================================
+
+Summon Game e um jogo top-down 2D em tempo real renderizado em HTML5 Canvas.
+A arquitetura segue o padrao Game Loop com objetos-entidade e sistemas
+centralizados em uma classe Game orquestradora.
+
+ARQUITETURA EM CAMADAS:
+
+  [INPUT LAYER] --> [GAME LOOP] --> [UPDATE] --> [RENDER]
+       |                |               |             |
+  keydown/keyup    loop(now)      update(dt)    render()
+  objeto keys      requestAnim     todos os      canvas 2D
+  listeners DOM    Frame           sistemas      context
+
+O jogo e single-threaded, executando em um loop continuo via
+requestAnimationFrame. Nao ha workers, backend, ou rede.
+
+DIAGRAMA DE DEPENDENCIAS ENTRE OBJETOS PRINCIPAIS:
+
+  Game (orquestrador)
+  |-- Player (controlado por input)
+  |-- MonsterEntity (IA autonoma, referencia Game)
+  |-- DoorEntity[] (entidades passivas)
+  |-- ArtifactEntity[] (entidades passivas)
+  |-- Particle[] (particulas efemeras)
+  |-- tiles[][] (matriz de caracteres ASCII)
+  |-- visibilityGrid[][] / visibilityAge[][] (fog of war)
+  |-- keys{} (objeto global de teclas pressionadas)
+  |-- DOM elements (HUD, paineis, botoes)
+
+
+================================================================================
+2. ESTRUTURA GERAL DO ARQUIVO
+================================================================================
+
+O arquivo SummonGame.html contem tres secoes principais:
+
+SECAO 1: <style> (linhas 7-187)
+  CSS para todos os elementos DOM: canvas, HUD, painel de configuracoes,
+  editor de mapa, barra de interacao, mensagens.
+
+SECAO 2: <body> (linhas 189-214)
+  Estrutura DOM:
+    #game-container > canvas#game (superficie de renderizacao)
+    #hud (painel de informacoes superior esquerdo)
+    #interaction-label (texto de prompt de interacao)
+    #interaction-bar > #interaction-fill (barra de progresso)
+    #settings-btn (botao engrenagem, canto superior direito)
+    #settings-panel (menu: Restart / Map Editor / Close)
+    #map-editor-panel (editor ASCII com textarea, preview, legenda, botoes)
+    #message (texto central de feedback)
+
+SECAO 3: <script> (linhas 216-1701)
+  Todo o codigo JavaScript organizado em secoes:
+    - CONFIGURATION (linhas 220-253)
+    - DEFAULT MAP (linhas 258-277)
+    - MAP PARSER (linhas 282-331)
+    - PARTICLE SYSTEM (linhas 336-356)
+    - DOOR ENTITY (linhas 361-398)
+    - ARTIFACT ENTITY (linhas 403-426)
+    - PLAYER (linhas 431-574)
+    - MONSTER (linhas 579-920)
+    - GAME CLASS (linhas 925-1573)
+    - INPUT HANDLING (linhas 1578-1596)
+    - UI HANDLERS (linhas 1601-1635)
+    - INITIALIZATION (linhas 1637-1700)
+
+
+================================================================================
+3. PIPELINE DE INICIALIZACAO
+================================================================================
+
+Fluxo completo de inicializacao (ordem de execucao):
+
+1. DOMContentLoaded dispara (linha 1639)
+2. game = new Game() (linha 1640)
+   - constructor (linha 926): inicializa todas as propriedades com valores
+     default. Nao cria entidades ainda.
+3. game.start() (linha 1641)
+   - loadMap(parseMap(DEFAULT_MAP.join('\n'))) (linha 1040)
+     a. parseMap() processa o array DEFAULT_MAP (18 strings ASCII)
+        - Remove espacos de cada linha
+        - Descobre largura maxima (cols)
+        - Padroniza todas as linhas para mesma largura (preenche com 'G')
+        - Valida caracteres (Set de 10 caracteres validos)
+        - Varre a matriz 2D coletando posicoes de: portas, artefatos,
+          waypoints, altar, player spawn, monster spawn
+        - Retorna objeto mapData com todas as estruturas
+     b. loadMap(mapData) (linha 963)
+        - Armazena tiles, dimensoes, doorEntities, artifactEntities,
+          waypoints, altarPos, playerSpawn, monsterSpawn
+        - Cria instancias DoorEntity para cada 'd' encontrado
+        - Cria instancias ArtifactEntity para cada 'F' encontrado
+        - Define artifactCount baseado na quantidade de F tiles
+        - Define dificuldade (easy <=3, medium <=4, hard >=5)
+        - Inicializa visibilityGrid e visibilityAge como matrizes de 0
+        - Redimensiona o canvas: mapWidth * TILE_SIZE x mapHeight * TILE_SIZE
+        - Cria/reposiciona Player, reseta HP, alive, interacoes, invuln
+        - Cria MonsterEntity e imediatamente chama monster.die()
+        - Reseta: summonCount, collectedArtifacts, isNight,
+          nightTransition, roofAlpha, targetRoofAlpha, summoning,
+          summonTimer, summonDelay, particles
+        - Chama setDifficulty() e updateMapEditor()
+        - Limpa mensagem
+   - lastTime = performance.now() (linha 1041)
+   - Inicia o game loop: this.loop(this.lastTime) (linha 1042)
+4. updateMapEditor(game) (linha 1642) - popula legenda no painel do editor
+5. Configuracao de event listeners DOM (linhas 1644-1699)
+6. resizeCanvas() (linha 1699) - ajusta escala CSS do canvas a viewport
+
+
+================================================================================
+4. FLUXO COMPLETO DO GAME LOOP
+================================================================================
+
+O game loop e implementado no metodo Game.loop(now):
+
+  loop(now) {
+    dt = min((now - lastTime) / 1000, 0.1)   // delta time em segundos, cap 100ms
+    lastTime = now
+    update(dt)
+    render()
+    requestAnimationFrame(loop)
+  }
+
+DELTA TIME (dt):
+  - Calculado como diferenca entre timestamps de requestAnimationFrame (ms)
+  - Convertido para segundos (divisao por 1000)
+  - Limitado a 0.1 (100ms) para evitar espasmos de fisica se a aba ficar
+    em background
+  - Todas as velocidades, timers e animacoes sao multiplicadas por dt
+
+ORDEM DE ATUALIZACAO (update):
+  1. Portas (doorEntities) - animacoes, debounce
+  2. Player - movimento, colisao, interacao
+  3. MonsterEntity - IA (FSM), ataque
+  4. ArtifactsEntity - animacao de glow
+  5. Particulas - movimento e remocao de expiradas
+  6. Mensagens - timer de exibicao
+  7. Transicao dia/noite - roof alpha, nightTransition
+  8. Delay de summon - contagem regressiva para spawn do monstro
+  9. Game state - verifica se todos artefatos foram coletados
+  10. Camera - segue o player no centro do canvas
+  11. Visibilidade - fog of war, raycasting
+  12. HUD - atualizacao do HTML do painel
+
+ORDEM DE RENDERIZACAO (render):
+  1. clearRect - limpa o canvas
+  2. Background preto #111
+  3. renderTiles - todos os tiles do mapa (com camX/camY offset)
+  4. renderArtifacts - glow dos artefatos sobre o chao
+  5. renderRoof - overlay escuro sobre interior (se player fora)
+  6. player.render - circulo azul com olhos
+  7. monster.render - esfera roxa com chapeu, olhos, indicador
+  8. renderParticles - particulas 2x2
+  9. renderFog - overlay preto semi-transparente sobre tiles nao visiveis
+  10. renderNight - vignette radial escura
+  11. renderDebug - (se debugMode) waypoints, estado IA, cone de visao, FPS
+  12. renderMessage - atualiza DOM do elemento #message
+  13. renderInteractionBar - atualiza DOM da barra de progresso
+
+
+================================================================================
+5. SISTEMA DE RENDERIZACAO
+================================================================================
+
+CANVAS:
+  - Resolucao fixa: mapWidth * TILE_SIZE x mapHeight * TILE_SIZE
+    (mapa default 37x18 = 1184x576 pixels)
+  - CSS scale: calculado em resizeCanvas() para caber na viewport,
+    limitado a 1.5x. Usa image-rendering: pixelated para scaling nitido.
+  - Contexto: 2D ('2d')
+
+SISTEMA DE CAMADA (PAINTER'S ALGORITHM):
+  A renderizacao segue ordem back-to-front. Cada camada pode sobrescrever
+  parcialmente a anterior:
+
+  Camada 0: Background solido (#111)
+  Camada 1: Tiles do mapa (parede, chao, grama, porta, altar, furniture)
+  Camada 2: Artefatos (glow pulsante)
+  Camada 3: Telhado (overlay escuro sobre interior)
+  Camada 4: Player (circulo azul)
+  Camada 5: Monstro (esfera roxa com chapeu)
+  Camada 6: Particulas (quadrados 2x2 coloridos)
+  Camada 7: Fog of War (overlay preto semi-transparente)
+  Camada 8: Night vignette (gradiente radial escuro)
+  Camada 9: Debug (waypoints, textos, cone de visao - apenas debugMode)
+
+FRUSTUM CULLING:
+  Em renderTiles, cada tile e verificado contra os limites do canvas com
+  margem de 50px. Tiles fora da viewport sao pulados:
+    if (sx + TILE_SIZE < -50 || sx > canvas.width + 50 ||
+        sy + TILE_SIZE < -50 || sy > canvas.height + 50) continue;
+================================================================================
+6. SISTEMA DE CAMERA
+================================================================================
+
+A camera e um offset (camX, camY) que centraliza o player no canvas.
+
+  updateCamera() {
+    camX = player.px - (mapWidth * TILE_SIZE / 2)
+    camY = player.py - (mapHeight * TILE_SIZE / 2)
+  }
+
+Todo elemento renderizado subtrai camX/camY da sua posicao mundial:
+  screenX = worldX - camX
+  screenY = worldY - camY
+
+Isso cria o efeito de camera seguindo o player. Nao ha limites de clamp.
+
+
+================================================================================
+7. SISTEMA DE COLISAO
+================================================================================
+
+COLISAO DO PLAYER (Player.canMoveTo, linha 471):
+
+  Algoritmo: 4-point corner collision check com margem de 4px.
+
+  Para a posicao candidata (px, py), verifica 4 cantos com offset de 4px:
+    (px-4, py-4)  (px+4, py-4)
+    (px-4, py+4)  (px+4, py+4)
+
+  Para cada canto, converte para coordenada de tile (divisao inteira por
+  TILE_SIZE) e verifica:
+
+  - Se fora dos limites do mapa -> colide
+  - Se tile === 'O' (parede) -> colide
+  - Se tile === 'W' (furniture) -> colide
+  - Se tile === 'd' (porta):
+      Busca a DoorEntity na posicao. Se door.solid === true -> colide.
+      door.solid retorna true quando porta fechada (!open) OU
+      durante a animacao (animating).
+
+  Movimento e feito por eixo separadamente (move X, depois move Y),
+  permitindo deslizar ao longo de paredes.
+
+COLISAO DO MONSTRO (MonsterEntity.canMoveTo, linha 690):
+
+  Identico ao player, mas com margem de 3px (ligeiramente menor).
+  O pathfinding BFS ja garante que o monstro so tenta se mover
+  para tiles validos. A verificacao de colisao e uma camada extra.
+
+
+================================================================================
+8. ESTRUTURA DO MAPA
+================================================================================
+
+O mapa e definido como uma matriz de caracteres ASCII (tiles[y][x]).
+
+DIMENSOES DO MAPA DEFAULT:
+  Largura: 37 tiles
+  Altura:  18 tiles
+  Resolucao: 1184 x 576 pixels (37*32 x 18*32)
+
+SIMBOLOS E SEUS SIGNIFICADOS NO GAMEPLAY:
+
+  O = Wall (parede solida)
+      Bloqueia movimento, visao (raycasting), pathfinding
+      Cor: marrom escuro (#5c3a1e)
+
+  C = Floor (chao interior)
+      Passavel, nao bloqueia nada
+      Cor: bege madeira (#c4a67a)
+
+  G = Grass (grama)
+      Passavel, exterior
+      Cor: verde (#3a7a2a)
+      Player nesta area -> telhado cobre interior
+      Padding: linhas mais curtas sao preenchidas com 'G' pelo parser
+
+  d = Door (porta)
+      Comportamento dinamico (aberta = passavel, fechada = solida)
+      Cor: dourado fechada (#8b6914), marrom aberta (#4a3a0a)
+      Cada 'd' gera uma instancia DoorEntity
+      Interagivel com tecla E, monstro abre automaticamente
+
+  A = Altar (altar de summon)
+      Passavel, interagivel
+      Cor: vermelho (#ff4444)
+      Funcao: ponto onde o player realiza o ritual (hold E 4s)
+
+  P = Player Spawn
+      Ponto de spawn do jogador. Apenas 1 P valido.
+
+  M = Monster Spawn
+      Ponto onde o monstro aparece ao ser invocado.
+
+  F = Artifact Spawn
+      Ponto de spawn de artefato. Cada F gera uma ArtifactEntity.
+      Quantidade de F tiles define a dificuldade inicial.
+
+  U = Waypoint
+      Ponto de patrulha do monstro.
+      Invisivel em gameplay normal, visivel no modo debug.
+      Nao tem colisao propria.
+
+  W = Furniture (obstaculo solido interno)
+      Bloqueia movimento e pathfinding
+      Cor: cinza (#666666)
+
+PARSING DO MAPA (parseMap, linha 282):
+
+  Entrada: string de texto com multiplas linhas
+  Processamento:
+    1. Split por '\n', filtra linhas vazias
+    2. Remove TODOS os espacos (replace(/ /g, ''))
+    3. Determina largura maxima entre todas as linhas
+    4. Padroniza: linhas mais curtas recebem 'G' no final
+    5. Valida cada caractere contra o Set de 10 simbolos validos.
+       Caracteres invalidos sao substituidos por 'C' (floor) com console.warn
+    6. Durante a varredura, coleta em arrays separados:
+       - doors[]: posicoes {x,y} de 'd'
+       - artifacts[]: posicoes {x,y} de 'F'
+       - waypoints[]: posicoes {x,y} de 'U'
+       - altarPos: posicao de 'A' (ultimo encontrado)
+       - playerSpawn: posicao de 'P' (ultimo encontrado)
+       - monsterSpawn: posicao de 'M' (ultimo encontrado)
+
+  Retorno: objeto {
+    tiles, doors, artifacts, waypoints,
+    altarPos, playerSpawn, monsterSpawn,
+    width, height
+  }
+
+  Fallbacks:
+    - playerSpawn: se nao encontrado, usa {x:1, y:1}
+    - monsterSpawn: se nao encontrado, usa altarPos; se tambem null, {x:2, y:2}
+    - artifactCount: se 0 artefatos no mapa, define 3 como default
+
+
+================================================================================
+9. SISTEMA DE PORTAS
+================================================================================
+
+CLASSE: DoorEntity (linha 361)
+
+ATRIBUTOS:
+  tileX, tileY      - posicao no grid (imutavel)
+  open              - boolean, estado atual (false = fechada)
+  animating         - boolean, true durante transicao
+  animTimer         - float, progresso da animacao em segundos
+  animDuration      - float, duracao total da animacao (0.4s)
+  debounceTimer     - float, cooldown apos animacao terminar (0.3s)
+  animProgress      - float [0-1], 0=fechada, 1=aberta
+
+ESTADOS DA PORTA:
+
+  [FECHADA] --toggle()--> [ANIMANDO ABRINDO] --0.4s--> [ABERTA + DEBOUNCE]
+  [ABERTA]  --toggle()--> [ANIMANDO FECHANDO]--0.4s--> [FECHADA + DEBOUNCE]
+
+  Durante animacao: animating=true, solid=true (bloqueia passagem)
+  Durante debounce (0.3s): toggle() ignorado (evita spam)
+
+ANIMACAO (update, linha 372):
+
+  if (animating) {
+    animTimer += dt
+    if (open)  animProgress = min(1, animTimer / animDuration)       // 0->1
+    else       animProgress = max(0, 1 - animTimer / animDuration)   // 1->0
+    if (animTimer >= animDuration) {
+      animating = false
+      debounceTimer = 0.3
+      animProgress = open ? 1 : 0
+    }
+  }
+  if (debounceTimer > 0) debounceTimer -= dt
+
+TOGGLE (linha 388):
+  So executa se !animating e debounceTimer <= 0
+  Inverte open, inicia animacao (animating=true, animTimer=0)
+
+FORCE OPEN (linha 394):
+  Usado pelo monstro para abrir portas automaticamente
+  So executa se porta fechada e nao animando. Chama toggle().
+
+SOLID GETTER (linha 397):
+  return !open || animating
+  Porta e solida se fechada OU durante animacao
+
+
+================================================================================
+10. SISTEMA DE ARTEFATOS
+================================================================================
+
+CLASSE: ArtifactEntity (linha 403)
+
+ATRIBUTOS:
+  tileX, tileY    - posicao no grid
+  collected        - boolean, true se ja foi coletado
+  glowPhase        - float, fase da animacao de brilho (radianos)
+
+ANIMACAO DE GLOW:
+  update(dt): glowPhase += dt * 3  (3 rad/s, ~0.48 ciclos/s)
+  render: glow = 0.5 + 0.5 * sin(glowPhase)
+
+  Duas camadas de circulo:
+  1. Circulo externo: raio TILE_SIZE * 0.3, alpha 0.3 + glow*0.7
+  2. Circulo interno: raio TILE_SIZE * 0.12, alpha 1
+
+SPAWN:
+  Criados em loadMap() para cada tile 'F' encontrado
+
+COLETA:
+  Player segura E por 1.5 segundos proximo ao artefato
+  Ao completar: collected=true, collectedArtifacts++,
+  spawna 6 particulas ciano
+
+RESPAWN:
+  Quando todos os artefatos sao coletados (monstro morre):
+  respawnArtifacts() reseta collected=false em todos.
+  Se houver menos entidades que artifactCount, cria novas
+  em posicoes 'F' aleatorias.
+
+
+================================================================================
+11. SISTEMA DO ALTAR
+================================================================================
+
+O altar e um ponto de interacao onde o player invoca o monstro.
+
+LOCALIZACAO: tile 'A' no mapa. Posicao armazenada em game.altarPos.
+
+INTERACAO:
+  1. Player se aproxima do altar (distancia < 1.5 tiles)
+  2. Player pressiona e segura E
+  3. Barra de progresso enche por 4 segundos (interactDuration = 4)
+  4. Ao completar 4s:
+     - summoning = true
+     - summonDelay = 3 (3 segundos de delay)
+     - Mensagem: "Summoning ritual begins..."
+  5. Apos 3 segundos de delay:
+     - spawnMonster() e chamado
+     - summonCount incrementa
+     - monster.speed = 70 + (summonCount - 1) * 10
+     - monster.spawn() - ativa o monstro, inicia patrulha
+
+CONDICAO: O altar so pode ser usado se o monstro NAO estiver vivo
+  (game.monster.alive === false).
+
+FLUXO DE ESTADOS DO ALTAR:
+
+  [ALTAR INATIVO] --hold E 4s--> [RITUAL INICIADO] --3s delay--> [MONSTRO SPAWNA]
+  [MONSTRO VIVO] --coleta todos artefatos--> [MONSTRO MORRE] --> [ALTAR INATIVO]
+
+
+================================================================================
+12. MAQUINA DE ESTADOS DO MONSTRO
+================================================================================
+
+O monstro implementa uma FSM (Finite State Machine) com 3 estados.
+
+ESTADOS:
+  'patrol'  - Patrulhando waypoints em ordem (sorteada aleatoriamente)
+  'chase'   - Perseguindo o player ativamente
+  'search'  - Indo ate a ultima posicao conhecida do player
+
+TRANSICOES:
+
+  PATROL -> CHASE:
+    canDetectBehind() retorna true (player muito perto por tras)
+    canSeePlayer() retorna true (player no cone de visao com LOS)
+    Ao entrar: chaseTimer = 0, path = null
+
+  CHASE -> SEARCH:
+    Nao consegue ver o player (nem cone, nem deteccao traseira)
+    chaseTimer > 1.0 segundo
+    Ao entrar: salva lastKnownPlayerPos, searchTimer = 0, path = null
+
+  CHASE -> PATROL:
+    Player morreu (!game.player.alive)
+    Ao entrar: path = null
+
+  SEARCH -> CHASE:
+    canSeePlayer() ou canDetectBehind() voltam a detectar
+    Ao entrar: chaseTimer = 0, path = null
+
+  SEARCH -> PATROL:
+    searchTimer > 2.0s (timeout)
+    lastKnownPlayerPos e null
+    Chegou ao destino (followPath retorna false)
+    Nao foi possivel calcular caminho
+    Ao entrar: path = null
+
+DIAGRAMA DE TRANSICOES:
+
+                    +--(ve player)---> CHASE ---(perde visao 1s)---> SEARCH
+                    |                    |  ^                          |
+  PATROL -----------+                    |  |---(re-ve player)---------|
+       ^                                |                             |
+       |---(player morto)---------------|                             |
+       |                                                              |
+       +----(timeout 2s / chegou / sem caminho)----------------------+
+
+VARIAVEIS DE CONTROLE DA FSM:
+  state              - string: 'patrol' | 'chase' | 'search'
+  chaseTimer         - float: tempo sem ver o player durante chase
+  searchTimer        - float: tempo gasto no estado search
+  lastKnownPlayerPos - {x,y}|null: ultima posicao conhecida do player
+  path               - [{x,y}]|null: caminho BFS atual
+  pathTarget         - int|string|null: identificador do alvo do path
+  pathRecalc         - float: timer para recalcular path no patrol
+
+
+================================================================================
+13. SISTEMA DE VISAO DO MONSTRO
+================================================================================
+
+O monstro possui dois metodos de deteccao do player.
+
+DETECCAO POR CONE DE VISAO (canSeePlayer, linha 633):
+
+  Condicoes para detectar:
+  1. Player esta vivo
+  2. Distancia euclidiana <= 250 pixels (~7.8 tiles)
+  3. Player dentro do cone de 180 graus frontal
+     (exceto se distancia <= 50 pixels - ve em qualquer direcao)
+  4. Linha de visao desobstruida (hasLineOfSight)
+
+  Calculo do cone:
+    angleToPlayer = atan2(player.py - monster.py, player.px - monster.px)
+    diff = angleToPlayer - facingAngle
+    Normaliza diff para [-PI, PI]
+    Se |diff| > PI/2 (90 graus) E distancia > 50 -> fora do cone
+
+DETECCAO TRASEIRA (canDetectBehind, linha 647):
+
+  Condicoes:
+  1. Player esta vivo
+  2. Distancia euclidiana <= 45 pixels (~1.4 tiles)
+  3. Player no setor traseiro: |angleToPlayer - facingAngle| > 0.65*PI
+     (~117 graus do facing)
+
+LINHA DE VISAO (hasLineOfSight, linha 661):
+
+  Algoritmo: Bresenham Line Algorithm em coordenadas de tile.
+
+  Percorre cada tile na linha reta entre origem e destino:
+  - Se tile === 'O' (parede) -> bloqueada, retorna false
+  - Se tile === 'd' (porta) -> verifica door.solid; se solida -> bloqueada
+
+  Retorna true se nenhum obstaculo encontrado no caminho.
+
+
+================================================================================
+14. SISTEMA DE BUSCA E PERSEGUICAO (PATHFINDING)
+================================================================================
+
+O monstro usa o algoritmo BFS (Breadth-First Search) para encontrar o menor
+caminho ate o alvo, desviando de paredes e moveis.
+
+ALGORITMO BFS: Game.findPath(sx, sy, gx, gy) - linha 1187
+
+  Complexidade: O(W*H) onde W=mapWidth, H=mapHeight
+  Para o mapa default (37x18): maximo 666 tiles visitados
+
+  Funcionamento:
+  1. Se origem == destino, retorna [{x:gx, y:gy}]
+  2. Valida bounds de origem e destino
+  3. Inicializa matrizes visited[height][width] e parent[height][width]
+  4. Usa fila com pointer head para O(1) dequeue:
+     - Adiciona origem, marca visited
+     - Enquanto fila nao vazia: desenfileira, se for destino reconstroi
+       caminho via parent e retorna array
+     - Para cada vizinho (4-direcoes):
+       Pula se fora dos bounds, visited, ou tile === 'O'/'W'
+       Portas ('d') sao transitaveis (monstro pode abri-las)
+       Marca visited, registra parent, enfileira
+  5. Se fila esgotar: retorna null (sem caminho)
+
+SEGUIMENTO DE CAMINHO: MonsterEntity.followPath(dt) - linha 750
+
+  Para cada frame:
+  1. Pega o primeiro tile do path (path[0])
+  2. Calcula vetor direcao ate o centro daquele tile
+  3. Se distancia < TILE_SIZE * 0.25 (8 pixels): remove path[0],
+     avanca para proximo tile (recursao)
+  4. Senao: move na direcao com velocidade speed (patrol/search)
+     ou speed * 1.4 (chase)
+  5. Atualiza facingAngle para direcao do movimento
+  6. Verifica colisao via canMoveTo antes de mover
+
+  Retorna: true se ainda ha tiles no path, false se chegou ao destino.
+
+COMPORTAMENTO POR ESTADO:
+
+  PATROL:
+    Recalcula caminho a cada 0.5s ou quando waypoint muda
+    Se findPath retorna null: pula para proximo waypoint
+    Ao chegar: currentWaypoint++, se esgotou gera nova ordem
+
+  CHASE:
+    Recalcula caminho TODO frame ate o tile do player
+    Se player morre: volta para PATROL
+
+  SEARCH:
+    Calcula caminho UMA vez ao entrar no estado
+    Se nao ha caminho: volta para PATROL
+    Segue path ate o fim ou timeout (2s)
+
+
+================================================================================
+15. SISTEMA DE WAYPOINTS
+================================================================================
+
+Waypoints sao pontos de patrulha do monstro, definidos por tiles 'U' no mapa.
+
+ESTRUTURA DE DADOS:
+  game.waypoints: [{x, y}, ...] - array de coordenadas de tile
+  monster.waypointOrder: [int, ...] - permutacao aleatoria de indices
+  monster.currentWaypoint: int - indice em waypointOrder do waypoint atual
+
+GERACAO DE ORDEM (generateWaypointOrder, linha 621):
+  Fisher-Yates shuffle:
+    indices = [0, 1, 2, ..., n-1]
+    for i = n-1 downto 1:
+      j = random(0, i)
+      swap(indices[i], indices[j])
+
+FLUXO DE PATRULHA:
+  1. Gera ordem aleatoria de waypoints
+  2. Vai para waypointOrder[0]
+  3. Ao chegar: currentWaypoint++
+  4. Continua ate waypointOrder[n-1]
+  5. Ao completar: gera nova ordem aleatoria (loop infinito)
+
+INTERRUPCAO: Se o monstro detectar o player, transita para CHASE.
+Ao voltar para PATROL, continua do waypoint onde parou.
+
+
+================================================================================
+16. SISTEMA DE FOG OF WAR
+================================================================================
+
+O Fog of War controla quais tiles sao visiveis para o player.
+
+ESTRUTURAS DE DADOS:
+  visibilityGrid[height][width]: int
+    0 = nunca visto (preto opaco)
+    1 = visto anteriormente, nao visivel agora (preto semi-transparente)
+    2 = visivel agora (sem overlay)
+
+  visibilityAge[height][width]: float [0-1]
+    Quanto tempo resta antes do tile ser esquecido.
+    1 = recem visto, 0 = esquecido.
+
+ATUALIZACAO (updateVisibility, linha 1124):
+
+  Se debugMode ativo:
+    Define TODOS visibilityGrid = 2 e retorna.
+
+  Se debugMode inativo:
+
+  FASE 1 - AGING:
+    Para cada tile:
+      Se visibilityAge > 0:
+        age -= fogDecay * 0.02
+          Dia (fogDecay=0.4): age reduz 0.008/frame
+          Noite (fogDecay=0.15): age reduz 0.003/frame
+        Se age <= 0: zera age e visibilityGrid = 0
+        Senao se visibilityGrid == 2: muda para 1 (visto anteriormente)
+      Senao se visibilityGrid > 0 (age==0 mas ainda visivel):
+        Reseta visibilityGrid = 0 (correcao de bug do debug mode)
+
+  FASE 2 - RAYCASTING:
+    Raio: Dia=12 tiles, Noite=5 tiles
+    Para cada tile dentro do raio circular:
+      Se hasLineOfSight(player, tile): visibilityGrid=2, visibilityAge=1
+
+RENDERIZACAO DO FOG (renderFog, linha 1482):
+  Se visibilityGrid >= 2: pula (totalmente visivel)
+  Se visibilityGrid == 1: overlay rgba(0,0,0,0.6)
+  Se visibilityGrid == 0: overlay rgba(0,0,0,0.92)
+
+
+================================================================================
+17. SISTEMA DE DIA/NOITE
+================================================================================
+
+O ciclo dia/noite esta vinculado ao estado do monstro.
+
+VARIAVEIS:
+  isNight: boolean - true quando monstro vivo por tempo suficiente
+  nightTransition: float [0-1] - transicao suave dia (0) -> noite (1)
+
+LOGICA DE TRANSICAO (Game.update):
+
+  Monstro vivo E ainda nao e noite:
+    nightTransition += dt * 0.8     // sobe a 0.8/s
+    Quando nightTransition >= 1: isNight = true
+
+  Monstro NAO vivo E e noite:
+    nightTransition -= dt * 1.2     // desce a 1.2/s
+    Quando nightTransition <= 0: isNight = false
+
+  Monstro NAO vivo, nao e noite, mas nightTransition > 0:
+    nightTransition -= dt * 1.2     // termina de descer
+
+EFEITOS:
+  Dia: raio de visao 12 tiles, fog decay 0.4, sem vignette
+  Noite: raio de visao 5 tiles, fog decay 0.15, vignette radial escura
+
+RENDERIZACAO DA NOITE (renderNight, linha 1499):
+  Gradiente radial centrado no canvas:
+    Centro (30%): rgba(0,0,0,0) - transparente
+    Meio (50%): rgba(0,0,30, nightTransition*0.3)
+    Borda (100%): rgba(0,0,0, nightTransition*0.7)
+  Intensidade proporcional a nightTransition.
+
+
+================================================================================
+18. SISTEMA DE TELHADO (ROOF SYSTEM)
+================================================================================
+
+O telhado cobre o interior da casa quando o player esta do lado de fora.
+
+CALCULO DE ALPHA (computeRoofAlpha, linha 1099):
+
+  Se debugMode: retorna 0 (telhado invisivel)
+
+  Detecta se player esta dentro ou fora:
+    Se tile != 'G' e != 'O': player dentro -> retorna 0
+
+  Player fora:
+    Para cada porta aberta (open=true, !animating):
+      dist = sqrt((door.x - player.tileX)^2 + (door.y - player.tileY)^2)
+      Se dist < 3: retorna max(0, (dist-1)/2)
+      (gradiente: perto=0, longe=1)
+    Se nenhuma porta aberta proxima: retorna 1
+
+SUAVIZACAO:
+  roofAlpha += (targetRoofAlpha - roofAlpha) * min(dt * 4, 1)
+  Interpolacao linear com speed 4/s.
+
+RENDERIZACAO (renderRoof, linha 1448):
+  Se roofAlpha <= 0.01: nao renderiza
+  Para cada tile interior (!= 'G', != 'O'):
+    Se perto de porta aberta (Manhattan <= 2): alpha * 0.3
+    Senao: alpha * 0.85
+    Desenha retangulo rgba(30,20,15, alpha)
+
+
+================================================================================
+19. SISTEMA DE PARTICULAS
+================================================================================
+
+CLASSE: Particle (linha 336)
+
+ATRIBUTOS:
+  x, y      - posicao em pixels (mundo)
+  vx, vy    - velocidade em pixels/segundo
+  life      - vida restante em segundos
+  maxLife   - vida inicial (para calculo de alpha)
+  color     - cor CSS
+
+UPDATE (linha 343):
+  x += vx * dt; y += vy * dt; life -= dt
+  alive getter: life > 0
+
+RENDER (linha 349):
+  alpha = life / maxLife (fade out linear)
+  Quadrado 2x2 pixels com alpha variavel
+
+GARBAGE COLLECTION:
+  Iteracao reversa, splice quando !alive
+
+USOS:
+  Player toma dano: 8 particulas vermelhas, vida 0.4s, vx/vy -40 a +40
+  Artefato coletado: 6 particulas ciano, vida 0.5s, vx/vy -50 a +50
+
+
+================================================================================
+20. SISTEMA DE INPUT
+================================================================================
+
+ESTRUTURA: objeto global keys{} (linha 1578)
+  keys[key.toLowerCase()] = boolean (true enquanto pressionada)
+
+EVENTOS:
+  keydown (linha 1579):
+    keys[key] = true
+    F1: toggle game.debugMode (preventDefault)
+    E: se tem interactTarget e nao interagindo, inicia interacao
+
+  keyup (linha 1590):
+    keys[key] = false
+    E: cancela interacao
+
+  Escape (linha 1679): fecha paineis
+
+MOVIMENTO DO PLAYER:
+  Teclas: WASD e Arrow Keys
+  Normalizacao diagonal: multiplica por 0.707 (1/sqrt(2))
+
+INPUT DE INTERACAO:
+  Hold E: inicia interacao com alvo mais proximo
+  Soltar E: cancela interacao
+  So comeca se player.interactTarget nao for null
+================================================================================
+21. SISTEMA DE HUD
+================================================================================
+
+FUNCAO: updateHUD(game) - linha 1601
+
+Atualiza o innerHTML do elemento #hud a cada frame.
+Mostra:
+  HP: [hp]/[maxHp]           - vida atual / vida maxima
+  Dificuldade: [difficulty]   - easy | medium | hard
+  Artefatos: [collected]/[total] - progresso de coleta
+  Summons: [count]            - numero de invocacoes realizadas
+  Estado: DAY | NIGHT         - baseado em nightTransition > 0.3
+
+
+================================================================================
+22. SISTEMA DE INTERACAO
+================================================================================
+
+O sistema de interacao usa hold-to-activate (estilo Proximity Prompt).
+
+DETECCAO DE ALVOS (Player.checkInteraction, linha 493):
+
+  Raio de interacao: 1.5 tiles (48 pixels)
+  Prioridade: alvo mais proximo dentro do raio.
+
+  Ordem de verificacao:
+    1. Portas (doorEntities) - tipo 'door'
+    2. Altar (se monstro nao estiver vivo) - tipo 'altar'
+    3. Artefatos (nao coletados) - tipo 'artifact'
+
+  Para cada alvo, distancia euclidiana em pixels.
+  O alvo com menor bestDist e escolhido.
+
+HOLD INTERACTION (Game.updateInteraction, linha 1283):
+
+  Duracao de hold por tipo:
+    door: 0.3 segundos
+    altar: 4.0 segundos
+    artifact: 1.5 segundos
+
+  A cada frame com E pressionado e alvo:
+    player.interactTimer += dt
+
+  Quando interactTimer >= duracao:
+    player.interacting = false, interactTimer = 0
+    door: target.toggle()
+    altar (se !summoning): summoning=true, summonDelay=3
+    artifact: collectArtifact(target)
+
+BARRA DE PROGRESSO (renderInteractionBar, linha 1549):
+  Durante interacao:
+    Barra visivel, width = (interactTimer / interactDuration) * 100%
+    Label: "Opening/Closing...", "Summoning...", "Collecting..."
+  Prompt quando perto sem segurar E:
+    Label: "Hold E to open/close", "Hold E to summon", "Hold E to collect"
+
+
+================================================================================
+23. SISTEMA DE SPAWN
+================================================================================
+
+SPAWN DO PLAYER:
+  Posicao: tile 'P'. Pixel = (tileX+0.5)*TILE_SIZE.
+  Fallback: {x:1, y:1}
+
+SPAWN DO MONSTRO:
+  Posicao: tile 'M'. Fallback: altarPos, depois {x:2, y:2}.
+  Instanciado em loadMap mas comeca morto (monster.die()).
+  spawnMonster() -> monster.spawn() ativa e posiciona.
+
+SPAWN DE ARTEFATOS:
+  Cada tile 'F' gera ArtifactEntity em loadMap.
+  Respawn: collected=false em todos. Cria novos se necessario.
+
+SPAWN DE PARTICULAS:
+  takeDamage: 8 particulas. collectArtifact: 6 particulas.
+  Removidas quando life <= 0.
+
+
+================================================================================
+24. SISTEMA DE DIFICULDADE
+================================================================================
+
+Determinada pela quantidade de artefatos (tiles 'F'):
+  easy:   <= 3 artefatos
+  medium: 4 artefatos
+  hard:   >= 5 artefatos
+
+ESCALONAMENTO DO MONSTRO:
+  speed = 70 + (summonCount - 1) * 10
+  Summon 1: 70, Summon 2: 80, Summon 3: 90...
+  Chase speed = speed * 1.4
+
+
+================================================================================
+25. SISTEMA DE DEBUG
+================================================================================
+
+Ativado/desativado com F1 (toggle game.debugMode).
+
+EFEITOS QUANDO ATIVO:
+  1. Visibilidade total: todos visibilityGrid = 2
+  2. Telhado desativado: computeRoofAlpha() retorna 0
+  3. Grid de tiles: bordas rgba(255,255,255,0.1) em cada tile
+  4. Waypoints visiveis: retangulo amarelo + texto 'U'
+  5. Estado IA visivel: texto rosa com estado do monstro
+  6. Cone de visao: arco 180 graus vermelho semi-transparente
+  7. FPS: 1000/(performance.now() - lastTime + 0.001)
+  8. Posicao do player: coordenadas de tile
+
+CORRECAO DE BUG (ALTERACAO RECENTE):
+  Ao desativar debug, tiles com age=0 e visibilityGrid=2 ficavam
+  permanentemente visiveis. Adicionado else no aging:
+    else if (visibilityGrid[y][x] > 0) visibilityGrid[y][x] = 0
+
+
+================================================================================
+26. ESTRUTURA MATEMATICA
+================================================================================
+
+FUNCOES MATEMATICAS USADAS:
+
+1. Distancia Euclidiana: dist = sqrt(dx^2 + dy^2)
+   Usada em: interacao, deteccao, perseguicao
+
+2. Normalizacao de vetor: ndx = dx/dist, ndy = dy/dist
+   Usada em: movimento, pathfinding
+
+3. Angulo entre pontos: angle = atan2(dy, dx)
+   Usada em: visao do monstro, direcao
+
+4. Normalizacao de angulo para [-PI, PI]:
+   while (diff > PI) diff -= 2*PI
+   while (diff < -PI) diff += 2*PI
+   Usada em: cone de visao
+
+5. Interpolacao linear: value += (target - value) * min(dt*speed, 1)
+   Usada em: roof alpha
+
+6. Bresenham Line Algorithm:
+   Percorre tiles em linha reta para raycasting de visao
+
+7. BFS (Breadth-First Search):
+   Fila com pointer head. 4 vizinhos. Reconstroi caminho via parent.
+   Usada em: pathfinding do monstro
+
+8. Fisher-Yates Shuffle:
+   for i = n-1 downto 1: j = random(0,i); swap(arr[i], arr[j])
+   Usada em: ordem de waypoints
+
+9. Oscilacao senoidal: glow = 0.5 + 0.5*sin(phase)
+   Usada em: glow de artefatos
+
+10. Mapeamento tile <-> pixel:
+    tileX = floor(pixelX / TILE_SIZE)
+    pixelX = tileX * TILE_SIZE + TILE_SIZE/2
+
+
+================================================================================
+27. FUNCOES UTILITARIAS
+================================================================================
+
+parseMap(text) - linha 282
+  Converte string ASCII multilinha em estrutura de dados do mapa.
+  Entrada: string. Retorna: objeto mapData ou null.
+
+updateHUD(game) - linha 1601
+  Atualiza o HTML do painel HUD com informacoes do jogo.
+
+updateMapEditor(game) - linha 1612
+  Preenche a legenda de cores no painel do editor de mapa.
+
+updatePreview() - linha 1623
+  Atualiza preview colorida no editor de mapa baseado no conteudo
+  da textarea. Converte caractere em <span style="color:...">.
+
+resizeCanvas() - linha 1687
+  Ajusta CSS width/height do canvas para caber na viewport.
+  Limite de escala: 1.5x. Chamada no resize da window.
+
+showMessage(text) - linha 1306
+  Exibe mensagem temporaria no centro da tela (DOM). Timer de 2.5s.
+
+
+================================================================================
+28. DEPENDENCIAS INTERNAS (GRAFO DE CHAMADAS)
+================================================================================
+
+DOMContentLoaded
+  -> new Game()
+  -> game.start()
+       -> parseMap(DEFAULT_MAP.join('\n'))
+       -> loadMap(mapData)
+            -> new DoorEntity() N vezes
+            -> new ArtifactEntity() N vezes
+            -> new Player() / reposiciona existente
+            -> new MonsterEntity()
+            -> monster.die()
+            -> updateMapEditor()
+  -> configura event listeners
+  -> resizeCanvas()
+
+requestAnimationFrame -> game.loop(now)
+  -> game.update(dt)
+       -> doorEntities[].update(dt)
+       -> player.update(dt, game)
+            -> player.canMoveTo() [4 chamadas]
+            -> player.checkInteraction(game)
+            -> game.updateInteraction(player)
+       -> monster.update(dt)
+            -> monster.checkNearbyDoors()
+            -> monster.updatePatrol/Chase/Search(dt)
+                 -> game.findPath() [BFS]
+                 -> monster.followPath(dt)
+                      -> monster.canMoveTo()
+            -> game.player.takeDamage() [se em alcance]
+       -> artifactEntities[].update(dt)
+       -> particles[].update(dt) + GC
+       -> game.computeRoofAlpha()
+       -> game.updateCamera()
+       -> game.updateVisibility()
+            -> game.hasLineOfSight() [N chamadas]
+       -> game.checkGameState()
+       -> updateHUD(game)
+  -> game.render()
+       -> game.renderTiles()
+       -> game.renderArtifacts() -> artifact.render()
+       -> game.renderRoof()
+       -> player.render()
+       -> monster.render()
+       -> game.renderParticles() -> particle.render()
+       -> game.renderFog()
+       -> game.renderNight()
+       -> game.renderDebug() [se debugMode]
+            -> monster.renderVisionCone()
+       -> game.renderMessage() [DOM]
+       -> game.renderInteractionBar() [DOM]
+
+
+================================================================================
+29. ORDEM DE ATUALIZACAO DOS SISTEMAS (MOTIVACAO)
+================================================================================
+
+1. DOORS primeiro: player/monstro precisam do estado atualizado
+   das portas para colisao.
+
+2. PLAYER segundo: atualiza movimento usando doors ja processadas,
+   verifica interacao para o resto do frame.
+
+3. MONSTER terceiro: usa posicao atualizada do player para deteccao.
+   IA decide transicao de estado baseada na nova posicao.
+
+4. ARTIFACTS quarto: apenas animacao visual, sem impacto em outros.
+
+5. PARTICLES quinto: efeito visual + GC.
+
+6. MESSAGE: timer de exibicao.
+
+7. DIA/NOITE: depende do estado do monstro (passo 3).
+
+8. SUMMON DELAY: depende do summoning flag (passo 2).
+
+9. CHECK GAME STATE: verifica coleta de artefatos (passo 4),
+   pode matar o monstro.
+
+10. CAMERA: usa posicao final do player apos movimento.
+
+11. VISIBILIDADE: usa posicao final e isNight (passo 7).
+
+12. HUD: reflete estado final de todos os sistemas.
+
+
+================================================================================
+30. ORDEM DE RENDERIZACAO (MOTIVACAO)
+================================================================================
+
+1. CLEAR + BACKGROUND: base
+
+2. TILES: camada mais baixa - paredes, chao, grama
+
+3. ARTIFACTS: glow sobre chao, abaixo de overlays
+
+4. ROOF: overlay sobre interior (cobre tiles e artefatos)
+
+5. PLAYER: sobre chao e telhado
+
+6. MONSTER: sobre chao, pode ser coberto pelo telhado
+
+7. PARTICLES: efeitos sobre tudo
+
+8. FOG: escuridao sobre tiles nao visiveis, antes da vignette
+
+9. NIGHT VIGNETTE: ultima camada de cor, escurece bordas
+
+10. DEBUG: camada mais alta, sobre tudo
+
+11. MESSAGE + INTERACTION BAR: DOM HTML sobre canvas (z-index)
+
+
+================================================================================
+31. FLUXO COMPLETO DE GAMEPLAY
+================================================================================
+
+FASE 1 - EXPLORACAO (DIA):
+  Monstro nao existe. Ambiente claro, visao ampla (12 tiles).
+  Player explora, entra na casa pelas portas.
+  Telhado cobre interior quando player esta fora.
+
+FASE 2 - INVOCACAO:
+  Player encontra o altar (tile 'A'). Segura E por 4 segundos.
+  Apos 3 segundos de delay, monstro spawna no tile 'M'.
+
+FASE 3 - SOBREVIVENCIA (NOITE):
+  Monstro ativo: patrulha waypoints.
+  Ambiente escurece (~1.25s). Visao reduzida (5 tiles).
+  Player coleta todos os artefatos (hold E 1.5s cada).
+  Monstro detecta player -> persegue (chase speed 1.4x).
+  Player perde 20 HP/hit (cooldown 1s). 100 HP total.
+
+FASE 4 - VITORIA:
+  Todos artefatos coletados -> monstro morre.
+  Ambiente clareia (~0.83s).
+  Artefatos reaparecem nos pontos 'F'.
+
+FASE 5 - REPETICAO:
+  Player invoca novamente. summonCount++.
+  Monstro mais rapido: speed = 70 + (summonCount-1)*10.
+  Ciclo reinicia da Fase 2.
+
+
+================================================================================
+32. FLUXO DE ESTADOS GLOBAIS
+================================================================================
+
+VARIAVEIS DE ESTADO NO GAME:
+
+isNight (boolean)
+  false -> true: quando nightTransition >= 1 (monstro vivo)
+  true -> false: quando nightTransition <= 0 (monstro morto)
+
+nightTransition (float 0-1)
+  0: dia pleno, >0<1: transicao, 1: noite plena
+
+summoning (boolean)
+  false -> true: player completa hold no altar
+  true -> false: monstro morre (die) ou restart
+
+summonDelay (float)
+  >0: contagem regressiva, 0: monstro spawna
+
+debugMode (boolean) - toggle via F1
+
+roofAlpha (float 0-1)
+  Interpolado suavemente para targetRoofAlpha
+  0: player dentro, 0-1: perto de porta, 1: fora
+
+monster.state (string)
+  'patrol' | 'chase' | 'search'
+
+monster.alive (boolean)
+  false -> true: spawn(), true -> false: die()
+
+
+================================================================================
+33. ANALISE DE PERFORMANCE
+================================================================================
+
+COMPLEXIDADE POR FRAME (mapa 37x18):
+
+renderTiles: O(666) - ~500 com frustum culling
+
+updateVisibility:
+  Aging: 666 iteracoes
+  Dia: ~452 tiles * ~6 passos Bresenham = ~2700 ops
+  Noite: ~78 tiles * ~3 passos = ~234 ops
+
+renderFog: O(666) - reduzido por early exit (vis >= 2)
+
+renderRoof: O(666 * ~6 portas) = ~4000 comparacoes
+
+findPath (BFS): O(666) tiles max
+  Chase: 60x/s * 666 = ~40k visitas/s
+  Patrol: 2x/s * 666 = ~1.3k visitas/s
+
+TOTAL POR FRAME: ~8000-12000 operacoes. Performance aceitavel.
+
+MEMORIA:
+  visibilityGrid: 666 ints (~5KB)
+  visibilityAge: 666 floats (~5KB)
+  BFS visited+parent: ~15KB alocado/frame durante chase (GC)
+  Canvas buffer: 1184*576*4 = ~2.7MB (domina)
+
+POTENCIAL GARGALO: BFS alocado 60x/s durante chase. Para mapas
+muito maiores (ex: 100x100 = 10000 tiles), BFS seria 10000*60 =
+600k visitas/s, ainda aceitavel mas com GC press.
+
+
+================================================================================
+34. DEPENDENCIAS CRITICAS
+================================================================================
+
+O jogo quebra se:
+
+1. DEFAULT_MAP contem caracteres fora do Set de 10 validos.
+   Invalidos sao substituidos por 'C', mas logica pode falhar
+   se simbolos esperados estiverem ausentes.
+
+2. Nao houver porta ('d'): player nao consegue transitar entre
+   interior/exterior. Telhado sempre cobre ou nunca cobre.
+
+3. Nao houver altar ('A') e/ou spawn monstro ('M'): summoning
+   nao funciona. Fallback usa altarPos como monsterSpawn.
+
+4. Nao houver waypoints ('U'): monstro em patrol nao se move.
+
+5. Nao houver artefatos ('F'): artifactCount=3 (fallback), mas
+   sem entidades. checkGameState nunca detecta vitoria.
+
+6. game.monster ou game.player forem null: crash.
+
+7. canvas nao encontrado: ctx e null, crash em render.
+
+
+================================================================================
+35. RELACAO ENTRE OBJETOS
+================================================================================
+
+REFERENCIAS CRUZADAS:
+
+Game -> Player (1:1, this.player)
+Game -> MonsterEntity (1:1, this.monster)
+Game -> DoorEntity[] (1:N, this.doorEntities)
+Game -> ArtifactEntity[] (1:N, this.artifactEntities)
+Game -> Particle[] (1:N, this.particles)
+
+MonsterEntity -> Game (1:1, this.game) [circular]
+  Acessa: tiles, doorEntities, waypoints, player,
+  mapWidth, mapHeight, findPath()
+
+Player -> Game (parametro, sem referencia circular)
+  Passado em: update(dt, game), canMoveTo(px, py, game),
+  checkInteraction(game), render(ctx, game)
+
+DoorEntity: autonoma, sem referencias
+ArtifactEntity: autonoma, sem referencias
+Particle: autonoma, sem referencias
+
+CIRCULARIDADE: Game -> MonsterEntity -> Game
+  JavaScript GC gerencia. Nao causa memory leak (single-page app).
+================================================================================
+36. CICLO DE VIDA DAS ENTIDADES
+================================================================================
+
+PLAYER:
+  Criado: new Player() em loadMap (linha 1007)
+  Reutilizado: loadMap subsequentes reposicionam e resetam
+  Nunca destruido (single-page app)
+  Estado "morto": alive=false (invisivel, nao atualiza)
+
+MONSTER:
+  Criado: new MonsterEntity() em loadMap (linha 1010)
+  Reutilizado: mesmo objeto, morre e revive
+  Ciclo: die() -> spawn() -> die() -> spawn() ...
+  Estado "morto": alive=false
+
+PORTAS:
+  Criadas: new DoorEntity() para cada 'd' em loadMap
+  Array completamente substituido a cada loadMap
+  Estado persiste entre summons
+
+ARTEFATOS:
+  Criados: new ArtifactEntity() para cada 'F' em loadMap
+  Estado: collected=false -> true -> false (respawn)
+  Array substituido a cada loadMap
+
+PARTICULAS:
+  Criadas: push() em takeDamage/collectArtifact
+  Destruidas: splice() quando life <= 0
+  Array limpo em loadMap/restart
+
+
+================================================================================
+37. ESTRUTURA DE MEMORIA
+================================================================================
+
+ALOCACOES (mapa default 37x18):
+
+tiles:               string[18][37]        ~1.3KB
+visibilityGrid:      int[18][37]           ~2.6KB
+visibilityAge:       float[18][37]         ~5.3KB
+doorEntities:        ~6 objetos            ~1KB
+artifactEntities:    ~5 objetos            ~1KB
+waypoints:           ~6 objetos            ~0.5KB
+particles:           variavel (0-20)       ~2KB
+BFS visited+parent:  alocado/frame         ~15KB (GC)
+
+TOTAL ESTADO ESTACIONARIO: ~15-20KB
+CANVAS BUFFER: 1184*576*4 = ~2.7MB (domina)
+
+ALOCACAO POR FRAME (chase):
+  findPath: 2 arrays 18x37 = ~15KB, liberados apos retorno.
+  60 FPS = ~900KB/s alocado/coletado pelo GC.
+
+
+================================================================================
+38. FLUXO DE EVENTOS
+================================================================================
+
+EVENTOS DOM:
+
+DOMContentLoaded (document):
+  Cria Game, inicia loop, configura listeners
+
+keydown (window):
+  keys[key] = true
+  F1: toggle debugMode
+  E: inicia interacao (se tem alvo)
+
+keyup (window):
+  keys[key] = false
+  E: cancela interacao
+
+keydown Escape (window):
+  Fecha paineis de UI
+
+click #settings-btn:
+  Toggle painel configuracoes
+
+click #btn-restart:
+  game.restart(), fecha painel
+
+click #btn-map-editor:
+  Abre editor de mapa
+
+click #btn-apply-map:
+  Aplica mapa do editor
+
+click #btn-reset-map:
+  Restaura DEFAULT_MAP no editor
+
+click #btn-cancel-map:
+  Fecha editor
+
+click #btn-close-settings:
+  Fecha painel configuracoes
+
+input #map-editor-textarea:
+  Atualiza preview colorida em tempo real
+
+resize (window):
+  Recalcula escala CSS do canvas
+
+
+================================================================================
+39. CONTROLE TEMPORAL (DT / TIMERS)
+================================================================================
+
+DELTA TIME (dt):
+  Calculo: (now - lastTime) / 1000 (ms -> seg)
+  Cap: 0.1 (100ms)
+  Usado em: todas as atualizacoes de movimento, animacao, timers
+
+TIMERS E COOLDOWNS:
+
+DoorEntity.animDuration:     0.4s  (animacao abrir/fechar)
+DoorEntity.debounceTimer:    0.3s  (cooldown pos-animacao)
+Player.interactTimer:        acumula dt durante hold E
+Player.invulnTimer:          0.8s  (invencibilidade pos-dano)
+Monster.attackCooldown:      1.0s  (intervalo entre ataques)
+Monster.chaseTimer:          max 1.0s (sem ver -> search)
+Monster.searchTimer:         max 2.0s (search -> patrol)
+Monster.pathRecalc:          0.5s  (recalc path no patrol)
+Game.summonDelay:            3.0s  (ritual -> spawn)
+Game.messageTimer:           2.5s  (duracao mensagem)
+Game.nightTransition speed:  0.8/s (sobe), 1.2/s (desce)
+
+PARTICULAS:
+  Dano: 8 particulas, vida 0.4s, v -40 a +40
+  Artefato: 6 particulas, vida 0.5s, v -50 a +50
+
+
+================================================================================
+40. CHANGELOG - ALTERACOES RECENTES
+================================================================================
+
+DATA: Maio 2026
+
+ALTERACAO 1 - PATHFINDING BFS PARA O MONSTRO:
+
+  PROBLEMA: O monstro andava em linha reta em direcao ao waypoint/player,
+  batendo em paredes e ficando preso. Nao conseguia navegar por portas
+  para alcancar alvos em outros comodos.
+
+  SOLUCAO: Implementado algoritmo BFS (Breadth-First Search) para
+  pathfinding em grid.
+
+  MUDANCAS NO CODIGO:
+
+    a) Game.findPath(sx, sy, gx, gy) - NOVO METODO (linha 1187):
+       BFS puro em grid 2D. 4 direcoes. Bloqueia tiles 'O' e 'W'.
+       Portas ('d') transitaveis (monstro abre). Retorna array de
+       tiles [{x,y}, ...] ou null. Complexidade O(W*H).
+
+    b) MonsterEntity.followPath(dt) - NOVO METODO (linha 750):
+       Segue array path tile por tile. Move ao centro do proximo tile.
+       Threshold de chegada: TILE_SIZE * 0.25 (8 pixels).
+       Avanca ao chegar. Retorna false quando path esgota.
+
+    c) MonsterEntity - novos atributos:
+       path: [{x,y}]|null - caminho atual
+       pathTarget: int|string|null - identificador do alvo
+       pathRecalc: float - timer para recalculo
+
+    d) updatePatrol(dt) - REESCRITO (linha 773):
+       Recalcula path a cada 0.5s ou quando waypoint muda.
+       Se findPath null: pula waypoint. Usa followPath.
+
+    e) updateChase(dt) - REESCRITO (linha 816):
+       Recalcula path todo frame ate tile do player.
+       Usa followPath para perseguir.
+
+    f) updateSearch(dt) - REESCRITO (linha 846):
+       Calcula path uma vez. Se null: volta patrol.
+       Usa followPath ate destino ou timeout.
+
+    g) Transicoes: path = null ao trocar estado (forca recalculo).
+
+    h) spawn() e die(): resetam path e pathTarget.
+
+ALTERACAO 2 - CORRECAO DO BUG DE DEBUG MODE (F1):
+
+  PROBLEMA: Ao desativar debug mode, mapa continuava inteiramente
+  visivel e nao era possivel reativar fog of war.
+
+  CAUSA: debug mode definia visibilityGrid=2 sem definir
+  visibilityAge. Ao desligar, aging so processava tiles com age>0.
+  Tiles com age=0 e visibilityGrid=2 permaneciam visiveis.
+
+  SOLUCAO: Clausula else no loop de aging (linha 1146):
+    else if (visibilityGrid[y][x] > 0) visibilityGrid[y][x] = 0
+  Reseta tiles com age=0 para nao-visivel, corrigindo estado
+  residual do debug mode.
+
+ALTERACAO 3 - SUBSTITUICAO DO MAPA DEFAULT:
+
+  Mapa antigo: 31x15, casa pequena no canto superior esquerdo.
+  Mapa novo (MapaNovo.txt): 37x18, casa grande lado esquerdo
+  com multiplos comodos e area externa lado direito.
+
+  Novo mapa inclui:
+    6 portas ('d'), 5 artefatos ('F'), 6 waypoints ('U'),
+    1 altar ('A'), 1 player spawn ('P'), 1 monster spawn ('M'),
+    3 furniture ('W').
+
+
+================================================================================
+CONCLUSAO TECNICA
+================================================================================
+
+Summon Game e um jogo completo implementado em ~1700 linhas de
+JavaScript puro com HTML5 Canvas. Arquitetura Game Loop com
+separacao clara entre entidades e sistemas.
+
+PONTOS FORTES:
+  - Single-file, zero dependencias
+  - DeltaTime em todo movimento e animacao
+  - FSM para IA do monstro com 3 estados
+  - Pathfinding BFS para navegacao em grid
+  - Fog of war com raycasting Bresenham
+  - Sistema de telhado com deteccao de proximidade
+  - Editor de mapa ASCII com preview colorida
+  - Modo debug para inspecao de sistemas
+  - Sistema de interacao hold-to-activate
+
+PONTOS DE ATENCAO PARA EXPANSAO:
+  - BFS alocado por frame durante chase pode pressionar GC
+  - Sistema de dificuldade simplificado (baseado em contagem de F)
+  - Sem audio, sem suporte mobile/touch
+  - Colisao baseada em grid, sem fisica avancada
+  - Camera sem limites de clamp
+  - Monstro abre qualquer porta no caminho (sem custo)
+
+ESTRUTURA PARA NOVOS MAPAS:
+  Para criar um novo mapa, adicione strings no array DEFAULT_MAP
+  ou use o editor ASCII no jogo. Certifique-se de incluir:
+  - P (player spawn) - obrigatorio
+  - M (monster spawn) - recomendado
+  - A (altar) - obrigatorio para summon
+  - U (waypoints) - recomendado para patrol
+  - F (artifacts) - obrigatorio para gameplay
+  - d (doors) - para conectar areas
+  - O (walls) - para delimitar areas
+  - W (furniture) - opcional, obstaculos internos
+  - C (floor) e G (grass) - para areas internas/externas
+================================================================================
+FIM DA DOCUMENTACAO
+================================================================================

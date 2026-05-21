@@ -1,0 +1,336 @@
+Crie um jogo chamado “Summon Game” em um único arquivo HTML contendo HTML, CSS e JavaScript juntos, sem bibliotecas externas.
+
+O jogo deve ser um top-down 2D com movimentação fluida (WASD) usando HTML5 Canvas, com arquitetura organizada e fácil de expandir.
+
+MAPA / CONCEITO GERAL
+
+O mapa representa uma casa com interior e exterior, baseada em uma imagem de referência:
+
+linhas pretas = paredes sólidas com colisão
+retângulos vermelhos = portas
+quadrados azuis = spawn de artefatos
+quadrado laranja = altar
+quadrados verdes = waypoints do monstro
+(observe a imagem com o nome mapaPoints.png)
+ZONAS:
+Interior (azul da imagem): dentro da casa
+Exterior (vermelho da imagem): fora da casa
+(observe a imagem mapaZones.png)
+VISUAL DO MAPA
+Interior da casa:
+chão: pastel brown(meio cor de pele, tabuas de madeira)
+paredes: marrom(madeira)
+estilo limpo, decorado e normal (não abandonado)
+pode conter móveis simples (sofá, mesa, plantas, estantes feitos com formas básicas)
+Exterior:
+grama verde
+iluminação externa natural
+SISTEMA DE TELHADO (ROOF SYSTEM)
+Quando o player estiver fora da casa:
+um teto cobre todo o interior
+não é possível ver dentro da casa
+EXCEÇÃO:
+se o player estiver fora e perto de uma porta aberta
+ele consegue ver parcialmente o interior através da abertura
+Quando o player entra na casa:
+o teto desaparece suavemente
+CICLO DIA / NOITE
+Quando o monstro NÃO estiver vivo:
+é dia
+iluminação clara
+visão ampla
+ambiente calmo
+o player consegue ver a casa inteira e através das paredes
+Quando o monstro estiver vivo:
+é noite
+iluminação escura
+visão reduzida
+vinheta escura na tela
+clima de tensão/horror
+PLAYER
+movimentação WASD fluida
+colisão com paredes
+100 de vida
+HUD mostrando vida
+INTERAÇÃO (TECLA E)
+
+Sistema de interação estilo Roblox Proximity Prompt:
+
+barra circular ou progress bar suave
+animação de carregamento
+
+A tecla E serve para:
+
+abrir portas
+ativar altar
+coletar artefatos
+PORTAS
+começam fechadas
+podem ser abertas clicando E, elas tem uma animação pra fechar e abrir. enquanto a animação está rolando, não é possível interagir com a porta, ao terminar a animação, terá 0.3s de cooldown para poder interagir dnv, use um sistema de debounce
+monstro também pode abrir portas ao chegar perto
+não fecham automaticamente
+ALTAR / SUMMON
+player deve chegar perto do altar
+segurar E por 4 segundos
+após isso:
+esperar 3 segundos
+monstro spawna no altar
+ciclo de jogo começa
+MONSTRO
+VISUAL:
+uma esfera estilizada (CSS/Canvas)
+indicador de direção para onde está olhando
+com um chapéu amarelo feito com css(chapéu pequeno, 1/4 tamanho do monstro)
+COMPORTAMENTO:
+escolhe sequência aleatória de waypoints
+percorre todos em ordem
+depois gera nova sequência
+DETECÇÃO:
+cone de visão de 180 graus frontal
+só enxerga para onde está se movendo
+se ver o player:
+entra em perseguição
+se perder visão:
+continua perseguindo por 1 segundo
+depois volta ao patrulhamento, de volta a ir para o waypoint que estava seguindo antes de perseguir o player.
+após patrulhar por todos os artefatos, sortear a ordem de ida novamente de todos os artefatos. é assim que funciona o loop de patrulha
+DETECÇÃO EXTRA:
+se o player chegar muito perto por trás:
+monstro detecta e persegue
+COMBATE DO MONSTRO:
+dano: 20 por hit
+cooldown de ataque de 1 segundo
+player tem 100 de vida
+ARTEFATOS
+brilham e têm leve animação
+ficam visíveis no escuro, é possível ver eles ao chegar perto
+spawnam nos pontos azuis
+DIFICULDADE:
+fácil: 3 artefatos
+médio: 4 artefatos
+difícil: 5 artefatos
+INTERAÇÃO:
+segurar E por 1.5 segundos para coletar
+LOOP DO JOGO
+quando todos os artefatos são coletados:
+monstro morre/desaparece
+player pode invocar novamente no altar
+novos artefatos aleatórios aparecem
+contador de summons aumenta em 1
+monstro fica mais rápido a cada summon
+HUD
+
+Mostrar:
+
+vida do player
+dificuldade
+progresso dos artefatos (ex: 1/3)
+número de summons
+mensagens de interação
+barra de interação estilo Roblox ProximityPrompt
+MONSTRO (DIFICULDADE ESCALÁVEL)
+a cada summon:
+aumenta velocidade do monstro
+SISTEMA DE VISÃO / RAYCAST
+paredes bloqueiam visão
+player não vê através de paredes
+sistema de fog of war leve
+quando monstro está vivo:
+visão do player reduzida
+IA (ARQUITETURA)
+
+Usar estados:
+
+Patrol
+Chase
+Search
+
+Deve ser expansível para:
+
+novos monstros
+novos mapas
+multiplayer futuro
+sistemas de classes(habilidades especiais únicas para o player)
+sistema de loja
+pontuação
+DEBUG / ADMIN MODE
+
+Tecla (ex: F1) ativa/desativa modo admin:
+
+Quando ativo:
+
+ver mapa inteiro
+remover fog
+ver interior da casa sempre
+mostrar hitboxes
+mostrar cone de visão do monstro
+mostrar waypoints
+mostrar pathfinding
+mostrar estados da IA
+mostrar colisões
+mostrar FPS
+mostrar artefatos
+não é detectado pelo monstro
+POLIMENTO
+transições suaves de luz (dia/noite)
+sombras leves
+partículas sutis
+glow em objetos importantes
+câmera suave
+UI moderna minimalista
+sensação de terror crescente quando monstro aparece
+REGRAS TÉCNICAS
+tudo em um único arquivo HTML
+sem bibliotecas externas
+sem usar código de outras linguagens(tipo java, python, C, C++), usar apenas HTML, CSS E JS
+usar Canvas
+usar classes organizadas
+usar deltaTime
+código comentado
+performance otimizada
+preparado para expansão
+
+após terminar o código, gerar uma documentação:
+Crie um arquivo de texto (.txt) que funcione como uma documentação técnica profissional extremamente detalhada do jogo “Summon Game”.
+
+O documento deve explicar o jogo como se fosse uma documentação interna de um estúdio de desenvolvimento (nível GDD + technical design document).
+
+NÃO inclua explicações de estilo visual, estética artística detalhada ou escolhas de cor decorativas, exceto quando forem necessárias para entender mecânicas (ex: distinção de áreas do mapa).
+
+OBJETIVO DO DOCUMENTO
+
+O texto deve explicar COMPLETAMENTE:
+
+todas as mecânicas do jogo
+todos os sistemas
+regras de gameplay
+IA do monstro
+lógica de interação
+fluxo do jogo (game loop)
+estruturas internas sugeridas (classes, estados, sistemas)
+lógica de colisão e detecção
+lógica de visão (raycasting / fog of war conceitual)
+lógica de portas, altar e artefatos
+progressão de dificuldade
+sistema de debug/admin
+regras de spawn e reset
+FORMATO OBRIGATÓRIO
+
+O documento deve ser escrito como:
+
+linguagem técnica profissional
+organizado em seções hierárquicas
+com títulos claros
+com explicações completas e sem ambiguidade
+estilo de documentação de engine ou jogo indie profissional
+
+Pode conter:
+
+listas técnicas
+pseudo-código simples (quando necessário)
+diagramas descritos em texto (não visuais)
+definições de estados (FSM da IA)
+tabelas conceituais
+CONTEÚDO OBRIGATÓRIO
+
+O documento deve incluir e explicar com profundidade:
+
+1. Visão geral do jogo
+conceito do Summon Game
+objetivo do player
+loop principal
+2. Estrutura do mapa
+casa dividida em interior e exterior
+lógica de zonas (dentro/fora)
+paredes e colisão
+portas como entidades interativas
+waypoints e pontos de spawn
+3. Sistema de jogador
+movimentação WASD
+vida e dano
+interação por tecla E
+sistema de hold interaction (proximity prompt estilo Roblox)
+regras de morte e reset
+4. Sistema de portas
+estados da porta (aberta/fechada)
+interação do player
+interação do monstro
+efeitos no fluxo de visão
+5. Sistema do altar (summon system)
+ativação por hold de 4 segundos
+delay de spawn do monstro
+reset de estado após ciclo
+6. Sistema de monstro (IA COMPLETA)
+estados:
+Patrol
+Chase
+Search
+lógica de patrulha por waypoints
+escolha aleatória de rota
+perseguição baseada em visão
+perda de alvo após tempo
+detecção por cone de visão 180°
+detecção por proximidade traseira
+ataque e dano
+velocidade escalável por summon
+7. Sistema de artefatos
+spawn em pontos fixos aleatórios
+quantidade por dificuldade
+coleta por hold interaction
+regra de remoção e progresso
+8. Game loop completo
+invocação do monstro
+coleta de artefatos
+morte do monstro
+reinício do ciclo
+aumento de dificuldade
+9. Sistema de visão e detecção
+raycasting conceitual
+bloqueio por paredes
+fog of war conceitual
+restrição de visão quando monstro está ativo
+lógica de cone de visão do monstro
+10. Sistema de dia e noite
+mudança de estado global do ambiente
+impacto na visibilidade e tensão do jogo
+11. Sistema de HUD
+informações exibidas ao jogador
+progresso de artefatos
+vida
+status do jogo
+feedback de interação
+12. Sistema de debug/admin
+toggle por tecla (F1)
+remoção de limitações de visão
+exibição de hitboxes
+exibição de IA (estado, visão, path)
+exibição de colisões
+visão completa do mapa
+13. Arquitetura sugerida do código
+classes principais:
+Game
+Player
+Monster
+Map
+Door
+Artifact
+sistema de estados (FSM)
+separação lógica de sistemas
+uso de deltaTime
+escalabilidade para multiplayer e novos mapas
+14. Regras gerais e restrições técnicas
+single file HTML (para implementação futura)
+sem dependências externas
+performance e otimização
+expansão futura do projeto
+TOM DO DOCUMENTO
+profissional
+técnico
+detalhado
+sem linguagem informal
+estilo documentação de engine/jogo indie
+IMPORTANTE
+NÃO descrever estética detalhada ou cores como foco principal
+NÃO incluir narrativa ou história longa
+foco total em mecânicas, sistemas e lógica
+o documento deve parecer pronto para ser entregue a outro desenvolvedor implementar o jogo do zero

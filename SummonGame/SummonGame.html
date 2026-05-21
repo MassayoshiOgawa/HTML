@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summon Game</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0a;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+  user-select: none;
+}
+#game-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+#hud {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #ccc;
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 10;
+  background: rgba(0,0,0,0.7);
+  padding: 8px 12px;
+  border-radius: 4px;
+  line-height: 1.6;
+}
+#interaction-bar {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+  z-index: 10;
+  display: none;
+}
+#interaction-fill {
+  height: 100%;
+  background: #4fc3f7;
+  border-radius: 3px;
+  transition: width 0.05s;
+}
+#interaction-label {
+  position: absolute;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 12px;
+  z-index: 10;
+  text-align: center;
+  display: none;
+}
+#settings-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid #444;
+  color: #aaa;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 20;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+#settings-btn:hover { background: rgba(40,40,40,0.8); color: #fff; }
+#settings-panel {
+  position: absolute;
+  top: 52px;
+  right: 10px;
+  width: 280px;
+  background: rgba(15,15,20,0.95);
+  border: 1px solid #333;
+  border-radius: 6px;
+  z-index: 20;
+  padding: 12px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  color: #ccc;
+  font-size: 13px;
+}
+#settings-panel.open { display: flex; }
+#settings-panel button {
+  background: #1a1a2e;
+  border: 1px solid #444;
+  color: #ccc;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+#settings-panel button:hover { background: #2a2a3e; }
+#settings-panel button.danger { border-color: #833; color: #f88; }
+#settings-panel button.danger:hover { background: #3a1a1a; }
+#map-editor-panel {
+  position: absolute;
+  top: 52px;
+  right: 300px;
+  width: 500px;
+  max-height: 80vh;
+  background: rgba(15,15,20,0.95);
+  border: 1px solid #333;
+  border-radius: 6px;
+  z-index: 20;
+  padding: 12px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  color: #ccc;
+  font-size: 13px;
+  overflow-y: auto;
+}
+#map-editor-panel.open { display: flex; }
+#map-editor-panel label { color: #aaa; font-size: 11px; }
+#map-editor-textarea {
+  width: 100%;
+  min-height: 300px;
+  background: #0d0d0d;
+  color: #ccc;
+  border: 1px solid #333;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.15;
+  padding: 8px;
+  resize: vertical;
+  tab-size: 1;
+  caret-color: #fff;
+}
+#map-editor-preview {
+  width: 100%;
+  background: #0d0d0d;
+  border: 1px solid #333;
+  border-radius: 3px;
+  overflow: auto;
+}
+#map-editor-preview pre {
+  margin: 0;
+  padding: 6px 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.15;
+  min-height: 60px;
+}
+#map-editor-panel .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; }
+#map-editor-panel .legend span { white-space: nowrap; }
+#map-editor-panel .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+#map-editor-panel .btn-row button { flex: 1; min-width: 70px; }
+#message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 24px;
+  z-index: 10;
+  text-align: center;
+  pointer-events: none;
+  text-shadow: 0 0 8px rgba(0,0,0,0.8);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+#message.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="game"></canvas>
+  <div id="hud"></div>
+  <div id="interaction-label"></div>
+  <div id="interaction-bar"><div id="interaction-fill"></div></div>
+  <button id="settings-btn" title="Configuracoes">&#x2699;</button>
+  <div id="settings-panel">
+    <button id="btn-restart">Restart Game</button>
+    <button id="btn-map-editor">Map Editor</button>
+    <button id="btn-close-settings">Close</button>
+  </div>
+  <div id="map-editor-panel">
+    <label>ASCII Map Editor</label>
+    <textarea id="map-editor-textarea" spellcheck="false"></textarea>
+    <label>Preview:</label>
+    <div id="map-editor-preview"><pre></pre></div>
+    <div class="legend" id="map-legend"></div>
+    <div class="btn-row">
+      <button id="btn-apply-map">Apply Map</button>
+      <button id="btn-reset-map">Reset Default</button>
+      <button id="btn-cancel-map">Cancel</button>
+    </div>
+  </div>
+  <div id="message"></div>
+  <div id="class-select" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:30; flex-direction:column; align-items:center; justify-content:center; gap:20px; color:#ccc; font-family:'Courier New',monospace;">
+    <h2 style="color:#fff; margin:0;">Choose Your Class</h2>
+    <div id="class-options" style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center;"></div>
+    <div id="class-desc" style="min-height:40px; color:#aaa; font-size:14px; text-align:center; max-width:400px;"></div>
+    <button id="btn-start-game" style="background:#2a2a3e; border:1px solid #4fc3f7; color:#fff; padding:10px 30px; cursor:pointer; font-family:'Courier New',monospace; font-size:16px; border-radius:4px;">Start Game</button>
+  </div>
+  <div id="ability-hud" style="position:absolute; bottom:10px; right:10px; z-index:10; color:#ccc; font-size:12px; font-family:'Courier New',monospace; text-align:right; pointer-events:none;">
+    <div id="ability-name" style="color:#888;"></div>
+    <div style="width:120px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; margin-top:2px;">
+      <div id="ability-bar" style="height:100%; background:rgba(255,60,60,0.6); border-radius:3px; width:100%; transition:width 0.1s;"></div>
+    </div>
+    <div id="ability-text" style="color:#666; font-size:10px;"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURATION
+// ============================================================
+const TILE_SIZE = 32;
+const INTERIOR_COLOR = '#c4a67a';
+const WALL_COLOR = '#5c3a1e';
+const GRASS_COLOR = '#3a7a2a';
+const FURNITURE_COLOR = '#3a3030';
+const ALTAR_COLOR = '#ff4444';
+const DOOR_CLOSED_COLOR = '#8b6914';
+const DOOR_OPEN_COLOR = '#4a3a0a';
+
+const LEGEND_COLORS = {
+  'O': '#5c3a1e',
+  'C': '#c4a67a',
+  'G': '#3a7a2a',
+  'd': '#c9a916',
+  'A': '#ff4444',
+  'P': '#4488ff',
+  'M': '#aa33cc',
+  'F': '#00cccc',
+  'U': '#dddd00',
+  'W': '#666666'
+};
+
+const LEGEND_LABELS = {
+  'O': 'Wall',
+  'C': 'Floor',
+  'G': 'Grass',
+  'd': 'Door',
+  'A': 'Altar',
+  'P': 'Player Spawn',
+  'M': 'Monster Spawn',
+  'F': 'Artifact',
+  'U': 'Waypoint',
+  'W': 'Furniture'
+};
+
+// ============================================================
+// MONSTER TYPES
+// ============================================================
+const MonsterTypes = {
+  normal: {
+    name: 'Monster',
+    desc: 'Standard behavior',
+    weight: 1,
+    chaseLoseTime: 1.0,
+    searchDuration: 2.0,
+    spawnCount: 1,
+    color: '#aa33cc',
+    strokeColor: '#661188'
+  },
+  blueman: {
+    name: 'Blue Man',
+    desc: 'Never forgets your scent',
+    weight: 1,
+    chaseLoseTime: 2.0,
+    searchDuration: 4.0,
+    spawnCount: 1,
+    color: '#3388ff',
+    strokeColor: '#1155cc'
+  },
+  twins: {
+    name: 'Twins',
+    desc: 'Double the terror',
+    weight: 1,
+    chaseLoseTime: 1.0,
+    searchDuration: 2.0,
+    spawnCount: 2,
+    color: '#cc3333',
+    strokeColor: '#881111'
+  }
+};
+
+function weightedRandom(types) {
+  const entries = Object.entries(types);
+  const totalWeight = entries.reduce((sum, [, t]) => sum + t.weight, 0);
+  let r = Math.random() * totalWeight;
+  for (const [key, t] of entries) {
+    r -= t.weight;
+    if (r <= 0) return key;
+  }
+  return entries[entries.length - 1][0];
+}
+
+// ============================================================
+// PLAYER CLASSES
+// ============================================================
+const PlayerClasses = {
+  none: {
+    name: 'No Class',
+    desc: 'No special ability',
+    abilityName: 'None',
+    cooldown: 0,
+    duration: 0,
+    icon: 'X'
+  },
+  oracle: {
+    name: 'Oracle',
+    desc: 'Reveal monster position through walls',
+    abilityName: 'Reveal Monster',
+    cooldown: 25,
+    duration: 5,
+    icon: 'O'
+  },
+  scout: {
+    name: 'Scout',
+    desc: 'Move 1.5x faster temporarily',
+    abilityName: 'Speed Burst',
+    cooldown: 20,
+    duration: 6,
+    icon: 'S'
+  }
+};
+
+// ============================================================
+// DEFAULT MAP
+// ============================================================
+const DEFAULT_MAP = [
+'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO',
+'OCCCCFCOCCFCOFCCCCCACCCCUCOGGFGGGGGGO',
+'OUCCCCCdCCCCOCCCCCCMCCCCCCOGGGGGGUGGO',
+'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGGGO',
+'OOOOOOOOCCCCOCCCCCCCCCCCWCOGGGGGGGGGO',
+'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGGGO',
+'OCCUFCCOCCCCdCCCCCPCCCCCCCOGGGGGGGGGO',
+'OCCCCCCOCCCCOCCCCCCCCCCCCCOGGGGGGGGGO',
+'OCCCCCCOCCCCOOOOOOOdOOOOOOOGGGGGGGGGO',
+'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGGGGGGO',
+'OCCCCCCdCCCCCCCCCCCCCCCCCCdGGGGGGGGGO',
+'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGGGGGGO',
+'OOOOOOOOOOOOOOOOOdOOOOOOOOOGGGGGGGGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+'OGGGGGGGGGGGGGFGUGGGGGGGGGGGGGGGGGGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'
+];
+
+// ============================================================
+// MAP PARSER
+// ============================================================
+function parseMap(text) {
+  const lines = text.split('\n').filter(l => l.length > 0);
+  if (lines.length === 0) return null;
+  let cleanLines = [];
+  let cols = 0;
+  for (const line of lines) {
+    const clean = line.replace(/ /g, '');
+    if (clean.length > 0) {
+      cleanLines.push(clean);
+      if (clean.length > cols) cols = clean.length;
+    }
+  }
+  if (cleanLines.length === 0) return null;
+  // Pad rows to same width
+  for (let i = 0; i < cleanLines.length; i++) {
+    while (cleanLines[i].length < cols) cleanLines[i] += 'G';
+  }
+  const validChars = new Set(['O','C','G','d','A','P','M','F','U','W']);
+  const tiles = [];
+  const doors = [];
+  const artifacts = [];
+  const waypoints = [];
+  let altarPos = null;
+  let playerSpawn = null;
+  let monsterSpawn = null;
+  for (let y = 0; y < cleanLines.length; y++) {
+    const row = [];
+    for (let x = 0; x < cleanLines[y].length; x++) {
+      const ch = cleanLines[y][x];
+      if (!validChars.has(ch)) {
+        console.warn('Invalid char:', ch, 'at', x, y);
+        row.push('C');
+        continue;
+      }
+      row.push(ch);
+      if (ch === 'd') doors.push({ x, y });
+      if (ch === 'F') artifacts.push({ x, y });
+      if (ch === 'U') waypoints.push({ x, y });
+      if (ch === 'A') altarPos = { x, y };
+      if (ch === 'P') playerSpawn = { x, y };
+      if (ch === 'M') monsterSpawn = { x, y };
+    }
+    tiles.push(row);
+  }
+  return {
+    tiles, doors, artifacts, waypoints,
+    altarPos, playerSpawn, monsterSpawn,
+    width: cols, height: cleanLines.length
+  };
+}
+
+// ============================================================
+// PARTICLE SYSTEM
+// ============================================================
+class Particle {
+  constructor(x, y, vx, vy, life, color) {
+    this.x = x; this.y = y;
+    this.vx = vx; this.vy = vy;
+    this.life = life; this.maxLife = life;
+    this.color = color;
+  }
+  update(dt) {
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.life -= dt;
+  }
+  get alive() { return this.life > 0; }
+  render(ctx, cx, cy) {
+    const alpha = this.life / this.maxLife;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x - cx, this.y - cy, 2, 2);
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ============================================================
+// DOOR ENTITY
+// ============================================================
+class DoorEntity {
+  constructor(x, y) {
+    this.tileX = x; this.tileY = y;
+    this.open = false;
+    this.animating = false;
+    this.animTimer = 0;
+    this.animDuration = 0.4;
+    this.debounceTimer = 0;
+    this.animProgress = 0;
+    this.cooldown = false;
+  }
+  update(dt) {
+    if (this.animating) {
+      this.animTimer += dt;
+      if (this.open) this.animProgress = Math.min(1, this.animTimer / this.animDuration);
+      else this.animProgress = Math.max(0, 1 - this.animTimer / this.animDuration);
+      if (this.animTimer >= this.animDuration) {
+        this.animating = false;
+        this.debounceTimer = 0.3;
+        this.animProgress = this.open ? 1 : 0;
+      }
+    }
+    if (this.debounceTimer > 0) {
+      this.debounceTimer -= dt;
+      if (this.debounceTimer <= 0) this.debounceTimer = 0;
+    }
+  }
+  toggle() {
+    if (this.animating || this.debounceTimer > 0) return;
+    this.open = !this.open;
+    this.animating = true;
+    this.animTimer = 0;
+  }
+  forceOpen() {
+    if (!this.open && !this.animating) this.toggle();
+  }
+  get solid() { return !this.open || this.animating; }
+}
+
+// ============================================================
+// ARTIFACT ENTITY
+// ============================================================
+class ArtifactEntity {
+  constructor(x, y) {
+    this.tileX = x; this.tileY = y;
+    this.collected = false;
+    this.glowPhase = Math.random() * Math.PI * 2;
+  }
+  update(dt) { this.glowPhase += dt * 3; }
+  render(ctx, tx, ty, ts, camX, camY) {
+    if (this.collected) return;
+    const cx = tx * ts + ts / 2 - camX;
+    const cy = ty * ts + ts / 2 - camY;
+    const glow = 0.5 + 0.5 * Math.sin(this.glowPhase);
+    ctx.fillStyle = '#00cccc';
+    ctx.globalAlpha = 0.3 + glow * 0.7;
+    ctx.beginPath();
+    ctx.arc(cx, cy, ts * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#00cccc';
+    ctx.beginPath();
+    ctx.arc(cx, cy, ts * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// ============================================================
+// PLAYER
+// ============================================================
+class Player {
+  constructor(tileX, tileY) {
+    this.tileX = tileX;
+    this.tileY = tileY;
+    this.px = tileX * TILE_SIZE + TILE_SIZE / 2;
+    this.py = tileY * TILE_SIZE + TILE_SIZE / 2;
+    this.speed = 140;
+    this.baseSpeed = 140;
+    this.hp = 100;
+    this.maxHp = 100;
+    this.alive = true;
+    this.interacting = false;
+    this.interactTimer = 0;
+    this.interactTarget = null;
+    this.interactType = null;
+    this.invulnTimer = 0;
+    this.playerClass = 'none';
+    this.abilityCooldown = 0;
+    this.abilityActive = false;
+    this.abilityTimer = 0;
+  }
+
+  update(dt, game) {
+    if (this.invulnTimer > 0) this.invulnTimer -= dt;
+    if (!this.alive) return;
+    // Ability timers
+    if (this.abilityCooldown > 0) this.abilityCooldown -= dt;
+    if (this.abilityActive) {
+      this.abilityTimer -= dt;
+      if (this.abilityTimer <= 0) {
+        this.abilityActive = false;
+        if (this.playerClass === 'scout') this.speed = this.baseSpeed;
+      }
+    }
+    let dx = 0, dy = 0;
+    if (keys['w'] || keys['arrowup']) dy -= 1;
+    if (keys['s'] || keys['arrowdown']) dy += 1;
+    if (keys['a'] || keys['arrowleft']) dx -= 1;
+    if (keys['d'] || keys['arrowright']) dx += 1;
+    if (dx !== 0 && dy !== 0) { dx *= 0.707; dy *= 0.707; }
+    const spd = this.speed;
+    const nx = this.px + dx * spd * dt;
+    const ny = this.py + dy * spd * dt;
+    if (this.canMoveTo(nx, this.py, game)) this.px = nx;
+    if (this.canMoveTo(this.px, ny, game)) this.py = ny;
+    this.tileX = Math.floor(this.px / TILE_SIZE);
+    this.tileY = Math.floor(this.py / TILE_SIZE);
+    this.checkInteraction(game);
+    // Single-click doors
+    if (keysJustPressed['e'] && this.interactTarget && this.interactType === 'door') {
+      this.interactTarget.toggle();
+      keysJustPressed['e'] = false;
+    }
+    // Hold E for altar/artifact
+    if (this.interacting && this.interactType !== 'door') {
+      this.interactTimer += dt;
+      game.updateInteraction(this);
+    }
+    if (!keys['e']) { this.interacting = false; this.interactTimer = 0; }
+  }
+
+  canMoveTo(px, py, game) {
+    const margin = 4;
+    const checks = [
+      { x: px - margin, y: py - margin },
+      { x: px + margin, y: py - margin },
+      { x: px - margin, y: py + margin },
+      { x: px + margin, y: py + margin }
+    ];
+    for (const c of checks) {
+      const tx = Math.floor(c.x / TILE_SIZE);
+      const ty = Math.floor(c.y / TILE_SIZE);
+      if (tx < 0 || ty < 0 || tx >= game.mapWidth || ty >= game.mapHeight) return false;
+      const tile = game.tiles[ty][tx];
+      if (tile === 'O' || tile === 'W') return false;
+      if (tile === 'd') {
+        const door = game.doorEntities.find(d => d.tileX === tx && d.tileY === ty);
+        if (door && door.solid) return false;
+      }
+    }
+    return true;
+  }
+
+  checkInteraction(game) {
+    const range = 1.5;
+    this.interactTarget = null;
+    let bestDist = range * TILE_SIZE;
+    // Check doors
+    for (const door of game.doorEntities) {
+      const dx = door.tileX + 0.5 - this.px / TILE_SIZE;
+      const dy = door.tileY + 0.5 - this.py / TILE_SIZE;
+      const dist = Math.sqrt(dx * dx + dy * dy) * TILE_SIZE;
+      if (dist < bestDist) {
+        bestDist = dist;
+        this.interactTarget = door;
+        this.interactType = 'door';
+      }
+    }
+    // Check altar
+    if (game.altarPos && !game.monster.alive) {
+      const dx = game.altarPos.x + 0.5 - this.px / TILE_SIZE;
+      const dy = game.altarPos.y + 0.5 - this.py / TILE_SIZE;
+      const dist = Math.sqrt(dx * dx + dy * dy) * TILE_SIZE;
+      if (dist < bestDist) {
+        bestDist = dist;
+        this.interactTarget = 'altar';
+        this.interactType = 'altar';
+      }
+    }
+    // Check artifacts
+    for (const art of game.artifactEntities) {
+      if (art.collected) continue;
+      const dx = art.tileX + 0.5 - this.px / TILE_SIZE;
+      const dy = art.tileY + 0.5 - this.py / TILE_SIZE;
+      const dist = Math.sqrt(dx * dx + dy * dy) * TILE_SIZE;
+      if (dist < bestDist) {
+        bestDist = dist;
+        this.interactTarget = art;
+        this.interactType = 'artifact';
+      }
+    }
+  }
+
+  takeDamage(dmg) {
+    if (this.invulnTimer > 0) return;
+    this.hp -= dmg;
+    this.invulnTimer = 0.8;
+    for (let i = 0; i < 8; i++) {
+      game.particles.push(new Particle(
+        this.px, this.py,
+        (Math.random() - 0.5) * 80, (Math.random() - 0.5) * 80,
+        0.4, '#ff4444'
+      ));
+    }
+    if (this.hp <= 0) {
+      this.hp = 0; this.alive = false;
+      game.showMessage('You died! Open settings to restart.');
+    }
+  }
+
+  render(ctx, game) {
+    if (!this.alive) return;
+    if (this.invulnTimer > 0 && Math.floor(this.invulnTimer * 10) % 2 === 0) return;
+    const sx = this.px - game.camX;
+    const sy = this.py - game.camY;
+    ctx.fillStyle = '#4488ff';
+    ctx.beginPath();
+    ctx.arc(sx, sy, TILE_SIZE * 0.35, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2266dd';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Eyes
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(sx - 3, sy - 2, 3, 0, Math.PI * 2);
+    ctx.arc(sx + 3, sy - 2, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.arc(sx - 3, sy - 2, 1.5, 0, Math.PI * 2);
+    ctx.arc(sx + 3, sy - 2, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// ============================================================
+// MONSTER
+// ============================================================
+class MonsterEntity {
+  constructor(tileX, tileY, game, monsterType) {
+    this.tileX = tileX;
+    this.tileY = tileY;
+    this.px = tileX * TILE_SIZE + TILE_SIZE / 2;
+    this.py = tileY * TILE_SIZE + TILE_SIZE / 2;
+    this.speed = 70;
+    this.alive = false;
+    this.state = 'patrol';
+    this.currentWaypoint = 0;
+    this.waypointOrder = [];
+    this.facingAngle = 0;
+    this.chaseTimer = 0;
+    this.searchTimer = 0;
+    this.lastKnownPlayerPos = null;
+    this.attackCooldown = 0;
+    this.game = game;
+    this.path = null;
+    this.pathTarget = null;
+    this.pathRecalc = 0;
+    this.type = monsterType || 'normal';
+    const mt = MonsterTypes[this.type];
+    this.chaseLoseTime = mt.chaseLoseTime;
+    this.searchDuration = mt.searchDuration;
+    this.bodyColor = mt.color;
+    this.bodyStroke = mt.strokeColor;
+    this.name = mt.name;
+  }
+
+  spawn() {
+    this.alive = true;
+    this.state = 'patrol';
+    this.currentWaypoint = 0;
+    this.generateWaypointOrder();
+    if (this.waypointOrder.length > 0) this.currentWaypoint = 0;
+    this.px = this.tileX * TILE_SIZE + TILE_SIZE / 2;
+    this.py = this.tileY * TILE_SIZE + TILE_SIZE / 2;
+    this.path = null;
+    this.pathTarget = null;
+  }
+
+  die() {
+    this.alive = false;
+    this.state = 'patrol';
+    this.path = null;
+    this.pathTarget = null;
+  }
+
+  generateWaypointOrder() {
+    const wp = this.game.waypoints;
+    if (wp.length === 0) { this.waypointOrder = []; return; }
+    const indices = [...Array(wp.length).keys()];
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    this.waypointOrder = indices;
+    this.currentWaypoint = 0;
+  }
+
+  canSeePlayer() {
+    if (!this.game.player.alive) return false;
+    const dx = this.game.player.px - this.px;
+    const dy = this.game.player.py - this.py;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 250) return false;
+    const angle = Math.atan2(dy, dx);
+    let diff = angle - this.facingAngle;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    if (Math.abs(diff) > Math.PI / 2 && dist > 50) return false;
+    return this.hasLineOfSight(this.px, this.py, this.game.player.px, this.game.player.py);
+  }
+
+  canDetectBehind() {
+    if (!this.game.player.alive) return false;
+    const dx = this.game.player.px - this.px;
+    const dy = this.game.player.py - this.py;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 45) return false;
+    const angleToPlayer = Math.atan2(dy, dx);
+    let diff = angleToPlayer - this.facingAngle;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    if (Math.abs(diff) > Math.PI * 0.65) return true;
+    return false;
+  }
+
+  hasLineOfSight(x1, y1, x2, y2) {
+    const tiles = this.game.tiles;
+    const tx1 = Math.floor(x1 / TILE_SIZE);
+    const ty1 = Math.floor(y1 / TILE_SIZE);
+    const tx2 = Math.floor(x2 / TILE_SIZE);
+    const ty2 = Math.floor(y2 / TILE_SIZE);
+    const dx = Math.abs(tx2 - tx1);
+    const dy = Math.abs(ty2 - ty1);
+    const sx = tx1 < tx2 ? 1 : -1;
+    const sy = ty1 < ty2 ? 1 : -1;
+    let err = dx - dy;
+    let cx = tx1, cy = ty1;
+    const steps = dx + dy;
+    for (let i = 0; i < steps; i++) {
+      if (cx === tx2 && cy === ty2) break;
+      const e2 = err * 2;
+      if (e2 > -dy) { err -= dy; cx += sx; }
+      if (e2 < dx) { err += dx; cy += sy; }
+      if (cx >= 0 && cx < this.game.mapWidth && cy >= 0 && cy < this.game.mapHeight) {
+        if (tiles[cy][cx] === 'O') return false;
+        if (tiles[cy][cx] === 'd') {
+          const door = this.game.doorEntities.find(d => d.tileX === cx && d.tileY === cy);
+          if (!door || door.solid) return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  canMoveTo(px, py) {
+    const margin = 3;
+    const checks = [
+      { x: px - margin, y: py - margin },
+      { x: px + margin, y: py - margin },
+      { x: px - margin, y: py + margin },
+      { x: px + margin, y: py + margin }
+    ];
+    for (const c of checks) {
+      const tx = Math.floor(c.x / TILE_SIZE);
+      const ty = Math.floor(c.y / TILE_SIZE);
+      if (tx < 0 || ty < 0 || tx >= this.game.mapWidth || ty >= this.game.mapHeight) return false;
+      const tile = this.game.tiles[ty][tx];
+      if (tile === 'O' || tile === 'W') return false;
+      if (tile === 'd') {
+        const door = this.game.doorEntities.find(d => d.tileX === tx && d.tileY === ty);
+        if (door && door.solid) return false;
+      }
+    }
+    return true;
+  }
+
+  update(dt) {
+    if (!this.alive) return;
+    if (this.attackCooldown > 0) this.attackCooldown -= dt;
+    // Check for doors nearby
+    this.checkNearbyDoors(dt);
+    // State machine
+    switch (this.state) {
+      case 'patrol': this.updatePatrol(dt); break;
+      case 'chase': this.updateChase(dt); break;
+      case 'search': this.updateSearch(dt); break;
+    }
+    // Attack player
+    if (this.alive && this.game.player.alive) {
+      const dx = this.game.player.px - this.px;
+      const dy = this.game.player.py - this.py;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < TILE_SIZE * 0.8 && this.attackCooldown <= 0) {
+        this.game.player.takeDamage(20);
+        this.attackCooldown = 1.0;
+      }
+    }
+  }
+
+  checkNearbyDoors(dt) {
+    const tx = Math.floor(this.px / TILE_SIZE);
+    const ty = Math.floor(this.py / TILE_SIZE);
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const cx = tx + dx, cy = ty + dy;
+        if (cx < 0 || cy < 0 || cx >= this.game.mapWidth || cy >= this.game.mapHeight) continue;
+        if (this.game.tiles[cy][cx] === 'd') {
+          const door = this.game.doorEntities.find(d => d.tileX === cx && d.tileY === cy);
+          if (door && !door.open) door.forceOpen();
+        }
+      }
+    }
+  }
+
+  followPath(dt) {
+    if (!this.path || this.path.length === 0) return false;
+    const next = this.path[0];
+    const tx = next.x * TILE_SIZE + TILE_SIZE / 2;
+    const ty = next.y * TILE_SIZE + TILE_SIZE / 2;
+    const dx = tx - this.px;
+    const dy = ty - this.py;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < TILE_SIZE * 0.25) {
+      this.path.shift();
+      if (this.path.length === 0) return false;
+      return this.followPath(dt);
+    }
+    const ndx = dx / dist, ndy = dy / dist;
+    this.facingAngle = Math.atan2(ndy, ndx);
+    const spd = this.state === 'chase' ? this.speed * 1.4 : this.speed;
+    const nx = this.px + ndx * spd * dt;
+    const ny = this.py + ndy * spd * dt;
+    if (this.canMoveTo(nx, this.py)) this.px = nx;
+    if (this.canMoveTo(this.px, ny)) this.py = ny;
+    return true;
+  }
+
+  updatePatrol(dt) {
+    if (this.canDetectBehind()) {
+      this.state = 'chase'; this.chaseTimer = 0; this.path = null; return;
+    }
+    if (this.canSeePlayer()) {
+      this.state = 'chase'; this.chaseTimer = 0; this.path = null; return;
+    }
+    if (this.waypointOrder.length === 0) return;
+    const wpIdx = this.waypointOrder[this.currentWaypoint];
+    if (wpIdx >= this.game.waypoints.length) {
+      this.generateWaypointOrder(); return;
+    }
+    const wp = this.game.waypoints[wpIdx];
+    this.pathRecalc -= dt;
+    if (!this.path || this.pathTarget !== wpIdx || this.pathRecalc <= 0) {
+      const stx = Math.floor(this.px / TILE_SIZE);
+      const sty = Math.floor(this.py / TILE_SIZE);
+      const found = this.game.findPath(stx, sty, wp.x, wp.y);
+      if (found) {
+        this.path = found;
+        this.pathTarget = wpIdx;
+        this.pathRecalc = 0.5;
+      } else {
+        this.path = null;
+        this.pathTarget = null;
+      }
+    }
+    if (this.path && this.path.length > 0) {
+      if (!this.followPath(dt)) {
+        this.path = null;
+        this.currentWaypoint++;
+        if (this.currentWaypoint >= this.waypointOrder.length) {
+          this.generateWaypointOrder();
+        }
+      }
+    } else {
+      this.currentWaypoint++;
+      if (this.currentWaypoint >= this.waypointOrder.length) {
+        this.generateWaypointOrder();
+      }
+    }
+  }
+
+  updateChase(dt) {
+    if (!this.game.player.alive) { this.state = 'patrol'; this.path = null; return; }
+    if (!this.canSeePlayer() && !this.canDetectBehind()) {
+      this.chaseTimer += dt;
+      if (this.chaseTimer > 1.0) {
+        this.lastKnownPlayerPos = {
+          x: this.game.player.px, y: this.game.player.py
+        };
+        this.state = 'search';
+        this.searchTimer = 0;
+        this.path = null;
+        return;
+      }
+    } else {
+      this.chaseTimer = 0;
+    }
+    this.lastKnownPlayerPos = {
+      x: this.game.player.px, y: this.game.player.py
+    };
+    const stx = Math.floor(this.px / TILE_SIZE);
+    const sty = Math.floor(this.py / TILE_SIZE);
+    const gtx = Math.floor(this.game.player.px / TILE_SIZE);
+    const gty = Math.floor(this.game.player.py / TILE_SIZE);
+    const found = this.game.findPath(stx, sty, gtx, gty);
+    if (found && found.length > 0) {
+      this.path = found;
+      this.followPath(dt);
+    }
+  }
+
+  updateSearch(dt) {
+    if (this.canSeePlayer() || this.canDetectBehind()) {
+      this.state = 'chase'; this.chaseTimer = 0; this.path = null; return;
+    }
+    this.searchTimer += dt;
+    if (this.searchTimer > 2.0 || !this.lastKnownPlayerPos) {
+      this.state = 'patrol'; this.path = null; return;
+    }
+    const stx = Math.floor(this.px / TILE_SIZE);
+    const sty = Math.floor(this.py / TILE_SIZE);
+    const gtx = Math.floor(this.lastKnownPlayerPos.x / TILE_SIZE);
+    const gty = Math.floor(this.lastKnownPlayerPos.y / TILE_SIZE);
+    if (!this.path) {
+      const found = this.game.findPath(stx, sty, gtx, gty);
+      if (found && found.length > 0) {
+        this.path = found;
+      } else {
+        this.state = 'patrol'; this.path = null; return;
+      }
+    }
+    if (!this.followPath(dt)) {
+      this.state = 'patrol'; this.path = null;
+    }
+  }
+
+  render(ctx, game) {
+    if (!this.alive) return;
+    const rx = this.px - game.camX;
+    const ry = this.py - game.camY;
+    // Body
+    ctx.fillStyle = '#aa33cc';
+    ctx.beginPath();
+    ctx.arc(rx, ry, TILE_SIZE * 0.38, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#661188';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Direction indicator
+    const ex = rx + Math.cos(this.facingAngle) * TILE_SIZE * 0.5;
+    const ey = ry + Math.sin(this.facingAngle) * TILE_SIZE * 0.5;
+    ctx.fillStyle = '#ff0';
+    ctx.beginPath();
+    ctx.arc(ex, ey, 3, 0, Math.PI * 2);
+    ctx.fill();
+    // Hat
+    ctx.fillStyle = '#ffcc00';
+    ctx.fillRect(rx - TILE_SIZE * 0.15, ry - TILE_SIZE * 0.45, TILE_SIZE * 0.3, TILE_SIZE * 0.12);
+    ctx.fillRect(rx - TILE_SIZE * 0.08, ry - TILE_SIZE * 0.6, TILE_SIZE * 0.16, TILE_SIZE * 0.18);
+    // Eyes
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(rx - 3, ry - 2, 3, 0, Math.PI * 2);
+    ctx.arc(rx + 3, ry - 2, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f00';
+    ctx.beginPath();
+    ctx.arc(rx - 3, ry - 2, 1.5, 0, Math.PI * 2);
+    ctx.arc(rx + 3, ry - 2, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  renderVisionCone(ctx, game) {
+    if (!this.alive || !game.debugMode) return;
+    const rx = this.px - game.camX;
+    const ry = this.py - game.camY;
+    const r = 250;
+    ctx.strokeStyle = 'rgba(255,0,0,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(rx, ry, r, this.facingAngle - Math.PI / 2, this.facingAngle + Math.PI / 2);
+    ctx.lineTo(rx, ry);
+    ctx.closePath();
+    ctx.stroke();
+  }
+}
+
+// ============================================================
+// GAME CLASS
+// ============================================================
+class Game {
+  constructor() {
+    this.canvas = document.getElementById('game');
+    this.ctx = this.canvas.getContext('2d');
+    this.tiles = [];
+    this.mapWidth = 0;
+    this.mapHeight = 0;
+    this.doorEntities = [];
+    this.artifactEntities = [];
+    this.waypoints = [];
+    this.altarPos = null;
+    this.playerSpawn = { x: 0, y: 0 };
+    this.monsterSpawn = { x: 0, y: 0 };
+    this.player = null;
+    this.monster = null;
+    this.particles = [];
+    this.camX = 0; this.camY = 0;
+    this.summonCount = 0;
+    this.difficulty = 'easy';
+    this.nightTransition = 0;
+    this.isNight = false;
+    this.roofAlpha = 1;
+    this.targetRoofAlpha = 1;
+    this.debugMode = false;
+    this.visibilityGrid = [];
+    this.visibilityAge = [];
+    this.lastTime = 0;
+    this.artifactCount = 3;
+    this.collectedArtifacts = 0;
+    this.summoning = false;
+    this.summonTimer = 0;
+    this.summonDelay = 0;
+    this.messageText = '';
+    this.messageTimer = 0;
+    this.interactDisplay = null;
+    this.interactDuration = 0;
+  }
+
+  loadMap(mapData) {
+    if (!mapData) return;
+    this.tiles = mapData.tiles;
+    this.mapWidth = mapData.width;
+    this.mapHeight = mapData.height;
+    this.doorEntities = mapData.doors.map(d => new DoorEntity(d.x, d.y));
+    this.artifactEntities = [];
+    this.waypoints = mapData.waypoints;
+    this.altarPos = mapData.altarPos;
+    this.playerSpawn = mapData.playerSpawn || { x: 1, y: 1 };
+    this.monsterSpawn = mapData.monsterSpawn || mapData.altarPos || { x: 2, y: 2 };
+    // Spawn artifacts
+    for (const pos of mapData.artifacts) {
+      this.artifactEntities.push(new ArtifactEntity(pos.x, pos.y));
+    }
+    // Count initial artifacts
+    this.artifactCount = this.artifactEntities.length;
+    if (this.artifactCount === 0) this.artifactCount = 3;
+    // Difficulty
+    if (this.artifactCount <= 3) this.difficulty = 'easy';
+    else if (this.artifactCount <= 4) this.difficulty = 'medium';
+    else this.difficulty = 'hard';
+    // Visibility
+    this.visibilityGrid = [];
+    this.visibilityAge = [];
+    for (let y = 0; y < this.mapHeight; y++) {
+      this.visibilityGrid.push(new Array(this.mapWidth).fill(0));
+      this.visibilityAge.push(new Array(this.mapWidth).fill(0));
+    }
+    // Resize canvas
+    this.canvas.width = this.mapWidth * TILE_SIZE;
+    this.canvas.height = this.mapHeight * TILE_SIZE;
+    // Create/place player
+    if (this.player) {
+      this.player.px = this.playerSpawn.x * TILE_SIZE + TILE_SIZE / 2;
+      this.player.py = this.playerSpawn.y * TILE_SIZE + TILE_SIZE / 2;
+      this.player.tileX = this.playerSpawn.x;
+      this.player.tileY = this.playerSpawn.y;
+      this.player.alive = true;
+      this.player.hp = this.player.maxHp;
+      this.player.interacting = false;
+      this.player.interactTimer = 0;
+      this.player.invulnTimer = 0;
+    } else {
+      this.player = new Player(this.playerSpawn.x, this.playerSpawn.y);
+    }
+    // Create monster
+    this.monster = new MonsterEntity(this.monsterSpawn.x, this.monsterSpawn.y, this);
+    this.monster.die();
+    // Reset state
+    this.summonCount = 0;
+    this.collectedArtifacts = 0;
+    this.isNight = false;
+    this.nightTransition = 0;
+    this.roofAlpha = 1;
+    this.targetRoofAlpha = 1;
+    this.summoning = false;
+    this.summonTimer = 0;
+    this.summonDelay = 0;
+    this.particles = [];
+    this.setDifficulty();
+    updateMapEditor(this);
+    this.showMessage('');
+  }
+
+  setDifficulty() {
+    if (this.artifactCount <= 3) this.difficulty = 'easy';
+    else if (this.artifactCount <= 4) this.difficulty = 'medium';
+    else this.difficulty = 'hard';
+  }
+
+  restart() {
+    this.summoning = false;
+    this.loadMap(parseMap(DEFAULT_MAP.join('\n')));
+  }
+
+  start() {
+    this.loadMap(parseMap(DEFAULT_MAP.join('\n')));
+    this.lastTime = performance.now();
+    this.loop(this.lastTime);
+  }
+
+  loop(now) {
+    const dt = Math.min((now - this.lastTime) / 1000, 0.1);
+    this.lastTime = now;
+    this.update(dt);
+    this.render();
+    requestAnimationFrame(t => this.loop(t));
+  }
+
+  update(dt) {
+    // Update doors
+    for (const door of this.doorEntities) door.update(dt);
+    // Update player
+    this.player.update(dt, this);
+    // Update monster
+    this.monster.update(dt);
+    // Update artifacts
+    for (const art of this.artifactEntities) art.update(dt);
+    // Update particles
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      this.particles[i].update(dt);
+      if (!this.particles[i].alive) this.particles.splice(i, 1);
+    }
+    // Update message
+    if (this.messageTimer > 0) { this.messageTimer -= dt; if (this.messageTimer <= 0) this.showMessage(''); }
+    // Day/night transition
+    const monsterAlive = this.monster.alive;
+    this.targetRoofAlpha = this.computeRoofAlpha();
+    this.roofAlpha += (this.targetRoofAlpha - this.roofAlpha) * Math.min(dt * 4, 1);
+    if (monsterAlive && !this.isNight) {
+      this.nightTransition = Math.min(1, this.nightTransition + dt * 0.8);
+      if (this.nightTransition >= 1) this.isNight = true;
+    } else if (!monsterAlive && this.isNight) {
+      this.nightTransition = Math.max(0, this.nightTransition - dt * 1.2);
+      if (this.nightTransition <= 0) this.isNight = false;
+    } else if (!monsterAlive && !this.isNight && this.nightTransition > 0) {
+      this.nightTransition = Math.max(0, this.nightTransition - dt * 1.2);
+    }
+    // Summon delay
+    if (this.summonDelay > 0) {
+      this.summonDelay -= dt;
+      if (this.summonDelay <= 0) {
+        this.spawnMonster();
+      }
+    }
+    // Check game state
+    this.checkGameState();
+    // Camera
+    this.updateCamera();
+    // Visibility
+    this.updateVisibility();
+    // Update HUD
+    updateHUD(this);
+  }
+
+  computeRoofAlpha() {
+    if (this.debugMode) return 0;
+    const pt = this.player.tileX;
+    const pty = this.player.tileY;
+    const tile = (pty >= 0 && pty < this.mapHeight && pt >= 0 && pt < this.mapWidth)
+      ? this.tiles[pty][pt] : 'G';
+    if (tile !== 'G' && tile !== 'O') return 0; // Player is inside
+    // Player is outside - check near open doors
+    for (const door of this.doorEntities) {
+      if (!door.open && !door.animating) continue;
+      const dx = door.tileX - pt;
+      const dy = door.tileY - pty;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 3) return Math.max(0, (dist - 1) / 2); // Partial roof near open door
+    }
+    return 1;
+  }
+
+  updateCamera() {
+    const cx = this.mapWidth * TILE_SIZE / 2;
+    const cy = this.mapHeight * TILE_SIZE / 2;
+    this.camX = this.player.px - cx;
+    this.camY = this.player.py - cy;
+  }
+
+  updateVisibility() {
+    const vRadius = this.isNight ? 5 : 12;
+    const pt = this.player.tileX;
+    const pty = this.player.tileY;
+    const fogDecay = this.isNight ? 0.15 : 0.4;
+    if (this.debugMode) {
+      for (let y = 0; y < this.mapHeight; y++)
+        for (let x = 0; x < this.mapWidth; x++)
+          this.visibilityGrid[y][x] = 2;
+      return;
+    }
+    // Age all tiles
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        if (this.visibilityAge[y][x] > 0) {
+          this.visibilityAge[y][x] -= fogDecay * 0.02;
+          if (this.visibilityAge[y][x] <= 0) {
+            this.visibilityAge[y][x] = 0;
+            this.visibilityGrid[y][x] = 0;
+          } else if (this.visibilityGrid[y][x] === 2) {
+            this.visibilityGrid[y][x] = 1;
+          }
+        } else if (this.visibilityGrid[y][x] > 0) {
+          this.visibilityGrid[y][x] = 0;
+        }
+      }
+    }
+    // Check visible tiles
+    for (let dy = -vRadius; dy <= vRadius; dy++) {
+      for (let dx = -vRadius; dx <= vRadius; dx++) {
+        const tx = pt + dx, ty = pty + dy;
+        if (tx < 0 || ty < 0 || tx >= this.mapWidth || ty >= this.mapHeight) continue;
+        if (dx * dx + dy * dy <= vRadius * vRadius) {
+          if (this.hasLineOfSight(pt, pty, tx, ty)) {
+            this.visibilityGrid[ty][tx] = 2;
+            this.visibilityAge[ty][tx] = 1;
+          }
+        }
+      }
+    }
+  }
+
+  hasLineOfSight(x1, y1, x2, y2) {
+    const dx = Math.abs(x2 - x1), dy = Math.abs(y2 - y1);
+    const sx = x1 < x2 ? 1 : -1, sy = y1 < y2 ? 1 : -1;
+    let err = dx - dy, cx = x1, cy = y1;
+    const steps = dx + dy;
+    for (let i = 0; i < steps; i++) {
+      if (cx === x2 && cy === y2) break;
+      const e2 = err * 2;
+      if (e2 > -dy) { err -= dy; cx += sx; }
+      if (e2 < dx) { err += dx; cy += sy; }
+      if (cx >= 0 && cx < this.mapWidth && cy >= 0 && cy < this.mapHeight) {
+        if (this.tiles[cy][cx] === 'O') return false;
+        if (this.tiles[cy][cx] === 'd') {
+          const door = this.doorEntities.find(d => d.tileX === cx && d.tileY === cy);
+          if (!door || door.solid) return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  findPath(sx, sy, gx, gy) {
+    if (sx === gx && sy === gy) return [{ x: gx, y: gy }];
+    const w = this.mapWidth, h = this.mapHeight;
+    if (sx < 0 || sy < 0 || sx >= w || sy >= h ||
+        gx < 0 || gy < 0 || gx >= w || gy >= h) return null;
+    const visited = new Array(h);
+    const parent = new Array(h);
+    for (let i = 0; i < h; i++) {
+      visited[i] = new Array(w).fill(false);
+      parent[i] = new Array(w).fill(null);
+    }
+    const queue = [{ x: sx, y: sy }];
+    visited[sy][sx] = true;
+    let head = 0;
+    const dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+    while (head < queue.length) {
+      const { x: cx, y: cy } = queue[head++];
+      if (cx === gx && cy === gy) {
+        const path = [];
+        let bx = cx, by = cy;
+        while (bx !== sx || by !== sy) {
+          path.unshift({ x: bx, y: by });
+          const p = parent[by][bx];
+          if (!p) break;
+          bx = p.x; by = p.y;
+        }
+        return path;
+      }
+      for (const [dx, dy] of dirs) {
+        const nx = cx + dx, ny = cy + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h || visited[ny][nx]) continue;
+        const tile = this.tiles[ny][nx];
+        if (tile === 'O' || tile === 'W') continue;
+        visited[ny][nx] = true;
+        parent[ny][nx] = { x: cx, y: cy };
+        queue.push({ x: nx, y: ny });
+      }
+    }
+    return null;
+  }
+
+  checkGameState() {
+    if (!this.monster.alive) return;
+    let allCollected = true;
+    for (const art of this.artifactEntities) {
+      if (!art.collected) { allCollected = false; break; }
+    }
+    if (allCollected) {
+      this.monster.die();
+      this.collectedArtifacts = 0;
+      this.isNight = false;
+      this.showMessage('All artifacts collected! Monster defeated!');
+      // Respawn artifacts
+      this.respawnArtifacts();
+    }
+  }
+
+  respawnArtifacts() {
+    // Find all artifact spawn points
+    const spawnPoints = [];
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        if (this.tiles[y][x] === 'F') spawnPoints.push({ x, y });
+      }
+    }
+    // Reset existing artifacts
+    for (const art of this.artifactEntities) art.collected = false;
+    // If not enough entities, create more
+    while (this.artifactEntities.length < this.artifactCount && spawnPoints.length > 0) {
+      const sp = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
+      this.artifactEntities.push(new ArtifactEntity(sp.x, sp.y));
+    }
+  }
+
+  spawnMonster() {
+    this.summonCount++;
+    this.monster.speed = 70 + (this.summonCount - 1) * 10;
+    this.monster.spawn();
+    this.showMessage('The monster has been summoned!');
+  }
+
+  collectArtifact(art) {
+    if (art.collected) return;
+    art.collected = true;
+    this.collectedArtifacts++;
+    this.showMessage('Artifact collected! (' + this.collectedArtifacts + '/' + this.artifactCount + ')');
+    for (let i = 0; i < 6; i++) {
+      this.particles.push(new Particle(
+        art.tileX * TILE_SIZE + TILE_SIZE / 2,
+        art.tileY * TILE_SIZE + TILE_SIZE / 2,
+        (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100,
+        0.5, '#00cccc'
+      ));
+    }
+  }
+
+  updateInteraction(player) {
+    const target = player.interactTarget;
+    const type = player.interactType;
+    if (!target || !type) return;
+    let duration = 0;
+    if (type === 'door') duration = 0.3;
+    else if (type === 'altar') duration = 4;
+    else if (type === 'artifact') duration = 1.5;
+    this.interactDisplay = { type, duration, target };
+    this.interactDuration = duration;
+    if (player.interactTimer >= duration) {
+      player.interacting = false;
+      player.interactTimer = 0;
+      if (type === 'door') target.toggle();
+      else if (type === 'altar' && !this.summoning) {
+        this.summoning = true;
+        this.summonDelay = 3;
+        this.showMessage('Summoning ritual begins...');
+      }
+      else if (type === 'artifact') this.collectArtifact(target);
+    }
+  }
+
+  showMessage(text) {
+    this.messageText = text;
+    this.messageTimer = text ? 2.5 : 0;
+    const el = document.getElementById('message');
+    el.textContent = text;
+    if (text) el.classList.add('show');
+    else el.classList.remove('show');
+  }
+
+  openMapEditor() {
+    const panel = document.getElementById('map-editor-panel');
+    panel.classList.add('open');
+    const ta = document.getElementById('map-editor-textarea');
+    ta.value = this.tiles.map(row => row.join('')).join('\n');
+    updatePreview();
+    document.getElementById('settings-panel').classList.remove('open');
+  }
+
+  closeMapEditor() {
+    document.getElementById('map-editor-panel').classList.remove('open');
+  }
+
+  applyMapFromEditor() {
+    const ta = document.getElementById('map-editor-textarea');
+    const mapData = parseMap(ta.value);
+    if (mapData) {
+      this.loadMap(mapData);
+      this.closeMapEditor();
+      this.showMessage('Map applied!');
+    } else {
+      this.showMessage('Invalid map!');
+    }
+  }
+
+  resetDefaultMap() {
+    const ta = document.getElementById('map-editor-textarea');
+    ta.value = DEFAULT_MAP.join('\n');
+    updatePreview();
+  }
+
+  // ============================================================
+  // RENDERING
+  // ============================================================
+  render() {
+    const ctx = this.ctx;
+    const W = this.canvas.width, H = this.canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    // Background
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 0, W, H);
+    // Draw tiles
+    this.renderTiles(ctx);
+    // Draw artifacts on floor
+    this.renderArtifacts(ctx);
+    // Draw roof overlay
+    this.renderRoof(ctx);
+    // Draw entities
+    this.player.render(ctx, this);
+    this.monster.render(ctx, this);
+    this.renderParticles(ctx);
+    // Fog overlay
+    this.renderFog(ctx);
+    // Night overlay
+    this.renderNight(ctx);
+    // Debug
+    if (this.debugMode) this.renderDebug(ctx);
+    // Message
+    this.renderMessage(ctx);
+    // Interaction bar
+    this.renderInteractionBar();
+  }
+
+  renderTiles(ctx) {
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        const tile = this.tiles[y][x];
+        const sx = x * TILE_SIZE - this.camX;
+        const sy = y * TILE_SIZE - this.camY;
+        if (sx + TILE_SIZE < -50 || sx > this.canvas.width + 50 || sy + TILE_SIZE < -50 || sy > this.canvas.height + 50) continue;
+        let color = '#111';
+        switch (tile) {
+          case 'O': color = WALL_COLOR; break;
+          case 'C': color = INTERIOR_COLOR; break;
+          case 'G': color = GRASS_COLOR; break;
+          case 'd': {
+            const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
+            color = (door && door.open) ? DOOR_OPEN_COLOR : DOOR_CLOSED_COLOR;
+            break;
+          }
+          case 'A': color = ALTAR_COLOR; break;
+          case 'P': color = INTERIOR_COLOR; break;
+          case 'M': color = INTERIOR_COLOR; break;
+          case 'F': color = INTERIOR_COLOR; break;
+          case 'U': color = INTERIOR_COLOR; break;
+          case 'W': color = FURNITURE_COLOR; break;
+        }
+        ctx.fillStyle = color;
+        ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+        // Grid lines in debug
+        if (this.debugMode) {
+          ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(sx, sy, TILE_SIZE, TILE_SIZE);
+        }
+        // Draw door indicator
+        if (tile === 'd') {
+          const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
+          if (door && !door.open) {
+            ctx.fillStyle = '#8b6914';
+            ctx.fillRect(sx + TILE_SIZE * 0.1, sy + TILE_SIZE * 0.1, TILE_SIZE * 0.8, TILE_SIZE * 0.8);
+          }
+          if (door && door.animating) {
+            const progress = door.animProgress;
+            ctx.fillStyle = '#8b6914';
+            const barW = TILE_SIZE * 0.8 * progress;
+            ctx.fillRect(sx + TILE_SIZE * 0.1, sy + TILE_SIZE * 0.1, barW, TILE_SIZE * 0.8);
+          }
+        }
+        // Draw altar marker
+        if (tile === 'A') {
+          ctx.fillStyle = '#ff4444';
+          ctx.fillRect(sx + TILE_SIZE * 0.15, sy + TILE_SIZE * 0.15, TILE_SIZE * 0.7, TILE_SIZE * 0.7);
+          ctx.strokeStyle = '#aa2222';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(sx + TILE_SIZE * 0.15, sy + TILE_SIZE * 0.15, TILE_SIZE * 0.7, TILE_SIZE * 0.7);
+        }
+        // Draw furniture
+        if (tile === 'W') {
+          ctx.fillStyle = '#666';
+          ctx.fillRect(sx + TILE_SIZE * 0.15, sy + TILE_SIZE * 0.15, TILE_SIZE * 0.7, TILE_SIZE * 0.7);
+        }
+      }
+    }
+  }
+
+  renderArtifacts(ctx) {
+    for (const art of this.artifactEntities) {
+      if (art.collected) continue;
+      art.render(ctx, art.tileX, art.tileY, TILE_SIZE, this.camX, this.camY);
+    }
+  }
+
+  renderRoof(ctx) {
+    if (this.roofAlpha <= 0.01) return;
+    const alpha = this.roofAlpha;
+    ctx.fillStyle = `rgba(30,20,15,${alpha * 0.85})`;
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        const tile = this.tiles[y][x];
+        if (tile === 'G' || tile === 'O') continue; // Exterior
+        const sx = x * TILE_SIZE - this.camX;
+        const sy = y * TILE_SIZE - this.camY;
+        // Check if near open door
+        let nearOpenDoor = false;
+        for (const door of this.doorEntities) {
+          if (!door.open && !door.animating) continue;
+          const dx = door.tileX - x;
+          const dy = door.tileY - y;
+          if (Math.abs(dx) <= 2 && Math.abs(dy) <= 2 && door.open) nearOpenDoor = true;
+        }
+        if (nearOpenDoor) {
+          ctx.fillStyle = `rgba(30,20,15,${alpha * 0.3})`;
+        } else {
+          ctx.fillStyle = `rgba(30,20,15,${alpha * 0.85})`;
+        }
+        ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+      }
+    }
+  }
+
+  renderParticles(ctx) {
+    for (const p of this.particles) {
+      p.render(ctx, this.camX, this.camY);
+    }
+  }
+
+  renderFog(ctx) {
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        const vis = this.visibilityGrid[y][x];
+        if (vis >= 2) continue;
+        const sx = x * TILE_SIZE - this.camX;
+        const sy = y * TILE_SIZE - this.camY;
+        if (vis === 1) {
+          ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        } else {
+          ctx.fillStyle = 'rgba(0,0,0,0.92)';
+        }
+        ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+      }
+    }
+  }
+
+  renderNight(ctx) {
+    if (this.nightTransition <= 0) return;
+    // Vignette
+    const cx = this.canvas.width / 2;
+    const cy = this.canvas.height / 2;
+    const maxR = Math.sqrt(cx * cx + cy * cy);
+    const gradient = ctx.createRadialGradient(cx, cy, maxR * 0.3, cx, cy, maxR);
+    gradient.addColorStop(0, 'rgba(0,0,0,0)');
+    gradient.addColorStop(0.5, `rgba(0,0,30,${this.nightTransition * 0.3})`);
+    gradient.addColorStop(1, `rgba(0,0,0,${this.nightTransition * 0.7})`);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  renderDebug(ctx) {
+    ctx.font = '10px monospace';
+    ctx.fillStyle = '#0f0';
+    // Waypoints
+    for (const wp of this.waypoints) {
+      const sx = wp.x * TILE_SIZE + TILE_SIZE / 2 - this.camX;
+      const sy = wp.y * TILE_SIZE + TILE_SIZE / 2 - this.camY;
+      ctx.strokeStyle = '#ff0';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(sx - 4, sy - 4, 8, 8);
+      ctx.fillText('U', sx + 6, sy - 6);
+    }
+    // Monster state
+    if (this.monster.alive) {
+      const mx = this.monster.px - this.camX;
+      const my = this.monster.py - this.camY;
+      ctx.fillStyle = '#f0f';
+      ctx.fillText(this.monster.state.toUpperCase(), mx + 12, my - 12);
+      this.monster.renderVisionCone(ctx, this);
+    }
+    // FPS
+    ctx.fillText('FPS: ' + Math.round(1000 / (performance.now() - this.lastTime + 0.001)), 10, this.canvas.height - 10);
+    // Player tile
+    ctx.fillText('Tile: ' + this.player.tileX + ',' + this.player.tileY, 10, this.canvas.height - 25);
+  }
+
+  renderMessage(ctx) {
+    const el = document.getElementById('message');
+    if (this.messageText) {
+      el.classList.add('show');
+      el.textContent = this.messageText;
+    } else {
+      el.classList.remove('show');
+    }
+  }
+
+  renderInteractionBar() {
+    const bar = document.getElementById('interaction-bar');
+    const fill = document.getElementById('interaction-fill');
+    const label = document.getElementById('interaction-label');
+    if (this.player.interacting && this.interactDisplay) {
+      bar.style.display = 'block';
+      label.style.display = 'block';
+      const pct = Math.min(100, (this.player.interactTimer / this.interactDuration) * 100);
+      fill.style.width = pct + '%';
+      if (this.interactDisplay.type === 'door') label.textContent = 'Opening/Closing...';
+      else if (this.interactDisplay.type === 'altar') label.textContent = 'Summoning...';
+      else if (this.interactDisplay.type === 'artifact') label.textContent = 'Collecting...';
+    } else {
+      bar.style.display = 'none';
+      label.style.display = 'none';
+    }
+    // Show prompt when near interactable
+    if (this.player.interactTarget && !this.player.interacting) {
+      label.style.display = 'block';
+      if (this.player.interactType === 'door') label.textContent = 'Hold E to open/close';
+      else if (this.player.interactType === 'altar') label.textContent = 'Hold E to summon';
+      else if (this.player.interactType === 'artifact') label.textContent = 'Hold E to collect';
+    }
+  }
+}
+
+// ============================================================
+// INPUT HANDLING
+// ============================================================
+const keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.key.toLowerCase()] = true;
+  if (e.key === 'F1') {
+    e.preventDefault();
+    game.debugMode = !game.debugMode;
+  }
+  if (e.key.toLowerCase() === 'e' && !game.player.interacting && game.player.interactTarget) {
+    game.player.interacting = true;
+    game.player.interactTimer = 0;
+  }
+});
+window.addEventListener('keyup', e => {
+  keys[e.key.toLowerCase()] = false;
+  if (e.key.toLowerCase() === 'e') {
+    game.player.interacting = false;
+    game.player.interactTimer = 0;
+  }
+});
+
+// ============================================================
+// UI HANDLERS
+// ============================================================
+function updateHUD(game) {
+  const hud = document.getElementById('hud');
+  const night = game.nightTransition > 0.3 ? 'NIGHT' : 'DAY';
+  hud.innerHTML =
+    'HP: ' + game.player.hp + '/' + game.player.maxHp + '<br>' +
+    'Dificuldade: ' + game.difficulty + '<br>' +
+    'Artefatos: ' + game.collectedArtifacts + '/' + game.artifactCount + '<br>' +
+    'Summons: ' + game.summonCount + '<br>' +
+    'Estado: ' + night;
+}
+
+function updateMapEditor(game) {
+  // Build legend
+  const legend = document.getElementById('map-legend');
+  let html = '';
+  for (const [ch, label] of Object.entries(LEGEND_LABELS)) {
+    const color = LEGEND_COLORS[ch];
+    html += '<span style="color:' + color + '">' + ch + ' = ' + label + '</span>';
+  }
+  legend.innerHTML = html;
+}
+
+function updatePreview() {
+  const ta = document.getElementById('map-editor-textarea');
+  const pre = document.querySelector('#map-editor-preview pre');
+  const text = ta.value;
+  let html = '';
+  for (const ch of text) {
+    if (ch === '\n') { html += '\n'; continue; }
+    if (ch === ' ') { html += ' '; continue; }
+    const color = LEGEND_COLORS[ch] || '#ccc';
+    html += '<span style="color:' + color + '">' + ch + '</span>';
+  }
+  pre.innerHTML = html;
+}
+
+let game = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  game = new Game();
+  game.start();
+  updateMapEditor(game);
+
+  // Settings button
+  document.getElementById('settings-btn').addEventListener('click', () => {
+    const panel = document.getElementById('settings-panel');
+    panel.classList.toggle('open');
+  });
+
+  document.getElementById('btn-close-settings').addEventListener('click', () => {
+    document.getElementById('settings-panel').classList.remove('open');
+  });
+
+  document.getElementById('btn-restart').addEventListener('click', () => {
+    game.restart();
+    document.getElementById('settings-panel').classList.remove('open');
+  });
+
+  document.getElementById('btn-map-editor').addEventListener('click', () => {
+    game.openMapEditor();
+  });
+
+  document.getElementById('btn-apply-map').addEventListener('click', () => {
+    game.applyMapFromEditor();
+  });
+
+  document.getElementById('btn-reset-map').addEventListener('click', () => {
+    game.resetDefaultMap();
+  });
+
+  document.getElementById('btn-cancel-map').addEventListener('click', () => {
+    game.closeMapEditor();
+  });
+
+  // Live preview update
+  document.getElementById('map-editor-textarea').addEventListener('input', updatePreview);
+
+  // Close panels on Escape
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.getElementById('settings-panel').classList.remove('open');
+      game.closeMapEditor();
+    }
+  });
+
+  // Resize canvas display
+  function resizeCanvas() {
+    const container = document.getElementById('game-container');
+    const maxW = container.clientWidth - 40;
+    const maxH = container.clientHeight - 40;
+    const canvas = document.getElementById('game');
+    const scaleW = maxW / canvas.width;
+    const scaleH = maxH / canvas.height;
+    const scale = Math.min(scaleW, scaleH, 1.5);
+    canvas.style.width = (canvas.width * scale) + 'px';
+    canvas.style.height = (canvas.height * scale) + 'px';
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+});
+</script>
+</body>
+</html>
