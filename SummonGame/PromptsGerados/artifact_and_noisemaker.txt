@@ -1,0 +1,161 @@
+# Mega Prompt: Dynamic Artifact Collection Time + Noise Maker Taunt Item for SummonGame.html
+
+## Overview
+Implement two features in `SummonGame.html` (single-file HTML5 Canvas game, zero external dependencies):
+1. **Dynamic Artifact Collection Time** — collection time scales with number of connected players.
+2. **Noise Maker Item** — a new purchasable trap-type item that taunts monsters, overriding their current behavior.
+
+**IMPORTANT**: Every code change MUST be documented professionally in `Documentacao_Completa.txt`. Run tests with fictitious values to prove functionality. Avoid broken/glitchy characters (use UTF-8 only). Review this prompt 5 times before finalizing.
+
+---
+
+## Feature 1: Dynamic Artifact Collection Time
+
+### Current Behavior (read existing code)
+- Artifacts are defined in the `artifacts` array (look for artifact names like "Ancient Sculpture", "Cursed Idol", etc.).
+- Collection time per artifact is stored in the `interactionTime` property (e.g., 3000ms).
+- When a player interacts with an artifact (`E` key), a bar fills over `interactionTime` ms, then the artifact is collected.
+- The relevant interaction/collection logic is in the player interaction handler and the artifact draw/update loop.
+
+### Required Change
+- **Formula**: `baseInteractionTime + 2500 * max(0, numberOfConnectedPlayers - 1)` where `baseInteractionTime` is the artifact's original `interactionTime`.
+- **Resulting times**: 1 player = base; 2 players = base + 2500ms; 3 players = base + 5000ms; 4 players = base + 7500ms.
+
+### Implementation Steps
+1. **Track connected player count**: Use the existing `game.players.length` (or equivalent) — this represents connected players. If there's a dedicated connection/count property, use that.
+2. **Modify collection time calculation**: Wherever the artifact interaction time is read to start/fill the progress bar, apply the formula above.
+   - Read the artifact's original `interactionTime`.
+   - Multiply/calculate: `effectiveTime = artifact.interactionTime + 2500 * Math.max(0, game.players.length - 1)`.
+   - Use `effectiveTime` for the progress bar duration.
+3. **Progress bar rendering**: The HUD progress bar must reflect the full effective time. The existing draw code likely uses `interactionTime` directly — redirect to the calculated effective time.
+4. **Edge cases**: If `game.players` is null/undefined during early init, fall back to `baseInteractionTime`. If a player disconnects mid-collection, the bar should NOT speed up retroactively — the effective time is determined when collection starts.
+
+### Test Plan
+- Set breakpoints/logs: `console.log` showing base time, player count, and effective time for each artifact interaction start.
+- Fictitious test: temporarily set `game.players.length` to 2, 3, 4 and verify logs show correct effective times (e.g., base=3000 → 5500, 8000, 10500).
+- Verify the progress bar takes the expected real-world duration.
+
+---
+
+## Feature 2: Noise Maker Item (Taunt Trap)
+
+### Concept
+A purchasable item that the player places on the ground (like a trap). When the monster walks over it (or when placed, depending on mechanic), the monster is **taunted** — it immediately changes target to the noise maker's position and moves there, ignoring its current FSM state (except attack).
+
+### Item Definition
+
+Add a new entry to the items shop array (find the existing `Items` array):
+
+```js
+{
+    name: 'Noise Maker',
+    type: 'trap',
+    description: 'Taunts the nearest monster for 3 seconds',
+    cost: 15,
+    rarity: 'Super Rare',
+    emoji: '📢',  // Use this or a suitable alternative
+    color: '#FF4444',
+    maxUses: 1,
+    stat: 'taunt', // Custom property to identify this item's effect
+    trapDuration: 3000, // Duration of taunt effect (ms)
+    trapRange: 0 // 0 = monster must touch it (proximity-based)
+}
+```
+
+- **Placement**: The Noise Maker is placed on the ground like other traps. Reuse the existing trap placement logic (look for how other trap-type items are placed, e.g., bear trap, spike trap).
+- **Visual**: On the ground, draw a **golf club** shape:
+  - Shaft: thin rectangle/line, brown or dark gray.
+  - Head (club face): white rectangle at the end of the shaft.
+  - Hosel (connector): small rectangle between shaft and head, colored blue on top half, red on bottom half.
+  - Can be drawn with simple `ctx.fillRect()` calls rotated to match placement angle.
+
+### Taunt Mechanics
+
+1. **When the Noise Maker is triggered** (monster walks within proximity / over it):
+   - The monster's current target is overridden. The monster's `fetchPath(noiseMakerPosition)` is called immediately.
+   - The monster's FSM state is overridden to a "taunted" state: the monster **only moves toward the noise maker position** for `trapDuration` ms (3000ms).
+   - **Attack override exception**: If during the taunt a player is within the monster's attack range, the monster STILL attacks them (attack takes priority over movement). After the attack animation, the monster resumes moving toward the noise maker.
+2. After `trapDuration` expires:
+   - The monster's FSM resets. Call a method like `resetFSM()` or set the monster state back to whatever it would normally be (e.g., `idle` or `patrol` depending on distance to players).
+   - The noise maker is removed from the ground (`game.traps[]` splice).
+
+### Monster FSM Modifications
+
+Find the monster's FSM update logic (likely a `update()` or `updateMonster()` function with a switch/case on `this.state` or `this.mode`).
+
+1. **Add a new state**: `taunted` (or `NOISE_TAUNT`).
+2. **In the `taunted` state**:
+   - Target = noise maker position (stored in a property like `this.tauntTarget` or `this.forcedTarget`).
+   - Call `fetchPath(this.forcedTarget)` on each update (or only when the path is empty).
+   - Move along the path normally.
+   - **Attack check**: Each update, check if any player is within attack range — if so, execute attack (reuse existing attack logic), then continue pathfinding to taunt target.
+3. **Transition to `taunted`**: When a noise maker is triggered, set:
+   - `monster.state = 'taunted'`
+   - `monster.forcedTarget = noiseMakerPosition`
+   - `monster.tauntTimer = trapDuration` (3000ms)
+   - `monster.path = []` (clear current path to force recalculation)
+4. **Transition out of `taunted`**: Each update, decrement `monster.tauntTimer` by delta time. When it reaches ≤ 0, transition:
+   - `monster.state = 'idle'` (or `'patrol'`)
+   - `monster.forcedTarget = null`
+   - `monster.tauntTimer = 0`
+   - Then run the normal FSM target selection logic on the next update.
+
+### Trap Trigger Detection
+
+Find where existing traps detect monster proximity (likely in the monster's update loop or a separate trap update loop). Add:
+
+```js
+if (trap.type === 'taunt' && distance(monster.pos, trap.pos) < triggerRadius) {
+    // Apply taunt effect
+    monster.state = 'taunted';
+    monster.forcedTarget = { x: trap.pos.x, y: trap.pos.y };
+    monster.tauntTimer = trap.trapDuration || 3000;
+    monster.path = [];
+    // Remove the trap from the array
+    game.traps.splice(index, 1);
+}
+```
+
+### Visual Feedback
+
+- When a monster is taunted, draw a visual indicator above its head:
+  - Angry exclamation marks "!!!" in red, bouncing slightly.
+  - Use the same pattern as other status indicators in the monster draw function (check for existing indicators like damage numbers, stun effects, etc.).
+- When a player looks at the Noise Maker in their hotbar/inventory, show the golf club icon using emoji or a small drawn icon.
+
+### Edge Cases
+- **Multiple monsters**: Only the nearest monster to the noise maker should be affected. Check distance for all monsters and pick the closest within trigger radius.
+- **Monster already taunted**: Ignore if the monster is already in `taunted` state (don't stack/replace).
+- **Monster in attack animation**: Let the attack complete, then apply taunt — OR — interrupt the attack and apply taunt immediately (preferred: interrupt).
+- **Player disconnects while taunt active**: Taunt continues for its full duration.
+- **Noise Maker placed outside walkable area**: Use existing placement validation (same as other traps).
+
+### Test Plan
+- Purchase Noise Maker, place it, verify it appears as a golf club on the ground.
+- Lure a monster near it, verify the monster changes direction toward the noise maker.
+- Verify the monster still attacks if a player is adjacent during taunt.
+- Verify after 3 seconds the monster resumes normal behavior.
+- Verify the "!!!" indicator appears above the taunted monster.
+- Log timing: `console.log` taunt start, monster position vs noise maker position, taunt end.
+
+---
+
+## Documentation Requirements
+
+For every change in `Documentacao_Completa.txt`:
+- Section header with feature name and date.
+- **Before**: describe the current code behavior (with line numbers).
+- **After**: describe the new behavior, formula, and implementation details.
+- **Code Sample**: Show the key code changed (not the entire file, just the relevant blocks).
+- **Test Log**: Paste console output from fictitious tests proving the feature works.
+
+---
+
+## Final Review Checklist (Review 5 Times)
+
+1. [ ] Both features are fully specified with no ambiguity.
+2. [ ] All code references use correct variable/function names as they appear in the existing code.
+3. [ ] Edge cases are addressed for both features.
+4. [ ] No broken/glitchy characters; UTF-8 enforced.
+5. [ ] Test plans are concrete and executable.
+6. [ ] Documentation update instructions are clear.

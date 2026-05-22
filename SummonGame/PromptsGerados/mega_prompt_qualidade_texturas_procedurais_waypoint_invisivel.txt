@@ -1,0 +1,302 @@
+================================================================================
+MEGA PROMPT — MELHORIA DE QUALIDADE VISUAL E REMOCAO DO INDICADOR DE WAYPOINT
+================================================================================
+
+ATENCAO: Leia TODO o arquivo SummonGame.html (4744 linhas) e a documentacao
+completa Documentacao_Completa.txt (4859 linhas) antes de comecar.
+
+Este prompt descreve DUAS tarefas a serem implementadas. Execute ambas na
+mesma sessao, sem perguntar nada. Apenas faca.
+
+
+================================================================================
+REGRA ABSOLUTA — SEM ARQUIVOS EXTERNOS
+================================================================================
+
+Voce NAO pode criar, modificar ou sugerir a criacao de arquivos em outras
+linguagens: CSS separado, JS separado, Python, Java, C++, C, C#, TypeScript,
+ou qualquer outro. NAO pode adicionar spritesheets, imagens, arquivos de
+textura, SVGs, Data URIs de imagens ou assets externos.
+
+Todas as alteracoes devem ser feitas EXCLUSIVAMENTE no arquivo:
+  SummonGame.html
+
+Toda alteracao no codigo DEVE ser registrada na documentacao:
+  Documentacao_Completa.txt
+
+Adicione um novo CHANGELOG no final da Documentacao_Completa.txt com o titulo:
+  "ALTERACAO 32 — MELHORIA DE QUALIDADE VISUAL (TEXTURAS PROCEDURAIS) + WAYPOINT INVISIVEL"
+
+A documentacao deve ser profissional, limpa, bem estruturada, com secoes,
+explicacoes tecnicas, e os testes realizados (veja secao de testes no final).
+
+
+================================================================================
+TAREFA 1 — MELHORAR QUALIDADE VISUAL (REMOVER PIXELADO + TEXTURAS PROCEDURAIS)
+================================================================================
+
+PROBLEMA:
+O jogo usa `image-rendering: pixelated` no canvas (linha 25 do CSS) e renderiza
+todos os tiles como cores solidas via fillRect. O resultado e visualmente pobre,
+parecendo um jogo de 8 bits sem personalidade visual.
+
+SOLUCAO:
+1. REMOVER `image-rendering: pixelated` da regra CSS do canvas (linha 25).
+   Substituir por `image-rendering: auto` para que o canvas seja renderizado
+   de forma suave.
+
+2. MELHORAR A RENDERIZACAO DE CADA TILE com detalhes procedurais via Canvas 2D,
+   sem usar imagens externas. Cada tile deve ganhar variacao visual rica usando
+   gradientes, ruido procedural, linhas, pontos e translucidez.
+
+3. O sistema existente de autotiling (tileVariation, tileEdgeMask) JA EXISTE e
+   deve ser aproveitado/expandido. Nao recrie do zero — adicione melhorias.
+
+4. Manter a cor base de cada tile (WALL_COLOR, INTERIOR_COLOR, GRASS_COLOR, etc.)
+   mas enriquecer com detalhes.
+
+DETALHAMENTO POR TILE:
+
+A) WALL (O) — cor #5c3a1e:
+   - Adicionar textura de tijolo/aparencia de pedra
+   - Usar linhas horizontais finas simulando argamassa (rgba(0,0,0,0.08))
+   - Variacao sutil de tom baseada em tileVariation (hash)
+   - Bordas levemente mais escuras nas laterais para dar profundidade 3D
+
+B) FLOOR (C) — cor #c4a67a:
+   - JA EXISTE autotiling com linhas de tabua (plank lines)
+   - Melhorar: alternar entre linhas de tabua HORIZONTAIS e VERTICAIS
+     baseado no hash do tile (Game.tileHash)
+   - Adicionar nos de madeira: pequenos circulos escuros em posicoes
+     pseudo-aleatorias (usando tileHash para determinar posicao)
+   - Variacao de brilho de +/- 6% em vez de +/- 4%
+   - Manter edge darkening (ja existe)
+
+C) GRASS (G) — cor #3a7a2a:
+   - JA EXISTE autotiling com variacao de cor e detalhes de folha
+   - Melhorar: adicionar pequenas flores/pontos coloridos ocasionais
+     (1-2 por tile, usando hash para decidir se aparece e qual cor)
+   - Variacao de matiz expandida: +/- 12% em vez de +/- 8%
+   - Adicionar "tufos" de grama mais altos: linhas verticais finas verde
+     mais escuro no terco superior ou inferior do tile
+   - Manter edge transition (ja existe)
+
+D) DOOR (d) — cor #8b6914 / #4a3a0a:
+   - Adicionar textura de madeira: linhas verticais finas simulando
+     ripas de porta
+   - Puxador com efeito metalico (gradiente linear dourado)
+   - Quando aberta, a porta deve mostrar a passagem (cor do chao interno)
+     mas manter a moldura nas bordas
+
+E) ALTAR (A) — cor #ff4444:
+   - Adicionar glow pulsante (ja existe em ArtifactEntity, adaptar)
+   - Textura de runas: linhas finas escuras em padrao cruzado
+   - Efeito de pedra com variacao de tom baseada em tileHash
+
+F) FURNITURE (W) — cor #3a3030 / #666:
+   - Adicionar textura de moveis (linhas simulando veios de madeira escura)
+   - Sombra projetada no canto inferior direito
+
+G) PLAYER SPAWN (P) / MONSTER SPAWN (M):
+   - Manter mesma textura do FLOOR (C), sem marcacao especial
+   - (Ja e assim atualmente, manter)
+
+H) SHOP (S) / TRASH (T):
+   - Manter mesma textura do FLOOR (C)
+   - Sem marcacao extra de piso
+
+I) ARTIFACT SPAWN (F):
+   - Manter a resolucao de base (baseTileResolved) para decidir se
+     e grass ou floor — JA EXISTE e funciona
+   - Manter o marcador ciano sutil (ja existe na linha 3708-3711)
+   - Nao adicionar novos marcadores
+
+J) WAYPOINT (U):
+   - VER TAREFA 2
+
+K) RANDOM MONSTER SPAWN (m):
+   - Manter a resolucao de base (baseTileResolved)
+   - Nao adicionar marcador visual extra (so visivel em debug)
+
+L) SHORTWALL (W) — ja tratado em FURNITURE acima
+
+3. Expandir o sistema tileVariation para incluir SUB-VARIACOES:
+   - Criar tileVariation2[y][x] = Game.tileHash(x * 7 + 13, y * 11 + 5)
+   - tileVariation3[y][x] = Game.tileHash(x * 3 + 7, y * 17 + 3)
+   - Usar essas variacoes extras para decidir detalhes menores
+     (posicao de nos, tipo de flor, orientacao de tabua, etc.)
+
+4. Nao aumentar o consumo de memoria significativamente:
+   - tileVariation ja existe (Float32Array)
+   - tileVariation2 e tileVariation3: mesmos Float32Array
+   - edgeMask ja existe (Int8Array)
+   - Nao criar arrays desnecessarios
+
+
+================================================================================
+TAREFA 2 — REMOVER INDICADOR VISUAL DE WAYPOINT (TILE U)
+================================================================================
+
+PROBLEMA:
+Atualmente, tiles 'U' (Waypoint) renderizam um marcador visual no chao:
+  ctx.fillRect(sx + 4, sy + 4, TILE_SIZE - 8, TILE_SIZE - 8) com alpha 0.08
+  ctx.arc(...) com alpha 0.04
+Isso cria uma "sombra quadrada" no meio do tile que denuncia a posicao do
+waypoint.
+
+SOLUCAO:
+1. REMOVER o bloco de renderizacao do waypoint em renderTiles().
+   Atualmente nas linhas 3699-3707, o bloco:
+     if (tile === 'U') { ... }
+
+2. O tile 'U' deve ser renderizado EXATAMENTE como o tile de base
+   (grass ou floor, definido por baseTileResolved), sem nenhum
+   marcador adicional, assim como os tiles P, M, S, T.
+
+3. Manter a renderizacao DEBUG dos waypoints no metodo renderDebug()
+   (linhas 3978-3985). Em modo debug (F1), waypoints continuam
+   visiveis com retangulo amarelo e texto 'U'.
+
+4. Confirmar que:
+   - O array game.waypoints continua sendo populado corretamente
+     em parseMap() — NAO ALTERAR a logica de parsing
+   - A IA do monstro continua encontrando waypoints para patrulha
+     (game.waypoints e usado por MonsterEntity)
+   - A resolucao de base (baseTileResolved) continua funcionando
+     para tiles U (resolveBaseTile ja trata 'U')
+
+
+================================================================================
+ESTRUTURA DE TESTES (OBRIGATORIO)
+================================================================================
+
+Crie funcoes de teste em JavaScript DENTRO do arquivo SummonGame.html que
+validem as alteracoes. As funcoes devem:
+
+1. Criar um canvas offscreen (document.createElement('canvas'))
+2. Renderizar cada tipo de tile usando os novos metodos de renderizacao
+3. Verificar se os pixels resultantes diferem do que seria um tile "solido"
+   (sem textura procedural), comprovando que as texturas estao sendo aplicadas
+
+Testes especificos requeridos:
+
+A) TESTE DE TEXTURA WALL:
+   - Renderizar um tile 'O' no canvas offscreen
+   - Verificar que ha variacao de cor (nao e monocromatico)
+   - Extrair 5 pixels aleatorios e confirmar que nao sao identicos ao
+     WALL_COLOR puro (#5c3a1e)
+
+B) TESTE DE TEXTURA FLOOR:
+   - Renderizar um tile 'C'
+   - Verificar que existem linhas de tabua (pixels escuros formando linhas)
+   - Verificar variacao de cor entre tiles diferentes (usando hash diferentes)
+
+C) TESTE DE TEXTURA GRASS:
+   - Renderizar 3 tiles 'G' com hash diferentes
+   - Confirmar que as cores diferem entre si (variacao de matiz)
+
+D) TESTE DE WAYPOINT INVISIVEL:
+   - Renderizar um tile 'U' resolvido como 'C' e um 'U' resolvido como 'G'
+   - Comparar pixel a pixel com o tile base equivalente (C puro ou G puro)
+   - A diferenca maxima por pixel deve ser ZERO (tiles identicos)
+   - Em debug mode: o marcador amarelo deve aparecer (renderDebug)
+
+E) TESTE DE CONSISTENCIA DE VARIANCIA:
+   - Renderizar o mesmo tile (mesmo x, y) duas vezes
+   - Os resultados devem ser IDENTICOS (deterministico)
+
+F) TESTE DE PERFORMANCE:
+   - Renderizar 100 tiles em sequencia
+   - O tempo total deve ser inferior a 5ms
+
+Formato dos testes:
+- Criar uma funcao global `runVisualTests()` que executa todos os testes
+- Cada teste retorna { nome: string, passou: boolean, detalhes: string }
+- runVisualTests() exibe resultados no console do navegador
+- Adicionar um botao "Run Visual Tests" no painel de configuracoes
+  (#settings-panel) que chama runVisualTests() e exibe resultados em
+  um alert() ou div
+
+Registre TODOS os resultados dos testes na documentacao, incluindo:
+- Valores ficticios usados (coordenadas de tile, hash values)
+- Pixels extraidos e comparados
+- Tabela de passou/falhou para cada teste
+- Screenshot description do resultado esperado
+
+
+================================================================================
+DOCUMENTACAO — REGISTRO DAS ALTERACOES
+================================================================================
+
+No final da Documentacao_Completa.txt, adicione um novo changelog:
+
+ALTERACAO 32 — MELHORIA DE QUALIDADE VISUAL (TEXTURAS PROCEDURAIS) + WAYPOINT INVISIVEL
+
+Deve conter:
+
+A) DESCRICAO DO PROBLEMA:
+   - Jogo pixelado com cores solidas
+   - Waypoint com sombra quadrada denunciando posicao
+
+B) SOLUCAO IMPLEMENTADA:
+   - Remocao de image-rendering: pixelated
+   - Melhorias procedurais por tile (detalhar cada tipo)
+   - Novo sistema de sub-variacao (tileVariation2, tileVariation3)
+   - Remocao do marcador visual de waypoint
+
+C) MUDANCAS NO CODIGO:
+   - Listar cada metodo/classe alterado com numero de linha aproximado
+   - Listar novas propriedades (tileVariation2, tileVariation3)
+   - Listar funcoes de teste criadas (runVisualTests)
+
+D) SISTEMAS AFETADOS:
+   - renderTiles() — principais alteracoes de rendering
+   - renderDebug() — waypoint ainda visivel em debug
+   - buildAutotileCache() — novas variacoes
+   - Player.canMoveTo / MonsterEntity — NENHUMA alteracao necessaria
+   - Pathfinding — NENHUMA alteracao necessaria
+   - Roof system — NENHUMA alteracao necessaria
+   - Lightmap / Fog — NENHUMA alteracao necessaria
+
+E) TESTES REALIZADOS:
+   - Tabela completa com: nome do teste, valores usados, resultado esperado,
+     resultado obtido, status (PASSOU / FALHOU)
+   - Incluir pelo menos 6 cenarios de teste
+
+F) NOTAS DE SEGURANCA E PERFORMANCE:
+   - Impacto no FPS (deve ser inferior a 5% de aumento no tempo de frame)
+   - Consumo de memoria (tileVariation2 e tileVariation3 Float32Array)
+
+
+================================================================================
+REGRAS FINAIS DE EXECUCAO
+================================================================================
+
+1. NAO pergunte nada. Apenas execute as duas tarefas.
+
+2. Leia o codigo COMPLETO do SummonGame.html (4744 linhas) e da
+   Documentacao_Completa.txt (4859 linhas) antes de comecar.
+
+3. Todas as alteracoes devem ser feitas exclusivamente em SummonGame.html.
+   Nao crie arquivos separados de CSS, JS, ou qualquer outra linguagem.
+
+4. Registre TODAS as alteracoes na Documentacao_Completa.txt.
+
+5. Crie as funcoes de teste runVisualTests() e execute-as com valores
+   ficticios para comprovar que as mudancas funcionam.
+
+6. Apos terminar, revise TODO o trabalho 5 vezes:
+   - Verifique se nao quebrou nenhum sistema existente
+   - Verifique se o waypoint esta realmente invisivel em jogo normal
+   - Verifique se os testes passam
+   - Verifique se a documentacao esta completa
+   - Verifique se nao criou arquivos externos
+
+7. Se durante a revisao encontrar algum problema, corrija imediatamente.
+
+8. Nao adicione explicacoes ou comentarios desnecessarios no codigo.
+   Seja direto e preciso.
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================

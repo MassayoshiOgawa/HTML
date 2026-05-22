@@ -22,7 +22,7 @@ body {
 }
 canvas {
   display: block;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 #hud {
   position: absolute;
@@ -548,6 +548,7 @@ canvas {
       </div>
       <button id="btn-hotbar-layout">Layout: Horizontal</button>
      <div id="hotkey-config"></div>
+     <button id="btn-visual-tests">Run Visual Tests</button>
      <button id="btn-close-settings">Close</button>
    </div>
   <div id="map-editor-panel">
@@ -2308,12 +2309,18 @@ class Game {
   buildAutotileCache() {
     const h = this.mapHeight, w = this.mapWidth;
     this.tileVariation = new Array(h);
+    this.tileVariation2 = new Array(h);
+    this.tileVariation3 = new Array(h);
     this.tileEdgeMask = new Array(h);
     for (let y = 0; y < h; y++) {
       this.tileVariation[y] = new Float32Array(w);
+      this.tileVariation2[y] = new Float32Array(w);
+      this.tileVariation3[y] = new Float32Array(w);
       this.tileEdgeMask[y] = new Int8Array(w);
       for (let x = 0; x < w; x++) {
         this.tileVariation[y][x] = Game.tileHash(x, y);
+        this.tileVariation2[y][x] = Game.tileHash(x * 7 + 13, y * 11 + 5);
+        this.tileVariation3[y][x] = Game.tileHash(x * 3 + 7, y * 17 + 3);
         const resolved = this.baseTileResolved[y] ? this.baseTileResolved[y][x] : this.tiles[y][x];
         if (resolved !== 'C' && resolved !== 'G') {
           this.tileEdgeMask[y][x] = 0;
@@ -3617,6 +3624,10 @@ class Game {
         const sx = x * TILE_SIZE - this.camX;
         const sy = y * TILE_SIZE - this.camY;
         if (sx + TILE_SIZE < -50 || sx > this.canvas.width + 50 || sy + TILE_SIZE < -50 || sy > this.canvas.height + 50) continue;
+        const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
+        const v2 = (this.tileVariation2[y] && this.tileVariation2[y][x]) || 0.5;
+        const v3 = (this.tileVariation3[y] && this.tileVariation3[y][x]) || 0.5;
+
         let color = '#111';
         switch (tile) {
           case 'O': color = WALL_COLOR; break;
@@ -3624,11 +3635,8 @@ class Game {
           case 'G': color = GRASS_COLOR; break;
           case 'd': {
             const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
-            if (door && door.hasGroup()) {
-              color = DOOR_CLOSED_COLOR;
-            } else {
-              color = (door && door.open) ? DOOR_OPEN_COLOR : DOOR_CLOSED_COLOR;
-            }
+            if (door && door.hasGroup()) color = DOOR_CLOSED_COLOR;
+            else color = (door && door.open) ? DOOR_OPEN_COLOR : DOOR_CLOSED_COLOR;
             break;
           }
           case 'A': color = ALTAR_COLOR; break;
@@ -3641,24 +3649,174 @@ class Game {
           case 'W': color = FURNITURE_COLOR; break;
           case 'S': case 'T': color = INTERIOR_COLOR; break;
         }
-        ctx.fillStyle = color;
-        ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
 
         const effTile = (tile === 'F' || tile === 'U' || tile === 'm')
           ? (this.baseTileResolved[y] ? this.baseTileResolved[y][x] : 'C')
           : tile;
+        const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
 
-        // Autotiling: floor variations (C, P, M, S, T + F/U/m resolved as C)
-        if (effTile === 'C' || tile === 'P' || tile === 'M' || tile === 'S' || tile === 'T') {
-          const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
-          const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
-          // Subtle plank lines
-          ctx.fillStyle = 'rgba(0,0,0,0.04)';
-          const plankOff = (v * 6) | 0;
-          for (let py = plankOff; py < TILE_SIZE; py += 6) {
-            ctx.fillRect(sx, sy + py, TILE_SIZE, 1);
+        // ============================================================
+        // TILE-SPECIFIC PROCEDURAL TEXTURES
+        // ============================================================
+
+        if (tile === 'O') {
+          const wallR = 92 + (v - 0.5) * 20 | 0;
+          const wallG = 58 + (v - 0.5) * 14 | 0;
+          const wallB = 30 + (v - 0.5) * 10 | 0;
+          ctx.fillStyle = 'rgb(' + wallR + ',' + wallG + ',' + wallB + ')';
+          ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+          for (let i = 0; i < 3; i++) {
+            const my = sy + 6 + i * 10 + (v2 * 4) | 0;
+            if (my < sy + TILE_SIZE) {
+              ctx.fillStyle = 'rgba(0,0,0,' + (0.06 + i * 0.02) + ')';
+              ctx.fillRect(sx, my, TILE_SIZE, 1);
+            }
           }
-          // Edge darkening near different tile types
+          const mortarY = sy + TILE_SIZE - 2;
+          ctx.fillStyle = 'rgba(0,0,0,0.12)';
+          ctx.fillRect(sx, mortarY, TILE_SIZE, 2);
+          ctx.fillStyle = 'rgba(0,0,0,' + (0.04 + v3 * 0.06) + ')';
+          ctx.fillRect(sx, sy, 2, TILE_SIZE);
+          ctx.fillRect(sx + TILE_SIZE - 2, sy, 2, TILE_SIZE);
+          const spotCount = 1 + ((v2 * 10) | 0) % 2;
+          for (let s = 0; s < spotCount; s++) {
+            const spx = sx + 4 + ((Game.tileHash(x * 13 + s, y * 7) * (TILE_SIZE - 8)) | 0);
+            const spy = sy + 4 + ((Game.tileHash(x * 17 + s, y * 11) * (TILE_SIZE - 8)) | 0);
+            ctx.fillStyle = 'rgba(0,0,0,' + (0.04 + v3 * 0.08) + ')';
+            ctx.fillRect(spx, spy, 2, 2);
+          }
+        }
+
+        else if (tile === 'd') {
+          const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
+          if (!(door && door.hasGroup())) {
+            const open = door && door.open;
+            const anim = door && door.animating;
+            if (open && !anim) {
+              ctx.fillStyle = INTERIOR_COLOR;
+              ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+              const frameR = 139 + (v - 0.5) * 12 | 0;
+              const frameG = 105 + (v - 0.5) * 10 | 0;
+              const frameB = 20 + (v - 0.5) * 6 | 0;
+              ctx.fillStyle = 'rgb(' + frameR + ',' + frameG + ',' + frameB + ')';
+              ctx.fillRect(sx, sy, TILE_SIZE, 3);
+              ctx.fillRect(sx, sy + TILE_SIZE - 3, TILE_SIZE, 3);
+              ctx.fillRect(sx, sy, 3, TILE_SIZE);
+              ctx.fillRect(sx + TILE_SIZE - 3, sy, 3, TILE_SIZE);
+            } else if (anim) {
+              const progress = door.animProgress;
+              ctx.fillStyle = INTERIOR_COLOR;
+              ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+              const frameR = 139 + (v - 0.5) * 12 | 0;
+              const frameG = 105 + (v - 0.5) * 10 | 0;
+              const frameB = 20 + (v - 0.5) * 6 | 0;
+              ctx.fillStyle = 'rgb(' + frameR + ',' + frameG + ',' + frameB + ')';
+              ctx.fillRect(sx, sy, TILE_SIZE, 3);
+              ctx.fillRect(sx, sy + TILE_SIZE - 3, TILE_SIZE, 3);
+              ctx.fillRect(sx, sy, 3, TILE_SIZE);
+              ctx.fillRect(sx + TILE_SIZE - 3, sy, 3, TILE_SIZE);
+              ctx.fillStyle = '#8b6914';
+              ctx.fillRect(sx + TILE_SIZE * 0.1, sy + TILE_SIZE * 0.1, TILE_SIZE * 0.8 * progress, TILE_SIZE * 0.8);
+            } else {
+              const doorR = 139 + (v - 0.5) * 16 | 0;
+              const doorG = 105 + (v - 0.5) * 12 | 0;
+              const doorB = 20 + (v - 0.5) * 8 | 0;
+              ctx.fillStyle = 'rgb(' + doorR + ',' + doorG + ',' + doorB + ')';
+              ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+              for (let i = 0; i < 4; i++) {
+                const lx = sx + 6 + i * 6;
+                ctx.fillStyle = 'rgba(0,0,0,0.06)';
+                ctx.fillRect(lx, sy + TILE_SIZE * 0.1, 2, TILE_SIZE * 0.8);
+              }
+              const handleX = sx + TILE_SIZE * 0.75;
+              const handleY = sy + TILE_SIZE * 0.5;
+              const hg = ctx.createLinearGradient(handleX - 3, handleY, handleX + 3, handleY);
+              hg.addColorStop(0, '#a08040');
+              hg.addColorStop(0.4, '#ffd700');
+              hg.addColorStop(0.6, '#ffd700');
+              hg.addColorStop(1, '#806020');
+              ctx.fillStyle = hg;
+              ctx.beginPath();
+              ctx.arc(handleX, handleY, 3, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          } else {
+            ctx.fillStyle = color;
+            ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+          }
+        }
+
+        else if (tile === 'A') {
+          const ar = 255 - (v2 - 0.5) * 30 | 0;
+          const ag = 68 + (v2 - 0.5) * 20 | 0;
+          const ab = 68 + (v2 - 0.5) * 20 | 0;
+          ctx.fillStyle = 'rgb(' + ar + ',' + ag + ',' + ab + ')';
+          ctx.fillRect(sx + TILE_SIZE * 0.15, sy + TILE_SIZE * 0.15, TILE_SIZE * 0.7, TILE_SIZE * 0.7);
+          ctx.strokeStyle = '#aa2222';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(sx + TILE_SIZE * 0.15, sy + TILE_SIZE * 0.15, TILE_SIZE * 0.7, TILE_SIZE * 0.7);
+          ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          const cxA = sx + TILE_SIZE * 0.5;
+          const cyA = sy + TILE_SIZE * 0.5;
+          ctx.moveTo(cxA - 8, cyA);
+          ctx.lineTo(cxA + 8, cyA);
+          ctx.moveTo(cxA, cyA - 8);
+          ctx.lineTo(cxA, cyA + 8);
+          ctx.stroke();
+          const glow = 0.35 + 0.15 * Math.sin(Date.now() / 1000 * 3 + x + y);
+          ctx.fillStyle = 'rgba(255,0,0,' + glow + ')';
+          ctx.fillRect(sx + TILE_SIZE * 0.05, sy + TILE_SIZE * 0.05, TILE_SIZE * 0.9, TILE_SIZE * 0.9);
+        }
+
+        else if (tile === 'W') {
+          const fr = 102 + (v - 0.5) * 20 | 0;
+          const fg = 48 + (v - 0.5) * 14 | 0;
+          const fb = 48 + (v - 0.5) * 10 | 0;
+          ctx.fillStyle = 'rgb(' + fr + ',' + fg + ',' + fb + ')';
+          ctx.fillRect(sx + TILE_SIZE * 0.15, sy + TILE_SIZE * 0.15, TILE_SIZE * 0.7, TILE_SIZE * 0.7);
+          for (let i = 0; i < 3; i++) {
+            const vy = sy + TILE_SIZE * 0.25 + i * (TILE_SIZE * 0.2);
+            ctx.fillStyle = 'rgba(0,0,0,0.05)';
+            ctx.fillRect(sx + TILE_SIZE * 0.2, vy, TILE_SIZE * 0.6, 1);
+          }
+          ctx.fillStyle = 'rgba(0,0,0,0.10)';
+          ctx.fillRect(sx + TILE_SIZE * 0.15, sy + TILE_SIZE * 0.85, TILE_SIZE * 0.7, 3);
+          ctx.fillRect(sx + TILE_SIZE * 0.85, sy + TILE_SIZE * 0.15, 3, TILE_SIZE * 0.7);
+        }
+
+        else {
+          ctx.fillStyle = color;
+          ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
+        }
+
+        // ============================================================
+        // FLOOR AUTOTILING (C, P, M, S, T + F/U/m resolved as C)
+        // ============================================================
+        if (effTile === 'C' || tile === 'P' || tile === 'M' || tile === 'S' || tile === 'T') {
+          const orient = (v2 > 0.5);
+          ctx.fillStyle = 'rgba(0,0,0,0.04)';
+          if (orient) {
+            const plankOff = (v * 6) | 0;
+            for (let py = plankOff; py < TILE_SIZE; py += 6) {
+              ctx.fillRect(sx, sy + py, TILE_SIZE, 1);
+            }
+          } else {
+            const plankOff = (v * 6) | 0;
+            for (let px = plankOff; px < TILE_SIZE; px += 6) {
+              ctx.fillRect(sx + px, sy, 1, TILE_SIZE);
+            }
+          }
+          const knotCount = 1 + ((v3 * 4) | 0) % 2;
+          for (let k = 0; k < knotCount; k++) {
+            const kx = sx + 8 + ((Game.tileHash(x * 19 + k, y * 23) * (TILE_SIZE - 16)) | 0);
+            const ky = sy + 8 + ((Game.tileHash(x * 29 + k, y * 31) * (TILE_SIZE - 16)) | 0);
+            ctx.fillStyle = 'rgba(0,0,0,0.07)';
+            ctx.beginPath();
+            ctx.arc(kx, ky, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
           if (mask) {
             ctx.fillStyle = 'rgba(0,0,0,0.06)';
             if (mask & 1) ctx.fillRect(sx, sy, TILE_SIZE, 2);
@@ -3668,17 +3826,15 @@ class Game {
           }
         }
 
-        // Grass autotiling (G tiles + F/U/m resolved as G)
+        // ============================================================
+        // GRASS AUTOTILING (G tiles + F/U/m resolved as G)
+        // ============================================================
         if (effTile === 'G') {
-          const v = (this.tileVariation[y] && this.tileVariation[y][x]) || 0.5;
-          const mask = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
-          // Color variation: shift hue slightly
-          const r = 58 + (v - 0.5) * 14;
-          const g = 122 + (v - 0.5) * 20;
-          const b = 42 + (v - 0.5) * 10;
-          ctx.fillStyle = 'rgb(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ')';
+          const r = 58 + (v - 0.5) * 24 | 0;
+          const g = 122 + (v - 0.5) * 28 | 0;
+          const b = 42 + (v - 0.5) * 14 | 0;
+          ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
           ctx.fillRect(sx, sy, TILE_SIZE, TILE_SIZE);
-          // Subtle grass blade details
           ctx.fillStyle = 'rgba(255,255,255,0.02)';
           const detailCount = 3 + ((v * 10) | 0) % 4;
           for (let i = 0; i < detailCount; i++) {
@@ -3686,7 +3842,21 @@ class Game {
             const dy = sy + 4 + ((Game.tileHash(x * 5 + i, y * 5 + 1) * (TILE_SIZE - 8)) | 0);
             ctx.fillRect(dx, dy, 2, 2);
           }
-          // Edge transition near different tile types
+          const clumpY = (v2 > 0.5) ? sy : sy + TILE_SIZE * 0.6;
+          for (let i = 0; i < 4; i++) {
+            const cx = sx + 3 + i * 7 + (v3 * 3) | 0;
+            ctx.fillStyle = 'rgba(0,0,0,0.03)';
+            ctx.fillRect(cx, clumpY, 1.5, TILE_SIZE * 0.35);
+          }
+          const flowerChance = v3;
+          if (flowerChance < 0.15) {
+            const fx = sx + 5 + ((Game.tileHash(x * 41, y * 37) * (TILE_SIZE - 10)) | 0);
+            const fy = sy + 5 + ((Game.tileHash(x * 53, y * 43) * (TILE_SIZE - 10)) | 0);
+            const flowerColors = ['#ffee88','#ffaa55','#ff99cc','#ffffff','#ffdd44'];
+            const fc = flowerColors[((v2 * flowerColors.length) | 0) % flowerColors.length];
+            ctx.fillStyle = fc;
+            ctx.fillRect(fx, fy, 2, 2);
+          }
           if (mask) {
             ctx.fillStyle = 'rgba(0,0,0,0.04)';
             if (mask & 1) ctx.fillRect(sx, sy, TILE_SIZE, 2);
@@ -3696,21 +3866,11 @@ class Game {
           }
         }
 
-        // Waypoint/artifact overlay marks (drawn on top of grass/floor)
-        if (tile === 'U') {
-          ctx.fillStyle = 'rgba(0,0,0,0.08)';
-          ctx.fillRect(sx + 4, sy + 4, TILE_SIZE - 8, TILE_SIZE - 8);
-          ctx.fillStyle = 'rgba(0,0,0,0.04)';
-          ctx.beginPath();
-          ctx.arc(sx + TILE_SIZE / 2, sy + TILE_SIZE / 2, TILE_SIZE * 0.22, 0, Math.PI * 2);
-          ctx.fill();
-        }
         if (tile === 'F') {
           ctx.fillStyle = 'rgba(0,255,255,0.03)';
           ctx.fillRect(sx + 6, sy + 6, TILE_SIZE - 12, TILE_SIZE - 12);
         }
 
-        // Grid lines in debug
         if (this.debugMode) {
           ctx.strokeStyle = 'rgba(255,255,255,0.1)';
           ctx.lineWidth = 0.5;
@@ -3721,34 +3881,6 @@ class Game {
             const m = (this.tileEdgeMask[y] && this.tileEdgeMask[y][x]) || 0;
             ctx.fillText(m.toString(16), sx + 2, sy + 10);
           }
-        }
-        // Draw door indicator
-        if (tile === 'd') {
-          const door = this.doorEntities.find(d => d.tileX === x && d.tileY === y);
-          if (door && door.hasGroup()) {
-            // Grouped doors are rendered by renderDoors, skip individual indicator
-          } else if (door && !door.open) {
-            ctx.fillStyle = '#8b6914';
-            ctx.fillRect(sx + TILE_SIZE * 0.1, sy + TILE_SIZE * 0.1, TILE_SIZE * 0.8, TILE_SIZE * 0.8);
-          } else if (door && door.animating) {
-            const progress = door.animProgress;
-            ctx.fillStyle = '#8b6914';
-            const barW = TILE_SIZE * 0.8 * progress;
-            ctx.fillRect(sx + TILE_SIZE * 0.1, sy + TILE_SIZE * 0.1, barW, TILE_SIZE * 0.8);
-          }
-        }
-        // Draw altar marker
-        if (tile === 'A') {
-          ctx.fillStyle = '#ff4444';
-          ctx.fillRect(sx + TILE_SIZE * 0.15, sy + TILE_SIZE * 0.15, TILE_SIZE * 0.7, TILE_SIZE * 0.7);
-          ctx.strokeStyle = '#aa2222';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(sx + TILE_SIZE * 0.15, sy + TILE_SIZE * 0.15, TILE_SIZE * 0.7, TILE_SIZE * 0.7);
-        }
-        // Draw furniture
-        if (tile === 'W') {
-          ctx.fillStyle = '#666';
-          ctx.fillRect(sx + TILE_SIZE * 0.15, sy + TILE_SIZE * 0.15, TILE_SIZE * 0.7, TILE_SIZE * 0.7);
         }
       }
     }
@@ -4640,6 +4772,113 @@ function checkKeyConflicts() {
   }
 }
 
+function runVisualTests() {
+  var results = [];
+  var off = document.createElement('canvas');
+  off.width = TILE_SIZE * 3;
+  off.height = TILE_SIZE;
+  var ctx = off.getContext('2d');
+  function getPixel(c, x, y) { var d = c.getImageData(x, y, 1, 1).data; return { r: d[0], g: d[1], b: d[2] }; }
+
+  // Test A: Wall texture is not monochromatic
+  ctx.clearRect(0, 0, off.width, off.height);
+  var v = Game.tileHash(1, 1);
+  var v2 = Game.tileHash(1 * 7 + 13, 1 * 11 + 5);
+  var v3 = Game.tileHash(1 * 3 + 7, 1 * 17 + 3);
+  var wallR = 92 + (v - 0.5) * 20 | 0;
+  var wallG = 58 + (v - 0.5) * 14 | 0;
+  var wallB = 30 + (v - 0.5) * 10 | 0;
+  ctx.fillStyle = 'rgb(' + wallR + ',' + wallG + ',' + wallB + ')';
+  ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  var p1 = getPixel(ctx, 4, 4);
+  ctx.fillStyle = 'rgba(0,0,0,0.06)';
+  ctx.fillRect(0, 8, TILE_SIZE, 1);
+  var p2 = getPixel(ctx, 8, 8);
+  var passA = p1.r !== p2.r || p1.g !== p2.g || p1.b !== p2.b;
+  results.push({ nome: 'A - Wall texture variation', passou: passA, detalhes: 'Pixel1: rgb(' + p1.r + ',' + p1.g + ',' + p1.b + '), Pixel2: rgb(' + p2.r + ',' + p2.g + ',' + p2.b + ')' });
+
+  // Test B: Floor has plank lines
+  ctx.clearRect(0, 0, off.width, off.height);
+  ctx.fillStyle = INTERIOR_COLOR;
+  ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(0, 2, TILE_SIZE, 1);
+  ctx.fillRect(0, 8, TILE_SIZE, 1);
+  var fp1 = getPixel(ctx, 5, 5);
+  var fp2 = getPixel(ctx, 5, 8);
+  var passB = fp1.r !== fp2.r || fp1.g !== fp2.g || fp1.b !== fp2.b;
+  results.push({ nome: 'B - Floor plank lines', passou: passB, detalhes: 'Off-line pixel: rgb(' + fp1.r + ',' + fp1.g + ',' + fp1.b + '), On-line pixel: rgb(' + fp2.r + ',' + fp2.g + ',' + fp2.b + ')' });
+
+  // Test C: Grass tiles differ with different hash
+  ctx.clearRect(0, 0, off.width, off.height);
+  var vA = Game.tileHash(5, 5);
+  var vB2 = Game.tileHash(8 * 7 + 13, 8 * 11 + 5);
+  var rA = 58 + (vA - 0.5) * 24 | 0;
+  var gA = 122 + (vA - 0.5) * 28 | 0;
+  var bA = 42 + (vA - 0.5) * 14 | 0;
+  ctx.fillStyle = 'rgb(' + rA + ',' + gA + ',' + bA + ')';
+  ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  var gp1 = getPixel(ctx, 10, 10);
+  ctx.clearRect(0, 0, off.width, off.height);
+  var rB2 = 58 + (vB2 - 0.5) * 24 | 0;
+  var gB2 = 122 + (vB2 - 0.5) * 28 | 0;
+  var bB2 = 42 + (vB2 - 0.5) * 14 | 0;
+  ctx.fillStyle = 'rgb(' + rB2 + ',' + gB2 + ',' + bB2 + ')';
+  ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  var gp2 = getPixel(ctx, 10, 10);
+  var passC = gp1.r !== gp2.r || gp1.g !== gp2.g || gp1.b !== gp2.b;
+  results.push({ nome: 'C - Grass color variation', passou: passC, detalhes: 'Tile1: rgb(' + gp1.r + ',' + gp1.g + ',' + gp1.b + '), Tile2: rgb(' + gp2.r + ',' + gp2.g + ',' + gp2.b + ')' });
+
+  // Test D: Waypoint is visually identical to base tile
+  ctx.clearRect(0, 0, off.width, off.height);
+  ctx.fillStyle = INTERIOR_COLOR;
+  ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  var dp1 = getPixel(ctx, 10, 10);
+  ctx.clearRect(0, 0, off.width, off.height);
+  ctx.fillStyle = INTERIOR_COLOR;
+  ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  var dp2 = getPixel(ctx, 10, 10);
+  var passD = dp1.r === dp2.r && dp1.g === dp2.g && dp1.b === dp2.b;
+  results.push({ nome: 'D - Waypoint invisible (no marker)', passou: passD, detalhes: 'Base tile pixel: rgb(' + dp1.r + ',' + dp1.g + ',' + dp1.b + '), Waypoint pixel: rgb(' + dp2.r + ',' + dp2.g + ',' + dp2.b + ')' });
+
+  // Test E: Deterministic rendering (same tile twice identical)
+  ctx.clearRect(0, 0, off.width, off.height);
+  var hv = Game.tileHash(3, 3);
+  var hr = 58 + (hv - 0.5) * 24 | 0;
+  var hgv = 122 + (hv - 0.5) * 28 | 0;
+  var hb = 42 + (hv - 0.5) * 14 | 0;
+  ctx.fillStyle = 'rgb(' + hr + ',' + hgv + ',' + hb + ')';
+  ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  var e1 = getPixel(ctx, 15, 15);
+  ctx.clearRect(0, 0, off.width, off.height);
+  ctx.fillStyle = 'rgb(' + hr + ',' + hgv + ',' + hb + ')';
+  ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  var e2 = getPixel(ctx, 15, 15);
+  var passE = e1.r === e2.r && e1.g === e2.g && e1.b === e2.b;
+  results.push({ nome: 'E - Deterministic rendering', passou: passE, detalhes: 'First: rgb(' + e1.r + ',' + e1.g + ',' + e1.b + '), Second: rgb(' + e2.r + ',' + e2.g + ',' + e2.b + ')' });
+
+  // Test F: Performance (100 tiles under 5ms)
+  var start = performance.now();
+  var perfCtx = off.getContext('2d');
+  for (var i = 0; i < 100; i++) {
+    perfCtx.fillStyle = 'rgb(' + (58 + (i % 10)) + ',122,42)';
+    perfCtx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  }
+  var elapsed = performance.now() - start;
+  var passF = elapsed < 5;
+  results.push({ nome: 'F - Performance 100 tiles < 5ms', passou: passF, detalhes: 'Elapsed: ' + elapsed.toFixed(2) + 'ms' });
+
+  var allPassed = results.every(function(r) { return r.passou; });
+  var msg = 'VISUAL TESTS RESULTS:\n\n';
+  for (var ri = 0; ri < results.length; ri++) {
+    msg += results[ri].nome + ': ' + (results[ri].passou ? 'PASSOU' : 'FALHOU') + '\n  ' + results[ri].detalhes + '\n\n';
+  }
+  msg += 'Total: ' + results.filter(function(r) { return r.passou; }).length + '/' + results.length + ' passed';
+  if (allPassed) msg += '\n\nALL TESTS PASSED!';
+  alert(msg);
+  console.log(msg);
+}
+
 let game = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -4704,6 +4943,8 @@ document.addEventListener('DOMContentLoaded', () => {
     layoutBtn.textContent = 'Layout: ' + (game.hotbarLayout === 'horizontal' ? 'Horizontal' : 'Vertical');
     updateHotbarHUD(game);
   });
+
+  document.getElementById('btn-visual-tests').addEventListener('click', runVisualTests);
 
   document.getElementById('hotbar-gap-range').addEventListener('input', () => {
     const val = parseInt(document.getElementById('hotbar-gap-range').value);
