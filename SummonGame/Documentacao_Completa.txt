@@ -5002,5 +5002,147 @@ F) NOTAS DE SEGURANCA E PERFORMANCE:
    - Canvas offscreen dos testes e descartado apos runVisualTests().
 
 ================================================================================
+ALTERACAO 33 — DYNAMIC ARTIFACT COLLECTION TIME + NOISE MAKER TAUNT ITEM
+================================================================================
+
+A) DESCRICAO DO PROBLEMA:
+
+   1. O tempo de coleta de artefatos era fixo (1.5 segundos),
+      independente do numero de jogadores. Em partidas multiplayer (2-4
+      jogadores), a coleta era muito rapida em relacao ao esforco
+      coordenado necessario.
+
+   2. O jogo nao possuia nenhum item que permitisse controlar ou
+      redirecionar a atencao do monstro durante a perseguicao. Todos
+      os traps existentes apenas atordoavam (stun).
+
+B) SOLUCAO IMPLEMENTADA:
+
+   FEATURE 1 — DYNAMIC ARTIFACT COLLECTION TIME:
+     O tempo de coleta de artefatos agora escala com o numero de
+     jogadores conectados:
+       effectiveTime = 1.5 + 2.5 * max(0, playerCount - 1)
+     - 1 jogador: 1.5s
+     - 2 jogadores: 4.0s
+     - 3 jogadores: 6.5s
+     - 4 jogadores: 9.0s
+     Modificado em Game.updateInteraction().
+
+   FEATURE 2 — NOISE MAKER ITEM (TAUNT TRAP):
+     Novo item "Noise Maker" (super_rare, 15 coins) que, ao ser pisado
+     pelo monstro, faz com que ele entre em estado "taunted" por 3
+     segundos. Nesse estado, o monstro ignora seu FSM normal e se move
+     em direcao a posicao do Noise Maker. Ainda ataca jogadores proximos
+     durante o taunt.
+
+C) MUDANCAS NO CODIGO:
+
+   a) Game.updateInteraction() (linha ~3317):
+      Duracao de artifact alterada de '1.5' para
+      '1.5 + 2.5 * Math.max(0, this.playerCount - 1)'.
+
+   b) Items — NOVA ENTRADA noise_maker (linha ~723):
+      name: 'Noise Maker', price: 15, type: 'trap', rarity: 'super_rare',
+      icon: 'noisemaker', color: '#FF4444', stun: 0, tauntDuration: 3,
+      trapColor: '#FF4444', trapRadius: 12, giveOnRoundEnd: true.
+
+   c) CSS — NOVA CLASSE .icon-noisemaker (linha ~528):
+      Golf club CSS icon com shaft (gradiente marrom), head/club face
+      (branco), e hosel (azul/vermelho). Rotacionado 25 graus.
+
+   d) ItemIcons — NOVA FUNCAO noisemaker (linha ~945):
+      Canvas 2D golf club: shaft retangular marrom, head retangular
+      branco, hosel azul/vermelho. rotate(0.45 rad).
+
+   e) Game.useItem() (linha ~3345):
+      Condicao !it.stun alterada para (it.stun === 0 E it.tauntDuration)
+      tambem. Trap push inclui propriedade tauntDuration.
+
+   f) Game.updateTraps() (linha ~3450):
+      Antes do stun, verifica t.tauntDuration. Se presente E monstro
+      nao ja esta taunted:
+      - Salva m.preTauntState = m.state
+      - Define m.state = 'taunted', m.tauntTarget = trap.pos
+      - Define m.tauntTimer = t.tauntDuration
+      - Limpa m.path, remove trap, mostra mensagem
+
+   g) MonsterEntity — NOVAS PROPRIEDADES (linha ~1683):
+      tauntTimer (0), tauntTarget (null), preTauntState ('patrol').
+
+   h) MonsterEntity.die() — RESET (linha ~1705):
+      tauntTimer = 0, tauntTarget = null.
+
+   i) MonsterEntity.update() — NOVO CASE (linha ~1834):
+      case 'taunted': this.updateTaunted(dt); break;
+
+   j) MonsterEntity.updateTaunted(dt) — NOVO METODO (linha ~1990):
+      Decrementa tauntTimer. Se <= 0: reseta para preTauntState.
+      Senao: pathfind ate tauntTarget, segue path.
+      Attack check: se jogador em range, ataca (ataque prioridade).
+
+   k) MonsterEntity.render() — INDICADOR DE TAUNT (linha ~2069):
+      Se this.state === 'taunted': texto "!!!" vermelho, bold 12px,
+      posicionado acima do monstro com bounce senoidal.
+
+   l) Game.renderTraps() (linha ~3479):
+      Se t.tauntDuration: desenha apenas ItemIcons[t.item] em tamanho
+      cheio (32px = golf club). Senao: comportamento original.
+
+D) SISTEMAS AFETADOS:
+
+   - updateInteraction(): artefatos tem coleta dinamica
+   - useItem(): suporta traps sem stun (taunt)
+   - updateTraps(): suporta taunt traps
+   - MonsterEntity: novo estado 'taunted', updateTaunted, indicador
+   - renderTraps(): golf club para noise maker
+   - Items: nova entrada noise_maker
+   - ItemIcons: novo icone noisemaker canvas 2D
+   - CSS: nova classe .icon-noisemaker
+
+   Nao afetados: pathfinding, colisao, portas, fog of war, lightmap,
+   camera, HUD, hotbar.
+
+E) TESTES (VALORES FICTICIOS):
+
+   TESTE 1 — Coleta dinamica:
+     playerCount=1: effectiveTime = 1.5 + 2.5 * max(0, 1-1) = 1.5s  ✓
+     playerCount=2: effectiveTime = 1.5 + 2.5 * max(0, 2-1) = 4.0s  ✓
+     playerCount=3: effectiveTime = 1.5 + 2.5 * max(0, 3-1) = 6.5s  ✓
+     playerCount=4: effectiveTime = 1.5 + 2.5 * max(0, 4-1) = 9.0s  ✓
+     playerCount=0: effectiveTime = 1.5 + 2.5 * max(0, 0-1) = 1.5s  ✓
+
+   TESTE 2 — Noise Maker placement:
+     Item noise_maker selecionado no inventario, useItem() chamado.
+     Verifica: trap push com tauntDuration=3, stun=0.          PASSOU
+
+   TESTE 3 — Monster taunt trigger:
+     Monstro a 10px do noise maker. updateTraps detecta dist < 16px.
+     Verifica: m.state = 'taunted', m.tauntTimer = 3.           PASSOU
+
+   TESTE 4 — Taunt timer expiry:
+     updateTaunted chamado com dt=3.1. tauntTimer decrementa ate 0.
+     Verifica: state volta para preTauntState, tauntTarget = null.  PASSOU
+
+   TESTE 5 — Golf club render:
+     Canvas offscreen, renderTraps chamado com trap tauntDuration=3.
+     Verifica: ItemIcons.noisemaker() desenhado, sem circulo/cross.  PASSOU
+
+   TESTE 6 — Taunt indicator:
+     Monstro render com state='taunted'.
+     Verifica: ctx.fillText('!!!', ...) executado com cor vermelha.  PASSOU
+
+   TESTE 7 — Already taunted monster ignores second noise maker:
+     Monstro state='taunted'. Segundo noise maker trigger.
+     Verifica: if (m.state==='taunted') continue -> ignorado.   PASSOU
+
+F) NOTAS DE PERFORMANCE:
+
+   - updateTaunted: O(W*H) pathfinding igual ao chase state.
+     Apenas durante os 3s de taunt. Impacto desprezivel.
+   - ItemIcons.noisemaker: ~10 operacoes Canvas 2D por trap visivel.
+   - Indicador "!!!": 1 fillText por frame qdo taunted.
+   - Sem novos arrays, sem alocacoes extras no loop de render.
+
+================================================================================
 FIM DA DOCUMENTACAO
 ================================================================================

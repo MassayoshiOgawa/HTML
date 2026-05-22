@@ -525,6 +525,25 @@ canvas {
   border-radius: 60% 0 60% 0;
   transform: rotate(-15deg);
 }
+.icon-noisemaker {
+  position: relative;
+  background: transparent;
+}
+.icon-noisemaker::before {
+  content: ''; position: absolute;
+  top: 0; left: 35%; width: 10%; height: 70%;
+  background: linear-gradient(90deg, #6b4226, #8b5e3c, #6b4226);
+  border-radius: 1px;
+  transform: rotate(25deg);
+  transform-origin: center bottom;
+}
+.icon-noisemaker::after {
+  content: ''; position: absolute;
+  bottom: 5%; left: 28%; width: 44%; height: 14%;
+  background: #e8e8e8;
+  border: 1px solid #ccc;
+  border-radius: 1px 3px 3px 1px;
+}
 </style>
 </head>
 <body>
@@ -700,6 +719,12 @@ const Items = {
     icon: 'apple', color: '#c44', rarity: 'common', type: 'consumable',
     giveOnRoundEnd: false,
     effect: { type: 'heal', amount: 25 }
+  },
+  noise_maker: {
+    name: 'Noise Maker', price: 15, desc: 'Taunts the nearest monster for 3 seconds',
+    icon: 'noisemaker', color: '#FF4444', rarity: 'super_rare', type: 'trap',
+    giveOnRoundEnd: true,
+    stun: 0, tauntDuration: 3, trapColor: '#FF4444', trapRadius: 12
   }
 };
 
@@ -916,6 +941,26 @@ const ItemIcons = {
     ctx.quadraticCurveTo(x + size*0.12, y - r*1.25, x + size*0.15, y - r*1.1);
     ctx.quadraticCurveTo(x + size*0.1, y - r*1.1, x + size*0.02, y - r*1.2);
     ctx.fill();
+  },
+  noisemaker: function(ctx, x, y, size) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(0.45);
+    const shaftH = size * 0.5;
+    const shaftW = size * 0.06;
+    ctx.fillStyle = '#6b4226';
+    ctx.fillRect(-shaftW / 2, -shaftH * 0.7, shaftW, shaftH);
+    const headW = size * 0.22;
+    const headH = size * 0.10;
+    ctx.fillStyle = '#e8e8e8';
+    ctx.fillRect(-shaftW / 2, -shaftH * 0.7 - headH * 0.6, headW, headH);
+    const hoselW = size * 0.10;
+    const hoselH = size * 0.06;
+    ctx.fillStyle = '#4488ff';
+    ctx.fillRect(-shaftW / 2, -shaftH * 0.7 + headH * 0.4, hoselW, hoselH / 2);
+    ctx.fillStyle = '#ff4444';
+    ctx.fillRect(-shaftW / 2, -shaftH * 0.7 + headH * 0.4 + hoselH / 2, hoselW, hoselH / 2);
+    ctx.restore();
   }
 };
 
@@ -1635,6 +1680,9 @@ class MonsterEntity {
     this.bodyStroke = mt.strokeColor;
     this.name = mt.name;
     this.stunTimer = 0;
+    this.tauntTimer = 0;
+    this.tauntTarget = null;
+    this.preTauntState = 'patrol';
   }
 
   spawn() {
@@ -1654,6 +1702,8 @@ class MonsterEntity {
     this.state = 'patrol';
     this.path = null;
     this.pathTarget = null;
+    this.tauntTimer = 0;
+    this.tauntTarget = null;
   }
 
   generateWaypointOrder() {
@@ -1781,6 +1831,7 @@ class MonsterEntity {
       case 'patrol': this.updatePatrol(dt); break;
       case 'chase': this.updateChase(dt); break;
       case 'search': this.updateSearch(dt); break;
+      case 'taunted': this.updateTaunted(dt); break;
     }
     this.tileX = Math.floor(this.px / TILE_SIZE);
     this.tileY = Math.floor(this.py / TILE_SIZE);
@@ -1936,6 +1987,43 @@ class MonsterEntity {
     }
   }
 
+  updateTaunted(dt) {
+    this.tauntTimer -= dt;
+    if (this.tauntTimer <= 0) {
+      this.tauntTimer = 0;
+      this.tauntTarget = null;
+      this.state = this.preTauntState || 'patrol';
+      this.path = null;
+      return;
+    }
+    if (!this.tauntTarget) { this.state = 'patrol'; this.path = null; return; }
+    const attackTarget = this.findNearestPlayer();
+    if (attackTarget) {
+      const adx = attackTarget.px - this.px;
+      const ady = attackTarget.py - this.py;
+      const adist = Math.sqrt(adx * adx + ady * ady);
+      if (adist < TILE_SIZE * 0.8 && this.attackCooldown <= 0) {
+        attackTarget.takeDamage(20, this.game);
+        this.attackCooldown = 1.0;
+      }
+    }
+    const stx = Math.floor(this.px / TILE_SIZE);
+    const sty = Math.floor(this.py / TILE_SIZE);
+    const gtx = Math.floor(this.tauntTarget.x / TILE_SIZE);
+    const gty = Math.floor(this.tauntTarget.y / TILE_SIZE);
+    if (!this.path) {
+      const found = this.game.findPath(stx, sty, gtx, gty);
+      if (found && found.length > 0) {
+        this.path = found;
+      } else {
+        this.path = null;
+      }
+    }
+    if (this.path && this.path.length > 0) {
+      this.followPath(dt);
+    }
+  }
+
   render(ctx, game) {
     if (!this.alive) return;
     const oracleReveal = game.players.some(p => p.playerClass === 'oracle' && p.abilityActive);
@@ -1978,6 +2066,14 @@ class MonsterEntity {
     ctx.arc(rx - 3, ry - 2, 1.5, 0, Math.PI * 2);
     ctx.arc(rx + 3, ry - 2, 1.5, 0, Math.PI * 2);
     ctx.fill();
+    if (this.state === 'taunted') {
+      const bounce = Math.sin(Date.now() / 1000 * 8 + (this.px + this.py) * 0.1) * 2;
+      ctx.font = 'bold 12px "Courier New", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ff0000';
+      ctx.fillText('!!!', rx, ry - TILE_SIZE * 0.5 + bounce);
+      ctx.textAlign = 'start';
+    }
   }
 
   renderVisionCone(ctx, game) {
@@ -3218,7 +3314,7 @@ class Game {
     let duration = 0;
     if (type === 'door') duration = 0.3;
     else if (type === 'altar') duration = 4;
-    else if (type === 'artifact') duration = 1.5;
+    else if (type === 'artifact') duration = 1.5 + 2.5 * Math.max(0, this.playerCount - 1);
     this.interactDisplay = { type, duration, target };
     this.interactDuration = duration;
     if (player.interactTimer >= duration) {
@@ -3246,14 +3342,15 @@ class Game {
     const it = Items[item];
     if (!it) return;
     if (it.type === 'trap') {
-      if (!it.stun) return;
-      let bonusRadius = 0, bonusStun = 0;
+      if (!it.stun && it.stun !== 0 && !it.tauntDuration) return;
+      let bonusRadius = 0, bonusStun = 0, bonusTaunt = 0;
       if (player.playerClass === 'boringtrapper' && item === 'beartrap') {
         bonusRadius = it.trapRadius;
         bonusStun = 1;
       }
       this.traps.push({ x: player.px, y: player.py, item: item, active: true,
-        stun: it.stun + bonusStun, trapColor: it.trapColor, trapRadius: it.trapRadius + bonusRadius });
+        stun: (it.stun || 0) + bonusStun, trapColor: it.trapColor, trapRadius: it.trapRadius + bonusRadius,
+        tauntDuration: it.tauntDuration || 0 });
       player.removeEquipped();
       this.showMessage(player.name + ' placed ' + it.name);
     } else if (it.type === 'consumable') {
@@ -3350,6 +3447,18 @@ class Game {
         const dx = m.px - t.x;
         const dy = m.py - t.y;
         if (Math.sqrt(dx * dx + dy * dy) < TILE_SIZE * 0.5) {
+          if (t.tauntDuration) {
+            if (m.state === 'taunted') continue;
+            m.preTauntState = m.state;
+            m.state = 'taunted';
+            m.tauntTarget = { x: t.x, y: t.y };
+            m.tauntTimer = t.tauntDuration;
+            m.path = null;
+            t.active = false;
+            this.traps.splice(i, 1);
+            this.showMessage(Items[t.item].name + ' triggered! Monster taunted!');
+            break;
+          }
           m.stunTimer = t.stun;
           t.active = false;
           this.traps.splice(i, 1);
@@ -3367,24 +3476,28 @@ class Game {
       const sx = t.x - this.camX;
       const sy = t.y - this.camY;
       if (sx < -50 || sx > this.canvas.width + 50 || sy < -50 || sy > this.canvas.height + 50) continue;
-      ctx.fillStyle = t.trapColor;
-      ctx.beginPath();
-      ctx.arc(sx, sy, t.trapRadius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 0.5;
-      ctx.stroke();
-      // Cross mark
-      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(sx - 3, sy);
-      ctx.lineTo(sx + 3, sy);
-      ctx.moveTo(sx, sy - 3);
-      ctx.lineTo(sx, sy + 3);
-      ctx.stroke();
-      const iconFn = ItemIcons[t.item];
-      if (iconFn) iconFn(ctx, sx, sy, Math.min(t.trapRadius * 1.2, 20));
+      if (t.tauntDuration) {
+        const iconFn = ItemIcons[t.item];
+        if (iconFn) iconFn(ctx, sx, sy, 32);
+      } else {
+        ctx.fillStyle = t.trapColor;
+        ctx.beginPath();
+        ctx.arc(sx, sy, t.trapRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(sx - 3, sy);
+        ctx.lineTo(sx + 3, sy);
+        ctx.moveTo(sx, sy - 3);
+        ctx.lineTo(sx, sy + 3);
+        ctx.stroke();
+        const iconFn = ItemIcons[t.item];
+        if (iconFn) iconFn(ctx, sx, sy, Math.min(t.trapRadius * 1.2, 20));
+      }
     }
   }
 
