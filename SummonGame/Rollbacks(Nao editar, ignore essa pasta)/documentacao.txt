@@ -4554,8 +4554,48 @@ ALTERACAO 29 — 7 NOVAS CLASSES JOGAVEIS (TOTAL: 11 CLASSES)
      z) MonsterEntity.canMoveTo() — ALTERADO:
         Verifica isWallTile() para bloquear movimento do monstro por paredes.
 
-     aa) updateAbilityHUD() — ALTERADO:
+           aa) updateAbilityHUD() — ALTERADO:
         Time Traveler mostra "Used" apos uso em vez do cooldown numerico gigante.
+
+================================================================================
+ALTERACAO 30 — TEXTO "Artifact" ACIMA DOS ARTEFATOS
+================================================================================
+
+   PROBLEMA: Os artefatos (tiles 'F') nao tinham identificacao textual,
+   dificultando a localizacao visual dos mesmos no mapa,
+   especialmente em areas com multiplos tiles ou durante a coleta.
+
+   SOLUCAO: Adicionado texto "Artifact" em ingles, branco com contorno
+   preto, acima de cada artefato que ainda nao foi coletado.
+
+   ESPECIFICACOES:
+     - Conteudo: "Artifact"
+     - Tamanho: 24px (75% de TILE_SIZE = 32px)
+     - Fonte: 'Courier New', monospace
+     - Cor: preenchimento branco (#fff), contorno preto (#000) com lineWidth 3
+     - Posicao: centralizado horizontalmente sobre o tile,
+       verticalmente a TILE_SIZE * 0.5 (meio tile) acima do centro
+     - Ordem: strokeText (preto) antes, fillText (branco) depois
+     - Comportamento: estatico, sem animacao, sempre visivel
+     - Visibilidade: SEMPRE visivel enquanto !art.collected,
+       independente do lightmap/isPointVisible
+     - Renderizacao ocorre EM PASSADA SEPARADA apos o lightmap
+       (ctx.drawImage(lightmap)), garantindo que o texto nao seja
+       escurecido pela iluminacao
+
+   MUDANCAS NO CODIGO:
+
+     a) Game.renderArtifactLabels() — NOVO METODO:
+        Renderiza texto "Artifact" acima de cada artefato nao coletado.
+        Executado apos ctx.drawImage(lightmap) no pipeline de render.
+        - Itera sobre this.artifactEntities
+        - Para cada nao coletado: calcula cx, cy em screen space
+        - textY = cy - TILE_SIZE * 0.5 (meio tile acima do centro)
+        - strokeText + fillText com restauracao de estado do contexto
+
+     b) Game.render() — ALTERADO:
+        Adicionada chamada this.renderArtifactLabels(ctx) apos
+        ctx.drawImage(lightmap, 0, 0) e antes de renderDoors.
 
 ================================================================================
 FIM DA DOCUMENTACAO

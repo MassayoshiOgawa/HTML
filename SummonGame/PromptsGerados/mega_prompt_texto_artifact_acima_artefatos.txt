@@ -1,0 +1,156 @@
+================================================================================
+MEGA PROMPT — TEXTO "Artifact" ACIMA DE TODOS OS ARTEFATOS SPAWNADOS
+================================================================================
+
+INSTRUCOES GLOBAIS (LEIA ANTES DE QUALQUER ACAO):
+- Voce so pode modificar o arquivo SummonGame.html. Nao crie nem modifique
+  nenhum outro arquivo (css, js, json, md, etc.), a menos que eu peca
+  explicitamente.
+- Nao crie documentos separados, nem arquivos de estilo ou script externos.
+- Nao adicione comentarios ao codigo, a menos que seja estritamente necessario
+  para organizacao (ex: separadores de secoes ja existentes).
+- Siga o estilo de codigo existente: mesmo recuo, mesmo padrao de
+  nomenclatura, mesmas tecnicas de Canvas API.
+- Ao terminar qualquer alteracao no SummonGame.html, voce DEVE registrar
+  a alteracao no arquivo Documentacao_Completa.txt, de forma profissional,
+  limpa, bem estruturada e no mesmo padrao do changelog ja existente.
+- Antes de comecar, leia a Documentacao_Completa.txt por completo para
+  entender a arquitetura, identificar possiveis conflitos e garantir que
+  a implementacao seja coerente com o resto do jogo.
+- Apos implementar, revise o codigo 5 vezes para garantir que esta correto,
+  consistente, sem bugs e seguindo todas as especificacoes abaixo. Se
+  durante a revisao surgir alguma duvida, pare e pergunte antes de finalizar.
+
+================================================================================
+DESCRICAO DA TAREFA
+================================================================================
+
+Adicionar um texto escrito "Artifact" (em ingles) acima de cada artefato
+spawnado (tile 'F') que ainda nao foi coletado. O texto deve aparecer
+enquanto o artefato existir e nao tiver sido coletado.
+
+================================================================================
+ESPECIFICACOES DETALHADAS
+================================================================================
+
+1. TEXTO:
+   - Conteudo exato: "Artifact" (letra 'A' maiuscula, resto minusculo).
+   - Idioma: ingles (conforme solicitado).
+
+2. TAMANHO DA FONTE:
+   - A altura do texto deve ser 75% (setenta e cinco por cento) da altura
+     de um tile.
+   - TILE_SIZE = 32 pixels.
+   - Logo, font-size = 24 pixels (0.75 * 32 = 24).
+
+3. POSICIONAMENTO:
+   - O texto deve ficar centralizado horizontalmente sobre o centro do tile
+     do artefato.
+   - Verticalmente, o centro do texto deve ficar a uma distancia de 85%
+     do tamanho de um tile ACIMA do centro do artefato.
+   - Formula da posicao Y no Canvas (screen space):
+       textY = (tileY * TILE_SIZE + TILE_SIZE / 2 - camY) - TILE_SIZE * 0.85
+   - Formula da posicao X:
+       textX = (tileX * TILE_SIZE + TILE_SIZE / 2 - camX)
+   - Use textAlign = 'center' e textBaseline = 'middle' para garantir
+     centralizacao exata.
+
+4. COR E CONTORNO:
+   - Cor do texto: branco (#ffffff ou 'white').
+   - O texto deve ter uma borda/contorno (outline) preto (#000000) ao
+     redor de cada caractere para garantir legibilidade contra qualquer
+     fundo.
+   - Use ctx.strokeText() para o contorno preto, com lineWidth adequado
+     (recomendado: 3 a 4 pixels) e ctx.fillText() para o preenchimento
+     branco por cima.
+   - Ordem: primeiro stroke (preto), depois fill (branco).
+
+5. COMPORTAMENTO VISUAL:
+   - O texto deve ser ESTATICO, sem animacao, sem pulsacao, sem fade.
+   - Opacidade fixa em 1 (totalmente opaco).
+
+6. VISIBILIDADE:
+   - O texto deve ser SEMPRE visivel enquanto o artefato nao foi coletado,
+     INDEPENDENTEMENTE do estado do lightmap/isPointVisible.
+   - Mesmo que o tile do artefato esteja em uma area escura (fora do raio
+     de iluminacao do jogador), o texto "Artifact" deve aparecer.
+   - A unica condicao para nao exibir: art.collected === true.
+
+7. ONDE IMPLEMENTAR NO CODIGO:
+   - A renderizacao do texto deve ser feita DENTRO do metodo
+     ArtifactEntity.render(ctx, tx, ty, ts, camX, camY), apos desenhar
+     os circulos de glow e antes do return implicito.
+
+8. FONTE:
+   - Use a mesma familia de fonte do jogo: 'Courier New', monospace.
+   - ctx.font = '24px "Courier New", monospace' (ou bold se preferir,
+     mas deve ser consistente com o estilo do jogo).
+
+9. RESPEITO A ARQUITETURA EXISTENTE:
+   - O metodo ArtifactEntity.render() atualmente verifica
+     "if (this.collected) return;" no inicio. O texto so deve ser
+     desenhado se collected for false (o que ja e garantido pelo
+     early return).
+   - Nao modifique a assinatura do metodo render.
+   - Nao adicione novas propriedades ao construtor do ArtifactEntity
+     a nao ser que seja estritamente necessario.
+   - Nao altere o comportamento de update() ou qualquer outro metodo.
+   - Nao mexa no Game.renderArtifacts() — a chamada ja existe e funciona.
+
+10. DOCUMENTACAO:
+    - Apos implementar, abra o Documentacao_Completa.txt e adicione um
+      NOVO registro no CHANGELOG (secão de Maio 2026) com:
+      - Titulo: "ALTERACAO 30 — TEXTO 'Artifact' ACIMA DOS ARTEFATOS"
+      - Descricao do problema (artefatos sem identificacao textual)
+      - Solucao implementada (texto "Artifact" com as especificacoes acima)
+      - Mudancas no codigo em detalhe (metodo alterado, linhas, parametros)
+      - Atualizacao das secoes afetadas (secao 10 - ArtifactEntity,
+        e qualquer outra seção relevante)
+    - Siga o mesmo formato profissional e estruturado do changelog existente.
+
+================================================================================
+PONTOS DE ATENCAO (EVITAR ERROS COMUNS)
+================================================================================
+
+- Certifique-se de que o texto NAO suma quando o artefato esta em area
+  escura (fora do lightmap). Nao adicione verificacao de isPointVisible
+  ou visibilityGrid para o texto.
+- O texto deve ser desenhado em COORDENADAS DE TELA (screen space),
+  ou seja, subtraindo camX e camY das coordenadas do mundo.
+- Nao confunda textY com o valor do cx/cy ja calculados. O metodo
+  render() recebe camX e camY como parametros, use-os.
+- A posicao do texto e cx, cy - TILE_SIZE * 0.85, onde cx e cy sao
+  as coordenadas do centro do tile em screen space (ja calculadas no
+  metodo como cx e cy).
+- ctx.textAlign e ctx.textBaseline afetam TODOS os textos subsequentes
+  no mesmo contexto. Restaure textAlign para 'start' (padrao) e
+  textBaseline para 'alphabetic' (padrao) apos desenhar o texto, para
+  nao afetar outros elementos que usam ctx.fillText depois.
+- ctx.save() e ctx.restore() podem ser usados para isolar as alteracoes
+  de estado do contexto, mas verifique se isso nao interfere com o
+  restante da pipeline de renderizacao.
+
+================================================================================
+RESUMO DO QUE DEVE SER FEITO (CHECKLIST)
+================================================================================
+
+[ ] 1. Ler a Documentacao_Completa.txt por completo.
+[ ] 2. Abrir SummonGame.html e localizar a classe ArtifactEntity.
+[ ] 3. Localizar o metodo ArtifactEntity.render().
+[ ] 4. Adicionar o codigo de renderizacao do texto "Artifact" dentro do
+       metodo render(), apos desenhar os circulos e antes do return
+       implicito (ou seja, ainda dentro do bloco if (!this.collected)).
+[ ] 5. Configurar ctx.font, ctx.textAlign, ctx.textBaseline.
+[ ] 6. Desenhar o contorno preto (strokeText) e depois o texto branco
+       (fillText) na posicao calculada.
+[ ] 7. Restaurar textAlign e textBaseline para os valores padrao.
+[ ] 8. Verificar se o texto aparece corretamente no jogo para artefatos
+       nao coletados, e desaparece apos coleta.
+[ ] 9. Verificar se o texto aparece mesmo em areas escuras.
+[ ] 10. Registrar a alteracao no Documentacao_Completa.txt.
+[ ] 11. Revisar o codigo 5 vezes, verificando bugs, consistencia,
+        aderencia as especificacoes.
+
+================================================================================
+FIM DO PROMPT
+================================================================================
