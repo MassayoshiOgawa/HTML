@@ -1,0 +1,793 @@
+================================================================================
+MEGA PROMPT - SISTEMA DE CONFIGURACAO DE HOTKEYS POR JOGADOR COM DETECCAO DE
+CONFLITOS (TELA DE SELECAO + DURANTE PARTIDA)
+================================================================================
+
+ATENCAO: Leia TODO o arquivo SummonGame.html e TODO o arquivo
+Documentacao_Completa.txt antes de comecar a implementar. Nao pule nenhuma
+parte. Voce precisa entender a arquitetura completa do jogo, especialmente:
+- O sistema de selecao de classes (showClassSelection, buildPanels)
+- O sistema de configuracao de hotkeys (buildHotkeyConfig, finalizeRebinding,
+  cancelRebinding, rebindingPlayer, rebindingAction)
+- O sistema de jogadores (players[], keybinds, DEFAULT_KEYBINDS)
+- O fluxo de teclas (keydown, keyup, keys, keysJustPressed)
+
+================================================================================
+1. INSTRUCOES GLOBAIS (LEIA ANTES DE TUDO)
+================================================================================
+
+- Faca TODAS as alteracoes APENAS no arquivo SummonGame.html.
+- Nao crie NENHUM outro arquivo de nenhuma linguagem (nao crie .css, .js,
+  .py, .java, .c, .cpp, .md, .json, .txt, .xml, .yaml, .ts, .rs, .go,
+  .rb, .php, .lua, .sh, .bat, .ps1 — nada). A unica excecao e a
+  documentacao (Documentacao_Completa.txt) que voce DEVE ATUALIZAR.
+- Nao dependa de bibliotecas externas, frameworks, CDNs ou assets externos.
+- Todo o codigo deve ser HTML + CSS + JavaScript PURO, inline no mesmo
+  arquivo, seguindo o estilo do codigo existente.
+- Ao fazer QUALQUER alteracao no SummonGame.html, voce DEVE registrar a
+  alteracao no Documentacao_Completa.txt em DOIS lugares:
+  a) No CHANGELOG (antes do "FIM DA DOCUMENTACAO") como "ALTERACAO 31 — ..."
+  b) Em uma NOVA SECAO numerada (SECAO 60) explicando o sistema em
+     detalhe, com conceito, estrutura de dados, fluxo, codigo, regras e
+     escalabilidade.
+- A documentacao deve ser profissional, limpa, bem estruturada, em
+  portugues. Siga EXATAMENTE o estilo e formato das alteracoes e secoes
+  existentes no Documentacao_Completa.txt.
+- Implemente TUDO AGORA, sem perguntar, sem pedir confirmacao, sem
+  hesitar. Nao escreva "vou fazer" — faca. Nao resuma — implemente.
+- Apos terminar a implementacao, REVISE 5 VEZES o prompt inteiro.
+  Se surgir qualquer duvida durante a revisao, pare e pergunte antes de
+  finalizar. O prompt precisa ser perfeito.
+
+================================================================================
+2. OBJETIVO PRINCIPAL
+================================================================================
+
+Implementar um sistema de configuracao de hotkeys (teclas) por jogador que
+funciona em DOIS contextos diferentes:
+
+  CONTEXTO A — TELA DE SELECAO DE CLASSES (#class-select):
+    Cada painel de jogador (.player-setup-panel) ganha um botao "Configure
+    Hotkeys" que, ao ser clicado, expande a configuracao das 7 teclas
+    daquele jogador DENTRO do proprio painel. A configuracao usa o mesmo
+    sistema de rebinding ja existente (clicar no botao da tecla, pressionar
+    nova tecla no teclado).
+
+  CONTEXTO B — PAINEL DE CONFIGURACOES DURANTE A PARTIDA (#settings-panel):
+    O sistema atual de configuracao de hotkeys (#hotkey-config, funcao
+    buildHotkeyConfig) mostrava todas as teclas de TODOS os jogadores
+    expandidas. Agora deve mostrar apenas botoes com o nome de cada
+    jogador (ex: "P1 - Name", "P2 - Name"), e ao clicar em um desses
+    botoes, as 7 teclas daquele jogador expandem INLINE abaixo do nome.
+    Outro clique no mesmo nome recolhe (toggle).
+
+  EM AMBOS OS CONTEXTOS — DETECCAO DE CONFLITOS:
+    Apos qualquer rebind de tecla, o sistema verifica se a mesma tecla
+    esta sendo usada por OUTRO jogador para QUALQUER acao. Se houver
+    conflito, o botao da tecla conflitante recebe borda vermelha e um
+    atributo title (tooltip) informando qual jogador e qual acao esta
+    usando a mesma tecla. O rebind e PERMITIDO mesmo com conflito
+    (apenas avisa, nao bloqueia).
+
+================================================================================
+3. REQUISITOS DETALHADOS - CONTEXTO A (TELA DE SELECAO DE CLASSES)
+================================================================================
+
+3.1 — MODIFICAR A FUNCAO showClassSelection() (linha ~2281)
+
+  Dentro da funcao buildPanels() (definida dentro de showClassSelection),
+  para cada painel de jogador, ADICIONAR apos o bloco de icones de classe:
+
+    a) Um botao "Configure Hotkeys" com:
+       - id unico: "btn-toggle-hotkey-P{index}" (ex: btn-toggle-hotkey-0)
+       - Classe: .toggle-hotkey-btn
+       - Texto inicial: "Configure Hotkeys"
+       - Estilo: mesmo padrao dos botoes do painel (background #1a1a2e,
+         border 1px solid #444, color #ccc, padding 6px 10px, cursor pointer,
+         font-family monospace, font-size 12px, border-radius 3px,
+         width 100%, margin-top 8px)
+       - Quando clicado:
+         * Alterna (toggle) estado expandido/recolhido
+         * Se expandindo: texto muda para "Hide Hotkeys"
+         * Se recolhendo: texto volta para "Configure Hotkeys"
+         * Cria ou remove o elemento .hotkey-config-inline dentro do panel
+
+    b) Um container div (gerado dinamicamente ao expandir) com:
+       - Classe: .hotkey-config-inline
+       - position: relative dentro do panel
+       - width: 100%, margin-top: 8px
+       - Dentro dele: as 7 linhas de configuracao de teclas para ESTE
+         jogador (usando o mesmo formato visual de .hotkey-row do CSS
+         existente, mas com IDs e data attributes apropriados)
+       - As 7 acoes: Move Up, Move Down, Move Left, Move Right, Interact,
+         Ability, Use/Cycle Item (mesmas da configuracao existente)
+
+3.2 — GERACAO DO HTML DAS TECLAS
+
+  Dentro do .hotkey-config-inline, gerar para cada uma das 7 acoes:
+
+    <div class="hotkey-row">
+      <span class="action">{Label}</span>
+      <button class="key-btn" data-player="{index}" data-action="{key}">
+        {TECLA_ATUAL}
+      </button>
+    </div>
+
+  Onde:
+    - {index}: indice do jogador no array game.players (0, 1, 2, 3)
+    - {key}: identificador da acao ('up', 'down', 'left', 'right',
+      'interact', 'ability', 'use')
+    - {Label}: nome legivel ('Move Up', 'Move Down', ..., 'Use/Cycle Item')
+    - {TECLA_ATUAL}: game.players[index].keybinds[key].toUpperCase()
+
+  REAPROVEITE a mesma estrutura de CSS existente (.hotkey-row, .action,
+  .key-btn, .key-btn:hover, .key-btn.waiting, @keyframes pulse).
+
+3.3 — REBINDING NA TELA DE SELECAO
+
+  O sistema de rebinding global (variaveis rebindingPlayer, rebindingAction,
+  funcoes finalizeRebinding, cancelRebinding) ja escuta eventos keydown na
+  window. Como a tela de selecao esta aberta ANTES do jogo comecar, os
+  listeners de keydown ja estao configurados e funcionarao.
+
+  Ao clicar em um .key-btn na tela de selecao:
+    1. Define rebindingPlayer = parseInt(btn.dataset.player)
+    2. Define rebindingAction = btn.dataset.action
+    3. Remove classe 'waiting' de todos .key-btn no documento
+    4. Adiciona classe 'waiting' ao btn clicado
+    5. Altera texto do btn para '...'
+
+  Quando finalizeRebinding(k) for chamado (apos pressionar tecla):
+    1. IMPEDIR que a tecla seja processada como tecla normal de jogo
+       (ja existe e.preventDefault no bloco de rebinding)
+    2. Atualiza p.keybinds[rebindingAction] = keyName
+    3. Chama a funcao de POS-REBIND que:
+       a. Atualiza o texto do botao com a nova tecla
+       b. Remove classe 'waiting' do botao
+       c. Executa DETECCAO DE CONFLITOS (ve secao 5)
+    4. Reseta rebindingPlayer e rebindingAction para null
+
+  IMPORTANTE: Durante a tela de selecao, o game.players ainda nao foi
+  criado (ele e criado em loadMap()). Mas as variaveis
+  game.playerClasses[i] e game.playerNames[i] ja estao setadas. Como o
+  sistema de keybinds depende de game.players[].keybinds, e a classe
+  Player define keybinds no construtor, precisamos de uma abordagem
+  especial:
+
+    - Antes do jogo comecar, armazene as teclas configuradas em um array
+      temporario: game.tempKeybinds[i] = { ...DEFAULT_KEYBINDS[i] }
+    - Durante a tela de selecao, modifique game.tempKeybinds[i] em vez de
+      game.players[i].keybinds
+    - No construtor da classe Player (linha ~1198), se game.tempKeybinds
+      existir para este playerIndex, use-o como base:
+        this.keybinds = game.tempKeybinds && game.tempKeybinds[playerIndex]
+          ? { ...game.tempKeybinds[playerIndex] }
+          : { ...DEFAULT_KEYBINDS[playerIndex] };
+    - Em loadMap() (ou no clique do Start Game), apos criar os players,
+      limpe game.tempKeybinds = null para economizar memoria
+
+  ALTERNATIVA MAIS SIMPLES:
+    - Crie um objeto global preGameKeybinds = {} que armazena
+      { playerIndex: { up: 'w', down: 's', ... } }
+    - Durante a tela de selecao, leia e escreva em preGameKeybinds[i]
+    - No construtor Player, se preGameKeybinds[playerIndex] existir,
+      use-o como keybinds base
+    - A funcao buildKeyButtonText(keybinds, playerIndex, action) leva
+      o objeto keybinds correto
+
+  ESCOLHA a alternativa mais limpa e coerente com o estilo do codigo
+  existente.
+
+3.4 — CSS PARA A TELA DE SELECAO
+
+  Adicionar no bloco <style>:
+
+    /* Botao toggle de hotkey no painel de selecao */
+    .toggle-hotkey-btn {
+      background: #1a1a2e;
+      border: 1px solid #444;
+      color: #aaa;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      border-radius: 3px;
+      width: 100%;
+      margin-top: 8px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .toggle-hotkey-btn:hover {
+      background: #2a2a3e;
+      color: #ccc;
+    }
+
+    /* Container de hotkey inline no painel de selecao */
+    .hotkey-config-inline {
+      width: 100%;
+      margin-top: 8px;
+      padding: 6px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 4px;
+      border: 1px solid #333;
+    }
+
+    /* Classe de conflito para botoes de tecla */
+    .key-btn.conflict {
+      border-color: #ff3333 !important;
+      color: #ff6666 !important;
+      box-shadow: 0 0 4px rgba(255,0,0,0.5);
+    }
+
+    /* Botao de jogador no painel de settings (Contexto B) */
+    .player-hotkey-toggle {
+      display: block;
+      width: 100%;
+      background: #1a1a2e;
+      border: 1px solid #444;
+      color: #ccc;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      border-radius: 3px;
+      text-align: left;
+      transition: background 0.2s;
+      margin-bottom: 4px;
+    }
+    .player-hotkey-toggle:hover {
+      background: #2a2a3e;
+    }
+    .player-hotkey-toggle.expanded {
+      border-color: #4fc3f7;
+      color: #4fc3f7;
+    }
+
+    /* Container expandido das teclas de um jogador no settings */
+    .player-hotkey-content {
+      padding: 6px 8px;
+      margin-bottom: 8px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 0 0 4px 4px;
+      border-left: 2px solid #4fc3f7;
+    }
+
+================================================================================
+4. REQUISITOS DETALHADOS - CONTEXTO B (PAINEL DE CONFIGURACOES DURANTE PARTIDA)
+================================================================================
+
+4.1 — REEESCREVER A FUNCAO buildHotkeyConfig(game)
+
+  A funcao atual (linha ~4285) gera HTML com TODOS os jogadores expandidos.
+  Reescreva para gerar:
+
+    CABECALHO: <h3>Key Bindings</h3> (mantido)
+
+    Para cada jogador (i = 0 ate game.playerCount - 1):
+      - Um botao <button class="player-hotkey-toggle" data-player="i">
+        com o texto: "{cor}Player {i+1} ({nome}) [TECLAS]"
+        Onde {cor} e um span com style color da cor do jogador.
+        Exemplo: "<span style='color:#4488ff;'>P1</span> (Leandro) [W, A, S, D, E, F, R]"
+        As teclas sao extraidas de game.players[i].keybinds
+      - Ao clicar no botao:
+        * Alterna classe .expanded no botao
+        * Se expandindo: cria/insere apos o botao um div
+          .player-hotkey-content com as 7 linhas de configuracao
+          (igual ao formato atual de .hotkey-row)
+        * Se recolhendo: remove o .player-hotkey-content
+
+    O estado de expansao deve ser armazenado de forma que persista
+    mesmo quando buildHotkeyConfig for chamado novamente (ex: apos
+    finalizeRebinding). Sugestao: usar game.expandedHotkeyPlayers = new Set()
+    que armazena indices dos jogadores atualmente expandidos.
+
+    FLUXO COM REBIND:
+      1. finalizeRebinding e chamado
+      2. finalizeRebinding chama buildHotkeyConfig(game)
+      3. buildHotkeyConfig itera sobre todos jogadores:
+         - Para cada jogador, verifica se game.expandedHotkeyPlayers.has(i)
+         - Se sim, gera o botao com classe .expanded + o .player-hotkey-content
+         - Se nao, gera apenas o botao sem .expanded
+      4. Apos rebuild, aplica deteccao de conflitos em todos .key-btn
+
+4.2 — BOTAO DE JOGADOR EXPANDIDO
+
+  Quando expandido, o .player-hotkey-content contem:
+    <h3 style="color:{COR_DO_JOGADOR};margin-bottom:4px;font-size:13px;">
+      {NOME_DO_JOGADOR} - Key Bindings
+    </h3>
+    Seguido das 7 .hotkey-row com .key-btn
+
+  O estilo visual deve ser identico ao atual (mesmo CSS de .hotkey-row,
+  .action, .key-btn, etc.), apenas reorganizado dentro do novo container.
+
+================================================================================
+5. REQUISITOS DETALHADOS - DETECCAO DE CONFLITOS (AMBOS OS CONTEXTOS)
+================================================================================
+
+5.1 — FUNCAO checkKeyConflicts()
+
+  Crie uma nova funcao global:
+
+    function checkKeyConflicts() {
+      // 1. Coletar TODOS os .key-btn no documento
+      // 2. Para cada botao, obter: playerIndex, actionKey, teclaAtual
+      // 3. Para cada botao, verificar se a MESMA tecla aparece em
+      //    algum outro jogador (playerIndex diferente) para QUALQUER acao
+      // 4. Se conflito encontrado:
+      //    a. Adiciona classe 'conflict' ao botao
+      //    b. Define btn.title = "Conflito: {NomeJogador} usa "
+      //       + "{Tecla} para {Acao correspondente}"
+      //    c. Exemplo: btn.title = "Conflito: P2 usa W para Move Up"
+      // 5. Se NENHUM conflito:
+      //    a. Remove classe 'conflict' do botao
+      //    b. Remove btn.title (ou define title vazio)
+    }
+
+  IMPORTANTE: A verificacao deve ser feita DA PERSPECTIVA DE CADA BOTAO.
+  Para o botao do Player 1 acao "up" com tecla "w":
+    - Procura em Player 2, 3, 4 (se existirem) se alguma acao usa "w"
+    - Se Player 2 tiver "w" para "up": conflito
+    - Se Player 2 tiver "w" para "down": conflito tambem
+    - O title deve dizer exatamente qual jogador e qual acao
+
+  A funcao deve ser CHAMADA apos:
+    - finalizeRebinding (sempre)
+    - buildHotkeyConfig (sempre, no final)
+    - Sempre que um .hotkey-config-inline for criado na tela de selecao
+
+5.2 — ONDE LER AS TECLAS PARA DETECCAO
+
+  Contexto A (tela de selecao): leia de preGameKeybinds (ou tempKeybinds)
+  Contexto B (durante partida): leia de game.players[i].keybinds
+
+  Para simplificar, a funcao checkKeyConflicts() deve aceitar uma fonte
+  de dados:
+
+    function checkKeyConflicts(keybindSource) {
+      // keybindSource: funcao (playerIndex, action) => teclaAtual
+      // ou simplesmente le do local correto baseado no contexto
+    }
+
+  Alternativa: criar duas funcoes ou usar um parametro booleano.
+
+  RECOMENDACAO: Como a deteccao precisa ser chamada apos rebuild, e o
+  rebuild do Contexto B usa game.players, e o Contexto A usa dados
+  temporarios, crie:
+
+    function checkKeyConflicts(getKeybindFn) {
+      // getKeybindFn(playerIndex, action) retorna a string da tecla
+      const allBtns = document.querySelectorAll('.key-btn');
+      for (const btn of allBtns) {
+        const pi = parseInt(btn.dataset.player);
+        const act = btn.dataset.action;
+        const currentKey = getKeybindFn(pi, act);
+        let conflictMsg = '';
+        // Verifica todos os outros jogadores
+        for (let otherPi = 0; otherPi < MAX_PLAYERS; otherPi++) {
+          if (otherPi === pi) continue;
+          const otherKey = getKeybindFn(otherPi, 'up'); // etc para cada acao
+          // ... verifica todas as 7 acoes do outro jogador
+        }
+        // Aplica ou remove classe conflict
+      }
+    }
+
+  Mas isso pode ser simplificado: como cada .key-btn ja tem
+  data-player e data-action, e o texto do botao e a tecla atual,
+  podemos simplesmente comparar os textos de todos os botoes.
+
+  SIMPLIFICACAO: comparar textContent de todos .key-btn com o mesmo
+  texto (tecla), excluindo botoes com classe .waiting, e verificar
+  se o data-player e diferente.
+
+    function checkKeyConflicts() {
+      const btns = document.querySelectorAll('.key-btn:not(.waiting)');
+      // Para cada par de botoes (i, j) com i < j:
+      //   Se textContent igual E data-player diferente:
+      //     Marca AMBOS como conflito
+      //     Title um do outro
+    }
+
+  Esta abordagem e mais simples e funciona em ambos os contextos sem
+  parametros adicionais.
+
+================================================================================
+6. DETALHES DE IMPLEMENTACAO
+================================================================================
+
+6.1 — VARIAVEIS GLOBAIS NOVAS
+
+    let preGameKeybinds = {};  // Armazena keybinds configurados na tela
+                               // de selecao, antes do jogo comecar.
+                               // Estrutura: { 0: { up:'w', down:'s', ... },
+                               //              1: { up:'arrowup', ... } }
+
+    // (rebindingPlayer e rebindingAction ja existem)
+
+6.2 — ALTERACAO NO CONSTRUTOR Player (linha ~1198)
+
+    No construtor, apos definir this.playerIndex:
+
+      // Usar keybinds pre-configurados na tela de selecao, se existirem
+      if (typeof preGameKeybinds !== 'undefined' && preGameKeybinds[playerIndex]) {
+        this.keybinds = { ...preGameKeybinds[playerIndex] };
+      } else {
+        this.keybinds = { ...DEFAULT_KEYBINDS[playerIndex] };
+      }
+
+6.3 — ALTERACAO EM showClassSelection() > buildPanels()
+
+    No loop de criacao dos paineis, apos o bloco classIcons:
+
+      // Botao toggle de hotkey
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'toggle-hotkey-btn';
+      toggleBtn.textContent = 'Configure Hotkeys';
+      toggleBtn.dataset.playerIndex = i;
+      panel.appendChild(toggleBtn);
+
+      toggleBtn.addEventListener('click', () => {
+        const isExpanded = toggleBtn.textContent === 'Hide Hotkeys';
+        if (isExpanded) {
+          // Recolher
+          toggleBtn.textContent = 'Configure Hotkeys';
+          const inline = panel.querySelector('.hotkey-config-inline');
+          if (inline) inline.remove();
+        } else {
+          // Expandir
+          toggleBtn.textContent = 'Hide Hotkeys';
+          const inlineDiv = document.createElement('div');
+          inlineDiv.className = 'hotkey-config-inline';
+          // Gerar HTML das 7 teclas
+          const kb = preGameKeybinds[i] || { ...DEFAULT_KEYBINDS[i] };
+          const actions = [
+            { key: 'up', label: 'Move Up' },
+            { key: 'down', label: 'Move Down' },
+            { key: 'left', label: 'Move Left' },
+            { key: 'right', label: 'Move Right' },
+            { key: 'interact', label: 'Interact' },
+            { key: 'ability', label: 'Ability' },
+            { key: 'use', label: 'Use/Cycle Item' }
+          ];
+          let html = '';
+          for (const act of actions) {
+            const keyName = (kb[act.key] || '').toString();
+            html += '<div class="hotkey-row">';
+            html += '<span class="action">' + act.label + '</span>';
+            html += '<button class="key-btn" data-player="' + i + '" data-action="' + act.key + '">' + keyName.toUpperCase() + '</button>';
+            html += '</div>';
+          }
+          inlineDiv.innerHTML = html;
+          panel.appendChild(inlineDiv);
+          // Adiciona listeners nos .key-btn
+          inlineDiv.querySelectorAll('.key-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const pi = parseInt(this.dataset.player);
+              const act = this.dataset.action;
+              rebindingPlayer = pi;
+              rebindingAction = act;
+              document.querySelectorAll('.key-btn').forEach(b => b.classList.remove('waiting'));
+              this.classList.add('waiting');
+              this.textContent = '...';
+            });
+          });
+          // Verifica conflitos iniciais
+          checkKeyConflicts();
+        }
+      });
+
+6.4 — ALTERACAO EM finalizeRebinding(keyName)
+
+    Apos a linha p.keybinds[rebindingAction] = keyName:
+
+      // Se estamos na tela de selecao (preGameKeybinds existe e o
+      // jogador nao foi criado ainda), tambem atualizar preGameKeybinds
+      if (!game.players[rebindingPlayer]) {
+        if (!preGameKeybinds[rebindingPlayer]) {
+          preGameKeybinds[rebindingPlayer] = { ...DEFAULT_KEYBINDS[rebindingPlayer] };
+        }
+        preGameKeybinds[rebindingPlayer][rebindingAction] = keyName;
+      }
+
+      // Apos definir, chamar checkKeyConflicts() para atualizar indicadores
+      // (checkKeyConflicts deve ser chamada APOS rebuild do HTML,
+      // entao a chamada deve ser dentro de buildHotkeyConfig ou
+      // apos a atualizacao manual dos botoes na tela de selecao)
+
+    Para o Contexto A (tela de selecao), como nao queremos reconstruir
+    todo o HTML, apenas atualize o texto do botao e chame conflitos:
+
+      // Atualizar texto do botao que estava esperando
+      const waitingBtn = document.querySelector('.key-btn.waiting');
+      if (waitingBtn) {
+        waitingBtn.textContent = keyName.toUpperCase();
+        waitingBtn.classList.remove('waiting');
+      }
+      checkKeyConflicts();
+
+6.5 — ALTERACAO EM buildHotkeyConfig(game) (Contexto B)
+
+    Reescrever completamente para:
+
+      function buildHotkeyConfig(game) {
+        const container = document.getElementById('hotkey-config');
+        let html = '<h3>Key Bindings</h3>';
+        for (let i = 0; i < game.playerCount; i++) {
+          const p = game.players[i];
+          if (!p) continue;
+          const color = ['#4488ff','#ff8844','#44ff44','#ff44ff'][i] || '#ccc';
+          const keysList = ['up','down','left','right','interact','ability','use']
+            .map(a => p.keybinds[a].toUpperCase()).join(', ');
+          const isExpanded = game.expandedHotkeyPlayers && game.expandedHotkeyPlayers.has(i);
+
+          html += '<button class="player-hotkey-toggle" data-player="' + i + '" data-expanded="' + (isExpanded ? '1' : '0') + '">';
+          html += '<span style="color:' + color + ';font-weight:bold;">P' + (i + 1) + '</span>';
+          html += ' (' + p.name + ') <span style="color:#666;font-size:11px;">[' + keysList + ']</span>';
+          html += '</button>';
+
+          if (isExpanded) {
+            html += '<div class="player-hotkey-content">';
+            html += '<h3 style="color:' + color + ';margin:0 0 6px;font-size:13px;">' + p.name + ' - Key Bindings</h3>';
+            const actions = [
+              { key: 'up', label: 'Move Up' },
+              { key: 'down', label: 'Move Down' },
+              { key: 'left', label: 'Move Left' },
+              { key: 'right', label: 'Move Right' },
+              { key: 'interact', label: 'Interact' },
+              { key: 'ability', label: 'Ability' },
+              { key: 'use', label: 'Use/Cycle Item' }
+            ];
+            for (const act of actions) {
+              html += '<div class="hotkey-row">';
+              html += '<span class="action">' + act.label + '</span>';
+              html += '<button class="key-btn" data-player="' + i + '" data-action="' + act.key + '">' + p.keybinds[act.key].toUpperCase() + '</button>';
+              html += '</div>';
+            }
+            html += '</div>';
+          }
+        }
+        container.innerHTML = html;
+
+        // Listeners para botoes de toggle dos jogadores
+        container.querySelectorAll('.player-hotkey-toggle').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const pi = parseInt(btn.dataset.player);
+            if (!game.expandedHotkeyPlayers) game.expandedHotkeyPlayers = new Set();
+            if (game.expandedHotkeyPlayers.has(pi)) {
+              game.expandedHotkeyPlayers.delete(pi);
+            } else {
+              game.expandedHotkeyPlayers.add(pi);
+            }
+            buildHotkeyConfig(game);
+          });
+        });
+
+        // Listeners para key-btn (mesmo codigo existente)
+        container.querySelectorAll('.key-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const pi = parseInt(btn.dataset.player);
+            const act = btn.dataset.action;
+            rebindingPlayer = pi;
+            rebindingAction = act;
+            container.querySelectorAll('.key-btn').forEach(b => b.classList.remove('waiting'));
+            btn.classList.add('waiting');
+            btn.textContent = '...';
+          });
+        });
+
+        // Deteccao de conflitos apos renderizar
+        checkKeyConflicts();
+      }
+
+6.6 — INICIALIZACAO DE expandedHotkeyPlayers
+
+    No constructor da classe Game:
+      this.expandedHotkeyPlayers = new Set();
+
+    Em loadMap() e restart():
+      this.expandedHotkeyPlayers = new Set();
+
+6.7 — CANCELAMENTO DE REBIND NA TELA DE SELECAO
+
+    Ao pressionar Escape durante rebinding na tela de selecao:
+      - O keydown listener ja trata Escape chamando cancelRebinding()
+      - cancelRebinding() chama buildHotkeyConfig(game)
+      - Mas durante a tela de selecao, buildHotkeyConfig pode nao
+        refletir o estado correto (pois #hotkey-config e da settings)
+      - SOLUCAO: Modificar cancelRebinding para tambem limpar o
+        estado de waiting nos .key-btn da tela de selecao:
+
+        function cancelRebinding() {
+          if (rebindingPlayer !== null) {
+            // Verificar se estamos na tela de selecao
+            const isPreGame = !game.players[rebindingPlayer];
+            if (isPreGame) {
+              // Restaurar texto do botao waiting
+              const waitingBtns = document.querySelectorAll('.key-btn.waiting');
+              waitingBtns.forEach(btn => {
+                const pi = parseInt(btn.dataset.player);
+                const act = btn.dataset.action;
+                const kb = preGameKeybinds[pi] || DEFAULT_KEYBINDS[pi];
+                btn.textContent = (kb[act] || '').toUpperCase();
+                btn.classList.remove('waiting');
+              });
+              // Se estava na settings, chama buildHotkeyConfig
+              if (document.getElementById('settings-panel').classList.contains('open')) {
+                buildHotkeyConfig(game);
+              }
+            } else {
+              buildHotkeyConfig(game);
+            }
+          }
+          rebindingPlayer = null;
+          rebindingAction = null;
+        }
+
+================================================================================
+7. FUNCAO checkKeyConflicts() - IMPLEMENTACAO COMPLETA
+================================================================================
+
+  function checkKeyConflicts() {
+    const btns = document.querySelectorAll('.key-btn:not(.waiting)');
+    // Mapa: tecla -> array de botoes (para O(1) lookup)
+    const keyMap = {};
+    for (const btn of btns) {
+      const key = btn.textContent.trim().toLowerCase();
+      if (!key || key === '...') continue;
+      if (!keyMap[key]) keyMap[key] = [];
+      keyMap[key].push(btn);
+    }
+
+    // Para cada tecla com 2+ botoes de jogadores DIFERENTES
+    for (const [key, btnList] of Object.entries(keyMap)) {
+      // Agrupa por playerIndex
+      const playerGroups = {};
+      for (const btn of btnList) {
+        const pi = btn.dataset.player;
+        if (!playerGroups[pi]) playerGroups[pi] = [];
+        playerGroups[pi].push(btn);
+      }
+      const uniquePlayers = Object.keys(playerGroups);
+      if (uniquePlayers.length < 2) continue; // sem conflito (mesmo jogador)
+
+      // Ha conflito: marcar todos os botoes desses players
+      for (const [pi, buttons] of Object.entries(playerGroups)) {
+        // Encontrar o nome do jogador
+        let playerName = 'P' + (parseInt(pi) + 1);
+        // Construir mensagem de conflito
+        const conflicts = [];
+        for (const [otherPi, otherBtns] of Object.entries(playerGroups)) {
+          if (otherPi === pi) continue;
+          const otherName = 'P' + (parseInt(otherPi) + 1);
+          for (const ob of otherBtns) {
+            const actionLabel = {
+              'up': 'Move Up', 'down': 'Move Down',
+              'left': 'Move Left', 'right': 'Move Right',
+              'interact': 'Interact', 'ability': 'Ability',
+              'use': 'Use/Cycle Item'
+            }[ob.dataset.action] || ob.dataset.action;
+            conflicts.push(otherName + ' usa ' + key.toUpperCase() + ' para ' + actionLabel);
+          }
+        }
+        for (const btn of buttons) {
+          btn.classList.add('conflict');
+          btn.title = 'Conflito: ' + conflicts.join('; ');
+        }
+      }
+    }
+
+    // Botoes SEM conflito: limpar marcacao
+    for (const btn of btns) {
+      const key = btn.textContent.trim().toLowerCase();
+      if (!key || key === '...') continue;
+      const list = keyMap[key] || [];
+      const playerSet = new Set(list.map(b => b.dataset.player));
+      if (playerSet.size < 2) {
+        btn.classList.remove('conflict');
+        btn.title = '';
+      }
+    }
+  }
+
+================================================================================
+8. RESUMO DAS ALTERACOES NO CODIGO
+================================================================================
+
+  1. BLOCO <style> — Adicionar classes:
+     .toggle-hotkey-btn
+     .hotkey-config-inline
+     .key-btn.conflict
+     .player-hotkey-toggle
+     .player-hotkey-toggle.expanded
+     .player-hotkey-content
+
+  2. ANTES DA CLASSE Game (ou no inicio do script) — Adicionar:
+     let preGameKeybinds = {};
+
+  3. CONSTRUTOR Player (linha ~1219) — ALTERAR:
+     this.keybinds = preGameKeybinds[playerIndex]
+       ? { ...preGameKeybinds[playerIndex] }
+       : { ...DEFAULT_KEYBINDS[playerIndex] };
+
+  4. CONSTRUCTOR Game — ADICIONAR:
+     this.expandedHotkeyPlayers = new Set();
+
+  5. METODO showClassSelection() > buildPanels() — ADICIONAR:
+     Botao toggle + .hotkey-config-inline com key-buttons
+
+  6. METODO loadMap() — ADICIONAR:
+     this.expandedHotkeyPlayers = new Set();
+     preGameKeybinds = {}; (para liberar memoria)
+
+  7. METODO restart() — ADICIONAR:
+     this.expandedHotkeyPlayers = new Set();
+
+  8. FUNCAO buildHotkeyConfig(game) — REESCREVER:
+     Mostrar botoes de jogador com toggle inline
+
+  9. FUNCAO finalizeRebinding(keyName) — ALTERAR:
+     Atualizar preGameKeybinds se for pre-game
+     Chamar checkKeyConflicts() apos rebuild/update
+
+  10. FUNCAO cancelRebinding() — ALTERAR:
+      Limpar waiting da tela de selecao se necessario
+
+  11. NOVA FUNCAO GLOBAL: checkKeyConflicts()
+      Implementar deteccao de conflitos entre jogadores
+
+================================================================================
+9. TESTES E VERIFICACAO
+================================================================================
+
+  Apos implementar, verifique:
+
+  1. Na tela de selecao de classes:
+     - Cada painel de jogador tem um botao "Configure Hotkeys"
+     - Ao clicar, as 7 teclas aparecem dentro do painel
+     - Ao clicar em uma tecla, o botao fica amarelo (classe waiting)
+     - Ao pressionar uma tecla no teclado, o botao atualiza
+     - Se dois jogadores usarem a mesma tecla, borda vermelha + tooltip
+     - Ao recolher (Hide Hotkeys), as teclas desaparecem
+     - Ao iniciar o jogo, as teclas configuradas sao respeitadas
+
+  2. No painel de configuracoes durante a partida:
+     - Abrir settings mostra botoes P1, P2, etc (nao expandido)
+     - Cada botao mostra as teclas atuais como preview
+     - Ao clicar em P1, expande as 7 teclas abaixo
+     - Ao clicar em P2, expande as 7 teclas abaixo (P1 continua expandido)
+     - Clicar novamente no mesmo jogador recolhe
+     - Conflitos sao detectados e mostrados com borda vermelha + tooltip
+     - Rebinding funciona normalmente
+
+  3. Conflitos:
+     - Conflitos so sao detectados entre JOGADORES DIFERENTES
+     - Um mesmo jogador pode ter a mesma tecla em acoes diferentes
+       (ex: usar 'e' para Interact e 'e' para Ability) — isso NAO e conflito
+     - Conflito entre P1 e P2: ambos os botoes ficam vermelhos
+     - Conflito entre P1, P2 e P3: todos os 3 botoes ficam vermelhos
+     - Tooltip mostra exatamente quem esta usando a tecla para qual acao
+     - Se o conflito for resolvido (um dos jogadores muda a tecla),
+       a borda vermelha desaparece
+
+================================================================================
+10. ESCALABILIDADE E OBSERVACOES
+================================================================================
+
+  - O sistema funciona para QUALQUER numero de jogadores (MAX_PLAYERS).
+    Nenhum hardcoded alem de MAX_PLAYERS.
+  - preGameKeybinds e liberado apos loadMap() para economizar memoria.
+  - expandedHotkeyPlayers e um Set, entao suporta qualquer numero
+    de jogadores expandidos simultaneamente sem custo adicional.
+  - A funcao checkKeyConflicts() e O(N*M) onde N = numero de botoes
+    e M = numero de teclas unicas. Para ate 4 jogadores * 7 acoes = 28
+    botoes, a performance e irrelevante.
+  - Se no futuro houver mais acoes (ex: 10 acoes por jogador), basta
+    adicionar ao array actions em ambos os contextos.
+  - Para adicionar suporte a mais jogadores (MAX_PLAYERS > 4):
+    - Nenhuma alteracao no sistema de hotkey config
+    - DEFAULT_KEYBINDS precisa de novas entradas
+    - preGameKeybinds e expandido automaticamente
+
+================================================================================
+FIM DO PROMPT
+================================================================================

@@ -4598,5 +4598,262 @@ ALTERACAO 30 — TEXTO "Artifact" ACIMA DOS ARTEFATOS
         ctx.drawImage(lightmap, 0, 0) e antes de renderDoors.
 
 ================================================================================
+CHANGELOG - MAIO 2026 (CONFIGURACAO DE HOTKEYS POR JOGADOR COM DETECCAO DE CONFLITOS)
+================================================================================
+
+ALTERACAO 31 — SISTEMA DE CONFIGURACAO DE HOTKEYS POR JOGADOR COM DETECCAO DE CONFLITOS
+
+   PROBLEMA: A configuracao de hotkeys durante a tela de selecao de classes
+   nao era possivel — os jogadores so podiam configurar teclas APOS o jogo
+   comecar, atraves do painel de settings. Durante a partida, o painel de
+   configuracao mostrava todas as teclas de TODOS os jogadores expandidas
+   simultaneamente, poluindo a interface. Tambem nao havia deteccao ou aviso
+   quando dois jogadores usavam a mesma tecla para acoes diferentes.
+
+   SOLUCAO: Implementado sistema completo de configuracao de hotkeys que
+   funciona em DOIS contextos (tela de selecao e durante partida), com
+   deteccao automatica de conflitos entre jogadores.
+
+   CONTEXTO A — TELA DE SELECAO DE CLASSES:
+     Cada painel de jogador (.player-setup-panel) ganha um botao
+     "Configure Hotkeys" que expande/recolhe a configuracao das 7 teclas
+     inline dentro do proprio painel. A configuracao usa o mesmo sistema
+     de rebinding ja existente. As teclas configuradas sao armazenadas em
+     preGameKeybinds[] (global) e transferidas para o construtor Player
+     quando o jogo inicia.
+
+   CONTEXTO B — PAINEL DE CONFIGURACOES DURANTE A PARTIDA:
+     O sistema agora mostra botoes colapsados com o nome de cada jogador
+     (ex: "P1 - Leandro [W, A, S, D, E, F, R]"). Ao clicar, as 7 teclas
+     expandem inline abaixo. Outro clique recolhe (toggle). Multiplos
+     jogadores podem estar expandidos simultaneamente.
+
+   DETECCAO DE CONFLITOS:
+     Nova funcao checkKeyConflicts() varre todos .key-btn no documento,
+     agrupa por texto da tecla, e verifica se a mesma tecla aparece em
+     jogadores diferentes. Em caso de conflito: borda vermelha + classe
+     .conflict + tooltip informando qual jogador e qual acao usa a tecla.
+     Conflitos NAO bloqueiam o rebind — apenas avisam visualmente.
+     O mesmo jogador pode usar a mesma tecla para acoes diferentes sem
+     gerar conflito.
+
+   MUDANCAS NO CODIGO:
+     a) CSS — NOVAS 5 CLASSES:
+        .toggle-hotkey-btn, .hotkey-config-inline, .key-btn.conflict,
+        .player-hotkey-toggle, .player-hotkey-toggle.expanded,
+        .player-hotkey-content
+
+     b) NOVA VARIAVEL GLOBAL preGameKeybinds = {}:
+        Armazena { playerIndex: { up:'w', down:'s', ... } } durante
+        a tela de selecao. Liberada em loadMap() apos criar players.
+
+     c) Player constructor — MODIFICADO (linha ~1278):
+        this.keybinds = preGameKeybinds[playerIndex]
+          ? { ...preGameKeybinds[playerIndex] }
+          : { ...DEFAULT_KEYBINDS[playerIndex] };
+
+     d) Game constructor — NOVA PROPRIEDADE:
+        this.expandedHotkeyPlayers = new Set();
+        Rastreia quais jogadores estao expandidos no painel de settings.
+
+     e) Game.loadMap() — ADICIONADO:
+        this.expandedHotkeyPlayers = new Set();
+        preGameKeybinds = {}; (libera memoria)
+
+     f) Game.restart() — ADICIONADO:
+        this.expandedHotkeyPlayers = new Set();
+
+     g) Game.showClassSelection() > buildPanels() — MODIFICADO:
+        Apos classIcons, adiciona botao "Configure Hotkeys" que faz
+        toggle de um div .hotkey-config-inline com as 7 teclas.
+        Listeners nos .key-btn iniciam rebinding.
+
+     h) buildHotkeyConfig(game) — REESCRITO:
+        Mostra botoes .player-hotkey-toggle por jogador com preview
+        das teclas. Ao clicar, toggle expande .player-hotkey-content
+        com as 7 linhas. Estado persiste via expandedHotkeyPlayers Set.
+
+     i) finalizeRebinding(keyName) — MODIFICADO:
+        Se player ainda nao foi criado (pre-game): atualiza
+        preGameKeybinds em vez de p.keybinds, atualiza botao waiting
+        manualmente, chama checkKeyConflicts().
+
+     j) cancelRebinding() — MODIFICADO:
+        Detecta contexto pre-game e restaura texto dos botoes
+        a partir de preGameKeybinds. Senao chama buildHotkeyConfig().
+
+     k) checkKeyConflicts() — NOVA FUNCAO:
+        Varre todos .key-btn:not(.waiting), agrupa por tecla.
+        Se 2+ jogadores usam a mesma tecla: marca .conflict + title.
+        Remove .conflict quando conflito resolvido.
+
+================================================================================
+SECAO 60 — SISTEMA DE CONFIGURACAO DE HOTKEYS POR JOGADOR COM DETECCAO DE CONFLITOS
+================================================================================
+
+60.1 — CONCEITO
+
+   O sistema de configuracao de hotkeys por jogador permite que cada
+   jogador configure suas 7 teclas (Move Up, Move Down, Move Left,
+   Move Right, Interact, Ability, Use/Cycle Item) de forma independente,
+   tanto ANTES do jogo comecar (na tela de selecao de classes) quanto
+   DURANTE a partida (no painel de settings).
+
+   O sistema detecta automaticamente conflitos: quando dois ou mais
+   jogadores configuram a mesma tecla, ambos os botoes recebem borda
+   vermelha e um tooltip informando quem mais usa aquela tecla. O
+   conflito e apenas um AVISO visual — nao bloqueia o rebind.
+
+60.2 — ARQUITETURA DOS DOIS CONTEXTOS
+
+   CONTEXTO A (Tela de Selecao): Antes do jogo comecar, game.players[]
+   ainda nao existe. As teclas configuradas sao armazenadas no objeto
+   global preGameKeybinds = { playerIndex: { up:'w', ... } }.
+   Quando loadMap() cria os players, o construtor Player consulta
+   preGameKeybinds[playerIndex] para inicializar this.keybinds.
+
+   CONTEXTO B (Durante Partida): game.players[] ja existe. O painel
+   de settings (#settings-panel > #hotkey-config) mostra botoes
+   colapsados por jogador. As teclas sao lidas/escritas diretamente
+   em game.players[i].keybinds.
+
+   O sistema de rebinding (rebindingPlayer, rebindingAction,
+   finalizeRebinding, cancelRebinding) funciona da mesma forma em
+   ambos os contextos, com logica condicional para cada caso.
+
+60.3 — ESTRUTURA DE DADOS
+
+   preGameKeybinds: Object
+     Chave: playerIndex (0, 1, 2, 3)
+     Valor: { up: 'w', down: 's', left: 'a', right: 'd',
+              interact: 'e', ability: 'f', use: 'r' }
+     Criado: na declaracao global (let preGameKeybinds = {})
+     Preenchido: durante rebind na tela de selecao
+     Consumido: no construtor Player
+     Liberado: em loadMap() (preGameKeybinds = {})
+
+   Game.expandedHotkeyPlayers: Set<number>
+     Armazena indices dos jogadores atualmente expandidos no painel
+     de settings. Criado no constructor, resetado em loadMap/restart.
+     Usado por buildHotkeyConfig para decidir se renderiza
+     .player-hotkey-content para cada jogador.
+
+   rebindingPlayer: number | null
+   rebindingAction: string | null
+     Variaveis globais que rastreiam qual jogador e qual acao estao
+     sendo reconfigurados. Usadas por keydown/keyup para interceptar
+     a proxima tecla pressionada.
+
+60.4 — FLUXO DE REBIND (AMBOS OS CONTEXTOS)
+
+   1. Usuario clica em um .key-btn
+   2. Handler define rebindingPlayer = pi, rebindingAction = act
+   3. Remove classe .waiting de todos .key-btn
+   4. Adiciona .waiting ao botao clicado, texto = '...'
+   5. Usuario pressiona uma tecla no teclado
+   6. Keydown listener detecta rebindingPlayer !== null:
+      a. e.preventDefault() (impede acao normal da tecla)
+      b. Escape: chama cancelRebinding()
+      c. Qualquer outra: chama finalizeRebinding(keyName)
+   7. finalizeRebinding(keyName):
+      a. Se player existe (p = game.players[rebindingPlayer]):
+         - Limpa keys[p.keybinds[rebindingAction]] = false
+         - Define p.keybinds[rebindingAction] = keyName
+         - Reseta rebindingPlayer/rebindingAction = null
+         - Chama buildHotkeyConfig(game)
+      b. Se player NAO existe (pre-game):
+         - Atualiza preGameKeybinds[rebindingPlayer][rebindingAction]
+         - Atualiza texto do botao .waiting
+         - Remove classe .waiting
+         - Reseta rebindingPlayer/rebindingAction
+         - Chama checkKeyConflicts()
+   8. buildHotkeyConfig() (quando chamada) redesenha o HTML e
+      chama checkKeyConflicts() ao final.
+
+60.5 — ALGORITMO DE DETECCAO DE CONFLITOS
+
+   checkKeyConflicts():
+     1. Seleciona todos .key-btn:not(.waiting) no documento
+     2. Constroi mapa: keyMap[tecla] = [btn1, btn2, ...]
+     3. Para cada tecla com 2+ botoes de jogadores diferentes:
+        a. Agrupa por data-player
+        b. Se 2+ jogadores: marca todos como .conflict
+        c. Constroi tooltip: "Conflito: P2 usa W para Move Up"
+     4. Para botoes sem conflito: remove .conflict e limpa title
+
+   REGRAS:
+     - Mesmo jogador com mesma tecla em acoes diferentes: NAO conflito
+     - Jogadores diferentes com mesma tecla: conflito (ambos marcados)
+     - 3+ jogadores: todos os botoes conflitantes marcados
+     - Conflito NAO bloqueia rebind — apenas avisa
+
+60.6 — CSS DO SISTEMA
+
+   .toggle-hotkey-btn:
+     Botao "Configure Hotkeys" / "Hide Hotkeys" nos paineis de selecao.
+     Fundo #1a1a2e, borda #444, padding 6px 10px, width 100%.
+
+   .hotkey-config-inline:
+     Container das 7 linhas de teclas dentro do painel de selecao.
+     Fundo rgba(0,0,0,0.3), borda #333, padding 6px.
+
+   .key-btn.conflict:
+     Borda vermelha #ff3333, texto #ff6666, box-shadow vermelho.
+     Aplicado quando checkKeyConflicts detecta conflito.
+
+   .player-hotkey-toggle:
+     Botao de jogador no painel de settings durante a partida.
+     Fundo #1a1a2e, borda #444, padding 8px 12px, text-align left.
+     Mostra: "<span color> P1 </span> (Nome) [W, A, S, D, E, F, R]"
+
+   .player-hotkey-toggle.expanded:
+     Quando expandido: borda #4fc3f7, cor #4fc3f7.
+
+   .player-hotkey-content:
+     Container expandido das 7 teclas de um jogador no settings.
+     Padding 6px 8px, borda esquerda 2px #4fc3f7.
+
+60.7 — INICIALIZACAO E RESET
+
+   let preGameKeybinds = {}:
+     Declarado antes da classe Game. Objeto global.
+
+   Game.constructor:
+     this.expandedHotkeyPlayers = new Set()
+
+   Game.loadMap():
+     this.expandedHotkeyPlayers = new Set()
+     preGameKeybinds = {}
+
+   Game.restart():
+     this.expandedHotkeyPlayers = new Set()
+     (loadMap() subsequente tambem reseta)
+
+   Player.constructor:
+     this.keybinds = preGameKeybinds[playerIndex]
+       ? { ...preGameKeybinds[playerIndex] }
+       : { ...DEFAULT_KEYBINDS[playerIndex] }
+
+60.8 — ESCALABILIDADE
+
+   Para adicionar mais acoes (ex: 10 acoes por jogador):
+     1. Adicionar ao array actions em ambos buildPanels e buildHotkeyConfig
+     2. Adicionar ao DEFAULT_KEYBINDS para cada jogador
+     3. Adicionar ao actionLabel em checkKeyConflicts
+     4. Nenhuma alteracao estrutural necessaria
+
+   Para suportar mais jogadores (MAX_PLAYERS > 4):
+     1. Nenhuma alteracao no sistema de hotkey config
+     2. DEFAULT_KEYBINDS precisa de novas entradas
+     3. preGameKeybinds e expandido automaticamente
+     4. checkKeyConflicts funciona com qualquer N
+
+   Para adicionar bloqueio de conflitos (nao apenas aviso):
+     1. Em finalizeRebinding, apos calcular keyName:
+        Chamar checkKeyConflicts com a tecla candidata
+     2. Se houver conflito, mostrar confirmacao/perguntar
+     3. Se usuario aceitar, prosseguir com o rebind
+
+================================================================================
 FIM DA DOCUMENTACAO
 ================================================================================
