@@ -1592,9 +1592,9 @@ class Game {
     this.players = [];
     const count = this.playerCount;
     for (let i = 0; i < count; i++) {
-      const ox = i > 0 ? ((i % 2 === 1 ? 1 : -1) * Math.ceil(i / 2)) : 0;
-      const sx = Math.max(0, Math.min(this.mapWidth - 1, this.playerSpawn.x + ox));
-      const sy = this.playerSpawn.y;
+      const spawnPos = this.findSpawnPosition(this.playerSpawn.x, this.playerSpawn.y, i);
+      const sx = spawnPos.x;
+      const sy = spawnPos.y;
       const p = new Player(sx, sy, i, this.playerNames[i] || ('P' + (i + 1)), this.playerClasses[i] || 'none');
       if (i === 0) {
         p.px = this.playerSpawn.x * TILE_SIZE + TILE_SIZE / 2;
@@ -1740,6 +1740,43 @@ class Game {
     this.showClassSelection();
   }
 
+  isWalkableTile(tx, ty) {
+    if (tx < 0 || ty < 0 || tx >= this.mapWidth || ty >= this.mapHeight) return false;
+    const tile = this.tiles[ty][tx];
+    if (tile === 'O' || tile === 'W') return false;
+    if (tile === 'd') {
+      const door = this.doorEntities.find(d => d.tileX === tx && d.tileY === ty);
+      if (door && door.solid) return false;
+    }
+    return true;
+  }
+
+  findSpawnPosition(baseX, baseY, playerIndex) {
+    const offsetsX = [0, 1, -1, 2];
+    const offsetsY = [0, 0, 0, 0];
+    let idx = playerIndex;
+    if (idx >= offsetsX.length) idx = 0;
+    let tx = baseX + offsetsX[idx];
+    let ty = baseY + offsetsY[idx];
+    if (this.isWalkableTile(tx, ty)) return { x: tx, y: ty };
+    for (let radius = 1; radius <= 5; radius++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const checkX = baseX + dx;
+        const checkY = baseY;
+        if (this.isWalkableTile(checkX, checkY)) return { x: checkX, y: checkY };
+      }
+      for (let dy = -radius; dy <= radius; dy++) {
+        if (dy === 0) continue;
+        for (let dx = -radius; dx <= radius; dx++) {
+          const checkX = baseX + dx;
+          const checkY = baseY + dy;
+          if (this.isWalkableTile(checkX, checkY)) return { x: checkX, y: checkY };
+        }
+      }
+    }
+    return { x: baseX, y: baseY };
+  }
+
   start() {
     this.loadMap(parseMap(DEFAULT_MAP.join('\n')));
     this.lastTime = performance.now();
@@ -1756,7 +1793,7 @@ class Game {
 
     label.textContent = this.playerCount + ' Player' + (this.playerCount > 1 ? 's' : '');
     minusBtn.disabled = (this.playerCount <= 1);
-    plusBtn.disabled = (this.playerCount >= 2);
+    plusBtn.disabled = (this.playerCount >= MAX_PLAYERS);
 
     // Difficulty selector
     const diffBtns = document.querySelectorAll('#difficulty-selector button');
@@ -1820,8 +1857,8 @@ class Game {
       }
     };
 
-    minusBtn.onclick = () => { if (this.playerCount > 1) { this.playerCount--; label.textContent = this.playerCount + ' Player' + (this.playerCount > 1 ? 's' : ''); minusBtn.disabled = (this.playerCount <= 1); plusBtn.disabled = (this.playerCount >= 2); buildPanels(); } };
-    plusBtn.onclick = () => { if (this.playerCount < 2) { this.playerCount++; label.textContent = this.playerCount + ' Player' + (this.playerCount > 1 ? 's' : ''); minusBtn.disabled = (this.playerCount <= 1); plusBtn.disabled = (this.playerCount >= 2); buildPanels(); } };
+    minusBtn.onclick = () => { if (this.playerCount > 1) { this.playerCount--; label.textContent = this.playerCount + ' Player' + (this.playerCount > 1 ? 's' : ''); minusBtn.disabled = (this.playerCount <= 1); plusBtn.disabled = (this.playerCount >= MAX_PLAYERS); buildPanels(); } };
+    plusBtn.onclick = () => { if (this.playerCount < MAX_PLAYERS) { this.playerCount++; label.textContent = this.playerCount + ' Player' + (this.playerCount > 1 ? 's' : ''); minusBtn.disabled = (this.playerCount <= 1); plusBtn.disabled = (this.playerCount >= MAX_PLAYERS); buildPanels(); } };
 
     buildPanels();
     descEl.textContent = '';
@@ -3366,9 +3403,9 @@ function updateHotbarHUD(game) {
   const numPlayers = alivePlayers.length;
   if (numPlayers === 0) { container.innerHTML = ''; return; }
   const isVertical = game.hotbarLayout === 'vertical';
-  const slotSize = isVertical ? 36 : Math.max(24, Math.min(80, Math.floor(55 * game.hotbarSize / 100)));
-  const fontSizeSlot = isVertical ? 20 : Math.max(14, Math.min(40, Math.floor(28 * game.hotbarSize / 100)));
-  const fontSizeName = isVertical ? 16 : Math.max(10, Math.min(30, Math.floor(23 * game.hotbarSize / 100)));
+  const slotSize = isVertical ? 36 : Math.max(18, Math.min(80, Math.floor(55 * game.hotbarSize / 100)));
+  const fontSizeSlot = isVertical ? 20 : Math.max(10, Math.min(40, Math.floor(28 * game.hotbarSize / 100)));
+  const fontSizeName = isVertical ? 16 : Math.max(8, Math.min(30, Math.floor(23 * game.hotbarSize / 100)));
   const barWidth = isVertical ? 40 : Math.max(20, Math.min(80, Math.floor(50 * game.hotbarSize / 100)));
   const barHeight = isVertical ? 6 : Math.max(4, Math.min(14, Math.floor(10 * game.hotbarSize / 100)));
   const slotGap = isVertical ? 4 : 8;

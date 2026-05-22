@@ -1,0 +1,307 @@
+================================================================================
+MEGA PROMPT - ATIVAR SUPORTE PARA 3 E 4 JOGADORES (MULTIPLAYER)
+================================================================================
+
+ARQUIVO ALVO: SummonGame.html (mesmo diretorio deste prompt)
+DOCUMENTACAO: Documentacao_Completa.txt (mesmo diretorio deste prompt)
+
+INSTRUCOES GLOBAIS:
+- Faca TODAS as alteracoes necessarias no arquivo SummonGame.html.
+- NAO crie nenhum arquivo novo (NAO crie .css, .js, .py, .java, .cpp, .c, ou qualquer outro arquivo separado). Tudo deve permanecer no unico arquivo SummonGame.html.
+- NAO crie documentacao adicional, READMEs, ou arquivos de configuracao.
+- Ao finalizar cada alteracao no codigo HTML, ATUALIZE a Documentacao_Completa.txt com as mudancas feitas, de forma profissional, limpa e bem estruturada (secao CHANGELOG + novas secoes SECAO conforme o padrao ja existente no documento).
+- Siga o estilo de codigo existente: JavaScript puro sem dependencias, Canvas 2D, sem frameworks, sem TypeScript.
+- Mantenha a compatibilidade com o sistema existente.
+- Implemente TUDO agora, sem deixar para depois, sem "TODO" ou "FUTURE WORK".
+
+OBSERVACOES IMPORTANTES:
+- MAX_PLAYERS ja e 4 (constante na linha 367). NAO alterar.
+- DEFAULT_KEYBINDS ja tem entradas para 4 jogadores. NAO alterar.
+- As cores dos jogadores ja tem 4 definidas: ['#4488ff','#ff8844','#44ff44','#ff44ff']. NAO alterar.
+- playerNames e playerClasses ja sao arrays de 4 elementos. NAO alterar.
+- O sistema de camera, lightmap, HUD, hotbar, ability HUD, door rendering, shop system, monster AI - todos ja iteram sobre game.players[] e funcionam com qualquer quantidade.
+
+================================================================================
+1. SELETOR DE NUMERO DE JOGADORES (showClassSelection)
+================================================================================
+
+1.1 - ALTERAR LIMITE DO BOTAO [+]
+No metodo Game.showClassSelection(), localizar:
+
+    plusBtn.disabled = (this.playerCount >= 2);
+
+SUBSTITUIR por:
+
+    plusBtn.disabled = (this.playerCount >= MAX_PLAYERS);
+
+1.2 - ALTERAR CONDICAO DO CLICK DO BOTAO [+]
+Localizar:
+
+    plusBtn.onclick = () => { if (this.playerCount < 2) { ... } };
+
+SUBSTITUIR por:
+
+    plusBtn.onclick = () => { if (this.playerCount < MAX_PLAYERS) { ... } };
+
+1.3 - VERIFICAR SE + E - FUNCIONAM
+As funcoes de click do minusBtn e plusBtn atualizam label.textContent, habilitam/desabilitam botoes, e chamam buildPanels().
+O buildPanels() ja gera dinamicamente baseado em this.playerCount, entao deve funcionar para 3 e 4 jogadores sem alteracoes.
+
+================================================================================
+2. SISTEMA DE SPAWN RESPONSIVO PARA MULTIPLAYER
+================================================================================
+
+2.1 - PROBLEMA ATUAL
+Em Game.loadMap(), o codigo que cria/reposiciona jogadores usa:
+
+    const ox = i > 0 ? ((i % 2 === 1 ? 1 : -1) * Math.ceil(i / 2)) : 0;
+    const sx = Math.max(0, Math.min(this.mapWidth - 1, this.playerSpawn.x + ox));
+    const sy = this.playerSpawn.y;
+
+Isso resulta em:
+  P1: offset=0,  sx=playerSpawn.x,   sy=playerSpawn.y
+  P2: offset=+1, sx=playerSpawn.x+1, sy=playerSpawn.y
+  P3: offset=-1, sx=playerSpawn.x-1, sy=playerSpawn.y
+  P4: offset=+2, sx=playerSpawn.x+2, sy=playerSpawn.y
+
+Problemas:
+  1. Todos compartilham o mesmo Y (sy = playerSpawn.y), podendo sobrepor
+  2. Nao verifica se o tile na posicao calculada e valido (passavel)
+  3. Em mapas futuros, pode haver uma parede (O), moveis (W), ou porta solida (d) na coordenada calculada
+
+2.2 - NOVA LOGICA DE SPAWN
+Substituir TODO o bloco de criacao de jogadores em loadMap() (linhas ~1592 a 1619) por:
+
+    this.players = [];
+    const count = this.playerCount;
+    for (let i = 0; i < count; i++) {
+      // Calcular posicao de spawn responsiva
+      const spawnPos = this.findSpawnPosition(this.playerSpawn.x, this.playerSpawn.y, i);
+      const sx = spawnPos.x;
+      const sy = spawnPos.y;
+      const p = new Player(sx, sy, i, this.playerNames[i] || ('P' + (i + 1)), this.playerClasses[i] || 'none');
+      if (i === 0) {
+        p.px = this.playerSpawn.x * TILE_SIZE + TILE_SIZE / 2;
+        p.py = this.playerSpawn.y * TILE_SIZE + TILE_SIZE / 2;
+        p.tileX = this.playerSpawn.x;
+        p.tileY = this.playerSpawn.y;
+      }
+      p.alive = true;
+      p.hp = p.maxHp;
+      p.interacting = false;
+      p.interactTimer = 0;
+      p.invulnTimer = 0;
+      p.abilityCooldown = 0;
+      p.abilityActive = false;
+      p.abilityTimer = 0;
+      if (p.playerClass === 'scout') p.speed = p.baseSpeed;
+      p.inventory = [null, null, null, null, null];
+      p.selectedSlot = 0;
+      p.useTimer = 0;
+      p.using = false;
+      this.players.push(p);
+    }
+
+2.3 - NOVO METODO: Game.findSpawnPosition(baseX, baseY, playerIndex)
+Adicionar este metodo na classe Game (antes ou depois de loadMap):
+
+    findSpawnPosition(baseX, baseY, playerIndex) {
+      // Calcula offsets baseados no indice do jogador
+      // P1: +0, P2: +1, P3: -1, P4: +2
+      let offsetsX = [0, 1, -1, 2];
+      let offsetsY = [0, 0, 0, 0];
+      
+      if (playerIndex >= offsetsX.length) playerIndex = 0;
+      let tx = baseX + offsetsX[playerIndex];
+      let ty = baseY + offsetsY[playerIndex];
+      
+      // Verifica se a posicao calculada e valida (dentro do mapa e passavel)
+      if (this.isWalkableTile(tx, ty)) {
+        return { x: tx, y: ty };
+      }
+      
+      // Se nao for valida, faz busca em raio crescente ao redor do spawn
+      for (let radius = 1; radius <= 5; radius++) {
+        // Prioriza tiles na horizontal (mesma linha)
+        for (let dx = -radius; dx <= radius; dx++) {
+          const checkX = baseX + dx;
+          const checkY = baseY;
+          if (this.isWalkableTile(checkX, checkY)) {
+            return { x: checkX, y: checkY };
+          }
+        }
+        // Depois tenta linhas acima e abaixo
+        for (let dy = -radius; dy <= radius; dy++) {
+          if (dy === 0) continue; // ja verificamos dy=0
+          for (let dx = -radius; dx <= radius; dx++) {
+            const checkX = baseX + dx;
+            const checkY = baseY + dy;
+            if (this.isWalkableTile(checkX, checkY)) {
+              return { x: checkX, y: checkY };
+            }
+          }
+        }
+      }
+      
+      // Fallback: retorna o proprio spawn mesmo que seja invalido
+      return { x: baseX, y: baseY };
+    }
+
+2.4 - NOVO METODO AUXILIAR: Game.isWalkableTile(tx, ty)
+Adicionar este metodo auxiliar:
+
+    isWalkableTile(tx, ty) {
+      if (tx < 0 || ty < 0 || tx >= this.mapWidth || ty >= this.mapHeight) return false;
+      const tile = this.tiles[ty][tx];
+      if (tile === 'O' || tile === 'W') return false;
+      if (tile === 'd') {
+        const door = this.doorEntities.find(d => d.tileX === tx && d.tileY === ty);
+        if (door && door.solid) return false;
+      }
+      return true;
+    }
+
+Obs: isWalkableTile replica a logica de colisao de Player.canMoveTo() sem a margem de 4px. Apenas verifica se o tile e' fundamentalmente transponivel.
+
+================================================================================
+3. TAMANHO MINIMO DA HOTBAR
+================================================================================
+
+3.1 - REDUZIR CLAMP MINIMO DO SLOT SIZE
+Em updateHotbarHUD(), localizar:
+
+    const slotSize = isVertical ? 36 : Math.max(24, Math.min(80, Math.floor(55 * game.hotbarSize / 100)));
+
+SUBSTITUIR por:
+
+    const slotSize = isVertical ? 36 : Math.max(18, Math.min(80, Math.floor(55 * game.hotbarSize / 100)));
+
+Isso permite slots de ate 18px quando ha muitos jogadores ou hotbarSize baixo.
+
+3.2 - REDUZIR CLAMP MINIMO DO FONT SIZE DO SLOT
+Localizar:
+
+    const fontSizeSlot = isVertical ? 20 : Math.max(14, Math.min(40, Math.floor(28 * game.hotbarSize / 100)));
+
+SUBSTITUIR por:
+
+    const fontSizeSlot = isVertical ? 20 : Math.max(10, Math.min(40, Math.floor(28 * game.hotbarSize / 100)));
+
+Isso permite fonte de icone de ate 10px.
+
+3.3 - REDUZIR CLAMP MINIMO DO FONT SIZE DO NOME
+Localizar:
+
+    const fontSizeName = isVertical ? 16 : Math.max(10, Math.min(30, Math.floor(23 * game.hotbarSize / 100)));
+
+SUBSTITUIR por:
+
+    const fontSizeName = isVertical ? 16 : Math.max(8, Math.min(30, Math.floor(23 * game.hotbarSize / 100)));
+
+Isso permite fonte do nome do jogador de ate 8px.
+
+================================================================================
+4. VERIFICACOES ADICIONAIS DE CONSISTENCIA
+================================================================================
+
+4.1 - VARIAVEL this.playerCount
+Ja inicializado como 1 no construtor. Nao precisa alterar.
+
+4.2 - LABEL DO SELETOR
+O label ja se adapta: "1 Player" / "2 Players" / "3 Players" / "4 Players" pois usa `this.playerCount > 1 ? 's' : ''`. Funciona para 3 e 4.
+
+4.3 - PAINEL DE CONFIGURACAO (buildHotkeyConfig)
+O buildHotkeyConfig() itera `for (let i = 0; i < game.playerCount; i++)` e mostra keybinds para cada jogador. O container tem `max-height: 400px; overflow-y: auto`, entao para 4 jogadores a lista vai ocupar mais espaco vertical mas tera scroll. Funciona sem alteracoes.
+
+4.4 - NOME DOS PLAYERS (playerNames)
+O array `this.playerNames = ['P1', 'P2', 'P3', 'P4']` ja tem 4 entradas. O input de nome na tela de selecao usa `this.playerNames[i] || ''`. Para P3 e P4 funcionara normalmente.
+
+4.5 - CLASSES DOS PLAYERS (playerClasses)
+Array `this.playerClasses = ['none', 'none', 'none', 'none']` ja tem 4. Funciona.
+
+4.6 - HUD DE HABILIDADE (updateAbilityHUD)
+O metodo ja itera sobre todos os jogadores vivos. Para 3-4, a lista sera mais longa mas cabe no canto inferior esquerdo sem problemas.
+
+4.7 - HUD PRINCIPAL (updateHUD)
+Itera sobre todos os jogadores. Para 3-4, o HUD no canto superior esquerdo ficara maior, mas como tem background rgba(0,0,0,0.7) e padding, funciona.
+
+4.8 - CAMERA (updateCamera)
+O modo "show entire map" e ativado quando `alive.length > 1`. Para 3-4 jogadores vivos, o mapa inteiro sera exibido (camScale aproximando de 1, camX/camY aproximando de 0). Nao precisa alterar.
+
+4.9 - SISTEMA DE REVIVE (checkGameState)
+Quando todos artefatos coletados, o codigo itera sobre todos os players e revive os mortos no playerSpawn. Isso ja funciona para 3-4 jogadores.
+
+4.10 - HOTBAR WIDTH PERCENT
+A formula `(100 / numPlayers) * (hotbarSize / 100)` para 4 players com hotbarSize=100 resulta em 25% cada. Funciona.
+
+================================================================================
+5. DOCUMENTACAO
+================================================================================
+
+Ao finalizar TODAS as alteracoes no SummonGame.html, abrir Documentacao_Completa.txt e adicionar ao final:
+
+5.1 - NOVA ENTRADA NO CHANGELOG:
+
+    CHANGELOG - MAIO 2026 (SUPORTE PARA 3 E 4 JOGADORES)
+
+    PROBLEMA: O jogo limitava o numero de jogadores a 2, apesar de MAX_PLAYERS = 4,
+    DEFAULT_KEYBINDS ter entradas para 4, e as cores/arrays de suporte ja estarem preparados.
+
+    SOLUCAO: Ativado o seletor de jogadores para permitir 3 e 4 jogadores. Sistema de
+    spawn responsivo que verifica se o tile de spawn e valido (passavel) antes de
+    posicionar o jogador. Hotbar com tamanhos minimos reduzidos para acomodar mais
+    jogadores na tela.
+
+    MUDANCAS NO CODIGO:
+      a) Game.showClassSelection() — ALTERADO:
+         Limite do botao [+] alterado de 2 para MAX_PLAYERS (4).
+         Condicao do click do botao [+] alterada de < 2 para < MAX_PLAYERS.
+
+      b) Game — NOVO METODO findSpawnPosition(baseX, baseY, playerIndex):
+         Calcula offset horizontal baseado no indice do jogador ([0, +1, -1, +2]).
+         Verifica se a posicao e passavel (isWalkableTile).
+         Se nao for, faz busca em raio crescente ao redor do spawn.
+         Fallback para o proprio spawn se nada for encontrado.
+
+      c) Game — NOVO METODO isWalkableTile(tx, ty):
+         Verifica se tile esta dentro dos limites do mapa.
+         Retorna false se tile for 'O' (wall), 'W' (furniture),
+         ou 'd' (door) com door.solid === true.
+
+      d) Game.loadMap() — ALTERADO:
+         Criacao de jogadores agora usa findSpawnPosition() em vez de
+         calculo manual de offset com Math.ceil.
+
+      e) updateHotbarHUD() — ALTERADO:
+         slotSize clamp minimo: 24 -> 18px
+         fontSizeSlot clamp minimo: 14 -> 10px
+         fontSizeName clamp minimo: 10 -> 8px
+
+    SISTEMAS QUE FUNCIONAM SEM MODIFICACAO (JA PREPARADOS PARA 4 PLAYERS):
+      - MAX_PLAYERS = 4 (constante)
+      - DEFAULT_KEYBINDS[0..3] (keybinds para 4 jogadores)
+      - Cores dos jogadores: ['#4488ff','#ff8844','#44ff44','#ff44ff']
+      - playerNames: ['P1', 'P2', 'P3', 'P4']
+      - playerClasses: ['none','none','none','none']
+      - buildHotkeyConfig(): itera sobre todos os jogadores
+      - Camera: modo mapa inteiro para 2+ jogadores
+      - Lightmap: processa todos os jogadores vivos
+      - HUD/Ability HUD/Hotbar: iteram sobre todos os jogadores
+      - Door rendering: proximidade checada para todos os jogadores
+      - Monster AI: findNearestPlayer() funciona com N jogadores
+      - Sistema de revive: itera sobre todos os players
+      - Shop/Trash interaction: por jogador individual
+
+5.2 - NOVA SECAO (SECAO 58 - SISTEMA DE MULTIPLAYER PARA 3 E 4 JOGADORES):
+
+    Documentar:
+    - Funcionamento do seletor de jogadores (limite = MAX_PLAYERS)
+    - Algoritmo de spawn responsivo (findSpawnPosition + isWalkableTile)
+    - Tabela de offsets por jogador: P1=0, P2=+1, P3=-1, P4=+2
+    - Busca em raio crescente quando tile ocupado
+    - Novos tamanhos minimos de hotbar para 3-4 jogadores
+    - Lista de sistemas que ja funcionavam sem alteracao
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================
