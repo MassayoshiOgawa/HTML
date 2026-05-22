@@ -4285,6 +4285,7 @@ SECAO 4 (FLUXO DO GAME LOOP) — NOTA:
 SECAO 6 (ELEMENTOS DOM) — ATUALIZADA:
    #hotbar-hud: CSS .vertical, clamp minimos reduzidos (18/10/8).
    Seletor de jogadores: botao [+] permite ate MAX_PLAYERS (4).
+   #hotbar-gap-range: controle deslizante de distancia entre hotbars (0-100, padrao 30).
 
 SECAO 8 (ESTRUTURA DO MAPA) — NOTA:
    Novo tile 'P' como player spawn. Multiplos jogadores spawnam
@@ -4302,6 +4303,7 @@ SECAO 18 (SISTEMA DE ECONOMIA) — ATUALIZADA:
 SECAO 21 (SISTEMA DE HUD) — ATUALIZADA:
    updateHotbarHUD: barra de progresso removida, mensagem individual,
    dimensoes dinamicas, clamps reduzidos (18/10/8) para 3-4 jogadores.
+   hotbarGap: margem entre hotbars controlada por range slider (0-100px).
 
 SECAO 22 (SISTEMA DE INTERACAO) — ATUALIZADA:
    Sistema tap vs hold para uso de item. Consumiveis aplicam efeitos.
@@ -4323,6 +4325,41 @@ SECAO 45 (MULTIPLAYER) — ATUALIZADA:
 SECAO 51-59 (SISTEMAS RECENTES) — NOTA:
    Todas as novas secoes documentam sistemas ja funcionais para
    qualquer numero de jogadores.
+
+================================================================================
+ALTERACAO 27 — CONTROLE DE DISTANCIA ENTRE HOTBARS (HOTBAR GAP)
+================================================================================
+
+   PROBLEMA: A distancia entre as hotbars de cada jogador era fixa
+   (30px de margem horizontal + 8px de gap CSS). Jogadores nao podiam
+   ajustar a separacao entre hotbars, causando problemas de legibilidade
+   em resolucoes diferentes ou com 3-4 jogadores.
+
+   SOLUCAO: Adicionado controle deslizante (range input) abaixo do
+   controle Hotbar Size no painel de configuracoes. O range vai de
+   0 a 100 e o valor padrao e 30 (equivalente a margem atual de 30px).
+
+   MUDANCAS NO CODIGO:
+
+     a) Game constructor, loadMap(), restart() — NOVA PROPRIEDADE:
+        this.hotbarGap = 30 (valor padrao em pixels de margem entre hotbars)
+
+     b) updateHotbarHUD() — ALTERADO:
+        Layout horizontal: margin-right usa game.hotbarGap em vez de 30px fixo
+        Layout vertical: margin-bottom usa game.hotbarGap / 2
+        Container #hotbar-hud: gap definido dinamicamente via inline style
+          (horizontal = hotbarGap, vertical = hotbarGap / 2, min 2px)
+
+     c) Painel de configuracoes — NOVO ELEMENTO DOM:
+        <input type="range" id="hotbar-gap-range" min="0" max="100" value="30">
+        <span id="hotbar-gap-value"> - mostra o valor atual
+
+     d) Event listener — NOVO:
+        input no #hotbar-gap-range: atualiza game.hotbarGap, o span de
+        valor, e chama updateHotbarHUD() para aplicar visualmente
+
+     e) Abertura do settings panel: range e span sincronizados com
+        o valor atual de game.hotbarGap
 
 ================================================================================
 FIM DA DOCUMENTACAO

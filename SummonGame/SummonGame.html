@@ -268,10 +268,15 @@ canvas {
      <div style="display:flex;align-items:center;gap:6px;font-size:13px;">
        <span style="color:#aaa;">Hotbar Size:</span>
        <button id="btn-hotbar-minus" style="width:28px;height:28px;padding:0;font-size:16px;">-</button>
-       <span id="hotbar-size-value" style="color:#4fc3f7;font-family:'Courier New',monospace;font-size:16px;min-width:32px;text-align:center;">100</span>
-       <button id="btn-hotbar-plus" style="width:28px;height:28px;padding:0;font-size:16px;">+</button>
-     </div>
-     <button id="btn-hotbar-layout">Layout: Horizontal</button>
+        <span id="hotbar-size-value" style="color:#4fc3f7;font-family:'Courier New',monospace;font-size:16px;min-width:32px;text-align:center;">100</span>
+        <button id="btn-hotbar-plus" style="width:28px;height:28px;padding:0;font-size:16px;">+</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;">
+        <span style="color:#aaa;">Hotbar Gap:</span>
+        <input type="range" id="hotbar-gap-range" min="0" max="100" value="30" style="width:80px;">
+        <span id="hotbar-gap-value" style="color:#4fc3f7;font-family:'Courier New',monospace;font-size:13px;min-width:30px;text-align:center;">30</span>
+      </div>
+      <button id="btn-hotbar-layout">Layout: Horizontal</button>
      <div id="hotkey-config"></div>
      <button id="btn-close-settings">Close</button>
    </div>
@@ -384,20 +389,20 @@ const Items = {
     stun: 1, trapColor: '#666', trapRadius: 12
   },
   landmine: {
-    name: 'Land Mine', price: 10, desc: 'Stuns monster for 3 seconds',
-    icon: 'M', color: '#c44', rarity: 'rare', type: 'trap',
+    name: 'Land Mine', price: 10, desc: 'Stuns monster for 5 seconds',
+    icon: 'L', color: '#007002', rarity: 'rare', type: 'trap',
     giveOnRoundEnd: true,
-    stun: 3, trapColor: '#a22', trapRadius: 12
+    stun: 5, trapColor: '#007002', trapRadius: 12
   },
   crucifix: {
-    name: 'Crucifix', price: 15, desc: 'Stuns monster for 7 seconds',
-    icon: '+', color: '#cc0', rarity: 'super_rare', type: 'trap',
+    name: 'Crucifix', price: 15, desc: 'Stuns monster for 10 seconds',
+    icon: '+', color: '#693300', rarity: 'super_rare', type: 'trap',
     giveOnRoundEnd: true,
-    stun: 7, trapColor: '#aa0', trapRadius: 12
+    stun: 10, trapColor: '#693300', trapRadius: 12
   },
   bloxy_cola: {
     name: 'Bloxy Cola', price: 5, desc: 'Increases speed by 1.25x for 5 seconds',
-    icon: 'C', color: '#ff4444', rarity: 'common', type: 'consumable',
+    icon: 'B', color: '#B05E20', rarity: 'common', type: 'consumable',
     giveOnRoundEnd: true,
     effect: { type: 'speed', multiplier: 1.25, duration: 5 }
   },
@@ -409,21 +414,21 @@ const Items = {
   },
   witches_brew: {
     name: 'Witches Brew', price: 10, desc: 'Increases speed by 1.6x for 8 seconds',
-    icon: 'B', color: '#44ff44', rarity: 'rare', type: 'consumable',
+    icon: 'W', color: '#44ff44', rarity: 'rare', type: 'consumable',
     giveOnRoundEnd: true,
     effect: { type: 'speed', multiplier: 1.6, duration: 8 }
   },
   medkit: {
-    name: 'Medkit', price: 10, desc: 'Heals 50 HP (cannot exceed max HP)',
+    name: 'Medkit', price: 10, desc: 'Heals 50 HP',
     icon: '+', color: '#ff4444', rarity: 'rare', type: 'consumable',
     giveOnRoundEnd: false,
     effect: { type: 'heal', amount: 50 }
   },
   apple: {
-    name: 'Apple', price: 7, desc: 'Heals 10 HP (cannot exceed max HP)',
-    icon: 'A', color: '#44ff44', rarity: 'common', type: 'consumable',
+    name: 'Apple', price: 7, desc: 'Heals 25 HP',
+    icon: 'A', color: '#c44', rarity: 'common', type: 'consumable',
     giveOnRoundEnd: false,
-    effect: { type: 'heal', amount: 10 }
+    effect: { type: 'heal', amount: 25 }
   }
 };
 
@@ -558,18 +563,20 @@ const PlayerClasses = {
 // ============================================================
 const DEFAULT_MAP = [
 'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO',
-'OCWCCFCOCCFCOFCCTCCACCCCUCOGGFGGGGO',
-'OCCCUCCdCCCCOSCCCCCMCCCCCCOGGGGGUGO',
-'OmCCCCCOCCCCOSCCCCCCCCCCWCOGGGGGmGO',
-'OOOOOOOOCCCCOSCCCCCCCCCCWCOGGGGGGGO',
-'OCCCCCCOCCCCOCCCCCCCCCCCWCOGGGGGGGO',
-'OCCUFCCOCCCCdCCCCCPCCCCCCCOGGGGGGGO',
-'OCCCCCCOCCCCOCCCCCCCCCCCCCOGGGGGGGO',
-'OCmCCCCOCCCCOOOOOOOdOOOOOOOGGGGGGGO',
-'OCCCCCCdCCCCCCCCCCCCCCCCCCOGGGGWGGO',
-'OCCCCCCdCCCmCCCCCCCCCCCCCCdGGGGWGGO',
+'OCWCCFCOCCFOFCCCTCCACCCCUCOGGFGGGGO',
+'OCCCUCCdCCCOSCCCCCCMCCCCCCOGGGGGUGO',
+'OCCCCCCdCCCOSCCCCCCCCCCCCCOGGGGGmGO',
+'OCCmCCCOCCCOSCCCCCCCCCCCWCOGGGGGGGO',
+'OOOOOOOOCCCOCCCCCCCCCCCCWCOGGGGGGGO',
+'OCCUFCCOCCCdCCCCCCPCCCCCWCOGGGGGGGO',
+'OCCCCCWOCCCdCCCCCCCCCCCCCCOGGGGGGGO',
+'OCCCCCCOCCCOCCCCCCCCCCCCCCOGGGGGGGO',
+'OCmCCCWOCCCOOOOOOOddOOOOOOOGGGGGGGO',
 'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGWGGO',
-'OOOOOOOOOOOOOOOOOdOOOOOOOOOGGGGWGGO',
+'OCCCCCCdCCCmCCCCCCCCCCCCCCdGGGGWGGO',
+'OCCCCCCdCCCCCCCCCCCCCCCCCCdGGGGWGGO',
+'OCCCCCCOCCCCCCCCCCCCCCCCCCOGGGGWGGO',
+'OOOOOOOOOOOOOOOOddOOOOOOOOOGGGGWGGO',
 'OGGGGGGGGGGGGGGGGGGGGGGGGGGGmGGWGGO',
 'OGGGGGGGGGGGGGFGUGGGGGGGGGGGGGGWGGO',
 'OGGGGGGmGGGGGGGGGGGGGGGGWWWWWWWWGGO',
@@ -1476,6 +1483,7 @@ class Game {
     this.baseTileResolved = [];
     this.hotbarSize = 100;
     this.hotbarLayout = 'horizontal';
+    this.hotbarGap = 30;
   }
 
   static tileHash(x, y) {
@@ -1652,6 +1660,7 @@ class Game {
     this.showMessage('');
     this.hotbarSize = 100;
     this.hotbarLayout = 'horizontal';
+    this.hotbarGap = 30;
   }
 
   selectArtifactsForRound() {
@@ -1736,6 +1745,7 @@ class Game {
     this.currency = 0;
     this.hotbarSize = 100;
     this.hotbarLayout = 'horizontal';
+    this.hotbarGap = 30;
     this.loadMap(parseMap(DEFAULT_MAP.join('\n')));
     this.showClassSelection();
   }
@@ -3389,6 +3399,7 @@ function updateAbilityHUD(game) {
 function updateHotbarHUD(game) {
   const container = document.getElementById('hotbar-hud');
   container.classList.toggle('vertical', game.hotbarLayout === 'vertical');
+  container.style.gap = (game.hotbarLayout === 'vertical' ? Math.floor(game.hotbarGap / 2) : game.hotbarGap) + 'px';
   const abilityHud = document.getElementById('ability-hud');
   if (game.hotbarLayout === 'vertical') {
     abilityHud.style.bottom = 'auto';
@@ -3409,7 +3420,6 @@ function updateHotbarHUD(game) {
   const barWidth = isVertical ? 40 : Math.max(20, Math.min(80, Math.floor(50 * game.hotbarSize / 100)));
   const barHeight = isVertical ? 6 : Math.max(4, Math.min(14, Math.floor(10 * game.hotbarSize / 100)));
   const slotGap = isVertical ? 4 : 8;
-  const hotbarWidthPercent = (100 / numPlayers) * (game.hotbarSize / 100);
 
   function getInteractionText(p) {
     if (!p.interactTarget) return null;
@@ -3434,7 +3444,7 @@ function updateHotbarHUD(game) {
     const interactText = getInteractionText(p);
 
     if (isVertical) {
-      html += '<div style="display:flex;flex-direction:row;gap:8px;align-items:center;width:100%;flex-shrink:0;">';
+      html += '<div style="display:flex;flex-direction:row;gap:8px;align-items:center;width:100%;flex-shrink:0;margin-bottom:' + Math.floor(game.hotbarGap / 2) + 'px;">';
       html += '<div style="display:flex;flex-direction:column;gap:' + slotGap + 'px;align-items:center;">';
       html += '<span style="color:' + color + ';font-size:' + fontSizeName + 'px;min-width:' + (fontSizeName * 2.5) + 'px;text-align:center;">' + p.name.substring(0, 3) + '</span>';
       for (let i = 0; i < 5; i++) {
@@ -3452,7 +3462,7 @@ function updateHotbarHUD(game) {
       html += '</div>';
     } else {
       html += '<div style="display:flex;flex-direction:column;gap:4px;align-items:center;' +
-        'margin-right:30px;width:' + hotbarWidthPercent + '%;flex-shrink:0;">';
+        'margin-right:' + game.hotbarGap + 'px;flex-shrink:0;">';
       if (interactText) {
         html += '<div style="background:rgba(0,0,0,0.7);border-radius:4px;padding:4px 8px;font-size:11px;font-family:\'Courier New\',monospace;color:#fff;pointer-events:none;white-space:nowrap;text-align:center;">' + interactText + '</div>';
       }
@@ -3582,6 +3592,8 @@ document.addEventListener('DOMContentLoaded', () => {
       buildHotkeyConfig(game);
       document.getElementById('hotbar-size-value').textContent = game.hotbarSize;
       document.getElementById('btn-hotbar-layout').textContent = 'Layout: ' + (game.hotbarLayout === 'horizontal' ? 'Horizontal' : 'Vertical');
+      document.getElementById('hotbar-gap-range').value = game.hotbarGap;
+      document.getElementById('hotbar-gap-value').textContent = game.hotbarGap;
     }
   });
 
@@ -3627,6 +3639,13 @@ document.addEventListener('DOMContentLoaded', () => {
     game.hotbarLayout = game.hotbarLayout === 'horizontal' ? 'vertical' : 'horizontal';
     const layoutBtn = document.getElementById('btn-hotbar-layout');
     layoutBtn.textContent = 'Layout: ' + (game.hotbarLayout === 'horizontal' ? 'Horizontal' : 'Vertical');
+    updateHotbarHUD(game);
+  });
+
+  document.getElementById('hotbar-gap-range').addEventListener('input', () => {
+    const val = parseInt(document.getElementById('hotbar-gap-range').value);
+    game.hotbarGap = val;
+    document.getElementById('hotbar-gap-value').textContent = val;
     updateHotbarHUD(game);
   });
 
