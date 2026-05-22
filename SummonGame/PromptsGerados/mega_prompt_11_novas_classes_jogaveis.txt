@@ -1,0 +1,1718 @@
+================================================================================
+MEGA PROMPT - IMPLEMENTACAO DE 11 NOVAS CLASSES JOGAVEIS - SUMMON GAME
+================================================================================
+
+INSTRUCOES GLOBAIS OBRIGATORIAS:
+- Nao crie nenhum arquivo separado (.css, .js, .py, .java, .cpp, .c, etc.).
+- Toda e qualquer alteracao deve ser feita exclusivamente no arquivo SummonGame.html.
+- Nao crie documentos de documentacao, README ou outros arquivos de texto,
+  a menos que seja explicitamente solicitado.
+- Nao adicione comentarios ao codigo, a menos que seja estritamente
+  necessario para clareza de um bloco complexo.
+- Siga o estilo de codigo existente: mesmo padrao de nomenclatura, uso de
+  aspas, espacamento, etc.
+- Todas as alteracoes no codigo devem ser REGISTRADAS na documentacao
+  (Documentacao_Completa.txt) de forma profissional, limpa e bem estruturada,
+  seguindo o padrao existente no arquivo (secao CHANGELOG com descricao do
+  problema, solucao, mudancas no codigo e secoes afetadas).
+- Leia TODO o arquivo SummonGame.html e TODA a Documentacao_Completa.txt
+  antes de comecar a implementar, para entender completamente a arquitetura
+  e evitar conflitos com sistemas existentes.
+- Implemente AGORA, sem questionamentos ou adicoes nao solicitadas.
+  Execute a implementacao completa e finalize.
+- NAO use caracteres bugados ou corrompidos em nenhum lugar do codigo ou
+  documentacao. Use APENAS caracteres UTF-8 validos. Exemplo de caracteres
+  PROIBIDOS: âï¿½ ðâ¤. Se um emoji ou simbolo especial nao renderizar
+  corretamente, use alternativas ASCII ou descritivas.
+- O codigo deve ser ESCALAVEL: futuramente novas classes, monstros, itens
+  e sistemas serao adicionados. Nao faca hardcode que impossibilite expansao.
+- Todo novo sistema criado (ex: mini-menu, TPs do Chamber, zonas do Mighty
+  Tinkerer) deve ser projetado como um COMPONENTE REUTILIZAVEL, para que
+  outras classes futuras possam aproveita-lo sem reescrever tudo.
+
+================================================================================
+VISAO GERAL DA ARQUITETURA ATUAL (para consulta rapida)
+================================================================================
+
+- Jogo top-down 2D em HTML5 Canvas, single-file (~5139 linhas).
+- Constantes principais: TILE_SIZE = 32, PLAYER_COUNT (ate 4).
+- Game centraliza tudo: entidades, loop, renderizacao.
+- PlayerClasses: objeto com definicoes das classes jogaveis.
+  Atualmente contem: oracle, scout, redhacker, commandyeller, boringtrapper,
+  dyingguy, teevee, annoyinglooper, timetraveler, luckyspender (10 classes).
+  Cada classe tem: name, desc, abilityName, cooldown, duration, icon.
+  NOTA: cooldown=0 e duration=0 indica habilidade passiva (tecla F ignorada).
+- activateAbility(game, player): chamada ao pressionar tecla F (keybinds.ability).
+  Verifica cooldown>0 ou abilityActive. Se ok, executa logica da classe.
+  Atualmente trata com switch: timetraveler, redhacker, scout, commandyeller,
+  dyingguy, annoyinglooper (os outros usam o fluxo padrao: abilityActive=true,
+  abilityCooldown=cooldown+duration).
+- Player: construtor recebe tileX, tileY, playerIndex, name, playerClass.
+  Propriedades: px, py, speed, baseSpeed (140), hp (100), maxHp (100), alive,
+  interacting, interactTimer, interactTarget, interactType, invulnTimer,
+  playerClass, abilityCooldown, abilityActive, abilityTimer,
+  keybinds, inventory[5], selectedSlot, useTimer, using, useTapPending,
+  speedItemTimer, speedItemMult, commandYellMult, commandYellTimer,
+  invisible, invisibleTimer, timeTravelUsed, duplicatedSlots (Set),
+  lastDx, lastDy.
+- Player.update(dt, game): atualiza cooldowns, buffs timers, calcula speed
+  (baseSpeed + scout 1.5x + speedItemMult + commandYellMult), move,
+  checkInteraction, gerencia hotbar tap/hold.
+- Player.checkInteraction(game): verifica entidades proximas (portas, altar,
+  artefatos, shops, lixeiras). Define interactTarget e interactType.
+  Alvos: 'door', 'altar', 'artifact', 'shop', 'trash'.
+- Interacao: hold E para interagir (portas sao toggle instantaneo). Duracao:
+  door=0.3s, altar=4s, artifact=1.5s + 2.5*(playerCount-1).
+- Hotbar: tecla R. Tap (<0.3s) cicla entre slots ocupados. Hold (>=1s)
+  usa item equipado (chama game.useItem). Circular progress bar no hold.
+- Game.useItem(player): traps (cria trap), consumables (aplica efeito).
+- Game.buyFromShop(player, shopData): compra item, logica do Lucky Spender.
+- Game.sellItem(player): vende item equipado, bloqueia duplicated do Lucky
+  Spender.
+- DoorEntity: toggle(), open, animating, solid (getter: !open && !animating),
+  groupMembers. Portas sao animadas (abertura/fechamento).
+- MonsterEntity: FSM (patrol/chase/search), BFS pathfinding (Game.findPath),
+  stunTimer, speed (varia por tipo), canSeePlayer, canDetectBehind.
+- Game.traps[]: objetos com x, y, item, active, stun, trapColor, trapRadius,
+  tauntDuration, tauntTimer, tauntedMonster.
+- Game.activeClones[]: array de clones do Red Hacker.
+- Game.activeWalls[]: array de paredes do Annoying Looper.
+- Game.activeMonsters[]: monstros ativos no round.
+- Game.artifactEntities[]: artefatos no mapa.
+- Game.shopItems[]: lojas com itemKey, price, sold.
+- Game.currency: moeda compartilhada entre jogadores.
+- Game.playerCount: numero de jogadores.
+- Game.playerClasses[]: array de strings com classe de cada jogador.
+- Game.playerNames[]: array de strings com nome de cada jogador.
+- Fim de round: Game.checkGameState() verifica se todos artefatos foram
+  coletados e todos monstros estao mortos. Chama loadMap() para novo round.
+- Fog of war: raycasting poligonal com isPointVisible().
+- HUD: paineis HTML (#hud, #ability-hud, #hotbar-container, etc).
+
+================================================================================
+11 NOVAS CLASSES A IMPLEMENTAR
+================================================================================
+
+Adicione as 11 classes abaixo ao objeto PlayerClasses. Cada classe deve
+seguir o formato existente: name, desc, abilityName, cooldown, duration, icon.
+Classes com cooldown=0 e duration=0 sao PASSIVAS - a tecla F nao faz nada.
+A logica de cada classe deve ser implementada na funcao activateAbility()
+e nos metodos update/render afetados (Player, Game, MonsterEntity, etc.).
+
+IMPORTANTE: As classes abaixo devem ser ADICIONADAS ao PlayerClasses existente
+(sem remover as classes atuais). O objeto PlayerClasses ficara com
+10 classes existentes + 11 novas = 21 classes no total.
+
+================================================================================
+CLASSE 1: Utility Player
+================================================================================
+
+PlayerClasses key: 'utilityplayer'
+
+name: 'Utility Player'
+desc: 'Comeca o jogo com 5 itens aleatorios na hotbar'
+abilityName: 'Suprimentos Iniciais'
+cooldown: 0 (passiva - acontece automaticamente no spawn inicial)
+duration: 0
+icon: 'U'
+
+COMPORTAMENTO (HABILIDADE PASSIVA - SPO INICIAL):
+- Esta e uma habilidade passiva que acontece UMA UNICA VEZ: quando o jogo
+  comeca (primeiro loadMap, nao a cada round).
+- Ao spawnar pela primeira vez, os 5 slots da hotbar do Utility Player
+  sao preenchidos com 5 itens aleatorios.
+- Pool de itens: TODOS os itens definidos no objeto Items (beartrap,
+  landmine, crucifix, bloxy_cola, cake, witches_brew, medkit, apple,
+  noise_maker). Total: 9 itens possiveis.
+- Todos os itens tem a MESMA chance de serem selecionados (1/9 cada).
+- Um mesmo item PODE aparecer mais de uma vez (selecao independente
+  com reposicao, como Math.random() individual para cada slot).
+- Preencher slots 0, 1, 2, 3, 4 (todos os 5 slots).
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Player: initialSpawnDone (boolean, default false).
+- Em Game.loadMap(): apos criar os jogadores, iterar sobre game.players.
+  Para cada player com playerClass === 'utilityplayer' e !player.initialSpawnDone:
+  - Obter array de keys de Items: Object.keys(Items)
+  - Para cada slot (0 a 4): sortear um item aleatorio e chamar
+    player.addToInventory(randomItemKey)
+  - Definir player.initialSpawnDone = true
+  - Mostrar mensagem: player.name + ' received 5 random items!'
+- O initialSpawnDone NAO deve ser resetado em loadMaps futuros.
+  Apenas na primeira chamada de loadMap da sessao.
+
+EDGE CASES:
+- Se houver menos de 9 itens no pool (futuramente itens podem ser
+  removidos), a selecao ainda funciona com Math.random() * keys.length.
+- Se dois Utility Players spawnarem, cada um recebe seus proprios 5 itens
+  independentes.
+
+TESTES SUGERIDOS:
+- Iniciar jogo com um Utility Player e verificar se hotbar tem 5 itens.
+- Verificar se itens sao variados (nao sempre os mesmos).
+- Verificar se ao iniciar novo round (loadMap apos vitoria) o Utility
+  Player NAO recebe mais 5 itens (so na primeira vez).
+
+================================================================================
+CLASSE 2: Mighty Tinkerer
+================================================================================
+
+PlayerClasses key: 'mightytinkerer'
+
+name: 'Mighty Tinkerer'
+desc: 'Cria uma zona circular de 7x7 tiles que acelera aliados e reduz
+       a velocidade do monstro'
+abilityName: 'Zona de Engenharia'
+cooldown: 45
+duration: 0 (a zona tem sua propria duracao, nao o player)
+icon: 'M'
+
+COMPORTAMENTO:
+- Ao pressionar F (activateAbility):
+  * Cria uma zona circular ESTATICA na posicao exata do player no momento
+    da ativacao.
+  * A zona tem 7x7 tiles de diametro (circular, raio = 3.5 tiles).
+  * A zona e FIXA no mapa - nao segue o player.
+  * O player e o monstro podem se mover livremente (a zona fica no lugar).
+  * IMPORTANTE: A zona permanece ativa ENQUANTO a habilidade estiver em
+    cooldown (45 segundos). Apenas 1 zona pode existir por Mighty Tinkerer
+    por vez. Quando o cooldown expirar, a zona some e o jogador pode
+    criar uma nova zona. Desta forma, o tempo de uptime da zona e de
+    aprox. 45 segundos (pode ser ajustado futuramente para um valor
+    independente, como 10s ou 15s, se necessario para balanceamento).
+
+- EFEITOS DENTRO DA ZONA:
+  * PLAYERS ALIADOS dentro do raio da zona: +30 de speed ADICIONADO
+    a velocidade atual.
+    FORMULA: Se o player estiver dentro da zona, speed += 30 (flat bonus).
+    Este bonus e aplicado a TODOS os players (nao so o Mighty Tinkerer).
+    O bonus e aplicado frame a frame enquanto o player estiver dentro.
+  * MONSTRO dentro do raio da zona: speed = 70 (SPEED FIXA, nao reducao).
+    Enquanto o monstro estiver dentro da zona, sua velocidade e FORCADA
+    para 70, independente da velocidade base do tipo de monstro.
+    Quando o monstro sai da zona, sua velocidade volta ao normal.
+
+- VISUAL:
+  * Circulo azulado (cor sugerida: rgba(100, 150, 255, 0.3) - 30% transparencia).
+  * Raio visual: 3.5 * TILE_SIZE pixels.
+  * Borda do circulo: rgba(100, 150, 255, 0.5) com lineWidth 2.
+  * Opcional: leve pulsar na transparencia (animacao sutil).
+  * A zona deve ficar visivel NO CHAO (renderizar atras dos players e
+    do monstro, mas acima do piso).
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Game: activeZones[] = [{ x, y, radius, timer, ownerIndex,
+  bonusSpeed, monsterSpeed }].
+- Em activateAbility: criar zona e adicionar a activeZones.
+  Definir abilityCooldown = 45 (cooldown do player).
+  ANTES de criar: remover qualquer zona existente deste mesmo jogador
+  (evitar acumulo de zonas do mesmo Mighty Tinkerer).
+  O abilityActive NAO e necessario (duracao da zona e gerenciada
+  separadamente pelo timer da zona, nao pelo abilityTimer do player).
+  Exemplo:
+    // Remove zona anterior deste jogador
+    game.activeZones = game.activeZones.filter(z => z.ownerIndex !== p.playerIndex);
+    game.activeZones.push({ x: p.px, y: p.py, radius: 3.5 * TILE_SIZE,
+      timer: 45, ownerIndex: p.playerIndex,
+      bonusSpeed: 30, monsterSpeed: 70 });
+    p.abilityCooldown = 45;
+- Em Game.update(): atualizar timer das zonas; remover expiradas.
+- Em Game.render(): desenhar zonas como circulos semi-transparentes
+  (renderizar depois do mapa/piso, antes das entidades).
+- Em Player.update(): verificar se o player esta dentro de alguma zona
+  ativa. Se sim, speed += zone.bonusSpeed (30). Aplicar APOS o calculo
+  normal de speed (baseSpeed, scout, speedItem, commandYell).
+- Em MonsterEntity.update(): verificar se o monstro esta dentro de
+  alguma zona ativa. Se sim, forcar speed = zone.monsterSpeed (70).
+  Aplicar APOS o calculo normal de speed do monstro.
+- A verificacao de "dentro da zona" e distancia euclidiana simples:
+  Math.sqrt((px - zone.x)**2 + (py - zone.y)**2) <= zone.radius.
+
+EDGE CASES:
+- Duas zonas sobrepostas (dois Mighty Tinkerers): efeitos acumulam?
+  NAO - usar apenas a primeira zona encontrada (ou a mais restritiva).
+  Para simplificar: se player/monstro esta dentro de multiplas zonas,
+  aplicar APENAS o efeito da primeira zona detectada.
+- Zona parcialmente dentro de paredes: a zona e puramente visual e de
+  efeito, nao tem colisao. Paredes nao afetam a zona.
+- Zona criada fora do mapa: permitir (o circulo pode ser criado em
+  qualquer lugar).
+- Player morre dentro da zona: zona continua existindo ate expirar.
+
+TESTES SUGERIDOS:
+- Criar zona e verificar se player ganha +30 speed dentro dela.
+- Criar zona e verificar se monstro fica com speed 70 dentro dela.
+- Verificar se ao sair da zona, velocidades voltam ao normal.
+- Verificar se a zona expira apos 8 segundos.
+- Verificar se duas zonas sobrepostas nao causam acumulo indevido.
+- Verificar timer de cooldown de 45s no HUD de habilidade.
+
+================================================================================
+CLASSE 3: Wired Girl
+================================================================================
+
+PlayerClasses key: 'wiredgirl'
+
+name: 'Wired Girl'
+desc: 'Teleporta para um artefato aleatorio nao coletado (1x por summon)'
+abilityName: 'Teleporte Eletrico'
+cooldown: 999999 (efetivamente uma vez por summon, similar ao Time Traveler)
+duration: 0 (instantaneo)
+icon: 'W'
+
+COMPORTAMENTO:
+- Uma vez por summon (enquanto o monstro NAO esta spawnado):
+  * Ao pressionar F, teleporta o jogador para um artefato NAO COLETADO
+    aleatorio.
+  * Selecao: de todos os game.artifactEntities que tem art.collected === false,
+    escolher UM aleatoriamente com Math.random().
+  * O jogador e movido para o centro do tile do artefato:
+    this.px = art.tileX * TILE_SIZE + TILE_SIZE / 2;
+    this.py = art.tileY * TILE_SIZE + TILE_SIZE / 2;
+  * Apos o teleporte: abilityCooldown = 9999 (ou marcar como usado).
+  * Efeito visual no teleporte: particulas (sparks eletricos azuis/amarelos)
+    na origem e no destino.
+- O uso e resetado quando o monstro e derrotado (fim do round).
+  Igual ao Time Traveler: em loadMap() e checkGameState(), resetar o uso.
+
+RESTRICOES:
+- So pode ser usado quando nao ha monstros vivos:
+  game.activeMonsters.every(m => !m.alive).
+- Se NAO houver artefatos nao coletados: mostrar mensagem "No uncollected
+  artifacts to teleport to!" e NAO gastar o uso.
+- Se o jogador ja usou a habilidade neste summon: mostrar mensagem
+  "Already used this summon!" e nao fazer nada.
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Player: wiredGirlUsed (boolean, default false).
+- Em activateAbility: se playerClass === 'wiredgirl':
+  - Se wiredGirlUsed: return (mostrar mensagem).
+  - Se ha monstros vivos: return (mostrar mensagem "Ability only usable
+    when monster is not spawned!").
+  - Filtrar game.artifactEntities.filter(a => !a.collected).
+  - Se array vazio: return (mostrar mensagem).
+  - Escolher aleatorio: const target = uncollected[Math.floor(Math.random() * uncollected.length)].
+  - Criar particulas na posicao atual (sparks).
+  - Teleportar: player.px = target.tileX * TILE_SIZE + TILE_SIZE/2;
+    player.py = target.tileY * TILE_SIZE + TILE_SIZE/2;
+  - Criar particulas no destino.
+  - player.wiredGirlUsed = true.
+  - player.abilityCooldown = 9999.
+- Em Game.checkGameState() (fim de round) e loadMap():
+  - Resetar wiredGirlUsed = false e abilityCooldown = 0 para todos
+    os players com playerClass === 'wiredgirl'.
+
+EDGE CASES:
+- Jogador teleporta para dentro de uma parede? O artefato esta em tile
+  'O' (open) ou 'd' (door) por definicao do mapa. Artefatos nao sao
+  colocados em paredes. Nao ha risco de teleportar para dentro de parede.
+- Jogador teleporta para o MESMO tile de outro jogador: permitido.
+- Se o unico artefato nao coletado estiver exatamente onde o jogador
+  ja esta: teleportar mesmo assim (efeito visual acontece, mas posicao
+  nao muda).
+
+TESTES SUGERIDOS:
+- Usar habilidade com artefatos nao coletados: verificar teleporte.
+- Usar habilidade sem artefatos nao coletados: verificar mensagem de erro.
+- Usar habilidade com monstro vivo: verificar bloqueio.
+- Verificar se apos vencer o round, o uso e resetado.
+- Verificar efeito visual de particulas no teleporte.
+
+================================================================================
+CLASSE 4: Archaeologist
+================================================================================
+
+PlayerClasses key: 'archaeologist'
+
+name: 'Archaeologist'
+desc: 'Ganha 1 moeda extra a cada artefato coletado'
+abilityName: 'Olho de Arqueologo'
+cooldown: 0 (passiva permanente)
+duration: 0
+icon: 'A'
+
+COMPORTAMENTO (HABILIDADE PASSIVA PERMANENTE):
+- Nao requer ativacao (tecla F nao faz nada).
+- SEMPRE que QUALQUER jogador coleta um artefato, se existe pelo menos
+  UM Archaeologist no time (vivo ou morto), o time ganha +$1 extra.
+- O bonus e de +$1 POR ARTEFATO, independente de quantos Archaeologists
+  existem (nao acumula com multiplos Archaeologists). Se houver 4
+  Archaeologists e 1 artefato for coletado, o bonus ainda e +$1.
+- O dinheiro e adicionado ao game.currency (moeda compartilhada).
+
+IMPLEMENTACAO SUGERIDA:
+- Em Game.collectArtifact(art): apos a coleta normal do artefato,
+  verificar se existe algum player com playerClass === 'archaeologist'
+  nos game.players (vivo ou morto, mas que esteja no jogo):
+    const hasArchaeologist = game.players.some(p => p.playerClass === 'archaeologist');
+    if (hasArchaeologist) {
+      game.currency += 1;
+      game.showMessage('Archaeologist bonus: +1 coin!');
+    }
+- NOTA: a coleta de artefato ja da dinheiro? Verificar. Se ja der,
+  o +$1 e ADICIONAL.
+- Nao precisa modificar Player ou activateAbility. E puramente uma
+  verificacao no momento da coleta.
+
+EDGE CASES:
+- Se o Archaeologist estiver MORTO: ainda ganha o bonus? Sim. O bonus
+  e do time, nao do jogador individual. Verificar se o player existe
+  em game.players (independente de alive).
+- Multiplos Archaeologists: bonus nao acumula. Usar game.players.some()
+  garante que so aplica uma vez.
+- Se nao houver Archaeologist: comportamento normal, sem bonus.
+
+TESTES SUGERIDOS:
+- Jogar com 1 Archaeologist e coletar artefato: verificar +$1 extra.
+- Jogar com 4 Archaeologists e coletar artefato: verificar apenas +$1
+  extra (nao +$4).
+- Jogar SEM Archaeologist: verificar que nao ha bonus extra.
+- Matar o Archaeologist e depois coletar artefato: verificar se bonus
+  ainda aplica.
+
+================================================================================
+CLASSE 5: Untitled Generalist
+================================================================================
+
+PlayerClasses key: 'untitledgeneralist'
+
+name: 'Untitled Generalist'
+desc: 'Concede 2 segundos de invulnerabilidade a todos os jogadores'
+abilityName: 'Protetor Geral'
+cooldown: 36
+duration: 0 (o efeito nos outros players e instantaneo, nao e um buff
+           continuo do Generalist)
+icon: 'G'
+
+COMPORTAMENTO:
+- Ao pressionar F: TODOS os jogadores VIVOS recebem 2 segundos de
+  invulnerabilidade.
+- O efeito ACUMULA com outros buffs de invulnerabilidade (ex: Cake).
+  Se um jogador ja tem invulnTimer > 0, o novo tempo e SOMADO:
+    player.invulnTimer = Math.max(player.invulnTimer, 0) + 2;
+  Ou simplesmente: player.invulnTimer += 2;
+  NOTA: Atualmente, Cake usa Math.max(player.invulnTimer, effect.duration)
+  que SUBSTITUI o timer. Para o Generalist, use += 2 para acumular.
+  Verificar o comportamento desejado: "acumula com o cake" significa
+  que se o jogador tem 5s de cake e recebe +2s do Generalist, fica
+  com 7s de invulnerabilidade total.
+- O proprio Generalist TAMBEM recebe o buff de invulnerabilidade.
+- Efeito visual nos jogadores: breve flash branco ou brilho dourado
+  ao receber o buff (particulas douradas por 0.5s).
+- Cooldown: 36 segundos no Generalist.
+
+IMPLEMENTACAO SUGERIDA:
+- Em activateAbility: se playerClass === 'untitledgeneralist':
+  * NAO usar abilityActive (efeito instantaneo, sem duracao de habilidade).
+  * Apenas definir player.abilityCooldown = 36;
+  * O HUD mostrara o cooldown normalmente (CD countdown).
+  * Para cada op em game.players:
+    - Se op.alive:
+      op.invulnTimer += 2; (acumula com valor existente)
+      Criar particulas douradas em volta de op.
+  * game.showMessage(player.name + ' granted 2s invulnerability to all!');
+- Nota sobre acumulo: atualmente em applyItemEffect, o cake usa:
+    player.invulnTimer = Math.max(player.invulnTimer, effect.duration);
+  Isso SUBSTITUI se o duration for maior. Como o Generalist usa += 2,
+  ele sempre adiciona 2s ao timer atual.
+  Exemplo: player tem invulnTimer=5 (cake), Generalist ativa:
+  invulnTimer = 5 + 2 = 7. Funciona como esperado.
+  Exemplo: player tem invulnTimer=1, Generalist ativa:
+  invulnTimer = 1 + 2 = 3.
+
+EDGE CASES:
+- Jogadores mortos: nao recebem o buff.
+- So o Generalist no time (singleplayer): ele recebe +2s invuln.
+- Multiplos Generalists ativando ao mesmo tempo: cada um adiciona +2s
+  (efeito acumula). Efeito desejado.
+
+TESTES SUGERIDOS:
+- Ativar com 4 jogadores vivos: verificar todos recebem +2s invuln.
+- Ativar com 2 vivos e 2 mortos: verificar so vivos recebem.
+- Ativar enquanto jogador ja tem invuln do cake: verificar acumulo (7s).
+- Verificar cooldown de 36s no HUD.
+- Verificar efeito visual de particulas douradas.
+
+================================================================================
+CLASSE 6: Clown
+================================================================================
+
+PlayerClasses key: 'clown'
+
+name: 'Clown'
+desc: 'Deixa uma casca de banana no chao que stuna o monstro por 4s'
+abilityName: 'Casca de Banana'
+cooldown: 30
+duration: 0 (a trap tem sua propria duracao, nao o player)
+icon: 'C'
+
+COMPORTAMENTO:
+- Ao pressionar F: cria uma "Casca de Banana" no chao, na posicao atual
+  do jogador.
+- A casca de banana e uma TRAP com as seguintes caracteristicas:
+  * Duracao: 15 segundos no chao (some apos expirar).
+  * Se o monstro pisar nela (distancia < trapRadius): stun de 4 segundos.
+  * A casca NAO afeta jogadores (so o monstro).
+  * Apos o monstro pisar, a casca e DESTRUIDA (some imediatamente).
+  * Se expirar os 15s sem ninguem pisar, a casca some sem efeito.
+
+- VISUAL DA CASCA DE BANANA:
+  * Deve ter uma estilizacao PROFISSIONAL e DETALHADA.
+  * Desenhar usando Canvas 2D: forma alongada e curva de casca de banana,
+    com detalhes internos (parte de dentro clara/amarelada, parte de fora
+    amarela com pontas escuras).
+  * Tamanho: aproximadamente 70% de um tile (22 pixels de largura).
+  * Cores: casca externa #e8c840 (amarelo banana), interior #fffde0
+    (amarelo claro/quase branco), pontas #6b4c00 (marrom escuro).
+  * A casca deve ter uma leve rotacao aleatoria para parecer natural.
+  * Deve ser renderizada com perspectiva isometrica ou vista superior:
+    uma forma oval/curva com uma linha central representando a divisao
+    da casca, e pequenas manchas marrons para realismo.
+  * Funcao de renderizacao dedicada: desenhar a casca com ctx (bezier
+    curves ou arcos) para criar o formato caracteristico de casca de
+    banana vista de cima.
+
+IMPLEMENTACAO SUGERIDA:
+- Criar um novo tipo de trap no sistema existente, mas com campos extras:
+  * Adicionar ao objeto trap: lifetime (duracao maxima no chao, default
+    Infinity para traps normais), timer (contador regressivo, default 0).
+  * Modificar Game.update() no loop de traps:
+    - Se trap.lifetime && trap.timer !== undefined:
+      trap.timer -= dt;
+      Se trap.timer <= 0: remover trap (marcar para remocao ou splice).
+    - Verificar colisao com monstro (codigo existente):
+      Se distancia < trap.trapRadius e trap.active:
+        Se monster.stunTimer > 0: skip (ja stunado).
+        Senao: monster.stunTimer = trap.stun, remover trap.
+  * Para traps normais (bear trap, landmine, etc): lifetime = Infinity,
+    timer = 0. Nunca expiram (comportamento existente preservado).
+  * Para casca de banana: lifetime = 15, timer = 15, stun = 4,
+    trapColor = '#e8c840', trapRadius = 12.
+
+- Em activateAbility: se playerClass === 'clown':
+  * NAO usar abilityActive (a trap tem seu proprio tempo de vida).
+  * Apenas definir player.abilityCooldown = 30;
+  * Criar objeto trap:
+    this.traps.push({
+      x: player.px, y: player.py,
+      item: 'banana_peel', // item key especial para renderizacao
+      active: true,
+      stun: 4,
+      trapColor: '#e8c840',
+      trapRadius: 12,
+      lifetime: 15,
+      timer: 15,
+      rotation: Math.random() * Math.PI * 2, // rotacao aleatoria visual
+      tauntDuration: 0,
+      tauntTimer: 0,
+      tauntedMonster: null
+    });
+  * game.showMessage(player.name + ' slipped a banana peel!');
+
+- Modificar Game.render() no loop de traps:
+  * Se trap.item === 'banana_peel': chamar funcao de renderizacao
+    dedicada drawBananaPeel(ctx, sx, sy, trap.rotation).
+  * Senao: usar renderizacao existente.
+
+- IMPORTANTE - Tratamento de mensagem de colisao:
+  * O codigo existente de colisao de traps acessa Items[t.item].name
+    para mostrar a mensagem de "X triggered!". Como 'banana_peel'
+    nao existe no objeto Items, isso causaria erro.
+    SOLUCAO: No loop de colisao de traps (Game.update), adicionar
+    verificacao especial ANTES de acessar Items[t.item]:
+      if (t.item === 'banana_peel') {
+        this.showMessage('Banana Peel triggered! Monster stunned ' + t.stun + 's');
+      } else {
+        this.showMessage(Items[t.item].name + ' triggered! Monster stunned ' + t.stun + 's');
+      }
+  * Nao adicionar 'banana_peel' ao objeto Items (evita que apareca
+    em shops ou seja rerrolado pelo Rerroler).
+
+EDGE CASES:
+- Se o monstro ja esta stunado (por outra trap) e pisa na banana:
+  NAO aplicar stun adicional. A casca permanece ate ele sair e
+  potencialmente pisar de novo, ou ate expirar os 15s.
+  NOTA: O codigo existente de traps ja verifica m.stunTimer > 0 e pula.
+  Manter esse comportamento.
+- Multiplos Clowns: cada um pode ter sua propria casca. Multiplas cascas
+  podem coexistir no chao.
+- Casca colocada em cima de outra casca: permitido (sobreposicao visual).
+- Casca dentro de parede? O jogador nao pode estar dentro da parede,
+  entao a casca sempre estara em area aberta.
+
+RENDERIZACAO DA CASCA DE BANANA (drawBananaPeel):
+- Funcao dedicada que desenha uma casca de banana detalhada:
+  1. Corpo externo: forma oval alongada usando bezier curves, preenchida
+     com gradiente de #e8c840 para #c8a020.
+  2. Interior: forma similar menor, preenchida com #fffde0.
+  3. Linha central: stroke #c8a020 ao longo do eixo maior.
+  4. Pontas: pequenos triangulos/curvas escuras (#6b4c00) nas extremidades.
+  5. Detalhes: 3-4 pequenas manchas ovais marrons (#8b6c20) com alpha 0.4
+     espalhadas na casca externa para realismo.
+  6. Sombra: elipse escura com alpha 0.2 abaixo da casca (projecao no chao).
+
+TESTES SUGERIDOS:
+- Colocar casca e verificar visual (deve parecer uma casca de banana
+  realista e detalhada).
+- Monstro pisar na casca: verificar stun de 4s.
+- Verificar se a casca some apos 15s sem ser pisada.
+- Verificar se a casca some imediatamente apos o monstro pisar.
+- Verificar cooldown de 30s.
+- Verificar se multiplas cascas de multiplos Clowns funcionam.
+
+================================================================================
+CLASSE 7: Chamber
+================================================================================
+
+PlayerClasses key: 'chamber'
+
+name: 'Chamber'
+desc: 'Posiciona 2 portais de teletransporte no mapa'
+abilityName: 'Portais Dimensionais'
+cooldown: 23 (cooldown do TELEPORTE, nao do posicionamento)
+duration: 0
+icon: 'H2'
+
+COMPORTAMENTO - SISTEMA DE DUAS FASES:
+
+FASE 1: POSICIONAMENTO (sem cooldown, APENAS com monstro NAO spawnado)
+- O jogador pode colocar ate 2 TPs (teletransportes) por summon.
+- Cada TP tem 70% do tamanho de um tile (TILE_SIZE * 0.7 = ~22 pixels).
+- Posicionamento e feito no TILE ATUAL do jogador (sem modo de mira).
+- Como funciona:
+  * Pressionar F: se nenhum TP foi colocado ainda neste summon,
+    coloca TP1 no tile atual do jogador.
+  * Pressionar F novamente: se TP1 ja foi colocado mas TP2 nao:
+    - Verificar se o tile atual do jogador esta dentro de um raio de
+      2.5 tiles (distancia euclidiana em tiles) do TP1.
+      Formula: Math.sqrt((tileX - tp1.tileX)**2 + (tileY - tp1.tileY)**2) <= 2.5
+    - Se ESTIVER dentro do range: coloca TP2 no tile atual.
+    - Se NAO estiver: mostrar mensagem "TP2 must be within 2.5 tiles of TP1!"
+      e NAO colocar.
+  * Apos ambos TPs posicionados: o sistema entra na Fase 2.
+- Posicionamento NAO TEM cooldown. O jogador pode andar e pressionar F
+  livremente para escolher onde colocar.
+- Se o jogador quiser REPOSICIONAR um TP antes de colocar o segundo:
+  * Pressionar F em cima de um TP ja colocado: remove aquele TP
+    (mostrar mensagem "TP removed. Place again.").
+  * Ou: adicionar logica de que segurar F sobre um TP existente o remove.
+    NOTA DO PROMPT: a logica de remover/reposicionar e opcional para
+    a primeira implementacao. Se for complexo, implementar apenas
+    colocacao sequencial (TP1 depois TP2, sem remover).
+
+FASE 2: ATIVACAO (teleporte, 23s cooldown, monstro SPAWNADO)
+- Apos ambos TPs estarem posicionados, cada TP tem um raio de ativacao
+  circular de 1.5 tiles (1.5 * TILE_SIZE pixels).
+- Quando o jogador esta DENTRO do raio de ativacao de qualquer um
+  dos TPs (distancia euclidiana do centro do TP ate o player < 1.5 * TILE_SIZE):
+  * Pressionar F: teleporta para o TP mais DISTANTE da posicao atual.
+    - Se o jogador esta perto do TP1: teleporta para TP2.
+    - Se o jogador esta perto do TP2: teleporta para TP1.
+    - Se esta perto de ambos (sobreposicao): teleporta para o mais longe.
+  * Cooldown de 23s inicia apos o teleporte.
+- Enquanto o cooldown esta ativo (23s), o jogador NAO pode teleportar
+  novamente, mas os TPs continuam visiveis e funcionais para usos futuros.
+- Posicionamento SO pode ocorrer com monstro NAO spawnado.
+- Teleporte SO pode ocorrer com monstro SPAWNADO (vivo).
+  * Se o monstro esta morto/spawnando: mostrar mensagem e nao teleportar.
+
+DESTRUICAO DOS TPs:
+- Quando o monstro e derrotado (checkGameState detecta vitoria):
+  TODOS os TPs de TODOS os Chambers sao destruidos.
+- Em loadMap() (novo round): resetar estado de todos os Chambers.
+
+VISUAL DOS TPs:
+- Cada TP e um circulo/portal com 70% do tamanho de um tile (~22px raio).
+- Cor: roxo/roxo-azulado com brilho (rgba(150, 50, 220, 0.7)).
+- Animacao: pulsar suave (escala ou opacidade oscilando).
+- Borda: circulo mais claro (rgba(200, 150, 255, 0.9)).
+- Linhas conectando TP1 e TP2: uma linha tracejada sutil (rgba(150, 50, 220, 0.3))
+  entre os dois TPs para mostrar que estao vinculados.
+- Raio de ativacao: opcionalmente desenhar um circulo sutil (alpha 0.1)
+  de 1.5 tiles ao redor de cada TP quando ambos estao posicionados.
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Player: chamberTP1 (null ou {tileX, tileY, px, py}),
+  chamberTP2 (null ou {tileX, tileY, px, py}), chamberTPsPlaced (0, 1 ou 2).
+
+- ATENCAO: O fluxo de activateAbility para Chamber DEVE ser colocado
+  ANTES da verificacao generica "if (p.abilityCooldown > 0 || p.abilityActive) return",
+  porque o posicionamento de TPs NAO tem cooldown. A verificacao de cooldown
+  so se aplica ao TELEPORTE (Fase 2). Estrutura correta:
+
+  function activateAbility(game, player) {
+    const p = player;
+    const cls = PlayerClasses[p.playerClass];
+    if (!cls) return;
+
+    // Chamber: tratado ANTES do check generico de cooldown
+    if (p.playerClass === 'chamber') {
+      // ... (logica abaixo)
+      return;
+    }
+
+    // Demais classes: check generico
+    if (cls.cooldown === 0) return;
+    if (p.abilityCooldown > 0 || p.abilityActive) return;
+    // ...
+  }
+
+- Dentro do bloco do Chamber:
+  * Verificar se ha monstros vivos:
+    Se SIM (monstro spawnado) -> logica de TELEPORTE (Fase 2).
+      NOTA: aqui SIM verificar abilityCooldown > 0.
+    Se NAO (monstro morto) -> logica de POSICIONAMENTO (Fase 1).
+      NOTA: aqui NAO verificar cooldown.
+
+  FASE 1 - Posicionamento:
+    Se player.chamberTPsPlaced === 0:
+      Colocar TP1 no tile atual.
+      player.chamberTP1 = { tileX: player.tileX, tileY: player.tileY,
+                             px: player.px, py: player.py };
+      player.chamberTPsPlaced = 1;
+    Senao se player.chamberTPsPlaced === 1:
+      Verificar distancia entre tile atual e TP1 (em tiles).
+      Se dentro de 2.5: colocar TP2.
+        player.chamberTP2 = { ... };
+        player.chamberTPsPlaced = 2;
+      Senao: mostrar mensagem de erro, nao colocar.
+
+  FASE 2 - Teleporte:
+    // Nota: Chamber esta ANTES do check generico de cooldown,
+    // entao precisamos verificar manualmente
+    Se player.chamberTPsPlaced !== 2: mostrar "Place both TPs first!". return.
+    Se player.abilityCooldown > 0: return (em cooldown, nao faz nada).
+    Verificar se o jogador esta dentro do raio de ATIVACAO de algum TP:
+      distToTP1 = distancia(player.px, player.py, TP1.px, TP1.py)
+      distToTP2 = distancia(player.px, player.py, TP2.px, TP2.py)
+      activationRadius = 1.5 * TILE_SIZE;
+    Se distToTP1 > activationRadius && distToTP2 > activationRadius:
+      mostrar "Not in activation range of any TP!".
+    Senao:
+      Destino = distToTP1 >= distToTP2 ? TP1 : TP2
+      (teleporta para o MAIS DISTANTE: se esta perto do TP1, vai pro TP2,
+       e vice-versa. Logica correta: se distToTP1 < distToTP2, destino = TP2).
+      Teleportar: player.px = destino.px; player.py = destino.py;
+      Efeito visual: particulas roxas.
+      player.abilityCooldown = 23;
+      game.showMessage(player.name + ' teleported through portal!');
+
+- Em Game.render(): desenhar TPs de cada Chamber:
+  * Iterar sobre game.players, para cada um com playerClass === 'chamber':
+    - Se chamberTP1 existe: desenhar TP1.
+    - Se chamberTP2 existe: desenhar TP2.
+    - Se ambos existem: desenhar linha tracejada entre eles.
+    - Se ambos existem: desenhar circulos de ativacao (alpha 0.1).
+
+- Em Game.checkGameState() (vitoria):
+  * Destruir TPs de todos os Chambers, resetar chamberTPsPlaced = 0.
+- Em loadMap():
+  * Resetar TPs de todos os Chambers.
+
+EDGE CASES:
+- TP colocado exatamente em cima do outro: impossivel (distancia minima
+  de 2.5 tiles garante separacao).
+- Jogador morre com TPs colocados: TPs devem desaparecer? Manter ate
+  o fim do round (monstro derrotado destoi tudo). O jogador morto nao
+  pode usar, mas os TPs ficam visiveis.
+- Multiplos Chambers: cada um tem seus proprios TPs independentes.
+  TPs de jogadores diferentes nao interagem entre si.
+- Desconexao de jogador (player sai): limpar TPs daquele jogador.
+  Se nao houver sistema de desconexao, limpar em loadMap.
+
+TESTES SUGERIDOS:
+- Colocar TP1 e TP2: verificar se aparecem visualmente.
+- Tentar colocar TP2 fora do range de 2.5 tiles: verificar bloqueio.
+- Posicionar ambos TPs e teleportar: verificar chegada no TP mais distante.
+- Verificar cooldown de 23s apos teleporte.
+- Verificar se TPs sao destruidos ao derrotar o monstro.
+- Verificar se nao e possivel teleportar com monstro morto.
+- Verificar se nao e possivel posicionar TPs com monstro vivo.
+
+================================================================================
+CLASSE 8: Rerroler
+================================================================================
+
+PlayerClasses key: 'rerroler'
+
+name: 'Rerroler'
+desc: 'Rerrola todos os itens das lojas (1x por summon, monstro nao spawnado)'
+abilityName: 'Rerrolar Lojas'
+cooldown: 999999 (uma vez por summon)
+duration: 0
+icon: 'R2'
+
+COMPORTAMENTO:
+- Uma vez por summon, ENQUANTO O MONSTRO NAO ESTA SPAWNADO:
+  * Ao pressionar F: TODOS os shops que tem um item NAO COMPRADO (shop.sold === false)
+    tem seu item substituido por um novo item aleatorio.
+  * So shops NAO VENDIDOS sao afetados. Shops ja comprados (shop.sold === true)
+    permanecem como estao.
+  * O novo item e escolhido aleatoriamente do pool de itens (Object.keys(Items)).
+  * O preco e definido pelo item (Items[itemKey].price).
+  * Apos rerrolar, marcar habilidade como usada neste summon.
+  * Se nao houver shops NAO VENDIDOS: mostrar "No shops to reroll!"
+    e NAO gastar o uso (preserva para quando shops estiverem disponiveis).
+- O uso e resetado quando o monstro e derrotado (checkGameState/loadMap).
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Player: rerrolerUsed (boolean, default false).
+- Em activateAbility: se playerClass === 'rerroler':
+  * Se rerrolerUsed: return (mostrar "Already rerolled this summon!").
+  * Se ha monstros vivos: return (mostrar "Only usable when monster is not spawned!").
+  * Filtrar game.shopItems.filter(s => !s.sold).
+  * Se array vazio: return (mostrar "No shops to reroll!").
+  * Para cada shop no array:
+    - Escolher item aleatorio: const keys = Object.keys(Items);
+      const newItem = keys[Math.floor(Math.random() * keys.length)];
+    - shop.itemKey = newItem;
+    - shop.price = Items[newItem].price;
+    - NOTA: NAO alterar shop.x, shop.y (posicao da loja).
+  * player.rerrolerUsed = true;
+  * player.abilityCooldown = 9999;
+  * game.showMessage(player.name + ' rerolled ' + shopsToReroll.length + ' shops!');
+- Em checkGameState() e loadMap(): resetar rerrolerUsed = false e
+  abilityCooldown = 0 para todos Rerrolers.
+
+EDGE CASES:
+- Shop items sao definidos em Game.generateShops(). O rerroler altera
+  items EXISTENTES. O layout das lojas (posicoes) nao muda.
+- Se um item rerrolado e comprado depois, funciona normalmente.
+- Multiplos Rerrolers: cada um pode usar sua habilidade independentemente.
+  O segundo Rerroler rerrola shops que ja podem ter sido rerrolados
+  pelo primeiro (incluindo shops ainda nao vendidos).
+- Pool de itens: usar Object.keys(Items) para obter todos os itens
+  disponiveis. Se futuramente novos itens forem adicionados, serao
+  incluidos automaticamente.
+
+TESTES SUGERIDOS:
+- Rerrolar shops: verificar se itens mudaram.
+- Rerrolar com shops ja comprados: verificar so nao-vendidos mudam.
+- Tentar rerrolar sem shops disponiveis: verificar mensagem.
+- Tentar rerrolar com monstro vivo: verificar bloqueio.
+- Verificar reset apos derrotar o monstro.
+
+================================================================================
+CLASSE 9: Vex
+================================================================================
+
+PlayerClasses key: 'vex'
+
+name: 'Vex'
+desc: 'Atravessa paredes solidas por 1.5 segundos'
+abilityName: 'Intangibilidade'
+cooldown: 20
+duration: 1.5
+icon: 'V'
+
+COMPORTAMENTO:
+- Ao pressionar F: o jogador ganha a habilidade de ATRAVESSAR PAREDES
+  SOLIDAS por 1.5 segundos.
+- Durante a habilidade ativa:
+  * O jogador IGNORA tiles do tipo 'O' (wall) e 'W' (window, outro tipo
+    de parede solida) ao verificar colisao no metodo canMoveTo().
+  * O jogador AINDA e afetado por portas fechadas (tiles 'd' com
+    door.solid === true). Paredes temporarias do Annoying Looper
+    tambem bloqueiam (a menos que se decida o contrario).
+  * O jogador pode entrar em tiles que normalmente seriam solidos.
+  * O jogador NAO fica preso dentro de paredes quando a habilidade expira:
+    - Se ao expirar, o jogador estiver com seu centro (px, py) em um
+      tile solido: teleportar para o tile aberto mais proximo.
+      Usar BFS a partir do tile atual, procurando o primeiro tile 'O'? Nao!
+      Procurar o primeiro tile que NAO e 'O' nem 'W' (tile aberto).
+      Usar Game.findPath ou uma busca em espiral simples.
+      Se nenhum tile aberto encontrado (mapa completamente solido? Impossivel),
+      manter posicao.
+    - ALTERNATIVA MAIS SIMPLES: no canMoveTo do player, quando a habilidade
+      expira e o player esta em tile solido, empurrar para fora na direcao
+      de onde veio (usar lastDx/lastDy invertido ate sair do tile solido).
+
+- EFEITO VISUAL:
+  * Durante a habilidade: o jogador fica semi-transparente (globalAlpha = 0.4)
+    com um brilho/glow azul claro.
+  * Efeito de "ghost": borda do jogador fica azul claro (#88ccff) pulsando.
+
+IMPLEMENTACAO SUGERIDA:
+- NAO e necessario adicionar novas propriedades ao Player. Usar
+  abilityActive e abilityTimer como indicador de phasing.
+- Em activateAbility: se playerClass === 'vex':
+  * player.abilityActive = true;
+    player.abilityTimer = 1.5;
+    player.abilityCooldown = 20 + 1.5; // cooldown total = cooldown + duration
+- Em Player.update(): APOS o bloco que gerencia abilityActive, adicionar
+  verificacao de ejecao. Quando abilityTimer chega a 0 e abilityActive
+  se torna false, verificar se o jogador esta em tile solido:
+  * Modificar o bloco existente:
+    if (this.abilityActive) {
+      this.abilityTimer -= dt;
+      if (this.abilityTimer <= 0) {
+        this.abilityActive = false;
+        if (this.playerClass === 'vex') {
+          ejectPlayerFromWall(this, game);
+        }
+      }
+    }
+- Em Player.canMoveTo(): se this.abilityActive && this.playerClass === 'vex',
+  NAO verificar tiles 'O' e 'W'. Ainda verificar tiles 'd' (portas fechadas).
+  Modificar a condicao:
+    if (tile === 'O' || tile === 'W') {
+      if (!(this.abilityActive && this.playerClass === 'vex')) return false;
+    }
+- Em Player.render(): se this.abilityActive && this.playerClass === 'vex',
+  ctx.globalAlpha = 0.4, adicionar glow azul claro ao redor do player.
+
+FUNCAO ejectPlayerFromWall(player, game):
+- Obter tx, ty do tile atual.
+- Tentar empurrar nas 4 direcoes (cima, baixo, esquerda, direita).
+- Usar direcao oposta ao ultimo movimento (lastDx, lastDy).
+- BFS simples: busca em espiral a partir de (tx, ty) ate encontrar
+  um tile que NAO seja 'O' ou 'W'.
+- Quando encontrar: teleportar o player para o centro daquele tile.
+- Se nao encontrar (impossivel): manter posicao (nao travar o jogo).
+
+EDGE CASES:
+- Vex atravessa paredes e entra em area fora do mapa: canMoveTo ja
+  verifica limites (tx < 0 || tx >= mapWidth). Manter essa verificacao.
+- Vex atravessa parede e o monstro esta do outro lado: o monstro pode
+  atacar o Vex normalmente (a habilidade e de MOVIMENTO, nao de
+  invulnerabilidade).
+- Vex em phasing + Dying Guy invisivel: efeitos acumulam (transparencia
+  extra). Visualmente: aplicar o menor alpha (0.4 do phasing).
+- Expirar dentro de uma parede temporaria (Annoying Looper): a parede
+  temporaria NAO e um tile 'O'/'W', e uma entidade separada.
+  O Vex NAO atravessa paredes temporarias (apenas tiles solidos 'O'/'W').
+  Entao nao ha risco de ficar preso em parede temporaria.
+
+TESTES SUGERIDOS:
+- Ativar Vex e atravessar uma parede: verificar movimento livre.
+- Ativar Vex e ficar dentro da parede quando expira: verificar ejecao
+  para tile aberto.
+- Verificar se portas fechadas ainda bloqueiam o Vex.
+- Verificar cooldown de 20s + 1.5s de duracao.
+- Verificar efeito visual (transparencia + glow azul).
+
+================================================================================
+CLASSE 10: Locker Guy
+================================================================================
+
+PlayerClasses key: 'lockerguy'
+
+name: 'Locker Guy'
+desc: 'Tranca uma porta com cadeado. O monstro e redirecionado.'
+abilityName: 'Trancar Porta'
+cooldown: 0 (sem cooldown - pode trancar/destrancar livremente)
+duration: 0
+icon: 'LK'
+
+COMPORTAMENTO:
+- O Locker Guy pode trancar UMA porta por vez no mapa inteiro.
+- APENAS 1 cadeado pode existir GLOBALMENTE, independentemente de
+  quantos jogadores estao usando a classe Locker Guy.
+- Para COLOCAR o cadeado:
+  * Aproximar-se de uma porta FECHADA (door.open === false).
+  * Em vez de pressionar E (interact) para abrir, pressionar F (ability)
+    para COLOCAR o cadeado.
+  * Isso SO funciona se NAO existe nenhum cadeado ativo no momento.
+  * A porta fica TRANCADA: nao pode ser aberta por ninguem (E nao funciona).
+  * Visual: aparece um icone de CADEADO no meio da porta.
+- Para REMOVER o cadeado:
+  * Aproximar-se da porta trancada.
+  * Pressionar F novamente.
+  * A porta volta ao normal (fechada, pode ser aberta com E).
+  * O cadeado some visualmente.
+- O Locker Guy NAO pode abrir portas com E enquanto estiver perto
+  de uma porta? Nao - ele pode abrir portas normalmente com E.
+  So quando ele pressiona F perto de uma porta fechada, o cadeado e colocado.
+  Se a porta ja esta trancada, F remove o cadeado.
+
+INTERACAO COM O MONSTRO (PATHFINDING BFS):
+- Quando o monstro tenta atravessar uma porta TRANCADA:
+  * O pathfinding BFS do monstro trata a porta trancada como PAREDE (tile 'O').
+  * Se o monstro esta seguindo um path e encontra uma porta trancada,
+    o BFS naturalmente nao incluira aquele tile no caminho.
+  * COMPORTAMENTO ESPECIAL: Se o monstro esta em patrol e seu waypoint
+    esta atras de uma porta trancada, ele deve ser REDIRECIONADO para
+    outro waypoint (como se ja tivesse "checkado" o waypoint na sala
+    trancada).
+    IMPLEMENTACAO: No BFS do monstro, tiles 'd' com porta trancada sao
+    tratados como 'O'. Isso naturalmente bloqueia o caminho.
+    Se o BFS nao encontra caminho para o waypoint: o monstro pula para
+    o proximo waypoint (comportamento ja existente de fallback).
+    VERIFICAR se o codigo atual ja trata BFS sem caminho -> proximo
+    waypoint. Se sim, o comportamento desejado ja funciona.
+    Se nao: adicionar fallback no patrol para pular waypoint quando
+    BFS retorna null.
+
+VISUAL DO CADEADO:
+- Renderizado no CENTRO da porta (tileX * TILE_SIZE + TILE_SIZE/2,
+  tileY * TILE_SIZE + TILE_SIZE/2).
+- Tamanho: ~60% do TILE_SIZE (~19 pixels).
+- Cores: corpo do cadeado #aaa (cinza metalico), arco #888, buraco da
+  fechadura #444.
+- Desenho: retangulo arredondado para o corpo, arco em forma de U
+  invertido no topo, pequeno circulo preto para a fechadura.
+- Deve ser visivel mesmo com fog of war? Sim - o cadeado e um objeto
+  fisico no mapa, visivel se a porta estiver no campo de visao.
+- NOTA: o cadeado so deve ser renderizado se a porta estiver trancada.
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Game: lockedDoor (objeto ou null).
+  Estrutura: { doorRef: referencia a DoorEntity, tileX, tileY }.
+  Apenas UMA porta pode estar trancada globalmente.
+
+- Modificar activateAbility: o caso do lockerguy DEVE ser colocado ANTES
+  do check generico "if (cls.cooldown === 0) return", porque lockerguy
+  tem cooldown=0 mas PRECISA responder a tecla F.
+
+  if (p.playerClass === 'lockerguy') {
+    // logica de trancamento/destrancamento
+    return;
+  }
+
+  Dentro do bloco:
+  * Verificar se o jogador esta perto de uma porta:
+    - Iterar game.doorEntities, verificar distancia (usar mesma logica
+      de checkInteraction para portas, mas com range menor: 1.5 tiles).
+    - Encontrar a porta mais proxima dentro do range.
+  * Se nenhuma porta proxima: return (mostrar "No door nearby!").
+  * Se a porta esta ABERTA (door.open): return (mostrar "Door must be closed to lock!").
+  * Logica de alternancia (toggle lock):
+    - Se game.lockedDoor EXISTE e game.lockedDoor.doorRef === door:
+      REMOVER cadeado: game.lockedDoor = null.
+      Mostrar mensagem: player.name + ' removed the lock.'
+    - Se game.lockedDoor NAO existe (null):
+      COLOCAR cadeado: game.lockedDoor = { doorRef: door, tileX: door.tileX, tileY: door.tileY }.
+      Mostrar mensagem: player.name + ' locked the door!'
+    - Se game.lockedDoor existe mas e de OUTRA porta:
+      Mostrar mensagem: "A door is already locked! Remove it first."
+      (O jogador precisa ir ate a porta trancada e pressionar F para remove-la.)
+
+- Modificar Player.checkInteraction() e/ou a interacao com portas:
+  * Se game.lockedDoor e o jogador esta perto daquela porta:
+    - A opcao de interacao (E) nao deve mostrar "abrir porta".
+    - Ou: se a porta esta trancada, checkInteraction NAO a considera
+      como interactTarget (para que E nao abra).
+      IMPLEMENTACAO: no loop de portas em checkInteraction, pular portas
+      que estao trancadas (game.lockedDoor && game.lockedDoor.doorRef === door).
+
+- Modificar DoorEntity.toggle():
+  * Se esta porta esta trancada (game.lockedDoor.doorRef === this):
+    NAO permitir toggle. A porta nao abre.
+  * Nota: o toggle pode ser chamado por forcar abertura (forceOpen)
+    de outras classes? Nao - forceOpen e usado pelo sistema de grupos
+    de portas ao abrir uma porta. Se a porta trancada esta em grupo,
+    as outras portas do grupo abrem mas esta nao (a menos que forceOpen
+    seja chamado nela). IMPLEMENTAR: no toggle(), verificar se a porta
+    esta trancada e retornar sem fazer nada.
+
+- Modificar BFS do monstro (Game.findPath ou MonsterEntity.findPath):
+  * No loop que verifica tiles vizinhos, quando encontra tile 'd':
+    - Verificar se game.lockedDoor existe e game.lockedDoor.tileX === tx
+      e game.lockedDoor.tileY === ty.
+    - Se sim: tratar como obstaculo (pular, como se fosse 'O').
+
+- Renderizacao do cadeado (Game.render() ou na renderizacao de portas):
+  * Apos desenhar a porta, se game.lockedDoor e a porta atual e a
+    lockedDoor: desenhar cadeado no centro do tile da porta.
+  * Funcao drawLock(ctx, x, y, size):
+    - x, y: centro do tile da porta.
+    - size: TILE_SIZE * 0.6.
+    - Corpo: ctx.fillStyle = '#aaa'; ctx.fillRect(x - size*0.2, y - size*0.05, size*0.4, size*0.35);
+      com ctx.strokeStyle = '#666'; ctx.lineWidth = 1; para borda.
+    - Arco: ctx.strokeStyle = '#888'; ctx.lineWidth = size*0.15;
+      ctx.beginPath(); ctx.arc(x, y - size*0.1, size*0.25, Math.PI, 0);
+      ctx.stroke();
+    - Fechadura: ctx.fillStyle = '#333'; ctx.beginPath();
+      ctx.arc(x, y + size*0.1, size*0.07, 0, Math.PI*2); ctx.fill();
+
+- Limpeza: em loadMap(), sempre resetar game.lockedDoor = null.
+
+EDGE CASES:
+- Monstro tenta abrir porta trancada com forceOpen: o forceOpen do
+  DoorEntity deve verificar se a porta esta trancada. Se sim, nao abrir.
+- Locker Guy morre: o cadeado permanece. O cadeado so e removido quando
+  outro Locker Guy (ou o mesmo apos revive) pressiona F na porta.
+- Nao ha Locker Guy no time, mas existe cadeado de round anterior:
+  loadMap() reseta game.lockedDoor = null.
+- Duas portas em grupo (double door): se uma porta do grupo e trancada,
+  a outra porta do grupo NAO deve abrir quando o jogador interage com ela
+  (porque o toggle com propagacao de grupo tenta abrir a trancada e falha).
+  IMPLEMENTACAO: no toggle(skipPropagation) da porta, verificar se
+  this ou algum groupMember esta trancado. Se sim, nao propagar e nao abrir.
+  Ou, mais simples: no checkInteraction, pular portas trancadas (incluindo
+  groupMembers). Assim, o jogador nunca interage com portas de um grupo
+  que tem membro trancado.
+
+TESTES SUGERIDOS:
+- Aproximar de porta fechada, pressionar F: verificar cadeado aparece.
+- Pressionar E na porta trancada: verificar que nao abre.
+- Monstro tentar passar por porta trancada: verificar que e redirecionado.
+- Pressionar F novamente na porta trancada: verificar cadeado some.
+- Tentar trancar segunda porta enquanto uma ja esta trancada: verificar bloqueio.
+- Verificar se so 1 cadeado global existe (tentar com 2 Locker Guys).
+- Verificar se loadMap() limpa o cadeado.
+
+================================================================================
+CLASSE 11: Helpful Priest
+================================================================================
+
+PlayerClasses key: 'helpfulpriest'
+
+name: 'Helpful Priest'
+desc: 'Abre um mini-menu para curar ou reviver aliados'
+abilityName: 'Mini-Menu de Suporte'
+cooldown: 0 (o cooldown e gerenciado internamente - cura/revive pode ser
+           usada a qualquer momento, balanceada pelo tempo de hold)
+duration: 0
+icon: 'P'
+
+COMPORTAMENTO - SISTEMA DE MINI-MENU (TAP VS HOLD):
+
+Este sistema substitui COMPLETAMENTE o comportamento normal da tecla F
+(ability) para o Helpful Priest. Em vez de ativar uma habilidade
+convencional, a tecla F controla um mini-menu de suporte.
+
+MECANICA TAP VS HOLD (identica ao sistema da hotbar com tecla R):
+- TAP na tecla F (pressionar e soltar em menos de 0.3s = useTapPending):
+  * Abre o mini-menu (se estiver fechado) OU cicla para o proximo jogador
+    no menu (se ja estiver aberto).
+  * NAO consome recurso, NAO tem cooldown.
+- HOLD na tecla F (segurar por >= 1.0s, mesmo tempo que usar item na hotbar):
+  * Cura o jogador SELECIONADO em 40 HP OU revive o jogador selecionado
+    (se estiver morto) com 3s de invulnerabilidade.
+  * Durante o hold: aparece o circulo de carregamento PADRAO do sistema
+    de itens (mesmo estilo visual do hold da tecla R).
+  * Apos completar o hold: efeito aplicado, NAO ha cooldown convencional.
+    O "cooldown" e o tempo de hold (1s) - o jogador pode usar novamente
+    imediatamente apos, mas precisa segurar por 1s novamente.
+
+MINI-MENU - ESPECIFICACOES VISUAIS E COMPORTAMENTO:
+- Posicao: 1 tile de distancia a DIREITA do usuario (player.px + TILE_SIZE,
+  player.py). O mini-menu ACOMPANHA o usuario (segue o movimento).
+- Tamanho base: 1 tile de altura (TILE_SIZE).
+- Expansao horizontal: para cada jogador no jogo, e adicionado 1 tile
+  de largura. O menu expande para a DIREITA.
+  - 2 jogadores: 2 tiles de largura.
+  - 3 jogadores: 3 tiles de largura.
+  - 4 jogadores: 4 tiles de largura.
+- Fundo do menu: retangulo semi-transparente escuro (rgba(0,0,0,0.6))
+  com borda sutil (rgba(255,255,255,0.2)).
+- Para cada jogador (Player i):
+  * Um "slot" de 1 tile x 1 tile com:
+    - Pequeno circulo colorido (cor do jogador: #4488ff, #ff8844, #44ff44, #ff44ff)
+      no centro do slot, representando o icone/skin do jogador (raio: 30% do tile).
+    - Nome do jogador abaixo do circulo (fonte pequena: 8px).
+    - Barra de HP acima do circulo? Opcional. Para simplicidade inicial:
+      apenas circulo + nome.
+- Jogador SELECIONADO (ativo):
+  * Borda quadrada VERDE (#00ff00) de 1 tile de tamanho, OCA (sem preenchimento),
+    com grossura de 20% do tamanho de um tile (6.4 pixels = TILE_SIZE * 0.2).
+  * A borda envolve o slot inteiro daquele jogador.
+- Jogador MORTO:
+  * X VERMELHO (#ff0000) de 70% do tamanho de um tile (22.4 pixels),
+    CENTRALIZADO sobre o icone do jogador morto.
+  * O X e desenhado como duas linhas cruzadas (stroke).
+
+ESTADO DO MINI-MENU:
+- menuOpen: boolean (false inicialmente).
+- menuSelectedIndex: indice do jogador selecionado (0 a playerCount-1,
+  default: 0 ou o primeiro jogador VIVO).
+- menuUseTimer: timer de hold (identico a useTimer da hotbar).
+- menuUseTapPending: flag de tap pendente (identico a useTapPending).
+
+LOGICA COMPLETA:
+- Ao pressionar F (keysJustPressed[kb.ability]):
+  * menuUseTapPending = true; menuUseTimer = 0;
+  * Se !menuOpen: menuOpen = true; menuSelectedIndex = primeiro jogador
+    VIVO (ou 0 se todos mortos).
+
+- Enquanto F esta pressionado (keys[kb.ability]):
+  * Se menuUseTapPending (tap pendente):
+    - menuUseTimer += dt;
+    - Se menuUseTimer >= 0.3s: cancela tap, menuUseTapPending = false,
+      menuUseTimer = 0 (agora entrou no modo hold).
+  * Senao (modo hold):
+    - menuUseTimer += dt;
+    - Se menuUseTimer >= 1.0s: EXECUTAR acao (curar/reviver).
+      menuUseTimer = 0.
+
+- Ao SOLTAR F (!keys[kb.ability]):
+  * Se menuUseTapPending (foi um tap):
+    - Ciclar selecao: menuSelectedIndex = (menuSelectedIndex + 1) % playerCount.
+      PULAR jogadores que nao existem? Nao, sempre ciclar entre 0 e playerCount-1.
+      Se quiser pular jogadores mortos? Opcional. Sugestao: ciclar entre
+      TODOS os jogadores (vivos e mortos), para permitir selecionar um
+      morto para revive.
+    - Fechar menu? NAO. O menu permanece aberto.
+      Alternativa: o menu fecha apos X segundos sem interacao? Nao especificado.
+      Manter aberto enquanto o jogador estiver vivo.
+  * menuUseTapPending = false; menuUseTimer = 0;
+
+- Renderizacao do Mini-Menu (NO CANVAS, nao em HTML):
+  * Desenhar apos as entidades (player, monstro) para ficar visivel.
+  * Posicao screen: (player.px - game.camX + TILE_SIZE, player.py - game.camY).
+  * Para cada jogador i (0 a playerCount-1):
+    - Calcular offsetX = i * TILE_SIZE.
+    - Desenhar fundo do slot.
+    - Desenhar icone do jogador (circulo colorido).
+    - Se i === menuSelectedIndex: desenhar borda verde.
+    - Se !game.players[i].alive: desenhar X vermelho.
+    - Desenhar nome.
+  * Renderizar circulo de carregamento se estiver em hold (menuUseTimer > 0):
+    - Mesmo estilo do hold da hotbar (arco circular que preenche).
+    - Posicao: centralizado no slot do jogador selecionado.
+
+CURA E REVIVE:
+- Ao completar o hold (menuUseTimer >= 1.0):
+  * Verificar se o jogador selecionado esta VIVO:
+    - Curar 40 HP: player.hp = Math.min(player.maxHp, player.hp + 40).
+    - Mostrar mensagem: player.name + ' healed ' + target.name + ' for 40 HP!'
+  * Verificar se o jogador selecionado esta MORTO:
+    - Reviver: target.alive = true; target.hp = target.maxHp;
+    - Conceder 3s de invulnerabilidade: target.invulnTimer = 3;
+    - Mostrar mensagem: player.name + ' revived ' + target.name + '!'
+    - Remover X vermelho do slot daquele jogador.
+  * Efeito visual: particulas verdes (cura) ou douradas (revive) no alvo.
+
+AUTO-FECHAR MENU:
+- O menu fecha se o Helpful Priest morrer.
+- O menu NAO fecha sozinho (fica aberto ate o jogador morrer ou o round
+  acabar). Alternativa: fechar apos 5s sem interacao? Nao especificado.
+  Para simplicidade: manter aberto.
+
+ESCALABILIDADE DO SISTEMA DE MINI-MENU:
+- O mini-menu deve ser implementado como um SISTEMA REUTILIZAVEL.
+- Estrutura sugerida:
+  * Game.activeMiniMenus[]: array de mini-menus ativos.
+  * Cada mini-menu: { playerRef, targets[], selectedIndex, open, purpose,
+    useTimer, useTapPending, onActivate(target), renderCustom(target, ctx, x, y) }
+  * targets: array de referencias (ex: game.players, ou artefatos, ou shops).
+  * onActivate: callback chamado quando o hold completa.
+  * renderCustom: callback opcional para customizar a aparencia dos slots.
+- No futuro, outras classes podem criar mini-menus com diferentes targets
+  e acoes (ex: teleportar para aliado, buffar aliado especifico, etc).
+- Para a implementacao INICIAL do Helpful Priest, pode-se comecar com uma
+  implementacao mais simples (hardcoded para players) e depois refatorar
+  para o sistema generico. O importante e que o CODIGO seja estruturado
+  de forma que a refatoracao futura seja facil (funcoes separadas,
+  parametros configuraveis).
+
+IMPLEMENTACAO SUGERIDA (FASE 1 - DIRETA):
+- Adicionar ao Player (apenas para helpfulpriest ou generico):
+  * menuOpen (boolean, false)
+  * menuSelectedIndex (number, 0)
+  * menuUseTimer (float, 0)
+  * menuUseTapPending (boolean, false)
+
+- A logica de tap/hold do mini-menu DEVE ser executada continuamente
+  (a cada frame), assim como a hotbar. Implementar como um metodo
+  do Player ou como bloco dentro de Player.update().
+
+- Em Player.update(): APOS o bloco da hotbar (tap/hold da tecla R),
+  adicionar bloco similar para a tecla de habilidade do Helpful Priest:
+
+  if (this.playerClass === 'helpfulpriest') {
+    const kb = this.keybinds;
+    // --- TAP: tecla pressionada pela primeira vez ---
+    if (keysJustPressed[kb.ability]) {
+      this.menuOpen = true;
+      this.menuUseTapPending = true;
+      this.menuUseTimer = 0;
+      if (this.menuSelectedIndex === undefined || this.menuSelectedIndex >= game.playerCount) {
+        this.menuSelectedIndex = 0;
+      }
+      keysJustPressed[kb.ability] = false;
+    }
+
+    // --- HOLD: tecla mantida pressionada ---
+    if (keys[kb.ability]) {
+      if (this.menuUseTapPending) {
+        this.menuUseTimer += dt;
+        if (this.menuUseTimer >= 0.3) {
+          this.menuUseTapPending = false;
+          this.menuUseTimer = 0;
+        }
+      } else {
+        this.menuUseTimer += dt;
+        if (this.menuUseTimer >= 1.0) {
+          applyPriestEffect(game, this);
+          this.menuUseTimer = 0;
+        }
+      }
+    }
+
+    // --- SOLTOU: verificar se foi tap ---
+    if (!keys[kb.ability]) {
+      if (this.menuUseTapPending) {
+        // Ciclar selecao
+        this.menuSelectedIndex = (this.menuSelectedIndex + 1) % game.playerCount;
+      }
+      this.menuUseTapPending = false;
+      this.menuUseTimer = 0;
+    }
+  }
+
+- Funcao applyPriestEffect(game, priest):
+  * const target = game.players[priest.menuSelectedIndex];
+  * Se !target: return.
+  * Se target.alive:
+    - target.hp = Math.min(target.maxHp, target.hp + 40);
+    - game.showMessage(priest.name + ' healed ' + target.name + ' for 40 HP!');
+    - Criar particulas verdes no target.
+  * Senao (target morto):
+    - target.alive = true;
+    - target.hp = target.maxHp;
+    - target.invulnTimer = 3;
+    - game.showMessage(priest.name + ' revived ' + target.name + '!');
+    - Criar particulas douradas no target.
+
+- IMPORTANTE: Garantir que a tecla F do Helpful Priest NAO chame
+  activateAbility. Isso pode ser feito de duas formas:
+  A) Dentro de activateAbility, no topo da funcao, retornar early
+     para helpfulpriest (o bloco de menu ja roda em Player.update).
+  B) No ponto onde activateAbility e chamado (loop principal),
+     pular jogadores com playerClass === 'helpfulpriest'.
+  A opcao A e mais simples e segura:
+    function activateAbility(game, player) {
+      const p = player;
+      if (p.playerClass === 'helpfulpriest') return; // menu handle in Player.update
+      // ...
+    }
+
+- O menu fecha automaticamente quando o Helpful Priest morre:
+  em Player.update(), no inicio: if (!this.alive) this.menuOpen = false;
+
+- Renderizacao (em Game.render() ou Player.render()):
+  * Se this.menuOpen e this.playerClass === 'helpfulpriest':
+    desenhar mini-menu.
+  * Implementar drawPriestMenu(ctx, player, game):
+    - Calcular posicao base:
+      baseX = player.px - game.camX + TILE_SIZE;
+      baseY = player.py - game.camY - TILE_SIZE/2; // centralizado verticalmente no player
+    - Desenhar fundo do menu (tamanho: game.playerCount * TILE_SIZE de largura,
+      TILE_SIZE de altura).
+    - Para cada i de 0 a game.playerCount - 1:
+      slotX = baseX + i * TILE_SIZE;
+      slotY = baseY;
+      // Fundo do slot
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.fillRect(slotX, slotY, TILE_SIZE, TILE_SIZE);
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.strokeRect(slotX, slotY, TILE_SIZE, TILE_SIZE);
+      // Icone do jogador
+      const cx = slotX + TILE_SIZE/2;
+      const cy = slotY + TILE_SIZE/2 - 4;
+      ctx.fillStyle = ['#4488ff','#ff8844','#44ff44','#ff44ff'][i] || '#ccc';
+      ctx.beginPath();
+      ctx.arc(cx, cy, TILE_SIZE * 0.3, 0, Math.PI*2);
+      ctx.fill();
+      // Nome
+      ctx.font = '8px "Courier New", monospace';
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.fillText(game.players[i] ? game.players[i].name : 'P'+(i+1), cx, slotY + TILE_SIZE - 4);
+      // Borda verde se selecionado
+      if (i === player.menuSelectedIndex) {
+        ctx.strokeStyle = '#00ff00';
+        ctx.lineWidth = TILE_SIZE * 0.2; // 6.4px
+        ctx.strokeRect(slotX + 2, slotY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+      }
+      // X vermelho se morto
+      if (game.players[i] && !game.players[i].alive) {
+        const xSize = TILE_SIZE * 0.7;
+        const xCX = slotX + TILE_SIZE/2;
+        const xCY = slotY + TILE_SIZE/2;
+        ctx.strokeStyle = '#ff0000';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(xCX - xSize/2, xCY - xSize/2);
+        ctx.lineTo(xCX + xSize/2, xCY + xSize/2);
+        ctx.moveTo(xCX + xSize/2, xCY - xSize/2);
+        ctx.lineTo(xCX - xSize/2, xCY + xSize/2);
+        ctx.stroke();
+      }
+      // Circulo de carregamento no slot selecionado
+      if (player.menuUseTimer > 0 && i === player.menuSelectedIndex && !player.menuUseTapPending) {
+        const pct = player.menuUseTimer / 1.0;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, TILE_SIZE * 0.4, -Math.PI/2, -Math.PI/2 + Math.PI*2*pct);
+        ctx.stroke();
+      }
+    - ctx.textAlign = 'start';
+
+EDGE CASES:
+- Helpful Priest seleciona a si mesmo: pode curar a si mesmo.
+- Helpful Priest tenta curar jogador com HP cheio: ainda gasta o hold
+  (mostrar "+0 HP" ou "Already full HP!").
+- Helpful Priest tenta reviver jogador vivo: curar 40 HP normalmente.
+  A logica: se target.alive === true, curar; senao, reviver.
+- Helpful Priest morre com menu aberto: menu fecha (menuOpen = false).
+- Dois Helpful Priests: cada um tem seu proprio menu independente.
+  Menus podem se sobrepor visualmente. OK.
+- Mini-menu sai da tela (viewport): permitir - o menu segue o jogador.
+  Se o jogador esta perto da borda direita, menu pode ficar parcialmente
+  fora da tela. OK.
+- Jogador selecionado morre DURANTE o hold: verificar no momento da
+  ativacao (quando hold completa) se o target ainda existe.
+  Se o target morreu durante o hold: revive-lo (pois agora esta morto).
+
+TESTES SUGERIDOS:
+- Tap F: verificar abertura do mini-menu.
+- Tap F novamente: verificar ciclagem entre jogadores.
+- Borda verde no jogador selecionado.
+- X vermelho em jogador morto.
+- Hold F por 1s em jogador vivo: verificar cura de 40 HP.
+- Hold F por 1s em jogador morto: verificar revive + 3s invuln.
+- Circulo de carregamento durante hold.
+- Verificar que o menu fecha quando o Helpful Priest morre.
+- Verificar que dois Helpful Priests tem menus independentes.
+
+================================================================================
+AJUSTES GLOBAIS PARA SUPORTAR AS NOVAS CLASSES
+================================================================================
+
+1. PlayerClasses: ADICIONAR as 11 novas classes ao objeto existente.
+   Total apos adicao: 21 classes (10 existentes + 11 novas).
+
+2. Player constructor: adicionar novas propriedades para as classes que
+   precisam de estado proprio:
+   - initialSpawnDone (utilityplayer)
+   - wiredGirlUsed (wiredgirl)
+   - chamberTP1, chamberTP2, chamberTPsPlaced (chamber)
+   - rerrolerUsed (rerroler)
+   - menuOpen, menuSelectedIndex, menuUseTimer, menuUseTapPending (helpfulpriest)
+   NOTA: Vex NAO precisa de novas propriedades (usa abilityActive como
+   indicador de phasing). Adicionar APENAS as propriedades necessarias.
+
+3. Game constructor/state: adicionar novas estruturas globais:
+   - activeZones: [] (Mighty Tinkerer)
+   - lockedDoor: null (Locker Guy)
+   - activeMiniMenus: [] (Helpful Priest, se optar pelo sistema generico)
+   NOTA: para o sistema de mini-menu, se optar pela implementacao
+   hardcoded no Player, nao precisa de activeMiniMenus.
+
+4. activateAbility(): REESTRUTURAR a funcao com a seguinte ordem:
+   
+   function activateAbility(game, player) {
+     const p = player;
+     const cls = PlayerClasses[p.playerClass];
+     if (!cls) return;
+   
+     // --- BLOCOS ESPECIAIS (ANTES do check generico) ---
+     // Estas classes tem logica propria de cooldown/ativacao
+     
+     if (p.playerClass === 'chamber') {
+       // Fase 1 (posicionamento): sem cooldown, sem abilityActive
+       // Fase 2 (teleporte): verificar abilityCooldown manualmente
+       // ... (ver implementacao na secao da classe)
+       return;
+     }
+     
+     if (p.playerClass === 'lockerguy') {
+       // cooldown=0 mas responde a F (nao e passiva)
+       // ... (ver implementacao na secao da classe)
+       return;
+     }
+     
+     if (p.playerClass === 'helpfulpriest') {
+       // Menu handle in Player.update() - nao faz nada aqui
+       return;
+     }
+     
+     // --- CHECK GENERICO ---
+     if (cls.cooldown === 0) return; // passivas
+     if (p.abilityCooldown > 0 || p.abilityActive) return;
+     
+     // --- CLASSES QUE USAM O FLUXO PADRAO ---
+     // abilityActive=true, abilityTimer=duration, abilityCooldown=cooldown+duration
+     // mais logica especifica da classe
+     
+     if (p.playerClass === 'timetraveler') { ... }
+     if (p.playerClass === 'redhacker') { ... }
+     
+     // NOVAS classes com fluxo padrao:
+     // mightytinkerer: cria zona, cooldown=45 (NAO usar abilityActive)
+     if (p.playerClass === 'mightytinkerer') {
+       game.activeZones.push({ ... });
+       p.abilityCooldown = 45;
+       return;
+     }
+     // wiredgirl: teleporte para artefato, cooldown=9999
+     if (p.playerClass === 'wiredgirl') {
+       if (p.wiredGirlUsed) return;
+       if (game.activeMonsters.some(m => m.alive)) return;
+       // ...
+       p.wiredGirlUsed = true;
+       p.abilityCooldown = 9999;
+       return;
+     }
+     // untitledgeneralist: invuln para todos, cooldown=36
+     if (p.playerClass === 'untitledgeneralist') {
+       for (const op of game.players) { if (op.alive) op.invulnTimer += 2; }
+       p.abilityCooldown = 36;
+       return;
+     }
+     // clown: casca de banana, cooldown=30
+     if (p.playerClass === 'clown') {
+       game.traps.push({ ... banana_peel ... });
+       p.abilityCooldown = 30;
+       return;
+     }
+     // rerroler: rerrolar shops, cooldown=9999
+     if (p.playerClass === 'rerroler') { ... }
+     // vex: phasing, cooldown=21.5 (20+1.5)
+     if (p.playerClass === 'vex') {
+       p.abilityActive = true;
+       p.abilityTimer = 1.5;
+       p.abilityCooldown = 20 + 1.5;
+       p.phasing = true;
+       p.phasingTimer = 1.5;
+       return;
+     }
+     
+     // Fluxo padrao para classes que usam abilityActive
+     p.abilityActive = true;
+     p.abilityTimer = cls.duration;
+     p.abilityCooldown = cls.cooldown + cls.duration;
+     
+     if (p.playerClass === 'scout') { ... }
+     if (p.playerClass === 'commandyeller') { ... }
+     if (p.playerClass === 'dyingguy') { ... }
+     if (p.playerClass === 'annoyinglooper') { ... }
+   }
+   
+   NOTA: utilityplayer e archaeologist sao PASSIVAS (cooldown=0),
+   nao chegam em activateAbility. O check generico as bloqueia.
+
+5. Player.update(): 
+   - Adicionar logica de phasing (diminuir timer, verificar ejecao).
+   - Adicionar logica de bonus de velocidade de zonas (verificar
+     activeZones para speed bonus).
+   - NAO modificar o fluxo da tecla F aqui (ja tratado separadamente).
+
+6. Player.canMoveTo():
+   - Adicionar verificacao de phasing (ignorar tiles 'O'/'W' se phasing).
+
+7. Player.checkInteraction():
+   - Adicionar verificacao de porta trancada (pular lockedDoor).
+
+8. Game.render():
+   - Adicionar renderizacao de activeZones (circulos azuis).
+   - Adicionar renderizacao de TPs do Chamber (circulos roxos + linhas).
+   - Adicionar renderizacao de cadeado (lockedDoor).
+   - Adicionar renderizacao de mini-menu (Helpful Priest).
+   - Adicionar renderizacao especial da casca de banana no loop de traps.
+
+9. Game.update():
+   - Adicionar update de activeZones (timer, remocao).
+   - Modificar update de traps para suportar lifetime/timer (expirar casca).
+   - Verificar zonas para bonus de velocidade (aplicar em monsters).
+
+10. MonsterEntity:
+    - Em update ou no calculo de speed: verificar activeZones para
+      forcar speed=70.
+    - Em BFS pathfinding: verificar lockedDoor como obstaculo.
+    - Em forceOpen/toggle: verificar se a porta esta trancada.
+
+11. DoorEntity.toggle() e forceOpen():
+    - Verificar se a porta esta trancada (game.lockedDoor) e bloquear.
+
+12. Game.checkGameState() / loadMap():
+    - Resetar estados: wiredGirlUsed, rerrolerUsed, chamberTPs,
+      activeZones (limpar), lockedDoor = null.
+    - NAO resetar: initialSpawnDone (Utility Player).
+
+13. Tratamento da tecla F para Helpful Priest:
+    - A logica de tap/hold do mini-menu e executada DENTRO de
+      Player.update() (similar a hotbar). Nao e necessario modificar
+      o ponto onde activateAbility e chamado.
+    - Dentro de activateAbility, adicionar return early para helpfulpriest
+      (o bloco do menu ja processou a tecla F em Player.update).
+    - Desta forma, a tecla F funciona normalmente para outras classes
+      e o Helpful Priest tem seu proprio fluxo de menu.
+
+14. Sistema de traps: adicionar campos lifetime e timer para suportar
+    traps com duracao limitada (banana peel). Modificar o loop de update
+    de traps para decrementar timer e remover traps expiradas.
+    Tambem adicionar verificacao para o item 'banana_peel' no loop
+    de colisao de traps (evitar crash ao acessar Items['banana_peel']).
+
+15. updateInteraction: a duracao de interacao com artefatos ja considera
+    playerCount. Nao precisa de ajustes para o Archaeologist.
+
+16. updateAbilityHUD: adicionar casos especiais para classes "once per summon"
+    (assim como ja existe para timetraveler):
+    - Se p.playerClass === 'wiredgirl' && p.wiredGirlUsed: mostrar "Used"
+    - Se p.playerClass === 'rerroler' && p.rerrolerUsed: mostrar "Used"
+    - Se p.playerClass === 'chamber': mostrar "TPs: X/2" ou "Ready"
+      (customizar o HUD para indicar o estado dos TPs)
+    Esses casos devem ser adicionados na funcao updateAbilityHUD,
+    junto com o tratamento existente do timetraveler.
+
+================================================================================
+SISTEMA DE MINI-MENU REUTILIZAVEL (ARQUITETURA FUTURA)
+================================================================================
+
+Para escalabilidade, o sistema de mini-menu deve ser projetado como um
+componente reutilizavel. Abaixo esta a arquitetura sugerida para
+implementacao futura (apos o Helpful Priest funcionar com a versao
+hardcoded inicial).
+
+ESTRUTURA GENERICA:
+{
+  owner: Player,           // quem abriu o menu
+  targets: Array,          // array de alvos (players, artefatos, etc)
+  selectedIndex: number,   // indice selecionado
+  open: boolean,           // menu aberto?
+  useTimer: number,        // timer de hold
+  useTapPending: boolean,  // flag de tap
+  holdDuration: number,    // duracao do hold para ativar (default 1.0)
+  tapDuration: number,     // duracao maxima do tap (default 0.3)
+  onActivate: function(target, owner, game),  // callback ao completar hold
+  renderSlot: function(ctx, x, y, target, index, isSelected, game), // custom render
+  getSlotCount: function(targets), // quantos slots renderizar
+  positionOffset: { dx: number, dy: number }  // offset relativo ao owner
+}
+
+FUNCOES DO SISTEMA:
+- createMiniMenu(owner, targets, options): cria e retorna objeto mini-menu.
+- updateMiniMenu(menu, dt, keys, keybind): atualiza logica tap/hold.
+- renderMiniMenu(ctx, menu, game): renderiza o menu.
+- closeMiniMenu(menu): fecha e limpa.
+
+Desta forma, futuras classes podem criar mini-menus com:
+- Targets diferentes (ex: lista de waypoints para teleporte, lista de
+  artefatos para visao remota).
+- Acoes diferentes (ex: buffar, teleportar, marcar).
+- Visuais customizados (ex: icones de artefatos em vez de jogadores).
+
+Nota: Esta arquitetura NAO precisa ser implementada completamente agora.
+Implemente primeiro a versao hardcoded do Helpful Priest. A estrutura
+generica pode ser refatorada depois, quando outra classe precisar de
+mini-menu. O importante e que o codigo do Helpful Priest seja escrito
+com funcoes separadas e parametros claros, facilitando a extracao futura.
+
+================================================================================
+TESTES E VERIFICACAO (OBRIGATORIO)
+================================================================================
+
+APOS implementar TODAS as classes, execute os seguintes testes usando
+VALORES FICTICIOS para comprovar que cada classe funciona. Registre
+os resultados na Documentacao_Completa.txt.
+
+PROCEDIMENTO DE TESTE:
+1. Para cada classe, crie um cenario de teste isolado:
+   - Inicie o jogo com 1-4 jogadores da classe sendo testada.
+   - Use o debugMode (F3) para facilitar (visao completa, shops sempre
+     acessiveis, dinheiro infinito).
+   - Execute a habilidade e verifique o comportamento esperado.
+
+2. Para CADA teste, registre:
+   - Classe testada
+   - Condicoes do teste (numero de jogadores, estado do monstro, etc.)
+   - Valor ficticio usado (se aplicavel)
+   - Resultado esperado
+   - Resultado obtido
+   - Status: PASSOU / FALHOU
+   - Se FALHOU: descreva o bug e a correcao aplicada
+
+3. Testes minimos por classe:
+   - Utility Player: verificar 5 itens no spawn inicial; verificar
+     que nao recebe itens em rounds subsequentes.
+   - Mighty Tinkerer: verificar zona circular azul; verificar +30 speed
+     no jogador dentro; verificar speed=70 no monstro dentro.
+   - Wired Girl: verificar teleporte para artefato aleatorio; verificar
+     bloqueio com monstro vivo; verificar reset apos round.
+   - Archaeologist: verificar +$1 ao coletar artefato; verificar que
+     bonus nao acumula com multiplos Archaeologists.
+   - Untitled Generalist: verificar +2s invuln em todos; verificar
+     acumulo com cake; verificar cooldown 36s.
+   - Clown: verificar casca de banana visual; verificar stun 4s no
+     monstro; verificar expiracao em 15s.
+   - Chamber: verificar colocacao TP1 e TP2; verificar restricao de
+     distancia 2.5 tiles; verificar teleporte para TP mais distante;
+     verificar cooldown 23s; verificar destruicao ao derrotar monstro.
+   - Rerroler: verificar rerrolagem de shops; verificar que shops
+     vendidos nao sao afetados; verificar reset apos round.
+   - Vex: verificar atravessar paredes; verificar ejecao ao expirar
+     dentro de parede; verificar cooldown 20s + 1.5s.
+   - Locker Guy: verificar cadeado visual; verificar porta nao abre;
+     verificar remocao do cadeado; verificar bloqueio de segundo cadeado;
+     verificar redirecionamento do monstro.
+   - Helpful Priest: verificar abertura do menu com tap F; verificar
+     ciclagem entre jogadores; verificar borda verde no selecionado;
+     verificar X vermelho em mortos; verificar cura 40 HP com hold;
+     verificar revive + 3s invuln com hold; verificar circulo de
+     carregamento.
+
+4. Teste de CONFLITOS entre classes:
+   - Testar Vex (phasing) + Dying Guy (invisivel) simultaneamente.
+   - Testar Mighty Tinkerer (zona) + Command Yeller (speed buff) - os
+     efeitos de speed devem acumular corretamente.
+   - Testar Chamber + Helpful Priest + Utility Player no mesmo time.
+   - Verificar se o jogo NAO congela ou crasha com combinacoes de classes.
+
+5. Teste de performance:
+   - Verificar FPS com 4 jogadores de classes diferentes usando
+     habilidades simultaneamente.
+   - Se FPS cair abaixo de 30: otimizar loops e renderizacao.
+
+================================================================================
+DOCUMENTACAO DAS ALTERACOES (OBRIGATORIO)
+================================================================================
+
+A CADA alteracao feita no codigo, atualize a Documentacao_Completa.txt
+IMEDIATAMENTE, seguindo o padrao existente:
+
+1. Adicione uma nova entrada no CHANGELOG (proximo numero de alteracao).
+2. Inclua:
+   - PROBLEMA: o que motivou a mudanca.
+   - SOLUCAO: como foi resolvido.
+   - MUDANCAS NO CODIGO: lista detalhada de metodos novos/modificados,
+     atributos novos, logicas alteradas.
+   - SECOES AFETADAS: referencia as secoes da documentacao que mudaram.
+3. Crie NOVAS SECOES na documentacao para cada sistema novo:
+   - "SECAO XX - SISTEMA DE ZONAS (MIGHTY TINKERER)"
+   - "SECAO XX - SISTEMA DE MINI-MENU (HELPFUL PRIEST)"
+   - "SECAO XX - SISTEMA DE PORTALS (CHAMBER)"
+   - "SECAO XX - SISTEMA DE TRANCAMENTO DE PORTAS (LOCKER GUY)"
+   - "SECAO XX - SISTEMA DE PHASING (VEX)"
+   - "SECAO XX - SISTEMA DE TRAPS TEMPORARIAS (CLOWN)"
+   Cada secao deve documentar: arquitetura, estrutura de dados,
+   fluxo de execucao, interacoes com outros sistemas.
+
+4. Registre TODOS os testes realizados na documentacao, incluindo:
+   - Data do teste
+   - Classe/sistema testado
+   - Valores ficticios usados
+   - Resultado
+   - Correcoes aplicadas (se houver)
+
+================================================================================
+VERIFICACAO FINAL
+================================================================================
+
+Apos implementar tudo, faca uma verificacao RAPIDA:
+
+- [ ] Todas as 11 classes estao no objeto PlayerClasses?
+- [ ] As classes passivas (Utility Player, Archaeologist) nao consomem F?
+- [ ] As classes ativas respondem corretamente a tecla F?
+- [ ] O Helpful Priest substitui completamente o comportamento normal de F?
+- [ ] O Locker Guy responde a F perto de portas (nao E)?
+- [ ] O sistema de traps suporta lifetime/timer para a casca de banana?
+- [ ] O sistema de zonas (Mighty Tinkerer) funciona sem conflitos?
+- [ ] O sistema de TPs (Chamber) funciona nas duas fases?
+- [ ] O phasing (Vex) permite atravessar paredes e ejeita ao expirar?
+- [ ] A documentacao foi atualizada com TODAS as alteracoes?
+- [ ] Nao ha conflitos entre as novas classes e as existentes?
+- [ ] O jogo continua rodando sem erros de console?
+- [ ] Nao ha caracteres bugados/corrompidos em nenhum lugar?
+- [ ] O sistema de mini-menu e escalavel para futuras classes?
+- [ ] Todos os timers, cooldowns e duracoes estao corretos?
+- [ ] A limpeza de estado entre rounds funciona (checkGameState/loadMap)?
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================
