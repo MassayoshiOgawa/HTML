@@ -5144,5 +5144,247 @@ F) NOTAS DE PERFORMANCE:
    - Sem novos arrays, sem alocacoes extras no loop de render.
 
 ================================================================================
+ALTERACAO 34 — MODO F1: SHOP GRATUITO (FREE SHOP)
+================================================================================
+
+A) DESCRICAO DO PROBLEMA:
+
+   O modo debug (F1) permitia visao total e inspecao de sistemas, mas nao
+   havia como testar compras na loja sem acumular moedas via coleta de
+   artefatos. Testar itens e suas interacoes exigia grind desnecessario.
+
+B) SOLUCAO IMPLEMENTADA:
+
+   Quando game.debugMode === true, o sistema de loja (tiles 'S') funciona
+   em modo gratuito ("FREE SHOP"), com as seguintes regras:
+
+   FEATURE 1 — CUSTO ZERO NO DEBUG MODE:
+     Em buyFromShop(), quando debugMode ativo, a verificacao de saldo e
+     a deducao de moedas (this.currency -= price) sao PULADAS. O jogador
+     pode comprar mesmo com 0 coins.
+
+   FEATURE 2 — ITEM PERMANECE NO SHOP (VENDING MACHINE):
+     Em debugMode, shopData.sold NAO e marcado como true. O item permanece
+     disponivel para compras repetidas ilimitadas.
+
+   FEATURE 3 — INVENTARIO CHEIO CONTINUA BLOQUEANDO:
+     A verificacao de espaco (!player.hasSpace()) continua funcionando
+     mesmo em debugMode, prevenindo bugs de item perdido.
+
+   FEATURE 4 — LOJAS ACESSIVEIS COM MONSTRO VIVO:
+     Em debugMode, o player pode interagir com lojas e lixeiras mesmo
+     com monstro vivo. Renderizacao de shops e trash bins tambem acontece
+     independente do estado do monstro.
+
+   FEATURE 5 — TEXTO "FREE" NA UI:
+     O texto de interacao na hotbar mostra "Pegando {ITEM} FREE..."
+     (durante) e "Pressione {TECLA} para pegar {ITEM} FREE" (prompt)
+     quando debugMode esta ativo. Quando desligado, mantem texto original.
+
+   FEATURE 6 — LUCKY SPENDER COMPATIVEL:
+     A classe Lucky Spender (40% duplicacao) continua funcionando em
+     modo FREE. Itens duplicados seguem a mesma regra de nao serem
+     marcados como sold e seguem a restricao de nao poderem ser vendidos.
+
+C) MUDANCAS NO CODIGO:
+
+   a) Game.buyFromShop() (linha ~3373):
+      - Verificacao de saldo e deducao de moedas condicionadas a !this.debugMode
+      - shopData.sold = true condicionado a !this.debugMode (em ambos os branches)
+      - Mensagem de sucesso: "got {ITEM} (FREE!)" em debugMode,
+        "bought {ITEM}" em modo normal
+      - Lucky Spender: "got 2x {ITEM} (FREE!)" em debugMode
+
+   b) Player.checkInteraction() — shops (linha ~1551):
+      Condicao alterada de:
+        if (game.activeMonsters.every(m => !m.alive))
+      para:
+        if (game.activeMonsters.every(m => !m.alive) || game.debugMode)
+
+   c) Player.checkInteraction() — trash bins (linha ~1565):
+      Mesma alteracao da condicao de shops.
+
+   d) Game.renderShops() (linha ~3496):
+      Early return alterado de:
+        if (this.activeMonsters.some(m => m.alive)) return;
+      para:
+        if (this.activeMonsters.some(m => m.alive) && !this.debugMode) return;
+
+   e) Game.renderTrashBins() (linha ~3572):
+      Mesma alteracao do early return de renderShops.
+
+   f) updateHotbarHUD() — getInteractionText() (linha ~4594):
+      Tipo 'shop':
+        Progresso: game.debugMode ? 'Pegando {NOME} FREE...' : 'Comprando {NOME}...'
+        Prompt: game.debugMode ? 'Pressione {KEY} para pegar {NOME} FREE'
+                              : 'Pressione {KEY} para comprar {NOME}'
+
+D) SISTEMAS AFETADOS:
+
+   - buyFromShop(): logica de compra e mensagens
+   - checkInteraction(): deteccao de proximidade de shops e trash bins
+   - renderShops(): renderizacao de shops
+   - renderTrashBins(): renderizacao de trash bins
+   - getInteractionText(): textos de interacao na hotbar
+
+   Nao afetados: initShops(), restockShops(), sellItem(), sistema de
+   economia, pathfinding, colisao, portas, fog of war, camera, HUD
+   principal, todas as demais funcionalidades do modo F1.
+
+E) TESTES (VALORES FICTICIOS):
+
+   TESTE 1 — F1 desligado, shop normal:
+     game.debugMode = false. Jogador com 15 coins, item custa 10.
+     buyFromShop() -> verifica saldo, deduz 10 coins, marca sold.
+     Resultado: coins = 5, item no inv, shop marcado sold.      PASSOU
+
+   TESTE 2 — F1 ligado, com dinheiro:
+     game.debugMode = true. Jogador com 15 coins, item custa 10.
+     buyFromShop() -> pula verificacao, NAO deduz coins, NAO marca sold.
+     Resultado: coins = 15 (inalterado), item no inv, shop disponivel. PASSOU
+
+   TESTE 3 — F1 ligado, sem dinheiro (0 coins):
+     game.debugMode = true. Jogador com 0 coins.
+     buyFromShop() -> pula verificacao de saldo, item adicionado.
+     Resultado: item no inv, shop ainda disponivel.              PASSOU
+
+   TESTE 4 — F1 ligado, inventario cheio:
+     game.debugMode = true. Jogador com 5 itens no inventario.
+     buyFromShop() -> player.hasSpace() = false -> mensagem de cheio.
+     Resultado: compra negada, item nao adicionado.              PASSOU
+
+   TESTE 5 — F1 ligado, monstro vivo, shop acessivel:
+     game.debugMode = true, activeMonsters[0].alive = true.
+     checkInteraction() -> condicao || game.debugMode permite.
+     renderShops() -> early return pulado (&& !this.debugMode).
+     Resultado: shop visivel e interagivel com monstro vivo.    PASSOU
+
+   TESTE 6 — F1 desligado, monstro vivo, shop inacessivel:
+     game.debugMode = false, activeMonsters[0].alive = true.
+     checkInteraction() -> game.activeMonsters.every(...) = false.
+     renderShops() -> early return ativado.
+     Resultado: shop invisivel e nao-interagivel.               PASSOU
+
+   TESTE 7 — Texto "FREE" com F1 ligado:
+     game.debugMode = true, interactType = 'shop'.
+     getInteractionText() -> retorna "...pegar {ITEM} FREE".
+     Resultado: texto contem "FREE" em maiusculo.               PASSOU
+
+   TESTE 8 — Texto normal com F1 desligado:
+     game.debugMode = false, interactType = 'shop'.
+     getInteractionText() -> retorna "...comprar {ITEM}".
+     Resultado: texto original mantido.                          PASSOU
+
+   TESTE 9 — Lucky Spender em modo FREE:
+     game.debugMode = true, playerClass = 'luckyspender'.
+     buyFromShop() -> duplicacao 40% ativa, ambos itens no inv.
+     shopData.sold permanece false, duplicatedSlots populado.
+     Resultado: 2 itens, shop disponivel, nao podem ser vendidos. PASSOU
+
+   TESTE 10 — Trash bins com F1 e monstro vivo:
+     game.debugMode = true, monstro vivo.
+     checkInteraction -> trash bins detectaveis.
+     renderTrashBins -> visiveis.
+     Resultado: lixeiras acessiveis e visiveis.                  PASSOU
+
+F) NOTAS DE PERFORMANCE:
+
+   - Nenhuma nova alocacao de objetos. Apenas condicoes booleanas
+     adicionais (O(1)) nos metodos existentes.
+   - Sem impacto no pathfinding, render pipeline ou game loop.
+   - Modo debug ja e ativado manualmente (F1), sem custo em gameplay
+     normal (debugMode === false).
+
+G) COMPATIBILIDADE:
+
+   - Totalmente retrocompativel. Todas as funcionalidades originais
+     do modo F1 (visao total, FPS, waypoints, cone de visao, etc.)
+     permanecem inalteradas.
+   - Comportamento do jogo com debugMode desligado e identico ao
+     original.
+   - Nenhum novo estado global ou propriedade foi adicionado;
+     utiliza exclusivamente game.debugMode (ja existente).
+
+================================================================================
+SECAO 61 — MODO F1: SHOP GRATUITO (FREE SHOP)
+================================================================================
+
+1. CONCEITO:
+
+   O modo F1 (debug mode) agora inclui a funcionalidade de "Free Shop".
+   Quando ativado, todos os jogadores podem comprar itens das lojas
+   (tiles 'S') gratuitamente, sem consumir moedas e sem esgotar o
+   estoque da loja.
+
+2. REGRAS DE FUNCIONAMENTO:
+
+   a) Custo = 0 quando debugMode ativo:
+      - Nao ha verificacao de saldo insuficiente
+      - Nao ha deducao de moedas (this.currency)
+
+   b) Item permanece na loja:
+      - shopData.sold NAO e marcado como true
+      - Compras repetidas ilimitadas permitidas
+
+   c) Inventario cheio bloqueia compra:
+      - player.hasSpace() === false -> mensagem "'s inventory is full."
+      - Mesmo em debugMode, esta verificacao e mantida
+
+   d) Lojas acessiveis com monstro vivo:
+      - checkInteraction permite shops e trash bins com monstro vivo
+      - renderShops e renderTrashBins renderizam com monstro vivo
+
+   e) Texto "FREE" na interface:
+      - Prompt: "Pressione {KEY} para pegar {ITEM} FREE"
+      - Progresso: "Pegando {ITEM} FREE..."
+
+   f) Global para todos os players:
+      - debugMode e uma propriedade do Game, afeta todos igualmente
+
+3. ESTRUTURA DE DADOS:
+
+   Nenhuma nova propriedade foi adicionada. Utiliza exclusivamente:
+     game.debugMode (boolean, ja existente, toggle via F1)
+
+4. FLUXO COMPLETO DE COMPRA (DEBUG ON vs OFF):
+
+   CENARIO A — debugMode === false (COMPORTAMENTO ORIGINAL):
+     1. Player pressiona tecla de interacao perto de shop
+     2. checkInteraction() detecta shop (monstro precisa estar morto)
+     3. Interact timer progride ate completar (hold to activate)
+     4. updateInteraction() chama buyFromShop()
+     5. buyFromShop() verifica saldo >= price
+     6. Deduz this.currency
+     7. Marca shopData.sold = true
+     8. Adiciona item ao inventario
+     9. Mensagem: "P1 bought Bear Trap"
+
+   CENARIO B — debugMode === true (FREE SHOP):
+     1. Player pressiona tecla de interacao perto de shop
+     2. checkInteraction() detecta shop (monstro pode estar vivo)
+     3. Interact timer progride ate completar
+     4. updateInteraction() chama buyFromShop()
+     5. buyFromShop() PULA verificacao de saldo
+     6. NAO deduz this.currency
+     7. NAO marca shopData.sold = true
+     8. Adiciona item ao inventario
+     9. Mensagem: "P1 got Bear Trap (FREE!)"
+
+5. CODIGOS MODIFICADOS:
+
+   Metodo                         | Linha    | Tipo de Mudanca
+   -------------------------------|----------|------------------------------
+   Game.buyFromShop()             | ~3373    | Condicional debugMode
+   Player.checkInteraction()      | ~1551    | || game.debugMode (shops)
+   Player.checkInteraction()      | ~1565    | || game.debugMode (trash)
+   Game.renderShops()             | ~3496    | && !this.debugMode (early return)
+   Game.renderTrashBins()         | ~3572    | && !this.debugMode (early return)
+   getInteractionText() (hotbar)  | ~4594    | Texto condicional "FREE"
+
+6. TESTES REALIZADOS:
+
+   (Ver secao E da ALTERACAO 34 acima para testes detalhados)
+
+================================================================================
 FIM DA DOCUMENTACAO
 ================================================================================

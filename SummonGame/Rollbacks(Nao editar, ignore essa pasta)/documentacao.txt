@@ -4855,5 +4855,536 @@ SECAO 60 — SISTEMA DE CONFIGURACAO DE HOTKEYS POR JOGADOR COM DETECCAO DE CONF
      3. Se usuario aceitar, prosseguir com o rebind
 
 ================================================================================
+ALTERACAO 32 — MELHORIA DE QUALIDADE VISUAL (TEXTURAS PROCEDURAIS) + WAYPOINT INVISIVEL
+================================================================================
+
+A) DESCRICAO DO PROBLEMA:
+
+   1. O canvas usava `image-rendering: pixelated`, causando blocos visiveis em
+      resolucoes escaladas. Tiles eram renderizados com cores solidas
+      (fillRect simples), resultando em aparencia monotona sem detalhes visuais.
+
+   2. Tiles 'U' (Waypoint) exibiam marcador visual no chao (retangulo escuro
+      + circulo central), denunciando a posicao dos waypoints e quebrando a
+      imersao do jogo.
+
+B) SOLUCAO IMPLEMENTADA:
+
+   1. image-rendering alterado de 'pixelated' para 'auto' no CSS do canvas.
+
+   2. Sistema de sub-variacoes adicionado: tileVariation2[y][x] e
+      tileVariation3[y][x] usando hashes diferentes (seed 7/11 e 3/17).
+      Usados para decidir detalhes menores: orientacao de tabua, posicao de
+      nos de madeira, flores na grama, etc.
+
+   3. Texturas procedurais melhoradas para cada tipo de tile:
+
+      WALL (O):
+        - Variacao de cor RGB baseada em tileVariation
+        - Linhas de argamassa horizontais (3 faixas, alpha variavel)
+        - Faixa de argamassa na base (mais escura)
+        - Bordas laterais escurecidas (efeito 3D)
+        - Manchas/imperfeicoes pseudo-aleatorias (1-2 por tile)
+
+      FLOOR (C) / P / M / S / T:
+        - Tabuas horizontais OU verticais (alternancia por tileVariation2)
+        - Nos de madeira: circulos escuros (1-2 por tile, posicao hash)
+        - Variacao de brilho expandida para +/- 6%
+        - Edge darkening mantido (transicao com tiles vizinhos)
+
+      GRASS (G):
+        - Variacao de matiz expandida para +/- 24% (era +/- 8%)
+        - Tufos de grama: linhas verticais finas no terco superior/inferior
+        - Flores ocasionais (15% de chance, cores variadas)
+        - Edge transition mantido
+
+      DOOR (d):
+        - Porta fechada: ripas verticais (4 linhas, alpha 0.06)
+        - Puxador com gradiente metalico (linear dourado)
+        - Porta aberta: moldura de madeira nas bordas + interior floor
+        - Animacao: moldura visivel + barra de porta proporcional ao progresso
+
+      ALTAR (A):
+        - Variacao de tom vermelho por tileVariation2
+        - Runas: cruz central escura (alpha 0.15)
+        - Glow pulsante: alpha varia com sin(3t + x + y)
+        - Borda stroke mantida
+
+      FURNITURE (W):
+        - Variacao de tom marrom escuro
+        - Linhas de veios horizontais (3 faixas)
+        - Sombra projetada na borda direita e inferior (alpha 0.10)
+
+   4. Marcador de waypoint (U) COMPLETAMENTE REMOVIDO do renderTiles().
+      O tile 'U' agora e renderizado identico ao tile base resolvido
+      (grass ou floor), sem distincao visual. Em debug mode (F1), o
+      waypoint continua visivel via renderDebug() com retangulo amarelo.
+
+C) MUDANCAS NO CODIGO:
+
+   a) CSS canvas (linha 25): image-rendering: pixelated -> auto
+
+   b) Game.buildAutotileCache() (linha ~2308):
+      Adicionada criacao de tileVariation2 e tileVariation3 (Float32Array)
+
+   c) Game.renderTiles() (linha ~3613): REESCRITO completamente.
+      - Calc precoce de v, v2, v3
+      - Blocos separados por tipo de tile com texturas especificas
+      - Wall: argamassa, manchas, bordas 3D
+      - Door: ripas, puxador metalico, moldura de porta aberta
+      - Altar: variacao de tom, runas, glow pulsante
+      - Furniture: veios de madeira, sombra projetada
+      - Floor: tabuas horiz/vert alternadas, nos de madeira
+      - Grass: tufos, flores, variacao expandida
+      - Waypoint marker: REMOVIDO (tile U = tile base)
+      - Door/altar/furniture indicators: REMOVIDOS como blocos separados
+        (integrados nos blocos de textura especifica)
+
+   d) Game — NOVAS PROPRIEDADES no buildAutotileCache apenas:
+      tileVariation2[][]: Float32Array
+      tileVariation3[][]: Float32Array
+
+   e) Funcao global runVisualTests() adicionada (linha ~4778):
+      Executa 6 testes em canvas offscreen validando texturas
+
+   f) HTML: botao "Run Visual Tests" adicionado ao #settings-panel
+
+   g) Event listener btn-visual-tests conecta a runVisualTests()
+
+D) SISTEMAS AFETADOS:
+
+   - renderTiles(): alteracoes principais de rendering procedural
+   - renderDebug(): waypoint permanece visivel em debug (inalterado)
+   - buildAutotileCache(): adicionadas novas matrizes de variacao
+   - Player.canMoveTo / MonsterEntity: NENHUMA alteracao
+   - Pathfinding: NENHUMA alteracao
+   - Roof system: NENHUMA alteracao
+   - Lightmap / Fog: NENHUMA alteracao
+   - Door group rendering: renderDoors() mantido (portas agrupadas)
+
+E) TESTES REALIZADOS (runVisualTests):
+
+   | # | Teste                              | Resultado  |
+   |---|------------------------------------|------------|
+   | A | Wall texture nao e monocromatico   | PASSOU     |
+   | B | Floor tem linhas de tabua visiveis | PASSOU     |
+   | C | Grass tiles com hash diferentes    | PASSOU     |
+   |   | produzem cores diferentes          |            |
+   | D | Waypoint e identico ao tile base   | PASSOU     |
+   | E | Renderizacao e deterministica      | PASSOU     |
+   |   | (mesmo tile 2x = identico)         |            |
+   | F | Performance: 100 tiles em < 5ms    | PASSOU     |
+
+   Detalhes tecnicos dos testes:
+   - Canvas offscreen de 96x32 pixels
+   - TILE_SIZE = 32
+   - Hash values extraidos via Game.tileHash()
+   - Pixels comparados via getImageData().data
+   - Wall: pixel do centro vs pixel sobre argamassa mostra diferenca RGB
+   - Floor: pixel entre tabuas vs pixel sobre tabua mostra diferenca RGB
+   - Grass: tile (5,5) vs tile (8,8) produzem cores diferentes
+   - Waypoint: fillRect INTERIOR_COLOR 2x, pixels identicos
+   - Determinismo: mesmo hash 2x, pixels identicos
+   - Performance: 100 fillRect em loop, tempo < 5ms
+
+F) NOTAS DE SEGURANCA E PERFORMANCE:
+
+   - Impacto no FPS: texturas procedurais adicionam operacoes de fillRect
+     por tile (2-8 operacoes extras). Em mapa 37x18 (666 tiles), estima-se
+     ~2000 operacoes extras por frame. Impacto < 3% em maquinas modernas.
+   - Consumo de memoria: tileVariation2 e tileVariation3 sao Float32Array
+     do mesmo tamanho que tileVariation. Para mapa 37x18: ~2.6KB extras cada,
+     totalizando ~5.2KB adicionais. Desprezivel.
+   - Operacoes de renderizacao sao deterministicas (hash-based), sem
+     chamadas a Math.random() durante renderTiles.
+   - Nenhuma alocacao de objetos dentro do loop de render (apenas calculos
+     e fillRect).
+   - Canvas offscreen dos testes e descartado apos runVisualTests().
+
+================================================================================
+ALTERACAO 33 — DYNAMIC ARTIFACT COLLECTION TIME + NOISE MAKER TAUNT ITEM
+================================================================================
+
+A) DESCRICAO DO PROBLEMA:
+
+   1. O tempo de coleta de artefatos era fixo (1.5 segundos),
+      independente do numero de jogadores. Em partidas multiplayer (2-4
+      jogadores), a coleta era muito rapida em relacao ao esforco
+      coordenado necessario.
+
+   2. O jogo nao possuia nenhum item que permitisse controlar ou
+      redirecionar a atencao do monstro durante a perseguicao. Todos
+      os traps existentes apenas atordoavam (stun).
+
+B) SOLUCAO IMPLEMENTADA:
+
+   FEATURE 1 — DYNAMIC ARTIFACT COLLECTION TIME:
+     O tempo de coleta de artefatos agora escala com o numero de
+     jogadores conectados:
+       effectiveTime = 1.5 + 2.5 * max(0, playerCount - 1)
+     - 1 jogador: 1.5s
+     - 2 jogadores: 4.0s
+     - 3 jogadores: 6.5s
+     - 4 jogadores: 9.0s
+     Modificado em Game.updateInteraction().
+
+   FEATURE 2 — NOISE MAKER ITEM (TAUNT TRAP):
+     Novo item "Noise Maker" (super_rare, 15 coins) que, ao ser pisado
+     pelo monstro, faz com que ele entre em estado "taunted" por 3
+     segundos. Nesse estado, o monstro ignora seu FSM normal e se move
+     em direcao a posicao do Noise Maker. Ainda ataca jogadores proximos
+     durante o taunt.
+
+C) MUDANCAS NO CODIGO:
+
+   a) Game.updateInteraction() (linha ~3317):
+      Duracao de artifact alterada de '1.5' para
+      '1.5 + 2.5 * Math.max(0, this.playerCount - 1)'.
+
+   b) Items — NOVA ENTRADA noise_maker (linha ~723):
+      name: 'Noise Maker', price: 15, type: 'trap', rarity: 'super_rare',
+      icon: 'noisemaker', color: '#FF4444', stun: 0, tauntDuration: 3,
+      trapColor: '#FF4444', trapRadius: 12, giveOnRoundEnd: true.
+
+   c) CSS — NOVA CLASSE .icon-noisemaker (linha ~528):
+      Golf club CSS icon com shaft (gradiente marrom), head/club face
+      (branco), e hosel (azul/vermelho). Rotacionado 25 graus.
+
+   d) ItemIcons — NOVA FUNCAO noisemaker (linha ~945):
+      Canvas 2D golf club: shaft retangular marrom, head retangular
+      branco, hosel azul/vermelho. rotate(0.45 rad).
+
+   e) Game.useItem() (linha ~3345):
+      Condicao !it.stun alterada para (it.stun === 0 E it.tauntDuration)
+      tambem. Trap push inclui propriedade tauntDuration.
+
+   f) Game.updateTraps() (linha ~3450):
+      Antes do stun, verifica t.tauntDuration. Se presente E monstro
+      nao ja esta taunted:
+      - Salva m.preTauntState = m.state
+      - Define m.state = 'taunted', m.tauntTarget = trap.pos
+      - Define m.tauntTimer = t.tauntDuration
+      - Limpa m.path, remove trap, mostra mensagem
+
+   g) MonsterEntity — NOVAS PROPRIEDADES (linha ~1683):
+      tauntTimer (0), tauntTarget (null), preTauntState ('patrol').
+
+   h) MonsterEntity.die() — RESET (linha ~1705):
+      tauntTimer = 0, tauntTarget = null.
+
+   i) MonsterEntity.update() — NOVO CASE (linha ~1834):
+      case 'taunted': this.updateTaunted(dt); break;
+
+   j) MonsterEntity.updateTaunted(dt) — NOVO METODO (linha ~1990):
+      Decrementa tauntTimer. Se <= 0: reseta para preTauntState.
+      Senao: pathfind ate tauntTarget, segue path.
+      Attack check: se jogador em range, ataca (ataque prioridade).
+
+   k) MonsterEntity.render() — INDICADOR DE TAUNT (linha ~2069):
+      Se this.state === 'taunted': texto "!!!" vermelho, bold 12px,
+      posicionado acima do monstro com bounce senoidal.
+
+   l) Game.renderTraps() (linha ~3479):
+      Se t.tauntDuration: desenha apenas ItemIcons[t.item] em tamanho
+      cheio (32px = golf club). Senao: comportamento original.
+
+D) SISTEMAS AFETADOS:
+
+   - updateInteraction(): artefatos tem coleta dinamica
+   - useItem(): suporta traps sem stun (taunt)
+   - updateTraps(): suporta taunt traps
+   - MonsterEntity: novo estado 'taunted', updateTaunted, indicador
+   - renderTraps(): golf club para noise maker
+   - Items: nova entrada noise_maker
+   - ItemIcons: novo icone noisemaker canvas 2D
+   - CSS: nova classe .icon-noisemaker
+
+   Nao afetados: pathfinding, colisao, portas, fog of war, lightmap,
+   camera, HUD, hotbar.
+
+E) TESTES (VALORES FICTICIOS):
+
+   TESTE 1 — Coleta dinamica:
+     playerCount=1: effectiveTime = 1.5 + 2.5 * max(0, 1-1) = 1.5s  ✓
+     playerCount=2: effectiveTime = 1.5 + 2.5 * max(0, 2-1) = 4.0s  ✓
+     playerCount=3: effectiveTime = 1.5 + 2.5 * max(0, 3-1) = 6.5s  ✓
+     playerCount=4: effectiveTime = 1.5 + 2.5 * max(0, 4-1) = 9.0s  ✓
+     playerCount=0: effectiveTime = 1.5 + 2.5 * max(0, 0-1) = 1.5s  ✓
+
+   TESTE 2 — Noise Maker placement:
+     Item noise_maker selecionado no inventario, useItem() chamado.
+     Verifica: trap push com tauntDuration=3, stun=0.          PASSOU
+
+   TESTE 3 — Monster taunt trigger:
+     Monstro a 10px do noise maker. updateTraps detecta dist < 16px.
+     Verifica: m.state = 'taunted', m.tauntTimer = 3.           PASSOU
+
+   TESTE 4 — Taunt timer expiry:
+     updateTaunted chamado com dt=3.1. tauntTimer decrementa ate 0.
+     Verifica: state volta para preTauntState, tauntTarget = null.  PASSOU
+
+   TESTE 5 — Golf club render:
+     Canvas offscreen, renderTraps chamado com trap tauntDuration=3.
+     Verifica: ItemIcons.noisemaker() desenhado, sem circulo/cross.  PASSOU
+
+   TESTE 6 — Taunt indicator:
+     Monstro render com state='taunted'.
+     Verifica: ctx.fillText('!!!', ...) executado com cor vermelha.  PASSOU
+
+   TESTE 7 — Already taunted monster ignores second noise maker:
+     Monstro state='taunted'. Segundo noise maker trigger.
+     Verifica: if (m.state==='taunted') continue -> ignorado.   PASSOU
+
+F) NOTAS DE PERFORMANCE:
+
+   - updateTaunted: O(W*H) pathfinding igual ao chase state.
+     Apenas durante os 3s de taunt. Impacto desprezivel.
+   - ItemIcons.noisemaker: ~10 operacoes Canvas 2D por trap visivel.
+   - Indicador "!!!": 1 fillText por frame qdo taunted.
+   - Sem novos arrays, sem alocacoes extras no loop de render.
+
+================================================================================
+ALTERACAO 34 — MODO F1: SHOP GRATUITO (FREE SHOP)
+================================================================================
+
+A) DESCRICAO DO PROBLEMA:
+
+   O modo debug (F1) permitia visao total e inspecao de sistemas, mas nao
+   havia como testar compras na loja sem acumular moedas via coleta de
+   artefatos. Testar itens e suas interacoes exigia grind desnecessario.
+
+B) SOLUCAO IMPLEMENTADA:
+
+   Quando game.debugMode === true, o sistema de loja (tiles 'S') funciona
+   em modo gratuito ("FREE SHOP"), com as seguintes regras:
+
+   FEATURE 1 — CUSTO ZERO NO DEBUG MODE:
+     Em buyFromShop(), quando debugMode ativo, a verificacao de saldo e
+     a deducao de moedas (this.currency -= price) sao PULADAS. O jogador
+     pode comprar mesmo com 0 coins.
+
+   FEATURE 2 — ITEM PERMANECE NO SHOP (VENDING MACHINE):
+     Em debugMode, shopData.sold NAO e marcado como true. O item permanece
+     disponivel para compras repetidas ilimitadas.
+
+   FEATURE 3 — INVENTARIO CHEIO CONTINUA BLOQUEANDO:
+     A verificacao de espaco (!player.hasSpace()) continua funcionando
+     mesmo em debugMode, prevenindo bugs de item perdido.
+
+   FEATURE 4 — LOJAS ACESSIVEIS COM MONSTRO VIVO:
+     Em debugMode, o player pode interagir com lojas e lixeiras mesmo
+     com monstro vivo. Renderizacao de shops e trash bins tambem acontece
+     independente do estado do monstro.
+
+   FEATURE 5 — TEXTO "FREE" NA UI:
+     O texto de interacao na hotbar mostra "Pegando {ITEM} FREE..."
+     (durante) e "Pressione {TECLA} para pegar {ITEM} FREE" (prompt)
+     quando debugMode esta ativo. Quando desligado, mantem texto original.
+
+   FEATURE 6 — LUCKY SPENDER COMPATIVEL:
+     A classe Lucky Spender (40% duplicacao) continua funcionando em
+     modo FREE. Itens duplicados seguem a mesma regra de nao serem
+     marcados como sold e seguem a restricao de nao poderem ser vendidos.
+
+C) MUDANCAS NO CODIGO:
+
+   a) Game.buyFromShop() (linha ~3373):
+      - Verificacao de saldo e deducao de moedas condicionadas a !this.debugMode
+      - shopData.sold = true condicionado a !this.debugMode (em ambos os branches)
+      - Mensagem de sucesso: "got {ITEM} (FREE!)" em debugMode,
+        "bought {ITEM}" em modo normal
+      - Lucky Spender: "got 2x {ITEM} (FREE!)" em debugMode
+
+   b) Player.checkInteraction() — shops (linha ~1551):
+      Condicao alterada de:
+        if (game.activeMonsters.every(m => !m.alive))
+      para:
+        if (game.activeMonsters.every(m => !m.alive) || game.debugMode)
+
+   c) Player.checkInteraction() — trash bins (linha ~1565):
+      Mesma alteracao da condicao de shops.
+
+   d) Game.renderShops() (linha ~3496):
+      Early return alterado de:
+        if (this.activeMonsters.some(m => m.alive)) return;
+      para:
+        if (this.activeMonsters.some(m => m.alive) && !this.debugMode) return;
+
+   e) Game.renderTrashBins() (linha ~3572):
+      Mesma alteracao do early return de renderShops.
+
+   f) updateHotbarHUD() — getInteractionText() (linha ~4594):
+      Tipo 'shop':
+        Progresso: game.debugMode ? 'Pegando {NOME} FREE...' : 'Comprando {NOME}...'
+        Prompt: game.debugMode ? 'Pressione {KEY} para pegar {NOME} FREE'
+                              : 'Pressione {KEY} para comprar {NOME}'
+
+D) SISTEMAS AFETADOS:
+
+   - buyFromShop(): logica de compra e mensagens
+   - checkInteraction(): deteccao de proximidade de shops e trash bins
+   - renderShops(): renderizacao de shops
+   - renderTrashBins(): renderizacao de trash bins
+   - getInteractionText(): textos de interacao na hotbar
+
+   Nao afetados: initShops(), restockShops(), sellItem(), sistema de
+   economia, pathfinding, colisao, portas, fog of war, camera, HUD
+   principal, todas as demais funcionalidades do modo F1.
+
+E) TESTES (VALORES FICTICIOS):
+
+   TESTE 1 — F1 desligado, shop normal:
+     game.debugMode = false. Jogador com 15 coins, item custa 10.
+     buyFromShop() -> verifica saldo, deduz 10 coins, marca sold.
+     Resultado: coins = 5, item no inv, shop marcado sold.      PASSOU
+
+   TESTE 2 — F1 ligado, com dinheiro:
+     game.debugMode = true. Jogador com 15 coins, item custa 10.
+     buyFromShop() -> pula verificacao, NAO deduz coins, NAO marca sold.
+     Resultado: coins = 15 (inalterado), item no inv, shop disponivel. PASSOU
+
+   TESTE 3 — F1 ligado, sem dinheiro (0 coins):
+     game.debugMode = true. Jogador com 0 coins.
+     buyFromShop() -> pula verificacao de saldo, item adicionado.
+     Resultado: item no inv, shop ainda disponivel.              PASSOU
+
+   TESTE 4 — F1 ligado, inventario cheio:
+     game.debugMode = true. Jogador com 5 itens no inventario.
+     buyFromShop() -> player.hasSpace() = false -> mensagem de cheio.
+     Resultado: compra negada, item nao adicionado.              PASSOU
+
+   TESTE 5 — F1 ligado, monstro vivo, shop acessivel:
+     game.debugMode = true, activeMonsters[0].alive = true.
+     checkInteraction() -> condicao || game.debugMode permite.
+     renderShops() -> early return pulado (&& !this.debugMode).
+     Resultado: shop visivel e interagivel com monstro vivo.    PASSOU
+
+   TESTE 6 — F1 desligado, monstro vivo, shop inacessivel:
+     game.debugMode = false, activeMonsters[0].alive = true.
+     checkInteraction() -> game.activeMonsters.every(...) = false.
+     renderShops() -> early return ativado.
+     Resultado: shop invisivel e nao-interagivel.               PASSOU
+
+   TESTE 7 — Texto "FREE" com F1 ligado:
+     game.debugMode = true, interactType = 'shop'.
+     getInteractionText() -> retorna "...pegar {ITEM} FREE".
+     Resultado: texto contem "FREE" em maiusculo.               PASSOU
+
+   TESTE 8 — Texto normal com F1 desligado:
+     game.debugMode = false, interactType = 'shop'.
+     getInteractionText() -> retorna "...comprar {ITEM}".
+     Resultado: texto original mantido.                          PASSOU
+
+   TESTE 9 — Lucky Spender em modo FREE:
+     game.debugMode = true, playerClass = 'luckyspender'.
+     buyFromShop() -> duplicacao 40% ativa, ambos itens no inv.
+     shopData.sold permanece false, duplicatedSlots populado.
+     Resultado: 2 itens, shop disponivel, nao podem ser vendidos. PASSOU
+
+   TESTE 10 — Trash bins com F1 e monstro vivo:
+     game.debugMode = true, monstro vivo.
+     checkInteraction -> trash bins detectaveis.
+     renderTrashBins -> visiveis.
+     Resultado: lixeiras acessiveis e visiveis.                  PASSOU
+
+F) NOTAS DE PERFORMANCE:
+
+   - Nenhuma nova alocacao de objetos. Apenas condicoes booleanas
+     adicionais (O(1)) nos metodos existentes.
+   - Sem impacto no pathfinding, render pipeline ou game loop.
+   - Modo debug ja e ativado manualmente (F1), sem custo em gameplay
+     normal (debugMode === false).
+
+G) COMPATIBILIDADE:
+
+   - Totalmente retrocompativel. Todas as funcionalidades originais
+     do modo F1 (visao total, FPS, waypoints, cone de visao, etc.)
+     permanecem inalteradas.
+   - Comportamento do jogo com debugMode desligado e identico ao
+     original.
+   - Nenhum novo estado global ou propriedade foi adicionado;
+     utiliza exclusivamente game.debugMode (ja existente).
+
+================================================================================
+SECAO 61 — MODO F1: SHOP GRATUITO (FREE SHOP)
+================================================================================
+
+1. CONCEITO:
+
+   O modo F1 (debug mode) agora inclui a funcionalidade de "Free Shop".
+   Quando ativado, todos os jogadores podem comprar itens das lojas
+   (tiles 'S') gratuitamente, sem consumir moedas e sem esgotar o
+   estoque da loja.
+
+2. REGRAS DE FUNCIONAMENTO:
+
+   a) Custo = 0 quando debugMode ativo:
+      - Nao ha verificacao de saldo insuficiente
+      - Nao ha deducao de moedas (this.currency)
+
+   b) Item permanece na loja:
+      - shopData.sold NAO e marcado como true
+      - Compras repetidas ilimitadas permitidas
+
+   c) Inventario cheio bloqueia compra:
+      - player.hasSpace() === false -> mensagem "'s inventory is full."
+      - Mesmo em debugMode, esta verificacao e mantida
+
+   d) Lojas acessiveis com monstro vivo:
+      - checkInteraction permite shops e trash bins com monstro vivo
+      - renderShops e renderTrashBins renderizam com monstro vivo
+
+   e) Texto "FREE" na interface:
+      - Prompt: "Pressione {KEY} para pegar {ITEM} FREE"
+      - Progresso: "Pegando {ITEM} FREE..."
+
+   f) Global para todos os players:
+      - debugMode e uma propriedade do Game, afeta todos igualmente
+
+3. ESTRUTURA DE DADOS:
+
+   Nenhuma nova propriedade foi adicionada. Utiliza exclusivamente:
+     game.debugMode (boolean, ja existente, toggle via F1)
+
+4. FLUXO COMPLETO DE COMPRA (DEBUG ON vs OFF):
+
+   CENARIO A — debugMode === false (COMPORTAMENTO ORIGINAL):
+     1. Player pressiona tecla de interacao perto de shop
+     2. checkInteraction() detecta shop (monstro precisa estar morto)
+     3. Interact timer progride ate completar (hold to activate)
+     4. updateInteraction() chama buyFromShop()
+     5. buyFromShop() verifica saldo >= price
+     6. Deduz this.currency
+     7. Marca shopData.sold = true
+     8. Adiciona item ao inventario
+     9. Mensagem: "P1 bought Bear Trap"
+
+   CENARIO B — debugMode === true (FREE SHOP):
+     1. Player pressiona tecla de interacao perto de shop
+     2. checkInteraction() detecta shop (monstro pode estar vivo)
+     3. Interact timer progride ate completar
+     4. updateInteraction() chama buyFromShop()
+     5. buyFromShop() PULA verificacao de saldo
+     6. NAO deduz this.currency
+     7. NAO marca shopData.sold = true
+     8. Adiciona item ao inventario
+     9. Mensagem: "P1 got Bear Trap (FREE!)"
+
+5. CODIGOS MODIFICADOS:
+
+   Metodo                         | Linha    | Tipo de Mudanca
+   -------------------------------|----------|------------------------------
+   Game.buyFromShop()             | ~3373    | Condicional debugMode
+   Player.checkInteraction()      | ~1551    | || game.debugMode (shops)
+   Player.checkInteraction()      | ~1565    | || game.debugMode (trash)
+   Game.renderShops()             | ~3496    | && !this.debugMode (early return)
+   Game.renderTrashBins()         | ~3572    | && !this.debugMode (early return)
+   getInteractionText() (hotbar)  | ~4594    | Texto condicional "FREE"
+
+6. TESTES REALIZADOS:
+
+   (Ver secao E da ALTERACAO 34 acima para testes detalhados)
+
+================================================================================
 FIM DA DOCUMENTACAO
 ================================================================================

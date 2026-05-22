@@ -1,0 +1,227 @@
+================================================================================
+MEGA PROMPT: MODO F1 - SHOP GRATUITO (FREE SHOP)
+================================================================================
+
+INSTRUCOES GERAIS:
+
+1. Leia COMPLETAMENTE o arquivo SummonGame.html e a Documentacao_Completa.txt
+   antes de comecar a implementar. Entenda toda a arquitetura do jogo.
+
+2. Faca TODAS as alteracoes exclusivamente no arquivo SummonGame.html.
+   NAO crie arquivos separados (CSS, JS, Python, C++, Java, etc).
+   NAO crie nenhum outro documento para nenhuma outra linguagem.
+
+3. Use apenas charset UTF-8. NAO use caracteres bugados como: ðâï¿½ðâ¤
+   Evite qualquer caractere especial que possa corromper o arquivo.
+
+4. Ao finalizar cada alteracao no codigo, registre a alteracao na
+   Documentacao_Completa.txt de forma profissional, limpa e bem estruturada
+   (secao CHANGELOG + nova secao dedicada ou atualizacao de secoes afetadas).
+
+5. Teste o codigo implementado com valores ficticios para comprovar que
+   funciona de verdade. Exemplo: ative F1, va ate um shop com inventario
+   vazio, compre, verifique se: (a) o item foi adicionado ao inventario,
+   (b) o dinheiro nao foi descontado, (c) o shop ainda esta disponivel
+   (nao marcado como sold), (d) o texto mostra "FREE". Registre os testes
+   na documentacao.
+
+6. Faca a implementacao agora, diretamente e sem hesitar. Nao pergunte
+   se esta correto, apenas implemente.
+
+7. Apos terminar, revise o prompt mentalmente 5 vezes antes de finalizar.
+   Verifique: cobertura de requisitos, consistencia, conflitos com codigo
+   existente, qualidade do codigo, e documentacao.
+
+================================================================================
+DESCRICAO DA FEATURE: SHOP GRATUITO NO MODO F1
+================================================================================
+
+O jogo ja possui um modo debug (F1) que ativa/desativa game.debugMode.
+Atualmente, F1 ativa: visao total, telhado desativado, grid de tiles,
+waypoints visiveis, estado da IA do monstro, cone de visao, FPS, etc.
+
+A NOVA FEATURE: Quando o modo F1 estiver ativo (game.debugMode === true),
+o player pode comprar itens da loja (tile 'S') GRATUITAMENTE.
+
+REGRAS DE COMPORTAMENTO:
+
+1. Custo forcado = 0:
+   - Quando game.debugMode === true, a funcao buyFromShop() NAO deve
+     deduzir moedas (this.currency) do jogador.
+   - O player pode comprar mesmo que tenha 0 coins.
+   - A verificacao de saldo insuficiente ("Not enough money") deve ser
+     PULADA quando debugMode estiver ativo.
+
+2. Item permanece no shop:
+   - Quando game.debugMode === true, o item comprado NAO deve ser marcado
+     como sold (shopData.sold = false permanece).
+   - O shop continua disponivel para compras repetidas (comportamento de
+     "vending machine": voce recebe o item, mas ele continua la).
+
+3. Espaco no inventario continua sendo verificado:
+   - Mesmo com debugMode ativo, se o inventario do player estiver cheio
+     (!player.hasSpace()), a compra deve ser NEGADA com a mensagem
+     "'s inventory is full."
+   - Isso evita bugs de item perdido.
+
+4. Lojas acessiveis mesmo com monstro vivo:
+   - Atualmente, a interacao com shops (Player.checkInteraction) so
+     acontece se todos os monstros estiverem mortos
+     (game.activeMonsters.every(m => !m.alive)).
+   - Quando game.debugMode === true, esta verificacao deve ser IGNORADA.
+   - O player pode interagir com shops mesmo com monstro vivo.
+   - A renderizacao das lojas (renderShops) tambem so acontece se monstro
+     estiver morto. Quando debugMode === true, esta verificacao deve ser
+     IGNORADA (shops sempre renderizadas).
+   - O mesmo se aplica a renderizacao das lixeiras (renderTrashBins).
+
+5. Texto de interacao mostra "FREE":
+   - No texto de prompt de interacao (getInteractionText dentro de
+     updateHotbarHUD), quando o tipo for 'shop' e game.debugMode === true,
+     o texto deve mostrar "FREE" em vez do preco.
+   - Texto de prompt: "Pressione {TECLA} para pegar {NOME_DO_ITEM} FREE"
+   - Texto de progresso (enquanto segura a tecla): "Pegando {NOME_DO_ITEM} FREE..."
+   - Use a palavra "FREE" em maiusculo para ficar claro.
+
+6. Global:
+   - Quando F1 esta ativo, TODOS os players se beneficiam do free shop.
+   - Nao ha distincao por player.
+
+7. Manter modo F1 existente:
+   - NAO refaca ou remova nenhuma funcionalidade existente do modo F1.
+   - Apenas ADICIONE a feature de compra gratuita.
+   - Todas as outras funcionalidades do debug mode continuam funcionando
+     normalmente (visao total, FPS, waypoints, etc).
+
+================================================================================
+PONTOS DE ATENCAO NO CODIGO EXISTENTE
+================================================================================
+
+Leia com cuidado os seguintes metodos e estruturas antes de modificar:
+
+1. Game.buyFromShop(player, shopData) - ~linha 3373
+   - Verifica shopData.sold, player.hasSpace(), this.currency
+   - Deduz this.currency, marca shopData.sold = true
+   - Adiciona item ao inventario do player
+   - MODIFICAR: quando debugMode, pular verificacao de currency,
+     nao marcar sold
+
+2. Player.checkInteraction(game) - ~linha 1515
+   - Na secao "Check shops (only when monster dead)" (~linha 1551):
+     if (game.activeMonsters.every(m => !m.alive))
+   - MODIFICAR: quando debugMode, permitir interacao mesmo com
+     monstro vivo (adicionar || game.debugMode)
+
+3. Game.renderShops(ctx) - ~linha 3496
+   - Primeira linha: if (this.activeMonsters.some(m => m.alive)) return;
+   - MODIFICAR: quando debugMode, nao retornar cedo
+     (if (this.activeMonsters.some(m => m.alive) && !this.debugMode) return;)
+
+4. Game.renderTrashBins(ctx) - ~linha 3572
+   - Mesma logica: if (this.activeMonsters.some(m => m.alive)) return;
+   - MODIFICAR: mesma modificacao que renderShops
+
+5. updateHotbarHUD(game) - ~linha 4569
+   - Funcao interna getInteractionText(p) - ~linha 4594
+   - Contem textos de interacao para shop (comprar {NOME_DO_ITEM})
+   - MODIFICAR: quando debugMode, texto diferente com "FREE"
+
+6. Game.restockShops() - ~linha 3423
+   - Reabastece shops no fim do round
+   - Nao precisa modificar (shops continuam funcionando normalmente
+     quando F1 desativado)
+
+7. Game.initShops() - ~linha 3407
+   - Inicializa shops no loadMap
+   - Nao precisa modificar
+
+8. Game.debugMode - ~linha 2145
+   - Boolean, toggle via F1 na linha ~4388
+   - JA EXISTE, nao recriar
+
+================================================================================
+IMPLEMENTACAO DETALHADA
+================================================================================
+
+PASSO 1: MODIFICAR Game.buyFromShop()
+
+Alterar o metodo para aceitar compras gratuitas quando debugMode:
+- Se this.debugMode === true:
+  - NAO verificar this.currency < shopData.price
+  - NAO fazer this.currency -= shopData.price
+  - NAO marcar shopData.sold = true
+  - Ainda verificar player.hasSpace()
+  - Ainda chamar player.addToInventory(shopData.itemKey)
+  - A mensagem de sucesso deve ser algo como:
+    player.name + ' got ' + Items[shopData.itemKey].name + ' (FREE!)'
+  - A classe Lucky Spender (luckyspender) com duplicacao de 40% deve
+    continuar funcionando mesmo em modo FREE, porem os itens duplicados
+    tambem nao devem ser marcados como sold
+  - Itens duplicados em modo FREE devem seguir a mesma regra de nao
+    poderem ser vendidos (duplicatedSlots)
+
+PASSO 2: MODIFICAR Player.checkInteraction()
+
+Na secao de verificacao de shops (~linha 1551-1564):
+- Condicao atual: if (game.activeMonsters.every(m => !m.alive))
+- Nova condicao: if (game.activeMonsters.every(m => !m.alive) || game.debugMode)
+
+Na secao de verificacao de trash bins (~linha 1566-1580):
+- Condicao atual: if (game.activeMonsters.every(m => !m.alive))
+- Nova condicao: if (game.activeMonsters.every(m => !m.alive) || game.debugMode)
+
+PASSO 3: MODIFICAR Game.renderShops()
+
+- Linha ~3497: if (this.activeMonsters.some(m => m.alive)) return;
+- Mudar para: if (this.activeMonsters.some(m => m.alive) && !this.debugMode) return;
+
+PASSO 4: MODIFICAR Game.renderTrashBins()
+
+- Linha ~3573: if (this.activeMonsters.some(m => m.alive)) return;
+- Mudar para: if (this.activeMonsters.some(m => m.alive) && !this.debugMode) return;
+
+PASSO 5: MODIFICAR getInteractionText() em updateHotbarHUD()
+
+Na funcao interna getInteractionText(p):
+- Localizar o bloco que trata do tipo 'shop':
+  - shop prompt: "Pressione {TECLA} para comprar {NOME_DO_ITEM}"
+  - shop progresso: "Comprando {NOME_DO_ITEM}..."
+- Adicionar logica: se game.debugMode === true:
+  - prompt: "Pressione {TECLA} para pegar {NOME_DO_ITEM} FREE"
+  - progresso: "Pegando {NOME_DO_ITEM} FREE..."
+
+Para acessar game.debugMode dentro de updateHotbarHUD(), use o
+parametro game que ja e passado para a funcao.
+
+PASSO 6: REGISTRAR NA DOCUMENTACAO
+
+Em Documentacao_Completa.txt, adicionar:
+1. CHANGELOG com nova alteracao "F1 Free Shop"
+2. Nova secao numerada (ex: SECAO 56) com:
+   - Conceito
+   - Regras de funcionamento
+   - Estrutura de dados (nenhuma nova, usa debugMode existente)
+   - Fluxo completo de compra (debug on vs off)
+   - Codigos modificados (metodos, linhas)
+   - Testes realizados com valores ficticios
+3. Atualizar secoes afetadas (shop system, interacao, input handling)
+
+PASSO 7: TESTES
+
+Apos implementar, execute testes manuais no jogo:
+- Teste 1: F1 desligado -> shop normal (deduz dinheiro, marca sold)
+- Teste 2: F1 ligado, com dinheiro -> compra gratis, item no inv, shop disponivel
+- Teste 3: F1 ligado, sem dinheiro (0 coins) -> compra gratis funciona
+- Teste 4: F1 ligado, inventario cheio -> compra negada (mensagem de cheio)
+- Teste 5: F1 ligado, monstro vivo -> shop acessivel e visivel
+- Teste 6: F1 desligado, monstro vivo -> shop inacessivel (comportamento original)
+- Teste 7: Texto de interacao mostra "FREE" com F1 ligado
+- Teste 8: F1 desligado, texto mostra preco normal
+
+Registre todos os testes na documentacao com resultados.
+
+================================================================================
+OBS: NAO MODIFICAR, APAGAR OU REFATORAR nenhuma funcionalidade existente do
+modo F1. Apenas ADICIONAR a feature de free shop. O modo F1 continua tendo
+todas as suas funcionalidades originais (visao total, FPS, debug info, etc).
+================================================================================
