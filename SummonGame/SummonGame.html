@@ -1064,16 +1064,8 @@ function weightedRandom(types) {
 // PLAYER CLASSES
 // ============================================================
 const PlayerClasses = {
-  none: {
-    name: 'No Class',
-    desc: 'No special ability',
-    abilityName: 'None',
-    cooldown: 0,
-    duration: 0,
-    icon: 'X'
-  },
   oracle: {
-    name: 'Oracle',
+    name: 'Delivery Guy',
     desc: 'Reveal monster position through walls',
     abilityName: 'Reveal Monster',
     cooldown: 25,
@@ -1081,7 +1073,7 @@ const PlayerClasses = {
     icon: 'O'
   },
   scout: {
-    name: 'Scout',
+    name: 'Weird Thief',
     desc: 'Move 1.5x faster temporarily',
     abilityName: 'Speed Burst',
     cooldown: 20,
@@ -1098,7 +1090,7 @@ const PlayerClasses = {
   },
   commandyeller: {
     name: 'Command Yeller',
-    desc: 'Aumenta a velocidade propria e de todos os participantes em 1.5x da base por 7s',
+    desc: 'Aumenta a velocidade propria e de todos os participantes em 1.22x da base por 7s',
     abilityName: 'Grito de Comando',
     cooldown: 25,
     duration: 7,
@@ -1369,7 +1361,7 @@ class Player {
     this.interactTarget = null;
     this.interactType = null;
     this.invulnTimer = 0;
-    this.playerClass = playerClass || 'none';
+    this.playerClass = playerClass || 'oracle';
     this.abilityCooldown = 0;
     this.abilityActive = false;
     this.abilityTimer = 0;
@@ -2127,7 +2119,7 @@ class Game {
     this.players = [];
     this.playerCount = 1;
     this.playerNames = ['P1', 'P2', 'P3', 'P4'];
-    this.playerClasses = ['none', 'none', 'none', 'none'];
+    this.playerClasses = ['oracle', 'oracle', 'oracle', 'oracle'];
     this.activeMonsters = [];
     this.monsterSpawnType = 'normal';
     this.summonPhase = '';
@@ -2293,7 +2285,7 @@ class Game {
       const spawnPos = this.findSpawnPosition(this.playerSpawn.x, this.playerSpawn.y, i);
       const sx = spawnPos.x;
       const sy = spawnPos.y;
-      const p = new Player(sx, sy, i, this.playerNames[i] || ('P' + (i + 1)), this.playerClasses[i] || 'none');
+      const p = new Player(sx, sy, i, this.playerNames[i] || ('P' + (i + 1)), this.playerClasses[i] || 'oracle');
       if (i === 0) {
         p.px = this.playerSpawn.x * TILE_SIZE + TILE_SIZE / 2;
         p.py = this.playerSpawn.y * TILE_SIZE + TILE_SIZE / 2;
@@ -4480,7 +4472,7 @@ function activateAbility(game, player) {
   if (p.playerClass === 'commandyeller') {
     for (const op of game.players) {
       if (!op.alive) continue;
-      op.commandYellMult = 0.5;
+      op.commandYellMult = 0.22;
       op.commandYellTimer = 7;
     }
   }
@@ -4526,7 +4518,7 @@ function updateHUD(game) {
   const mtName = MonsterTypes[mt] ? MonsterTypes[mt].name : 'None';
   let html = '';
   for (const p of game.players) {
-    const clsName = PlayerClasses[p.playerClass] ? PlayerClasses[p.playerClass].name : 'None';
+    const clsName = PlayerClasses[p.playerClass] ? PlayerClasses[p.playerClass].name : 'Delivery Guy';
     html += '<span style="color:' + (['#4488ff','#ff8844','#44ff44','#ff44ff'][p.playerIndex] || '#fff') + '">' + p.name + '</span>: ';
     html += 'HP:' + p.hp + '/' + p.maxHp + ' ';
     html += clsName + ' ';
