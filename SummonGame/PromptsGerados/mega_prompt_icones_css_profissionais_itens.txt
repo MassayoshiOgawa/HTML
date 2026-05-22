@@ -1,0 +1,367 @@
+================================================================================
+MEGA PROMPT - ICONES CSS PROFISSIONAIS PARA TODOS OS ITENS DO INVENTARIO
+================================================================================
+
+ARQUIVO ALVO: SummonGame.html (mesmo diretorio deste prompt)
+DOCUMENTACAO: Documentacao_Completa.txt (mesmo diretorio deste prompt)
+
+INSTRUCOES GLOBAIS:
+- Faca TODAS as alteracoes necessarias no arquivo SummonGame.html.
+- NAO crie nenhum arquivo novo (NÃO crie .css, .js, .py, .java, .cpp, .c, .py, .ts, .json, .xml ou qualquer outro arquivo separado). Tudo deve permanecer no unico arquivo SummonGame.html.
+- NAO crie documentacao adicional, READMEs, arquivos de configuracao, ou qualquer outro documento.
+- VOCE SO PODE CRIAR ARQUIVOS/DOCUMENTOS SE FOR EXPLICITAMENTE PEDIDO NESTE PROMPT (o que nao e o caso).
+- Ao finalizar cada alteracao no codigo HTML, ATUALIZE a Documentacao_Completa.txt com as mudancas feitas, de forma profissional, limpa e bem estruturada (secao CHANGELOG + novas secoes SECAO conforme o padrao ja existente no documento).
+- Siga o estilo de codigo existente: JavaScript puro sem dependencias, Canvas 2D, sem frameworks, sem TypeScript.
+- Mantenha a compatibilidade com o sistema existente (multiplayer, classes, economia, shops, traps, hotbar, etc.).
+- O prompt deve ser executado COMPLETAMENTE, sem pular etapas.
+- Implemente TUDO agora, sem deixar para depois, sem "TODO", "FUTURE WORK" ou comentarios de "a fazer".
+
+================================================================================
+CONTEXTO - COMO OS ITENS SAO EXIBIDOS ATUALMENTE
+================================================================================
+
+O jogo possui 8 itens definidos no objeto Items (linha ~384 do SummonGame.html).
+Atualmente cada item tem um campo 'icon' que e um caractere texto simples ('T', 'L', '+', 'B', 'K', 'W', 'A').
+
+Estes icones de texto aparecem em 3 lugares:
+
+1) HOTBAR (DOM HTML) - funcao updateHotbarHUD(), linha ~3399:
+   Cada slot do inventario exibe it.icon como texto puro:
+     html += it ? it.icon : '-';
+   Isto e renderizado dentro de um <div> com estilo inline.
+
+2) LOJAS/SHOPS (Canvas) - funcao renderShops(), linha ~2586:
+   O icone do item e desenhado no canvas com ctx.fillText(it.icon, sx, sy + 5):
+     ctx.fillStyle = it.color;
+     ctx.font = 'bold 14px "Courier New", monospace';
+     ctx.textAlign = 'center';
+     ctx.fillText(it.icon, sx, sy + 5);
+
+3) TRAPS/ARMADILHAS (Canvas) - funcao renderTraps(), linha ~2560:
+   Atualmente desenha apenas um circulo colorido:
+     ctx.fillStyle = t.trapColor;
+     ctx.beginPath();
+     ctx.arc(sx, sy, t.trapRadius, 0, Math.PI * 2);
+     ctx.fill();
+   O icone do item NAO aparece na trap atualmente.
+
+================================================================================
+OBJETIVO PRINCIPAL
+================================================================================
+
+Substituir TODOS os icones de texto por ICONES VISUAIS PROFISSIONAIS,
+detalhados e unicos para cada item, usando:
+
+- CSS PURO no DOM (hotbar) - cada icone como uma classe CSS com pseudo-elementos,
+  bordas, transformacoes, gradientes, box-shadow, clip-path, etc.
+- CANVAS DRAWING no canvas (shops, traps) - funcoes JavaScript que desenham o
+  mesmo icone visual usando API Canvas 2D (beginPath, arc, rect, bezierCurve,
+  fill, stroke, gradientes, etc.).
+
+Tamanho base do icone: 24px x 24px (centralizado dentro do slot/hotbar).
+
+================================================================================
+LISTA COMPLETA DE ITENS QUE PRECISAM DE ICONES
+================================================================================
+
+1. beartrap  - Bear Trap   - armadilha de urso (metálica, dentes/serra)
+2. landmine  - Land Mine   - mina terrestre (disco, fusível)
+3. crucifix  - Crucifix    - crucifixo (cruz de madeira)
+4. bloxy_cola - Bloxy Cola - latinha/garrafa de refrigerante
+5. cake      - Cake        - fatia de bolo com camadas
+6. witches_brew - Witches Brew - pocoes magicas (frasco verde)
+7. medkit    - Medkit      - caixa de primeiros socorros (cruz vermelha)
+8. apple     - Apple       - maca (vermelha com cabinho/folha)
+
+================================================================================
+PARTE 1 - ICONES CSS PARA O DOM (HOTBAR)
+================================================================================
+
+1.1 - Crie uma classe CSS para CADA item no bloco <style> (entre as linhas 7-258):
+
+   .icon-beartrap { ... }
+   .icon-landmine { ... }
+   .icon-crucifix { ... }
+   .icon-bloxy_cola { ... }
+   .icon-cake { ... }
+   .icon-witches_brew { ... }
+   .icon-medkit { ... }
+   .icon-apple { ... }
+
+1.2 - Cada classe deve:
+   - Ter width: 24px e height: 24px como tamanho base (ou usar 100% do container)
+   - Usar display: inline-block
+   - Usar position: relative (para pseudo-elementos)
+   - Usar APENAS CSS puro: ::before, ::after, borders, border-radius, transforms,
+     gradients (linear/radial), box-shadow, clip-path, background, etc.
+   - NAO usar imagens externas, NAO usar SVG, NAO usar data URIs
+   - Ser visualmente distinta e profissional (detalhada, com sombras, relevo, cores)
+   - Ser responsiva: usar dimensoes relativas ou porcentagem dentro do slot
+
+1.3 - DIRETRIZES VISUAIS PARA CADA ICONE:
+
+   beartrap:
+   - Fundo circular metalico escuro (#666) com borda serrilhada (dentes)
+   - Centro mais claro (#888) simulando o mecanismo
+   - Sombra interna (box-shadow inset) para dar profundidade
+   - Gradiente radial simulando metal
+
+   landmine:
+   - Disco circular verde escuro (#007002) com borda elevada
+   - Pequeno ponto/pino no centro (fusível)
+   - Detalhes radiais (riscos saindo do centro) simulando a estria da mina
+   - Sombra externa suave
+
+   crucifix:
+   - Cruz latina marrom (vertical + horizontal)
+   - Tonalidade madeira (#693300) com textura de grao (linhas finas)
+   - Opcional: pequeno detalhe dourado no centro ou nas pontas
+   - Sombra projetada
+
+   bloxy_cola:
+   - Formato de lata/garrafa estilizada
+   - Cor laranja/marrom (#B05E20) com detalhe branco
+   - Bolhas (pequenos círculos) saindo da boca
+   - Gradiente para dar volume cilindrico
+
+   cake:
+   - Fatia de bolo vista de lado ou de cima
+   - Camadas: rosa (#ff88ff) e branco alternando
+   - Cobertura no topo com detalhes
+   - Vela opcional no centro
+
+   witches_brew:
+   - Frasco/garrafa verde (#44ff44) com formato de pocao
+   - Liquido dentro do frasco (metade cheio)
+   - Rolha ou tampao no topo
+   - Brilho/reflexo na lateral
+   - Bolhas subindo
+
+   medkit:
+   - Caixa quadrada branca com bordas vermelhas
+   - Cruz vermelha no centro (#ff4444)
+   - Detalhes de fecho/fivela nas laterais
+   - Sombra para dar profundidade
+
+   apple:
+   - Formato de maca (circulo com depressao no topo)
+   - Vermelha (#c44) com gradiente para dar volume
+   - Cabinio verde no topo
+   - Folha pequena opcional
+   - Brilho/reflexo na lateral direita
+
+1.4 - Estilo base comum (opcional):
+
+   Crie uma classe base .item-icon com estilos compartilhados:
+     .item-icon {
+       display: inline-block;
+       width: 24px; height: 24px;
+       position: relative;
+       flex-shrink: 0;
+     }
+
+   Cada icon especifico estende esta base:
+     .icon-beartrap { /* estilos especificos */ }
+
+================================================================================
+PARTE 2 - FUNCOES CANVAS PARA DESENHAR ICONES (SHOPS, TRAPS)
+================================================================================
+
+2.1 - Crie um objeto ItemIcons no JavaScript (proximo ao objeto Items):
+
+   const ItemIcons = {
+     beartrap:      function(ctx, x, y, size) { ... },
+     landmine:      function(ctx, x, y, size) { ... },
+     crucifix:      function(ctx, x, y, size) { ... },
+     bloxy_cola:    function(ctx, x, y, size) { ... },
+     cake:          function(ctx, x, y, size) { ... },
+     witches_brew:  function(ctx, x, y, size) { ... },
+     medkit:        function(ctx, x, y, size) { ... },
+     apple:         function(ctx, x, y, size) { ... }
+   };
+
+2.2 - Cada funcao recebe:
+   - ctx: CanvasRenderingContext2D
+   - x, y: centro do icone em coordenadas de tela (screen)
+   - size: tamanho do icone em pixels (ex: 24)
+
+2.3 - Cada funcao deve:
+   - Usar APENAS a API Canvas 2D (beginPath, arc, rect, fill, stroke,
+     createRadialGradient, createLinearGradient, bezierCurveTo, quadraticCurveTo,
+     moveTo, lineTo, closePath, fillStyle, strokeStyle, lineWidth, etc.)
+   - Ser AUTOSSUFICIENTE (nao depender de elementos DOM externos)
+   - Desenhar o MESMO design visual da versao CSS, adaptado para canvas
+   - Usar coordenadas relativas ao centro (x, y) e ao size
+   - Ter boa performance (evitar operacoes desnecessarias)
+
+2.4 - DIRETRIZES VISUAIS (mesmas da Parte 1, mas em canvas):
+
+   Reproduzir o design de cada item usando canvas:
+   - beartrap: arcos serrilhados, gradiente radial metalico
+   - landmine: arcos concentricos, pino central
+   - crucifix: dois retangulos formando cruz, gradiente madeira
+   - bloxy_cola: retangulo arredondado, gradiente linear, bolhas
+   - cake: arco + retangulos para camadas
+   - witches_brew: formato de frasco com bezier curves, liquido
+   - medkit: quadrado com bordas, cruz vermelha
+   - apple: arco/circulo com bezier para depressao, cabinho
+
+================================================================================
+PARTE 3 - INTEGRACAO NA HOTBAR (DOM)
+================================================================================
+
+3.1 - No objeto Items (linha ~384), ATUALIZE o campo 'icon' de cada item:
+
+   Substitua o valor texto ('T', 'L', '+', etc.) pelo nome da classe CSS:
+   - beartrap:   icon: 'beartrap'
+   - landmine:   icon: 'landmine'
+   - crucifix:   icon: 'crucifix'
+   - bloxy_cola: icon: 'bloxy_cola'
+   - cake:       icon: 'cake'
+   - witches_brew: icon: 'witches_brew'
+   - medkit:     icon: 'medkit'
+   - apple:      icon: 'apple'
+
+   NOTA: O campo 'icon' agora armazena o identificador do item (string),
+   NAO mais o caractere de exibicao.
+
+3.2 - Na funcao updateHotbarHUD() (linha ~3399), SUBSTITUA a renderizacao do icone:
+
+   ONDE ANTES TINHA:
+     html += it ? it.icon : '-';
+
+   DEVE AGORA TER:
+     if (it) {
+       html += '<span class="item-icon icon-' + it.icon + '"></span>';
+     } else {
+       html += '<span style="color:#333;font-size:' + fontSizeSlot + 'px;">-</span>';
+     }
+
+   ATENCAO: Isso aparece em 2 lugares no codigo (layout horizontal e vertical).
+   Ambos devem ser alterados.
+
+3.3 - Ajuste o estilo dos slots da hotbar:
+
+   Os slots (<div>) que contem os icones devem ter:
+   - display: flex
+   - align-items: center
+   - justify-content: center
+   (ja devem ter, mas verifique)
+
+   O tamanho do slot (slotSize) deve ser usado para escalar o icone.
+   Para isso, o CSS do icone deve usar width/heigh relativos ou 100% do container:
+     .item-icon { width: 100%; height: 100%; }
+
+   OU usar uma abordagem com variavel CSS ou transform scale:
+     .item-icon { transform: scale(calc(var(--slot-size) / 24)); }
+
+   Escolha a melhor abordagem para que o icone se adapte ao tamanho do slot
+   (slotSize varia de ~18px a 80px conforme hotbarSize).
+
+================================================================================
+PARTE 4 - INTEGRACAO NAS SHOPS (CANVAS)
+================================================================================
+
+4.1 - Na funcao renderShops() (linha ~2586), SUBSTITUA a renderizacao do texto:
+
+   ONDE ANTES TINHA:
+     ctx.fillStyle = it.color;
+     ctx.font = 'bold 14px "Courier New", monospace';
+     ctx.textAlign = 'center';
+     ctx.fillText(it.icon, sx, sy + 5);
+
+   DEVE AGORA TER:
+     const iconFn = ItemIcons[shop.itemKey];
+     if (iconFn) iconFn(ctx, sx, sy, 24);
+     else {
+       // fallback: desenha circulo colorido
+       ctx.fillStyle = it.color;
+       ctx.beginPath();
+       ctx.arc(sx, sy, 10, 0, Math.PI * 2);
+       ctx.fill();
+     }
+
+   O icone deve ser desenhado no centro do pedestal (onde antes ficava o texto).
+   sx, sy = centro do tile da shop (ja calculado como shop.worldX - camX, etc.)
+
+================================================================================
+PARTE 5 - INTEGRACAO NAS TRAPS (CANVAS)
+================================================================================
+
+5.1 - Na funcao renderTraps() (linha ~2560), MODIFIQUE a renderizacao:
+
+   A trap atualmente desenha um circulo colorido com uma cruz branca.
+   MANTENHA o circulo colorido como fundo, e ADICIONE o icone do item por cima:
+
+   APOS desenhar o circulo e a cruz, ADICIONE:
+     const iconFn = ItemIcons[t.item];
+     if (iconFn) iconFn(ctx, sx, sy, Math.min(t.trapRadius * 1.2, 20));
+
+   ONDE:
+     - t.item e a chave do item (ex: 'beartrap')
+     - sx, sy sao as coordenadas de tela da trap
+     - O tamanho do icone na trap deve ser proporcional ao trapRadius
+
+   NOTA: O circulo colorido de fundo + a cruz branca DEVEM ser mantidos
+   para manter a visibilidade e o aspecto de armadilha no chao.
+   O icone do item fica CENTRALIZADO sobre este fundo.
+
+================================================================================
+PARTE 6 - DOCUMENTACAO (Documentacao_Completa.txt)
+================================================================================
+
+6.1 - ADICIONE uma nova entrada no CHANGELOG no final do arquivo:
+
+   ===============================================================================
+   CHANGELOG - MAIO 2026 (ICONES CSS PROFISSIONAIS PARA ITENS)
+   ===============================================================================
+
+   ALTERACAO 27 — ICONES CSS PROFISSIONAIS PARA TODOS OS ITENS
+
+      PROBLEMA: Os icones dos itens eram caracteres de texto simples ('T', 'L',
+      '+', etc.) exibidos na hotbar, shops e traps. Visualmente pobres e sem
+      identidade visual.
+
+      SOLUCAO: Implementado sistema completo de icones visuais profissionais
+      para todos os 8 itens do jogo, com:
+
+      A) 8 classes CSS no <style> (.icon-beartrap, .icon-landmine, .icon-crucifix,
+         .icon-bloxy_cola, .icon-cake, .icon-witches_brew, .icon-medkit,
+         .icon-apple) para renderizacao no DOM (hotbar). Cada classe usa
+         pseudo-elementos, gradientes, box-shadow, transforms e outras
+         tecnicas CSS para criar iconografias detalhadas e unicas.
+
+      B) 8 funcoes canvas em ItemIcons{} para renderizacao no Canvas (shops e
+         traps). Cada funcao recebe ctx, x, y, size e desenha o mesmo design
+         visual da versao CSS usando API Canvas 2D.
+
+      C) Integracao na hotbar (updateHotbarHUD): slots agora usam
+         <span class="item-icon icon-{key}"> em vez de caracteres texto.
+
+      D) Integracao nas shops (renderShops): pedestais desenham o icone via
+         ItemIcons[key](ctx, sx, sy, 24) em vez de ctx.fillText.
+
+      E) Integracao nas traps (renderTraps): icone do item desenhado sobre
+         o circulo colorido da trap, centralizado.
+
+      Mudancas no codigo:
+        a) CSS — NOVAS CLASSES (8 classes .icon-*) + classe base .item-icon
+        b) Items — campo 'icon' alterado de caractere para identificador string
+        c) ItemIcons — NOVO objeto com 8 funcoes de desenho canvas
+        d) updateHotbarHUD() — renderizacao substituida por span com classe CSS
+        e) renderShops() — drawImage/fillText substituido por ItemIcons[key]()
+        f) renderTraps() — icone adicionado sobre o circulo da trap
+
+================================================================================
+EXECUCAO: SIGA A ORDEM ABAIXO
+================================================================================
+
+PASSO 1: Crie as 8 classes CSS no bloco <style>
+PASSO 2: Crie o objeto ItemIcons com as 8 funcoes canvas
+PASSO 3: Atualize o campo 'icon' de cada item no objeto Items
+PASSO 4: Modifique updateHotbarHUD() (2 ocorrencias)
+PASSO 5: Modifique renderShops()
+PASSO 6: Modifique renderTraps()
+PASSO 7: Atualize a Documentacao_Completa.txt
+
+NAO PULE PASSOS. Implemente TUDO agora, sem excecao.

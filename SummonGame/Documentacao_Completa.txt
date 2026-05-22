@@ -4286,6 +4286,7 @@ SECAO 6 (ELEMENTOS DOM) — ATUALIZADA:
    #hotbar-hud: CSS .vertical, clamp minimos reduzidos (18/10/8).
    Seletor de jogadores: botao [+] permite ate MAX_PLAYERS (4).
    #hotbar-gap-range: controle deslizante de distancia entre hotbars (0-100, padrao 30).
+   .item-icon + .icon-* (8 classes): icones CSS profissionais para itens do inventario.
 
 SECAO 8 (ESTRUTURA DO MAPA) — NOTA:
    Novo tile 'P' como player spawn. Multiplos jogadores spawnam
@@ -4295,6 +4296,9 @@ SECAO 15 (SISTEMA DE ITENS) — ATUALIZADA:
    Items: 8 itens com rarity, type, giveOnRoundEnd, effect.
    Rarities: Common 65%, Rare 20%, Super Rare 15%.
    Recompensa de round por raridade.
+   ItemIcons: 8 funcoes Canvas 2D para desenho de icones nas shops/traps.
+   Icon field: identificadores string ('beartrap', 'landmine', etc.)
+     em vez de caracteres texto ('T', 'L', etc.).
 
 SECAO 18 (SISTEMA DE ECONOMIA) — ATUALIZADA:
    useItem() expandido para consumiveis. applyItemEffect() adicionado.
@@ -4304,6 +4308,7 @@ SECAO 21 (SISTEMA DE HUD) — ATUALIZADA:
    updateHotbarHUD: barra de progresso removida, mensagem individual,
    dimensoes dinamicas, clamps reduzidos (18/10/8) para 3-4 jogadores.
    hotbarGap: margem entre hotbars controlada por range slider (0-100px).
+   Icones: slots usam <span class="item-icon icon-{key}"> com CSS em vez de texto.
 
 SECAO 22 (SISTEMA DE INTERACAO) — ATUALIZADA:
    Sistema tap vs hold para uso de item. Consumiveis aplicam efeitos.
@@ -4358,8 +4363,64 @@ ALTERACAO 27 — CONTROLE DE DISTANCIA ENTRE HOTBARS (HOTBAR GAP)
         input no #hotbar-gap-range: atualiza game.hotbarGap, o span de
         valor, e chama updateHotbarHUD() para aplicar visualmente
 
-     e) Abertura do settings panel: range e span sincronizados com
+           e) Abertura do settings panel: range e span sincronizados com
         o valor atual de game.hotbarGap
+
+================================================================================
+ALTERACAO 28 — ICONES CSS PROFISSIONAIS PARA TODOS OS ITENS
+================================================================================
+
+   PROBLEMA: Os icones dos itens eram caracteres de texto simples ('T', 'L',
+   '+', etc.) exibidos na hotbar, shops e traps. Visualmente pobres, sem
+   identidade visual e indistinguiveis entre itens diferentes (ex: crucifix
+   e medkit ambos usavam '+').
+
+   SOLUCAO: Implementado sistema completo de icones visuais profissionais
+   para todos os 8 itens do jogo, com renderizacao dupla (CSS para DOM e
+   Canvas para jogo).
+
+   ITENS E SEUS NOVOS ICONES:
+     beartrap    - Armadilha metalica circular com dentes serrilhados
+     landmine    - Mina terrestre verde com pino central e estrias radiais
+     crucifix    - Cruz de madeira marrom com tom de textura
+     bloxy_cola  - Lata de refrigerante laranja com tampa e brilho
+     cake        - Fatia de bolo com camadas rosa/branco e vela
+     witches_brew - Frasco de pocao verde com liquido, rolha e bolhas
+     medkit      - Caixa branca com bordas vermelhas e cruz vermelha
+     apple       - Maca vermelha com gradiente, cabinho e folha
+
+   MUDANCAS NO CODIGO:
+
+     a) CSS — NOVAS 8 CLASSES (.icon-*) + classe base .item-icon:
+        Cada icone usa pseudo-elementos (::before, ::after), gradientes
+        radiais/lineares, box-shadow, border-radius, transforms e outras
+        tecnicas CSS puras. Nenhuma imagem externa, SVG ou data URI.
+        Classe base .item-icon: display inline-block, 100% width/height.
+
+     b) ItemIcons — NOVO OBJETO com 8 funcoes Canvas 2D:
+        Cada funcao (beartrap, landmine, crucifix, bloxy_cola, cake,
+        witches_brew, medkit, apple) recebe (ctx, x, y, size) e desenha
+        o mesmo design visual da versao CSS usando API Canvas 2D.
+        Operacoes: arc, fillRect, bezierCurveTo, quadraticCurveTo,
+        createRadialGradient, createLinearGradient, ellipse, stroke.
+
+     c) Items — CAMPO 'icon' ALTERADO:
+        De caracteres texto ('T','L','+','B','K','W','+','A') para
+        identificadores string ('beartrap','landmine','crucifix',
+        'bloxy_cola','cake','witches_brew','medkit','apple').
+
+     d) updateHotbarHUD() — ALTERADO (2 ocorrencias):
+        Renderizacao substituida de texto puro para <span class="item-icon
+        icon-{key}">. Slots nao usam mais font-size/color para o icone.
+        Slot vazio mostra '-' com estilo inline.
+
+     e) renderShops() — ALTERADO:
+        ctx.fillText(it.icon) substituido por ItemIcons[shop.itemKey](ctx,
+        sx, sy, 22). Fallback: circulo colorido se funcao nao encontrada.
+
+     f) renderTraps() — ALTERADO:
+        Adicionado ItemIcons[t.item](ctx, sx, sy, Math.min(t.trapRadius*1.2,20))
+        apos o circulo colorido e cruz branca existentes (mantidos).
 
 ================================================================================
 FIM DA DOCUMENTACAO
