@@ -3248,7 +3248,92 @@ ALTERACAO 24-B — SUBSTITUICAO DA BARRA DE PROGRESSO POR CIRCULO BRANCO
      Circulo interno: rgba(255,255,255,0.3)
      Arco de progresso: #ffffff (branco puro)
      Preenchimento: sentido horario a partir do topo (12 horas)
-     Tamanho: TILE_SIZE * 0.4 de raio
+      Tamanho: TILE_SIZE * 0.4 de raio
+
+================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (NOVOS ITENS, RARIDADES, DISPLAY DE SHOP)
+================================================================================
+
+ALTERACAO 25 — NOVOS ITENS, SISTEMA DE RARIDADES, CONSUMIVEIS E DISPLAY DE SHOP
+
+   PROBLEMA: O jogo possuia apenas 3 itens (todos traps), sem distincao
+   de raridade. A recompensa de round era puramente aleatoria entre todos
+   os itens. Nao havia itens consumiveis (speed, heal, invulnerabilidade).
+   O display de shop nao mostrava nome do item nem raridade.
+
+   SOLUCAO: Expansao completa do sistema de itens com:
+     A) 5 novos itens consumiveis (Bloxy Cola, Cake, Witches Brew,
+        Medkit, Apple) com sistema de efeitos
+     B) Sistema de raridades (Common 65%, Rare 20%, Super Rare 15%)
+     C) Recompensa de round baseada em raridade (random + fallback)
+     D) Metodo applyItemEffect() para processar consumiveis
+     E) Regra "maior valor vence" para speed items + Scout
+     F) Display de shop com tile nome+preco+raridade a direita
+
+   ITENS ADICIONADOS:
+     bloxy_cola: speed 1.25x por 5s, common, 5 coins
+     cake: invulnerabilidade por 5s, super_rare, 15 coins
+     witches_brew: speed 1.6x por 8s, rare, 10 coins
+     medkit: heal 50 HP, rare, 10 coins (nao dado em round reward)
+     apple: heal 10 HP, common, 7 coins (nao dado em round reward)
+
+   ITENS ATUALIZADOS (todos):
+     beartrap: rarity='common', type='trap', giveOnRoundEnd=true
+     landmine: rarity='rare', type='trap', giveOnRoundEnd=true
+     crucifix: rarity='super_rare', type='trap', giveOnRoundEnd=true
+
+   MUDANCAS NO CODIGO:
+
+     a) Items — EXPANDIDO:
+        Novos campos em todos os itens: rarity, type, giveOnRoundEnd.
+        Consumiveis tem campo effect com type, multiplier/amount, duration.
+
+     b) Rarities — NOVO OBJETO:
+        { common: { name:'Common', dropChance:0.65 },
+          rare: { name:'Rare', dropChance:0.20 },
+          super_rare: { name:'Super Rare', dropChance:0.15 } }
+
+     c) weightedRandomRarity() — NOVA FUNCAO:
+        Sorteia raridade por peso (similar a weightedRandom para monstros).
+
+     d) getRandomItemByRarity(game) — NOVA FUNCAO:
+        Filtra itens elegiveis (giveOnRoundEnd), sorteia raridade,
+        filtra por raridade, fallback para raridade inferior se necessario.
+
+     e) Player — NOVOS ATRIBUTOS:
+        speedItemTimer (float): duracao restante do speed de item
+        speedItemMult (float): multiplicador de speed do item ativo
+
+     f) Player.update() — RECALCULO DE SPEED:
+        A cada frame, speed = baseSpeed * max(scoutMult, itemMult).
+        Regra "maior valor vence" entre Scout e item de speed.
+        speedItemTimer decrementado com dt, reseta quando <= 0.
+
+     g) Game.useItem() — EXPANDIDO:
+        Verifica Items[item].type:
+        - 'trap': comportamento original (cria trap, remove item)
+        - 'consumable': chama applyItemEffect(), remove item
+
+     h) Game.applyItemEffect(player, itemKey) — NOVO METODO:
+        Processa efeitos por tipo:
+        - 'speed': define speedItemTimer e speedItemMult
+        - 'invuln': define invulnTimer (max entre atual e novo)
+        - 'heal': hp = min(maxHp, hp + amount)
+
+     i) Game.checkGameState() — MODIFICADO:
+        - Limpa speedItemTimer/speedItemMult de todos jogadores
+        - Recompensa de round usa getRandomItemByRarity() em vez de
+          random entre todas as keys
+        - Mensagem inclui nome da raridade: "received Bear Trap (Common)!"
+
+     j) Game.renderShops() — MODIFICADO:
+        - Adiciona tile arredondado a direita do pedestal com:
+          * Nome do item (cor do item, 9px bold)
+          * Preco + raridade (ex: "5g [Common]", cor #ff0, 8px)
+        - Tile usa fillStyle rgba(0,0,0,0.75), borda rgba(255,255,255,0.3)
+        - Inclui frustum culling para o tile de info
 
 ================================================================================
 
@@ -3873,7 +3958,152 @@ SECAO 57 — CORRECAO DO SISTEMA DE USO DE ITEM (TECLA R) + BARRA DE PROGRESSO C
      Modificar circleRadius, lineWidth, cores em renderUseProgressCircle
 
    Para alterar a posicao do circulo:
-     Modificar worldX = p.px + TILE_SIZE e worldY = p.py
+      Modificar worldX = p.px + TILE_SIZE e worldY = p.py
+
+================================================================================
+
+================================================================================
+SECAO 58 — NOVOS ITENS, RARIDADES E SISTEMA DE CONSUMIVEIS
+================================================================================
+
+58.1 — CONCEITO
+
+   O sistema de itens foi expandido de 3 traps para 8 itens com 2 tipos
+   distintos (trap e consumable). Foi adicionado um sistema de raridades
+   que influencia tanto as recompensas de round quanto a geracao de lojas.
+   Itens consumiveis aplicam efeitos temporarios (speed, invulnerabilidade,
+   cura) ao jogador que os utiliza.
+
+58.2 — ESTRUTURA DO OBJETO Items
+
+   Campos obrigatorios para todos os itens:
+     name: string — nome em ingles
+     price: number — preco em coins
+     desc: string — descricao curta
+     icon: string — caractere exibido no inventario/shop
+     color: string — cor CSS hex para o icone
+     rarity: string — 'common' | 'rare' | 'super_rare'
+     type: string — 'trap' | 'consumable'
+     giveOnRoundEnd: boolean — pode ser recompensa de round?
+
+   Campos especificos por tipo:
+     type === 'trap': stun (number), trapColor (string), trapRadius (number)
+     type === 'consumable': effect (object)
+       effect.type: 'speed' | 'invuln' | 'heal'
+       effect.multiplier: number (para speed)
+       effect.amount: number (para heal)
+       effect.duration: number em segundos (para speed, invuln)
+
+58.3 — SISTEMA DE RARIDADES
+
+   Objeto Rarities:
+     common:     { name: 'Common', dropChance: 0.65 }
+     rare:       { name: 'Rare', dropChance: 0.20 }
+     super_rare: { name: 'Super Rare', dropChance: 0.15 }
+
+   Funcao weightedRandomRarity():
+     Similar a weightedRandom() para monstros.
+     Soma dropChance de todas as raridades (total = 1.0).
+     random * totalWeight, subtrai dropChance de cada raridade.
+     Retorna a chave da raridade quando r <= 0.
+
+   Funcao getRandomItemByRarity(game):
+     - Filtra itens elegiveis (giveOnRoundEnd === true)
+     - Sorteia raridade via weightedRandomRarity()
+     - Filtra elegiveis pela raridade sorteada
+     - Fallback: super_rare -> rare -> common
+     - Se ainda vazio, usa todos os elegiveis
+     - Retorna key do item aleatorio
+
+58.4 — SISTEMA DE CONSUMIVEIS
+
+   Game.useItem(player):
+     Verifica Items[item].type:
+     - 'trap': cria trap, remove item (comportamento original)
+     - 'consumable': chama applyItemEffect(), remove item
+
+   Game.applyItemEffect(player, itemKey):
+     case 'speed':
+       Define player.speedItemTimer = effect.duration
+       Define player.speedItemMult = effect.multiplier
+       Speed final = max(baseSpeed * scoutMult, baseSpeed * itemMult)
+     case 'invuln':
+       Define player.invulnTimer = max(atual, effect.duration)
+       Nao acumula — usa o maior timer
+     case 'heal':
+       player.hp = Math.min(player.maxHp, player.hp + effect.amount)
+       Nao excede maxHp
+
+58.5 — REGRA "MAIOR VALOR VENCE" (SPEED)
+
+   Em Player.update(), o speed e recalculado a cada frame:
+     let finalSpeed = this.baseSpeed;
+     if (this.abilityActive && this.playerClass === 'scout') finalSpeed *= 1.5;
+     if (this.speedItemTimer > 0) {
+       this.speedItemTimer -= dt;
+       if (this.speedItemTimer <= 0) {
+         this.speedItemTimer = 0;
+         this.speedItemMult = 1;
+       } else {
+         finalSpeed = Math.max(finalSpeed, this.baseSpeed * this.speedItemMult);
+       }
+     }
+     this.speed = finalSpeed;
+
+   Items de speed (Bloxy Cola 1.25x, Witches Brew 1.6x) e Scout (1.5x)
+   usam Math.max para "maior valor vence". Um Witches Brew (1.6x)
+   substitui visualmente o Scout (1.5x) enquanto ativo.
+
+58.6 — DISPLAY DE SHOP COM TILE DE INFO
+
+   renderShops() agora desenha, alem do pedestal com icone e preco,
+   um tile arredondado a direita do pedestal contendo:
+     - Nome do item em negrito (9px, cor do item)
+     - Preco + raridade (8px, "#5g [Common]")
+   
+   O tile:
+     - Posicao: 20px a direita do pedestal, centralizado verticalmente
+     - Largura: TILE_SIZE * 2.4 (~77px)
+     - Altura: TILE_SIZE * 1.2 (~38px)
+     - Fundo: rgba(0,0,0,0.75)
+     - Borda: rgba(255,255,255,0.3), 1px
+     - Cantos arredondados (quadraticCurveTo para 3px radius)
+     - Com frustum culling independente
+
+58.7 — LIMPEZA DE EFEITOS NO FIM DO ROUND
+
+   Em checkGameState(), quando o round termina:
+     p.speedItemTimer = 0;
+     p.speedItemMult = 1;
+     Recalcula speed sem boost de item.
+     Isso evita que efeitos persistam entre rounds.
+
+58.8 — IMPACTO NOS SISTEMAS EXISTENTES
+
+   - initShops() e restockShops(): continuam funcionando (escolhem
+     itemKey aleatorio entre todas as keys de Items, incluindo novos)
+   - buyFromShop(): usa Items[].price, funciona para todos os itens
+   - sellItem(): usa Items[].price, funciona para todos os itens
+   - renderShops(): agora mostra info expandida para qualquer item
+   - getInteractionText(): usa Items[].name, funciona automaticamente
+   - useItem(): expandido para suportar ambos os tipos
+
+58.9 — ESCALABILIDADE
+
+   Para adicionar um novo item consumivel:
+     1. Adicionar entrada em Items com todos os campos obrigatorios
+     2. Definir effect.type e parametros especificos
+     3. Se o effect.type for novo, adicionar case em applyItemEffect()
+
+   Para adicionar uma nova raridade:
+     1. Adicionar entrada em Rarities com dropChance
+     2. Ajustar dropChance das outras para somar 1.0
+     3. Atualizar fallback em getRandomItemByRarity()
+
+   Para adicionar um novo tipo de efeito:
+     1. Adicionar case em applyItemEffect()
+     2. Se precisar de tracking, adicionar propriedade ao Player
+     3. Resetar no fim do round em checkGameState()
 
 ================================================================================
 
@@ -3882,54 +4112,53 @@ ATUALIZACAO DAS SECOES AFETADAS
 ================================================================================
 
 SECAO 3 (PIPELINE DE INICIALIZACAO) — ATUALIZADA:
-   Novas propriedades: Game.hotbarSize, Game.hotbarLayout.
-   Player.useTapPending inicializado como false no construtor.
+   Player: novas propriedades speedItemTimer, speedItemMult, useTapPending.
+   Game: hotbarSize, hotbarLayout.
+   Items expandido com rarity, type, giveOnRoundEnd, effect.
 
 SECAO 4 (FLUXO DO GAME LOOP) — ATUALIZADA:
-   Render pipeline: renderUseProgressCircle(ctx) adicionado apos
-   renderInteractionCircle(ctx) e antes de renderNight(ctx).
-   renderInteractionBar() agora e metodo vazio.
+   Render pipeline: renderUseProgressCircle apos renderInteractionCircle.
+   Player.update(): recalculo de speed com regra "maior valor vence".
+   Novas funcoes: weightedRandomRarity, getRandomItemByRarity.
 
 SECAO 5 (SISTEMA DE RENDERIZACAO) — ATUALIZADA:
-   Nova camada Canvas: circulo de progresso de uso de item
-   (renderUseProgressCircle). Desenhado sobre particulas e circulo
-   de interacao, antes do night overlay.
+   renderShops: tile de info com nome+preco+raridade a direita do pedestal.
+   renderUseProgressCircle: circulo branco de progresso de uso de item.
 
 SECAO 6 (ELEMENTOS DOM) — ATUALIZADA:
-   #hotbar-hud: CSS com suporte a classe .vertical.
-   #settings-panel: novos botoes (hotbar size/layout).
-   #ability-hud: reposicionado no layout vertical.
-   #interaction-label e #interaction-bar: ELEMENTOS REMOVIDOS.
-   Barra de progresso ciano (DOM na hotbar): REMOVIDA de ambos layouts.
+   #hotbar-hud: CSS .vertical, barra de progresso removida.
+   #interaction-label e #interaction-bar: removidos.
+   #settings-panel: novos botoes hotbar size/layout.
 
-SECAO 12 (MAQUINA DE ESTADOS DO MONSTRO) — NOTA:
-   Nenhuma alteracao.
+SECAO 15 (SISTEMA DE ITENS) — ATUALIZADA:
+   Items expandido de 3 para 8 itens. Novos campos: rarity, type,
+   giveOnRoundEnd, effect. Novos tipos: consumable (speed, invuln, heal).
+   Sistema de raridades com dropChance.
+
+SECAO 18 (SISTEMA DE ECONOMIA) — ATUALIZADA:
+   Recompensa de round usa raridade (getRandomItemByRarity).
+   Mensagem inclui nome da raridade. Efeitos de item limpos no fim do round.
+   useItem() expandido para consumiveis. applyItemEffect() adicionado.
 
 SECAO 21 (SISTEMA DE HUD) — ATUALIZADA:
-   updateHotbarHUD: barra de progresso horizontal removida. Mensagem
-   de interacao individual por jogador. Dimensoes dinamicas por
-   hotbarSize e modo de layout.
+   updateHotbarHUD: barra de progresso removida. Mensagem individual
+   por jogador. Dimensoes dinamicas.
 
 SECAO 22 (SISTEMA DE INTERACAO PLAYER) — ATUALIZADA:
-   Player.update(): sistema de uso de item reescrito com deteccao
-   tap vs hold. Nova propriedade: useTapPending.
-   Circulo de progresso Canvas (renderInteractionCircle) mantido.
-   Circulo de uso de item (renderUseProgressCircle) adicionado.
-
-SECAO 30 (ORDEM DE RENDERIZACAO) — ATUALIZADA:
-   Pipeline: particles -> interactionCircle -> useProgressCircle ->
-   night -> debug. Duas novas camadas Canvas adicionadas.
+   Sistema tap vs hold para uso de item. Circulos de progresso Canvas.
+   Consumiveis aplicam efeitos ao inves de colocar traps.
 
 SECAO 31 (FLUXO DE GAMEPLAY) — ATUALIZADA:
-   Uso de item: tap (< 0.3s) cicla slot, hold (>= 1s) usa item.
-   Feedback visual: circulo branco a direita do personagem.
+   Uso de itens: traps colocam no chao, consumiveis aplicam efeitos.
+   Regra "maior valor vence" para speed items + Scout.
 
-SECAO 38 (FLUXO DE EVENTOS) — ATUALIZADA:
-   Novos cliques: btn-hotbar-minus, btn-hotbar-plus, btn-hotbar-layout.
+SECAO 38 (FLUXO DE EVENTOS) — NOTA:
+   Novos botoes no painel de settings. Nenhuma alteracao nos inputs do jogo.
 
 SECAO 45 (MULTIPLAYER) — ATUALIZADA:
-   Hotbar dimensiona dinamicamente. Mensagem de interacao individual.
-   Circulo de uso de item por jogador (cada um ve o seu).
+   Hotbar dimensiona dinamicamente. Mensagem individual por jogador.
+   Circulo de uso de item por jogador. Efeitos independentes por jogador.
+   Recompensa de round individual por jogador.
 
 ================================================================================
 FIM DA DOCUMENTACAO
