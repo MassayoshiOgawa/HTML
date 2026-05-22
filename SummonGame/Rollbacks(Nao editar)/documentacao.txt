@@ -3337,6 +3337,66 @@ ALTERACAO 25 — NOVOS ITENS, SISTEMA DE RARIDADES, CONSUMIVEIS E DISPLAY DE SHO
 
 ================================================================================
 
+================================================================================
+CHANGELOG - MAIO 2026 (SUPORTE PARA 3 E 4 JOGADORES)
+================================================================================
+
+ALTERACAO 26 — ATIVAR SUPORTE PARA 3 E 4 JOGADORES (MULTIPLAYER)
+
+   PROBLEMA: O jogo limitava o numero de jogadores a 2, apesar de
+   MAX_PLAYERS = 4, DEFAULT_KEYBINDS ter entradas para 4, e as cores,
+   arrays e sistemas de suporte ja estarem preparados para 4 jogadores.
+
+   SOLUCAO: Ativado o seletor de jogadores para permitir 3 e 4 jogadores.
+   Sistema de spawn responsivo que verifica se o tile de spawn e valido
+   (passavel) antes de posicionar o jogador. Tamanhos minimos de hotbar
+   reduzidos para acomodar mais jogadores na tela.
+
+   MUDANCAS NO CODIGO:
+     a) Game.showClassSelection() — ALTERADO:
+        Limite do botao [+] alterado de 2 para MAX_PLAYERS (4).
+        Condicao do click do botao [+] alterada de < 2 para < MAX_PLAYERS.
+
+     b) Game — NOVO METODO findSpawnPosition(baseX, baseY, playerIndex):
+        Calcula offset baseado no indice do jogador (P1=0, P2=+1, P3=-1, P4=+2).
+        Verifica se a posicao e passavel via isWalkableTile().
+        Se nao for valida, faz busca em raio crescente (1 a 5) ao redor
+        do spawn, priorizando mesma linha horizontal, depois linhas acima/abaixo.
+        Fallback para o proprio spawn se nada for encontrado.
+
+     c) Game — NOVO METODO isWalkableTile(tx, ty):
+        Verifica bounds do mapa. Retorna false se tile for 'O' (wall),
+        'W' (furniture), ou 'd' com door.solid === true.
+        Replica a logica de colisao de Player.canMoveTo() sem margem de 4px.
+
+     d) Game.loadMap() — ALTERADO:
+        Criacao de jogadores agora usa this.findSpawnPosition() em vez de
+        calculo manual de offset com Math.ceil e operador ternario.
+
+     e) updateHotbarHUD() — ALTERADO (3 valores):
+        slotSize clamp minimo: 24 -> 18px
+        fontSizeSlot clamp minimo: 14 -> 10px
+        fontSizeName clamp minimo: 10 -> 8px
+        Permite 4 jogadores com hotbarSize=50 ocuparem a tela sem overflow.
+
+   SISTEMAS QUE JA FUNCIONAVAM PARA 4 JOGADORES (SEM ALTERACAO):
+     - MAX_PLAYERS = 4 (constante)
+     - DEFAULT_KEYBINDS[0..3] com keybinds para 4 jogadores
+     - Cores: ['#4488ff','#ff8844','#44ff44','#ff44ff']
+     - Arrays: playerNames[4], playerClasses[4]
+     - buildHotkeyConfig(): itera sobre todos os jogadores
+     - Camera: modo "mapa inteiro" para 2+ jogadores
+     - Lightmap: processa todos os jogadores vivos
+     - HUD, Ability HUD, Hotbar: iteram sobre todos os jogadores
+     - Door rendering: proximidade checada para todos os jogadores
+     - Monster AI: findNearestPlayer() funciona com N jogadores
+     - Sistema de revive: itera sobre todos os players
+     - Shop/Trash interaction: por jogador individual
+     - Fog of War / Raycasting: uniao de visibilidade de todos
+     - checkGameState: revive todos os mortos no spawn
+
+================================================================================
+
 ===============================================================================
 SECAO 52 — SISTEMA DE PORTA DUPLA SEMPRE VISIVEL
 ================================================================================
@@ -4107,58 +4167,199 @@ SECAO 58 — NOVOS ITENS, RARIDADES E SISTEMA DE CONSUMIVEIS
 
 ================================================================================
 
+================================================================================
+SECAO 59 — SUPORTE PARA 3 E 4 JOGADORES (MULTIPLAYER)
+================================================================================
+
+59.1 — CONCEITO
+
+   O jogo foi projetado desde o inicio com MAX_PLAYERS = 4, mas o seletor
+   de jogadores estava limitado a 2. Esta alteracao remove o limite
+   artificial, permitindo partidas com 3 e 4 jogadores locais.
+
+   Adicionalmente, o sistema de spawn foi refatorado para ser responsivo:
+   em vez de calcular offsets com formulas manuais, um novo metodo
+   findSpawnPosition() verifica se o tile de destino e valido (passavel)
+   e, se necessario, busca posicoes alternativas em raio crescente.
+
+59.2 — SELETOR DE JOGADORES
+
+   Alteracoes em Game.showClassSelection():
+   
+     plusBtn.disabled: this.playerCount >= 2 -> this.playerCount >= MAX_PLAYERS
+     plusBtn.onclick: this.playerCount < 2 -> this.playerCount < MAX_PLAYERS
+     minusBtn.onclick: this.playerCount >= 2 -> this.playerCount >= MAX_PLAYERS
+
+   O buildPanels() ja gera paineis dinamicamente baseado em
+   this.playerCount, funcionando para qualquer valor de 1 a MAX_PLAYERS.
+
+59.3 — SISTEMA DE SPAWN RESPONSIVO
+
+   METODO: Game.findSpawnPosition(baseX, baseY, playerIndex)
+
+   Offsets por jogador:
+     P1 (index 0): +0X, +0Y  -> spawn.x
+     P2 (index 1): +1X, +0Y  -> spawn.x + 1
+     P3 (index 2): -1X, +0Y  -> spawn.x - 1
+     P4 (index 3): +2X, +0Y  -> spawn.x + 2
+
+   ALGORITMO:
+     1. Calcula tile = baseX + offsetsX[playerIndex]
+     2. Verifica isWalkableTile(tx, ty)
+     3. Se valido: retorna { x: tx, y: ty }
+     4. Se invalido: busca em raio 1 a 5:
+        a. Prioriza mesma linha (dy=0): varre dx de -radius a +radius
+        b. Tenta linhas acima/abaixo: varre dy=-radius..radius, dx=-radius..radius
+        c. Primeiro tile passavel encontrado e retornado
+     5. Fallback: retorna o proprio spawn { x: baseX, y: baseY }
+
+   METODO: Game.isWalkableTile(tx, ty)
+     Verifica bounds do mapa (tx >= 0 && tx < mapWidth...)
+     tile === 'O' || tile === 'W' -> false (parede/movel)
+     tile === 'd' e door.solid -> false (porta fechada/animando)
+     Senao -> true (passavel: C, G, A, P, M, F, U, S, T, d aberta)
+
+59.4 — TAMANHOS MINIMOS DA HOTBAR
+
+   Para acomodar 4 jogadores lado a lado no layout horizontal, os
+   tamanhos minimos (clamp) foram reduzidos:
+
+     slotSize:       24 -> 18px  (slots de inventario)
+     fontSizeSlot:   14 -> 10px  (icone dentro do slot)
+     fontSizeName:   10 -> 8px   (nome do jogador)
+
+   Com hotbarSize=50 e 4 jogadores:
+     - Cada hotbar: 12.5% da tela
+     - Slots: ~18px (clamp minimo)
+     - Fonte de icone: 10px
+     - Fonte do nome: 8px
+     - Ainda legivel em telas de 800px+ de largura
+
+59.5 — SISTEMAS QUE JA FUNCIONAVAM SEM ALTERACAO
+
+   Todos os sistemas abaixo iteram sobre game.players[] e funcionam
+   para qualquer numero de jogadores sem modificacao:
+
+   - Camera (updateCamera): modo mapa inteiro para alive > 1
+   - Lightmap (buildLightmap): processa todos os jogadores vivos
+   - Fog of War (updateVisibility): raycasting para cada jogador
+   - HUD principal (updateHUD): uma linha por jogador
+   - Ability HUD (updateAbilityHUD): uma linha por jogador com habilidade
+   - Hotbar (updateHotbarHUD): uma hotbar por jogador
+   - Door rendering (renderDoors): proximidade para todos os jogadores
+   - Monster AI: findNearestPlayer() varre todos os jogadores
+   - Sistema de revive: itera sobre todos os players mortos
+   - checkGameState: revive todos no spawn, recompensa individual
+   - Shop/Trash interaction: por jogador (interactTarget individual)
+   - buildHotkeyConfig: mostra keybinds para todos os jogadores
+   - DEFAULT_KEYBINDS: ja tem 4 entradas
+   - Cores: 4 cores definidas ['#4488ff','#ff8844','#44ff44','#ff44ff']
+   - Arrays: playerNames[4], playerClasses[4]
+
+59.6 — ESCALABILIDADE
+
+   Para suportar mais de 4 jogadores (ex: MAX_PLAYERS = 6):
+     1. Aumentar MAX_PLAYERS
+     2. Adicionar entradas em DEFAULT_KEYBINDS
+     3. Adicionar cores extras no array de cores
+     4. Aumentar arrays playerNames e playerClasses
+     5. Em findSpawnPosition, aumentar offsetsX (ex: [0,1,-1,2,-2,3])
+     6. Verificar se o layout horizontal comporta (reduzir hotbarSize)
+     7. Nenhuma alteracao nos sistemas de renderizacao ou IA
+
+================================================================================
+
 ===============================================================================
 ATUALIZACAO DAS SECOES AFETADAS
 ================================================================================
 
 SECAO 3 (PIPELINE DE INICIALIZACAO) — ATUALIZADA:
-   Player: novas propriedades speedItemTimer, speedItemMult, useTapPending.
+   Player: speedItemTimer, speedItemMult, useTapPending.
    Game: hotbarSize, hotbarLayout.
-   Items expandido com rarity, type, giveOnRoundEnd, effect.
+   Items expandido. Seletor de jogadores: limite MAX_PLAYERS (4).
 
-SECAO 4 (FLUXO DO GAME LOOP) — ATUALIZADA:
-   Render pipeline: renderUseProgressCircle apos renderInteractionCircle.
-   Player.update(): recalculo de speed com regra "maior valor vence".
-   Novas funcoes: weightedRandomRarity, getRandomItemByRarity.
-
-SECAO 5 (SISTEMA DE RENDERIZACAO) — ATUALIZADA:
-   renderShops: tile de info com nome+preco+raridade a direita do pedestal.
-   renderUseProgressCircle: circulo branco de progresso de uso de item.
+SECAO 4 (FLUXO DO GAME LOOP) — NOTA:
+   Nenhuma alteracao no loop. Todos os sistemas ja iteram sobre
+   game.players[] e funcionam para 3-4 jogadores.
 
 SECAO 6 (ELEMENTOS DOM) — ATUALIZADA:
-   #hotbar-hud: CSS .vertical, barra de progresso removida.
-   #interaction-label e #interaction-bar: removidos.
-   #settings-panel: novos botoes hotbar size/layout.
+   #hotbar-hud: CSS .vertical, clamp minimos reduzidos (18/10/8).
+   Seletor de jogadores: botao [+] permite ate MAX_PLAYERS (4).
+   #hotbar-gap-range: controle deslizante de distancia entre hotbars (0-100, padrao 30).
+
+SECAO 8 (ESTRUTURA DO MAPA) — NOTA:
+   Novo tile 'P' como player spawn. Multiplos jogadores spawnam
+   com offsets via findSpawnPosition().
 
 SECAO 15 (SISTEMA DE ITENS) — ATUALIZADA:
-   Items expandido de 3 para 8 itens. Novos campos: rarity, type,
-   giveOnRoundEnd, effect. Novos tipos: consumable (speed, invuln, heal).
-   Sistema de raridades com dropChance.
+   Items: 8 itens com rarity, type, giveOnRoundEnd, effect.
+   Rarities: Common 65%, Rare 20%, Super Rare 15%.
+   Recompensa de round por raridade.
 
 SECAO 18 (SISTEMA DE ECONOMIA) — ATUALIZADA:
-   Recompensa de round usa raridade (getRandomItemByRarity).
-   Mensagem inclui nome da raridade. Efeitos de item limpos no fim do round.
    useItem() expandido para consumiveis. applyItemEffect() adicionado.
+   Efeitos limpos no fim do round.
 
 SECAO 21 (SISTEMA DE HUD) — ATUALIZADA:
-   updateHotbarHUD: barra de progresso removida. Mensagem individual
-   por jogador. Dimensoes dinamicas.
+   updateHotbarHUD: barra de progresso removida, mensagem individual,
+   dimensoes dinamicas, clamps reduzidos (18/10/8) para 3-4 jogadores.
+   hotbarGap: margem entre hotbars controlada por range slider (0-100px).
 
-SECAO 22 (SISTEMA DE INTERACAO PLAYER) — ATUALIZADA:
-   Sistema tap vs hold para uso de item. Circulos de progresso Canvas.
-   Consumiveis aplicam efeitos ao inves de colocar traps.
+SECAO 22 (SISTEMA DE INTERACAO) — ATUALIZADA:
+   Sistema tap vs hold para uso de item. Consumiveis aplicam efeitos.
+   renderInteractionCircle mantido. renderUseProgressCircle adicionado.
+
+SECAO 23 (SISTEMA DE SPAWN) — ATUALIZADA:
+   findSpawnPosition() substitui calculo manual de offsets.
+   isWalkableTile() verifica validade do tile de spawn.
+   P1=+0, P2=+1, P3=-1, P4=+2 com fallback em raio crescente.
 
 SECAO 31 (FLUXO DE GAMEPLAY) — ATUALIZADA:
-   Uso de itens: traps colocam no chao, consumiveis aplicam efeitos.
-   Regra "maior valor vence" para speed items + Scout.
-
-SECAO 38 (FLUXO DE EVENTOS) — NOTA:
-   Novos botoes no painel de settings. Nenhuma alteracao nos inputs do jogo.
+   1-4 jogadores locais com keybinds independentes.
+   Tap < 0.3s cicla slot, hold >= 1s usa item.
 
 SECAO 45 (MULTIPLAYER) — ATUALIZADA:
-   Hotbar dimensiona dinamicamente. Mensagem individual por jogador.
-   Circulo de uso de item por jogador. Efeitos independentes por jogador.
-   Recompensa de round individual por jogador.
+   Suporte completo para 3 e 4 jogadores. Spawn responsivo.
+   Hotbar dimensiona dinamicamente. Todos os sistemas preparados.
+
+SECAO 51-59 (SISTEMAS RECENTES) — NOTA:
+   Todas as novas secoes documentam sistemas ja funcionais para
+   qualquer numero de jogadores.
+
+================================================================================
+ALTERACAO 27 — CONTROLE DE DISTANCIA ENTRE HOTBARS (HOTBAR GAP)
+================================================================================
+
+   PROBLEMA: A distancia entre as hotbars de cada jogador era fixa
+   (30px de margem horizontal + 8px de gap CSS). Jogadores nao podiam
+   ajustar a separacao entre hotbars, causando problemas de legibilidade
+   em resolucoes diferentes ou com 3-4 jogadores.
+
+   SOLUCAO: Adicionado controle deslizante (range input) abaixo do
+   controle Hotbar Size no painel de configuracoes. O range vai de
+   0 a 100 e o valor padrao e 30 (equivalente a margem atual de 30px).
+
+   MUDANCAS NO CODIGO:
+
+     a) Game constructor, loadMap(), restart() — NOVA PROPRIEDADE:
+        this.hotbarGap = 30 (valor padrao em pixels de margem entre hotbars)
+
+     b) updateHotbarHUD() — ALTERADO:
+        Layout horizontal: margin-right usa game.hotbarGap em vez de 30px fixo
+        Layout vertical: margin-bottom usa game.hotbarGap / 2
+        Container #hotbar-hud: gap definido dinamicamente via inline style
+          (horizontal = hotbarGap, vertical = hotbarGap / 2, min 2px)
+
+     c) Painel de configuracoes — NOVO ELEMENTO DOM:
+        <input type="range" id="hotbar-gap-range" min="0" max="100" value="30">
+        <span id="hotbar-gap-value"> - mostra o valor atual
+
+     d) Event listener — NOVO:
+        input no #hotbar-gap-range: atualiza game.hotbarGap, o span de
+        valor, e chama updateHotbarHUD() para aplicar visualmente
+
+     e) Abertura do settings panel: range e span sincronizados com
+        o valor atual de game.hotbarGap
 
 ================================================================================
 FIM DA DOCUMENTACAO
