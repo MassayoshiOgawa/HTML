@@ -4279,14 +4279,19 @@ SECAO 3 (PIPELINE DE INICIALIZACAO) — ATUALIZADA:
    Items expandido. Seletor de jogadores: limite MAX_PLAYERS (4).
 
 SECAO 4 (FLUXO DO GAME LOOP) — NOTA:
-   Nenhuma alteracao no loop. Todos os sistemas ja iteram sobre
-   game.players[] e funcionam para 3-4 jogadores.
+   Nenhuma alteracao no loop. Adicionados updates de clones (activeClones)
+   e paredes temporais (activeWalls) na ordem de atualizacao.
+   Clones perseguem o monstro via findClonePath (BFS sem portas/paredes).
+   Paredes bloqueiam pathfinding, colisao e visao do monstro.
 
 SECAO 6 (ELEMENTOS DOM) — ATUALIZADA:
    #hotbar-hud: CSS .vertical, clamp minimos reduzidos (18/10/8).
    Seletor de jogadores: botao [+] permite ate MAX_PLAYERS (4).
    #hotbar-gap-range: controle deslizante de distancia entre hotbars (0-100, padrao 30).
    .item-icon + .icon-* (8 classes): icones CSS profissionais para itens do inventario.
+   Selecao de classes: 11 classes jogaveis com icones unicos (none, oracle, scout,
+   redhacker, commandyeller, boringtrapper, dyingguy, teevee, annoyinglooper,
+   timetraveler, luckyspender).
 
 SECAO 8 (ESTRUTURA DO MAPA) — NOTA:
    Novo tile 'P' como player spawn. Multiplos jogadores spawnam
@@ -4309,6 +4314,8 @@ SECAO 21 (SISTEMA DE HUD) — ATUALIZADA:
    dimensoes dinamicas, clamps reduzidos (18/10/8) para 3-4 jogadores.
    hotbarGap: margem entre hotbars controlada por range slider (0-100px).
    Icones: slots usam <span class="item-icon icon-{key}"> com CSS em vez de texto.
+   updateAbilityHUD: suporte a 10 classes com habilidades (Time Traveler
+   mostra "Used" apos uso). Passivas nao aparecem no HUD.
 
 SECAO 22 (SISTEMA DE INTERACAO) — ATUALIZADA:
    Sistema tap vs hold para uso de item. Consumiveis aplicam efeitos.
@@ -4421,6 +4428,134 @@ ALTERACAO 28 — ICONES CSS PROFISSIONAIS PARA TODOS OS ITENS
      f) renderTraps() — ALTERADO:
         Adicionado ItemIcons[t.item](ctx, sx, sy, Math.min(t.trapRadius*1.2,20))
         apos o circulo colorido e cruz branca existentes (mantidos).
+
+================================================================================
+ALTERACAO 29 — 7 NOVAS CLASSES JOGAVEIS (TOTAL: 11 CLASSES)
+================================================================================
+
+   PROBLEMA: O jogo possuia apenas 3 classes (none, oracle, scout),
+   limitando a variedade de gameplay e estrategias entre jogadores.
+
+   SOLUCAO: Implementadas 7 novas classes jogaveis com habilidades unicas,
+   totalizando 11 classes (none + 10 com habilidades). Cada classe tem
+   seu proprio icone exibido na tela de selecao.
+
+   NOVAS CLASSES:
+     1. Red Hacker (H)       - Cria clone que persegue e stuna o monstro
+     2. Command Yeller (Y)    - Buff de velocidade +50% baseSpeed para todos
+     3. Boring Trapper (B)    - Bear traps 2x maiores com +1s de stun (passiva)
+     4. Dying Guy (D)         - Invisivel ao monstro por 3s, reseta chase
+     5. Tee Vee (T)           - Coleta artefatos 1.5x mais rapido, 2x alcance (passiva)
+     6. Annoying Looper (L)   - Parede temporal que bloqueia monstro por 5s
+     7. Time Traveler (K)     - Reseta cooldowns de todos 1x por round
+     8. Lucky Spender ($)     - 40% chance duplicar compras, itens duplicados nao vendem (passiva)
+
+   MUDANCAS NO CODIGO:
+
+     a) PlayerClasses — AMPLIADO (linha ~909):
+        7 novas entradas com name, desc, abilityName, cooldown, duration, icon.
+        Total: 11 classes (none, oracle, scout, redhacker, commandyeller,
+        boringtrapper, dyingguy, teevee, annoyinglooper, timetraveler, luckyspender).
+
+     b) Player constructor — NOVAS PROPRIEDADES:
+        commandYellMult (0), commandYellTimer (0), invisible (false),
+        invisibleTimer (0), timeTravelUsed (false), duplicatedSlots (Set),
+        lastDx (0), lastDy (0).
+
+     c) Player.update() — ALTERADO:
+        - commandYellTimer e invisibleTimer decrementados a cada frame.
+        - Calculo de speed adiciona baseSpeed * commandYellMult quando buff ativo.
+        - lastDx/lastDy rastreados para orientacao da parede do Annoying Looper.
+        - Tee Vee: interactTimer incrementa 1.5x mais rapido em artefatos.
+
+     d) Player.checkInteraction() — ALTERADO:
+        Tee Vee: alcance de interacao inicializado em 2x (range*TILE_SIZE*2).
+
+     e) Player.render() — ALTERADO:
+        - Dying Guy: globalAlpha = 0.5 quando invisivel (exceto debugMode).
+        - Command Yeller: anel amarelo ao redor do jogador quando buff ativo.
+        - globalAlpha restaurado para 1 apos renderizacao.
+
+     f) Player.addToInventory/removeEquipped — ALTERADO:
+        removeEquipped limpa duplicatedSlots.delete(selectedSlot).
+
+     g) Player.countEmptySlots() — NOVO METODO:
+        Retorna quantidade de slots vazios no inventario.
+
+     h) activateAbility() — REESCRITO:
+        Switch/case expandido para todas as classes ativas:
+        - redhacker: cria clone no activeClones[] (1 por jogador, cooldown apos expirar).
+        - commandyeller: define commandYellMult=0.5, timer=7 para todos os players.
+        - dyingguy: invisible=true, timer=3, reseta chase/search para patrol.
+        - annoyinglooper: cria parede em activeWalls[] (3 tiles, orientacao por movimento).
+        - timetraveler: reseta abilityCooldown de todos (exceto outros Time Travelers).
+          1x por round. Cooldown definido como 9999 apos uso.
+
+     i) Game constructor — NOVAS PROPRIEDADES:
+        activeClones: [], activeWalls: [].
+
+     j) Game.update() — NOVO BLOCO (clones e paredes):
+        Clones: BFS via findClonePath (ignora portas), movimento a 200px/s,
+        stuna monstro por 3s ao tocar (TILE_SIZE*0.8), explode em particulas,
+        timeout de 8s.
+        Paredes: timer decrementa, removidas quando expiram.
+
+     k) Game.render() — NOVO BLOCO:
+        Clones: circulo colorido com alpha=0.3 e borda pontilhada.
+        Paredes: retangulos semi-transparentes azuis com borda tracejada.
+
+     l) Game.useItem() — ALTERADO:
+        Boring Trapper: beartrap ganha trapRadius*2 e stun+1.
+
+     m) Game.buyFromShop() — ALTERADO:
+        Lucky Spender: se >= 2 slots vazios e Math.random() < 0.4, adiciona
+        2 itens e marca ambos slots no duplicatedSlots.
+
+     n) Game.sellItem() — ALTERADO:
+        Lucky Spender: bloqueia venda de itens em slots marcados duplicatedSlots.
+
+     o) Game.checkGameState() — ALTERADO:
+        Limpa commandYellTimer/Mult, timeTravelUsed=false, activeClones=[],
+        activeWalls=[] ao vencer round.
+
+     p) Game.loadMap() — ALTERADO:
+        Reseta novas propriedades dos jogadores: commandYellMult, commandYellTimer,
+        invisible, invisibleTimer, timeTravelUsed, duplicatedSlots.
+        Limpa activeClones e activeWalls.
+
+     q) Game.restart() — ALTERADO:
+        Limpa activeClones e activeWalls.
+
+     r) Game.findPath() — ALTERADO:
+        Verifica isWallTile() para bloquear pathfinding do monstro pelas paredes.
+
+     s) Game.findClonePath() — NOVO METODO:
+        BFS identico a findPath mas sem verificacao de portas ou paredes.
+        Clones ignoram todos os obstaculos exceto tiles 'O' e 'W'.
+
+     t) Game.isWallTile() — NOVO METODO:
+        Verifica se um tile (tx, ty) esta ocupado por uma parede ativa.
+
+     u) Game.activateCloneCooldown() — NOVO METODO:
+        Inicia o cooldown do Red Hacker quando o clone expira ou toca o monstro.
+
+     v) MonsterEntity.findNearestPlayer() — ALTERADO:
+        Pula jogadores com invisible === true.
+
+     w) MonsterEntity.canSeePlayer() — ALTERADO:
+        Retorna false se findNearestPlayer retornar null ou player.invisible.
+
+     x) MonsterEntity.canDetectBehind() — ALTERADO:
+        Retorna false se player.invisible.
+
+     y) MonsterEntity.hasLineOfSight() — ALTERADO:
+        Verifica isWallTile() para bloquear linha de visao por paredes.
+
+     z) MonsterEntity.canMoveTo() — ALTERADO:
+        Verifica isWallTile() para bloquear movimento do monstro por paredes.
+
+     aa) updateAbilityHUD() — ALTERADO:
+        Time Traveler mostra "Used" apos uso em vez do cooldown numerico gigante.
 
 ================================================================================
 FIM DA DOCUMENTACAO

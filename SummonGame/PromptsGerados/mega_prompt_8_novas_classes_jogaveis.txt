@@ -1,0 +1,537 @@
+================================================================================
+MEGA PROMPT - IMPLEMENTACAO DE 7 NOVAS CLASSES JOGAVEIS - SUMMON GAME
+================================================================================
+
+INSTRUCOES GLOBAIS OBRIGATORIAS:
+- Nao crie nenhum arquivo separado (.css, .js, .py, .java, .cpp, .c, etc.).
+- Toda e qualquer alteracao deve ser feita exclusivamente no arquivo SummonGame.html.
+- Nao crie documentos de documentacao, README ou outros arquivos de texto,
+  a menos que seja explicitamente solicitado.
+- Nao adicione nenhum comentario ao codigo, a menos que seja estritamente
+  necessario para clareza de um bloco complexo.
+- Siga o estilo de codigo existente: mesmo padrao de nomenclatura, uso de
+  aspas, espacamento, etc.
+- Todas as alteracoes no codigo devem ser REGISTRADAS na documentacao
+  (Documentacao_Completa.txt) de forma profissional, limpa e bem estruturada,
+  seguindo o padrao existente no arquivo (secao CHANGELOG com descricao do
+  problema, solucao, mudancas no codigo e secoes afetadas).
+- Leia TODO o arquivo SummonGame.html e TODA a Documentacao_Completa.txt
+  antes de comecar a implementar, para entender completamente a arquitetura
+  e evitar conflitos com sistemas existentes.
+- Implemente AGORA, sem questionamentos ou adicoes nao solicitadas.
+  Execute a implementacao completa e finalize.
+
+================================================================================
+VISAO GERAL DA ARQUITETURA ATUAL (para consulta rapida)
+================================================================================
+
+- Jogo top-down 2D em HTML5 Canvas, single-file.
+- Classe Game centraliza tudo: entidades, loop, renderizacao.
+- PlayerClasses: objeto com definicoes das classes jogaveis.
+  Atualmente: { none, oracle, scout }.
+  Cada classe tem: name, desc, abilityName, cooldown, duration, icon.
+- ActivateAbility: chamado via tecla F (keybinds.ability).
+  Verifica cooldown > 0 ou abilityActive.
+  Se ok: abilityActive = true, abilityTimer = duration, abilityCooldown = cooldown + duration.
+- Player tem: baseSpeed (140), speed (calculado por frame),
+  abilityCooldown, abilityActive, abilityTimer, playerClass, playerIndex.
+- Sistema de Habilidade: #ability-hud mostra nome, barra de cooldown,
+  timer numerico, status (Active/CD/Ready).
+- Sistema de interacao: hold-to-activate com checkInteraction().
+- Sistema de traps: Game.traps[] com posicao, stun, trapColor, trapRadius.
+- Sistema de shop: Game.shopItems[] com itemKey, price, sold.
+- Sistema de monstro: FSM patrol/chase/search com pathfinding BFS.
+- Sistema de visao: raycasting poligonal com isPointVisible().
+- Sistema de particulas: Particle[] para efeitos visuais.
+- Sistema de multiplayer: ate 4 jogadores, cada um com seus proprios
+  atributos e keybinds.
+
+================================================================================
+8 NOVAS CLASSES A IMPLEMENTAR
+================================================================================
+
+Adicione as 7 classes abaixo ao objeto PlayerClasses, seguindo EXATAMENTE
+as especificacoes. Cada classe deve ter um icone (caractere) unico para
+exibicao na tela de selecao.
+
+IMPORTANTE: Cada classe DEVE ser registrada em PlayerClasses com os campos:
+  name, desc, abilityName, cooldown, duration, icon
+e a logica deve ser implementada na funcao activateAbility(game, player)
+e/ou nos metodos update/render/checkInteraction afetados.
+
+================================================================================
+CLASSE 1: Red Hacker
+================================================================================
+
+PlayerClasses key: 'redhacker'
+
+name: 'Red Hacker'
+desc: 'Cria um clone seu que persegue e stuna o monstro por 3s'
+abilityName: 'Clone Perseguidor'
+cooldown: 20
+duration: 0 (instantaneo, nao tem duracao de habilidade ativa - o clone que tem duracao)
+icon: 'R' (ou 'RH', algo representativo)
+
+COMPORTAMENTO:
+- Ao ativar a habilidade (tecla F):
+  * Cria um clone na posicao atual do jogador.
+  * O clone sabe EXATAMENTE onde o monstro esta (ignora fog/visao).
+  * O clone persegue o monstro usando pathfinding BFS (reutilizar Game.findPath)
+    ate o tile do monstro, recalculando a cada frame.
+  * Se o clone tocar no monstro (distancia < TILE_SIZE * 0.8, mesma logica de ataque):
+    - Monstro fica stunado por 3 segundos (monster.stunTimer = 3).
+    - Clone desaparece (explode em particulas ou simplesmente some).
+  * Se o clone nao tocar no monstro em ate 8 segundos, ele desaparece.
+  * So pode haver 1 clone ativo por Red Hacker por vez.
+  * Cooldown comeca APOS o clone desaparecer (seja por toque ou timeout).
+
+APARENCIA DO CLONE:
+- Renderizado como o proprio jogador (circulo colorido com olhos e nome),
+  mas com globalAlpha = 0.3 (30% de opacidade).
+- Nao tem nome renderizado acima.
+- Deve ter um indicador sutil (ex: borda pontilhada) para distinguir.
+
+COMPORTAMENTO FISICO:
+- O clone nao colide com o jogador.
+- O clone nao pode passar por paredes (usa pathfinding BFS normal).
+- O clone nao causa dano - apenas stuna ao tocar.
+- O clone ignora portas (pode atravessa-las independente do estado).
+  DICA: em canMoveTo do clone, tratar tile 'd' como sempre passavel.
+- O clone nao pode ser atacado/danificado.
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar uma estrutura para rastrear clones: Game.activeClones[] ou
+  um array de objetos { playerIndex, px, py, alive, timer, targetMonster }.
+- No Game.update(), atualizar clones (movimento, colisao com monstro, timer).
+- No Game.render(), renderizar clones antes dos monstros, com alpha 0.3.
+- No activateAbility, se playerClass === 'redhacker', criar clone.
+- O cooldown so deve comecar a contar quando o clone morrer/desaparecer.
+  Para isso: abilityCooldown so e definido quando clone expira/toca.
+  Enquanto clone estiver vivo, NÃO iniciar cooldown.
+
+================================================================================
+CLASSE 2: Command Yeller
+================================================================================
+
+PlayerClasses key: 'commandyeller'
+
+name: 'Command Yeller'
+desc: 'Aumenta a velocidade propria e de todos os participantes em 1.5x da base por 7s'
+abilityName: 'Grito de Comando'
+cooldown: 25
+duration: 7
+icon: 'Y'
+
+COMPORTAMENTO:
+- Ao ativar: todos os players vivos tem sua velocidade aumentada.
+- O bonus e: baseSpeed * 0.5 ADICIONADO a speed atual do jogador.
+  FORMULA: speed += baseSpeed * 0.5
+  REGRA: Se o jogador ja tem outros bônus de velocidade (Scout, speed items),
+    o Command Yeller ADICIONA +50% da baseSpeed por cima.
+    Exemplo: baseSpeed=140, Scout ativo (1.5x = 210), Command Yeller ativo
+    -> speed = 210 + 70 = 280.
+    Exemplo2: sem buffs, Command Yeller ativo -> speed = 140 + 70 = 210.
+- Todos os jogadores recebem o buff, independente da classe.
+- O buff dura 7 segundos (duration).
+- Quando expira, cada jogador tem sua speed recalculada normalmente
+  (sem o bonus do Command Yeller).
+- Deve ser visivel: os jogadores com o buff devem ter um efeito visual sutil
+  (ex: particulas amarelas ao redor ou brilho nas bordas).
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Player: commandYellMult (float, padrao 0, vira 0.5 quando ativo)
+  e commandYellTimer (float, duracao restante).
+- Em activateAbility: para cada player vivo, definir commandYellMult = 0.5
+  e commandYellTimer = 7.
+- Em Player.update(): no calculo de speed, adicionar:
+  if (commandYellTimer > 0) {
+    commandYellTimer -= dt;
+    speed += baseSpeed * commandYellMult;
+    if (commandYellTimer <= 0) { commandYellMult = 0; }
+  }
+- O cooldown do Command Yeller e individual de cada jogador (cada um tem
+  seu proprio cooldown de 25s).
+
+================================================================================
+CLASSE 3: Boring Trapper
+================================================================================
+
+PlayerClasses key: 'boringtrapper'
+
+name: 'Boring Trapper'
+desc: 'Bear traps sao 2x maiores e stunnao o monstro por 1s extra'
+abilityName: 'Armadilheiro'
+cooldown: 0 (passiva, nao tem ativacao por tecla)
+duration: 0
+icon: 'B'
+
+COMPORTAMENTO (HABILIDADE PASSIVA):
+- Nao requer ativacao (tecla F nao faz nada).
+- Quando o Boring Trapper COLOCA um Bear Trap (item beartrap):
+  * O tamanho visual da trap e 2x maior (trapRadius * 2).
+  * O stun do Bear Trap e aumentado em +1 segundo (stun + 1).
+- Afeta APENAS o item 'beartrap'. Landmine e Crucifix nao sao afetados.
+- So se aplica quando o proprio Boring Trapper coloca a trap
+  (game.useItem chamado pelo Boring Trapper).
+
+IMPLEMENTACAO SUGERIDA:
+- Em Game.useItem(player): antes de criar a trap, verificar se
+  player.playerClass === 'boringtrapper' e item === 'beartrap'.
+  Se sim: ajustar trapRadius *= 2 e it.stun += 1.
+  CUIDADO: nao modificar o objeto Items original (fazer copia local).
+  Usar valores temporarios ao criar a trap.
+
+================================================================================
+CLASSE 4: Dying Guy
+================================================================================
+
+PlayerClasses key: 'dyingguy'
+
+name: 'Dying Guy'
+desc: 'Fica invisivel para o monstro por 3s. O monstro perde o rastro.'
+abilityName: 'Fingir de Morto'
+cooldown: 18
+duration: 3
+icon: 'D'
+
+COMPORTAMENTO:
+- Ao ativar: o jogador fica "invisivel" para o monstro por 3s.
+- Efeitos durante a invisibilidade:
+  * O monstro NAO consegue detectar este jogador:
+    - canSeePlayer() retorna false para este jogador especifico.
+    - canDetectBehind() retorna false para este jogador especifico.
+    - findNearestPlayer() ignora este jogador.
+  * O monstro perde o rastro IMEDIATAMENTE:
+    - Se o monstro esta em chase: transita para patrol (sem search).
+    - O monstro simplesmente "esquece" que este jogador existe.
+    - O path do monstro e limpo (path = null).
+  * O jogador ainda TOMA dano se o monstro fisicamente estiver em cima dele.
+    (a invisibilidade e deteccao, nao invulnerabilidade)
+  * Outros jogadores veem o Dying Guy com 50% de transparencia (globalAlpha = 0.5).
+  * O Dying Guy se move normalmente e pode interagir com objetos.
+- Quando a habilidade expira (3s): o monstro pode detecta-lo novamente.
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Player: invisible (boolean), invisibleTimer (float).
+- Em activateAbility: se playerClass === 'dyingguy', definir invisible = true,
+  invisibleTimer = 3, e para cada monstro ativo que esta perseguindo este
+  jogador, forcar transicao para patrol (state='patrol', path=null).
+- Em MonsterEntity.findNearestPlayer(): pular jogadores com invisible === true.
+- Em MonsterEntity.canSeePlayer(): se o nearestPlayer tem invisible === true,
+  retornar false.
+- Em MonsterEntity.canDetectBehind(): similar.
+- Em Player.render(): se invisible === true e !debugMode, desenhar com
+  globalAlpha = 0.5.
+- Em Player.update(): decrementar invisibleTimer, quando <= 0, invisible = false.
+
+================================================================================
+CLASSE 5: Tee Vee
+================================================================================
+
+PlayerClasses key: 'teevee'
+
+name: 'Tee Vee'
+desc: 'Coleta artefatos 1.5x mais rapido, 2x mais longe e ate atraves de paredes'
+abilityName: 'Coletor Paranormal'
+cooldown: 0 (passiva permanente)
+duration: 0
+icon: 'T'
+
+COMPORTAMENTO (HABILIDADE PASSIVA PERMANENTE):
+- Nao requer ativacao (tecla F nao faz nada).
+- Efeitos:
+  1. VELOCIDADE DE COLETA: A interacao com artefatos e 1.5x mais rapida.
+     O interactTimer para artifact deve incrementar 1.5x mais rapido.
+     (efetivamente: duracao de 1.5s vira 1.0s)
+  2. ALCANCE DE COLETA: O raio de interacao para artefatos e 2x maior.
+     (range = 1.5 * TILE_SIZE * 2 = 96 pixels para artefatos)
+  3. COLETA ATRAVES DE PAREDES: O Tee Vee pode interagir com artefatos
+     mesmo que haja paredes, moveis ou portas fechadas entre ele e o artefato.
+     (basicamente: o raio de interacao ignora obstaculos, apenas verifica
+     distancia euclidiana em linha reta, sem importar tiles no caminho)
+
+IMPLEMENTACAO SUGERIDA:
+- Em Player.checkInteraction(): quando p.playerClass === 'teevee' e
+  o alvo e um artifact, usar range * 2 (em vez de 1.5 tiles).
+- Em Game.updateInteraction(): quando player.playerClass === 'teevee'
+  e type === 'artifact', usar duration * (1/1.5) ou fazer o timer
+  incrementar 1.5x mais rapido. Opcao: duration = 1.0 em vez de 1.5
+  para teevee em artifacts.
+- O range maior e passagem por paredes sao naturais se a interacao
+  so verificar distancia (sem LOS check). O sistema atual ja nao
+  verifica LOS para artefatos, entao o alcance maior ja resolve
+  a questao das paredes (se o artefato estiver a menos de 96px em
+  linha reta, mesmo atraves de parede, ele e interagivel).
+
+================================================================================
+CLASSE 6: Annoying Looper
+================================================================================
+
+PlayerClasses key: 'annoyinglooper'
+
+name: 'Annoying Looper'
+desc: 'Cria uma parede que o monstro nao passa por 5s'
+abilityName: 'Parede Temporal'
+cooldown: 40
+duration: 5 (duracao da parede)
+icon: 'L'
+
+COMPORTAMENTO:
+- Ao ativar: uma parede e criada na posicao atual do jogador.
+- CARACTERISTICAS DA PAREDE:
+  * Tamanho: 3 tiles de comprimento.
+  * Largura: 25% do TILE_SIZE (8 pixels).
+  * Aparencia: semi-transparente (ex: rgba(100,200,255,0.4)), com bordas
+    visiveis para o jogador enxergar.
+  * Duracao: 5 segundos.
+  * O monstro NAO pode passar pela parede (colisao para o monstro).
+  * O monstro NAO consegue ver o jogador atraves da parede
+    (hasLineOfSight do monstro bloqueada pela parede).
+  * O JOGADOR pode passar livremente pela parede.
+  * A parede NAO bloqueia visao do jogador (raycasting do jogador ignora).
+  * A parede NAO bloqueia pathfinding BFS do jogador.
+  * A parede BLOQUEIA pathfinding BFS do monstro (trata como obstaculo).
+
+- ROTACAO BASEADA NA MOVIMENTACAO:
+  * Se o jogador estava se movendo horizontalmente (dx != 0, |dx| > |dy|)
+    nos ultimos ~200ms antes da ativacao:
+    -> Parede vertical (3 tiles empilhados na vertical, norte-sul)
+    EXEMPLO: tiles em (playerX, playerY-1), (playerX, playerY), (playerX, playerY+1)
+  * Se o jogador estava se movendo verticalmente (dy != 0, |dy| > |dx|):
+    -> Parede horizontal (3 tiles na horizontal, leste-oeste)
+    EXEMPLO: tiles em (playerX-1, playerY), (playerX, playerY), (playerX+1, playerY)
+  * Se o jogador estava parado (dx=0, dy=0):
+    -> Parede horizontal (padrao).
+  * Diagonal: considerar o eixo com maior magnitude absoluta.
+
+- A parede e centrada no tile do jogador no momento da ativacao.
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar Game.activeWalls[]: array de objetos com:
+  { px, py, tileX, tileY, orientation, timer, duration, tiles[] }
+  onde orientation = 'horizontal' | 'vertical'.
+- Em activateAbility: criar a parede, definir timer = 5.
+- Em Game.update(): decrementar timer, quando <= 0 remover.
+- Em Game.render(): desenhar a parede (retangulo semi-transparente).
+- Em Player.canMoveTo(): NAO bloquear pela parede (player passa).
+- Em MonsterEntity.canMoveTo(): BLOQUEAR pela parede.
+- Em Game.findPath(): BLOQUEAR tiles que contem a parede para o monstro.
+- Em MonsterEntity.hasLineOfSight(): BLOQUEAR linha de visao pela parede.
+- Para o monstro nao ver atraves: monster.hasLineOfSight() deve verificar
+  se ha uma parede entre origem e destino.
+- Simbolo: usar um tile virtual. A parede nao e um tile no mapa, e sim
+  uma entidade separada que afeta colisao/pathfinding do monstro.
+
+DETALHES DE COLISAO:
+- A parede ocupa uma area retangular. Para colisao com o monstro:
+  - Se orientation === 'horizontal':
+    - Ocupa os tiles (tileX-1, tileY), (tileX, tileY), (tileX+1, tileY).
+    - Na pratica: cada tile tem uma "faixa" no meio que bloqueia.
+    - O monstro canMoveTo deve retornar false se o monstro estiver
+      tentando entrar em qualquer desses 3 tiles.
+  - Similar para vertical: (tileX, tileY-1), (tileX, tileY), (tileX, tileY+1).
+
+PARA SIMPLIFICAR:
+- Tratar cada tile da parede como um tile intransponivel para o monstro.
+- No pathfinding BFS do monstro, tiles ocupados pela parede sao tratados
+  como 'O' (wall).
+- Para a linha de visao do monstro, tiles ocupados pela parede bloqueiam.
+- Para colisao do monstro, tiles ocupados bloqueiam.
+
+================================================================================
+CLASSE 7: Time Traveler
+================================================================================
+
+PlayerClasses key: 'timetraveler'
+
+name: 'Time Traveler'
+desc: 'Reseta o cooldown de todas as habilidades de todos os players 1x por round'
+abilityName: 'Reset Temporal'
+cooldown: 999999 (efetivamente uma vez por round)
+duration: 0 (instantaneo)
+icon: 'T2' ou 'K' (usar 'K' para nao conflitar com Tee Vee)
+
+COMPORTAMENTO:
+- Uma vez por round (reseta ao derrotar o monstro), pode resetar o cooldown
+  de TODAS as habilidades de TODOS os players.
+- Nao funciona em outros Time Travelers (eles nao tem seus cooldowns resetados).
+- Quando ativado: para cada player, se playerClass !== 'timetraveler',
+  entao abilityCooldown = 0.
+- O Time Traveler gasta seu unico uso da rodada (abilityActive nao e usada,
+  apenas abilityCooldown e definido para um valor muito alto).
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Player: timeTravelUsed (boolean), resetado em loadMap() e
+  checkGameState() (fim do round).
+- Em activateAbility: se playerClass === 'timetraveler' e !timeTravelUsed:
+  - Para cada player p em game.players:
+    - Se p.playerClass !== 'timetraveler': p.abilityCooldown = 0.
+  - timeTravelUsed = true.
+  - Definir abilityCooldown para um valor alto (ex: 9999) e nao resetar.
+- Em loadMap() e checkGameState() (quando round vence): resetar
+  timeTravelUsed = false para todos os Time Travelers.
+
+================================================================================
+CLASSE 8: Lucky Spender
+================================================================================
+
+PlayerClasses key: 'luckyspender'
+
+name: 'Lucky Spender'
+desc: '40% de chance de duplicar itens ao comprar no shop'
+abilityName: 'Gasto de Sorte'
+cooldown: 0 (passiva permanente)
+duration: 0
+icon: '$'
+
+COMPORTAMENTO (HABILIDADE PASSIVA PERMANENTE):
+- Nao requer ativacao (tecla F nao faz nada).
+- Quando o Lucky Spender compra QUALQUER item no shop (S):
+  * 40% de chance (Math.random() < 0.4) de duplicar o item.
+  * Duplicar significa: 2 do mesmo item aparecem no inventario
+    (em vez de 1).
+  * O item da loja SEMPRE e removido (shop.sold = true) - o item
+    nao fica na loja.
+  * O jogador precisa ter espaco para 2 itens no inventario.
+    Se so tiver 1 espaco vazio: a duplicacao nao ocorre
+    (apenas 1 item e comprado normalmente).
+  * O jogador paga o preco normal (1x), mas recebe 2 itens.
+
+- RESTRICAO: Itens DUPLICADOS nao podem ser vendidos na lixeira (T).
+  * Quando o Lucky Spender tenta vender um item na lixeira, verificar
+    se aquele item especifico foi duplicado.
+  * Se foi duplicado: bloquear venda, mostrar mensagem
+    "Item duplicado nao pode ser vendido!".
+  * Como rastrear: adicionar uma flag ao inventario que marca cada
+    slot como 'duplicated' ou nao. Ou usar um Set com referencias
+    aos indices dos slots que contem itens duplicados.
+
+IMPLEMENTACAO SUGERIDA:
+- Modificar Player.inventory: em vez de [null, null, null, null, null],
+  usar array de objetos { key: string, duplicated: boolean } ou manter
+  dois arrays paralelos: inventory[] (string keys) e duplicatedFlags[]
+  (boolean).
+  Alternativa: adicionar Player.duplicatedSlots = new Set() que guarda
+  os indices dos slots que contem itens duplicados.
+
+- Em Game.buyFromShop():
+  * Se player.playerClass === 'luckyspender':
+    - Verificar se player.hasSpace() para 2 itens (se tiver chance de duplicar).
+      Se player tem >= 2 slots vazios: chance de 40% de duplicar.
+      Se player tem apenas 1 slot vazio: compra normal (sem duplicacao).
+    - Se duplicar: adicionar o item duas vezes, marcar ambos como duplicated.
+    - Se nao duplicar: adicionar uma vez, sem flag.
+
+- Em Game.sellItem():
+  * Verificar se o item no slot selecionado tem a flag duplicated.
+  * Se tiver: mostrar mensagem e nao vender.
+  * Senao: vender normalmente.
+
+OBSERVACAO: Se a implementacao com Set ficar complexa, uma alternativa
+mais simples e adicionar um array Player.duplicatedSlots = [false, false, false, false, false]
+que espelha os slots do inventario, true se o item naquele slot foi duplicado.
+
+================================================================================
+AJUSTES GLOBAIS PARA SUPORTAR AS NOVAS CLASSES
+================================================================================
+
+1. PlayerClasses: ADICIONAR as 7 novas classes (total: none, oracle, scout,
+   redhacker, commandyeller, boringtrapper, dyingguy, teevee, annoyinglooper,
+   timetraveler, luckyspender - 11 classes).
+
+2. ActivateAbility (funcao activateAbility): Expandir para chamar a logica
+   de cada classe. Atualmente so trata 'scout' como special case. Expandir
+   para chamar a funcao adequada para cada classe.
+
+   ESTRUTURA SUGERIDA:
+   function activateAbility(game, player) {
+     const cls = PlayerClasses[player.playerClass];
+     if (!cls || cls.cooldown === 0) return; // passivas ignoram
+     if (player.abilityCooldown > 0 || player.abilityActive) return;
+
+     switch (player.playerClass) {
+       case 'scout':
+         player.abilityActive = true;
+         player.abilityTimer = cls.duration;
+         player.abilityCooldown = cls.cooldown + cls.duration;
+         // speed ajustada em Player.update()
+         break;
+       case 'oracle':
+         player.abilityActive = true;
+         player.abilityTimer = cls.duration;
+         player.abilityCooldown = cls.cooldown + cls.duration;
+         break;
+       case 'redhacker':
+         // logica do clone
+         break;
+       case 'commandyeller':
+         // buffar todos os players
+         player.abilityActive = true;
+         player.abilityTimer = cls.duration;
+         player.abilityCooldown = cls.cooldown + cls.duration;
+         break;
+       case 'dyingguy':
+         player.abilityActive = true;
+         player.abilityTimer = cls.duration;
+         player.abilityCooldown = cls.cooldown + cls.duration;
+         break;
+       case 'annoyinglooper':
+         player.abilityActive = true;
+         player.abilityTimer = cls.duration;
+         player.abilityCooldown = cls.cooldown + cls.duration;
+         break;
+       case 'timetraveler':
+         // logica de reset
+         break;
+       // boringtrapper e teevee sao passivas (nao chegam aqui)
+     }
+   }
+
+3. Player.update(): recalculo de speed deve incluir commandYellMult.
+
+4. Game.render(): adicionar renderizacao de clones e paredes na pipeline.
+
+5. Game.update(): adicionar update de clones e paredes.
+
+6. Colisao e pathfinding: ajustar para bloquear monstro pelas paredes
+   do Annoying Looper, mas nao bloquear jogador.
+
+7. Fim de round (checkGameState): resetar timeTravelUsed, remover paredes,
+   remover clones.
+
+================================================================================
+DOCUMENTACAO DAS ALTERACOES
+================================================================================
+
+A CADA alteracao feita no codigo, atualize a Documentacao_Completa.txt
+imediatamente, seguindo o padrao existente:
+
+1. Adicione uma nova entrada no CHANGELOG (proximo numero de alteracao).
+2. Inclua:
+   - PROBLEMA: o que motivou a mudanca.
+   - SOLUCAO: como foi resolvido.
+   - MUDANCAS NO CODIGO: lista detalhada de metodos novos/modificados,
+     atributos novos, logicas alteradas.
+   - SECOES AFETADAS: referencia as secoes da documentacao que mudaram.
+3. Se necessario, crie novas secoes (ex: "SECAO 60 - SISTEMA DE CLONES",
+   "SECAO 61 - SISTEMA DE PAREDES TEMPORAIS") com documentacao detalhada
+   da arquitetura, estrutura de dados e fluxo de cada novo sistema.
+
+================================================================================
+VERIFICACAO FINAL
+================================================================================
+
+Apos implementar tudo, faca uma verificacao rapida:
+- Todas as 8 classes estao funcionando?
+- As classes passivas (Boring Trapper, Tee Vee) nao estao consumindo tecla F?
+- O Lucky Spender (se aplicavel) esta com a chance de 40% e as regras de
+  duplicacao corretas?
+- A documentacao foi atualizada com todas as alteracoes?
+- Nao ha conflitos entre as classes (ex: dois Time Travelers nao resetam
+  um ao outro)?
+- Nao ha conflitos com sistemas existentes (ex: Oracle + Dying Guy)?
+- O jogo continua compilando/rodando sem erros?
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================
