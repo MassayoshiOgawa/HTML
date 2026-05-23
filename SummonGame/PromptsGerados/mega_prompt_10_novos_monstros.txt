@@ -1,0 +1,1425 @@
+================================================================================
+MEGA PROMPT - IMPLEMENTACAO DE 10 NOVOS MONSTROS - SUMMON GAME
+================================================================================
+
+INSTRUCOES GLOBAIS OBRIGATORIAS:
+- Nao crie nenhum arquivo separado (.css, .js, .py, .java, .cpp, .c, etc.).
+- Toda e qualquer alteracao deve ser feita exclusivamente no arquivo SummonGame.html.
+- Nao crie documentos de documentacao, README ou outros arquivos de texto,
+  a menos que seja explicitamente solicitado.
+- Nao adicione comentarios ao codigo, a menos que seja estritamente
+  necessario para clareza de um bloco complexo.
+- Siga o estilo de codigo existente: mesmo padrao de nomenclatura, uso de
+  aspas, espacamento, etc.
+- Todas as alteracoes no codigo devem ser REGISTRADAS na documentacao
+  (Documentacao_Completa.txt) de forma profissional, limpa e bem estruturada,
+  seguindo o padrao existente no arquivo (secao CHANGELOG com descricao do
+  problema, solucao, mudancas no codigo e secoes afetadas).
+- Leia TODO o arquivo SummonGame.html e TODA a Documentacao_Completa.txt
+  antes de comecar a implementar, para entender completamente a arquitetura
+  e evitar conflitos com sistemas existentes.
+- Implemente AGORA, sem questionamentos ou adicoes nao solicitadas.
+  Execute a implementacao completa e finalize.
+- NAO use caracteres bugados ou corrompidos em nenhum lugar do codigo ou
+  documentacao. Use APENAS caracteres UTF-8 validos. Exemplo de caracteres
+  PROIBIDOS: âï¿½ ðâ¤. Se um emoji ou simbolo especial nao renderizar
+  corretamente, use alternativas ASCII ou descritivas.
+- O codigo deve ser ESCALAVEL: futuramente novos monstros, classes e
+  sistemas serao adicionados. Nao faca hardcode que impossibilite expansao.
+
+================================================================================
+VISAO GERAL DA ARQUITETURA DO SISTEMA DE MONSTROS (para consulta rapida)
+================================================================================
+
+- MonsterTypes: objeto com definicoes dos tipos de monstro.
+  Campos: name, desc, weight (peso para selecao aleatoria), chaseLoseTime,
+  searchDuration, spawnCount, color, strokeColor, speedMod, randomSpawn.
+  Atualmente: normal, blueman, twins, glitch (4 tipos).
+
+- MonsterEntity: classe do monstro. Construtor recebe tileX, tileY, game,
+  monsterType. Propriedades principais:
+  * px, py, speed (70 base), alive, state (patrol/chase/search/taunted)
+  * currentWaypoint, waypointOrder, facingAngle
+  * chaseTimer, searchTimer, lastKnownPlayerPos
+  * attackCooldown, game, path, pathTarget, pathRecalc
+  * type (string), chaseLoseTime, searchDuration, bodyColor, bodyStroke, name
+  * stunTimer, tauntTimer, tauntTarget, preTauntState
+  * Metodos: spawn(), die(), update(dt), render(ctx, game),
+    findNearestPlayer(), canSeePlayer(), canDetectBehind(),
+    hasLineOfSight(), canMoveTo(), checkNearbyDoors(), followPath(dt),
+    updatePatrol(dt), updateChase(dt), updateSearch(dt), updateTaunted(dt)
+
+- FSM (Finite State Machine):
+  * patrol: segue waypoints aleatorios usando BFS pathfinding.
+  * chase: persegue o jogador mais proximo via BFS. Se perder de vista
+    por chaseLoseTime segundos, transita para search.
+  * search: vai ate lastKnownPlayerPos. Se chegar ou searchDuration
+    expirar, volta para patrol.
+  * taunted: vai ate o tauntTarget (trap de noise maker). Ao expirar
+    tauntTimer, volta ao estado anterior.
+
+- Velocidade: speed = getMonsterSpeed() * speedMod no spawn.
+  Durante chase/taunted: speed * 1.4 no followPath().
+
+- Spawn: Game.spawnMonster() usa weightedRandom(MonsterTypes) para
+  escolher o tipo. Cria MonsterEntity, define speed, chama spawn().
+  Se randomSpawn=true, spawna em ponto aleatorio do mapa.
+
+- Render: MonsterEntity.render() desenha corpo circular (raio = TILE_SIZE*0.38),
+  chapeu amarelo, olhos brancos com pupilas vermelhas, indicador de direcao.
+  Se taunted: mostra "!!!" pulsando. Se oracleReveal ativo: overlay amarelo.
+  Fog of war: so renderiza se isPointVisible() ou debugMode ou oracleReveal.
+
+- Ataque: distancia < TILE_SIZE * 0.8 causa takeDamage(20) com 1s cooldown.
+
+- Stun: stunTimer > 0 bloqueia update (monstro nao se move, nao ataca).
+
+- Pathfinding BFS: Game.findPath(startTileX, startTileY, endTileX, endTileY).
+  Considera tiles 'O' e 'W' como obstaculos, portas solidas bloqueiam.
+
+- Traps: game.traps[] com { x, y, item, active, stun, trapColor, trapRadius,
+  tauntDuration, tauntTimer, tauntedMonster }. O loop de traps verifica
+  distancia do monstro e aplica stun.
+
+- Artifacts: game.artifactEntities[] com ArtifactEntity { tileX, tileY,
+  collected, glowPhase }. Coleta via hold E (interacao), chama collectArtifact().
+
+- ActivateAbility: game.activateAbility() e chamada quando player pressiona F.
+  Definida como funcao global activateAbility(game, player).
+
+================================================================================
+10 NOVOS MONSTROS A IMPLEMENTAR
+================================================================================
+
+Adicione as 10 entradas abaixo ao objeto MonsterTypes. Cada monstro deve
+seguir o formato existente: name, desc, weight, chaseLoseTime, searchDuration,
+spawnCount, color, strokeColor, speedMod, randomSpawn.
+
+IMPORTANTE: Os monstros abaixo devem ser ADICIONADOS ao MonsterTypes existente
+(sem remover os atuais). Total: 4 existentes + 10 novos = 14 monstros.
+
+Para monstros com comportamento especial, pode ser necessario:
+- Adicionar novas propriedades ao MonsterEntity
+- Modificar o metodo update() do MonsterEntity
+- Modificar o metodo render() do MonsterEntity
+- Modificar Game.spawnMonster() para logica de spawn especial
+- Adicionar novos metodos ou estados no MonsterEntity
+
+================================================================================
+MONSTRO 1: Jester
+================================================================================
+
+MonsterTypes key: 'jester'
+
+name: 'Jester'
+desc: 'Clears all traps before hunting. Knows where every trap is.'
+weight: 1
+chaseLoseTime: 1.0
+searchDuration: 2.0
+spawnCount: 1
+color: '#cc44cc'
+strokeColor: '#882288'
+speedMod: 1.0
+randomSpawn: false
+
+COMPORTAMENTO:
+- O Jester NAO ataca jogadores enquanto existir pelo menos 1 trap ativa
+  no mapa (game.traps.length > 0).
+- Enquanto ha traps: o Jester entra em modo "trap-seeking".
+  * Ele SABE onde estao TODAS as traps do mapa (acesso direto a game.traps).
+  * Ele se move ate a trap MAIS PROXIMA (distancia euclidiana).
+  * Usa pathfinding BFS normal (Game.findPath) para chegar ate a trap.
+  * Ao chegar na trap (distancia < TILE_SIZE * 0.5 do centro da trap):
+    - A trap e DESTRUIDA (removida de game.traps).
+    - O Jester toma o stun da trap (stunTimer = trap.stun) - ele "pisa"
+      na trap e sofre o efeito. Durante o stun, ele fica parado.
+    - Apos o stun, ele busca a PROXIMA trap mais proxima.
+  * O Jester IGNORA jogadores durante o trap-seeking (findNearestPlayer
+    nao e chamado, nao ataca, nao persegue).
+- Quando NAO HA mais traps (game.traps.length === 0):
+  * O Jester se torna um MONSTRO NORMAL.
+  * Passa a usar o FSM normal: patrol/chase/search.
+  * Comportamento identico ao monstro 'normal'.
+- Se o round comeca sem traps: o Jester ja comeca como monstro normal.
+
+VISUAL:
+- Corpo: roxo (#cc44cc) com borda (#882288).
+- Enquanto em trap-seeking: adicionar um icone ou efeito visual que o
+  diferencie. Sugestao: um pequeno simbolo de "alvo/靶" (circulo com
+  cruz) amarelo acima da cabeca, ou olhos amarelos em vez de vermelhos.
+- Apos virar normal: visual padrao de monstro (olhos vermelhos).
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao MonsterEntity: trapSeeking (boolean, default false).
+  Determinar em spawn() baseado em game.traps.length > 0.
+
+- Em MonsterEntity.update(): no inicio, antes do switch FSM:
+  * Se this.type === 'jester' && this.trapSeeking:
+    - Se game.traps.length === 0: this.trapSeeking = false; this.state = 'patrol';
+      this.generateWaypointOrder(); // Volta ao comportamento normal
+    - Senao: executar updateJester(dt) e return (pula o FSM normal).
+
+- Novo metodo updateJester(dt):
+  * Se this.stunTimer > 0: decrementar stunTimer, return (parado durante stun).
+  * Encontrar trap mais proxima:
+    let nearest = null; let nearestDist = Infinity;
+    for (const t of game.traps) {
+      const dx = t.x - this.px; const dy = t.y - this.py;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < nearestDist) { nearestDist = dist; nearest = t; }
+    }
+  * Se !nearest: this.trapSeeking = false; return (sem traps).
+  * Verificar se chegou na trap:
+    if (nearestDist < TILE_SIZE * 0.5) {
+      this.stunTimer = (nearest.stun || 1); // Toma o stun da trap
+      // Remove a trap
+      const idx = game.traps.indexOf(nearest);
+      if (idx >= 0) game.traps.splice(idx, 1);
+      this.path = null;
+      return;
+    }
+  * Pathfinding para a trap:
+    const stx = Math.floor(this.px / TILE_SIZE);
+    const sty = Math.floor(this.py / TILE_SIZE);
+    const gtx = Math.floor(nearest.x / TILE_SIZE);
+    const gty = Math.floor(nearest.y / TILE_SIZE);
+    if (!this.path) {
+      this.path = game.findPath(stx, sty, gtx, gty);
+    }
+  * Se tem path: seguir com followPath(dt) (movimento normal).
+  * Se nao tem path: tenta recalc a cada 0.5s (similar ao patrol).
+
+- Em MonsterEntity.update(): adicionar verificacao ANTES do bloco de ataque:
+  * Se this.type === 'jester' && this.trapSeeking: NAO atacar (pular o bloco
+    de ataque no final do update).
+
+- Em MonsterEntity.render():
+  * Se this.trapSeeking: desenhar um pequeno alvo/circulo amarelo acima
+    da cabeca (ex: ctx.strokeStyle = '#ff0'; ctx.arc(rx, ry - TILE_SIZE*0.5, 5, ...)).
+
+EDGE CASES:
+- Jester toma stun de traps de taunt (noise maker): o stun e 0 (tauntDuration=3),
+  entao stunTimer = 0. Ele "pisa" na trap, a trap e destruida, e ele continua.
+- Jester pisa em trap enquanto ja esta stunado: o codigo de trap-seeking
+  ja verifica stunTimer > 0 e retorna. O path e limpo, entao na proxima
+  iteracao ele recalcula para a trap mais proxima.
+- Se uma trap e removida por outro motivo (ex: jogador usa item? Nao, traps
+  sao permanentes ate o fim do round): o Jester recalcula naturalmente.
+- Se nao ha caminho para a trap (ex: porta trancada pelo Locker Guy bloqueia):
+  o BFS retorna null. O Jester fica parado? Ou tenta outra trap?
+  COMPORTAMENTO: se !this.path e pathRecalc <= 0, recalcula para a trap
+  MAIS PROXIMA (pode ser uma diferente se a anterior ficou inacessivel).
+  Adicionar this.pathRecalc para evitar recalculo todo frame.
+
+- NOTA sobre o ataque: o codigo de ataque do monstro esta no FINAL do
+  update(), apos o switch FSM. Verifica distancia < TILE_SIZE*0.8 e
+  attackCooldown <= 0. Para o Jester em trap-seeking, pular este bloco:
+    if (this.alive && !(this.type === 'jester' && this.trapSeeking)) {
+      // codigo de ataque...
+    }
+
+TESTES SUGERIDOS:
+- Spawnar Jester com traps no mapa: verificar se ele vai ate a trap mais
+  proxima e a destroi.
+- Verificar se o Jester toma o stun da trap ao pisa-la.
+- Verificar se apos destruir todas as traps, o Jester vira monstro normal
+  (persegue jogadores).
+- Verificar se com 0 traps no inicio, o Jester ja comeca como normal.
+- Verificar visual do modo trap-seeking (icone/alvo amarelo).
+
+================================================================================
+MONSTRO 2: Ballerina
+================================================================================
+
+MonsterTypes key: 'ballerina'
+
+name: 'Ballerina'
+desc: 'Only moves when no player is looking at her. Spawns randomly.'
+weight: 1
+chaseLoseTime: 1.0
+searchDuration: 2.0
+spawnCount: 1
+color: '#ff88cc'
+strokeColor: '#cc4488'
+speedMod: 1.0
+randomSpawn: true  // Spawna em local aleatorio
+
+COMPORTAMENTO:
+- A Ballerina SO se move quando NENHUM jogador esta "olhando" para ela.
+- "Olhando" = a direcao de movimento do jogador (facing) esta apontando
+  para a Ballerina, dentro de um cone de visao.
+- Como determinar se um jogador esta olhando:
+  1. Calcular o angulo do jogador para a Ballerina:
+     angleToBallerina = Math.atan2(ballerina.py - player.py, ballerina.px - player.px)
+  2. Calcular o angulo de facing do jogador (direcao de movimento):
+     playerFacing = Math.atan2(player.lastDy, player.lastDx)
+     NOTA: se player.lastDx === 0 && player.lastDy === 0 (jogador nunca
+     se moveu), considerar que NAO esta olhando (player parado = nao olha).
+  3. Calcular a diferenca angular:
+     let diff = angleToBallerina - playerFacing;
+     while (diff > Math.PI) diff -= Math.PI * 2;
+     while (diff < -Math.PI) diff += Math.PI * 2;
+  4. Se Math.abs(diff) < Math.PI / 3 (60 graus = cone de 120 graus):
+     o jogador ESTA olhando para a Ballerina.
+  5. A distancia NAO importa para o "olhar" - se o jogador esta olhando
+     na direcao, congela a Ballerina independente da distancia.
+     (O jogador pode estar do outro lado do mapa; se estiver olhando
+     na direcao, a Ballerina para.)
+
+- Se PELO MENOS 1 jogador (vivo) esta olhando: a Ballerina CONGELA.
+  * Nao se move (skip do movimento no update).
+  * AINDA pode atacar se um jogador estiver muito perto (distancia < TILE_SIZE*0.8).
+  * O FSM (patrol/chase/search) continua rodando, mas o movimento e bloqueado.
+- Se NENHUM jogador esta olhando: a Ballerina se move normalmente.
+
+- A verificacao de "olhando" deve ser feita a CADA FRAME.
+
+VISUAL:
+- Corpo: rosa (#ff88cc) com borda (#cc4488).
+- Quando congelada (sendo observada): desenhar um efeito visual sutil.
+  Sugestao: pequenas particulas/estrelas rosas ao redor, ou um leve
+  brilho/borda branca pulsante.
+- Quando em movimento: visual normal.
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar metodo ao MonsterEntity: isPlayerLooking(player):
+  * if (player.lastDx === 0 && player.lastDy === 0) return false;
+  * const angleToMe = Math.atan2(this.py - player.py, this.px - player.px);
+  * const playerFacing = Math.atan2(player.lastDy, player.lastDx);
+  * let diff = angleToMe - playerFacing;
+  * while (diff > Math.PI) diff -= Math.PI * 2;
+  * while (diff < -Math.PI) diff += Math.PI * 2;
+  * return Math.abs(diff) < Math.PI / 3;
+
+- Adicionar metodo: isBeingWatched():
+  * for (const p of game.players) {
+      if (p.alive && this.isPlayerLooking(p)) return true;
+    }
+  * return false;
+
+- Em MonsterEntity.update(): no inicio, antes do switch FSM:
+  * if (this.type === 'ballerina') {
+      this.frozen = this.isBeingWatched();
+    }
+  * Se this.frozen: NAO executar o switch FSM (pular movimento),
+    MAS ainda executar o bloco de ataque no final do update.
+  * Senao: executar FSM normalmente.
+
+- Em MonsterEntity.render():
+  * Se this.frozen: adicionar efeito visual (ex: ctx.strokeStyle
+    'rgba(255,255,255,0.5)'; ctx.lineWidth = 2; ctx.arc(...)).
+
+EDGE CASES:
+- Multiplos jogadores: se pelo menos 1 olha, congela.
+- Jogador parado (lastDx=0, lastDy=0): nao esta olhando.
+- Jogador morto: nao conta para a verificacao.
+- Ballerina em stun: o stun ja bloqueia o update. O frozen e irrelevante
+  durante o stun (ela ja esta parada).
+- Ballerina congelada com jogador MUITO perto (distancia < TILE_SIZE*0.8):
+  Ela AINDA ataca! O congelamento bloqueia MOVIMENTO, nao ataque.
+  O jogador nao pode chegar perto impunemente.
+
+TESTES SUGERIDOS:
+- Andar em direcao a Ballerina: verificar se ela congela.
+- Virar de costas para a Ballerina: verificar se ela se move.
+- Ballerina congelada com jogador proximo: verificar se ela ataca.
+- Dois jogadores: um olhando, outro nao -> Ballerina congelada.
+- Jogador parado (sem mover): verificar que Ballerina NAO congela.
+
+================================================================================
+MONSTRO 3: Alien
+================================================================================
+
+MonsterTypes key: 'alien'
+
+name: 'Alien'
+desc: 'Tiny and slow until it spots you. Then it transforms.'
+weight: 1
+chaseLoseTime: 1.0
+searchDuration: 2.0
+spawnCount: 1
+color: '#44ff44'
+strokeColor: '#228822'
+speedMod: 1.0
+randomSpawn: false
+
+COMPORTAMENTO:
+- O Alien tem DOIS ESTADOS fisicos: "small" (pequeno e lento) e "transformed"
+  (tamanho normal e rapido).
+- ESTADO SMALL (padrao):
+  * Tamanho: METADE do normal (raio = TILE_SIZE * 0.19 em vez de 0.38).
+  * Velocidade: 1/3 da velocidade base (speed = baseSpeed / 3).
+  * Ocorre quando o Alien NAO consegue ver nenhum jogador
+    (canSeePlayer() === false E canDetectBehind() === false).
+- ESTADO TRANSFORMED:
+  * Tamanho: NORMAL (raio = TILE_SIZE * 0.38).
+  * Velocidade: 4/3 da velocidade base (speed = baseSpeed * 4/3).
+  * Ocorre quando o Alien DETECTA um jogador (canSeePlayer() === true
+    OU canDetectBehind() === true).
+- A transicao e IMEDIATA: no frame em que detecta, transforma.
+  No frame em que perde deteccao, reverte.
+- Durante o estado small: o Alien ainda segue o FSM normal (patrol/chase/search).
+  Se ele esta em chase mas perdeu a visao, ele reverte para small e fica
+  lento durante a perseguicao - isso o torna mais facil de despistar.
+
+VISUAL:
+- Small: circulo verde claro (#44ff44) com metade do raio normal.
+  Olhos e chapeu proporcionais ao tamanho reduzido.
+- Transformed: mesmo visual do monstro normal, mas verde.
+- Transicao: efeito de "crescimento" ou "encolhimento"?
+  Para simplicidade: mudanca instantanea de tamanho. Opcional: animacao
+  de escala com lerp (levemente mais suave).
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao MonsterEntity: isTransformed (boolean, default false).
+- Em MonsterEntity.update(): ANTES do switch FSM, verificar deteccao
+  e ajustar estado:
+  * if (this.type === 'alien') {
+      const detected = this.canSeePlayer() || this.canDetectBehind();
+      this.isTransformed = detected;
+      const mt = MonsterTypes[this.type];
+      const baseSpd = this.game.getMonsterSpeed() * (mt.speedMod || 1);
+      if (this.isTransformed) {
+        this.speed = baseSpd * (4/3);
+      } else {
+        this.speed = baseSpd / 3;
+      }
+    }
+
+- Em MonsterEntity.render():
+  * const radius = (this.type === 'alien' && !this.isTransformed)
+    ? TILE_SIZE * 0.19 : TILE_SIZE * 0.38;
+  * Ajustar proporcionalmente: olhos, chapeu, indicador de direcao.
+    Usar radius como base para todos os elementos visuais.
+    Ex: chapeu = radius * 0.4 de largura, olhos a radius * 0.25 de distancia.
+
+- ATENCAO: A velocidade do Alien muda durante o jogo. O speed definido
+  no spawn e o base. As transformacoes multiplicam esse base por 1/3 ou 4/3.
+  O chase multiplier (1.4x) ainda se aplica sobre a velocidade atual
+  (dentro de followPath). Ou seja:
+  * Small + chase: speed = baseSpeed * (1/3) * 1.4 = baseSpeed * 0.467
+  * Transformed + chase: speed = baseSpeed * (4/3) * 1.4 = baseSpeed * 1.867
+  Isso torna o Alien extremamente perigoso quando transformado em chase.
+
+EDGE CASES:
+- A deteccao no update e verificada ANTES do FSM. Se o Alien detecta
+  o jogador, transforma imediatamente e entra em chase (se ainda nao estava).
+- Se o Alien perde a visao durante chase, ele reverte para small mas
+  continua em chase (vai para lastKnownPlayerPos). Durante esse chase
+  "cego", ele esta lento (1/3 speed), facilitando a fuga.
+- Oracle reveal: o Alien nao detecta jogadores via oracle reveal.
+  A deteccao e apenas visual (canSeePlayer/canDetectBehind).
+- O tamanho reduzido afeta a colisao de ataque? NAO. O ataque verifica
+  distancia < TILE_SIZE * 0.8 entre centros. O centro do Alien e o mesmo
+  independente do tamanho. O raio visual e apenas cosmetico.
+
+TESTES SUGERIDOS:
+- Spawnar Alien: verificar tamanho pequeno e velocidade lenta.
+- Aproximar do Alien ate ser detectado: verificar transformacao (tamanho
+  normal, velocidade 4/3).
+- Fugir e perder o Alien de vista: verificar reversao para small.
+- Verificar se o Alien pequeno em chase e mais lento que o normal.
+
+================================================================================
+MONSTRO 4: Monstrosity
+================================================================================
+
+MonsterTypes key: 'monstrosity'
+
+name: 'Monstrosity'
+desc: 'Stuns last 35% less. 20% bigger than normal.'
+weight: 1
+chaseLoseTime: 1.0
+searchDuration: 2.0
+spawnCount: 1
+color: '#ff6600'
+strokeColor: '#993300'
+speedMod: 1.0
+randomSpawn: false
+
+COMPORTAMENTO:
+- Comportamento de monstro NORMAL (FSM patrol/chase/search padrao).
+- Duas caracteristicas passivas:
+
+  1. STUNS REDUZIDOS (35% menos):
+     * Todo stun aplicado ao Monstrosity tem sua duracao multiplicada
+       por 0.65 (reducao de 35%).
+     * Afeta: stun de traps (Bear Trap, Land Mine, Crucifix, Banana Peel),
+       stun do clone do Red Hacker.
+     * Exemplo: Bear Trap normal = 1s stun. No Monstrosity = 0.65s.
+     * Exemplo: Landmine normal = 5s stun. No Monstrosity = 3.25s.
+
+  2. TAMANHO AUMENTADO (20% maior):
+     * Raio visual = TILE_SIZE * 0.38 * 1.2 = TILE_SIZE * 0.456.
+     * Afeta apenas o VISUAL (renderizacao). Nao afeta colisao,
+       deteccao, ou raio de ataque.
+     * O chapeu e olhos devem ser proporcionalmente maiores.
+
+IMPLEMENTACAO SUGERIDA:
+- Para reduzir stuns: modificar os pontos onde stunTimer e atribuido.
+  * Em Game.update() no loop de traps (colisao monstro-trap):
+    - Onde faz m.stunTimer = t.stun, adicionar:
+      m.stunTimer = m.type === 'monstrosity' ? t.stun * 0.65 : t.stun;
+  * Em Game.update() no loop de clones (colisao clone-monstro):
+    - Onde faz c.targetMonster.stunTimer = Math.max(..., 3):
+      const stunVal = c.targetMonster.type === 'monstrosity' ? 3 * 0.65 : 3;
+      c.targetMonster.stunTimer = Math.max(c.targetMonster.stunTimer || 0, stunVal);
+
+- Para o tamanho: modificar MonsterEntity.render().
+  * const baseRadius = TILE_SIZE * 0.38;
+  * const radius = this.type === 'monstrosity' ? baseRadius * 1.2 : baseRadius;
+  * Ajustar todos os elementos visuais (chapeu, olhos, indicador)
+    proporcionalmente ao radius.
+
+EDGE CASES:
+- Stun multiplo: se o Monstrosity ja esta stunado e pisa em outra trap,
+  o codigo existente verifica stunTimer > 0 e pula. O Monstrosity nao
+  toma stun adicional enquanto ja estiver stunado.
+- Taunt (noise maker): o taunt nao aplica stun (stun=0). O Monstrosity
+  ainda e afetado pelo taunt normalmente (vai ate o noise maker).
+- Clone stun: o clone aplica stun=3. Com Monstrosity = 3 * 0.65 = 1.95s.
+
+TESTES SUGERIDOS:
+- Colocar Bear Trap e Monstrosity pisar: verificar stun de ~0.65s.
+- Colocar Landmine: verificar stun de ~3.25s.
+- Clone do Red Hacker stunar Monstrosity: verificar stun de ~1.95s.
+- Verificar tamanho visual 20% maior.
+
+================================================================================
+MONSTRO 5: Desperation
+================================================================================
+
+MonsterTypes key: 'desperation'
+
+name: 'Desperation'
+desc: 'Gets faster as more artifacts are collected.'
+weight: 1
+chaseLoseTime: 1.0
+searchDuration: 2.0
+spawnCount: 1
+color: '#ff3333'
+strokeColor: '#991111'
+speedMod: 1.0
+randomSpawn: false
+
+COMPORTAMENTO:
+- Comportamento de monstro NORMAL (FSM padrao).
+- Velocidade AUMENTA conforme artefatos sao coletados:
+  * Para cada artefato coletado (game.collectedArtifacts), o Desperation
+    ganha +15 pontos de velocidade.
+  * Formula: speed = baseSpeed + (game.collectedArtifacts * 15)
+  * Onde baseSpeed = getMonsterSpeed() * speedMod (calculado no spawn).
+  * A velocidade e RECALCULADA a cada frame (dinamicamente conforme
+    artefatos sao coletados durante o round).
+
+- Exemplo: Round 1, baseSpeed = 70, 0 artefatos coletados -> speed = 70.
+  Coletou 2 artefatos -> speed = 70 + 30 = 100.
+  Coletou 4 artefatos -> speed = 70 + 60 = 130.
+
+VISUAL:
+- Cor: vermelho intenso (#ff3333) com borda escura (#991111).
+- Conforme a velocidade aumenta, o monstro fica visualmente mais intenso:
+  * Adicionar um leve glow/brilho vermelho que aumenta com a velocidade.
+  * Ou: aumentar ligeiramente o tamanho (escala de 1.0 ate 1.15 baseado
+    na proporcao de artefatos coletados).
+
+IMPLEMENTACAO SUGERIDA:
+- Em MonsterEntity.update(): ANTES do switch FSM, recalcular velocidade:
+  * if (this.type === 'desperation') {
+      const mt = MonsterTypes[this.type];
+      const baseSpd = this.game.getMonsterSpeed() * (mt.speedMod || 1);
+      this.speed = baseSpd + this.game.collectedArtifacts * 15;
+    }
+
+- Em MonsterEntity.render():
+  * Se this.type === 'desperation':
+    - Calcular intensidade: const intensity = Math.min(1, this.game.collectedArtifacts / Math.max(1, this.game.artifactCount));
+    - Aplicar glow: ctx.shadowColor = 'rgba(255,0,0,' + (0.3 + intensity * 0.5) + ')';
+      ctx.shadowBlur = 5 + intensity * 10;
+
+EDGE CASES:
+- Se collectedArtifacts for 0 no inicio do round: speed = baseSpeed (normal).
+- Se TODOS os artefatos forem coletados (round ganho): o Desperation
+  ja esta morto (checkGameState so verifica vitoria apos monstro morrer).
+- A velocidade pode ficar muito alta em rounds avancados (baseSpeed ja
+  aumenta por round). Combinado com o bonus de artefatos, pode chegar
+  a 200+. Isso e intencional para criar urgencia em coletar artefatos
+  rapidamente.
+- Multiplos Desperations (spawnCount > 1): cada um calcula sua velocidade
+  independentemente (mesmo base, mesmo bonus, mesma velocidade).
+
+TESTES SUGERIDOS:
+- Spawnar Desperation com 0 artefatos: verificar velocidade base.
+- Coletar 1 artefato: verificar speed += 15.
+- Coletar 4 artefatos: verificar speed += 60.
+- Verificar se a velocidade atualiza dinamicamente durante o round.
+
+================================================================================
+MONSTRO 6: Ghost
+================================================================================
+
+MonsterTypes key: 'ghost'
+
+name: 'Ghost'
+desc: 'Alternates between visible and invisible every 2 seconds.'
+weight: 1
+chaseLoseTime: 1.0
+searchDuration: 2.0
+spawnCount: 1
+color: '#cccccc'
+strokeColor: '#888888'
+speedMod: 1.0
+randomSpawn: false
+
+COMPORTAMENTO:
+- Comportamento de monstro NORMAL (FSM padrao).
+- A cada 2 SEGUNDOS, o Ghost alterna entre VISIVEL e INVISIVEL:
+  * 0s a 2s: visivel
+  * 2s a 4s: invisivel
+  * 4s a 6s: visivel
+  * (padrao: visivel nos pares, invisivel nos impares)
+
+- Quando INVISIVEL:
+  * O Ghost NAO e renderizado na tela (pula o render).
+  * O Ghost AINDA se move, persegue e ataca normalmente.
+  * Jogadores nao podem ve-lo, mas ele ainda pode causa dano.
+  * Fog of war: mesmo estando invisivel, o Ghost ainda e considerado
+    para raycasting? NAO - se nao e renderizado, nao bloqueia visao.
+    O raycasting deve ignora-lo.
+  * Oracle reveal: o overlay de oracle NAO revela o Ghost invisivel.
+    Se oracle esta ativo, o Ghost so aparece se estiver na fase visivel.
+
+- Quando VISIVEL:
+  * Renderizado normalmente (sujeito a fog of war e oracle reveal).
+
+VISUAL:
+- Corpo: cinza claro (#cccccc) com borda cinza escuro (#888888).
+- Quando visivel: aparencia fantasmagorica - semi-transparente
+  (globalAlpha = 0.7) mesmo quando visivel, para dar aspecto de fantasma.
+- Quando invisivel: nao renderizado.
+- Transicao: pode adicionar um breve flicker/闪烁 na transicao (0.1s de
+  alpha oscilando). Opcional para primeira implementacao.
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao MonsterEntity: ghostTimer (float, default 0),
+  ghostVisible (boolean, default true).
+
+- Em MonsterEntity.update(): ANTES do switch FSM:
+  * if (this.type === 'ghost') {
+      this.ghostTimer += dt;
+      if (this.ghostTimer >= 2.0) {
+        this.ghostVisible = !this.ghostVisible;
+        this.ghostTimer -= 2.0;
+      }
+    }
+
+- Em MonsterEntity.render(): no INICIO:
+  * if (this.type === 'ghost' && !this.ghostVisible) return;
+  * if (this.type === 'ghost') ctx.globalAlpha = 0.7;
+
+- NOTA: o oracle reveal (oracleReveal check no inicio do render) deve
+  ser modificado para nao revelar o Ghost invisivel:
+  * const oracleReveal = this.type !== 'ghost' || this.ghostVisible
+    ? game.players.some(p => p.playerClass === 'oracle' && p.abilityActive)
+    : false;
+
+EDGE CASES:
+- Ghost invisivel ataca jogador: o jogador toma dano "do nada".
+  Isso e intencional - parte do design de horror.
+- Ghost invisivel e atingido por clone do Red Hacker: o clone sabe
+  onde o monstro esta (ignora visao). O clone persegue e stuna o Ghost
+  mesmo invisivel.
+- Ghost invisivel pisa em trap: a trap ainda e ativada (o sistema de
+  colisao de traps nao verifica visibilidade).
+- Oracle reveal: nao revela Ghost invisivel. Oracle so revela a posicao
+  de monstros VISIVEIS atraves de paredes. Ghost invisivel = nao revelado.
+- O timer do Ghost (2s) e independente do relogio do jogo. Se o jogo
+  pausar, o timer pausa (dt = 0, sem problema).
+
+TESTES SUGERIDOS:
+- Spawnar Ghost: verificar alternancia visivel/invisivel a cada 2s.
+- Ghost invisivel: verificar que nao e renderizado.
+- Ghost invisivel perseguindo: verificar se ainda causa dano.
+- Oracle reveal com Ghost invisivel: verificar que nao aparece.
+- Clone do Red Hacker vs Ghost invisivel: verificar stun funciona.
+
+================================================================================
+MONSTRO 7: Darkness
+================================================================================
+
+MonsterTypes key: 'darkness'
+
+name: 'Darkness'
+desc: 'Blinds all players on spawn. Spawns randomly with reduced speed.'
+weight: 1
+chaseLoseTime: 1.0
+searchDuration: 2.0
+spawnCount: 1
+color: '#111111'
+strokeColor: '#000000'
+speedMod: null  // Velocidade fixa de 60, nao usa speedMod
+randomSpawn: true  // Spawna em local aleatorio
+
+COMPORTAMENTO:
+- Quando o Darkness e summonado (spawn):
+  * O campo de visao de TODOS os jogadores e REDUZIDO para 2x2 tiles
+    (1 tile em cada direcao a partir do jogador) por 5 SEGUNDOS.
+  * O monstro spawna em um local ALEATORIO do mapa.
+  * A velocidade do Darkness e FIXA em 60 (nao usa getMonsterSpeed).
+  * Durante os 5 segundos de escuridao, os jogadores veem muito pouco
+    (apenas 1 tile ao redor).
+
+- Apos 5 segundos:
+  * A visao dos jogadores VOLTA AO NORMAL (campo de visao padrao).
+  * O Darkness continua com velocidade 60 e comportamento normal de monstro.
+
+- O efeito de escuridao e GLOBAL: afeta todos os jogadores simultaneamente.
+
+VISUAL:
+- Corpo: preto (#111111) com borda preta (#000000) - quase invisivel
+  no escuro, muito dificil de ver.
+- Olhos: brancos ou vermelhos brilhantes para contraste (unica coisa
+  visivel no escuro).
+- Durante os primeiros 5 segundos (fase de escuridao): opcionalmente
+  adicionar um overlay escuro na tela ou particulas escuras.
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Game: darknessTimer (float, default 0), darknessActive (boolean).
+
+- Em Game.spawnMonster(): apos criar o monstro Darkness:
+  * if (typeKey === 'darkness') {
+      this.darknessTimer = 5.0;
+      this.darknessActive = true;
+      // Forcar speed = 60
+      m.speed = 60;
+    }
+
+- Em Game.update(): decrementar darknessTimer:
+  * if (this.darknessActive) {
+      this.darknessTimer -= dt;
+      if (this.darknessTimer <= 0) {
+        this.darknessActive = false;
+        this.darknessTimer = 0;
+        this.showMessage('The darkness fades...');
+      }
+    }
+
+- Modificar o sistema de visao (raycasting / fog of war):
+  * Onde o alcance de visao do jogador e definido (provavelmente na
+    funcao que constroi os raios de visao ou no isPointVisible):
+    - Verificar se game.darknessActive === true.
+    - Se sim: limitar o alcance maximo dos raios para 1.5 * TILE_SIZE
+      (~48 pixels, que cobre aproximadamente 2x2 tiles ao redor do jogador).
+    - O valor exato: 1.5 * TILE_SIZE = 48 pixels. Isso faz o raio cobrir
+      aproximadamente 1 tile em cada direcao (2x2 no total), com um pouco
+      de margem para os cantos.
+  * Alternativa mais simples: na funcao isPointVisible, verificar
+    distancia euclidiana do ponto ate o jogador. Se darknessActive e
+    distancia > 2 * TILE_SIZE (64 pixels), retornar false imediatamente.
+    Isso efetivamente limita a visao a um raio de 2 tiles.
+
+- Em Game.loadMap() / checkGameState(): resetar darknessActive = false.
+
+- Em Game.render(): se darknessActive, opcionalmente desenhar um overlay
+  escuro sutil nas bordas da tela (vinheta) para reforcar o efeito.
+  Nao obrigatorio - o limite de visao ja e suficiente.
+
+EDGE CASES:
+- Oracle reveal durante darkness: o Oracle ainda revela monstros DENTRO
+  do raio reduzido de visao? Sim - o Oracle revela monstros que estao
+  no campo de visao normal (se nao fosse a escuridao). Com a escuridao,
+  o Oracle so revela dentro do raio limitado.
+- Debug mode (F3): debug mode deve IGNORAR a escuridao (visao completa).
+  Verificar: se game.debugMode, nao aplicar limite de escuridao.
+- Multiplos Darkness no mesmo round (raro, mas possivel com spawnCount>1
+  ou rounds avancados): o timer de escuridao e resetado para 5s a cada
+  novo spawn de Darkness. O efeito NAO acumula (nao fica 10s).
+- A velocidade 60 e FIXA. O getMonsterSpeed() e ignorado para Darkness.
+  O speedMod no MonsterTypes e null/ignorado.
+
+TESTES SUGERIDOS:
+- Spawnar Darkness: verificar se a visao do jogador e reduzida para ~2x2 tiles.
+- Verificar se apos 5 segundos, a visao volta ao normal.
+- Verificar se o Darkness spawna em local aleatorio.
+- Verificar se a velocidade do Darkness e 60.
+- Debug mode: verificar se a escuridao e ignorada.
+
+================================================================================
+MONSTRO 8: Rush
+================================================================================
+
+MonsterTypes key: 'rush'
+
+name: 'Rush'
+desc: 'Gains speed every time a player uses an active ability.'
+weight: 1
+chaseLoseTime: 1.0
+searchDuration: 2.0
+spawnCount: 1
+color: '#ffaa00'
+strokeColor: '#885500'
+speedMod: 1.0
+randomSpawn: false
+
+COMPORTAMENTO:
+- Comportamento de monstro NORMAL (FSM padrao).
+- CADA VEZ que um jogador USA uma habilidade ATIVA (pressiona F e a
+  habilidade e executada com sucesso), o Rush ganha +20 pontos de
+  velocidade PERMANENTEMENTE (para o resto do round).
+- O bonus e CUMULATIVO. Exemplos:
+  * 1 habilidade usada: speed += 20
+  * 3 habilidades usadas: speed += 60
+  * 10 habilidades usadas: speed += 200
+- O bonus se aplica a TODAS as habilidades ativas de TODOS os jogadores.
+  * Scout (speed burst), Oracle (reveal), Command Yeller, Dying Guy,
+    Annoying Looper, Mighty Tinkerer, Untitled Generalist, Clown,
+    Chamber (teleporte), Vex, etc.
+  * NAO conta para habilidades passivas (Utility Player, Archaeologist,
+    Boring Trapper, Tee Vee, Lucky Spender).
+  * NAO conta para Time Traveler, Wired Girl, Rerroler (uma vez por round).
+    A decisao de contar ou nao para estas classes "uma vez por round"
+    e do implementador. Sugestao: CONTAR se a habilidade foi usada com
+    sucesso (nao foi bloqueada por ja ter sido usada).
+  * NAO conta para Locker Guy (cooldown=0, locking/unlocking nao e
+    uma "habilidade ativa" no sentido tradicional).
+  * Helpful Priest: NAO conta (o menu usa F mas nao e activateAbility).
+
+VISUAL:
+- Corpo: laranja/dourado (#ffaa00) com borda escura (#885500).
+- A cada bonus de velocidade, o Rush fica visualmente mais intenso:
+  * Quanto mais velocidade acumulada, maior o glow laranja.
+  * Opcional: rastro/afterimage laranja ao se mover (particulas).
+  * Indicador visual: linhas de velocidade (speed lines) atras do Rush
+    quando esta em alta velocidade.
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao MonsterEntity: rushSpeedBonus (float, default 0).
+
+- Modificar a funcao activateAbility(game, player):
+  * Apos a execucao bem-sucedida da habilidade (depois de definir
+    abilityCooldown, criar zona, etc.), ANTES de cada return, adicionar:
+    notifyRushMonsters(game);
+  * Criar funcao notifyRushMonsters(game):
+    for (const m of game.activeMonsters) {
+      if (m.type === 'rush' && m.alive) {
+        m.rushSpeedBonus += 20;
+        m.speed += 20;
+        // Efeito visual: particulas laranjas no Rush
+        for (let i = 0; i < 3; i++) {
+          game.particles.push(new Particle(
+            m.px, m.py,
+            (Math.random() - 0.5) * 40, (Math.random() - 0.5) * 40,
+            0.3, '#ffaa00'
+          ));
+        }
+      }
+    }
+
+  * IMPORTANTE: A chamada notifyRushMonsters deve acontecer APENAS quando
+    a habilidade e REALMENTE usada (nao quando e bloqueada por cooldown,
+    ja usada no round, etc.). Deve ser chamada apos a execucao da logica
+    especifica da classe.
+
+  * ESTRUTURA SUGERIDA PARA activateAbility:
+    - No inicio: checks genericos (cooldown, passiva).
+    - Cases especiais (chamber, lockerguy, helpfulpriest).
+    - Para CADA case que executa a habilidade com sucesso:
+      ... logica da habilidade ...
+      notifyRushMonsters(game);
+      return;
+    - No fluxo padrao (abilityActive = true, abilityCooldown = X):
+      ... logica padrao + specifca ...
+      notifyRushMonsters(game);
+
+  * Alternativa mais simples: chamar notifyRushMonsters UMA VEZ no final
+    da funcao activateAbility, apos todos os casos. Mas como cada caso
+    tem return, isso nao funciona. E necessario chamar antes de cada return.
+
+  * ALTERNATIVA MAIS LIMPA: criar uma funcao auxiliar
+    function finishAbility(game, player) {
+      notifyRushMonsters(game);
+    }
+    E chamar finishAbility(game, player) antes de cada return bem-sucedido.
+
+- Em MonsterEntity.update():
+  * if (this.type === 'rush') {
+      // speed ja foi incrementada por notifyRushMonsters
+      // O speed base + rushSpeedBonus ja esta em this.speed
+    }
+
+- Em MonsterEntity.render():
+  * Se this.type === 'rush' && this.rushSpeedBonus > 0:
+    - Adicionar rastro (afterimage): desenhar 2-3 silhuetas semi-transparentes
+      atras do Rush na direcao oposta ao movimento.
+    - Intensidade baseada em rushSpeedBonus.
+
+- Em Game.checkGameState() / loadMap(): resetar rushSpeedBonus = 0.
+
+EDGE CASES:
+- O Rush ganha velocidade MESMO se o jogador que usou a habilidade esta
+  longe? Sim. O Rush "sente" o uso de habilidades em qualquer lugar do mapa.
+- Habilidade usada com o Rush stunado: o Rush ainda ganha o bonus.
+- Multiplos Rush (spawnCount > 1): cada um ganha o bonus independentemente.
+- O bonus e resetado a cada round (checkGameState/loadMap).
+
+TESTES SUGERIDOS:
+- Usar habilidade do Scout: verificar Rush ganha +20 speed.
+- Usar 3 habilidades diferentes: verificar Rush ganha +60 speed.
+- Verificar se habilidades passivas NAO dao bonus.
+- Verificar se o bonus e resetado apos derrotar o monstro (novo round).
+- Verificar efeito visual de velocidade (rastro/glow).
+
+================================================================================
+MONSTRO 9: Rat King
+================================================================================
+
+MonsterTypes key: 'ratking'
+
+name: 'Rat King'
+desc: 'Summons 3 rats that devour traps. Normal otherwise.'
+weight: 1
+chaseLoseTime: 1.0
+searchDuration: 2.0
+spawnCount: 1
+color: '#886644'
+strokeColor: '#553311'
+speedMod: 1.0
+randomSpawn: false
+
+COMPORTAMENTO:
+- O Rat King e um MONSTRO NORMAL (FSM padrao: patrol/chase/search).
+- NO SPAWN: o Rat King invoca 3 RATOS.
+  * Os ratos spawnam na posicao do Rat King.
+  * Cada rato tem 25% do tamanho de um tile (TILE_SIZE * 0.25 = 8px).
+  * Os ratos sao ENTIDADES SEPARADAS que se movem independentemente.
+
+- COMPORTAMENTO DOS RATOS:
+  * Os ratos SABEM onde estao TODAS as traps do mapa (game.traps).
+  * Cada rato escolhe a trap MAIS PROXIMA (distancia euclidiana).
+  * Move-se ate a trap usando pathfinding BFS NORMAL (Game.findPath).
+  * Ao chegar na trap (distancia < TILE_SIZE * 0.4 do centro):
+    - O rato comeca a DEVORAR a trap. Tempo para devorar: 35 SEGUNDOS.
+    - Durante a devoracao: o rato fica PARADO no local da trap.
+    - Uma barra de progresso visual (opcional) ou indicador.
+  * Apos 35 segundos: a trap e DESTRUIDA (removida de game.traps).
+  * O rato entao busca a PROXIMA trap mais proxima.
+  * Quando NAO HA MAIS TRAPS (game.traps.length === 0):
+    - Os ratos RETORNAM ao Rat King (pathfinding BFS ate a posicao dele).
+    - Ao chegar no Rat King (distancia < TILE_SIZE * 0.5): o rato SOME
+      (e removido).
+  * Se o Rat King MORRER: todos os ratos somem imediatamente.
+
+- Os ratos sao INVENCIveis: jogadores NAO podem destrui-los, stuna-los,
+  ou interagir com eles de qualquer forma.
+- Os ratos NAO atacam jogadores, NAO causam dano, NAO interagem com
+  o monstro (apenas ignoram).
+- Os ratos NAO ativam traps ao passar por cima (eles as "devoram",
+  nao "pisam"). Eles nao tomam stun.
+
+VISUAL DO RAT KING:
+- Corpo: marrom (#886644) com borda escura (#553311).
+- Diferencial: uma "coroa" simples no topo da cabeca (3 pontas
+  triangulares amarelas/douradas).
+
+VISUAL DOS RATOS:
+- Cor: marrom escuro (#664422).
+- Tamanho: TILE_SIZE * 0.25 (8px de raio).
+- Forma: pequeno triangulo ou circulo com cauda (linha curta).
+- Sugestao: ctx.fillStyle = '#664422'; ctx.beginPath();
+  ctx.arc(sx, sy, 4, 0, Math.PI*2); ctx.fill();
+  // Cauda
+  ctx.strokeStyle = '#664422'; ctx.lineWidth = 1;
+  // desenhar linha curva para a cauda
+- Devorando trap: rato parado com pequenas particulas ao redor (indicando
+  atividade). Ou icone de "comendo" (pequenos triangulos).
+
+IMPLEMENTACAO SUGERIDA:
+- Adicionar ao Game: ratEntities[] (array de objetos rato).
+
+- Estrutura do rato (objeto, nao classe):
+  {
+    px, py, tileX, tileY,
+    targetTrap: null,     // referencia a trap alvo
+    devourTimer: 0,       // timer de devoracao (0 = nao esta devorando)
+    path: null,           // array de tiles do BFS
+    pathTarget: null,
+    alive: true,
+    kingRef: reference    // referencia ao MonsterEntity do Rat King
+  }
+
+- Em Game.spawnMonster(): apos criar o Rat King:
+  * if (typeKey === 'ratking') {
+      if (!this.ratEntities) this.ratEntities = [];
+      for (let i = 0; i < 3; i++) {
+        this.ratEntities.push({
+          px: m.px + (Math.random() - 0.5) * 20,
+          py: m.py + (Math.random() - 0.5) * 20,
+          tileX: m.tileX, tileY: m.tileY,
+          targetTrap: null, devourTimer: 0,
+          path: null, pathTarget: null, alive: true,
+          kingRef: m
+        });
+      }
+    }
+
+- Em Game.update(): adicionar updateRatEntities(dt):
+  * Para cada rato em this.ratEntities:
+    - Se !rato.alive: pular.
+    - Se !rato.kingRef.alive: rato.alive = false; continue (rei morreu).
+    - Se this.traps.length === 0 && !rato.targetTrap:
+      // Sem traps, voltar para o rei
+      mover para o Rat King. Se chegou: rato.alive = false.
+    - Se rato.devourTimer > 0:
+      // Esta devorando
+      rato.devourTimer -= dt;
+      if (rato.devourTimer <= 0) {
+        // Devorou! Remove a trap
+        const idx = this.traps.indexOf(rato.targetTrap);
+        if (idx >= 0) this.traps.splice(idx, 1);
+        rato.targetTrap = null;
+        rato.devourTimer = 0;
+        rato.path = null;
+        // Efeito visual/particulas
+        for (let i = 0; i < 4; i++) {
+          this.particles.push(new Particle(rato.px, rato.py,
+            (Math.random()-0.5)*50, (Math.random()-0.5)*50, 0.4, '#886644'));
+        }
+        this.showMessage('A rat devoured a trap!');
+      }
+      continue; // Nao se move enquanto devora
+    - Se !rato.targetTrap:
+      // Encontrar trap mais proxima
+      if (this.traps.length > 0) {
+        let nearest = null; let nearestDist = Infinity;
+        for (const t of this.traps) {
+          // Verificar se outro rato ja esta devorando esta trap
+          const otherRat = this.ratEntities.find(r =>
+            r !== rato && r.alive && r.targetTrap === t);
+          if (otherRat) continue; // Outro rato ja pegou esta
+          const dx = t.x - rato.px; const dy = t.y - rato.py;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < nearestDist) { nearestDist = dist; nearest = t; }
+        }
+        rato.targetTrap = nearest;
+        rato.path = null; // Forca recalculo do path
+      }
+    - Se rato.targetTrap:
+      // Mover ate a trap
+      const dx = rato.targetTrap.x - rato.px;
+      const dy = rato.targetTrap.y - rato.py;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < TILE_SIZE * 0.4) {
+        // Chegou! Comecar devorar
+        rato.devourTimer = 35;
+        rato.path = null;
+      } else {
+        // Seguir path
+        if (!rato.path) {
+          const stx = Math.floor(rato.px / TILE_SIZE);
+          const sty = Math.floor(rato.py / TILE_SIZE);
+          const gtx = Math.floor(rato.targetTrap.x / TILE_SIZE);
+          const gty = Math.floor(rato.targetTrap.y / TILE_SIZE);
+          rato.path = this.findPath(stx, sty, gtx, gty);
+        }
+        if (rato.path && rato.path.length > 0) {
+          followRatPath(rato, dt);
+        }
+        rato.tileX = Math.floor(rato.px / TILE_SIZE);
+        rato.tileY = Math.floor(rato.py / TILE_SIZE);
+      }
+
+- Funcao followRatPath(rato, dt):
+  * const next = rato.path[0];
+  * const tx = next.x * TILE_SIZE + TILE_SIZE/2;
+  * const ty = next.y * TILE_SIZE + TILE_SIZE/2;
+  * const dx = tx - rato.px; const dy = ty - rato.py;
+  * const dist = Math.sqrt(dx*dx + dy*dy);
+  * if (dist < 4) { rato.path.shift(); return; }
+  * const ratSpeed = 50; // Velocidade do rato (lenta)
+  * rato.px += (dx/dist) * ratSpeed * dt;
+  * rato.py += (dy/dist) * ratSpeed * dt;
+
+- Em Game.render():
+  * Renderizar ratos (pequenos circulos/criaturas).
+  * Se rato.devourTimer > 0: desenhar barra de progresso circular
+    ou texto "devouring..." acima do rato.
+
+- Em Game.loadMap() / checkGameState():
+  * Limpar ratEntities = [].
+
+EDGE CASES:
+- Dois ratos tentando devorar a MESMA trap: o codigo verifica se outro
+  rato ja esta devorando a trap antes de escolhe-la como alvo. Apenas
+  1 rato por trap.
+- Se uma trap for destruida enquanto um rato esta a caminho (ex: Jester
+  pisou nela, ou jogador usou alguma habilidade futura): o rato detecta
+  que trap nao existe mais (targetTrap nao esta em game.traps) e busca
+  outra. Adicionar verificacao: se rato.targetTrap e !game.traps.includes(rato.targetTrap),
+  rato.targetTrap = null.
+- Rat King morre: todos os ratos somem.
+- Rat King stunado: ratos continuam normalmente.
+- 3 ratos, 2 traps: um rato fica sem trap. Ele deve retornar ao Rat King.
+  O codigo naturalmente trata isso (sem traps disponiveis -> retorna).
+- Pathfinding do rato falha (sem caminho para trap): rato.targetTrap = null
+  e tenta outra trap no proximo frame.
+
+TESTES SUGERIDOS:
+- Spawnar Rat King: verificar se 3 ratos aparecem.
+- Ratos encontrarem traps: verificar se vao ate elas usando BFS.
+- Ratos devorarem trap: verificar se apos 35s a trap some.
+- Ratos retornarem ao rei apos todas as traps destruidas.
+- Rat King morrer: verificar ratos somem.
+- Verificar se ratos sao renderizados (visuais pequenos).
+
+================================================================================
+MONSTRO 10: Decoy
+================================================================================
+
+MonsterTypes key: 'decoy'
+
+name: 'Decoy'
+desc: 'Spawns a fake artifact. Collecting it teleports the monster to you.'
+weight: 1
+chaseLoseTime: 1.0
+searchDuration: 2.0
+spawnCount: 1
+color: '#9966ff'
+strokeColor: '#5533aa'
+speedMod: 1.0
+randomSpawn: false
+
+COMPORTAMENTO:
+- O Decoy e um MONSTRO NORMAL (FSM padrao: patrol/chase/search).
+- NO SPAWN: alem dos artefatos normais do round, o Decoy faz spawnar
+  UM ARTEFATO FALSO EXTRA em um tile vazio aleatorio do mapa.
+  * O artefato falso parece um artefato normal (circulo brilhante ciano).
+  * Porem, o NOME exibido e DIFERENTE do artefato real.
+  * Nome real: "Artifact" (com A maiusculo, I maiusculo).
+  * Nomes falsos (escolhido aleatoriamente entre 4):
+    - "artifact" (minusculo)
+    - "Artefact" (erro de ortografia: e no lugar do i)
+    - "Articfact" (erro de ortografia: i e c trocados)
+    - "Artfact" (falta o i)
+
+- QUANDO UM JOGADOR COLETA O ARTEFATO FALSO:
+  * O artefato falso e coletado (som de coleta, particulas normais).
+  * Mas o artefato NAO conta para o total de artefatos coletados
+    (game.collectedArtifacts NAO incrementa).
+  * IMEDIATAMENTE: o Decoy TELEPORTA para a posicao exata do artefato
+    falso (centro do tile).
+  * O Decoy ganha 100% de SPEED BOOST por 10 SEGUNDOS
+    (speed = speed * 2.0 durante 10s).
+  * Efeito visual no teleporte: particulas roxas na origem e no destino.
+  * Mensagem: "It was a fake artifact! The Decoy teleported to you!"
+
+- O artefato falso e VISUALMENTE identico ao real. A unica forma de
+  detecta-lo e LENDO O NOME exibido na interface de interacao.
+
+VISUAL DO DECOY:
+- Corpo: roxo (#9966ff) com borda (#5533aa).
+- Durante speed boost (10s apos fake): rastro roxo (afterimage) e glow.
+
+VISUAL DO ARTEFATO FALSO:
+- Identico ao artefato real (circulo ciano brilhante com glow pulsante).
+- O nome exibido no HUD de interacao e o nome falso (ex: "Artefact").
+
+IMPLEMENTACAO SUGERIDA:
+- Modificar ArtifactEntity: adicionar propriedade `displayName` (string).
+  * No construtor: this.displayName = 'Artifact';
+  * Para artefatos normais: displayName = 'Artifact'.
+  * Para artefato falso: displayName = nome falso aleatorio.
+
+- Em Game.spawnMonster(): apos criar o Decoy:
+  * if (typeKey === 'decoy') {
+      // Criar artefato falso em tile vazio aleatorio
+      const fakeNames = ['artifact', 'Artefact', 'Articfact', 'Artfact'];
+      const fakeDisplayName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+
+      // Encontrar tile vazio aleatorio (tipo 'C' ou 'F' ou 'G' - chao aberto)
+      let attempts = 0;
+      let fx, fy;
+      do {
+        fx = Math.floor(Math.random() * this.mapWidth);
+        fy = Math.floor(Math.random() * this.mapHeight);
+        attempts++;
+      } while (attempts < 200 &&
+        (this.tiles[fy][fx] === 'O' || this.tiles[fy][fx] === 'W' ||
+         this.tiles[fy][fx] === 'd'));
+
+      // Criar artefato falso
+      const fakeArt = new ArtifactEntity(fx, fy);
+      fakeArt.displayName = fakeDisplayName;
+      fakeArt.isFake = true;
+      fakeArt.decoyRef = m;  // Referencia ao Decoy
+
+      // Adicionar ao array de artefatos
+      this.artifactEntities.push(fakeArt);
+      // NAO incrementar artifactCount (nao conta para vitoria)
+    }
+
+- Modificar a renderizacao do HUD de interacao (updateInteraction ou
+  o codigo que mostra o texto de interacao):
+  * ONDE mostra "Coletando Artefato..." ou "Pressione E para coletar...":
+    - Verificar se o artefato tem displayName.
+    - Se sim: usar `target.displayName` em vez de "Artefato".
+    - Ex: 'Pressione E para coletar ' + target.displayName
+    - Ex: 'Coletando ' + target.displayName + '...'
+
+- Em Game.collectArtifact(art):
+  * ADICIONAR no inicio da funcao (antes do codigo existente):
+    if (art.isFake) {
+      // Artefato falso!
+      art.collected = true;
+      this.showMessage('WARNING: It was a fake artifact! The Decoy is coming!');
+      // Teleportar Decoy para o artefato
+      const decoy = art.decoyRef;
+      if (decoy && decoy.alive) {
+        // Particulas na origem
+        for (let i = 0; i < 10; i++) {
+          this.particles.push(new Particle(
+            decoy.px, decoy.py,
+            (Math.random()-0.5)*100, (Math.random()-0.5)*100,
+            0.5, '#9966ff'
+          ));
+        }
+        // Teleportar
+        decoy.px = art.tileX * TILE_SIZE + TILE_SIZE / 2;
+        decoy.py = art.tileY * TILE_SIZE + TILE_SIZE / 2;
+        decoy.tileX = art.tileX;
+        decoy.tileY = art.tileY;
+        decoy.path = null;
+        // Speed boost 100% por 10s
+        decoy.decoySpeedBoostTimer = 10;
+        // Particulas no destino
+        for (let i = 0; i < 10; i++) {
+          this.particles.push(new Particle(
+            decoy.px, decoy.py,
+            (Math.random()-0.5)*100, (Math.random()-0.5)*100,
+            0.5, '#9966ff'
+          ));
+        }
+        // Forcar estado chase (opcional - o Decoy vai atacar imediatamente)
+        decoy.state = 'chase';
+        decoy.chaseTimer = 0;
+        decoy.path = null;
+      }
+      return; // NAO executa o resto de collectArtifact (nao incrementa collectedArtifacts)
+    }
+    // (codigo existente de collectArtifact continua aqui)
+
+- Adicionar ao MonsterEntity: decoySpeedBoostTimer (float, default 0).
+
+- Em MonsterEntity.update():
+  * if (this.type === 'decoy' && this.decoySpeedBoostTimer > 0) {
+      this.decoySpeedBoostTimer -= dt;
+      if (this.decoySpeedBoostTimer <= 0) {
+        this.decoySpeedBoostTimer = 0;
+      }
+    }
+  * No calculo de velocidade (antes do FSM):
+    if (this.type === 'decoy' && this.decoySpeedBoostTimer > 0) {
+      this.speed = baseSpeed * 2.0; // 100% boost
+    } else {
+      this.speed = baseSpeed;
+    }
+
+- Em MonsterEntity.render():
+  * Se this.type === 'decoy' && this.decoySpeedBoostTimer > 0:
+    - Desenhar rastro roxo (afterimage).
+    - ctx.shadowColor = 'rgba(153,102,255,0.5)'; ctx.shadowBlur = 10;
+
+EDGE CASES:
+- Se o Decoy morrer ANTES do artefato falso ser coletado: o artefato
+  falso ainda existe no mapa, mas ao ser coletado, nao ha Decoy para
+  teleportar. O artefato e destruido sem efeito.
+- Multiplos Decoys (spawnCount > 1): cada Decoy spawna seu proprio
+  artefato falso. Cada artefato falso referencia seu Decoy especifico.
+- Artefato falso em tile com porta ou outro objeto: OK, desde que seja
+  tile de chao (C, F, G). Evitar spawn em paredes (O, W).
+- O artefato falso NAO e contado em game.artifactCount. Se houver 3
+  artefatos reais + 1 falso, artifactCount = 3. O jogador precisa
+  coletar 3 artefatos para vencer. O falso e extra.
+- O nome "Artifact" (correto) e "Artfact" (falso) sao muito similares.
+  Jogadores precisam prestar atencao. Isso e intencional.
+- O artefato falso deve ser visivel no minimapa ou HUD como um artefato
+  normal (mesma cor, mesmo icone). So o nome o diferencia.
+
+TESTES SUGERIDOS:
+- Spawnar Decoy: verificar se ha um artefato extra no mapa.
+- Aproximar do artefato falso: verificar se o nome exibido e um dos 4 falsos.
+- Coletar artefato falso: verificar se o Decoy teleporta para o jogador.
+- Verificar speed boost de 100% por 10 segundos apos o fake.
+- Coletar artefato real: verificar comportamento normal.
+- Verificar se o artefato falso NAO conta para a vitoria.
+
+================================================================================
+AJUSTES GLOBAIS PARA SUPORTAR OS NOVOS MONSTROS
+================================================================================
+
+1. MonsterTypes: ADICIONAR as 10 novas entradas. Total: 14 monstros.
+
+2. MonsterEntity: adicionar novas propriedades (inicializar no construtor
+   com valores default para nao quebrar monsters existentes):
+   - trapSeeking: false (Jester)
+   - frozen: false (Ballerina)
+   - isTransformed: false (Alien)
+   - ghostTimer: 0, ghostVisible: true (Ghost)
+   - rushSpeedBonus: 0 (Rush)
+   - decoySpeedBoostTimer: 0 (Decoy)
+   NOTA: adicionar APENAS as propriedades necessarias.
+
+3. MonsterEntity.update():
+   - Adicionar bloco Jester (trapSeeking) ANTES do switch FSM.
+   - Adicionar bloco Ballerina (frozen/isBeingWatched) ANTES do switch FSM.
+   - Adicionar bloco Alien (deteccao/transformacao) ANTES do switch FSM.
+   - Adicionar bloco Desperation (speed recalculo) ANTES do switch FSM.
+   - Adicionar bloco Ghost (timer visibilidade) ANTES do switch FSM.
+   - Adicionar bloco Decoy (speed boost timer) ANTES do switch FSM.
+   - Modificar bloco de ataque (final do update): pular para Jester em
+     trapSeeking e Ballerina congelada.
+
+4. MonsterEntity.render():
+   - Adicionar logica de tamanho variavel (Alien small, Monstrosity large,
+     Ballerina frozen effect, Ghost invisibility, Desperation glow,
+     Rush afterimage, Decoy speed boost effect).
+   - Ajustar oracleReveal para nao revelar Ghost invisivel.
+
+5. MonsterEntity.spawn(): adicionar inicializacao de estado para novos
+   monstros (ex: Jester trapSeeking baseado em game.traps.length).
+
+6. Game.spawnMonster():
+   - Adicionar logica de spawn do Darkness (darknessTimer, speed fixa).
+   - Adicionar logica de spawn do Rat King (criar ratEntities).
+   - Adicionar logica de spawn do Decoy (criar artefato falso).
+   - Para Ballerina e Darkness: randomSpawn=true ja trata spawn aleatorio.
+
+7. Game.update():
+   - Adicionar updateRatEntities(dt) (Rat King).
+   - Adicionar decremento de darknessTimer.
+   - Modificar loop de traps: aplicar multiplicador de stun 0.65 para
+     Monstrosity (stun reduzido).
+   - Modificar loop de clones: aplicar multiplicador de stun 0.65 para
+     Monstrosity.
+
+8. activateAbility(): adicionar chamada notifyRushMonsters(game) apos
+   cada uso bem-sucedido de habilidade ativa.
+
+9. Game.collectArtifact(): adicionar verificacao de artefato falso
+   (Decoy) no inicio da funcao.
+
+10. ArtifactEntity: adicionar displayName (string, default 'Artifact'),
+    isFake (boolean, default false), decoyRef (MonsterEntity, default null).
+
+11. Fog of war / raycasting:
+    - Modificar isPointVisible ou o laco de raycasting para limitar
+      alcance quando darknessActive === true (Game.darknessActive).
+    - Limite: 2 * TILE_SIZE pixels de raio maximo (64px, cobre ~2x2 tiles).
+    - Debug mode (F3): ignorar limite de escuridao.
+
+12. Game.render():
+    - Adicionar renderizacao de ratEntities (pequenos ratos).
+    - Opcional: overlay escuro sutil durante darknessActive (vinheta).
+
+13. Game.checkGameState() / loadMap():
+    - Resetar: darknessActive, darknessTimer, ratEntities,
+      rushSpeedBonus (em cada monstro).
+    - Limpar artefatos falsos (isFake) do array artifactEntities.
+
+14. HUD de interacao (updateInteraction / texto de interacao):
+    - Onde mostra o nome do artefato (ex: "Coletando Artefato..." e
+      "Pressione E para coletar o Artefato"), substituir "Artefato"
+      pelo displayName do artefato.
+    - Ex: 'Coletando ' + target.displayName + '...'
+    - Ex: 'Pressione E para coletar ' + target.displayName
+
+================================================================================
+TESTES E VERIFICACAO (OBRIGATORIO)
+================================================================================
+
+APOS implementar TODOS os monstros, execute os testes abaixo usando
+debugMode (F3) para facilitar. Registre resultados na Documentacao_Completa.txt.
+
+PROCEDIMENTO DE TESTE:
+1. Para cada monstro, inicie um round e verifique o comportamento.
+2. Para CADA teste, registre: monstro testado, condicoes, resultado
+   esperado, resultado obtido, status (PASSOU/FALHOU), correcoes.
+
+3. Testes minimos por monstro:
+   - Jester: trap-seeking ativo com traps; destruicao de trap; transicao
+     para normal apos 0 traps; stun ao pisar em trap.
+   - Ballerina: congelamento quando observada; movimento sem observacao;
+     ataque durante congelamento; spawn aleatorio.
+   - Alien: estado small inicial; transformacao ao detectar; reversao
+     ao perder deteccao; tamanhos e velocidades corretos.
+   - Ghost: alternancia visivel/invisivel a cada 2s; ataque durante
+     invisibilidade; oracle nao revela invisivel.
+   - Darkness: reducao de visao para ~2x2 tiles por 5s; restauracao
+     apos 5s; spawn aleatorio; velocidade 60.
+   - Rush: ganho de +20 speed por habilidade usada; acumulo; reset
+     apos round; habilidades passivas nao contam.
+   - Rat King: spawn de 3 ratos; ratos encontram traps; devoram em
+     35s; retornam ao rei; somem quando rei morre.
+   - Decoy: spawn de artefato falso extra; nome falso no HUD; teleport
+     ao coletar fake; speed boost 100% por 10s; fake nao conta pra vitoria.
+
+4. Teste de CONFLITOS:
+   - Jester + Rat King no mesmo round (competico por traps).
+   - Darkness + Ghost (Ghost invisivel durante escuridao).
+   - Rush + multiplos jogadores usando habilidades.
+   - Ballerina + Alien (comportamentos especiais de deteccao).
+   - Decoy + Oracle (Oracle revela Decoy, mas nao revela o artefato falso).
+
+5. Teste de performance:
+   - Rat King com 3 ratos + Jester + Ballerina: sem quedas de FPS.
+   - Multiplos monstros simultaneos: verificar se pathfinding nao
+     causa lag (BFS e caro com muitos agentes).
+
+================================================================================
+DOCUMENTACAO DAS ALTERACOES (OBRIGATORIO)
+================================================================================
+
+A CADA alteracao feita no codigo, atualize a Documentacao_Completa.txt
+IMEDIATAMENTE, seguindo o padrao existente:
+
+1. Adicione uma nova entrada no CHANGELOG (proximo numero de alteracao).
+2. Inclua: PROBLEMA, SOLUCAO, MUDANCAS NO CODIGO, SECOES AFETADAS.
+3. Crie NOVAS SECOES na documentacao para cada sistema novo:
+   - "SECAO XX - MONSTRO JESTER (TRAP-SEEKING)"
+   - "SECAO XX - MONSTRO BALLERINA (FREEZE POR OBSERVACAO)"
+   - "SECAO XX - MONSTRO ALIEN (TRANSFORMACAO POR DETECCAO)"
+   - "SECAO XX - MONSTRO MONSTROSITY (STUN REDUZIDO + TAMANHO)"
+   - "SECAO XX - MONSTRO DESPERATION (VELOCIDADE POR ARTEFATO)"
+   - "SECAO XX - MONSTRO GHOST (VISIBILIDADE ALTERNADA)"
+   - "SECAO XX - MONSTRO DARKNESS (ESCurIDAO GLOBAL)"
+   - "SECAO XX - MONSTRO RUSH (VELOCIDADE POR HABILIDADE)"
+   - "SECAO XX - MONSTRO RAT KING (RATOS DEVORADORES)"
+   - "SECAO XX - MONSTRO DECOY (ARTEFATO FALSO)"
+4. Registre TODOS os testes na documentacao.
+
+================================================================================
+VERIFICACAO FINAL
+================================================================================
+
+Apos implementar tudo, verifique:
+
+- [ ] Os 10 novos monstros estao no objeto MonsterTypes?
+- [ ] O weightedRandom funciona com 14 monstros (4 originais + 10 novos)?
+- [ ] Jester ignora jogadores e busca traps; vira normal apos 0 traps?
+- [ ] Ballerina congela quando observada; move quando nao?
+- [ ] Alien transforma tamanho/velocidade ao detectar/perder jogador?
+- [ ] Monstrosity toma 35% menos stun e e 20% maior?
+- [ ] Desperation ganha +15 speed por artefato coletado?
+- [ ] Ghost alterna visivel/invisivel a cada 2s?
+- [ ] Darkness reduz visao para 2x2 tiles por 5s no spawn?
+- [ ] Rush ganha +20 speed a cada habilidade ativa usada?
+- [ ] Rat King spawna 3 ratos que devoram traps?
+- [ ] Decoy spawna artefato falso; teleporta ao ser coletado?
+- [ ] A documentacao foi atualizada com TODAS as alteracoes?
+- [ ] Nao ha conflitos entre novos monstros e sistemas existentes?
+- [ ] O jogo continua rodando sem erros de console?
+- [ ] Nao ha caracteres bugados/corrompidos em nenhum lugar?
+- [ ] A performance nao degradou com novos comportamentos?
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================

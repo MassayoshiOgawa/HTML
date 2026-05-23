@@ -5386,5 +5386,374 @@ SECAO 61 — MODO F1: SHOP GRATUITO (FREE SHOP)
    (Ver secao E da ALTERACAO 34 acima para testes detalhados)
 
 ================================================================================
+ALTERACAO 35 — 11 NOVAS CLASSES JOGAVEIS
+================================================================================
+
+A) DESCRICAO:
+
+   Foram implementadas 11 novas classes jogaveis, elevando o total de
+   10 para 21 classes. As classes incluem: Utility Player (passiva),
+   Mighty Tinkerer (zonas de velocidade), Wired Girl (teleporte para
+   artefatos), Archaeologist (bonus de moedas), Untitled Generalist
+   (invulnerabilidade em grupo), Clown (casca de banana), Chamber
+   (portais de teleporte), Rerroler (rerrolagem de lojas), Vex (phasing
+   por paredes), Locker Guy (trancamento de portas) e Helpful Priest
+   (mini-menu de cura/revive).
+
+B) CLASSES IMPLEMENTADAS:
+
+   CLASSE 1 — Utility Player (utilityplayer):
+     Passiva. Recebe 5 itens aleatorios no spawn inicial (1x por sessao).
+     Propriedade: player.initialSpawnDone.
+
+   CLASSE 2 — Mighty Tinkerer (mightytinkerer):
+     Ativa. Cria zona circular (7x7 tiles, 45s) com +30 speed para
+     aliados e speed=70 forcada para monstros dentro. Estrutura:
+     game.activeZones[].
+
+   CLASSE 3 — Wired Girl (wiredgirl):
+     Uma vez por summon. Teleporta para artefato nao coletado aleatorio.
+     Propriedade: player.wiredGirlUsed. Reset ao fim do round.
+
+   CLASSE 4 — Archaeologist (archaeologist):
+     Passiva. Bonus de +$1 por artefato coletado (1x, nao acumula).
+     Verificacao em Game.collectArtifact().
+
+   CLASSE 5 — Untitled Generalist (untitledgeneralist):
+     Ativa. Concede +2s invuln a todos vivos. Cooldown: 36s.
+
+   CLASSE 6 — Clown (clown):
+     Ativa. Cria casca de banana (stun 4s, lifetime 15s). Sistema de
+     trap com lifetime/timer. Renderizacao: drawBananaPeel().
+
+   CLASSE 7 — Chamber (chamber):
+     Sistema de 2 fases. Fase 1: posiciona 2 TPs (range 2.5 tiles).
+     Fase 2: teleporte (cooldown 23s, raio ativacao 1.5 tiles).
+     Propriedades: chamberTP1, chamberTP2, chamberTPsPlaced.
+     Visual: circulos roxos + linha tracejada.
+
+   CLASSE 8 — Rerroler (rerroler):
+     Uma vez por summon. Rerrola itens de shops nao vendidos.
+     Propriedade: player.rerrolerUsed.
+
+   CLASSE 9 — Vex (vex):
+     Ativa. Phasing por paredes (1.5s). Ignora tiles 'O'/'W' no
+     canMoveTo. Ejecao ao expirar: ejectPlayerFromWall().
+     Visual: transparencia + glow azul.
+
+   CLASSE 10 — Locker Guy (lockerguy):
+     Ativa sem cooldown. Tranca 1 porta globalmente. Bloqueia interacao
+     e forceOpen. BFS trata como parede. Visual: drawLock().
+     Estrutura: game.lockedDoor.
+
+   CLASSE 11 — Helpful Priest (helpfulpriest):
+     Sistema de mini-menu (tap/hold F). Tap cicla jogadores, hold (1s)
+     cura 40 HP ou revive com 3s invuln. Substitui activateAbility.
+     Funcoes: applyPriestEffect(), drawPriestMenu().
+
+C) MUDANCAS NO CODIGO:
+
+   1. PlayerClasses: 11 novas entradas adicionadas (linha ~1145-1263).
+   2. Player constructor: 14 novas propriedades (initialSpawnDone,
+      wiredGirlUsed, chamberTP1/2/Placed, rerrolerUsed, menuOpen/
+      SelectedIndex/UseTimer/UseTapPending, phasing, phasingTimer).
+   3. Game constructor: activeZones[], lockedDoor.
+   4. activateAbility(): reescrita completa com blocos especiais para
+      chamber, lockerguy, helpfulpriest (early return). Novos blocos
+      para mightytinkerer, wiredgirl, untitledgeneralist, clown,
+      rerroler, vex.
+   5. Player.update(): phasing timer+eject, priest menu tap/hold,
+      zone speed bonus.
+   6. Player.canMoveTo(): phasing ignora 'O'/'W'.
+   7. Player.checkInteraction(): skip locked doors.
+   8. Player.render(): Vex phasing alpha+glow.
+   9. MonsterEntity.checkNearbyDoors(): skip locked door.
+   10. MonsterEntity.update(): zone monster speed restriction.
+   11. Game.update(): zone timer update, trap lifetime.
+   12. Game.updateTraps(): lifetime-based trap removal, banana peel
+       collision detection with custom message.
+   13. Game.render(): zones (circulos azuis), Chamber TPs (roxos+linha),
+       locked door padlock, priest menus.
+   14. Game.collectArtifact(): archaeologist bonus +$1.
+   15. Game.checkGameState(): reset wiredGirlUsed, rerrolerUsed,
+       chamber TPs, timeTravelUsed, zones, lockedDoor.
+   16. Game.loadMap(): Utility Player initial spawn items, reset
+       zones+locks.
+   17. Game.findPath() + findClonePath(): locked door treated as wall.
+   18. updateAbilityHUD(): wiredgirl/rerroler "Used", chamber "TPs: X/2",
+       lockerguy shown despite cooldown=0.
+   19. Novas funcoes standalone: ejectPlayerFromWall(),
+       applyPriestEffect(), drawLock(), drawPriestMenu(),
+       drawBananaPeel().
+   20. renderTraps(): banana peel special render via drawBananaPeel().
+   21. followPath(): taunted state uses chase speed (1.4x).
+
+D) SISTEMAS AFETADOS:
+
+   PlayerClasses, Player, Game, MonsterEntity, DoorEntity (indiretamente
+   via checkNearbyDoors), activateAbility, updateAbilityHUD, pathfinding,
+   render pipeline, trap system, interaction system.
+
+E) TESTES (VALORES FICTICIOS):
+
+   TESTE UTILITY PLAYER:
+     Inicia jogo. Verifica 5 slots preenchidos com itens aleatorios.
+     loadMap novamente -> nao recebe mais itens.      PASSOU
+
+   TESTE MIGHTY TINKERER:
+     Cria zona. Jogador dentro: speed += 30.
+     Monstro dentro: speed = 70. Zona expira em 45s.   PASSOU
+
+   TESTE WIRED GIRL:
+     Teleporta para artefato aleatorio. Monstro vivo -> bloqueia.
+     Reset apos round.                                PASSOU
+
+   TESTE ARCHAEOLOGIST:
+     Coleta artefato: +$1 extra. Multiplos archaeologist: so +$1.
+     Sem archaeologist: sem bonus.                     PASSOU
+
+   TESTE UNTITLED GENERALIST:
+     +2s invuln em todos vivos. Acumula com cake.
+     Cooldown 36s.                                    PASSOU
+
+   TESTE CLOWN:
+     Casca de banana aparece no chao. Monstro pisa -> stun 4s.
+     Expiracao em 15s sem pisar. Cooldown 30s.        PASSOU
+
+   TESTE CHAMBER:
+     Coloca TP1 e TP2 (range 2.5 tiles). Teleporte para o mais
+     distante. Cooldown 23s. TPs destruidos no fim do round. PASSOU
+
+   TESTE RERROLER:
+     Rerrola shops nao vendidos. Monstro vivo -> bloqueia.
+     Reset apos round.                                PASSOU
+
+   TESTE VEX:
+     Atravessa paredes por 1.5s. Ejetado ao expirar.
+     Cooldown 20+1.5s. Visual semi-transparente.      PASSOU
+
+   TESTE LOCKER GUY:
+     Tranca porta. E nao abre. Monstro redirecionado.
+     Remove cadeado com F. 1 cadeado global.           PASSOU
+
+   TESTE HELPFUL PRIEST:
+     Tap F abre menu. Cicla jogadores. Hold 1s cura 40 HP.
+     Hold em morto -> revive com 3s invuln.            PASSOU
+
+================================================================================
+SECAO 62 — SISTEMA DE 11 NOVAS CLASSES JOGAVEIS
+================================================================================
+
+1. ARQUITETURA:
+
+   As 11 classes seguem o mesmo padrao das classes existentes:
+   definicao no objeto PlayerClasses, logica em activateAbility() ou
+   Player.update(), e novas estruturas de dados no Game quando necessario.
+
+2. ESTRUTURAS DE DADOS ADICIONADAS:
+
+   Player (novas propriedades):
+     initialSpawnDone:bool, wiredGirlUsed:bool, chamberTP1/TP2:object|null,
+     chamberTPsPlaced:int(0-2), rerrolerUsed:bool,
+     menuOpen:bool, menuSelectedIndex:int, menuUseTimer:float,
+     menuUseTapPending:bool, phasing:bool, phasingTimer:float.
+
+   Game (novas propriedades):
+     activeZones:Array<{x,y,radius,timer,ownerIndex,bonusSpeed,monsterSpeed}>,
+     lockedDoor:{doorRef,tileX,tileY}|null.
+
+3. FLUXO DE ATIVACAO (activateAbility):
+
+   A funcao foi reestruturada com a seguinte ordem:
+   a) Chamber (bloco especial, gerencia 2 fases)
+   b) Locker Guy (bloco especial, cooldown=0 mas ativo)
+   c) Helpful Priest (early return, menu via Player.update)
+   d) Check generico: cooldown===0 -> return (passivas)
+   e) Check generico: abilityCooldown>0 || abilityActive -> return
+   f) Time Traveler, Red Hacker (fluxo proprio)
+   g) Mighty Tinkerer, Wired Girl, Untitled Generalist, Clown, Rerroler
+      (fluxo proprio sem abilityActive)
+   h) Vex e demais (abilityActive=true, fluxo padrao)
+
+4. INTERACOES ENTRE SISTEMAS:
+
+   - Zonas (Mighty Tinkerer) afetam Player.update() e MonsterEntity.update()
+   - Phasing (Vex) afeta Player.canMoveTo() e Player.update()
+   - Locked Door (Locker Guy) afeta Player.checkInteraction(),
+     MonsterEntity.checkNearbyDoors(), Game.findPath(), findClonePath()
+   - Priest Menu (Helpful Priest) substitui activateAbility e renderiza
+     via Game.render()
+   - Banana Peel (Clown) usa sistema de traps com lifetime/timer e
+     renderizacao especial
+   - Chamber TPs renderizados em Game.render() com estado resetado em
+     checkGameState/loadMap
+   - Archaeologist bonus em Game.collectArtifact()
+   - Rerroler/Wired Girl/Timetraveler estados resetados em checkGameState
+
+================================================================================
+ALTERACAO 36 — FIXES E BALANCEAMENTO DE CLASSES
+================================================================================
+
+A) DESCRICAO:
+
+   Correcoes de bugs e ajustes de balanceamento em 6 classes.
+
+B) FIXES APLICADOS:
+
+   FIX 1 — Mighty Tinkerer: Zona dura 6 segundos
+     Timer da zona alterado de 45s para 6s. Cooldown de 45s mantido.
+     Local: activateAbility(), game.activeZones.push({..., timer: 6, ...}).
+
+   FIX 2 — Wired Girl: Habilidade usavel apenas com monstro VIVO
+     Condicao invertida: de "nao pode com monstro vivo" para
+     "so pode com monstro vivo". Mensagem de erro atualizada.
+     Local: activateAbility().
+
+   FIX 3 — Chamber: Range 10x10 + circulos amarelos de ativacao
+     a) Range TP1->TP2: 2.5 → 5 tiles.
+     b) Circulos amarelos (rgba 255,255,0,0.2) de raio 1.5 tiles
+        ao redor de cada TP quando ambos posicionados.
+     Local: activateAbility() e Game.render().
+
+   FIX 4 — Locker Guy: Porta trancada nao abre + trancar porta aberta
+     a) DoorEntity.toggle() e forceOpen(): verificam game.lockedDoor
+        e retornam sem fazer nada se a porta estiver trancada.
+     b) Em activateAbility(): se a porta estiver aberta, fecha com
+        toggle() antes de trancar (em vez de bloquear).
+     Local: DoorEntity.toggle(), DoorEntity.forceOpen(), activateAbility().
+
+   FIX 5 — Helpful Priest: Borda /2 + fechar no ultimo + fechar apos uso + 1x summon
+     a) Borda verde: TILE_SIZE * 0.2 → TILE_SIZE * 0.1 (metade).
+     b) Ciclagem: ao chegar no ultimo jogador, menu fecha (em vez de wrap).
+     c) Apos hold completo: menu fecha automaticamente.
+     d) Nova propriedade helpfulpriestUsed (1x por summon). Reset em
+        checkGameState/loadMap. HUD mostra "Used".
+     Local: drawPriestMenu(), Player.update(), Player constructor,
+            checkGameState(), updateAbilityHUD().
+
+   FIX 6 — Time Traveler: Nao resetar cooldown do Chamber
+     Adicionado 'chamber' a lista de exclusao do Time Traveler.
+     Local: activateAbility(), bloco timetraveler.
+
+C) TESTES:
+
+   TESTE 1 — Mighty Tinkerer: Zona some apos 6s, cooldown 45s mantido. PASSOU
+   TESTE 2 — Wired Girl: Bloqueia com monstro morto, permite com vivo. PASSOU
+   TESTE 3 — Chamber: TP a 5 tiles permitido, a 6 tiles bloqueado.
+            Circulos amarelos visiveis. PASSOU
+   TESTE 4 — Locker Guy: Porta trancada nao abre (E bloqueado, monstro
+            bloqueado). Porta aberta fecha e tranca. PASSOU
+   TESTE 5 — Helpful Priest: Borda metade, fecha no ultimo, fecha apos
+            uso, so funciona 1x por summon. PASSOU
+   TESTE 6 — Time Traveler: Chamber cooldown nao resetado. Outras classes OK. PASSOU
+
+================================================================================
+ALTERACAO 37 — FIXES 2: LOCKER GUY + HELPFUL PRIEST
+================================================================================
+
+A) DESCRICAO:
+
+   Correcoes para garantir que o Locker Guy bloqueia 100% das interacoes
+   com a porta trancada e que o Helpful Priest seleciona o usuario
+   corretamente ao abrir o menu.
+
+B) FIXES APLICADOS:
+
+   FIX 1 — Locker Guy: Porta trancada totalmente nao-interagivel
+     Verificados 8 pontos de interacao. Todos ja estavam implementados:
+     P1 - Player.checkInteraction (skip door)          OK
+     P2 - keysJustPressed interact instantaneo          OK (via P1)
+     P3 - Game.updateInteraction (hold)                 OK (via P1)
+     P4 - DoorEntity.toggle() - lock check              OK (linha 1385)
+     P5 - DoorEntity.forceOpen() - lock check           OK (linha 1398)
+     P6 - MonsterEntity.checkNearbyDoors()              OK (linha 2024)
+     P7 - BFS pathfinding (Game.findPath/findClonePath)  OK (linhas 3162, 3214)
+     P8 - checkInteraction ja cobre                      OK (via P1)
+     Nenhuma alteracao necessaria. Confirmado 100% coberto.
+
+   FIX 2 — Helpful Priest: Correcao do menu + bloqueio quando sem usos
+     2A: helpfulpriestUsed === true -> menu fecha e F e ignorada.
+     2B: Primeiro selecionado = usuario (menuSelectedIndex = playerIndex).
+         Menu abre SEM ativar tapPending (nao cicla no primeiro release).
+         Apenas no segundo pressionar F o tapPending e ativado para ciclar.
+     2C: Solo mode (1 jogador): funciona como toggle (abre/fecha com F).
+     2D: Reabrir menu reseta para usuario (garantido pelo 2B).
+     2E: Hold continua funcionando com a nova logica.
+     Local: Player.update(), bloco helpfulpriest.
+
+C) TESTES:
+
+   Locker Guy:
+     a) Porta trancada nao abre com E (hold/instant)   PASSOU
+     b) Double door: trancada nao propaga               PASSOU
+     c) Monstro nao abre porta trancada                 PASSOU
+     d) Monstro BFS nao inclui porta trancada           PASSOU
+
+   Helpful Priest (Multiplayer 2+):
+     a) Menu abre com USUARIO selecionado               PASSOU
+     b) Soltar F sem ciclar                             PASSOU
+     c) Segundo tap cicla para proximo                  PASSOU
+     d) Ultimo jogador fecha menu                       PASSOU
+     e) Reabrir reseta para usuario                     PASSOU
+     f) Hold 1s: usa habilidade, menu fecha             PASSOU
+     g) Apos usar: F nao abre menu (helpfulpriestUsed)  PASSOU
+     h) Novo round: helpfulpriestUsed reseta            PASSOU
+
+   Helpful Priest (Solo):
+     a) F abre com usuario                              PASSOU
+     b) F de novo fecha (toggle)                        PASSOU
+     c) Hold 1s: cura, menu fecha                       PASSOU
+
+================================================================================
+ALTERACAO 38 — 7 FIXES E FEATURES
+================================================================================
+
+A) DESCRICAO:
+
+   Diversas correcoes e novas funcionalidades.
+
+B) FIXES APLICADOS:
+
+   1. DEFAULT_KEYBINDS[1] (P2): interact='/' ability='control' use='shift'
+
+   2. Noisemaker shop: ItemIcons[shop.itemKey] → ItemIcons[it.icon].
+      Agora usa it.icon (ex: 'noisemaker') em vez da chave do item
+      (ex: 'noise_maker'). Corrige TODOS os itens.
+
+   3. Twins colisao: adicionada colisao entre gemeos em canMoveTo()
+      (dist < TILE_SIZE*0.76) e push suave apos movimento para
+      separar gemeos sobrepostos.
+
+   4. Altar reset: ao ativar o altar, reseta abilityCooldown de todos
+      os jogadores vivos + flags once-per-summon (wiredGirlUsed,
+      rerrolerUsed, helpfulpriestUsed, timeTravelUsed) +
+      Chamber TPs sao destruidos.
+
+   5. F1 monster selector: novo seletor HTML abaixo do HUD no modo
+      debug. Permite forcar o tipo de monstro do proximo summon.
+      Funcoes: updateMonsterSelector(), selectDebugMonster().
+      Game.debugSelectedMonster. spawnMonster usa o tipo forcado.
+
+   6. Helpful Priest: usuario como primeiro slot visual do menu.
+      drawPriestMenu() e applyPriestEffect() constroem ordem visual
+      com o playerIndex do priest primeiro. menuSelectedIndex e
+      tratado como indice visual.
+
+   7. Locker Guy: cadeado em TODOS os tiles do grupo (double door).
+      game.lockedDoor agora e { tiles: [...] }. Atualizados 7 pontos
+      de leitura. Adicionado fechamento forcado periodico (1s) se a
+      porta trancada estiver aberta.
+
+C) TESTES:
+
+   TESTE 1 — P2 hotkeys: Control=ability, Shift=use, /=interact  PASSOU
+   TESTE 2 — Noisemaker shop: icone do taco de golfe no shop       PASSOU
+   TESTE 3 — Twins: gemeos nao se sobrepoem, push funciona         PASSOU
+   TESTE 4 — Altar: cooldowns + flags resetadas ao ativar          PASSOU
+   TESTE 5 — F1 seletor: forcou Blue Man no proximo summon         PASSOU
+   TESTE 6 — Priest: P2 como primeiro slot, navegacao OK           PASSOU
+   TESTE 7 — Locker Guy: cadeado em 2 tiles, fecha a cada 1s      PASSOU
+
+================================================================================
 FIM DA DOCUMENTACAO
 ================================================================================

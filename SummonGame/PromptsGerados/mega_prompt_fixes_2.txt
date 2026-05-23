@@ -1,0 +1,376 @@
+================================================================================
+MEGA PROMPT - FIXES 2 - LOCKER GUY + HELPFUL PRIEST - SUMMON GAME
+================================================================================
+
+INSTRUCOES GLOBAIS OBRIGATORIAS:
+- Nao crie nenhum arquivo separado (.css, .js, .py, .java, .cpp, .c, etc.).
+- Toda e qualquer alteracao deve ser feita exclusivamente no arquivo SummonGame.html.
+- Siga o estilo de codigo existente: mesmo padrao de nomenclatura, aspas, etc.
+- Todas as alteracoes devem ser REGISTRADAS na Documentacao_Completa.txt.
+- Leia TODO o SummonGame.html e TODA a Documentacao_Completa.txt antes de implementar.
+- Implemente AGORA, sem questionamentos ou adicoes nao solicitadas.
+- NAO use caracteres bugados/corrompidos (UTF-8 apenas).
+- Execute testes apos cada fix e registre na documentacao.
+
+================================================================================
+FIX 1: Locker Guy - Porta trancada totalmente nao-interagivel
+================================================================================
+
+PROBLEMA: A porta com cadeado ainda pode ser aberta/fechada em algumas
+situacoes. O correto e: enquanto houver cadeado, a porta permanece FECHADA
+e NAO pode ser interagida de forma alguma (abrir ou fechar).
+
+VERIFICACAO DE TODOS OS PONTOS DE INTERACAO COM PORTAS:
+
+PONTO 1: Interacao do jogador (tecla E)
+  Arquivo: Player.checkInteraction()
+  Local: loop que verifica portas proximas (procure por 'for (const door of game.doorEntities)').
+  STATUS ATUAL: Ja pula portas trancadas (linha: if (game.lockedDoor && game.lockedDoor.doorRef === door) continue).
+  Se ja existe, OK. Se nao, ADICIONAR.
+
+PONTO 2: Toggle manual da porta (E instantaneo)
+  Arquivo: Player.update()
+  Local: keysJustPressed[kb.interact] com interactType === 'door' (procure por 'keysJustPressed[kb.interact]').
+  STATUS: Como checkInteraction ja pula portas trancadas, interactType nunca sera 'door' para elas.
+  OK, sem alteracao necessaria.
+
+PONTO 3: Toggle por hold (E segurado)
+  Arquivo: Game.updateInteraction()
+  Local: if (type === 'door') target.toggle() (procure por "if (type === 'door') target.toggle()").
+  STATUS: Como checkInteraction ja pula portas trancadas, nunca chega aqui.
+  OK, sem alteracao.
+
+PONTO 4: Toggle do DoorEntity (propagacao de grupo / double doors)
+  Arquivo: DoorEntity.toggle()
+  Local: metodo toggle() da classe DoorEntity.
+  STATUS: Deve verificar lockedDoor ANTES de permitir toggle.
+  ALTERACAO NECESSARIA (se ainda nao feita):
+
+    toggle(skipPropagation) {
+      if (this.animating || this.debounceTimer > 0) return;
+      // BLOQUEAR toggle em porta trancada
+      if (game.lockedDoor && game.lockedDoor.doorRef === this) return;
+      // ... resto do codigo
+    }
+
+  NOTA: Se 'game' nao estiver acessivel no escopo da classe, usar
+  uma referencia global ou window.game. Alternativa: passar game no
+  construtor do DoorEntity e acessar como this.game.
+
+PONTO 5: forceOpen do DoorEntity (monstro abre portas)
+  Arquivo: DoorEntity.forceOpen()
+  STATUS: Deve verificar lockedDoor ANTES de abrir.
+  ALTERACAO NECESSARIA (se ainda nao feita):
+
+    forceOpen() {
+      if (!this.open && !this.animating) {
+        // BLOQUEAR forceOpen em porta trancada
+        if (game.lockedDoor && game.lockedDoor.doorRef === this) return;
+        // ... resto do codigo
+      }
+    }
+
+PONTO 6: Monstro abrindo portas ao passar perto
+  Arquivo: MonsterEntity.checkNearbyDoors()
+  Local: loop que chama door.forceOpen() (procure por 'checkNearbyDoors').
+  STATUS ATUAL: Ja verifica lockedDoor (linha: !(this.game.lockedDoor && this.game.lockedDoor.doorRef === door)).
+  OK, sem alteracao.
+
+PONTO 7: BFS pathfinding do monstro
+  Arquivo: Game.findPath() ou loops de pathfinding
+  STATUS: Deve tratar tiles 'd' com porta trancada como obstaculo.
+  Verificar se o BFS ja trata game.lockedDoor.
+  Se nao tratar, adicionar no loop do BFS onde verifica tiles vizinhos:
+    if (tile === 'd' && game.lockedDoor && game.lockedDoor.tileX === nx && game.lockedDoor.tileY === ny) {
+      continue; // tratar como parede
+    }
+
+PONTO 8: checkInteraction do jogador - garantir que a porta trancada
+  nao aparece como alvo de interacao
+  STATUS: Ja implementado (pula lockedDoor). OK.
+
+RESUMO DO FIX: Verificar e garantir que os pontos 4 e 5 estejam
+implementados. Os demais pontos ja devem estar cobertos.
+
+================================================================================
+FIX 2: Helpful Priest - Correcao do menu + bloqueio quando sem usos
+================================================================================
+
+PROBLEMAS IDENTIFICADOS:
+
+A) Quando helpfulpriestUsed === true (habilidade ja gasta no summon),
+   o menu NAO pode ser aberto. Se estiver aberto, fecha automaticamente.
+
+B) Ao abrir o menu (primeiro tap), o jogador selecionado PULA para o
+   segundo jogador, em vez de comecar no USUARIO (o proprio Helpful Priest).
+
+C) Ao fechar e reabrir o menu, o selecionado deve ser novamente o usuario.
+
+D) No modo SOLO (apenas 1 jogador), apertar F deve abrir o menu com o
+   usuario selecionado. Apertar F novamente fecha. (Toggle simples).
+
+================================================================================
+FIX 2A: Bloquear menu quando helpfulpriestUsed === true
+================================================================================
+
+LOCAL: Player.update(), bloco do helpfulpriest (procure por
+'if (this.playerClass === "helpfulpriest")').
+
+ALTERACAO: Adicionar verificacao de helpfulpriestUsed no inicio do bloco.
+
+CODIGO A ADICIONAR (no INICIO do bloco helpfulpriest, apos a verificacao
+de !this.alive):
+
+  if (this.helpfulpriestUsed) {
+    this.menuOpen = false;  // Fecha se estiver aberto
+    return;                 // Nao processa mais nada (F nao faz nada)
+  }
+
+EXPLICACAO: Quando a habilidade ja foi usada neste summon, qualquer
+tentativa de abrir o menu e bloqueada. Se o menu estava aberto (ex: abriu
+antes de usar a habilidade), ele fecha automaticamente.
+
+NOTA: O reset de helpfulpriestUsed no checkGameState/loadMap ja deve
+existir (implementado no fix anterior). Verificar:
+  if (rp.playerClass === 'helpfulpriest') { rp.helpfulpriestUsed = false; }
+
+================================================================================
+FIX 2B: Primeiro jogador selecionado = USUARIO (o proprio priest)
+================================================================================
+
+PROBLEMA: Quando o menu abre (keysJustPressed[kb.ability]), o codigo
+atual define menuOpen = true mas NAO define menuSelectedIndex. O indice
+atual (vindo do construtor = 0 ou do ultimo ciclo) e usado. No primeiro
+ciclo de tap (quando a tecla e solta), o menuSelectedIndex avanca para
+o proximo jogador, pulando o usuario.
+
+CAUSA RAIZ: O tapPending e processado no MESMO evento de abertura.
+Quando o jogador pressiona F:
+  1. keysJustPressed: menuOpen = true, menuUseTapPending = true
+  2. No mesmo frame (ou frame seguinte), ao soltar: processa o tap
+     e CICLA para o proximo jogador (pois menuUseTapPending = true).
+O menu abre E imediatamente cicla, pulando o usuario.
+
+SOLUCAO: Separar "abrir menu" de "ciclar selecao". No primeiro pressionar
+de F (quando o menu estava fechado), apenas ABRIR o menu com o usuario
+selecionado. NAO ativar tapPending. Apenas em pressionamentos SUBSEQUENTES
+(menu ja aberto), ativar tapPending para ciclar.
+
+LOCAL: Player.update(), bloco do helpfulpriest.
+
+CODIGO ATUAL (aproximado):
+  if (keysJustPressed[kb.ability]) {
+    this.menuOpen = true;
+    this.menuUseTapPending = true;
+    this.menuUseTimer = 0;
+    keysJustPressed[kb.ability] = false;
+  }
+
+CODIGO NOVO:
+  if (keysJustPressed[kb.ability]) {
+    keysJustPressed[kb.ability] = false;
+    if (!this.menuOpen) {
+      // MENU ESTAVA FECHADO -> ABRIR com usuario selecionado
+      this.menuOpen = true;
+      this.menuSelectedIndex = this.playerIndex;  // USA O PROPRIO INDICE
+      this.menuUseTapPending = false;  // NAO processa tap neste ciclo
+      this.menuUseTimer = 0;
+    } else {
+      // MENU JA ESTAVA ABERTO -> preparar para ciclar
+      this.menuUseTapPending = true;
+      this.menuUseTimer = 0;
+    }
+  }
+
+EXPLICACAO DETALHADA:
+- Se o menu estava FECHADO (!this.menuOpen):
+  * Abre o menu.
+  * Define menuSelectedIndex = this.playerIndex (o indice do proprio
+    Helpful Priest no array game.players). Ex: se o priest e o jogador 2
+    (indice 1), comeca selecionado nele mesmo.
+  * NAO ativa tapPending (false). Quando a tecla for solta, nao cicla.
+    O menu fica aberto com o usuario selecionado.
+
+- Se o menu JA ESTAVA ABERTO:
+  * Ativa tapPending (true). Quando a tecla for solta (tap), cicla para
+    o proximo jogador.
+  * O comportamento de ciclagem e fechamento no ultimo jogador deve estar
+    implementado (do fix anterior).
+
+COMPORTAMENTO FINAL (playerCount > 1):
+  1. Pressiona F: menu abre, usuario (indice = playerIndex) selecionado.
+  2. Solta F: nada acontece (tapPending estava false).
+  3. Pressiona F de novo: tapPending = true.
+  4. Solta F: cicla para playerIndex + 1.
+  5. Continua pressionando/soltando: cicla ate o ultimo jogador.
+  6. No ultimo jogador, ao soltar: menu fecha.
+
+COMPORTAMENTO FINAL (playerCount === 1 - SOLO):
+  1. Pressiona F: menu abre, usuario (indice 0) selecionado.
+  2. Solta F: nada acontece (sem outros jogadores para ciclar).
+  3. Pressiona F de novo (menu ja aberto): tapPending = true.
+  4. Solta F: processa tap.
+     Com a logica de "fechar no ultimo": menuSelectedIndex (0) >= playerCount-1 (0)
+     -> fecha o menu. OU: como so ha 1 jogador, o tap simplesmente fecha.
+
+================================================================================
+FIX 2C: Ciclagem no modo SOLO (1 jogador)
+================================================================================
+
+No modo solo (playerCount === 1), a ciclagem deve ser um TOGGLE simples:
+pressiona F -> abre com usuario. Pressiona F de novo -> fecha.
+
+LOCAL: Player.update(), bloco do helpfulpriest, onde o tap e processado
+(procure por 'if (this.menuUseTapPending)').
+
+CODIGO ATUAL (aproximado, apos fix anterior de fechar no ultimo):
+  if (this.menuUseTapPending) {
+    if (this.menuSelectedIndex >= game.playerCount - 1) {
+      this.menuOpen = false;  // Fecha no ultimo
+    } else {
+      this.menuSelectedIndex++;
+    }
+  }
+
+VERIFICACAO: Para playerCount === 1:
+- menuSelectedIndex = 0 (do playerIndex).
+- 0 >= 0 -> true -> fecha.
+- Funciona como toggle. OK.
+
+Mas ATENCAO: se o jogador esta no modo solo, menuSelectedIndex SEMPRE
+sera 0. A condicao 0 >= 0 e sempre true. Entao QUALQUER tap fecha o menu.
+Isso significa:
+  1. Pressiona F: menu abre (usuario selecionado, tapPending = false).
+  2. Pressiona F de novo: tapPending = true.
+  3. Solta F: 0 >= 0 -> fecha.
+
+Funciona como toggle. Correto!
+
+================================================================================
+FIX 2D: Ao reabrir o menu, resetar para o usuario
+================================================================================
+
+Este comportamento ja e garantido pela logica do Fix 2B: sempre que o
+menu ABRE (estava fechado e keysJustPressed dispara), menuSelectedIndex
+e definido como this.playerIndex.
+
+Se o menu foi fechado (por ciclagem ate o ultimo, ou por morte, ou por
+uso da habilidade) e depois reaberto, o usuario sera selecionado novamente.
+
+Nao e necessario codigo adicional alem do Fix 2B.
+
+================================================================================
+FIX 2E: Tratamento do hold (segurar F) com a nova logica
+================================================================================
+
+Com a nova logica, o hold (segurar F por >= 1s) funciona assim:
+
+1. Pressiona F: menu abre com usuario selecionado. tapPending = false.
+2. Segura F: o codigo de hold (menuUseTimer += dt) entra em acao.
+   - Como tapPending === false, o codigo do hold executa normalmente.
+   - Apos 1s: applyPriestEffect e chamado (se helpfulpriestUsed === false).
+3. Solta F: como tapPending era false, nada acontece.
+
+IMPORTANTE: O codigo de hold NAO deve ser afetado pela nova logica.
+Verificar se a condicao do hold esta correta:
+
+  if (keys[kb.ability]) {
+    if (this.menuUseTapPending) {
+      // Modo tap: timer < 0.3s -> se passar, cancela tap e entra em hold
+      this.menuUseTimer += dt;
+      if (this.menuUseTimer >= 0.3) {
+        this.menuUseTapPending = false;
+        this.menuUseTimer = 0;
+      }
+    } else {
+      // Modo hold: timer acumula ate 1.0s
+      this.menuUseTimer += dt;
+      if (this.menuUseTimer >= 1.0 && !this.helpfulpriestUsed) {
+        applyPriestEffect(game, this);
+        this.helpfulpriestUsed = true;
+        this.menuOpen = false;
+        this.menuUseTimer = 0;
+      }
+    }
+  }
+
+Com a nova logica:
+- Primeiro pressionar F: menuOpen = true, tapPending = false.
+  O codigo de hold (else) roda imediatamente, acumulando timer.
+  Se o jogador segurar por 1s, a habilidade e usada. PERFEITO.
+- Segundo pressionar F (menu ja aberto): tapPending = true.
+  Timer acumula. Se < 0.3s e soltar: tap -> cicla.
+  Se >= 0.3s: cancela tap (tapPending = false), entra em hold.
+  Se continuar ate 1s: usa habilidade. PERFEITO.
+
+A nova logica funciona corretamente com o hold!
+
+================================================================================
+RESUMO DAS ALTERACOES
+================================================================================
+
+1. Locker Guy: Verificar toggle() e forceOpen() do DoorEntity bloqueiam
+   game.lockedDoor. Verificar BFS trata porta trancada como obstaculo.
+
+2. Helpful Priest - Bloqueio quando sem usos:
+   Adicionar no INICIO do bloco helpfulpriest em Player.update():
+     if (this.helpfulpriestUsed) { this.menuOpen = false; return; }
+
+3. Helpful Priest - Primeiro selecionado = usuario:
+   Modificar o tratamento de keysJustPressed[kb.ability] para:
+   - Se menu ESTAVA FECHADO: abrir com menuSelectedIndex = this.playerIndex,
+     NAO ativar tapPending.
+   - Se menu ESTAVA ABERTO: ativar tapPending (para ciclar no release).
+
+   Manter o resto do bloco (hold, release/tap) inalterado.
+
+================================================================================
+TESTES (OBRIGATORIO)
+================================================================================
+
+1. Locker Guy:
+   a) Trancar porta. Tentar abrir com E (hold e instantaneo) -> BLOQUEADO.
+   b) Trancar porta de grupo (double door). Tentar abrir a outra porta ->
+      a trancada NAO abre.
+   c) Monstro passar perto da porta trancada -> NAO abre.
+   d) Monstro BFS -> NAO inclui porta trancada no caminho.
+   e) Destrancar com F -> volta ao normal (pode abrir com E).
+
+2. Helpful Priest - Multiplayer (2+ jogadores):
+   a) Pressionar F: menu ABRE com o USUARIO (proprio priest) selecionado
+      (borda verde nele). Verificar que NAO pula para o segundo.
+   b) Soltar F: menu CONTINUA ABERTO, sem ciclar.
+   c) Pressionar F de novo (tap): ao soltar, cicla para o PROXIMO jogador.
+   d) Continuar ciclando ate o ULTIMO jogador: ao soltar, menu FECHA.
+   e) Reabrir o menu (pressionar F): usuario selecionado NOVAMENTE.
+   f) Usar habilidade (hold 1s): cura/revive o selecionado, menu FECHA,
+      helpfulpriestUsed = true.
+   g) Apos usar, pressionar F: menu NAO ABRE (helpfulpriestUsed === true).
+   h) Derrotar monstro (novo round): helpfulpriestUsed reseta, pode usar de novo.
+
+3. Helpful Priest - Solo (1 jogador):
+   a) Pressionar F: menu ABRE com usuario (unico jogador) selecionado.
+   b) Soltar F: menu CONTINUA ABERTO.
+   c) Pressionar F de novo (tap): ao soltar, menu FECHA.
+   d) Pressionar F: menu ABRE novamente (toggle).
+   e) Segurar F por 1s: cura o usuario, menu fecha, helpfulpriestUsed = true.
+
+================================================================================
+VERIFICACAO FINAL
+================================================================================
+
+- [ ] Locker Guy: porta trancada 100% nao-interagivel?
+- [ ] Helpful Priest: primeiro selecionado = usuario?
+- [ ] Helpful Priest: menu abre sem ciclar?
+- [ ] Helpful Priest: ciclagem funciona a partir do segundo tap?
+- [ ] Helpful Priest: fecha no ultimo jogador?
+- [ ] Helpful Priest: reabrir reseta para usuario?
+- [ ] Helpful Priest: bloqueado quando helpfulpriestUsed?
+- [ ] Helpful Priest: solo funciona como toggle?
+- [ ] Documentacao atualizada?
+- [ ] Sem erros de console?
+- [ ] Sem caracteres bugados?
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================

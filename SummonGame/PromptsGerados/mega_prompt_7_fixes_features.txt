@@ -1,0 +1,559 @@
+================================================================================
+MEGA PROMPT - 7 FIXES E FEATURES - SUMMON GAME
+================================================================================
+
+INSTRUCOES GLOBAIS OBRIGATORIAS:
+- Nao crie nenhum arquivo separado (.css, .js, .py, .java, .cpp, .c, etc.).
+- Toda e qualquer alteracao deve ser feita exclusivamente no arquivo SummonGame.html.
+- Siga o estilo de codigo existente: mesmo padrao de nomenclatura, aspas, etc.
+- Todas as alteracoes devem ser REGISTRADAS na Documentacao_Completa.txt.
+- Leia TODO o SummonGame.html e TODA a Documentacao_Completa.txt antes de implementar.
+- Implemente AGORA, sem questionamentos ou adicoes nao solicitadas.
+- NAO use caracteres bugados/corrompidos (UTF-8 apenas).
+- Execute testes apos cada alteracao e registre na documentacao.
+
+================================================================================
+FIX 1: Mudar hotkeys padrao do P2
+================================================================================
+
+PROBLEMA: As hotkeys do Player 2 precisam ser alteradas.
+
+LOCAL: Constante DEFAULT_KEYBINDS (array global, procure por 'const DEFAULT_KEYBINDS').
+
+ALTERACAO: Modificar o indice 1 (P2) do array.
+
+CODIGO ATUAL:
+  { up: 'arrowup', down: 'arrowdown', left: 'arrowleft', right: 'arrowright',
+    interact: 'shift', ability: '/', use: '.' },
+
+CODIGO NOVO:
+  { up: 'arrowup', down: 'arrowdown', left: 'arrowleft', right: 'arrowright',
+    interact: '/', ability: 'control', use: 'shift' },
+
+MUDANCAS:
+  - interact: 'shift' -> '/' (barra)
+  - ability: '/' -> 'control' (Control direito)
+  - use: '.' -> 'shift' (Shift esquerdo)
+
+NOTA TECNICA: O jogo usa e.key.toLowerCase() para detectar teclas.
+'Control' e 'Shift' retornam o mesmo valor para esquerdo e direito.
+Nao e possivel distinguir left/right com o sistema atual. Se necessario
+no futuro, substituir e.key.toLowerCase() por e.code para ter 'ControlLeft'
+vs 'ControlRight' e 'ShiftLeft' vs 'ShiftRight'.
+
+================================================================================
+FIX 2: Arrumar textura do noisemaker no shop
+================================================================================
+
+PROBLEMA: No shop, o noisemaker aparece como uma bola vermelha em vez
+do icone detalhado que aparece na hotbar.
+
+CAUSA: O codigo de renderizacao do shop faz:
+  const iconFn = ItemIcons[shop.itemKey];
+Mas shop.itemKey e 'noise_maker'. Porem a chave no ItemIcons e 'noisemaker'
+(sem underscore). Como nao encontra, cai no fallback e desenha um circulo
+com a cor do item (vermelho = #FF4444).
+
+LOCAL: Game.render(), bloco de renderizacao de shops (procure por
+'ItemIcons[shop.itemKey]').
+
+ALTERACAO: Usar Items[shop.itemKey].icon para buscar o icone, que tem
+o nome correto da chave no ItemIcons.
+
+CODIGO ATUAL (aproximado):
+  const it = Items[shop.itemKey];
+  ...
+  const iconFn = ItemIcons[shop.itemKey];
+
+CODIGO NOVO:
+  const it = Items[shop.itemKey];
+  ...
+  const iconFn = ItemIcons[it.icon];  // usa it.icon em vez de shop.itemKey
+
+EXPLICACAO: Items[shop.itemKey].icon retorna a string correta:
+  - 'noise_maker'.icon = 'noisemaker' -> ItemIcons['noisemaker'] existe
+  - 'beartrap'.icon = 'beartrap' -> ItemIcons['beartrap'] existe
+  - 'bloxy_cola'.icon = 'bloxy_cola' -> ItemIcons['bloxy_cola'] existe
+Esta correcao funciona para TODOS os itens (nao apenas noisemaker).
+
+================================================================================
+FIX 3: Monstro "Twins" (Gemeos) com colisao entre si
+================================================================================
+
+PROBLEMA: Quando o monstro Twins (spawnCount: 2) esta ativo, os dois
+gemeos podem se sobrepor, passando um atraves do outro. Devem ter
+colisao entre si.
+
+LOCAL: MonsterEntity, metodo canMoveTo() ou followPath().
+Tambem adicionar logica no update() para empurrar gemeos sobrepostos.
+
+IMPLEMENTACAO:
+
+A) Em MonsterEntity.canMoveTo(), adicionar verificacao de colisao com
+   outros monstros gemeos (procure por 'canMoveTo(px, py)'):
+
+   Adicionar ANTES do return true no final:
+     // Colisao entre gemeos (Twins)
+     if (this.type === 'twins') {
+       for (var mi = 0; mi < this.game.activeMonsters.length; mi++) {
+         var other = this.game.activeMonsters[mi];
+         if (other === this || !other.alive || other.type !== 'twins') continue;
+         var odx = px - other.px;
+         var ody = py - other.py;
+         var odist = Math.sqrt(odx * odx + ody * ody);
+         if (odist < TILE_SIZE * 0.76) return false; // distancia minima entre gemeos
+       }
+     }
+
+   NOTA: TILE_SIZE * 0.76 = 2 * (TILE_SIZE * 0.38) = diametro de um gemeo.
+   Isso impede que os corpos se sobreponham.
+
+B) Em MonsterEntity.update(), apos mover o monstro (final do update),
+   adicionar um empurrao suave se dois gemeos estiverem muito proximos
+   (para evitar que fiquem travados). Adicionar apos a linha
+   'this.tileY = Math.floor(this.py / TILE_SIZE);':
+
+     if (this.type === 'twins') {
+       for (var mi = 0; mi < this.game.activeMonsters.length; mi++) {
+         var other = this.game.activeMonsters[mi];
+         if (other === this || !other.alive || other.type !== 'twins') continue;
+         var dx = this.px - other.px;
+         var dy = this.py - other.py;
+         var dist = Math.sqrt(dx * dx + dy * dy);
+         var minDist = TILE_SIZE * 0.76;
+         if (dist < minDist && dist > 0.001) {
+           var overlap = minDist - dist;
+           var nx = dx / dist;
+           var ny = dy / dist;
+           this.px += nx * overlap * 0.5;
+           this.py += ny * overlap * 0.5;
+           other.px -= nx * overlap * 0.5;
+           other.py -= ny * overlap * 0.5;
+         }
+       }
+     }
+
+EDGE CASES:
+- Apenas gemeos (type === 'twins') colidem entre si. Outros monstros
+  de tipos diferentes NAO colidem (comportamento atual mantido).
+- Se houver 2 gemeos e 1 outro monstro, gemeos colidem entre si mas
+  nao com o terceiro.
+- O empurrao (push) e feito APOS o movimento normal, corrigindo
+  sobreposicoes que possam ocorrer.
+
+================================================================================
+FIX 4: Altar reseta cooldown de TODAS as habilidades
+================================================================================
+
+PROBLEMA: Ao ativar o altar (iniciar o summon), todas as habilidades
+devem ter seu cooldown resetado. Principalmente a do Chamber, que
+gerencia TPs e cooldown de forma especial.
+
+LOCAL: Game.updateInteraction(), onde o altar e ativado (procure por
+"else if (type === 'altar' && !this.summoning)").
+
+ALTERACAO: Apos definir this.summoning = true, resetar cooldowns de
+todos os jogadores vivos.
+
+CODIGO ATUAL (aproximado):
+  else if (type === 'altar' && !this.summoning) {
+    this.summoning = true;
+    this.summonDelay = 3;
+    this.showMessage('Summoning ritual begins...');
+  }
+
+CODIGO NOVO:
+  else if (type === 'altar' && !this.summoning) {
+    this.summoning = true;
+    this.summonDelay = 3;
+    this.showMessage('Summoning ritual begins...');
+    // Resetar cooldown de TODAS as habilidades
+    for (var ri = 0; ri < this.players.length; ri++) {
+      var rp = this.players[ri];
+      if (!rp.alive) continue;
+      rp.abilityCooldown = 0;
+      rp.abilityActive = false;
+      rp.abilityTimer = 0;
+      // Chamber: resetar TPs tambem
+      if (rp.playerClass === 'chamber') {
+        rp.chamberTP1 = null;
+        rp.chamberTP2 = null;
+        rp.chamberTPsPlaced = 0;
+      }
+      // Wired Girl: resetar uso
+      if (rp.playerClass === 'wiredgirl') { rp.wiredGirlUsed = false; }
+      // Rerroler: resetar uso
+      if (rp.playerClass === 'rerroler') { rp.rerrolerUsed = false; }
+      // Helpful Priest: resetar uso
+      if (rp.playerClass === 'helpfulpriest') { rp.helpfulpriestUsed = false; }
+      // Time Traveler: resetar uso
+      if (rp.playerClass === 'timetraveler') { rp.timeTravelUsed = false; }
+    }
+    this.showMessage('All ability cooldowns reset!');
+  }
+
+EDGE CASES:
+- Jogadores mortos: cooldowns nao sao resetados (nao estao vivos).
+- O reset ocorre no MOMENTO em que o altar e ativado (inicio do hold de 4s
+  termina), 3 segundos antes do monstro spawnar.
+- Chamber perde os TPs colocados (sao destruidos). Ele pode recoloca-los
+  durante os 3s de summonDelay (monstro ainda nao spawnou).
+
+================================================================================
+FIX 5: Feature F1 - Seletor de monstro no debug mode
+================================================================================
+
+PROBLEMA: No modo debug (F1), adicionar um mini-menu abaixo do HUD de
+classes (canto superior esquerdo) que lista todos os monstros. Ao
+selecionar um, o proximo summon forcara aquele monstro.
+
+LOCAL: 
+- HTML: Adicionar um container abaixo do #hud (ou do #ability-hud).
+- JS: Gerenciar a selecao e forcar o tipo no spawnMonster.
+
+IMPLEMENTACAO:
+
+A) Adicionar ao HTML (procure pelo elemento #ability-hud ou #hud):
+
+   <div id="monster-selector" style="display:none; position:absolute; top:120px; left:10px;
+     background:rgba(0,0,0,0.75); color:#fff; padding:6px; font:10px monospace;
+     border:1px solid rgba(255,255,255,0.2); border-radius:4px; max-width:200px;">
+   </div>
+
+   A posicao 'top:120px' e aproximada. Ajustar para ficar abaixo do HUD
+   de classes e do ability-hud.
+
+B) Adicionar ao Game:
+   this.debugSelectedMonster = null;  // null = aleatorio (padrao)
+
+C) Funcao para atualizar o seletor (chamar no update ou quando F1 for
+   pressionado):
+   
+   function updateMonsterSelector(game) {
+     var sel = document.getElementById('monster-selector');
+     if (!sel) return;
+     if (!game.debugMode) { sel.style.display = 'none'; return; }
+     sel.style.display = 'block';
+     var html = '<b>Monster Selector:</b><br>';
+     var types = Object.keys(MonsterTypes);
+     for (var ti = 0; ti < types.length; ti++) {
+       var tkey = types[ti];
+       var mt = MonsterTypes[tkey];
+       var selClass = (game.debugSelectedMonster === tkey) ? 'color:#0f0;' : 'color:#aaa;';
+       html += '<span style="cursor:pointer;' + selClass + '" ';
+       html += 'onclick="selectDebugMonster(\'' + tkey + '\')">';
+       html += (game.debugSelectedMonster === tkey ? '> ' : '  ') + mt.name + '</span><br>';
+     }
+     if (game.debugSelectedMonster) {
+       html += '<br><span style="cursor:pointer;color:#f66;" onclick="selectDebugMonster(null)">[Random]</span>';
+     }
+     sel.innerHTML = html;
+   }
+
+   function selectDebugMonster(typeKey) {
+     game.debugSelectedMonster = typeKey;
+     game.showMessage(typeKey ? 'Next summon: ' + MonsterTypes[typeKey].name : 'Next summon: Random');
+     updateMonsterSelector(game);
+   }
+
+   NOTA: As funcoes selectDebugMonster e updateMonsterSelector devem ser
+   globais (window.selectDebugMonster = ...) para funcionar com onclick.
+
+D) Modificar Game.spawnMonster() (procure por 'spawnMonster'):
+   Onde o tipo e escolhido (weightedRandom), verificar debugSelectedMonster:
+
+   CODIGO ATUAL (aproximado):
+     const typeKey = weightedRandom(MonsterTypes);
+
+   CODIGO NOVO:
+     var typeKey;
+     if (this.debugMode && this.debugSelectedMonster) {
+       typeKey = this.debugSelectedMonster;
+     } else {
+       typeKey = weightedRandom(MonsterTypes);
+     }
+
+E) Resetar debugSelectedMonster no loadMap? NAO - o jogador pode querer
+   manter a selecao entre rounds. Mas resetar se o monstro selecionado
+   nao existir mais (futuramente).
+
+F) Chamar updateMonsterSelector(game) quando:
+   - F1 e pressionado (toggle debug mode): em window.addEventListener('keydown', ...)
+     apos a linha 'game.debugMode = !game.debugMode;'
+   - No inicio do jogo (apos criar a Game instance).
+   - Periodicamente no update loop (opcional, para manter sincronizado).
+
+================================================================================
+FIX 6: Helpful Priest - Usuario como primeiro da lista no menu
+================================================================================
+
+PROBLEMA: No mini-menu do Helpful Priest, a lista de jogadores aparece
+na ordem dos indices (P0, P1, P2, P3). O USUARIO (o proprio Helpful Priest)
+deve ser o PRIMEIRO da lista visual, e nao o P1.
+
+LOCAL: Funcao de renderizacao do mini-menu (procure por 'drawPriestMenu'
+ou o bloco que renderiza os slots com 'menuSelectedIndex').
+
+ALTERACAO: Reordenar a renderizacao para que o usuario (playerIndex do
+priest) seja o primeiro slot (posicao visual mais a esquerda).
+
+CODIGO ATUAL (aproximado - renderiza em ordem 0, 1, 2, 3):
+  for (var i = 0; i < game.playerCount; i++) {
+    slotX = baseX + i * TILE_SIZE;
+    // desenha jogador i
+  }
+
+CODIGO NOVO:
+  // Construir ordem: usuario primeiro, depois os outros em ordem natural
+  var order = [];
+  order.push(this.playerIndex); // usuario primeiro
+  for (var i = 0; i < game.playerCount; i++) {
+    if (i !== this.playerIndex) order.push(i);
+  }
+  // Renderizar na nova ordem
+  for (var oi = 0; oi < order.length; oi++) {
+    var i = order[oi];  // indice real do jogador
+    slotX = baseX + oi * TILE_SIZE;
+    // desenha jogador i (usando game.players[i])
+    ...
+  }
+
+EXPLICACAO:
+- Se o priest e P2 (playerIndex=2) em um jogo de 4 jogadores:
+  order = [2, 0, 1, 3]
+  O slot 0 mostra P2, slot 1 mostra P0, slot 2 mostra P1, slot 3 mostra P3.
+- Se o priest e P1 (playerIndex=0):
+  order = [0, 1, 2, 3] (mesmo que antes, pois P1 ja e o primeiro).
+- A logica de menuSelectedIndex continua funcionando com indices REAIS
+  (0 a playerCount-1), mas a renderizacao usa a ordem visual.
+
+ATENCAO: A ciclagem (menuSelectedIndex++) funciona com indices REAIS
+(nao com a ordem visual). A navegacao pula entre jogadores na ordem
+REAL (0, 1, 2, 3...), mas visualmente o primeiro slot e o usuario.
+Isso pode causar uma experiencia de navegacao nao-linear.
+ALTERNATIVA: Mapear menuSelectedIndex para a ordem visual. Neste caso,
+menuSelectedIndex = 0 sempre representa o usuario (indice visual).
+A funcao de render usa order[menuSelectedIndex] para obter o jogador real.
+A ciclagem incrementa menuSelectedIndex visualmente (0, 1, 2, 3...).
+
+IMPLEMENTACAO ALTERNATIVA (mais limpa - usar indices visuais):
+
+No bloco de renderizacao:
+  var order = [this.playerIndex];
+  for (var i = 0; i < game.playerCount; i++) {
+    if (i !== this.playerIndex) order.push(i);
+  }
+  for (var oi = 0; oi < order.length; oi++) {
+    var realIdx = order[oi];
+    slotX = baseX + oi * TILE_SIZE;
+    // desenha jogador realIdx
+    // borda verde se oi === this.menuSelectedIndex
+    // X vermelho se !game.players[realIdx].alive
+  }
+
+Na ciclagem (tap):
+  // menuSelectedIndex agora e INDICE VISUAL
+  if (this.menuUseTapPending) {
+    if (this.menuSelectedIndex >= game.playerCount - 1) {
+      this.menuOpen = false;
+    } else {
+      this.menuSelectedIndex++;
+    }
+  }
+
+No hold (aplicar efeito):
+  var order = [this.playerIndex];
+  for (var i = 0; i < game.playerCount; i++) {
+    if (i !== this.playerIndex) order.push(i);
+  }
+  var target = game.players[order[this.menuSelectedIndex]];
+  // aplicar cura/revive no target
+
+NOTA: Esta abordagem requer rebuild da order array em multiplos lugares
+(render, hold). Para evitar duplicacao, criar um metodo getMenuOrder()
+no Player ou uma funcao helper.
+
+================================================================================
+FIX 7: Locker Guy - Cadeado em portas duplas + Verificacao periodica
+================================================================================
+
+PROBLEMA 7a: Em portas duplas (double doors com groupMembers), o cadeado
+e colocado em apenas UM tile da porta. O outro tile da mesma porta continua
+sem cadeado, permitindo que jogadores/monstro passem por ele.
+
+LOCAL: Funcao activateAbility(), bloco do lockerguy, onde o cadeado e
+colocado (procure por 'game.lockedDoor = { doorRef: nearestDoor').
+
+ALTERACAO: Quando trancar uma porta que pertence a um GRUPO (groupMembers),
+marcar TODOS os membros do grupo como trancados. Modificar a estrutura
+de game.lockedDoor para suportar multiplas referencias.
+
+CODIGO ATUAL (aproximado):
+  game.lockedDoor = { doorRef: nearestDoor, tileX: nearestDoor.tileX, tileY: nearestDoor.tileY };
+
+CODIGO NOVO:
+  // Coletar TODOS os tiles da porta (incluindo groupMembers)
+  var lockedTiles = [];
+  if (nearestDoor.groupMembers && nearestDoor.groupMembers.length > 0) {
+    for (var gi = 0; gi < nearestDoor.groupMembers.length; gi++) {
+      var member = nearestDoor.groupMembers[gi];
+      lockedTiles.push({ doorRef: member, tileX: member.tileX, tileY: member.tileY });
+    }
+  } else {
+    lockedTiles.push({ doorRef: nearestDoor, tileX: nearestDoor.tileX, tileY: nearestDoor.tileY });
+  }
+  game.lockedDoor = { tiles: lockedTiles };
+
+EXPLICACAO: Em vez de armazenar uma unica doorRef, game.lockedDoor agora
+contem um array 'tiles' com todas as referencias de porta trancadas.
+Para portas simples: tiles tem 1 elemento.
+Para portas duplas: tiles tem 2 elementos (ou mais, se houver grupos maiores).
+
+ATUALIZAR TODOS OS LUGARES QUE LEEM game.lockedDoor:
+
+1. checkInteraction (pular portas trancadas):
+   Substituir:
+     if (game.lockedDoor && game.lockedDoor.doorRef === door) continue;
+   Por:
+     if (game.lockedDoor && game.lockedDoor.tiles.some(function(t) { return t.doorRef === door; })) continue;
+
+2. DoorEntity.toggle() e forceOpen():
+   Substituir:
+     if (game.lockedDoor && game.lockedDoor.doorRef === this) return;
+   Por:
+     if (game.lockedDoor && game.lockedDoor.tiles.some(function(t) { return t.doorRef === this; })) return;
+
+3. MonsterEntity.checkNearbyDoors():
+   Substituir:
+     !(this.game.lockedDoor && this.game.lockedDoor.doorRef === door)
+   Por:
+     !(this.game.lockedDoor && this.game.lockedDoor.tiles.some(function(t) { return t.doorRef === door; }))
+
+4. BFS pathfinding (tiles 'd' trancados):
+   Substituir:
+     if (tile === 'd' && this.lockedDoor && this.lockedDoor.tileX === nx && this.lockedDoor.tileY === ny) continue;
+   Por:
+     if (tile === 'd' && this.lockedDoor && this.lockedDoor.tiles.some(function(t) { return t.tileX === nx && t.tileY === ny; })) continue;
+
+5. Remover cadeado (activateAbility, lockerguy):
+   Substituir:
+     if (game.lockedDoor && game.lockedDoor.doorRef === nearestDoor) { game.lockedDoor = null; ... }
+   Por:
+     if (game.lockedDoor && game.lockedDoor.tiles.some(function(t) { return t.doorRef === nearestDoor; })) { game.lockedDoor = null; ... }
+
+6. Verificacao de cadeado existente:
+   Substituir:
+     if (game.lockedDoor) { game.showMessage('A door is already locked!...'); return; }
+   Por:
+     (manter igual - game.lockedDoor ainda e null ou objeto)
+
+7. Renderizacao do cadeado:
+   Agora desenhar um cadeado em CADA tile do grupo:
+     if (this.lockedDoor) {
+       for (var ti = 0; ti < this.lockedDoor.tiles.length; ti++) {
+         var lt = this.lockedDoor.tiles[ti];
+         var lx = lt.tileX * TILE_SIZE + TILE_SIZE/2 - this.camX;
+         var ly = lt.tileY * TILE_SIZE + TILE_SIZE/2 - this.camY;
+         drawLock(ctx, lx, ly, TILE_SIZE * 0.6);
+       }
+     }
+
+PROBLEMA 7b: Verificar periodicamente (a cada 1 segundo) se a porta
+trancada esta aberta. Se estiver, fecha-la instantaneamente.
+
+IMPLEMENTACAO:
+
+Adicionar ao Game: lockedDoorCheckTimer (float, default 0).
+
+Em Game.update(): adicionar bloco de verificacao periodica:
+
+  if (this.lockedDoor) {
+    this.lockedDoorCheckTimer = (this.lockedDoorCheckTimer || 0) + dt;
+    if (this.lockedDoorCheckTimer >= 1.0) {
+      this.lockedDoorCheckTimer -= 1.0;
+      for (var ti = 0; ti < this.lockedDoor.tiles.length; ti++) {
+        var lt = this.lockedDoor.tiles[ti];
+        var door = lt.doorRef;
+        if (door && door.open) {
+          // Fechar instantaneamente (sem animacao)
+          door.open = false;
+          door.animating = false;
+          door.animTimer = 0;
+          door.animProgress = 0;
+        }
+      }
+    }
+  }
+
+NOTA: O fechamento e instantaneo (sem animacao) para garantir que a
+porta nunca fique aberta enquanto trancada. Se o jogador de alguma
+forma conseguir abrir a porta (bug), ela sera fechada em no maximo 1s.
+
+================================================================================
+RESUMO DAS ALTERACOES
+================================================================================
+
+1. DEFAULT_KEYBINDS[1]: interact='/'  ability='control'  use='shift'
+2. Shop noisemaker: ItemIcons[shop.itemKey] -> ItemIcons[it.icon]
+3. Twins (gemeos): colisao entre si (canMoveTo + push no update)
+4. Altar: reseta cooldown de todos + Chamber TPs + flags once-per-summon
+5. F1: seletor de monstro no debug mode (HTML + JS + spawnMonster)
+6. Helpful Priest: usuario como primeiro slot visual no menu
+7. Locker Guy: cadeado em TODOS os tiles do grupo + fechamento forcado a cada 1s
+
+================================================================================
+TESTES (OBRIGATORIO)
+================================================================================
+
+1. Hotkeys P2:
+   - Pressionar Control -> ativa habilidade do P2.
+   - Pressionar Shift -> usa item do P2.
+   - Pressionar / -> interage do P2.
+
+2. Noisemaker shop:
+   - Ir ate um shop que vende noisemaker. Verificar se o icone e o
+     mesmo que aparece na hotbar (icone detalhado, nao apenas bola vermelha).
+
+3. Twins colisao:
+   - Spawnar gemeos. Verificar que eles NAO se sobrepoem.
+   - Andar entre eles: verificar que ha espaco entre os corpos.
+
+4. Altar reset:
+   - Usar habilidade (ex: Scout). Ir ao altar e ativar.
+     Verificar se o cooldown foi resetado.
+   - Chamber: colocar TPs, ativar altar -> TPs somem, pode colocar novos.
+   - Helpful Priest: usar cura, ativar altar -> pode usar de novo.
+
+5. F1 monster selector:
+   - Pressionar F1 (debug mode). Verificar seletor de monstro abaixo do HUD.
+   - Clicar em "Blue Man". Proximo summon deve ser Blue Man.
+   - Clicar em "[Random]". Proximo summon volta a ser aleatorio.
+
+6. Helpful Priest usuario primeiro:
+   - Jogar como P2 (Helpful Priest). Abrir menu. Verificar que P2 (voce)
+     e o primeiro slot a esquerda, e nao o P1.
+
+7. Locker Guy porta dupla:
+   - Trancar uma porta dupla. Verificar cadeado em AMBOS os tiles.
+   - Tentar passar pelo tile sem cadeado -> BLOQUEADO (porta fechada).
+   - Monstro BFS: nao consegue passar por nenhum dos tiles.
+   - (Debug) Forcar a porta abrir. Esperar 1s. Verificar que fecha sozinha.
+
+================================================================================
+VERIFICACAO FINAL
+================================================================================
+
+- [ ] P2 hotkeys alteradas?
+- [ ] Noisemaker icone correto no shop?
+- [ ] Gemeos nao se sobrepoem?
+- [ ] Altar reseta todos os cooldowns + flags?
+- [ ] F1 seletor de monstro funcional?
+- [ ] Helpful Priest: usuario primeiro no menu visual?
+- [ ] Locker Guy: cadeado em todos os tiles do grupo? Fecha a cada 1s?
+- [ ] Documentacao atualizada?
+- [ ] Sem erros de console?
+- [ ] Sem caracteres bugados?
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================

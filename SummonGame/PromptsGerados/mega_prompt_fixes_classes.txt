@@ -1,0 +1,401 @@
+================================================================================
+MEGA PROMPT - FIXES E BALANCEAMENTO DE CLASSES - SUMMON GAME
+================================================================================
+
+INSTRUCOES GLOBAIS OBRIGATORIAS:
+- Nao crie nenhum arquivo separado (.css, .js, .py, .java, .cpp, .c, etc.).
+- Toda e qualquer alteracao deve ser feita exclusivamente no arquivo SummonGame.html.
+- Siga o estilo de codigo existente: mesmo padrao de nomenclatura, aspas, etc.
+- Todas as alteracoes devem ser REGISTRADAS na Documentacao_Completa.txt.
+- Leia TODO o arquivo SummonGame.html e TODA a Documentacao_Completa.txt
+  antes de implementar.
+- Implemente AGORA, sem questionamentos ou adicoes nao solicitadas.
+- NAO use caracteres bugados/corrompidos (UTF-8 apenas).
+- Execute testes com valores ficticios apos cada fix e registre na documentacao.
+
+================================================================================
+FIX 1: Mighty Tinkerer - Zona dura 6 segundos
+================================================================================
+
+PROBLEMA: A zona de engenharia dura 45 segundos, tempo excessivo.
+
+LOCAL: Funcao activateAbility(), bloco do mightytinkerer (procure por
+'mightytinkerer' na funcao activateAbility).
+
+ALTERACAO: Mudar o timer da zona de 45 para 6.
+
+CODIGO ATUAL (aproximado):
+  game.activeZones.push({ ..., timer: 45, ... });
+
+CODIGO NOVO:
+  game.activeZones.push({ ..., timer: 6, ... });
+
+OBS: O cooldown da habilidade permanece 45s. Apenas a DURACAO da zona
+no chao muda para 6 segundos. O jogador ainda espera 45s para reutilizar.
+
+================================================================================
+FIX 2: Wired Girl - Habilidade usavel apenas com monstro VIVO
+================================================================================
+
+PROBLEMA: Atualmente a Wired Girl so pode usar a habilidade quando o
+monstro NAO esta spawnado (durante o downtime). O correto e o oposto:
+ela deve poder usar APENAS enquanto o monstro ESTIVER vivo/spawnado.
+
+LOCAL: Funcao activateAbility(), bloco da wiredgirl.
+
+ALTERACAO: Inverter a condicao de verificacao de monstros vivos.
+
+CODIGO ATUAL (aproximado):
+  if (!game.activeMonsters.every(function(m) { return !m.alive; })) {
+    game.showMessage('Ability only usable when monster is not spawned!');
+    return;
+  }
+
+CODIGO NOVO:
+  if (game.activeMonsters.every(function(m) { return !m.alive; })) {
+    game.showMessage('Ability only usable when monster is spawned!');
+    return;
+  }
+
+EXPLICACAO: A condicao `game.activeMonsters.every(m => !m.alive)` retorna
+true quando TODOS os monstros estao mortos. Com a negacao removida, o
+bloqueio ocorre quando NAO HA monstros vivos. Ou seja: so permite usar
+quando ha pelo menos 1 monstro vivo.
+
+Tambem atualizar a mensagem de erro para refletir a nova condicao.
+
+================================================================================
+FIX 3: Chamber - Range de TP para 10x10 tiles + circulo amarelo de ativacao
+================================================================================
+
+PROBLEMA 3a: O range para colocar o segundo TP e de apenas 2.5 tiles.
+Deve ser expandido para 10x10 tiles (raio = 5 tiles).
+
+LOCAL: Funcao activateAbility(), bloco do chamber, Fase 1 (posicionamento).
+
+ALTERACAO: Mudar a distancia maxima de 2.5 para 5.
+
+CODIGO ATUAL (aproximado):
+  var d = Math.sqrt((p.tileX - p.chamberTP1.tileX) ** 2 + (p.tileY - p.chamberTP1.tileY) ** 2);
+  if (d > 2.5) { game.showMessage('TP2 must be within 2.5 tiles of TP1!'); return; }
+
+CODIGO NOVO:
+  var d = Math.sqrt((p.tileX - p.chamberTP1.tileX) ** 2 + (p.tileY - p.chamberTP1.tileY) ** 2);
+  if (d > 5) { game.showMessage('TP2 must be within 5 tiles of TP1!'); return; }
+
+PROBLEMA 3b: Adicionar um circulo AMARELO com 80% de transparencia ao
+redor de CADA TP para indicar o raio de ativacao do teleporte (1.5 tiles).
+Isso permite ao jogador saber o quao perto precisa estar do TP para
+conseguir teleportar.
+
+LOCAL: Game.render(), onde os TPs do Chamber sao desenhados (procure
+por 'chamberTP1' no metodo render do Game).
+
+ALTERACAO: Apos desenhar cada TP, desenhar um circulo amarelo semi-
+transparente de raio 1.5 * TILE_SIZE centralizado no TP.
+
+CODIGO A ADICIONAR (dentro do loop de renderizacao de TPs, apos
+desenhar o TP em si):
+
+  // Circulo de ativacao amarelo ao redor do TP
+  ctx.beginPath();
+  ctx.arc(cp.chamberTP1.px - this.camX, cp.chamberTP1.py - this.camY,
+    1.5 * TILE_SIZE, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255, 255, 0, 0.2)';  // amarelo com 80% transparencia
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255, 255, 0, 0.35)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Repetir o mesmo para chamberTP2
+
+NOTA: So desenhar os circulos de ativacao quando AMBOS os TPs estiverem
+posicionados (chamberTPsPlaced === 2), pois o teleporte so funciona
+com os dois TPs colocados.
+
+================================================================================
+FIX 4: Locker Guy - Porta trancada nao pode abrir + trancar porta aberta
+================================================================================
+
+PROBLEMA 4a: A porta com cadeado CONSEGUE SER ABERTA. Isso ocorre porque
+o metodo DoorEntity.toggle() nao verifica se a porta esta trancada.
+Quando uma porta de um GRUPO (double door) e aberta, o toggle propaga
+para os membros do grupo, incluindo a porta trancada, abrindo-a.
+
+LOCAL: Classe DoorEntity, metodo toggle() (procure por 'class DoorEntity').
+
+ALTERACAO: Adicionar verificacao de lockedDoor no inicio do toggle().
+Se a porta esta trancada, NAO permitir toggle (retornar sem fazer nada).
+
+CODIGO ATUAL (aproximado):
+  toggle(skipPropagation) {
+    if (this.animating || this.debounceTimer > 0) return;
+    if (!skipPropagation && this.groupMembers) {
+      for (var i = 0; i < this.groupMembers.length; i++) {
+        var member = this.groupMembers[i];
+        if (member !== this) member.toggle(true);
+      }
+    }
+    this.open = !this.open;
+    this.animating = true;
+    this.animTimer = 0;
+  }
+
+CODIGO NOVO:
+  toggle(skipPropagation) {
+    if (this.animating || this.debounceTimer > 0) return;
+    // VERIFICACAO DE PORTA TRANCADA
+    if (this.game && this.game.lockedDoor && this.game.lockedDoor.doorRef === this) {
+      return; // Porta trancada: nao abre
+    }
+    if (!skipPropagation && this.groupMembers) {
+      for (var i = 0; i < this.groupMembers.length; i++) {
+        var member = this.groupMembers[i];
+        if (member !== this) member.toggle(true);
+      }
+    }
+    this.open = !this.open;
+    this.animating = true;
+    this.animTimer = 0;
+  }
+
+NOTA: O DoorEntity precisa de acesso ao game. Verificar se a classe
+DoorEntity ja tem uma referencia ao game (this.game). Se nao tiver,
+adicionar no construtor ou passar game como parametro, ou acessar
+via uma variavel global. Alternativa: verificar game.lockedDoor
+diretamente (se game for acessivel no escopo).
+
+Verificar tambem o metodo forceOpen() da DoorEntity. Adicionar a mesma
+verificacao de lockedDoor no inicio de forceOpen():
+
+  forceOpen() {
+    if (!this.open && !this.animating) {
+      // VERIFICACAO DE PORTA TRANCADA
+      if (this.game && this.game.lockedDoor && this.game.lockedDoor.doorRef === this) {
+        return; // Porta trancada: nao abre
+      }
+      if (this.groupMembers) { ... }
+      this.toggle(true);
+    }
+  }
+
+PROBLEMA 4b: Se o jogador usar F (cadeado) em uma porta ABERTA, a porta
+deve FECHAR automaticamente e entao ser trancada. Atualmente o codigo
+bloqueia a acao com mensagem "Door must be closed to lock!".
+
+LOCAL: Funcao activateAbility(), bloco do lockerguy.
+
+ALTERACAO: Em vez de bloquear quando nearestDoor.open === true, fechar
+a porta primeiro e depois trancar.
+
+CODIGO ATUAL (aproximado):
+  if (nearestDoor.open) { game.showMessage('Door must be closed to lock!'); return; }
+
+CODIGO NOVO:
+  if (nearestDoor.open) {
+    nearestDoor.toggle(); // Fecha a porta
+    // Continua para colocar o cadeado
+  }
+
+IMPORTANTE: Apos fechar a porta com toggle(), ela iniciara uma animacao
+de fechamento. O cadeado e colocado imediatamente (nao espera a animacao).
+Isso e aceitavel - a porta esta fechando e ja esta trancada.
+
+================================================================================
+FIX 5: Helpful Priest - Borda verde menor + fechar menu no ultimo player +
+       fechar apos usar habilidade + uma vez por summon
+================================================================================
+
+ALTERACOES MULTIPLAS NO HELPFUL PRIEST:
+
+PROBLEMA 5a: A borda verde que indica o jogador selecionado e muito grossa
+(TILE_SIZE * 0.2 = 6.4px). Deve ser reduzida pela METADE.
+
+LOCAL: Funcao de renderizacao do mini-menu (procure por 'menuSelectedIndex'
+na renderizacao do Game ou Player, onde a borda verde e desenhada com
+ctx.lineWidth = TILE_SIZE * 0.2).
+
+ALTERACAO:
+  ctx.lineWidth = TILE_SIZE * 0.1;  // metade: 3.2px em vez de 6.4px
+
+
+PROBLEMA 5b: Ao ciclar entre jogadores com tap na tecla F, quando chegar
+no ULTIMO jogador e der um tap, o menu deve FECHAR (em vez de voltar ao
+primeiro jogador).
+
+LOCAL: Player.update(), bloco do helpfulpriest, onde o tap e processado
+(procure por 'menuUseTapPending' no update do Player).
+
+ALTERACAO: Modificar a logica de ciclagem. Em vez de usar modulo para
+voltar ao inicio, verificar se ja esta no ultimo indice.
+
+CODIGO ATUAL (aproximado):
+  if (this.menuUseTapPending) {
+    this.menuSelectedIndex = (this.menuSelectedIndex + 1) % game.playerCount;
+  }
+
+CODIGO NOVO:
+  if (this.menuUseTapPending) {
+    if (this.menuSelectedIndex >= game.playerCount - 1) {
+      this.menuOpen = false;  // Fecha o menu no ultimo player
+    } else {
+      this.menuSelectedIndex++;
+    }
+  }
+
+
+PROBLEMA 5c: O menu deve FECHAR automaticamente apos a habilidade ser
+usada (hold completo). Atualmente o menu permanece aberto.
+
+LOCAL: Player.update(), bloco do helpfulpriest, onde o hold e completado
+(procure por 'menuUseTimer >= 1.0').
+
+ALTERACAO: Adicionar this.menuOpen = false apos completar o hold.
+
+CODIGO ATUAL (aproximado):
+  if (this.menuUseTimer >= 1.0) {
+    applyPriestEffect(game, this);
+    this.menuUseTimer = 0;
+  }
+
+CODIGO NOVO:
+  if (this.menuUseTimer >= 1.0 && !this.helpfulpriestUsed) {
+    applyPriestEffect(game, this);
+    this.helpfulpriestUsed = true;
+    this.menuOpen = false;    // Fecha o menu apos usar
+    this.menuUseTimer = 0;
+  }
+
+NOTA: Adicionar verificacao de helpfulpriestUsed para impedir usos
+multiplos (ver Problema 5d abaixo).
+
+
+PROBLEMA 5d: A habilidade do Helpful Priest so pode ser usada UMA VEZ
+POR SUMMON. Após curar/reviver um jogador, a habilidade fica desativada
+ate o proximo round. Atualmente pode ser usada infinitamente.
+
+IMPLEMENTACAO:
+
+1. Adicionar propriedade ao Player (no construtor da classe Player):
+   this.helpfulpriestUsed = false;
+
+2. No bloco do helpfulpriest em Player.update(), adicionar verificacao
+   de helpfulpriestUsed ANTES de permitir o hold:
+
+   if (this.menuUseTimer >= 1.0 && !this.helpfulpriestUsed) {
+     applyPriestEffect(game, this);
+     this.helpfulpriestUsed = true;
+     this.menuOpen = false;
+     this.menuUseTimer = 0;
+   }
+
+   // Se ja foi usado, o hold nao faz nada (ou mostra mensagem)
+   // Opcional: se foi usado, ainda permitir navegar no menu (tap)
+   // mas bloquear o hold. O codigo acima ja faz isso com a condicao
+   // !this.helpfulpriestUsed.
+
+3. Resetar helpfulpriestUsed no fim do round. Local: Game.checkGameState()
+   e/ou Game.loadMap(). Adicionar junto com os outros resets:
+
+   if (rp.playerClass === 'helpfulpriest') { rp.helpfulpriestUsed = false; }
+
+4. Atualizar HUD de habilidade (updateAbilityHUD) para mostrar "Used"
+   quando helpfulpriestUsed for true (similar ao Time Traveler):
+
+   if (p.playerClass === 'helpfulpriest' && p.helpfulpriestUsed) {
+     html += '<span style="color:#f66">Used</span>';
+   } else if (p.playerClass === 'helpfulpriest') {
+     html += '<span style="color:#6f6">Ready</span>';
+   }
+
+   NOTA: O helpfulpriest tem cooldown=0, entao nao aparece no HUD
+   normalmente. E necessario adicionar tratamento especial no
+   updateAbilityHUD para exibi-lo (assim como lockerguy).
+
+================================================================================
+FIX 6: Time Traveler - Nao resetar cooldown do Chamber
+================================================================================
+
+PROBLEMA: O Time Traveler reseta o cooldown de TODAS as classes (exceto
+outros Time Travelers). Isso inclui o Chamber, o que nao deveria acontecer.
+O Chamber gerencia seus TPs e cooldown de forma independente.
+
+LOCAL: Funcao activateAbility(), bloco do timetraveler.
+
+ALTERACAO: Adicionar 'chamber' a lista de exclusao, junto com 'timetraveler'.
+
+CODIGO ATUAL (aproximado):
+  if (op.playerClass !== 'timetraveler') { op.abilityCooldown = 0; count++; }
+
+CODIGO NOVO:
+  if (op.playerClass !== 'timetraveler' && op.playerClass !== 'chamber') {
+    op.abilityCooldown = 0;
+    count++;
+  }
+
+================================================================================
+RESUMO DAS ALTERACOES
+================================================================================
+
+1. Mighty Tinkerer: timer da zona de 45 -> 6 (activateAbility)
+2. Wired Girl: inverter condicao de monstro vivo (activateAbility)
+3. Chamber: range TP1->TP2 de 2.5 -> 5 + circulo amarelo de ativacao
+4. Locker Guy: toggle/forceOpen verifica lockedDoor + trancar porta aberta
+5. Helpful Priest: borda verde /2 + menu fecha no ultimo + fecha apos
+   uso + uma vez por summon (helpfulpriestUsed)
+6. Time Traveler: nao resetar Chamber
+
+================================================================================
+TESTES (OBRIGATORIO)
+================================================================================
+
+Execute cada teste com debugMode (F3) e registre na Documentacao_Completa.txt:
+
+1. Mighty Tinkerer: Criar zona, verificar se desaparece apos 6 segundos.
+   Verificar se o cooldown de 45s permanece.
+
+2. Wired Girl: Tentar usar habilidade com monstro morto -> bloqueado.
+   Tentar usar com monstro vivo -> permitido. Teleporte para artefato
+   aleatorio funciona.
+
+3. Chamber:
+   a) Colocar TP1, andar 5 tiles, colocar TP2 -> permitido.
+   b) Colocar TP1, andar 6 tiles, tentar TP2 -> bloqueado.
+   c) Verificar circulos amarelos de ativacao ao redor dos TPs (raio 1.5 tiles).
+   d) Teleporte funciona normalmente (23s cooldown).
+
+4. Locker Guy:
+   a) Trancar porta, tentar abrir com E -> bloqueado.
+   b) Trancar porta em grupo (double door), abrir a outra porta do grupo ->
+      a porta trancada NAO abre.
+   c) Monstro tentar forcar abertura de porta trancada -> bloqueado.
+   d) Usar F em porta aberta -> porta fecha e tranca automaticamente.
+
+5. Helpful Priest:
+   a) Borda verde esta com metade da grossura anterior.
+   b) Ciclar ate o ultimo jogador, dar tap -> menu fecha.
+   c) Usar habilidade (hold 1s) -> menu fecha automaticamente.
+   d) Apos usar 1 vez, nao consegue usar novamente (hold nao faz nada).
+   e) Apos derrotar o monstro, helpfulpriestUsed reseta (pode usar de novo).
+
+6. Time Traveler:
+   a) Usar Time Traveler com Chamber no time -> Chamber NAO tem cooldown resetado.
+   b) Outras classes continuam tendo cooldown resetado normalmente.
+
+================================================================================
+VERIFICACAO FINAL
+================================================================================
+
+- [ ] Mighty Tinkerer: zona expira em 6s, cooldown 45s mantido?
+- [ ] Wired Girl: so funciona com monstro vivo?
+- [ ] Chamber: range 5 tiles, circulo amarelo visivel?
+- [ ] Locker Guy: porta trancada nao abre; tranca porta aberta?
+- [ ] Helpful Priest: borda metade, menu fecha, uma vez por summon?
+- [ ] Time Traveler: nao reseta Chamber?
+- [ ] Documentacao atualizada?
+- [ ] Sem erros de console?
+- [ ] Sem caracteres bugados?
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================
