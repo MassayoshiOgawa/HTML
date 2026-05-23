@@ -1,0 +1,564 @@
+# PROMPT: Sistema de Save/Load JSON - Summon Game
+
+## REGRAS ABSOLUTAS (LEIA ANTES DE TUDO)
+
+### REGRA 1 - NENHUM ARQUIVO NOVO DE OUTRAS LINGUAGENS
+- **NÃO** crie arquivos .css separados. Todo CSS deve ficar dentro da tag `<style>` do SummonGame.html.
+- **NÃO** crie arquivos .js separados. Todo JavaScript deve ficar dentro da tag `<script>` do SummonGame.html.
+- **NÃO** crie arquivos .py, .java, .cpp, .c, .cs, .ts, .json, .xml ou qualquer outra linguagem.
+- **NÃO** crie novos arquivos .html. Tudo deve ser feito EXCLUSIVAMENTE no arquivo `SummonGame.html`.
+- A ÚNICA exceção: você PODE gerar o arquivo de save JSON quando o usuário clicar em "Exportar Save" (download de arquivo .json), mas isso é feito via JavaScript (Blob + download), NÃO criando arquivos estáticos no projeto.
+
+### REGRA 2 - CHARSET UTF-8, NENHUM CARACTERE BUGADO
+- O arquivo DEVE usar charset UTF-8 (meta charset="UTF-8").
+- **NÃO** use caracteres especiais que possam quebrar: nada de `ðâï¿½`, `Ã©`, `â¤`, ou qualquer caractere corrompido.
+- Use apenas caracteres ASCII padrão para código e comentários. Textos em português podem usar acentos normais (ç, ã, õ, é, etc.) desde que o charset UTF-8 esteja declarado.
+- Strings e textos no código devem usar escape Unicode quando necessário (ex: `\u2026` para reticências, `\u00E7` para ç).
+
+### REGRA 3 - NÃO REFAZER SISTEMAS EXISTENTES DO ZERO
+- Você deve ADICIONAR o sistema de save/load ao código EXISTENTE, não reescrever o jogo inteiro.
+- Modifique APENAS o que for necessário para implementar o sistema de save/load.
+- NÃO altere a lógica de gameplay, classes, monstros, habilidades, itens, colisão, pathfinding, etc.
+- Se algo já funciona, NÃO MEXA.
+
+### REGRA 4 - REGISTRAR ALTERAÇÕES NA DOCUMENTAÇÃO
+- Após fazer QUALQUER alteração no código HTML, você DEVE registrar a alteração no arquivo `Documentacao_Completa.txt`.
+- Adicione uma nova seção no final do documento (`CHANGELOG - DATA ATUAL`) descrevendo:
+  - O que foi alterado
+  - Por que foi alterado
+  - Quais métodos/funções/elementos foram modificados ou adicionados
+  - Como o novo sistema funciona
+  - Estrutura de dados envolvida
+- Formato limpo, profissional e bem estruturado (siga o padrão das seções existentes).
+
+### REGRA 5 - TESTAR O CÓDIGO
+- Após implementar, faça testes com valores fictícios para PROVAR que o sistema funciona.
+- Teste salvar configurações, carregar configurações, salvar jogo, carregar jogo.
+- Teste com 1, 2, 3 e 4 jogadores.
+- Teste com monstro summonado e sem monstro.
+- Teste os 3 slots de save.
+- Teste exportar e importar arquivos JSON.
+- **NÃO registre os testes na documentação.**
+
+### REGRA 6 - IMPLEMENTAR NA HORA
+- Faça todas as alterações necessárias em UMA única resposta. Não pergunte "quer que eu continue?" ou "posso implementar?".
+- Simplesmente IMPLEMENTE tudo o que for pedido neste prompt.
+
+### REGRA 7 - RESPONSIVIDADE E ESCALABILIDADE
+- O sistema de save DEVE ser escalável: se novos itens, monstros, classes ou estados forem adicionados no futuro, o save deve continuar funcionando ou ser facilmente extensível.
+- A UI dos botões de save/load deve ser responsiva e seguir o estilo visual existente do jogo (cores escuras, fonte Courier New, bordas sutis).
+- O sistema de save DEVE usar um formato JSON estruturado e versionado (incluir campo `version` no JSON).
+
+---
+
+## CONTEXTO DO PROJETO
+
+### O QUE É O SUMMON GAME
+Summon Game é um jogo top-down 2D em tempo real renderizado em HTML5 Canvas, implementado em um ÚNICO arquivo HTML (`SummonGame.html`). Não há dependências externas. Arquitetura: Game Loop com objetos-entidade e sistemas centralizados em uma classe Game orquestradora.
+
+### ESTRUTURA DO ARQUIVO
+- `<style>`: Todo o CSS do jogo (HUD, painéis, botões, hotbar, etc.)
+- `<body>`: Elementos DOM (canvas#game, #hud, #settings-btn, #settings-panel, #map-editor-panel, #message, #summon-desc, #class-select, #ability-hud, #hotbar-hud, #use-progress, #monster-selector)
+- `<script>`: Todo o JavaScript (configurações, classes, game loop, renderização, input, UI handlers)
+
+### SISTEMAS PRINCIPAIS (NÃO ALTERAR)
+- **Player**: classe com atributos como playerIndex, name, playerClass, hp, px, py, tileX, tileY, speed, inventory[5], selectedSlot, keybinds, useTimer, abilityCooldown, abilityActive, abilityTimer, interacting, interactTarget, interactType, invisible, invulnTimer, commandYellMult, speedItemTimer, speedItemMult, timeTravelUsed, wiredGirlUsed, rerrolerUsed, helpfulpriestUsed, phasing, menuOpen, etc.
+- **MonsterEntity**: classe com atributos como type, px, py, tileX, tileY, speed, alive, state, stunTimer, tauntTimer, etc.
+- **DoorEntity**: classe com atributos open, animating, animProgress, groupMembers
+- **ArtifactEntity**: classe com atributos collected, isFake
+- **Game**: classe orquestradora com todos os sistemas (players[], activeMonsters[], doorEntities[], artifactEntities[], traps[], shopItems[], visibilityPolygons[], currency, roundNumber, summonCount, difficulty, isNight, nightTransition, roofAlpha, hotbarSize, hotbarLayout, hotbarGap, activeClones[], activeWalls[], activeZones[], lockedDoor, ratEntities[], pendingMonsterType, selectedMonsterType, debugSelectedMonster, etc.)
+- **Tela inicial** (`#class-select`): contém título "Summon Game", seletor de dificuldade, seletor de quantidade de jogadores, painéis de setup por jogador (nome, classe, hotkeys), e botão "Start Game".
+
+### LOCALIZAÇÃO DOS ELEMENTOS NA TELA INICIAL
+A tela inicial (`#class-select`) tem esta estrutura vertical:
+1. `<h2>Summon Game</h2>` (título)
+2. `#difficulty-selector` (botões Easy/Medium/Hard)
+3. `#player-count-selector` (botões -/+, label de contagem)
+4. `#player-setup-container` (painéis de setup por jogador)
+5. `#player-setup-desc` (descrição da classe)
+6. `#btn-start-game` (botão Start Game)
+
+---
+
+## O QUE DEVE SER IMPLEMENTADO
+
+### PARTE 1: SISTEMA DE SAVE/LOAD DE CONFIGURAÇÕES (TELA INICIAL)
+
+#### 1.1 - BOTÕES NA TELA INICIAL
+Adicione DOIS botões na tela inicial (`#class-select`), posicionados ENTRE o título (`<h2>Summon Game</h2>`) e o seletor de dificuldade (`#difficulty-selector`):
+
+**Botão "Save Configuration"**:
+- Texto: "Save Configuration"
+- Posição: abaixo do título, acima do difficulty-selector
+- Estilo: seguir o padrão visual dos botões existentes (fundo escuro `#1a1a2e`, borda `#444`, cor `#ccc`, fonte Courier New, border-radius 4px)
+- Ao clicar: abre um mini-painel/modal com 3 botões de slot (Save 1, Save 2, Save 3) + botão "Export as File"
+
+**Botão "Load Configuration"**:
+- Texto: "Load Configuration"
+- Posição: abaixo do botão Save Configuration
+- Mesmo estilo visual
+- Ao clicar: abre um mini-painel/modal com 3 botões de slot (Load 1, Load 2, Load 3) + botão "Import from File"
+
+#### 1.2 - DADOS A SEREM SALVOS (CONFIGURAÇÕES)
+O JSON de configurações deve conter:
+
+```json
+{
+  "version": 1,
+  "type": "config",
+  "timestamp": "2026-05-23T...",
+  "data": {
+    "difficulty": "easy|medium|hard",
+    "playerCount": 1-4,
+    "players": [
+      {
+        "index": 0,
+        "name": "P1",
+        "class": "oracle",
+        "keybinds": {
+          "up": "w",
+          "down": "s",
+          "left": "a",
+          "right": "d",
+          "interact": "e",
+          "ability": "f",
+          "use": "r"
+        }
+      }
+    ]
+  }
+}
+```
+
+#### 1.3 - COMPORTAMENTO AO CARREGAR CONFIGURAÇÕES
+- Ao carregar uma configuração salva, atualize:
+  - `game.difficulty` e destaque visual no seletor
+  - `game.playerCount` e rebuild dos painéis de setup
+  - `game.playerNames[]` com os nomes salvos
+  - `game.playerClasses[]` com as classes salvas
+  - `preGameKeybinds[]` com os keybinds salvos (e atualize os botões de hotkey na UI)
+- A UI deve refletir imediatamente as mudanças (dificuldade destacada, painéis recriados, etc.)
+
+---
+
+### PARTE 2: SISTEMA DE SAVE/LOAD DURANTE O JOGO (IN-GAME)
+
+#### 2.1 - BOTÕES NO PAINEL DE SETTINGS
+Adicione no `#settings-panel` (painel que abre ao clicar na engrenagem no canto superior direito):
+
+**Botão "Save Game"**:
+- Posição: no início do painel de settings (antes do botão Restart Game)
+- Estilo: seguir o padrão dos botões do settings-panel
+- Ao clicar: abre um sub-painel com 3 slots (Save 1, Save 2, Save 3) + opção "Export as File"
+- **O jogo DEVE pausar** enquanto o sub-painel de save estiver aberto
+
+**Botão "Load Game"**:
+- Posição: abaixo do botão Save Game
+- Mesmo estilo
+- Ao clicar: abre um sub-painel com 3 slots (Load 1, Load 2, Load 3) + opção "Import from File"
+- **O jogo DEVE pausar** enquanto o sub-painel de load estiver aberto
+
+#### 2.2 - MECANISMO DE PAUSA
+- Crie uma flag `game.paused = true/false` no objeto Game.
+- No método `Game.update(dt)`, a PRIMEIRA verificação deve ser: `if (this.paused) return;`
+- No método `Game.render()`, a PRIMEIRA verificação deve ser: `if (this.paused) return;` (ou alternativamente continuar renderizando o último frame mas sem atualizar)
+- Ao abrir qualquer sub-painel de save/load: `game.paused = true`
+- Ao fechar o sub-painel (salvou, carregou, ou cancelou): `game.paused = false`
+- Mostre um overlay semi-transparente "GAME PAUSED" no centro da tela enquanto pausado
+
+#### 2.3 - DADOS A SEREM SALVOS (IN-GAME)
+O JSON do save in-game DEVE incluir TODAS as configurações da Parte 1 MAIS o estado completo do jogo:
+
+```json
+{
+  "version": 1,
+  "type": "save",
+  "timestamp": "2026-05-23T...",
+  "config": {
+    "difficulty": "easy|medium|hard",
+    "playerCount": 1-4,
+    "players": [ /* mesmo formato da parte 1 */ ]
+  },
+  "gameState": {
+    "roundNumber": 0,
+    "summonCount": 0,
+    "currency": 0,
+    "collectedArtifacts": 0,
+    "artifactCount": 3,
+    "isNight": false,
+    "nightTransition": 0,
+    "roofAlpha": 1,
+    "hotbarSize": 100,
+    "hotbarLayout": "horizontal",
+    "hotbarGap": 30,
+    "monsterSpawnType": "normal",
+    "pendingMonsterType": null,
+    "selectedMonsterType": null,
+    "debugSelectedMonster": null,
+    "summoning": false,
+    "summonDelay": 0,
+
+    "players": [
+      {
+        "index": 0,
+        "px": 100.5,
+        "py": 200.5,
+        "tileX": 3,
+        "tileY": 6,
+        "hp": 100,
+        "alive": true,
+        "inventory": ["beartrap", null, "bloxy_cola", null, null],
+        "selectedSlot": 0,
+        "duplicatedSlots": [],
+        "speedItemTimer": 0,
+        "speedItemMult": 1,
+        "invulnTimer": 0,
+        "invisible": false,
+        "invisibleTimer": 0,
+        "abilityCooldown": 0,
+        "abilityActive": false,
+        "abilityTimer": 0,
+        "timeTravelUsed": false,
+        "wiredGirlUsed": false,
+        "rerrolerUsed": false,
+        "helpfulpriestUsed": false,
+        "phasing": false,
+        "phasingTimer": 0,
+        "commandYellMult": 0,
+        "commandYellTimer": 0,
+        "menuOpen": false,
+        "interactTimer": 0,
+        "interacting": false,
+        "lastDx": 0,
+        "lastDy": 0
+      }
+    ],
+
+    "activeMonsters": [
+      {
+        "type": "normal",
+        "px": 500.5,
+        "py": 300.5,
+        "tileX": 15,
+        "tileY": 9,
+        "speed": 70,
+        "alive": true,
+        "state": "patrol",
+        "stunTimer": 0,
+        "tauntTimer": 0,
+        "tauntTarget": null,
+        "preTauntState": "patrol",
+        "currentWaypoint": 0,
+        "waypointOrder": [2, 0, 1, 3],
+        "facingAngle": 1.5,
+        "chaseTimer": 0,
+        "searchTimer": 0,
+        "lastKnownPlayerPos": null,
+        "attackCooldown": 0,
+        "path": null,
+        "pathTarget": null,
+        "pathRecalc": 0,
+        "trapSeeking": false,
+        "frozen": false,
+        "isTransformed": false,
+        "ghostTimer": 0,
+        "ghostVisible": true,
+        "rushSpeedBonus": 0,
+        "decoySpeedBoostTimer": 0,
+        "jesterPathRecalc": 0
+      }
+    ],
+
+    "doorEntities": [
+      {
+        "tileX": 2,
+        "tileY": 3,
+        "open": false,
+        "animating": false,
+        "animTimer": 0,
+        "animProgress": 0,
+        "debounceTimer": 0
+      }
+    ],
+
+    "artifactEntities": [
+      {
+        "tileX": 5,
+        "tileY": 2,
+        "collected": false,
+        "isFake": false,
+        "decoyRef": null
+      }
+    ],
+
+    "traps": [
+      {
+        "x": 300,
+        "y": 200,
+        "item": "beartrap",
+        "active": true,
+        "stun": 1,
+        "trapColor": "#666",
+        "trapRadius": 12,
+        "tauntDuration": 0,
+        "tauntTimer": 0,
+        "tauntedMonster": null
+      }
+    ],
+
+    "shopItems": [
+      {
+        "x": 10,
+        "y": 5,
+        "itemKey": "medkit",
+        "price": 10,
+        "sold": false
+      }
+    ],
+
+    "activeClones": [
+      {
+        "px": 150,
+        "py": 250,
+        "tileX": 4,
+        "tileY": 7,
+        "timer": 2.5,
+        "targetMonsterIndex": 0,
+        "playerIndex": 0,
+        "path": null
+      }
+    ],
+
+    "activeWalls": [
+      {
+        "tiles": [{"x": 8, "y": 4}, {"x": 8, "y": 5}],
+        "timer": 3.0
+      }
+    ],
+
+    "activeZones": [
+      {
+        "x": 400,
+        "y": 300,
+        "radius": 112,
+        "bonusSpeed": 40,
+        "timer": 5.0
+      }
+    ],
+
+    "lockedDoor": {
+      "tiles": [
+        {"tileX": 5, "tileY": 6, "doorRefIndex": 2}
+      ]
+    },
+    "lockedDoorCheckTimer": 0,
+
+    "ratEntities": [
+      {
+        "px": 500,
+        "py": 300,
+        "tileX": 15,
+        "tileY": 9,
+        "targetTrap": null,
+        "devourTimer": 0,
+        "alive": true,
+        "kingRefIndex": 0
+      }
+    ],
+
+    "expandedHotkeyPlayers": []
+  }
+}
+```
+
+**IMPORTANTE**: Ao salvar referências entre objetos (ex: clone.targetMonster, trap.tauntedMonster, artifact.decoyRef, rat.kingRef, lockedDoor.tiles[].doorRef), salve o ÍNDICE do objeto no array correspondente (ex: `targetMonsterIndex: 0` em vez de salvar o objeto inteiro). Ao carregar, restaure as referências pelos índices.
+
+#### 2.4 - ARMAZENAMENTO (3 SLOTS + EXPORT/IMPORT)
+
+**localStorage**:
+- Use as chaves: `summongame_save_1`, `summongame_save_2`, `summongame_save_3` para saves in-game
+- Use as chaves: `summongame_config_1`, `summongame_config_2`, `summongame_config_3` para configurações
+- Cada slot armazena a string JSON completa.
+- Mostre informação de quando o save foi feito (timestamp formatado) e um resumo (round, dificuldade, número de jogadores) no botão do slot.
+
+**Export/Import de arquivo**:
+- Export: crie um Blob com o JSON e dispare download via `URL.createObjectURL` + clique em `<a>` temporário. Nome do arquivo: `SummonGame_Save_SlotX_YYYYMMDD_HHMMSS.json`
+- Import: use um `<input type="file">` oculto, acione o clique via JS, leia o arquivo com FileReader, valide o JSON (verifique se tem `version` e `type`), e salve no slot correspondente.
+
+#### 2.5 - COMPORTAMENTO AO CARREGAR SAVE IN-GAME
+Ao carregar um save in-game:
+1. Restaure `game.paused = true` durante o processo
+2. Restaure TODOS os campos de `gameState` para o objeto Game
+3. Recrie os arrays de entidades (players, monsters, doors, artifacts, traps, shops, clones, walls, zones, rats) com os dados salvos
+4. Restaure as referências cruzadas (índices -> objetos reais)
+5. Reconstrua `visibilityPolygons[]` chamando `buildLightmap()` e `updateVisibility()`
+6. Aplique as configurações (dificuldade, nomes, classes, keybinds)
+7. Reconstrua a UI (HUD, hotbar, ability HUD)
+8. Defina `game.paused = false`
+9. O jogo continua exatamente de onde parou
+
+---
+
+## DETALHES DE UI
+
+### ESTILO DOS BOTÕES DE SAVE/LOAD
+- Siga o mesmo padrão visual dos botões existentes em `#settings-panel`:
+  ```css
+  background: #1a1a2e;
+  border: 1px solid #444;
+  color: #ccc;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  border-radius: 3px;
+  transition: background 0.2s;
+  ```
+- Hover: `background: #2a2a3e;`
+
+### SUB-PAINEL DE SLOTS
+- Fundo: `rgba(15,15,20,0.95)`, borda `1px solid #333`, border-radius 6px
+- Título: "Save Game - Slot X" ou "Load Game - Slot X"
+- 3 botões de slot, cada um mostrando:
+  - Se tem save: "Slot X - Round Y - Difficulty Z - N players - timestamp"
+  - Se vazio: "Slot X - Empty"
+- Botão "Export as File" / "Import from File" abaixo dos slots
+- Botão "Cancel" para fechar o sub-painel
+
+### OVERLAY DE PAUSA
+- Texto "GAME PAUSED" grande no centro da tela
+- Fundo semi-transparente `rgba(0,0,0,0.5)` sobre o canvas
+- Fonte: Courier New, cor #fff, com text-shadow
+
+### INDICADOR VISUAL DE SAVE/CONFIG SLOT PREENCHIDO
+- Se um slot tem dados salvos, o botão deve ter uma borda levemente colorida (ex: `#4fc3f7`)
+- Se vazio, borda padrão `#444`
+
+---
+
+## VALIDAÇÕES E SEGURANÇA
+
+### AO SALVAR
+- Verifique se `game` e seus arrays existem antes de tentar serializar
+- Use `try/catch` ao chamar `JSON.stringify` para evitar crash se algum dado for circular
+- Use `JSON.stringify` com um replacer que remove referências circulares e funções
+
+### AO CARREGAR
+- Valide que o JSON tem o campo `version` e `type`
+- Se `type === "config"`, só carregue configurações (não afeta o jogo em andamento)
+- Se `type === "save"`, carregue o jogo completo
+- Use `try/catch` ao fazer `JSON.parse`
+- Se o JSON for inválido, mostre mensagem de erro "Invalid save file" e NÃO crash o jogo
+- Verifique se os índices de referência cruzada são válidos antes de usá-los
+
+### COMPATIBILIDADE FUTURA
+- O campo `version` permite detectar saves de versões antigas
+- Se `version` for maior que a versão atual do jogo, avise "This save was created in a newer version"
+- Se `version` for menor, tente carregar mesmo assim (forward compatibility básica)
+
+---
+
+## TESTES QUE VOCÊ DEVE FAZER (NÃO REGISTRAR NA DOCUMENTAÇÃO)
+
+1. **Teste de save/load de configurações**:
+   - Configure 2 jogadores, difficulty Hard, nomes "Alpha" e "Beta", classes "scout" e "redhacker"
+   - Salve no Slot 1
+   - Recarregue a página (simulado)
+   - Carregue do Slot 1
+   - Verifique se dificuldade, nomes, classes e keybinds foram restaurados
+
+2. **Teste de save/load in-game (sem monstro)**:
+   - Inicie um jogo com 1 jogador, compre itens, coloque traps
+   - Salve no Slot 1
+   - Carregue do Slot 1
+   - Verifique se itens, traps, posição e dinheiro foram restaurados
+
+3. **Teste de save/load in-game (com monstro)**:
+   - Summone um monstro, colete 2 de 3 artefatos
+   - Coloque traps no chão
+   - Salve no Slot 2
+   - Carregue do Slot 2
+   - Verifique se monstro está na mesma posição, mesmo estado, traps intactos, artefatos coletados/mantidos
+
+4. **Teste de 3 slots**:
+   - Salve 3 jogos diferentes nos 3 slots
+   - Carregue cada um e verifique se os dados são independentes
+
+5. **Teste de export/import**:
+   - Salve no Slot 1
+   - Exporte como arquivo .json
+   - Limpe o localStorage
+   - Importe o arquivo .json
+   - Carregue do Slot 1 e verifique integridade
+
+6. **Teste de pausa**:
+   - Abra o painel de save durante o jogo
+   - Verifique se o jogo está pausado (monstro não se move, timer não avança)
+   - Feche o painel e verifique se o jogo volta ao normal
+
+7. **Teste com múltiplos jogadores**:
+   - Teste save/load com 2, 3 e 4 jogadores
+   - Verifique se todos os estados de todos os jogadores são restaurados
+
+8. **Teste de JSON inválido**:
+   - Tente carregar um JSON corrompido
+   - Verifique se o jogo mostra mensagem de erro e NÃO crasha
+
+9. **Teste de load durante jogo em andamento**:
+   - Com um jogo rodando (monstro vivo), carregue um save diferente
+   - Verifique se o estado anterior é completamente substituído
+
+---
+
+## DOCUMENTAÇÃO
+
+Após implementar TUDO, adicione ao FINAL do arquivo `Documentacao_Completa.txt` uma nova seção:
+
+```
+================================================================================
+CHANGELOG - MAIO 2026 (SISTEMA DE SAVE/LOAD JSON)
+================================================================================
+
+ALTERACAO 27 - SISTEMA DE SAVE/LOAD JSON COM 3 SLOTS
+
+   [Descrição completa do que foi implementado, estrutura de dados,
+    métodos adicionados, modificações no código, regras de funcionamento,
+    e escalabilidade futura]
+```
+
+Siga o formato das seções existentes na documentação.
+
+---
+
+## RESUMO DO QUE FAZER (CHECKLIST)
+
+- [ ] Adicionar flag `game.paused` no constructor de Game
+- [ ] Adicionar verificação `if (this.paused) return;` no início de `update(dt)` e `render()`
+- [ ] Criar função `saveConfig(slot)` que salva config no localStorage
+- [ ] Criar função `loadConfig(slot)` que carrega config do localStorage
+- [ ] Criar função `saveGame(slot)` que salva jogo completo no localStorage
+- [ ] Criar função `loadGame(slot)` que carrega jogo completo do localStorage
+- [ ] Criar função `exportSave(slot)` que faz download do JSON
+- [ ] Criar função `importSave(slot)` que lê arquivo JSON
+- [ ] Criar função `serializeGameState()` que retorna objeto serializável do jogo
+- [ ] Criar função `deserializeGameState(data)` que restaura jogo do objeto
+- [ ] Adicionar botões "Save Configuration" e "Load Configuration" na tela inicial (`#class-select`)
+- [ ] Criar sub-painel de slots para save/load de config
+- [ ] Adicionar botões "Save Game" e "Load Game" no `#settings-panel`
+- [ ] Criar sub-painel de slots para save/load in-game
+- [ ] Implementar overlay de "GAME PAUSED"
+- [ ] Implementar export/import de arquivos JSON
+- [ ] Implementar validações de JSON e tratamento de erros
+- [ ] Adicionar CSS necessário para os novos elementos
+- [ ] Adicionar HTML necessário para os novos elementos
+- [ ] Registrar TUDO na documentação (Documentacao_Completa.txt)
+- [ ] Fazer TODOS os testes listados
+
+---
+
+**IMPORTANTÍSSIMO**: 
+- NÃO crie outros arquivos além do SummonGame.html (a não ser o download do save JSON que é feito via Blob).
+- NÃO use caracteres bugados. Charset UTF-8.
+- NÃO refaça sistemas existentes. Apenas ADICIONE o sistema de save/load.
+- FAÇA na hora. Não pergunte se pode continuar. Implemente tudo em uma resposta.
+- Após implementar, REGISTRE na documentação e FAÇA os testes.

@@ -6250,3 +6250,244 @@ SECAO 62 - SISTEMA DE ICONES CSS PARA CLASSES DE PERSONAGENS
      helpfulpriest:    Cruz dourada vertical/horizontal
 
 ================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (SISTEMA DE SAVE/LOAD JSON COM 3 SLOTS)
+================================================================================
+
+ALTERACAO 27 - SISTEMA DE SAVE/LOAD JSON COM 3 SLOTS, EXPORT/IMPORT E PAUSA
+
+   PROBLEMA: Nao havia sistema de persistencia. Todas as configuracoes
+   (dificuldade, nomes, classes, keybinds) e todo o progresso do jogo
+   eram perdidos ao recarregar a pagina.
+
+   SOLUCAO: Implementado sistema completo de save/load com:
+     - Save de Configuracoes (tela inicial): salva dificuldade, nomes,
+       classes, keybinds em 3 slots independentes no localStorage.
+     - Save de Jogo (in-game): salva o estado COMPLETO do jogo (players,
+       monstros, portas, artefatos, traps, shops, clones, paredes, zonas,
+       rats, lockedDoor, etc.) em 3 slots no localStorage.
+     - Export/Import: permite baixar o JSON como arquivo ou importar de
+       um arquivo .json.
+     - Pausa: o jogo pausa automaticamente ao abrir o painel de save/load
+       durante a partida, com overlay "GAME PAUSED" no centro da tela.
+     - Versionamento: cada JSON salvo contem campo "version" para
+       compatibilidade futura.
+
+   MUDANCAS NO CODIGO:
+
+     a) CSS — NOVAS REGRAS (adicionadas antes de </style>):
+        - #config-save-btns: container flex para botoes de save/load de
+          config na tela inicial.
+        - #save-load-subpanel: painel modal com overlay escuro e caixa
+          central para slots de save/load.
+        - #save-load-subpanel .panel-box: caixa interna com titulo,
+          slots e botoes de acao.
+        - #pause-overlay: overlay DOM com texto "GAME PAUSED".
+        - .config-slot-btn, .has-save, .file-btn, .cancel-btn: estilos
+          para botoes de slot e acao.
+
+     b) HTML — NOVOS ELEMENTOS:
+        - #config-save-btns: div com botoes "Save Configuration" e
+          "Load Configuration" entre o titulo e o seletor de dificuldade
+          na tela inicial (#class-select).
+        - #btn-save-game e #btn-load-game: botoes adicionados ao
+          #settings-panel, antes de "Restart Game".
+        - #save-load-subpanel: painel modal para mostrar slots de save/load.
+        - #pause-overlay: div com texto "GAME PAUSED".
+        - #save-file-input: input type="file" oculto para importar JSON.
+
+     c) Game — NOVA PROPRIEDADE:
+        this.paused = false (boolean): controla se o jogo esta pausado.
+
+     d) Game.update(dt) — MODIFICADO:
+        Primeira linha: if (this.paused) return;
+        Quando pausado, nenhum sistema e atualizado (monstros, players,
+        traps, particulas, etc. congelam).
+
+     e) Game — NOVOS METODOS (adicionados antes do fechamento da classe):
+
+        serializeGameState():
+          Serializa TODO o estado do jogo em um objeto JavaScript puro
+          (sem referencias circulares). Retorna objeto gameState com:
+          - Estado global: roundNumber, summonCount, currency,
+            collectedArtifacts, artifactCount, isNight, nightTransition,
+            roofAlpha, hotbarSize, hotbarLayout, hotbarGap,
+            monsterSpawnType, pendingMonsterType, selectedMonsterType,
+            debugSelectedMonster, summoning, summonDelay,
+            lockedDoorCheckTimer.
+          - players[]: cada jogador com px, py, tileX, tileY, hp, alive,
+            inventory[], selectedSlot, duplicatedSlots[], speedItemTimer,
+            speedItemMult, invulnTimer, invisible, invisibleTimer,
+            abilityCooldown, abilityActive, abilityTimer,
+            timeTravelUsed, wiredGirlUsed, rerrolerUsed,
+            helpfulpriestUsed, phasing, phasingTimer, commandYellMult,
+            commandYellTimer, menuOpen, interactTimer, interacting,
+            lastDx, lastDy, name, playerClass, keybinds{}.
+          - activeMonsters[]: cada monstro com type, px, py, tileX, tileY,
+            speed, alive, state, stunTimer, tauntTimer, tauntTarget,
+            preTauntState, currentWaypoint, waypointOrder[], facingAngle,
+            chaseTimer, searchTimer, lastKnownPlayerPos, attackCooldown,
+            pathRecalc, trapSeeking, frozen, isTransformed, ghostTimer,
+            ghostVisible, rushSpeedBonus, decoySpeedBoostTimer,
+            jesterPathRecalc.
+          - doorEntities[]: tileX, tileY, open, animating, animTimer,
+            animProgress, debounceTimer.
+          - artifactEntities[]: tileX, tileY, collected, isFake,
+            displayName, decoyRefIndex.
+          - traps[]: x, y, item, active, stun, trapColor, trapRadius,
+            tauntDuration, tauntTimer, tauntedMonsterIndex, lifetime,
+            timer, rotation.
+          - shopItems[]: x, y, itemKey, price, sold.
+          - activeClones[]: px, py, tileX, tileY, timer,
+            targetMonsterIndex, playerIndex, playerColor.
+          - activeWalls[]: tiles[], timer.
+          - activeZones[]: x, y, radius, timer, ownerIndex, bonusSpeed.
+          - lockedDoor: tiles[] com tileX, tileY, doorRefIndex.
+          - ratEntities[]: px, py, tileX, tileY, devourTimer, alive,
+            kingRefIndex.
+          - expandedHotkeyPlayers[].
+          Referencias entre objetos (clone->monster, trap->monster,
+          artifact->decoy, rat->king, lockedDoor->door) sao salvas como
+          INDICES nos arrays correspondentes, nao como objetos.
+
+        deserializeGameState(gs):
+          Restaura TODO o estado do jogo a partir do objeto gameState.
+          Ordem de restauracao:
+          1. Estado global (variaveis numericas e booleanas)
+          2. DoorEntity[] (recriadas com estado individual)
+          3. Reconstroi door groups (mesmo algoritmo de loadMap)
+          4. ArtifactEntity[] (recriadas com estado individual)
+          5. Traps[] (recriadas, referencias restauradas depois)
+          6. ShopItems[] (recriadas)
+          7. Players[] (recriados com todos os atributos restaurados)
+          8. ActiveMonsters[] (recriados com todos os atributos)
+          9. Restaura referencias cruzadas:
+             - artifact.decoyRef pelo decoyRefIndex
+             - trap.tauntedMonster pelo tauntedMonsterIndex
+          10. ActiveClones[] com targetMonster restaurado
+          11. ActiveWalls[], ActiveZones[]
+          12. LockedDoor com doorRef restaurado pelo doorRefIndex
+          13. RatEntities[] com kingRef restaurado
+          14. ExpandedHotkeyPlayers (Set)
+          15. Reconstroi camera e visao
+
+        saveGame(slotNum):
+          Salva jogo completo no localStorage (chave: summongame_save_N).
+          Combina config (dificuldade, playerCount, nomes, classes,
+          keybinds) + gameState serializado. Retorna true/false.
+
+        loadGame(slotNum):
+          Carrega jogo completo do localStorage. Restaura config e
+          gameState. Atualiza HUD, Ability HUD, Hotbar HUD e Monster
+          Selector. Retorna true/false.
+
+        saveConfig(slotNum):
+          Salva apenas configuracoes no localStorage
+          (chave: summongame_config_N). Inclui dificuldade, playerCount,
+          nomes, classes, keybinds. Usa preGameKeybinds se player nao
+          instanciado, ou keybinds ativos do player.
+
+        loadConfig(slotNum):
+          Carrega configuracoes do localStorage. Atualiza difficulty,
+          playerCount, playerNames[], playerClasses[], preGameKeybinds.
+          Chama showClassSelection() para atualizar UI.
+
+        exportSave(slotNum, saveType):
+          Faz download do JSON como arquivo .json via Blob + URL.createObjectURL.
+          Nome: SummonGame_Save_SlotN_YYYYMMDD_HHMMSS.json ou
+          SummonGame_Config_SlotN_YYYYMMDD_HHMMSS.json.
+
+        importSave(slotNum, saveType, file):
+          Le arquivo via FileReader, parse JSON, salva no localStorage
+          e carrega automaticamente.
+
+        showSaveSlots(saveType):
+          Abre painel modal com 3 slots de save. Pausa o jogo.
+          Mostra resumo de cada slot (round, dificuldade, jogadores,
+          timestamp). Botoes "Export as File" e "Cancel".
+
+        showLoadSlots(saveType):
+          Abre painel modal com 3 slots de load. Pausa o jogo.
+          Mostra resumo de cada slot. Botoes "Import from File" e "Cancel".
+
+     f) FUNCOES GLOBAIS (adicionadas apos fechamento da classe Game):
+        window._saveToSlot(slotNum, saveType): executa saveGame ou saveConfig.
+        window._loadFromSlot(slotNum, saveType): executa loadGame ou loadConfig.
+        window._exportSlotFile(saveType): exporta primeiro slot nao vazio.
+        window._importSlotFile(saveType): aciona input file oculto.
+        window._closeSavePanel(): fecha painel, remove pausa.
+
+     g) DOMContentLoaded — NOVOS EVENT LISTENERS:
+        - btn-save-config.click: game.showSaveSlots('config')
+        - btn-load-config.click: game.showLoadSlots('config')
+        - btn-save-game.click: fecha settings, game.showSaveSlots('save')
+        - btn-load-game.click: fecha settings, game.showLoadSlots('save')
+        - save-file-input.change: le arquivo, importa para primeiro slot
+          livre, fecha painel
+        - Escape key handler: tambem fecha save-load-subpanel via
+          window._closeSavePanel()
+
+   ESTRUTURA DO JSON (VERSION 1):
+
+     Config JSON:
+     {
+       "version": 1,
+       "type": "config",
+       "timestamp": "ISO-8601",
+       "data": {
+         "difficulty": "easy|medium|hard",
+         "playerCount": 1-4,
+         "players": [{
+           "index": 0-3,
+           "name": "string",
+           "class": "string (PlayerClasses key)",
+           "keybinds": { "up","down","left","right","interact","ability","use" }
+         }]
+       }
+     }
+
+     Save JSON:
+     {
+       "version": 1,
+       "type": "save",
+       "timestamp": "ISO-8601",
+       "config": { ... (mesmo formato acima) },
+       "gameState": {
+         "roundNumber": int, "summonCount": int, "currency": int,
+         "collectedArtifacts": int, "artifactCount": int,
+         "isNight": bool, "nightTransition": float, "roofAlpha": float,
+         "hotbarSize": int, "hotbarLayout": string, "hotbarGap": int,
+         "monsterSpawnType": string, "pendingMonsterType": string|null,
+         "selectedMonsterType": string|null,
+         "debugSelectedMonster": string|null,
+         "summoning": bool, "summonDelay": float,
+         "lockedDoorCheckTimer": float,
+         "players": [...], "activeMonsters": [...], "doorEntities": [...],
+         "artifactEntities": [...], "traps": [...], "shopItems": [...],
+         "activeClones": [...], "activeWalls": [...], "activeZones": [...],
+         "lockedDoor": {...}, "ratEntities": [...],
+         "expandedHotkeyPlayers": [...]
+       }
+     }
+
+   VALIDACOES:
+     - saveGame/saveConfig usam try/catch para evitar crash.
+     - loadGame/loadConfig validam type e version.
+     - importSave valida JSON.parse e existencia de version.
+     - Mensagens de erro exibidas via showMessage() sem crash.
+
+   ESCALABILIDADE:
+     - Campo "version" permite detectar saves antigos/novos.
+     - serializeGameState salva TODOS os atributos de cada entidade,
+       entao novas propriedades podem ser adicionadas no futuro.
+     - Referencias cruzadas usam indices, permitindo expansao de arrays.
+     - O formato JSON e extensivel: novos campos no gameState sao
+       carregados com fallback para valores default.
+
+   ARMAZENAMENTO:
+     - localStorage: chaves summongame_save_1/2/3 e summongame_config_1/2/3
+     - Export: arquivo .json via Blob download
+     - Import: FileReader + JSON.parse
+
+================================================================================
