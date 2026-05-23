@@ -1,0 +1,333 @@
+================================================================================
+MEGA PROMPT - 8 FIXES E FEATURES - SUMMON GAME
+================================================================================
+
+INSTRUCOES GLOBAIS OBRIGATORIAS:
+- Nao crie nenhum arquivo separado (.css, .js, .py, .java, .cpp, .c, etc.).
+- Toda e qualquer alteracao deve ser feita exclusivamente no arquivo SummonGame.html.
+- Siga o estilo de codigo existente: mesmo padrao de nomenclatura, aspas, etc.
+- Todas as alteracoes devem ser REGISTRADAS na Documentacao_Completa.txt.
+- Leia TODO o SummonGame.html e TODA a Documentacao_Completa.txt antes de implementar.
+- Implemente AGORA, sem questionamentos ou adicoes nao solicitadas.
+- NAO use caracteres bugados/corrompidos (UTF-8 apenas).
+- Execute testes apos cada alteracao com valores ficticios para comprovar que funciona, mas nao registre os testes na documentacao.
+- CUIDADO: Nao refaca sistemas inteiros do zero. Apenas adicione/modifique a mecanica pedida em cima do existente.
+
+================================================================================
+FIX 1: Mensagem de nome do monstro centralizada
+================================================================================
+
+PROBLEMA: Ao interagir com o altar, a mensagem "*Nome do monstro* ouviu voce. Corra." aparece na parte de baixo da tela (acima da hotbar), enquanto a descricao do monstro aparece centralizada. O usuario quer que ambas fiquem centralizadas, no mesmo tamanho e posicao.
+
+LOCAIS:
+1. Funcao updateInteraction(), linhas ~3951-3952:
+   CODIGO ATUAL:
+     this.nameMessage = MonsterTypes[typeKey].name + ' ouviu voce. Corra.';
+     this.showSummonDesc(this.nameMessage);
+
+2. Funcao spawnMonster(), linhas ~3812-3814:
+   CODIGO ATUAL:
+     this.nameMessage = '';
+     this.hideSummonDesc();
+     this.showMessage(mt.desc, 5.0);
+
+3. CSS dos elementos #message e #summon-desc (linhas ~143-173):
+   #message: posicao absolute, top:50%, left:50%, transform:translate(-50%,-50%), font-size:29px, z-index:10
+   #summon-desc: posicao absolute, bottom:80px, left:50%, transform:translateX(-50%), font-size:18px, z-index:10
+
+ALTERACAO:
+- Substituir this.showSummonDesc(this.nameMessage) por this.showMessage(this.nameMessage, 5.0) na linha 3952.
+- Manter o this.showMessage(mt.desc, 5.0) em spawnMonster() — ele substituira naturalmente a mensagem de nome quando o monstro spawnar.
+- Remover o this.nameMessage = '' e this.hideSummonDesc() de spawnMonster() (linhas 3812-3813) se nao forem mais necessarios, ou mantê-los como redundancia segura.
+- Nao alterar o CSS. O elemento #message ja esta centralizado e com tamanho adequado.
+
+FLUXO RESULTANTE:
+1. Jogador interage com o altar → mensagem "X ouviu voce. Corra." aparece CENTRALIZADA por 5s
+2. Monstro spawna → descricao do monstro aparece CENTRALIZADA por 5s (substitui a anterior)
+
+================================================================================
+FIX 2: Decoy - destruir artefato falso ao derrotar o monstro
+================================================================================
+
+PROBLEMA: Quando todos os artefatos reais sao coletados e o round termina (checkGameState), o artefato falso criado pelo monstro Decoy permanece no mapa renderizando mesmo depois do round acabar. Ele so e limpo na proxima chamada de selectArtifactsForRound().
+
+LOCAL: Funcao checkGameState(), linhas ~3724-3786.
+
+CODIGO ATUAL (trecho relevante em ~3730-3732):
+  if (allCollected) {
+    for (const m of this.activeMonsters) m.die();
+    this.activeMonsters = [];
+    ...
+
+CAUSA: O artefato falso (art.isFake === true) e ignorado na verificacao de allCollected (linha 3728: if (!art.isFake && !art.collected)), mas nunca e removido de this.artifactEntities quando o round termina.
+
+ALTERACAO: Apos a linha que esvazia this.activeMonsters (e antes da mensagem "Round complete"), adicionar:
+  this.artifactEntities = this.artifactEntities.filter(a => !a.isFake);
+
+Isso garante que artefatos falsos sejam destruidos imediatamente ao finalizar o round, independentemente de terem sido coletados ou nao.
+
+PONTO DE INSERCAO PRECISO: Entre a linha que faz this.activeMonsters = [] (linha ~3732) e a linha this.summoning = false (linha ~3733), ou logo apos. Garanta que a filtragem ocorra antes de qualquer renderizacao pos-round.
+
+================================================================================
+FIX 3: Jester - sempre andando, so parar quando pego por trap
+================================================================================
+
+PROBLEMA: O Jester (MonsterType 'jester') vai ate uma trap e para ao lado dela sem pisar, porque o threshold de contato (nearestDist < TILE_SIZE * 0.2, ~6.4px) e muito rigoroso. O pathfinding leva o Jester ate o centro do tile, mas a coordenada exata da trap pode estar numa posicao que nao satisfaz esse threshold.
+
+LOCAL: Funcao updateJester(), linhas ~2403-2431.
+
+CODIGO ATUAL:
+  updateJester(dt) {
+    if (this.stunTimer > 0) { this.stunTimer -= dt; if (this.stunTimer <= 0) this.stunTimer = 0; return; }
+    let nearest = null; let nearestDist = Infinity;
+    for (const t of this.game.traps) {
+      const dx = t.x - this.px; const dy = t.y - this.py;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < nearestDist) { nearestDist = dist; nearest = t; }
+    }
+    if (!nearest) { this.trapSeeking = false; return; }
+    if (nearestDist < TILE_SIZE * 0.2) {
+      this.stunTimer = nearest.stun || 0;
+      const idx = this.game.traps.indexOf(nearest);
+      if (idx >= 0) this.game.traps.splice(idx, 1);
+      this.path = null;
+      return;
+    }
+    this.jesterPathRecalc -= dt;
+    const stx = Math.floor(this.px / TILE_SIZE);
+    const sty = Math.floor(this.py / TILE_SIZE);
+    const gtx = Math.floor(nearest.x / TILE_SIZE);
+    const gty = Math.floor(nearest.y / TILE_SIZE);
+    if (!this.path || this.jesterPathRecalc <= 0) {
+      this.path = this.game.findPath(stx, sty, gtx, gty);
+      this.jesterPathRecalc = 0.5;
+    }
+    if (this.path && this.path.length > 0) {
+      this.followPath(dt);
+    }
+  }
+
+ANALISE DO PROBLEMA:
+- O Jester encontra a trap mais proxima
+- Se nearestDist < TILE_SIZE * 0.2 (6.4px) → pisa na trap (stun e remove)
+- Senao: recalcula path periodica e segura e segue o path
+- O path leva ao centro do tile (gtx, gty), nao a coordenada exata da trap (nearest.x, nearest.y)
+- Quando chega no centro do tile ao lado da trap, o Jester pode parar porque this.path se esgota (path.length === 0) e nao ha logica para continuar andando
+- O Jester so recalcula o path quando this.path e null OU jesterPathRecalc <= 0, mas se o path existe e tem length 0, ele nunca recalcula
+
+ALTERACAO:
+
+1. Alterar a condicao de pisar na trap de nearestDist < TILE_SIZE * 0.2 para nearestDist < TILE_SIZE * 0.6 (~19.2px). Isso garante que o Jester pise na trap assim que chegar no tile adjacente.
+
+2. Garantir que o Jester SEMPRE tenha um path valido para andar enquanto houver traps no mapa, so parando quando stunTimer > 0. Modificar a logica para:
+   - Se stunTimer > 0: decrementar e retornar (parado)
+   - Encontrar nearest trap
+   - Se nearestDist < TILE_SIZE * 0.6: pisar na trap (stun, remover, path = null, retornar)
+   - Senao: recalcular path para o tile da nearest trap a cada frame (sem depender de jesterPathRecalc == 0 ou path existente). Usar uma logica mais simples: sempre recalcular o path se ele for null ou tiver comprimento 0, com taxa de recalc maxima de 0.1s para evitar CPU excessiva.
+   - Se o path existe e tem length > 0: seguir o path
+
+3. Remover a condicao if (!nearest) { this.trapSeeking = false; return; } — em vez disso, se nao houver traps, o Jester deve se mover aleatoriamente ou patrulhar waypoints (comportamento padrao de patrulha). IMPORTANTE: o Jester nao deve ficar parado mesmo sem traps.
+
+4. Verificar se a propriedade this.trapSeeking e usada em outro lugar; se nao for, pode ser removida ou mantida como inercial.
+
+CODIGO NOVO (esboco):
+  updateJester(dt) {
+    if (this.stunTimer > 0) { this.stunTimer -= dt; if (this.stunTimer <= 0) this.stunTimer = 0; return; }
+    let nearest = null; let nearestDist = Infinity;
+    for (const t of this.game.traps) {
+      const dx = t.x - this.px; const dy = t.y - this.py;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < nearestDist) { nearestDist = dist; nearest = t; }
+    }
+    if (nearest && nearestDist < TILE_SIZE * 0.6) {
+      this.stunTimer = nearest.stun || 0;
+      const idx = this.game.traps.indexOf(nearest);
+      if (idx >= 0) this.game.traps.splice(idx, 1);
+      this.path = null;
+      return;
+    }
+    if (nearest) {
+      const gtx = Math.floor(nearest.x / TILE_SIZE);
+      const gty = Math.floor(nearest.y / TILE_SIZE);
+      if (!this.path || this.path.length === 0) {
+        const stx = Math.floor(this.px / TILE_SIZE);
+        const sty = Math.floor(this.py / TILE_SIZE);
+        this.path = this.game.findPath(stx, sty, gtx, gty);
+        this.jesterPathRecalc = 0.5;
+      }
+      if (this.path && this.path.length > 0) {
+        this.followPath(dt);
+      } else {
+        // Path falhou ou esta bloqueado, anda em direcao a trap diretamente
+        this.moveToward(nearest.x, nearest.y, dt);
+      }
+    } else {
+      // Sem traps: patrulha ou move aleatoriamente (NAO parar)
+      this.patrolBehavior(dt);
+    }
+  }
+
+NOTA: O metodo moveToward() pode ser implementado como movimento linear em direcao a (targetX, targetY) usando a velocidade do monstro. O metodo patrolBehavior() pode reutilizar a logica existente de patrulha de waypoints (updatePatrol, etc.).
+
+================================================================================
+FEATURE 4: Icones CSS profissionais para as classes de personagem
+================================================================================
+
+PROBLEMA: Atualmente os icones das classes sao letras soltas (O, S, H, Y, B, D, T, L, K, $, U, M, W, A, G, C, R2, V, LK, P) exibidas como textContent dentro de divs de 48x48px no seletor de classe. O usuario quer icones CSS profissionais, minimalistas, que representem visualmente cada classe.
+
+LISTA DE CLASSES:
+  oracle (Delivery Guy)       - icon: 'O'  - revela monstro
+  scout (Weird Thief)         - icon: 'S'  - speed burst
+  redhacker (Red Hacker)      - icon: 'H'  - clone perseguidor
+  commandyeller (Command Yell)- icon: 'Y'  - grito de comando
+  boringtrapper (Boring Trap) - icon: 'B'  - armadilhas maiores
+  dyingguy (Dying Guy)        - icon: 'D'  - fingir de morto
+  teevee (Tee Vee)            - icon: 'T'  - coleta atraves de paredes
+  annoyinglooper (Annoy Loop) - icon: 'L'  - parede temporal
+  timetraveler (Time Traveler)- icon: 'K'  - reset cooldown
+  luckyspender (Lucky Spend)  - icon: '$'  - duplicar itens
+  utilityplayer (Utility Play)- icon: 'U'  - 5 itens iniciais
+  mightytinkerer (Mighty Tin) - icon: 'M'  - zona de engenharia
+  wiredgirl (Wired Girl)      - icon: 'W'  - teleporte para artefato
+  archaeologist (Archaeolog)  - icon: 'A'  - moeda extra
+  untitledgeneralist (Untitled)- icon: 'G' - invulnerabilidade
+  clown (Clown)               - icon: 'C'  - casca de banana
+  rerroler (Rerroler)         - icon: 'R2' - rerrolar lojas
+  vex (Vex)                   - icon: 'V'  - atravessa paredes
+  lockerguy (Locker Guy)      - icon: 'LK' - trancar porta
+  helpfulpriest (Helpful Priest)- icon: 'P' - curar/reviver
+
+LOCAIS:
+1. Definicao das classes PlayerClasses, linhas ~1180-1341 (cada classe tem uma propriedade icon)
+2. Renderizacao dos icones, linha ~3079: div.textContent = cls.icon;
+3. CSS dos icones, linhas ~200-206: .player-setup-panel .class-icons div
+
+ALTERACAO:
+
+PASSO 1 - NOVA PROPRIEDADE:
+Adicionar uma nova propriedade opcional `cssIcon` em cada classe em PlayerClasses. Exemplo:
+  oracle: {
+    ...existing props...,
+    icon: 'O',           // manter para fallback
+    cssIcon: 'oracle-icon'  // classe CSS para o icone estilizado
+  }
+
+PASSO 2 - CSS DOS ICONES:
+Adicionar regras CSS para cada classe usando pseudo-elementos ::before ou ::after ou SVG inline via data URI para criar icones minimalistas (48x48px, 2 cores no maximo, fundo escuro, borda fina).
+
+CONCEITOS DE DESIGN PARA CADA CLASSE:
+
+- Oracle (Delivery Guy): Olho estilizado (circulo com iris/pupila) - simbolo de visao/revelacao
+- Scout (Weird Thief): Pegada/sapato com riscos de velocidade - movimento
+- Red Hacker: Duas silhuetas/circulos sobrepostos - clone
+- Commands Yeller: Ondas de som concentricas (> > >)
+- Boring Trapper: Pinça de urso estilizada (U invertido com dentes) - beartrap
+- Dying Guy: Esqueleto/caveira minimalista ou 'X' nos olhos
+- TeeVee: Antena de TV com ondas
+- Annoying Looper: Retangulo (parede) com relogio ou infinito
+- Time Traveler: Relogio/ampulheta com seta circular
+- Lucky Spender: Moeda com estrela no centro
+- Utility Player: Caixa/baú com '?' ou engrenagem
+- Mighty Tinkerer: Engrenagem com zona circular ao redor
+- Wired Girl: Raio eletrico em ziguezague
+- Archaeologist: Picareta/escavacao ou osso
+- Untitled Generalist: Escudo com cruz
+- Clown: Sapatos de palhaco ou banana
+- Rerroler: Duas setas circulares formando loop
+- Vex: Fantasma com seta atravessando parede
+- Locker Guy: Cadeado com chave
+- Helpful Priest: Cruz/cura com coracao
+
+IMPLEMENTACAO TECNICA DOS ICONES:
+Usar uma das seguintes abordagens (escolha a mais adequada):
+
+OPCAO A - Unicode + CSS:
+  .class-icon-oracle::before { content: '\1F441'; font-size: 24px; } /* olho */
+  Usar caracteres unicode existentes para representar visualmente.
+
+OPCAO B - SVG inline como background-image via data URI:
+  .class-icon-scout div {
+    background-image: url("data:image/svg+xml,...");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  Vantagem: controle total do design. Desvantagem: SVG inline pode ser verboso.
+
+OPCAO C - Pseudo-elementos com bordas/background CSS puro:
+  .class-icon-vex div::before {
+    content: '';
+    display: block;
+    width: 20px; height: 20px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    /* etc */
+  }
+  Vantagem: sem dependencia externa, totalmente via CSS.
+
+OPCAO RECOMENDADA: Combinar OPCAO A (unicode para icones simples) com OPCAO C (CSS puro para icones mais elaborados).
+
+EXEMPLO DE IMPLEMENTACAO (esboco CSS):
+  .player-setup-panel .class-icons div.oracle-icon {
+    font-size: 0; /* esconde o textContent */
+  }
+  .player-setup-panel .class-icons div.oracle-icon::before {
+    content: '\25C9'; /* circulo com ponto no centro = olho */
+    font-size: 28px;
+    color: #4fc3f7;
+  }
+
+  .player-setup-panel .class-icons div.scout-icon {
+    font-size: 0;
+  }
+  .player-setup-panel .class-icons div.scout-icon::before {
+    content: '\27A1'; /* seta para direita com tracos */
+    font-size: 26px;
+    color: #ffcc00;
+  }
+
+PASSO 3 - RENDERIZACAO:
+Modificar a linha ~3079 de:
+  div.textContent = cls.icon;
+para:
+  div.textContent = cls.cssIcon ? '' : cls.icon;  // textContent vazio se tiver cssIcon
+  if (cls.cssIcon) div.classList.add(cls.cssIcon);
+
+Isso garante compatibilidade reversa: classes sem cssIcon continuam mostrando a letra.
+
+PASSO 4 - AJUSTE CSS:
+Os icones CSS podem precisar de ajustes no tamanho da fonte e cor. Garanta que:
+- Cada icone tenha uma cor distinta para facilitar identificacao visual
+- O fundo escuro (#1a1a2e) contraste bem com as cores dos icones
+- O tamanho total do icone preencha os 48x48px de forma harmoniosa
+
+SUGESTOES DE CORES POR CLASSE (usar cor no pseudo-elemento):
+  oracle    = #4fc3f7 (azul claro)
+  scout     = #ffcc00 (amarelo)
+  redhacker = #ff4444 (vermelho)
+  command   = #ff8800 (laranja)
+  trapper   = #886644 (marrom)
+  dyingguy  = #aaaaaa (cinza)
+  teevee    = #00ffaa (verde agua)
+  looper    = #8844ff (roxo)
+  timetravel= #ff66aa (rosa)
+  luckyspend= #ffdd00 (ouro)
+  utility   = #66aaff (azul medio)
+  tinkerer  = #ff6600 (laranja escuro)
+  wiredgirl = #00ccff (ciano)
+  archaeolog= #cc9966 (bege)
+  generalist= #44ff44 (verde)
+  clown     = #ff44ff (magenta)
+  rerroler  = #aaff00 (lima)
+  vex       = #aa66ff (lavanda)
+  lockerguy = #888800 (verde oliva)
+  priest    = #ffffff (branco)
+
+PASSO 5 - TESTE VISUAL:
+Apos implementar, verifique que:
+- Todos os 20 icones aparecem corretamente no setup de cada jogador
+- O hover e selected state funcionam (borda e fundo mudam)
+- Nao ha quebra de layout (wrap, tamanho, alinhamento)
+- A descricao ainda aparece corretamente no mouseenter
+
+================================================================================

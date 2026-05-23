@@ -1,0 +1,339 @@
+================================================================================
+MEGA PROMPT - ALTAR 2x2 + SUMMON REFINAMENTO + FIXES MONSTROS + F1 PERSISTE
+================================================================================
+
+INSTRUCOES GLOBAIS OBRIGATORIAS:
+- Nao crie nenhum arquivo separado (.css, .js, .py, .java, .cpp, .c, .css, etc.).
+- Toda e qualquer alteracao deve ser feita exclusivamente no arquivo SummonGame.html.
+- Siga o estilo de codigo existente: mesmo padrao de nomenclatura, aspas, identacao.
+- Todas as alteracoes DEVEM ser REGISTRADAS na Documentacao_Completa.txt de forma profissional, limpa e bem estruturada (secao CHANGELOG no final, com data, problema, solucao, mudancas no codigo).
+- Leia TODO o SummonGame.html e TODA a Documentacao_Completa.txt antes de implementar.
+- Implemente AGORA, sem questionamentos ou adicoes nao solicitadas.
+- NAO use caracteres bugados/corrompidos (UTF-8 apenas). Exemplo do que NAO fazer: ðâï¿½ðâ¤.
+- A IA deve testar o que implementou usando valores ficticios para provar que funciona. NAO registre os testes na documentacao.
+- CUIDADO: NAO refaca sistemas inteiros do zero. Apenas adicione/altere o necessario para cada requisito.
+- Ao adicionar algo novo, faca de forma responsiva e escalavel para que futuramente seja facil adicionar mais conteudo ou modificacoes.
+
+================================================================================
+REQUISITO 1 - ALTAR 2x2 (4 TILES EM QUADRADO)
+================================================================================
+
+PROBLEMA: Atualmente o jogo so reconhece UM tile 'A' como altar (game.altarPos armazena apenas o ultimo encontrado). Nao ha suporte para 4 tiles 'A' em formato 2x2 agindo como um unico altar maior.
+
+SOLUCAO: Implementar sistema de deteccao de altar 2x2, similar ao sistema de agrupamento de portas (double door). Quando 4 tiles 'A' formarem um quadrado 2x2, o jogo deve trata-los como UM unico altar.
+
+MUDANCAS NO CODIGO:
+
+a) Game - NOVAS PROPRIEDADES:
+   altarGroups: array de objetos { minX, minY, maxX, maxY, centerX, centerY } - grupos de 2x2 detectados
+   altarSingles: array de {x, y} - tiles 'A' isolados (nao parte de grupo 2x2)
+   Substituir o uso de game.altarPos (unico) por deteccao de grupos + singles.
+
+b) parseMap() - MODIFICAR:
+   Coletar TODAS as posicoes de 'A' em um array (ex: altarPositions[]), nao apenas a ultima.
+   Remover a propriedade altarPos do retorno.
+
+c) Game.loadMap() - NOVA LOGICA (apos criar doorEntities):
+   Receber todas as posicoes de 'A' do mapData.
+   Detectar grupos 2x2:
+     Para cada posicao 'A' (x, y), verificar se (x+1, y), (x, y+1), (x+1, y+1) tambem sao 'A'.
+     Se sim: e um grupo 2x2. Calcular:
+       minX = x, minY = y (canto superior esquerdo)
+       maxX = x+1, maxY = y+1 (canto inferior direito)
+       centerX = (minX + maxX + 1) / 2 * TILE_SIZE (centro em pixels entre os 4 tiles)
+       centerY = (minY + maxY + 1) / 2 * TILE_SIZE
+     Armazenar em altarGroups[].
+     Remover as 4 posicoes do pool de singles.
+   Para as posicoes 'A' restantes (nao agrupadas): adicionar em altarSingles[].
+
+d) Player.checkInteraction() - MODIFICAR:
+   Verificar distancia para CADA altar (grupo ou single):
+     - Para grupos: usar centerX/centerY como posicao de referencia
+     - Para singles: usar (x+0.5)*TILE_SIZE, (y+0.5)*TILE_SIZE
+   Escolher o mais proximo dentro do raio de interacao (1.5 tiles).
+   Armazenar em p.interactTarget se for altar: { type: 'altar', isGroup: bool, groupData, x, y }
+
+e) Game.renderInteractionCircle() - MODIFICAR:
+   Se o alvo for um altar EM GRUPO, desenhar o circulo de progresso no CENTRO do grupo (centerX, centerY).
+   Se for altar single, manter comportamento atual (desenhar no tile do altar).
+
+f) Game.renderTiles() - MODIFICAR (case 'A'):
+   Se o tile 'A' faz parte de um grupo 2x2, renderizar os 4 tiles como uma unica area de altar (cor vermelha #ff4444 em todos os 4, talvez com um glow central unificado).
+   Se for altar single, manter renderizacao atual.
+
+g) Game - altarPos removido:
+   Substituir todas as referencias a game.altarPos pelo novo sistema de altarGroups + altarSingles.
+
+h) Game.findPath() - BFS:
+   Tile 'A' continua passavel (como antes). Nao requer alteracao.
+
+i) Altar interaction:
+   Quando o player interage com um grupo 2x2, o comportamento e identico a um altar single (hold E por 2s para invocar). Apenas a posicao da barra de progresso e o centro visual mudam.
+
+================================================================================
+REQUISITO 2 - TEMPOS DE SUMMON
+================================================================================
+
+PROBLEMA: Tempo para summonar no altar (interactDuration) e 4 segundos. Tempo de summonDelay (espera ate o monstro spawnar) e 3 segundos.
+
+SOLUCAO: Reduzir tempo de interacao do altar pela metade. Aumentar summonDelay em 2 segundos.
+
+MUDANCAS NO CODIGO:
+
+a) Game.updateInteraction() - ALTERAR:
+   No trecho onde type === 'altar', mudar duration de 4 para 2.
+   No trecho onde this.summonDelay e definido, mudar de 3 para 5.
+
+b) ATENCAO: Nao alterar tempos de outros tipos de interacao (artifact, door, shop, trash). Apenas altar.
+
+================================================================================
+REQUISITO 3 - MENSAGEM DO SUMMON (NOME DURANTE DELAY + DESCRICAO NO SPAWN)
+================================================================================
+
+PROBLEMA: Ao ativar o altar, o jogo mostra "All ability cooldowns reset!" (mensagem indesejada). O nome do monstro so aparece DEPOIS do summonDelay (em spawnMonster), e a descricao aparece acima da hotbar em vez do centro da tela.
+
+SOLUCAO:
+- Ao ativar o altar, DETERMINAR O TIPO DE MONSTRO IMEDIATAMENTE (antes do summonDelay).
+- NAO mostrar "All ability cooldowns reset!".
+- Mostrar "*Nome* ouviu voce. Corra." no CENTRO da tela durante TODO o summonDelay.
+- Quando spawnMonster() for chamado, limpar a mensagem de nome e mostrar a DESCRICAO no centro da tela por 3 segundos.
+
+MUDANCAS NO CODIGO:
+
+a) Game - NOVA PROPRIEDADE:
+   pendingMonsterType: string | null - tipo do monstro ja decidido na ativacao do altar.
+   Inicializar como null no constructor e resetar em loadMap().
+
+b) Game.updateInteraction() - MODIFICAR bloco do altar:
+   REMOVER: this.showMessage('All ability cooldowns reset!')
+   MANTER: o reset de cooldowns das habilidades (abilityCooldown = 0, etc.)
+   ADICIONAR:
+     Decidir tipo do monstro AGORA (nao esperar spawnMonster):
+       const typeKey = this.debugSelectedMonster ? this.debugSelectedMonster : weightedRandom(MonsterTypes);
+       this.pendingMonsterType = typeKey;
+     Mostrar mensagem de nome imediatamente:
+       this.showMessage(MonsterTypes[typeKey].name + ' ouviu voce. Corra.');
+     Configurar timer para manter a mensagem visivel durante o summonDelay:
+       Opcao 1: Definir this.summonPhase='name', this.summonPhaseTimer=this.summonDelay,
+                this.summonPhaseMessage = nome + ' ouviu voce. Corra.'
+       Opcao 2: Usar showMessage com messageTimer grande
+     ESCOLHA a opcao mais limpa que evite conflito com showMessage normal.
+
+c) Game.spawnMonster() - MODIFICAR:
+   USAR this.pendingMonsterType em vez de determinar novamente.
+   Limpar this.pendingMonsterType apos usar.
+   Limpar a mensagem de nome do centro.
+   Mostrar a descricao do monstro no CENTRO da tela por 3 segundos:
+     - Usar showMessage(mt.desc) com messageTimer = 3.0
+     - Ou usar o sistema summonPhase com phase 'desc' e timer 3.0
+   NAO usar showSummonDesc() (que mostra acima da hotbar). A descricao deve aparecer no CENTRO (#message).
+   A Fase 2 (descricao) do sistema summonPhase atual mostrava em #summon-desc (acima da hotbar). Agora deve mostrar no centro via #message.
+
+d) Game.renderMessage() - SEM ALTERACOES (ja atualiza #message corretamente).
+
+e) ELEMENTO #summon-desc:
+   Pode permanecer no HTML (para compatibilidade) mas NAO deve ser usado neste fluxo.
+   Ou pode ser removido do HTML se nao for mais util.
+
+f) Game.update() - MODIFICAR bloco "Summon phase sequencial":
+   O bloco atual gerencia summonPhase 'name' e 'desc'. Precisa ser ajustado para:
+   - 'name': o timer agora cobre o summonDelay inteiro (5s), e a mensagem fica no centro.
+   - 'desc': agora mostra no centro via showMessage em vez de showSummonDesc.
+   Ou, alternativamente, simplificar: usar apenas showMessage com timers manuais e remover summonPhase.
+
+g) IMPORTANTE: O reset de cooldown das habilidades (trecho com abilityCooldown=0, etc.) DEVE continuar sendo executado. Apenas a mensagem "All ability cooldowns reset!" e removida.
+
+================================================================================
+REQUISITO 4 - MONSTER FIXES
+================================================================================
+
+PROBLEMA 4A - JESTER NAO ANDA SOBRE TRAPS:
+Atualmente o Jester, ao buscar traps (trapSeeking), para quando chega PERTO da trap em vez de andar sobre ela.
+No updateJester(), a logica de deteccao de trap (nearestDist < TILE_SIZE * 0.5) so funciona se o Jester estiver muito perto, mas ele para de se mover antes de alcancar a trap porque o pathfinding BFS evita tiles com traps ou a colisao/caminhada falha.
+
+SOLUCAO 4A:
+No updateJester(), o monstro deve caminhar ATE em cima da trap (dist < TILE_SIZE * 0.2) em vez de parar a 0.5 tile.
+Ajustar o threshold de chegada na trap: mudar de TILE_SIZE * 0.5 para TILE_SIZE * 0.2.
+Verificar se o pathfinding/BFS esta bloqueando o tile da trap. Se estiver, o Jester deve poder andar sobre traps (ignorar traps no pathfinding).
+No followPath, o Jester em modo trapSeeking nao deve ser bloqueado por traps.
+O Jester ainda ativa a trap ao chegar nela (stun e remocao).
+
+PROBLEMA 4B - ALIEN GRANDE APENAS EM PATROL:
+Atualmente Alien so e grande quando nao esta transformado (!isTransformed). O isTransformed fica true quando detecta player. O usuario quer que:
+- Em PATROL: Alien pequeno (radius * 0.5) - comportamento atual
+- Em CHASE: Alien GRANDE (radius normal, isTransformed = true)
+- Em SEARCH: Alien GRANDE (radius normal, isTransformed = true)
+
+SOLUCAO 4B:
+Modificar a logica de transformacao do Alien:
+- isTransformed = (this.state === 'chase' || this.state === 'search')
+- Ou seja, o Alien so e pequeno em patrol. Em chase e search, ele fica grande.
+- Remover a deteccao do player como gatilho de transformacao.
+- A velocidade do Alien:
+  Patrol: speed = baseSpd / 3 (lento, pequeno)
+  Chase: speed = baseSpd * (4/3) (rapido, grande, ativo)
+  Search: speed = baseSpd (normal, grande mas nao em perseguicao ativa)
+
+MUDANCAS:
+No update() do monstro, bloco if (this.type === 'alien'):
+  Mudar de:
+    const detected = this.canSeePlayer() || this.canDetectBehind();
+    this.isTransformed = detected;
+  Para:
+    this.isTransformed = (this.state === 'chase' || this.state === 'search');
+
+No render() do monstro:
+  if (this.type === 'alien' && !this.isTransformed) radius = baseRadius * 0.5;
+  Isso permanece igual, mas agora isTransformed reflete o estado, nao a deteccao.
+
+PROBLEMA 4C - RUSH NAO FICA MAIS RAPIDO COM HABILIDADES:
+Atualmente notifyRushMonsters() adiciona 20 a rushSpeedBonus e ao speed do monstro. Porem, no update() do monstro, o speed e recalculado DO ZERO todo frame: this.speed = (mt.speedMod || 1) * this.game.getMonsterSpeed(). Isso sobrescreve o bonus adicionado por notifyRushMonsters, fazendo com que Rush nunca fique mais rapido.
+
+SOLUCAO 4C:
+No update() do monstro, apos calcular this.speed, adicionar this.rushSpeedBonus:
+  this.speed = (mt.speedMod || 1) * this.game.getMonsterSpeed() + this.rushSpeedBonus;
+Isso garante que o bonus acumulado seja aplicado e mantido.
+
+PROBLEMA 4D - RAT KING: RATOS COMEM TRAPS 65% MAIS RAPIDO:
+Atualmente ratos do Rat King tem devourTimer = 35 (segundos para comer uma trap). O usuario quer 65% mais rapido.
+
+SOLUCAO 4D:
+No updateRatEntities(), na linha onde rato comeca a devorar:
+  Mudar de: rato.devourTimer = 35;
+  Para: rato.devourTimer = 35 * (1 - 0.65) = 35 * 0.35 = 12.25;
+  Ou seja: rato.devourTimer = 35 * 0.35;
+
+PROBLEMA 4E - DARKNESS: REMOVER COMPLETAMENTE:
+Remover o monstro Darkness do jogo inteiramente.
+
+SOLUCAO 4E:
+a) MonsterTypes - REMOVER a entrada 'darkness'.
+b) MonsterEntity constructor - REMOVER propriedades: (darkness nao tem propriedades especiais no constructor atualmente, mas verificar).
+c) MonsterEntity.update() - REMOVER bloco: if (this.type === 'darkness') { this.speed = 60; }
+d) Game constructor - REMOVER: this.darknessTimer = 0; this.darknessActive = false;
+e) Game.loadMap() - REMOVER: this.darknessTimer = 0; this.darknessActive = false;
+f) Game.restart() - REMOVER: this.darknessActive = false; this.darknessTimer = 0;
+g) Game.update() - REMOVER bloco:
+     if (this.darknessActive) {
+       this.darknessTimer -= dt;
+       if (this.darknessTimer <= 0) {
+         this.darknessActive = false;
+         this.darknessTimer = 0;
+         this.showMessage('The darkness fades...');
+       }
+     }
+h) Game.spawnMonster() - REMOVER bloco:
+     if (typeKey === 'darkness') {
+       this.darknessTimer = 5.0;
+       this.darknessActive = true;
+       if (this.activeMonsters.length > 0) {
+         this.activeMonsters[this.activeMonsters.length - 1].speed = 60;
+       }
+     }
+i) Game.checkGameState() - REMOVER: this.darknessActive = false; this.darknessTimer = 0;
+j) Renderizacao - Verificar se ha alguma referencia a darknessActive no render ou buildLightmap.
+   Se houver, remover.
+
+================================================================================
+REQUISITO 5 - F1 MONSTER SELECTOR PERSISTENTE
+================================================================================
+
+PROBLEMA: Atualmente, em spawnMonster(), o tipo de monstro escolhido pelo menu F1 (debugSelectedMonster) so e usado se debugMode (F1) estiver ativo no momento do spawn.
+
+SOLUCAO: Uma vez selecionado um monstro no menu F1, ele deve persistir para o PROXIMO summon, mesmo que F1 esteja desligado. O jogador deve explicitamente clicar em "Random" no menu para voltar a sortear aleatoriamente.
+
+MUDANCAS NO CODIGO:
+
+a) Game - NOVA PROPRIEDADE:
+   selectedMonsterType: string | null - armazena o tipo selecionado no menu F1.
+   Inicializar como null.
+
+b) Game.spawnMonster() - ALTERAR:
+   LINHA ATUAL: const typeKey = (this.debugMode && this.debugSelectedMonster) ? this.debugSelectedMonster : weightedRandom(MonsterTypes);
+   LINHA NOVA: const typeKey = this.selectedMonsterType || weightedRandom(MonsterTypes);
+   Ou seja: se selectedMonsterType nao for null, usa ele. Senao, sorteia aleatorio.
+
+c) function selectDebugMonster(typeKey) - ALTERAR:
+   Alem de atualizar debugSelectedMonster, atualizar TAMBEM game.selectedMonsterType.
+     game.selectedMonsterType = typeKey;
+     game.showMessage(typeKey ? 'Next summon: ' + MonsterTypes[typeKey].name : 'Next summon: Random');
+
+d) function updateMonsterSelector(game) - MODIFICAR:
+   Usar game.selectedMonsterType em vez de game.debugSelectedMonster para destacar a selecao atual.
+   A logica de exibicao (highlight, checkmark) deve refletir selectedMonsterType.
+
+e) selectedMonsterType NUNCA e resetado automaticamente (nem em loadMap, nem em restart).
+   So e alterado quando o jogador clica em um monstro ou "Random" no menu F1.
+   Se o jogador clicar em "Random", selectedMonsterType = null, e o proximo summon sera aleatorio.
+
+f) O menu F1 (monster-selector) so aparece com F1 ligado (debugMode). Isso permanece igual.
+   A diferenca e que a selecao feita nele persiste mesmo apos desligar F1.
+
+================================================================================
+REQUISITO 6 - REMOVER TESTES DA DOCUMENTACAO E DO HTML
+================================================================================
+
+PROBLEMA: Ha testes registrados na Documentacao_Completa.txt e codigo de teste (runVisualTests + botao) no SummonGame.html que devem ser removidos.
+
+SOLUCAO:
+
+a) SummonGame.html - REMOVER:
+   - O botao "Run Visual Tests" do #settings-panel (linha com id="btn-visual-tests").
+   - A funcao global runVisualTests().
+   - O event listener que conecta o botao a funcao: document.getElementById('btn-visual-tests').addEventListener('click', runVisualTests);
+
+b) Documentacao_Completa.txt - REMOVER:
+   - Toda a secao "E) TESTES REALIZADOS (runVisualTests)" da ALTERACAO que adicionou os testes.
+   - Remover entradas do changelog que descrevem a adicao de runVisualTests.
+   - Remover mencoes aos testes em outras secoes.
+   - Nao remover testes de outros prompts/sistemas que nao sejam estes testes visuais especificos.
+
+c) Nota: Apenas os testes de textura visual (runVisualTests) e suas documentacoes devem ser removidos.
+   Nao remover o sistema de autotiling/texturas em si, apenas os testes.
+
+================================================================================
+REGISTRO NA DOCUMENTACAO
+================================================================================
+
+Apos implementar TUDO, registre na Documentacao_Completa.txt:
+
+1. Na secao CHANGELOG, adicione uma nova entrada com data e titulo:
+   "ALTERACAO XX - SISTEMA DE ALTAR 2x2 + SUMMON REFINAMENTO + FIXES MONSTROS + F1 PERSISTENTE + REMOCAO DE TESTES"
+
+2. Descreva cada requisito como subsecao (A, B, C, D, E, F).
+
+3. Para cada alteracao, documento:
+   - PROBLEMA (o que estava errado ou faltando)
+   - SOLUCAO (o que foi implementado)
+   - MUDANCAS NO CODIGO (lista de metodos/linhas alterados, novos atributos, etc.)
+   - Se houver novas classes/propriedades, documente na secao 50+ com estrutura de dados completa.
+
+4. Atualize as secoes afetadas da documentacao (ex: SECAO 11 - SISTEMA DO ALTAR, SECAO 12 - MAQUINA DE ESTADOS DO MONSTRO, etc.).
+
+================================================================================
+ORDEM DE IMPLEMENTACAO SUGERIDA
+================================================================================
+
+1. Backup: faca uma copia do SummonGame.html atual antes de comecar.
+2. Requisito 6 primeiro: remover testes (runVisualTests + documentacao) para limpar o caminho.
+3. Requisito 4E: remover Darkness (simples e evita conflitos).
+4. Requisito 4C: corrigir Rush (mudanca de 1 linha).
+5. Requisito 4D: corrigir Rat King devourTimer (mudanca de 1 linha).
+6. Requisito 4B: corrigir Alien (logica de transformacao).
+7. Requisito 4A: corrigir Jester (threshold de distancia).
+8. Requisito 2: alterar tempos de summon (duration e summonDelay).
+9. Requisito 5: F1 monster selector persistente.
+10. Requisito 3: mensagens do summon (requer Requisito 5 para funcionar corretamente, pois precisa de selectedMonsterType).
+11. Requisito 1: altar 2x2 (mais complexo, requer alteracoes em parseMap, loadMap, interacao, render).
+12. Registre tudo na Documentacao_Completa.txt.
+
+================================================================================
+VERIFICACAO FINAL
+================================================================================
+
+Apos implementar todas as alteracoes:
+- Abra o SummonGame.html no navegador.
+- Teste cada requisito manualmente com valores ficticios.
+- Nao registre os testes na documentacao.
+- Verifique se nao ha erros no console do navegador.
+- Verifique se a documentacao esta atualizada e consistente.

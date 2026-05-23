@@ -5753,7 +5753,418 @@ C) TESTES:
    TESTE 5 — F1 seletor: forcou Blue Man no proximo summon         PASSOU
    TESTE 6 — Priest: P2 como primeiro slot, navegacao OK           PASSOU
    TESTE 7 — Locker Guy: cadeado em 2 tiles, fecha a cada 1s      PASSOU
+================================================================================
+CHANGELOG - MAIO 2026 (IMPLEMENTACAO DE 10 NOVOS MONSTROS)
+================================================================================
+
+ALTERACAO 21 - 10 NOVOS MONSTROS (JESTER, BALLERINA, ALIEN, MONSTROSITY,
+              DESPERATION, GHOST, DARKNESS, RUSH, RAT KING, DECOY)
+
+   PROBLEMA: O jogo possuia apenas 4 tipos de monstros (normal, blueman,
+   twins, glitch) com comportamentos limitados a variacoes de parametros
+   do FSM padrao (patrol/chase/search). Faltavam monstros com mecanicas
+   unicas que interagissem com outros sistemas do jogo (traps, artefatos,
+   habilidades, iluminacao, etc).
+
+   SOLUCAO: Implementados 10 novos monstros, totalizando 14 tipos.
+   Cada monstro adiciona comportamentos especificos que interagem com
+   sistemas existentes ou introduzem novas mecanicas.
+
+   MUDANCAS NO CODIGO:
+
+   A) MonsterTypes - Novas Entradas (Monstros 1-10):
+      Adicionadas 10 entradas ao objeto MonsterTypes: jester, ballerina,
+      alien, monstrosity, desperation, ghost, darkness, rush, ratking, decoy.
+      Cada entrada contem: name, desc, weight, chaseLoseTime, searchDuration,
+      spawnCount, color, strokeColor, speedMod, randomSpawn.
+
+   B) ArtifactEntity - Novas Propriedades:
+      displayName (string, default 'Artifact'): nome exibido no HUD.
+      isFake (boolean, default false): indica artefato falso (Decoy).
+      decoyRef (MonsterEntity|null): referencia ao Decoy dono do fake.
+
+   C) MonsterEntity - Novas Propriedades:
+      trapSeeking (boolean): Jester - modo de busca de traps.
+      frozen (boolean): Ballerina - congelada por observacao.
+      isTransformed (boolean): Alien - transformado (detectou jogador).
+      ghostTimer (float): Ghost - timer de alternancia visibilidade.
+      ghostVisible (boolean): Ghost - estado visivel atual.
+      rushSpeedBonus (float): Rush - bonus de velocidade acumulado.
+      decoySpeedBoostTimer (float): Decoy - timer de speed boost.
+      jesterPathRecalc (float): Jester - timer para recalculo de path.
+
+   D) MonsterEntity - Novos Metodos:
+      - isPlayerLooking(player): verifica se um jogador esta olhando
+        para o monstro (cone de 120 graus baseado no ultimo movimento).
+      - isBeingWatched(): verifica se PELO MENOS UM jogador vivo esta
+        olhando para o monstro.
+      - updateJester(dt): logica de trap-seeking (encontra trap mais
+        proxima via distancia euclidiana, usa BFS para alcancar,
+        destroi a trap ao chegar com distancia < TILE_SIZE * 0.5,
+        toma o stun da trap).
+
+   E) MonsterEntity.spawn() - Modificado:
+      Adicionada inicializacao de trapSeeking para Jester baseado
+      em game.traps.length > 0.
+
+   F) MonsterEntity.update() - Reescrito:
+      Velocidade: usa (mt.speedMod || 1) para tratar null (Darkness).
+      Jester (trapSeeking): se traps.length === 0, reverte para FSM normal.
+        Senao, executa updateJester(dt) e retorna (pula FSM).
+      Ballerina: verifica isBeingWatched() a cada frame. Se frozen,
+        pula o switch FSM (nao se move) mas registra tileX/tileY.
+      Alien: verifica deteccao (canSeePlayer/canDetectBehind) a cada
+        frame. Ajusta isTransformed e recalcula velocidade (1/3 ou 4/3).
+      Desperation: speed = baseSpeed + collectedArtifacts * 15.
+      Ghost: incrementa ghostTimer, alterna ghostVisible a cada 2s.
+      Decoy: decrementa decoySpeedBoostTimer, aplica 2x speed se ativo.
+      Darkness: forca speed = 60 (ignora getMonsterSpeed/speedMod).
+      Ataque: condicao adicional para pular ataque se Jester em
+        trapSeeking (nao ataca enquanto busca traps).
+
+   G) MonsterEntity.render() - Reescrito:
+      Ghost: se !ghostVisible, retorna sem renderizar (invisivel).
+        Oracle reveal nao revela Ghost invisivel.
+        globalAlpha = 0.7 quando visivel (aspecto fantasmagorico).
+      Tamanho variavel: radius base * 1.2 (Monstrosity), * 0.5 (Alien small).
+        Desperation: escala baseada em collectedArtifacts/artifactCount.
+      Efeitos visuais: shadowColor/shadowBlur para Desperation (glow
+        vermelho), Rush (glow laranja), Decoy (glow roxo), Ballerina
+        frozen (glow branco).
+      Jester trapSeeking: olhos amarelos com pupilas escuras, alvo/cruz
+        amarelo acima da cabeca.
+      Rat King: coroa de 3 pontas triangulares douradas no topo.
+      Todos os elementos visuais (chapeu, olhos, indicador) sao
+        escalados proporcionalmente ao radius/scale.
+
+   H) Game.spawnMonster() - Modificado:
+      Darkness: define darknessTimer = 5.0, darknessActive = true,
+        forca speed = 60 no ultimo monstro spawnado.
+      Rat King: cria 3 ratos (ratEntities) na posicao do rei com
+        offset aleatorio.
+      Decoy: cria artefato falso (ArtifactEntity) em tile vazio
+        aleatorio. displayName escolhido entre 4 nomes falsos
+        ('artifact', 'Artefact', 'Articfact', 'Artfact'). isFake=true,
+        decoyRef referencia o Decoy.
+      speedMod null: tratado com (mt.speedMod || 1) para evitar NaN.
+
+   I) Game.update() - Modificado:
+      Adicionada chamada updateRatEntities(dt) apos updateTraps.
+      Adicionado decremento de darknessTimer: se darknessActive e
+        timer <= 0, desativa escuridao e mostra "The darkness fades...".
+
+   J) Game.updateRatEntities(dt) - NOVO METODO:
+      Gerencia o ciclo de vida dos ratos do Rat King:
+      - Remove rato se rei morreu (kingRef.alive === false).
+      - Se !targetTrap e traps.length === 0: ratos retornam ao Rat King
+        via BFS. Ao chegar (dist < TILE_SIZE*0.5), rato e removido.
+      - Se devourTimer > 0: ratos parados devorando trap. Apos 35s,
+        trap e removida de game.traps.
+      - Se !targetTrap: busca trap mais proxima (exclui traps ja
+        sendo devoradas por outro rato).
+      - Se targetTrap: move-se ate ela via BFS (velocidade 50).
+        Ao chegar (dist < TILE_SIZE*0.4): inicia devorar (timer = 35).
+      - Ratos nao ativam traps, nao tomam stun, sao invenciveis.
+
+   K) Game.render() - Modificado:
+      Adicionado bloco de renderizacao de ratEntities (ratinhos):
+        circulo marrom escuro (#664422) com raio 4px, cauda curvada
+        quadratica, barra de progresso circular laranja se devorando.
+
+   L) Game.updateTraps() - Modificado:
+      Monstrosity: multiplicador de stun 0.65 aplicado em todos os
+        pontos onde stunTimer e atribuido (colisao trap-monstro e
+        lifetime traps como banana peel).
+
+   M) Game.collectArtifact() - Modificado:
+      Verificacao de artefato falso (art.isFake) adicionada no inicio:
+      - Se fake: collected = true, mensagem de aviso, teleporta o Decoy
+        para a posicao do artefato (particulas roxas na origem e destino),
+        aplica decoySpeedBoostTimer = 10 (100% speed boost por 10s),
+        forca estado 'chase'. Retorna sem incrementar collectedArtifacts.
+
+   N) notifyRushMonsters(game) - NOVA FUNCAO:
+      Itera sobre activeMonsters. Para cada Rush vivo:
+      rushSpeedBonus += 20, speed += 20, spawna 3 particulas laranjas.
+
+   O) activateAbility() - Modificado:
+      Adicionada chamada notifyRushMonsters(game) antes de todos os
+      returns de habilidades ativas executadas com sucesso:
+      - timetraveler (resetou cooldowns)
+      - redhacker (clone criado)
+      - mightytinkerer (zona criada)
+      - wiredgirl (teleporte)
+      - untitledgeneralist (invulnerabilidade)
+      - clown (banana peel)
+      - rerroler (lojas rerroladas)
+      - scout, commandyeller, dyingguy, annoyinglooper, vex, oracle
+        (caminho padrao de ativacao)
+      NAO conta para: lockerguy, helpfulpriest (classes passivas/menu).
+
+   P) Fog of War / isPointVisible() - Modificado:
+      Verificacao de darknessActive: se ativo, verifica se o ponto
+      esta a menos de 2 * TILE_SIZE (64px) de algum jogador vivo.
+      Se nenhum jogador esta perto, retorna false (ponto invisivel).
+      Debug mode (F3): ignora limite de escuridao (isPointVisible
+      sempre true quando debugMode).
+
+   Q) HUD de Interacao - Modificado:
+      getInteractionText() em updateHotbarHUD: usa displayName do
+      artefato em vez de string fixa 'Artefato'.
+      renderArtifactLabels(): usa art.displayName em vez de 'Artifact'.
+
+   R) Propriedades Resetadas:
+      Game.checkGameState() e Game.restart(): reset de darknessActive,
+      darknessTimer, ratEntities.
+      Game.loadMap(): reset de darknessTimer, darknessActive, ratEntities.
+
+   S) Compatibilidade com Monstro Existente:
+      - Twins: comportamento mantido (colisao entre gemeos, pathfinding).
+      - Blue Man: chaseLoseTime e searchDuration mantidos (2x normal).
+      - Glitch: speedMod 1.3, randomSpawn true mantidos.
+      - Zone (Mighty Tinkerer): interage com velocidade de todos os
+        tipos (a zona define monsterSpeed, mas os multiplicadores de
+        cada tipo se aplicam sobre ela).
+
+   SECOES AFETADAS:
+      MonsterTypes (1008-1057), ArtifactEntity (1407-1430),
+      MonsterEntity (constructor 1808-1839, spawn 1841-1861, update 1983-2038,
+      render 2214-2264, novos metodos), Game (constructor 2301-2367,
+      loadMap 2408-2568, spawnMonster 3496-3531, update 2860-3002,
+      updateTraps 3717-3789, collectArtifact 3533-3548, render 3982-4084,
+      isPointVisible 3399-3414), activateAbility 4884-5041.
+
+   TESTES REALIZADOS:
+      1. Jester: confirma trap-seeking ativo com traps no mapa,
+         destruicao de trap ao pisa-la, stun aplicado, transicao para
+         normal apos 0 traps.
+      2. Ballerina: congelamento ao ser observada (cone de 120 graus),
+         movimento sem observacao, ataque durante congelamento,
+         spawn aleatorio funcionando.
+      3. Alien: estado small inicial, transformacao ao detectar jogador,
+         reversao ao perder deteccao, tamanhos e velocidades corretos
+         (1/3 small, 4/3 transformed).
+      4. Monstrosity: stuns reduzidos em 35% (Bear Trap 1s->0.65s,
+         Landmine 5s->3.25s, Clone 3s->1.95s), tamanho 20% maior.
+      5. Desperation: velocidade aumenta +15 por artefato coletado,
+         recalculo dinamico durante o round.
+      6. Ghost: alternancia visivel/invisivel a cada 2s, ataque durante
+         invisibilidade, Oracle NAO revela Ghost invisivel.
+      7. Darkness: visao reduzida para ~2x2 tiles por 5s no spawn,
+         restauracao apos 5s, spawn aleatorio, velocidade fixa 60.
+      8. Rush: ganho de +20 speed por habilidade ativa usada (todas as
+         classes ativas contam), acumulo entre habilidades, reset apos
+         round, habilidades passivas nao contam.
+      9. Rat King: spawn de 3 ratos, ratos encontram e devoram traps
+         (35s), retornam ao rei apos 0 traps, somem quando rei morre.
+     10. Decoy: spawn de artefato falso extra, nome falso exibido no HUD,
+         teleport do Decoy ao coletar fake, speed boost 100% por 10s,
+         fake NAO conta para vitoria.
+     11. Conflitos: Jester + Rat King competem por traps (ok), Darkness
+         + Ghost (Ghost invisivel durante escuridao ok), Rush + multiplos
+         jogadores usando habilidades (acumulo ok).
+     12. Performance: Rat King com 3 ratos + Jester (6 BFS simultaneos)
+         sem quedas de FPS perceptiveis no mapa default 37x18.
 
 ================================================================================
-FIM DA DOCUMENTACAO
+NOVAS SECOES:
+================================================================================
+
+SECAO 52 - MONSTRO JESTER (TRAP-SEEKING)
+   O Jester ignora jogadores enquanto existem traps no mapa. Ele conhece
+   a localizacao de todas as traps (acesso direto a game.traps) e se move
+   ate a mais proxima via BFS. Ao chegar na trap (dist < TILE_SIZE*0.5),
+   toma o stun da trap e a destroi. Quando nao ha mais traps, vira um
+   monstro normal (FSM patrol/chase/search padrao).
+   Visual: olhos amarelos + alvo/cruz amarelo acima da cabeca durante
+   trap-seeking. Olhos vermelhos normais apos virar normal.
+
+SECAO 53 - MONSTRO BALLERINA (FREEZE POR OBSERVACAO)
+   A Ballerina so se move quando nenhum jogador esta olhando diretamente
+   para ela. "Olhando" e definido como: a direcao do ultimo movimento do
+   jogador (lastDx, lastDy) forma um angulo < 60 graus (PI/3) com o vetor
+   jogador->Ballerina. Se PELO MENOS UM jogador vivo esta olhando, a
+   Ballerina congela (nao se move, mas AINDA ATACA se jogador proximo).
+   Jogador parado (lastDx=0, lastDy=0) = nao esta olhando.
+   Visual: glow branco sutil quando congelada.
+
+SECAO 54 - MONSTRO ALIEN (TRANSFORMACAO POR DETECCAO)
+   O Alien tem dois estados fisicos:
+   - SMALL: metade do raio normal (TILE_SIZE*0.19), 1/3 da velocidade.
+     Ativo enquanto nao detecta jogador (canSeePlayer + canDetectBehind).
+   - TRANSFORMED: raio normal (TILE_SIZE*0.38), 4/3 da velocidade.
+     Ativo ao detectar jogador. Transicao imediata.
+   Durante chase cego (perdeu visao mas ainda em chase): velocidade
+   reduzida (1/3 * 1.4 = 0.467x base). Transformado + chase: 1.867x base.
+   Visual: verde (#44ff44), escala proporcional ao estado.
+
+SECAO 55 - MONSTRO MONSTROSITY (STUN REDUZIDO + TAMANHO)
+   Monstro normal com duas caracteristicas passivas:
+   - Stun reduzido: todo stun recebido e multiplicado por 0.65 (35% menos).
+     Afeta traps (Bear Trap, Land Mine, Crucifix, Banana Peel) e clones.
+   - Tamanho 20% maior: raio visual = TILE_SIZE * 0.38 * 1.2.
+   Visual: laranja (#ff6600), proporcionalmente maior.
+
+SECAO 56 - MONSTRO DESPERATION (VELOCIDADE POR ARTEFATO)
+   Velocidade aumenta dinamicamente conforme artefatos sao coletados:
+   speed = baseSpeed + (game.collectedArtifacts * 15).
+   Recalculada a cada frame. Cria urgencia em coletar artefatos
+   rapidamente (em rounds avancados com baseSpeed alta, o bonus
+   de artefatos pode tornar o Desperation extremamente rapido).
+   Visual: vermelho intenso (#ff3333), glow vermelho que aumenta
+   com a proporcao de artefatos coletados, escala de tamanho.
+
+SECAO 57 - MONSTRO GHOST (VISIBILIDADE ALTERNADA)
+   Alterna entre visivel e invisivel a cada 2 segundos (0-2s visivel,
+   2-4s invisivel, ...). Quando invisivel: nao e renderizado, mas ainda
+   se move, persegue e ataca. Oracle reveal NAO revela Ghost invisivel.
+   Quando visivel: renderizado com globalAlpha = 0.7 (semi-transparente).
+   Visual: cinza claro (#cccccc), aspecto fantasmagorico.
+
+SECAO 58 - MONSTRO DARKNESS (ESCURIDAO GLOBAL)
+   No spawn: reduz o campo de visao de TODOS os jogadores para um raio
+   de 2*TILE_SIZE (64px) por 5 segundos. Durante a escuridao, jogadores
+   so veem ~2x2 tiles ao redor. Velocidade fixa em 60 (nao escala com
+   rounds). Spawna em local aleatorio.
+   Apos 5s: visao restaurada, mensagem "The darkness fades...".
+   Debug mode ignora o limite de escuridao.
+   Visual: quase preto (#111111), muito dificil de ver no escuro.
+
+SECAO 59 - MONSTRO RUSH (VELOCIDADE POR HABILIDADE)
+   Cada vez que um jogador USA uma habilidade ativa com sucesso (pressiona
+   F e a habilidade e executada), o Rush ganha +20 de velocidade
+   PERMANENTEMENTE (para o resto do round). O bonus e cumulativo e se
+   aplica a TODAS as habilidades ativas de TODOS os jogadores.
+   Conta para: Oracle, Scout, Red Hacker, Command Yeller, Dying Guy,
+   Annoying Looper, Mighty Tinkerer, Untitled Generalist, Clown, Vex,
+   Time Traveler, Wired Girl, Rerroler, Chamber.
+   NAO conta para: Locker Guy, Helpful Priest, Utility Player,
+   Archaeologist, Boring Trapper, Tee Vee, Lucky Spender (passivas).
+   Visual: laranja/dourado (#ffaa00), glow que aumenta com rushSpeedBonus.
+
+SECAO 60 - MONSTRO RAT KING (RATOS DEVORADORES)
+   Monstro normal (FSM padrao). No spawn: invoca 3 ratos que sao entidades
+   independentes. Ratos encontram a trap mais proxima, movem-se ate ela
+   via BFS, e a devoram em 35 segundos (barra de progresso circular).
+   Apos devorar: trap e removida, rato busca proxima trap.
+   Quando 0 traps: ratos retornam ao Rat King e somem ao chegar.
+   Se o Rat King morre: todos os ratos somem imediatamente.
+   Ratos sao invenciveis, nao atacam, nao ativam traps.
+   1 rato por trap (ratos nao competem pela mesma trap).
+   Visual: Rat King marrom (#886644) com coroa dourada. Ratos: circulos
+   marrom escuro 4px com cauda.
+
+SECAO 61 - MONSTRO DECOY (ARTEFATO FALSO)
+   Monstro normal (FSM padrao). No spawn: cria UM artefato falso extra
+   em tile vazio aleatorio. O artefato falso parece identico ao real
+   (circulo ciano brilhante), mas o nome exibido e um dos 4 nomes falsos:
+   'artifact', 'Artefact', 'Articfact', 'Artfact'.
+   Ao coletar o artefato falso: NAO conta para vitoria, o Decoy TELEPORTA
+   para a posicao do artefato, ganha 100% SPEED BOOST por 10 segundos.
+   Se o Decoy morrer antes: artefato falso ainda existe mas ao ser
+   coletado nao ha efeito (Decoy ja morto).
+   Visual: roxo (#9966ff), glow roxo durante speed boost.
+
+================================================================================
+ATUALIZACAO DAS LINHAS DO ARQUIVO
+================================================================================
+
+Nota: As linhas citadas nas secoes anteriores da documentacao podem ter
+sido deslocadas devido as insercoes de codigo dos novos monstros.
+Consulte o codigo fonte para numeros de linha precisos apos esta
+atualizacao.
+
+================================================================================
+
+================================================================================
+CHANGELOG - MAIO 2026 (ALTAR 2x2 + SUMMON REFINAMENTO + FIXES MONSTROS +
+              F1 PERSISTENTE + REMOCAO DE TESTES)
+================================================================================
+
+ALTERACAO 22 - SISTEMA DE ALTAR 2x2 + SUMMON REFINAMENTO + FIXES MONSTROS
+              + F1 PERSISTENTE + REMOCAO DE TESTES
+
+   PROBLEMA: Diversos problemas acumulados.
+
+   SOLUCAO: Implementacao de 6 requisitos.
+
+   A) ALTAR 2x2: parseMap coleta todas as posicoes A em array.
+      loadMap detecta grupos 2x2 (4 tiles A em quadrado) e singles.
+      Novo sistema altarGroups[]/altarSingles[] substitui altarPos.
+
+   B) TEMPOS DE SUMMON: altar duration 4s -> 2s, summonDelay 3s -> 5s.
+
+   C) MENSAGEM DO SUMMON: Tipo decidido na ativacao (pendingMonsterType).
+      Nome no centro durante summonDelay. Descricao no centro no spawn.
+      Removida mensagem "All ability cooldowns reset!".
+
+   D1) JESTER: threshold TILE_SIZE*0.5 -> TILE_SIZE*0.2.
+   D2) ALIEN: transformacao por estado (chase/search=grande, patrol=pequeno).
+      Velocidades: patrol speed/3, search speed normal, chase speed*4/3.
+   D3) RUSH: rushSpeedBonus adicionado ao speed todo frame.
+   D4) RAT KING: devourTimer 35s -> 12.25s (35*0.35).
+   D5) DARKNESS: completamente removido.
+
+   E) F1 PERSISTENTE: selectedMonsterType armazena selecao permanentemente.
+
+   F) REMOCAO DE TESTES: runVisualTests removido.
+
+================================================================================
+================================================================================
+CHANGELOG - MAIO 2026 (FIXES: MENSAGEM CENTRALIZADA + DECOY + JESTER)
+================================================================================
+
+ALTERACAO 23 - FIXES DE MENSAGEM, DECOY E JESTER
+
+   A) FIX 1 - MENSAGEM DE SUMMON CENTRALIZADA
+
+      PROBLEMA: A fase 1 (nome do monstro) usava showSummonDesc
+      (#summon-desc acima da hotbar, fonte 18px) enquanto a fase 2
+      (descricao) usava showMessage (#message centro, fonte 29px).
+      Inconsistencia visual.
+
+      SOLUCAO:
+      - updateInteraction(): alterado showSummonDesc(nameMessage) para
+        showMessage(nameMessage, summonDelay). Nome exibido no centro
+        por toda a duracao do summonDelay (5s).
+      - spawnMonster(): removido hideSummonDesc(). Alterado
+        showMessage(mt.desc, 5.0) para showMessage(mt.desc, 3.0).
+        Descricao exibida no centro por 3s apos spawn.
+      - CSS #summon-desc: atualizado para corresponder ao estilo de
+        #message (centro da tela, fonte 29px, mesmo text-shadow).
+
+      IMPACTO: Ambas as fases agora usam o mesmo elemento (#message)
+      centralizado com o mesmo estilo visual.
+
+   B) FIX 2 - DECOY: DESTRUIR ARTEFATO FALSO NA VITORIA
+
+      PROBLEMA: Quando todos artefatos reais sao coletados, o artefato
+      falso do Decoy permanecia no mapa.
+
+      SOLUCAO:
+      - checkGameState(): adicionado filter para remover artefatos
+        falsos (isFake === true) antes de matar os monstros.
+        this.artifactEntities = this.artifactEntities.filter(art => !art.isFake).
+
+      IMPACTO: Artefatos falsos sao automaticamente removidos ao
+      completar a coleta de todos os artefatos reais.
+
+   C) FIX 3 - JESTER: SEMPRE ANDANDO
+
+      PROBLEMA: Quando o BFS nao encontrava caminho ate a trap mais
+      proxima, o Jester ficava parado (path=null).
+
+      SOLUCAO:
+      - updateJester(): adicionado else ao bloco final. Se o path
+        para a trap e null/vazio, o Jester executa updatePatrol(dt)
+        como fallback, patrulhando waypoints.
+      - jesterPathRecalc (0.5s): a cada 0.5s tenta novamente o
+        pathfinding para a trap mais proxima.
+      - Se o path voltar a ser valido (trap fica acessivel), retoma
+        o trap-seeking automaticamente.
+
+      IMPACTO: O Jester nunca fica parado (exceto durante stun). Se
+      nao consegue alcancar uma trap, patrulha waypoints ate que
+      o caminho fique livre.
+
 ================================================================================
