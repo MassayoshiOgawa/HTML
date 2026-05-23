@@ -6168,3 +6168,85 @@ ALTERACAO 23 - FIXES DE MENSAGEM, DECOY E JESTER
       o caminho fique livre.
 
 ================================================================================
+================================================================================
+CHANGELOG - MAIO 2026 (ICONES CSS PROFISSIONAIS PARA CLASSES DE PERSONAGENS)
+================================================================================
+
+ALTERACAO 28 - ICONES CSS PROFISSIONAIS PARA AS 20 CLASSES DE PERSONAGENS
+
+   PROBLEMA: As classes de personagens na tela de selecao exibiam apenas
+   caracteres de texto simples ('O', 'S', 'H', etc.), sem identidade visual.
+
+   SOLUCAO: Implementados 20 icones CSS puros, um para cada classe,
+   usando apenas pseudo-elementos (::before, ::after), gradientes,
+   clip-path, border-radius e transform.
+
+   MUDANCAS NO CODIGO:
+     a) CSS - 20 NOVAS CLASSES no bloco <style>:
+        .class-icon-oracle (caixa/pacote, #ffaa44)
+        .class-icon-scout (mascara de ladrao, #44dd44)
+        .class-icon-redhacker (colchetes < >, #ff3333)
+        .class-icon-commandyeller (megafone e ondas, #ffcc00)
+        .class-icon-boringtrapper (armadilha circular, #888)
+        .class-icon-dyingguy (fantasma, #cc88ff)
+        .class-icon-teevee (TV antiga, #44ccff)
+        .class-icon-annoyinglooper (barras com loop, #ff8800)
+        .class-icon-timetraveler (ampulheta, #ffdd44)
+        .class-icon-luckyspender (moeda com $, #ffdd00)
+        .class-icon-utilityplayer (mochila, #88aacc)
+        .class-icon-mightytinkerer (engrenagem, #ff8833)
+        .class-icon-wiredgirl (raio, #ff66aa)
+        .class-icon-archaeologist (picareta, #cc9944)
+        .class-icon-untitledgeneralist (escudo, #44aaff)
+        .class-icon-clown (chapeu listrado, #ff4488)
+        .class-icon-rerroler (seta circular, #66ccff)
+        .class-icon-vex (fantasma etéreo, #88ccff)
+        .class-icon-lockerguy (cadeado, #cccccc)
+        .class-icon-helpfulpriest (cruz com glow, #ffdd88)
+
+     b) JavaScript - showClassSelection() MODIFICADO:
+        div.textContent = cls.icon  ->  div.textContent = '';
+        div.classList.add('class-icon-' + key);
+        O icone visual e renderizado pelo CSS, nao mais pela letra.
+
+     c) PlayerClasses - SEM ALTERACAO (compatibilidade mantida).
+
+   COMPATIBILIDADE:
+     - Prefixos .class-icon-* nao conflitam com .icon-* (itens)
+     - Comportamento hover/selected inalterado
+     - Multiplayer funcional (4 jogadores independentes)
+     - Zero arquivos externos
+
+================================================================================
+SECAO 62 - SISTEMA DE ICONES CSS PARA CLASSES DE PERSONAGENS
+================================================================================
+
+   Cada classe possui um icone CSS puro renderizado via pseudo-elementos
+   em um quadrado 48x48px. As classes CSS seguem o prefixo .class-icon-{key}
+   e usam ::before e ::after para desenho. O elemento pai (.class-icons div)
+   fornece fundo, borda e tamanho. A classe .selected altera apenas
+   border-color e background, sem afetar os pseudo-elementos.
+
+   LISTA DE ICONES:
+     oracle:           Caixa com fita cruzada laranja
+     scout:            Mascara preta com furos brancos
+     redhacker:        Colchetes < > vermelhos com glow
+     commandyeller:    Triangulo amarelo + ondas concentricas
+     boringtrapper:    Circulo metalico cinza com centro escuro
+     dyingguy:         Cabeca redonda + corpo trapezoidal lilas
+     teevee:           Moldura de TV com tela azul e antena
+     annoyinglooper:   Tres barras laranja com arco circular
+     timetraveler:     Ampulheta (triangulos superior e inferior)
+     luckyspender:     Moeda dourada circular com cifrao
+     utilityplayer:    Mochila azul-acinzentada com alca
+     mightytinkerer:   Circulo laranja + circulo tracejado
+     wiredgirl:        Raio rosa com circulo eletrico
+     archaeologist:    Picareta diagonal marrom-dourada
+     untitledgeneralist: Escudo azul com faixa branca
+     clown:            Chapeu listrado rosa-branco com pompom
+     rerroler:         Arco azul com seta (refresh)
+     vex:              Fantasma azul claro semi-transparente
+     lockerguy:        Cadeado prata com arco superior
+     helpfulpriest:    Cruz dourada vertical/horizontal
+
+================================================================================

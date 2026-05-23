@@ -1,0 +1,843 @@
+================================================================================
+MEGA PROMPT - ÍCONES CSS PROFISSIONAIS PARA AS 20 CLASSES DE PERSONAGENS
+================================================================================
+
+ARQUIVO ALVO: SummonGame.html (mesmo diretório deste prompt)
+DOCUMENTAÇÃO: Documentacao_Completa.txt (mesmo diretório deste prompt)
+
+================================================================================
+INSTRUÇÕES GLOBAIS
+================================================================================
+
+1. Faça TODAS as alterações no arquivo SummonGame.html.
+2. NÃO crie nenhum arquivo novo (NADA de .css, .js, .py, .java, .cpp, .c, .cs, 
+   .ts, .json, .xml, .txt ou qualquer outro arquivo separado). Tudo deve 
+   permanecer no ÚNICO arquivo SummonGame.html.
+3. NÃO crie documentação adicional, READMEs, ou qualquer outro documento 
+   externo.
+4. VOCÊ SÓ PODE CRIAR ARQUIVOS/DOCUMENTOS SE FOR EXPLICITAMENTE PEDIDO NESTE 
+   PROMPT (o que NÃO é o caso).
+5. NÃO use caracteres bugados (exemplo: ðâï¿½ðâ¤). Use charset UTF-8 
+   consistentemente.
+6. NÃO insira emojis, símbolos Unicode não-ASCII ou caracteres quebrados no 
+   código. Apenas caracteres ASCII válidos no JavaScript.
+7. Siga o estilo de código existente: JavaScript puro, Canvas 2D, zero 
+   dependências externas.
+8. Ao finalizar, ATUALIZE a Documentacao_Completa.txt com todas as mudanças, 
+   no formato CHANGELOG + novas seções SECAO, conforme o padrão já existente.
+9. O prompt deve ser executado COMPLETAMENTE, sem pular etapas.
+10. Implemente TUDO agora, sem "TODO", "FUTURE WORK" ou comentários pendentes.
+
+================================================================================
+CONTEXTO - COMO AS CLASSES SÃO EXIBIDAS ATUALMENTE
+================================================================================
+
+O jogo possui 20 classes de personagens definidas no objeto PlayerClasses 
+(aproximadamente linha 1180 do SummonGame.html). Cada classe tem um campo 
+'icon' que atualmente é um CARACTERE DE TEXTO SIMPLES (uma ou duas letras).
+
+Exemplos atuais:
+  oracle:           icon: 'O'   (Delivery Guy)
+  scout:            icon: 'S'   (Weird Thief)
+  redhacker:        icon: 'H'   (Red Hacker)
+  commandyeller:    icon: 'Y'   (Command Yeller)
+  boringtrapper:    icon: 'B'   (Boring Trapper)
+  dyingguy:         icon: 'D'   (Dying Guy)
+  teevee:           icon: 'T'   (Tee Vee)
+  annoyinglooper:   icon: 'L'   (Annoying Looper)
+  timetraveler:     icon: 'K'   (Time Traveler)
+  luckyspender:     icon: '$'   (Lucky Spender)
+  utilityplayer:    icon: 'U'   (Utility Player)
+  mightytinkerer:   icon: 'M'   (Mighty Tinkerer)
+  wiredgirl:        icon: 'W'   (Wired Girl)
+  archaeologist:    icon: 'A'   (Archaeologist)
+  untitledgeneralist: icon: 'G' (Untitled Generalist)
+  clown:            icon: 'C'   (Clown)
+  rerroler:         icon: 'R2'  (Rerroler)
+  vex:              icon: 'V'   (Vex)
+  lockerguy:        icon: 'LK'  (Locker Guy)
+  helpfulpriest:    icon: 'P'   (Helpful Priest)
+
+As letras aparecem na TELA DE SELEÇÃO DE CLASSES (função showClassSelection, 
+aproximadamente linha 3034), renderizadas como texto puro:
+
+  const div = document.createElement('div');
+  div.textContent = cls.icon;   // <-- TEXTO puro (letra)
+  div.title = cls.name;
+
+Onde o CSS do container é:
+
+  .player-setup-panel .class-icons div {
+    width: 48px; height: 48px;
+    background: #1a1a2e;
+    border: 2px solid #444;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 22px;
+    color: #888;
+    transition: all 0.2s;
+  }
+  .player-setup-panel .class-icons div:hover { border-color: #888; color: #ccc; }
+  .player-setup-panel .class-icons div.selected {
+    border-color: #4fc3f7; color: #fff; background: #2a2a3e;
+  }
+
+================================================================================
+OBJETIVO PRINCIPAL
+================================================================================
+
+Substituir TODAS as letras que representam classes (ex: 'O', 'S', 'H', '$', 
+'R2', 'LK') por ÍCONES VISUAIS CSS profissionais, minimalistas e PERFEITOS 
+para cada classe de personagem.
+
+Cada ícone deve SER um quadrado de 48x48px que contém uma ilustração CSS 
+puramente geométrica (usando ::before, ::after, border, border-radius, 
+box-shadow, gradientes, clip-path, transform, etc.) que represente visualmente 
+o conceito da classe.
+
+O ícone NÃO pode ultrapassar o campo quadrado de 48x48px. Deve caber 
+perfeitamente com padding visual interno adequado.
+
+================================================================================
+DIRETRIZES DE DESIGN GLOBAL (LEIA COM MUITA ATENÇÃO)
+================================================================================
+
+A. PALETA DE CORES:
+   - Fundo do quadrado: #1a1a2e (padrão, herdado do CSS existente)
+   - Fundo selecionado: #2a2a3e (mantido pelo CSS existente)
+   - Cada ícone deve usar cores que CONTRASTEM com o fundo escuro
+   - Use cores vibrantes mas não saturadas demais: tons intermediários com 
+     boa legibilidade sobre fundo escuro (#1a1a2e)
+   - Prefira cores com luminosidade média-alta (ex: #4fc3f7, #ff8844, 
+     #44ff44, #ffcc00, #cc88ff, #ff6688, #88ccff, #ffaa44)
+   - Evite cores muito escuras (serão invisíveis sobre #1a1a2e)
+   - Use tons metálicos (gradientes cinza/prata) para classes de suporte
+   - Use tons quentes (laranja/amarelo/vermelho) para classes ofensivas
+   - Use tons frios (azul/ciano/roxo) para classes mágicas/tecnológicas
+   - Use tons terrosos (marrom/verde musgo) para classes utilitárias
+
+B. ESTILO MINIMALISTA:
+   - Linhas limpas, formas geométricas puras
+   - Sem detalhes excessivos: o ícone deve ser reconhecível em 48x48px
+   - Máximo 3 elementos visuais por ícone (ex: círculo + linha + ponto)
+   - Use gradientes sutis para dar profundidade, mas sem exageros
+   - Cantos arredondados onde apropriado
+   - Simetria ou assimetria proposital (nada acidental)
+
+C. CONSISTÊNCIA VISUAL:
+   - Todos os ícones devem parecer parte da mesma FAMÍLIA de design
+   - Espessura de linha consistente (~3-4px em escala 48px)
+   - Estilo de sombra consistente (box-shadow sutil)
+   - Proporções internas similares (elemento principal ocupa ~60-70% do espaço)
+   - Padding visual: ~8-10px de margem interna para não encostar nas bordas
+
+D. TÉCNICA CSS:
+   - Use ::before e ::after para criar formas
+   - Use border-radius para cantos arredondados e círculos
+   - Use transform: rotate(), scale(), skew() para orientação
+   - Use linear-gradient e radial-gradient para cores e profundidade
+   - Use box-shadow para sombras e destaques (inset e externo)
+   - Use clip-path para formas complexas (triângulos, polígonos)
+   - Use border com diferentes cores/lados para criar setas e formas
+   - NUNCA use imagens, SVG, data URIs ou fontes externas
+   - APENAS CSS puro no elemento e pseudo-elementos
+
+E. ABORDAGEM TÉCNICA PARA O ÍCONE:
+   - Crie uma classe CSS .class-icon-{key} para cada classe
+   - A classe NÃO define background (o fundo já vem do .class-icons div)
+   - A classe define APENAS o conteúdo visual do ícone via ::before e ::after
+   - Use position: relative no elemento e position: absolute nos pseudo-elementos
+   - Centralize tudo com top: 50%; left: 50%; transform: translate(-50%, -50%)
+
+================================================================================
+DESCRIÇÃO VISUAL DETALHADA DE CADA ÍCONE (20 CLASSES)
+================================================================================
+
+====================
+CLASSE 1: oracle (Delivery Guy / Entregador)
+Cor temática: #ffaa44 (laranja/âmbar)
+Conceito: Revelar a posição do monstro através de paredes
+Descrição visual do personagem: Um entregador ágil com boné, carregando uma 
+caixa/pacote. Simboliza revelação (sabe onde está o monstro).
+
+ÍCONE CSS:
+- Elemento principal: Uma CAIXA/PACOTE estilizada (retângulo arredondado com 
+  linhas de fita cruzada)
+- ::before: Retângulo arredondado central (16x20px), cor #ffaa44, borda 3px 
+  sólida, border-radius 3px
+- ::after: Cruz de fita (linha vertical 2px + linha horizontal 2px) sobre o 
+  pacote, cor #ffcc66 mais clara
+- Detalhe opcional: Pequeno círculo de 4px no topo como "lacre"
+- Gradiente: linear-gradient sutil no ::before para dar volume à caixa
+
+====================
+CLASSE 2: scout (Weird Thief / Ladrão Estranho)
+Cor temática: #44dd44 (verde)
+Conceito: Velocidade aumentada temporariamente
+Descrição visual do personagem: Um ladrão furtivo com capuz e máscara, movendo-se
+nas sombras. Simboliza agilidade e furtividade.
+
+ÍCONE CSS:
+- Elemento principal: Uma MÁSCARA DE LADRÃO estilizada (formato de olhos 
+  cobertos)
+- ::before: Faixa horizontal preta (#111) de 28x8px, border-radius 2px, no 
+  centro do ícone (representa a máscara sobre os olhos)
+- ::after: Dois círculos brancos (#fff) de 6px como "furos dos olhos" na 
+  máscara, posicionados lado a lado
+- Fundo com clip-path: Opcionalmente um capuz triangular (#2a5a2a) no topo, 
+  via ::before com clip-path: polygon(50% 0%, 0% 100%, 100% 100%)
+- Ou alternativamente: Um par de olhos com formato amendoado (ellipse) e 
+  pupilas finas (linhas verticais pretas), simbolizando visão noturna
+
+====================
+CLASSE 3: redhacker (Red Hacker)
+Cor temática: #ff3333 (vermelho)
+Conceito: Cria um clone que persegue e stuna o monstro
+Descrição visual do personagem: Um hacker com capuz vermelho e óculos escuros, 
+digitando em um terminal. Simboliza tecnologia e clones.
+
+ÍCONE CSS:
+- Elemento principal: Colchetes de código <> estilizados em vermelho
+- ::before: Símbolo "<" (seta para direita) feito com bordas CSS: triângulo 
+  via border-left: 8px solid #ff3333; border-top: 6px solid transparent; 
+  border-bottom: 6px solid transparent
+- ::after: Símbolo ">" (seta para esquerda) feito com bordas CSS, espelhado
+- Ou use uma abordagem mais simples: dois triângulos/chevrons apontando um 
+  para o outro (< >) centralizados
+- Fundo com clone: Pequeno círculo fantasma (rgba(255,51,51,0.3)) atrás do 
+  principal, representando o clone
+- Cor principal: #ff3333 com glow (box-shadow: 0 0 6px rgba(255,51,51,0.4))
+
+====================
+CLASSE 4: commandyeller (Command Yeller / Gritador de Comando)
+Cor temática: #ffcc00 (amarelo/dourado)
+Conceito: Aumenta velocidade de todos os jogadores
+Descrição visual do personagem: Um comandante/líder com um megafone, gritando 
+ordens para a equipe. Simboliza liderança e buff em área.
+
+ÍCONE CSS:
+- Elemento principal: Um MEGAFONE estilizado
+- ::before: Trapézio/triângulo truncado (megafone) em #ffcc00. Use 
+  clip-path: polygon(30% 20%, 70% 10%, 70% 90%, 30% 80%) ou bordas CSS 
+  (border-top, border-bottom triangulares)
+- ::after: Alça do megafone: arco na parte inferior, border curvo ou 
+  combinação de bordas com border-radius
+- Alternativa simplificada: Triângulo largo (#ffcc00) apontando para direita 
+  (cone de som) e 3 linhas curvas concêntricas (ondas sonoras) saindo dele
+- Ondas sonoras: 3 arcos concêntricos (::before com borda parcial) em 
+  #ffdd44 com opacidade decrescente
+
+====================
+CLASSE 5: boringtrapper (Boring Trapper / Armadilheiro Tedioso)
+Cor temática: #888888 (cinza metálico)
+Conceito: Bear traps são 2x maiores e stunnam por mais tempo
+Descrição visual do personagem: Um caçador/trapper paciente com chapéu, 
+carregando armadilhas de urso. Simboliza armadilhas e controle de área.
+
+ÍCONE CSS:
+- Elemento principal: Uma ARMADILHA DE URSO estilizada (mandíbulas serrilhadas)
+- ::before: Círculo base (#777) de 28px, borda serrilhada via múltiplos 
+  triângulos (use clip-path ou 8 bordas triangulares com ::before rotacionado)
+- ::after: Cruz central (#555) - duas linhas perpendiculares no centro
+- Alternativa: Círculo metálico com dentes internos: circulo externo com 
+  border-radius: 50% + border: 3px solid #666, e dentes feitos com 
+  box-shadow: inset com múltiplas interrupções (dotted border interno)
+- Gradiente radial no círculo para dar efeito metálico 3D
+- Sombra: box-shadow: 0 2px 4px rgba(0,0,0,0.5) para profundidade
+
+====================
+CLASSE 6: dyingguy (Dying Guy / Cara Morrendo)
+Cor temática: #cc88ff (roxo pálido / lilás fantasmagórico)
+Conceito: Fica invisível para o monstro
+Descrição visual do personagem: Uma figura pálida/doentia, quase fantasmagórica, 
+que finge de morto. Simboliza invisibilidade e morte fingida.
+
+ÍCONE CSS:
+- Elemento principal: Um CRÂNIO estilizado ou figura fantasma
+- ::before: Círculo branco (#ddd) de 22px (cabeça/crânio)
+- ::after: Triângulo inferior (corpo fantasma) usando clip-path ou bordas, 
+  mesma cor #ddd, ondulado na base (border-radius irregular)
+- Olhos: Dois círculos pretos (#111) de 4px no ::before (feitos via 
+  ::before com box-shadow ou gradiente radial duplo)
+- Ou simplificado: Círculo (cabeça) + trapézio (corpo) formando silhueta de 
+  fantasma, com borda inferior ondulada (vários border-radius assimétricos)
+- Opacidade geral levemente reduzida (0.85) para dar sensação fantasmagórica
+
+====================
+CLASSE 7: teevee (Tee Vee / Tevê)
+Cor temática: #44ccff (azul ciano / cor de tela)
+Conceito: Coleta artefatos mais rápido e através de paredes
+Descrição visual do personagem: Uma figura com uma TV antiga como cabeça, 
+antenas e tela brilhante. Simboliza coleta paranormal e visão expandida.
+
+ÍCONE CSS:
+- Elemento principal: Uma TV ANTIGA estilizada
+- ::before: Retângulo arredondado (18x14px) com borda 3px #888 (moldura da 
+  TV), border-radius 3px. Interior com gradiente #224466 para #44ccff 
+  (tela ligada)
+- ::after: Antena: Linha vertical fina (2px) de 10px saindo do topo, com 
+  "V" invertido no topo (duas linhas a 45°), cor #888
+- Tela com "glow": box-shadow interno azul claro na moldura
+- Opcional: Pequena linha horizontal na tela (scanline) para efeito retrô
+
+====================
+CLASSE 8: annoyinglooper (Annoying Looper / Looper Irritante)
+Cor temática: #ff8800 (laranja vibrante)
+Conceito: Cria uma parede que o monstro não pode atravessar
+Descrição visual do personagem: Um personagem que cria loops temporais e 
+paredes. Simboliza controle de espaço e tempo cíclico.
+
+ÍCONE CSS:
+- Elemento principal: Uma PAREDE/LOOP estilizado (símbolo de infinito 
+  transformado em barreira)
+- ::before: Retângulo vertical (#ff8800) de 6x24px (parede) centralizado
+- ::after: Seta circular/loop ao redor da parede: arco circular com 
+  border: 3px solid #ff8800; border-radius: 50%; clip: rect() ou 
+  border parcial (border-top + border-right apenas)
+- Alternativa: Símbolo de recarregar/refresh: arco com seta na ponta, 
+  feito com borda circular parcial + triângulo na ponta
+- Ou: Três barras verticais paralelas (parede) com altura crescente, 
+  e uma seta curva sobre elas (loop)
+
+====================
+CLASSE 9: timetraveler (Time Traveler / Viajante do Tempo)
+Cor temática: #ffdd44 (dourado / âmbar)
+Conceito: Reseta o cooldown de todas as habilidades (1x por round)
+Descrição visual do personagem: Um viajante do tempo com relógios e 
+ampulhetas. Simboliza reset temporal e manipulação do tempo.
+
+ÍCONE CSS:
+- Elemento principal: Uma AMPULHETA estilizada
+- ::before: Triângulo superior (vidro superior da ampulheta): 
+  clip-path: polygon(30% 0%, 70% 0%, 50% 50%) com cor #ffdd44
+  com opacidade 0.7 (areia restante)
+- ::after: Triângulo inferior (vidro inferior): 
+  clip-path: polygon(50% 50%, 70% 100%, 30% 100%) com cor #ffdd44 
+  (areia acumulada) com opacidade 1.0
+- Moldura: Borda vertical nas laterais (#aa8833, 2px) conectando topo e base
+- Base e topo: Pequenos retângulos horizontais (#aa8833, 4x14px) em cima e 
+  embaixo
+- Alternativa simplificada: Relógio: círculo com ponteiros em "X" (dois 
+  retângulos finos rotacionados)
+
+====================
+CLASSE 10: luckyspender (Lucky Spender / Gastador Sortudo)
+Cor temática: #ffdd00 (amarelo ouro)
+Conceito: 40% de chance de duplicar itens ao comprar
+Descrição visual do personagem: Um apostador/gastador com moedas e dados. 
+Simboliza sorte e duplicação.
+
+ÍCONE CSS:
+- Elemento principal: Uma MOEDA ou DADO
+- ::before: Círculo dourado (#ffcc00) de 24px, border-radius 50%, com 
+  borda mais escura (#cc9900, 2px)
+- ::after: Cifrão "$" simplificado: barra vertical (2x14px) + duas curvas 
+  (S estilizado via border-radius em retângulo), cor #996600
+- Ou: Dois círculos empilhados (moedas) com cifrão no centro
+- Ou: Dado (quadrado com cantos arredondados) com pontos (3 círculos 
+  pequenos formando padrão de face 3 do dado)
+- Use box-shadow: 0 0 8px rgba(255,200,0,0.4) para glow dourado
+
+====================
+CLASSE 11: utilityplayer (Utility Player / Jogador Utilitário)
+Cor temática: #88aacc (azul acinzentado / utilitário)
+Conceito: Começa com 5 itens aleatórios
+Descrição visual do personagem: Um jogador versátil com mochila cheia de 
+ferramentas. Simboliza preparação e suprimentos.
+
+ÍCONE CSS:
+- Elemento principal: Uma MOCHILA/CAIXA DE FERRAMENTAS
+- ::before: Retângulo arredondado (#88aacc, 20x18px) com border-radius 4px 
+  na base e 8px no topo (formato de mochila)
+- ::after: Alça: arco no topo da mochila, border curvo (#7799bb, 3px, 
+  border-top e border-radius criando semicírculo)
+- Bolsos/Fechos: Pequenos retângulos horizontais mais escuros (#6688aa) 
+  na frente da mochila (2-3 linhas)
+- Ou: Chave inglesa simplificada: círculo (#88aacc) com haste retangular 
+  saindo para baixo, e "boca" da chave (U invertido) na ponta
+
+====================
+CLASSE 12: mightytinkerer (Mighty Tinkerer / Poderoso Engenheiro)
+Cor temática: #ff8833 (laranja ferrugem / engenharia)
+Conceito: Cria zona circular que acelera aliados e reduz velocidade do monstro
+Descrição visual do personagem: Um engenheiro com macacão, chave inglesa e 
+óculos de proteção. Simboliza engenharia e zonas de efeito.
+
+ÍCONE CSS:
+- Elemento principal: Uma ENGRENAGEM estilizada
+- ::before: Círculo central (#ff8833, 12px), border-radius 50%
+- ::after: "Dentes" da engrenagem: use box-shadow com múltiplos retângulos 
+  radiais (4-6 dentes) ao redor do círculo central, cor #dd6622
+- Alternativa: Chave inglesa + círculo pontilhado: haste diagonal (#ff8833, 
+  3x22px, rotacionada 45°) com "boca" na ponta (U), e um círculo pontilhado 
+  (dotted border) envolvendo-a
+- Ou: Zona circular concêntrica: 3 círculos concêntricos com opacidade 
+  decrescente (representando a zona de efeito)
+
+====================
+CLASSE 13: wiredgirl (Wired Girl / Garota Conectada)
+Cor temática: #ff66aa (rosa elétrico / magenta)
+Conceito: Teleporta para um artefato aleatório (1x por summon)
+Descrição visual do personagem: Uma garota com cabelo colorido e fones de 
+ouvido, emanando eletricidade. Simboliza teleporte e eletricidade.
+
+ÍCONE CSS:
+- Elemento principal: Um RAIO/RELÂMPAGO estilizado
+- ::before: Raio em forma de "Z" angulado: use clip-path: 
+  polygon(50% 0%, 70% 35%, 55% 35%, 80% 100%, 35% 65%, 55% 65%, 25% 0%) 
+  com cor #ff66aa
+- ::after: Brilho/glow ao redor: círculo grande (30px) com border 
+  pontilhada ou dashed em rgba(255,102,170,0.3) representando o campo 
+  elétrico/teleporte
+- Ou: Silhueta de pessoa com linhas de energia saindo: círculo (cabeça, 
+  #ff66aa, 10px) + triângulo (corpo) + 3 linhas angulares (raios) saindo 
+  das laterais
+- Use box-shadow com blur para efeito de glow elétrico
+
+====================
+CLASSE 14: archaeologist (Archaeologist / Arqueólogo)
+Cor temática: #cc9944 (dourado terroso / âmbar escuro)
+Conceito: Ganha 1 moeda extra por artefato coletado
+Descrição visual do personagem: Um arqueólogo com chapéu de explorador e 
+picareta. Simboliza coleta de tesouros e exploração.
+
+ÍCONE CSS:
+- Elemento principal: Uma PICARETA ou PÁ estilizada
+- ::before: Haste diagonal (#aa7733, 3x24px, rotacionada 45°) da picareta
+- ::after: Cabeça da picareta: arco/curva na ponta da haste, feito com 
+  border-radius em retângulo (#cc9944) rotacionado, ou com clip-path 
+  em forma de meia-lua
+- Alternativa: Chapéu de explorador (semicírculo no topo) + picareta 
+  cruzada (X) abaixo
+- Ou: Pedra preciosa/gema: losango (#44dddd, ciano) com facetas (linhas 
+  internas), representando o artefato valioso encontrado
+
+====================
+CLASSE 15: untitledgeneralist (Untitled Generalist / Generalista Sem Título)
+Cor temática: #44aaff (azul protetor)
+Conceito: Concede 2 segundos de invulnerabilidade a todos
+Descrição visual do personagem: Um protetor generalista com escudo e aura. 
+Simboliza proteção em área.
+
+ÍCONE CSS:
+- Elemento principal: Um ESCUDO estilizado
+- ::before: Escudo: use border-radius para criar formato de escudo (topo 
+  reto, laterais curvas, base pontuda): 
+  border-radius: 40% 40% 50% 50% / 20% 20% 80% 80% em retângulo 22x26px, 
+  cor #44aaff
+- ::after: Detalhe no escudo: estrela de 4 pontas (cruz diagonal) ou barra 
+  horizontal (#2266cc) no centro
+- Borda do escudo: #2288dd, 2px
+- Ou: Círculo protetor com "onda" saindo: círculo central (#44aaff, 14px) 
+  + arco concêntrico externo (borda parcial, 120°, #88ccff)
+
+====================
+CLASSE 16: clown (Clown / Palhaço)
+Cor temática: #ff4488 (rosa / magenta vibrante)
+Conceito: Deixa casca de banana que stuna o monstro
+Descrição visual do personagem: Um palhaço colorido com nariz vermelho e 
+chapéu engraçado. Simboliza armadilhas cômicas e caos.
+
+ÍCONE CSS:
+- Elemento principal: Um CHAPÉU DE PALHAÇO ou NARIZ DE PALHAÇO
+- ::before: Triângulo do chapéu: clip-path: polygon(50% 0%, 15% 80%, 85% 80%) 
+  com listras coloridas (use repeating-linear-gradient com #ff4488 e #fff)
+- ::after: Pompom no topo: círculo (#ffdd00, 8px) no ápice do triângulo
+- Ou: Máscara de palhaço: dois olhos amendoados (elipses #fff) com pupilas 
+  (#111) e nariz redondo (#ff0000, 6px) entre eles
+- Alternativa minimalista: Círculo (rosto) com sorriso largo (arco) + nariz 
+  redondo + chapéu triangular no topo
+
+====================
+CLASSE 17: rerroler (Rerroler)
+Cor temática: #66ccff (azul claro)
+Conceito: Rerrola todos os itens das lojas (1x por summon)
+Descrição visual do personagem: Um apostador com dados e setas circulares. 
+Simboliza rerrolagem e aleatoriedade.
+
+ÍCONE CSS:
+- Elemento principal: DADOS ou SETA CIRCULAR
+- ::before: Seta circular (refresh/reload): arco de 270° com 
+  border: 3px solid #66ccff; border-radius: 50%; border-right-color: 
+  transparent; border-bottom-color: transparent
+- ::after: Ponta da seta: triângulo (#66ccff) na extremidade do arco: 
+  border-left: 6px solid #66ccff; border-top: 4px solid transparent; 
+  border-bottom: 4px solid transparent
+- Alternativa: Dois dados lado a lado: quadrados 10x10px (#66ccff, 
+  border-radius 3px) com pontos (3-4 círculos pequenos dentro)
+- Ou: Símbolo de shuffle: duas setas curvas formando um círculo com 
+  pontas opostas
+
+====================
+CLASSE 18: vex (Vex)
+Cor temática: #88ccff (azul fantasmagórico / etéreo)
+Conceito: Atravessa paredes sólidas por 1.5 segundos
+Descrição visual do personagem: Um ser etéreo/fantasmagórico que atravessa 
+matéria sólida. Simboliza intangibilidade e fases.
+
+ÍCONE CSS:
+- Elemento principal: Uma SILHUETA FANTASMA atravessando uma parede
+- ::before: Silhueta de fantasma (#88ccff, opacidade 0.7): círculo (cabeça, 
+  12px) + trapézio ondulado (corpo) formando fantasma clássico
+- ::after: Linhas de "fase/intangibilidade": 3-4 linhas horizontais 
+  tracejadas (#88ccff, opacidade 0.5) no centro, representando o efeito 
+  de atravessar matéria
+- Ou: Círculo com borda tracejada (#88ccff, dashed) + silhueta interna 
+  semi-transparente, representando o estado de "phasing"
+- Use opacity e border-style: dashed para representar intangibilidade
+
+====================
+CLASSE 19: lockerguy (Locker Guy / Cara do Cadeado)
+Cor temática: #cccccc (prata / cinza metálico)
+Conceito: Tranca uma porta com cadeado, redirecionando o monstro
+Descrição visual do personagem: Um guarda/zelador com chaves e cadeados. 
+Simboliza trancamento e controle de passagem.
+
+ÍCONE CSS:
+- Elemento principal: Um CADEADO estilizado
+- ::before: Corpo do cadeado: retângulo arredondado (#bbbbbb, 16x12px) com 
+  border-radius 4px, no centro inferior do ícone
+- ::after: Arco do cadeado (shackle): semicírculo no topo com 
+  border: 3px solid #aaaaaa; border-radius: 50% 50% 0 0; 
+  width: 14px; height: 14px; com fundo transparente (só a borda)
+- Buraco da fechadura: Pequeno círculo preto (#111, 4px) no centro do 
+  corpo, com triângulo/retângulo fino abaixo (formato de fechadura)
+- Gradiente metálico no corpo do cadeado
+- Sombra: box-shadow: 0 1px 3px rgba(0,0,0,0.4)
+
+====================
+CLASSE 20: helpfulpriest (Helpful Priest / Padre Prestativo)
+Cor temática: #ffdd88 (dourado claro / sagrado)
+Conceito: Abre mini-menu para curar ou reviver aliados
+Descrição visual do personagem: Um sacerdote/padre com aura sagrada e cruz. 
+Simboliza cura e suporte.
+
+ÍCONE CSS:
+- Elemento principal: Uma CRUZ ou SÍMBOLO DE CURA
+- ::before: Cruz vertical: retângulo vertical (#ffdd88, 6x20px) + retângulo 
+  horizontal (#ffdd88, 14x6px) sobrepostos, centralizados
+- ::after: Aura/auréola: círculo fino (#ffdd88, border: 2px, border-radius 
+  50%, 24px) ao redor da cruz, com opacidade 0.4
+- Ou: Cruz com brilho: cruz branca (#fff) com box-shadow: 0 0 10px 
+  rgba(255,221,136,0.6) simulando glow sagrado
+- Pontas da cruz levemente arredondadas (border-radius 2px nos retângulos)
+- Fundo da classe selecionada deve contrastar bem com o dourado
+
+================================================================================
+IMPLEMENTAÇÃO CSS - REGRAS TÉCNICAS
+================================================================================
+
+PARTE A - NOMENCLATURA DAS CLASSES:
+
+Crie no bloco <style> (entre as linhas 7-546 do HTML, agrupado com as demais 
+classes CSS) as seguintes classes:
+
+  .class-icon-oracle { ... }
+  .class-icon-scout { ... }
+  .class-icon-redhacker { ... }
+  .class-icon-commandyeller { ... }
+  .class-icon-boringtrapper { ... }
+  .class-icon-dyingguy { ... }
+  .class-icon-teevee { ... }
+  .class-icon-annoyinglooper { ... }
+  .class-icon-timetraveler { ... }
+  .class-icon-luckyspender { ... }
+  .class-icon-utilityplayer { ... }
+  .class-icon-mightytinkerer { ... }
+  .class-icon-wiredgirl { ... }
+  .class-icon-archaeologist { ... }
+  .class-icon-untitledgeneralist { ... }
+  .class-icon-clown { ... }
+  .class-icon-rerroler { ... }
+  .class-icon-vex { ... }
+  .class-icon-lockerguy { ... }
+  .class-icon-helpfulpriest { ... }
+
+Cada classe deve ter esta estrutura base:
+  .class-icon-{key} {
+    position: relative;
+  }
+
+E usar ::before e ::after para os elementos visuais.
+
+PARTE B - REGRAS TÉCNICAS OBRIGATÓRIAS:
+
+1. TODOS os pseudo-elementos (::before, ::after) devem ter:
+   - position: absolute
+   - content: '' (OBRIGATÓRIO para pseudo-elementos existirem)
+   
+2. Centralização no elemento pai (48x48px):
+   - Use top: 50%; left: 50%; transform: translate(-50%, -50%) 
+     para elementos centrados
+   - Ou calcule posições absolutas com px
+
+3. NÃO defina width/height nem background no .class-icon-{key}. 
+   O tamanho (48x48) e background (#1a1a2e) JÁ VEM do elemento pai 
+   (.class-icons div). A classe do ícone só adiciona o conteúdo visual.
+
+4. Use cores com contraste adequado contra fundo #1a1a2e (azul muito escuro).
+   Cores recomendadas: tons com luminosidade > 40%.
+
+5. Use z-index quando necessário para empilhamento de pseudo-elementos.
+
+6. Use opacity e rgba() para transparências e sobreposições.
+
+7. Use border-radius com valores diferentes para cada canto quando necessário 
+   (ex: border-radius: 50% 50% 0 0 para semicírculo no topo).
+
+8. Use clip-path com polygon() para formas complexas (triângulos, raios, 
+   setas, trapézios). Sintaxe:
+     clip-path: polygon(x1 y1, x2 y2, x3 y3, ...)
+   As coordenadas são porcentagens relativas ao elemento.
+
+9. Use transform: rotate(deg) para orientar elementos em ângulos.
+
+10. Use repeating-linear-gradient() para padrões (listras, texturas).
+
+================================================================================
+IMPLEMENTAÇÃO JAVASCRIPT - MODIFICAÇÕES NO CÓDIGO
+================================================================================
+
+ARQUIVO: SummonGame.html
+
+MODIFICAÇÃO 1 - PlayerClasses (aproximadamente linha 1180):
+
+NÃO altere a propriedade 'icon' no objeto PlayerClasses. Mantenha-a como está 
+para compatibilidade (alguns sistemas podem referenciá-la). O ícone CSS será 
+adicionado como uma CLASSE CSS separada no elemento DOM, sem ler a propriedade 
+'icon' do PlayerClasses.
+
+MODIFICAÇÃO 2 - showClassSelection() (aproximadamente linha 3034):
+
+Encontre o bloco onde os ícones de classe são criados:
+
+  for (const [key, cls] of Object.entries(PlayerClasses)) {
+    const div = document.createElement('div');
+    div.textContent = cls.icon;           // <-- LINHA A SER ALTERADA
+    div.title = cls.name;
+    ...
+  }
+
+ALTERE para:
+
+  for (const [key, cls] of Object.entries(PlayerClasses)) {
+    const div = document.createElement('div');
+    div.textContent = '';                 // REMOVE a letra
+    div.classList.add('class-icon-' + key); // ADICIONA classe CSS do ícone
+    div.title = cls.name;
+    ...
+  }
+
+ISSO É TUDO. Apenas DUAS LINHAS alteradas: limpar textContent e adicionar 
+classList. O CSS fará todo o resto.
+
+MODIFICAÇÃO 3 - Busca por outras ocorrências:
+
+Procure em TODO o arquivo SummonGame.html por qualquer outra ocorrência onde 
+PlayerClasses[key].icon seja usado para exibição visual (fora do objeto de 
+definição). Se encontrar, substitua pela abordagem de classe CSS (adicione 
+classList).
+
+================================================================================
+TESTES OBRIGATÓRIOS (A IA DEVE FAZER ISSO)
+================================================================================
+
+Após implementar, a IA DEVE fazer os seguintes testes com valores fictícios 
+para PROVAR que o código funciona:
+
+TESTE 1 - Verificação de todas as classes CSS:
+  - Liste mentalmente cada uma das 20 classes CSS e confirme que foram criadas
+  - Verifique se todas têm ::before e/ou ::after com content: ''
+  - Verifique se nenhuma classe CSS define width/height/background (herdado do pai)
+
+TESTE 2 - Teste de renderização no DOM:
+  - Simule mentalmente a criação de um div 48x48px com classe .class-icon-oracle
+  - Verifique se os pseudo-elementos são posicionados dentro do quadrado 48x48
+  - Verifique se as cores contrastam com fundo #1a1a2e
+  - Verifique se o ícone não ultrapassa as bordas do quadrado
+
+TESTE 3 - Teste de seleção de classe:
+  - Simule o fluxo: jogador clica no ícone de classe -> div recebe classe 
+    'selected' -> CSS .selected aplica border-color #4fc3f7 e background #2a2a3e
+  - Verifique se a classe 'selected' NÃO interfere nos pseudo-elementos do ícone
+    (os pseudo-elementos do ícone devem permanecer visíveis e bem posicionados 
+    mesmo com a classe .selected ativa)
+
+TESTE 4 - Teste de compatibilidade multiplayer:
+  - Simule 4 jogadores, cada um selecionando uma classe diferente
+  - Verifique se todos os 4 painéis mostram ícones corretos e independentes
+  - Verifique se hover e selected funcionam em cada painel separadamente
+
+TESTE 5 - Contagem de classes:
+  - Confirme que são exatamente 20 classes CSS (uma para cada PlayerClass)
+  - Confirme que todos os 20 ícones são visualmente distintos entre si
+
+TESTE 6 - Conflito com CSS existente:
+  - Verifique se as novas classes CSS (.class-icon-*) NÃO conflitam com 
+    classes CSS já existentes (.icon-beartrap, .icon-landmine, etc.)
+  - Os prefixos são diferentes: .class-icon-* vs .icon-*, então NÃO deve 
+    haver conflito
+
+Os testes NÃO devem ser registrados na documentação. São apenas para 
+verificação interna da IA antes de finalizar.
+
+================================================================================
+ATUALIZAÇÃO DA DOCUMENTAÇÃO (Documentacao_Completa.txt)
+================================================================================
+
+Após implementar tudo, adicione ao FINAL do arquivo Documentacao_Completa.txt:
+
+================================================================================
+CHANGELOG - MAIO 2026 (ÍCONES CSS PROFISSIONAIS PARA CLASSES DE PERSONAGENS)
+================================================================================
+
+ALTERACAO 28 — ÍCONES CSS PROFISSIONAIS PARA AS 20 CLASSES DE PERSONAGENS
+
+   PROBLEMA: Os ícones das classes de personagens na tela de seleção eram
+   caracteres de texto simples ('O', 'S', 'H', 'Y', 'B', 'D', 'T', 'L', 'K',
+   '$', 'U', 'M', 'W', 'A', 'G', 'C', 'R2', 'V', 'LK', 'P'), sem identidade 
+   visual e pobres esteticamente.
+
+   SOLUCAO: Implementado sistema completo de 20 ícones CSS puros, um para cada
+   classe de personagem, usando apenas pseudo-elementos (::before, ::after),
+   gradientes, clip-path, border-radius, box-shadow e transform. Cada ícone é
+   uma representação visual minimalista e profissional do conceito da classe,
+   contido em um quadrado de 48x48px.
+
+   MUDANÇAS NO CÓDIGO:
+     a) CSS — 20 NOVAS CLASSES no bloco <style>:
+        .class-icon-oracle, .class-icon-scout, .class-icon-redhacker,
+        .class-icon-commandyeller, .class-icon-boringtrapper, 
+        .class-icon-dyingguy, .class-icon-teevee, .class-icon-annoyinglooper,
+        .class-icon-timetraveler, .class-icon-luckyspender,
+        .class-icon-utilityplayer, .class-icon-mightytinkerer,
+        .class-icon-wiredgirl, .class-icon-archaeologist,
+        .class-icon-untitledgeneralist, .class-icon-clown,
+        .class-icon-rerroler, .class-icon-vex, .class-icon-lockerguy,
+        .class-icon-helpfulpriest
+
+     b) JavaScript — showClassSelection() MODIFICADO:
+        Em vez de div.textContent = cls.icon (letra), agora usa:
+        div.textContent = '' e div.classList.add('class-icon-' + key),
+        delegando a renderização visual ao CSS.
+
+     c) PlayerClasses — SEM ALTERAÇÃO: a propriedade 'icon' foi mantida
+        com o valor original (letra) para compatibilidade com outros 
+        sistemas que possam referenciá-la.
+
+   DESIGN:
+     Cada ícone foi projetado com:
+     - Cor temática única por classe
+     - Forma geométrica representativa do conceito da classe
+     - Estilo minimalista (máximo 3 elementos visuais)
+     - Contraste adequado contra fundo escuro (#1a1a2e)
+     - Consistência visual entre todos os 20 ícones
+
+   COMPATIBILIDADE:
+     - Classes CSS não conflitam com .icon-* existentes (prefixos diferentes)
+     - Comportamento hover/selected mantido (CSS existente inalterado)
+     - Multiplayer: cada jogador vê seus próprios ícones independentemente
+     - Nenhum arquivo externo criado (tudo em SummonGame.html)
+
+================================================================================
+SECAO 57 — SISTEMA DE ÍCONES CSS PARA CLASSES DE PERSONAGENS
+================================================================================
+
+57.1 — CONCEITO
+
+   Cada classe de personagem (PlayerClasses) possui agora um ícone visual
+   CSS puro renderizado na tela de seleção de classes. Os ícones substituem
+   as letras que eram usadas anteriormente, fornecendo identidade visual 
+   única e profissional para cada classe.
+
+57.2 — ESTRUTURA CSS
+
+   Cada ícone é uma classe CSS com prefixo .class-icon-{key}, onde {key}
+   é a chave da classe em PlayerClasses (ex: .class-icon-oracle).
+
+   Estrutura base de cada classe:
+     .class-icon-{key} {
+       position: relative;
+     }
+     .class-icon-{key}::before { ... }
+     .class-icon-{key}::after { ... }
+
+   O elemento pai (.class-icons div) já fornece:
+   - width: 48px; height: 48px
+   - background: #1a1a2e (ou #2a2a3e quando selecionado)
+   - display: flex; align-items: center; justify-content: center
+   - border-radius: 6px; border: 2px solid #444
+   
+   As classes .class-icon-* apenas adicionam os pseudo-elementos visuais,
+   sem redefinir dimensões ou fundo.
+
+57.3 — LISTA DE ÍCONES E SEUS CONCEITOS VISUAIS
+
+   oracle (Delivery Guy):         Caixa/pacote com fita cruzada (#ffaa44)
+   scout (Weird Thief):           Máscara de ladrão com furos dos olhos (#44dd44)
+   redhacker (Red Hacker):        Colchetes < > de código com glow (#ff3333)
+   commandyeller (Command Yeller): Megafone com ondas sonoras (#ffcc00)
+   boringtrapper (Boring Trapper): Armadilha de urso circular (#888888)
+   dyingguy (Dying Guy):          Fantasma/crânio estilizado (#cc88ff)
+   teevee (Tee Vee):              TV antiga com antena e tela (#44ccff)
+   annoyinglooper (Annoying Looper): Parede com loop circular (#ff8800)
+   timetraveler (Time Traveler):  Ampulheta com areia (#ffdd44)
+   luckyspender (Lucky Spender):  Moeda dourada com cifrão (#ffdd00)
+   utilityplayer (Utility Player): Mochila com alça e bolsos (#88aacc)
+   mightytinkerer (Mighty Tinkerer): Engrenagem com dentes (#ff8833)
+   wiredgirl (Wired Girl):        Raio/relâmpago com glow (#ff66aa)
+   archaeologist (Archaeologist): Picareta cruzada (#cc9944)
+   untitledgeneralist (Untitled Generalist): Escudo protetor (#44aaff)
+   clown (Clown):                 Chapéu de palhaço listrado (#ff4488)
+   rerroler (Rerroler):           Seta circular de refresh (#66ccff)
+   vex (Vex):                     Fantasma etéreo com linhas tracejadas (#88ccff)
+   lockerguy (Locker Guy):        Cadeado com arco e fechadura (#cccccc)
+   helpfulpriest (Helpful Priest): Cruz com auréola circular (#ffdd88)
+
+57.4 — INTEGRAÇÃO COM O SISTEMA DE SELEÇÃO
+
+   Função showClassSelection() (Game class):
+   - Para cada classe em PlayerClasses, cria um div 48x48px
+   - Adiciona a classe CSS correspondente via classList.add('class-icon-' + key)
+   - Remove o textContent (não exibe mais a letra)
+   - Mantém title = cls.name para tooltip
+   - Comportamento de hover/selected inalterado (CSS existente)
+
+57.5 — ESCALABILIDADE
+
+   Para adicionar uma nova classe de personagem:
+     1. Adicionar entrada em PlayerClasses com 'icon' (qualquer valor)
+     2. Criar classe CSS .class-icon-{novaKey} no <style>
+     3. Nenhuma alteração em showClassSelection() necessária
+     
+   Para modificar o visual de um ícone existente:
+     Alterar apenas a classe CSS .class-icon-{key} no <style>
+     
+   Para alterar o tamanho dos ícones (48px):
+     Modificar o CSS de .player-setup-panel .class-icons div
+
+57.6 — COMPATIBILIDADE
+
+   - Os prefixos .class-icon-* não conflitam com .icon-* (usados para itens)
+   - A classe .selected continua funcionando (muda border-color e background)
+   - A propriedade 'icon' em PlayerClasses foi mantida inalterada
+   - Nenhum arquivo externo foi criado
+
+================================================================================
+ORDEM DE EXECUÇÃO (SIGA RIGOROSAMENTE)
+================================================================================
+
+PASSO 1: Leia o arquivo SummonGame.html completo para entender o estado atual.
+PASSO 2: Leia Documentacao_Completa.txt para referência.
+PASSO 3: Crie as 20 classes CSS no bloco <style>, ANTES do fechamento </style>.
+         Agrupe-as juntas (adicione um comentário "/* CLASS ICONS */" acima).
+PASSO 4: Modifique showClassSelection(): altere textContent e adicione classList.
+PASSO 5: Verifique se há outras referências a PlayerClasses[key].icon para 
+         exibição visual no código e corrija-as se necessário.
+PASSO 6: Execute os TESTES OBRIGATÓRIOS mentalmente para validar.
+PASSO 7: Atualize a Documentacao_Completa.txt com o CHANGELOG e a SECAO 57.
+PASSO 8: Revise TUDO para garantir que não há caracteres bugados, arquivos 
+         externos, ou problemas de compatibilidade.
+
+NÃO PULE PASSOS. Implemente TUDO agora, completamente, sem exceção.
