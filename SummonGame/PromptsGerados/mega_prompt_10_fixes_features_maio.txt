@@ -1,0 +1,781 @@
+================================================================================
+MEGA PROMPT - 10 FIXES E FEATURES - SUMMON GAME
+================================================================================
+
+INSTRUCOES GLOBAIS OBRIGATORIAS:
+- NAO crie nenhum arquivo separado (.css, .js, .py, .java, .cpp, .c, .csharp,
+  .ts, etc.). Toda e qualquer alteracao deve ser feita exclusivamente dentro
+  do arquivo SummonGame.html.
+- Siga o estilo de codigo existente: mesmo padrao de nomenclatura, aspas
+  simples, ponto e virgula, var para declaracoes, function para metodos.
+- Todas as alteracoes devem ser REGISTRADAS na Documentacao_Completa.txt
+  de forma profissional, limpa e bem estruturada (seguindo o padrao de
+  changelog existente com secoes A), B), C) e testes com valores ficticios).
+- Leia TODO o arquivo SummonGame.html e TODA a Documentacao_Completa.txt
+  antes de implementar QUALQUER coisa.
+- Implemente AGORA, sem questionamentos, sem adicoes nao solicitadas, sem
+  mais nem menos.
+- NAO use caracteres bugados/corrompidos (ex: �âï¿½ðâ¤). Use APENAS UTF-8.
+- NAO refaca sistemas inteiros do zero. Apenas modifique o necessario.
+- Execute testes com valores ficticios para CADA item apos implementar,
+  provando que funciona. NAO registre os testes na documentacao.
+- Ao alterar o HTML, registre a alteracao na Documentacao_Completa.txt.
+- Se surgir duvida, PARE e pergunte. Nao assuma nada.
+
+================================================================================
+ITEM 1: PERDER TODOS OS ITENS DA HOTBAR AO MORRER
+================================================================================
+
+CONCEITO: Quando um jogador morre (hp <= 0, alive = false), ele perde
+todos os itens que tinha na hotbar. O inventario e completamente limpo.
+
+LOCAL: Player.takeDamage() - metodo da classe Player (procure por
+'takeDamage(dmg, game)' dentro da classe Player).
+
+LOGICA ATUAL: Quando hp <= 0, define alive = false e mostra mensagem.
+Nao mexe no inventario.
+
+ALTERACAO: Apos definir alive = false, limpar o inventario do jogador.
+Tambem limpar o Set de duplicatedSlots e resetar selectedSlot para 0.
+
+CODIGO A ADICIONAR (dentro do if (this.hp <= 0) { ... }):
+
+  this.inventory = [null, null, null, null, null];
+  this.selectedSlot = 0;
+  this.duplicatedSlots = new Set();
+  this.useTimer = 0;
+  this.using = false;
+  this.useTapPending = false;
+
+IMPORTANTE: O inventario e uma propriedade por jogador, entao em modo
+multiplayer cada jogador perde APENAS seus proprios itens ao morrer.
+O outro jogador mantem seus itens.
+
+TESTE:
+  1. Jogador com 3 itens na hotbar toma dano ate morrer.
+  2. Verificar: inventario = [null,null,null,null,null], hotbar vazia.
+
+================================================================================
+ITEM 2: FIX COMPLETO DA CLASSE MIGHTY TINKERER (3 CORRECOES)
+================================================================================
+
+CONCEITO: A zona de engenharia (7x7 tiles, 6s duracao) criada pelo
+Mighty Tinkerer deve ter 3 efeitos sobre os monstros dentro dela:
+  A) Velocidade do monstro reduzida para 60 (atualmente NAO funciona).
+  B) Monstro NAO detecta jogadores dentro da zona (como invisiveis).
+  C) Monstro NAO causa dano a jogadores dentro da zona.
+
+================================================================================
+ITEM 2A: CORRIGIR VELOCIDADE DO MONSTRO NA ZONA (monsterSpeed: 70 -> 60)
+================================================================================
+
+PROBLEMA: O codigo atual NUNCA reduz a velocidade do monstro dentro da
+zona. A zona tem a propriedade monsterSpeed, mas o MonsterEntity.update()
+nao verifica as zonas ativas para ajustar a velocidade.
+
+LOCAL 1 (criacao da zona): Funcao activateAbility(), bloco mightytinkerer.
+
+ALTERACAO: Mudar monsterSpeed de 70 para 60:
+
+CODIGO ATUAL (aproximado):
+  game.activeZones.push({ x: p.px, y: p.py, radius: 3.5 * TILE_SIZE,
+    timer: 6, ownerIndex: p.playerIndex, bonusSpeed: 30, monsterSpeed: 70 });
+
+CODIGO NOVO:
+  game.activeZones.push({ x: p.px, y: p.py, radius: 3.5 * TILE_SIZE,
+    timer: 6, ownerIndex: p.playerIndex, bonusSpeed: 30, monsterSpeed: 60 });
+
+LOCAL 2 (aplicacao da velocidade): MonsterEntity.update(), apos o calculo
+de speed (apos as linhas que definem this.speed para Desperation, Alien,
+etc., mas ANTES do bloco de ataque - procure por 'this.speed = (mt.speedMod').
+
+ALTERACAO: Adicionar verificacao de zonas ativas para forcar a velocidade
+do monstro para o valor monsterSpeed da zona quando ele estiver dentro.
+
+CODIGO A ADICIONAR (apos o ultimo ajuste de speed especifico de tipo,
+antes do bloco que verifica ballerina frozen e do switch FSM):
+
+  // Mighty Tinkerer zone: force monster speed
+  for (var zi = 0; zi < this.game.activeZones.length; zi++) {
+    var zone = this.game.activeZones[zi];
+    var zdx = this.px - zone.x;
+    var zdy = this.py - zone.y;
+    if (Math.sqrt(zdx * zdx + zdy * zdy) <= zone.radius) {
+      this.speed = zone.monsterSpeed;
+      break;
+    }
+  }
+
+NOTA: Isso deve ficar ANTES da multiplicacao do chase speed (1.4x).
+O chase speed usa this.speed * 1.4, entao o monsterSpeed da zona sera
+multiplicado por 1.4 durante chase, o que e aceitavel. Porem, se quiser
+que o speed seja EXATAMENTE 60 mesmo em chase, coloque este bloco APOS
+o calculo do chase speed no followPath(). Mas por simplicidade e para
+evitar modificar followPath(), coloque no update() e aceite 60*1.4=84
+em chase.
+
+================================================================================
+ITEM 2B: MONSTRO NAO DETECTA JOGADORES DENTRO DA ZONA
+================================================================================
+
+CONCEITO: Enquanto um jogador esta dentro de qualquer zona ativa do
+Mighty Tinkerer, o monstro nao pode ve-lo. O jogador fica "invisivel"
+para o sistema de deteccao do monstro (canSeePlayer e canDetectBehind).
+
+LOCAL: MonsterEntity.findNearestPlayer() - metodo que encontra o jogador
+vivo mais proximo. Ele ja verifica `if (p.invisible) continue;`.
+
+ALTERACAO: Adicionar uma verificacao adicional: pular jogadores que
+estao dentro de zonas ativas.
+
+CODIGO A ADICIONAR (dentro do loop 'for (const p of this.game.players)',
+logo apos `if (p.invisible) continue;`):
+
+  // Mighty Tinkerer zone: players inside zone are invisible to monster
+  var playerInZone = false;
+  for (var zi = 0; zi < this.game.activeZones.length; zi++) {
+    var zone = this.game.activeZones[zi];
+    var zdx = p.px - zone.x;
+    var zdy = p.py - zone.y;
+    if (Math.sqrt(zdx * zdx + zdy * zdy) <= zone.radius) {
+      playerInZone = true;
+      break;
+    }
+  }
+  if (playerInZone) continue;
+
+EXPLICACAO: Isso faz com que findNearestPlayer() ignore jogadores dentro
+de zonas. Como canSeePlayer() e canDetectBehind() usam findNearestPlayer()
+internamente, ambos automaticamente nao detectarao esses jogadores.
+O monstro simplesmente age como se o jogador nao existisse.
+
+================================================================================
+ITEM 2C: MONSTRO NAO CAUSA DANO A JOGADORES DENTRO DA ZONA
+================================================================================
+
+LOCAL: MonsterEntity.update(), bloco de ataque (procure por
+'attackCooldown <= 0' e 'target.takeDamage(20, this.game)').
+
+ALTERACAO: Antes de chamar target.takeDamage(), verificar se o jogador
+alvo esta dentro de alguma zona ativa. Se estiver, NAO causar dano.
+
+CODIGO ATUAL (aproximado, bloco no final de MonsterEntity.update()):
+  if (target) {
+    const dx = target.px - this.px;
+    const dy = target.py - this.py;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < TILE_SIZE * 0.8 && this.attackCooldown <= 0) {
+      target.takeDamage(20, this.game);
+      this.attackCooldown = 1.0;
+    }
+  }
+
+CODIGO NOVO:
+  if (target) {
+    const dx = target.px - this.px;
+    const dy = target.py - this.py;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < TILE_SIZE * 0.8 && this.attackCooldown <= 0) {
+      // Mighty Tinkerer zone: players inside zone take no damage
+      var targetInZone = false;
+      for (var zi = 0; zi < this.game.activeZones.length; zi++) {
+        var zone = this.game.activeZones[zi];
+        var zdx = target.px - zone.x;
+        var zdy = target.py - zone.y;
+        if (Math.sqrt(zdx * zdx + zdy * zdy) <= zone.radius) {
+          targetInZone = true;
+          break;
+        }
+      }
+      if (!targetInZone) {
+        target.takeDamage(20, this.game);
+        this.attackCooldown = 1.0;
+      }
+    }
+  }
+
+ATENCAO: Existe um bloco de ataque DUPLICADO no metodo updateTaunted()
+que tambem chama takeDamage. Aplique a MESMA verificacao de zona la
+(procure por 'takeDamage' dentro de updateTaunted).
+
+================================================================================
+ITEM 3: BARRA DE HP ABAIXO DO NOME DE CADA JOGADOR
+================================================================================
+
+CONCEITO: Desenhar uma barra de vida horizontal abaixo do nome do jogador,
+entre o nome e o circulo do personagem. A barra deve ter 1 tile de largura
+(TILE_SIZE = 32px), altura de 20% de TILE_SIZE (6.4px, arredondar para 6px).
+Gradiente CSS-like de verde (#00ff00) para vermelho (#ff0000) conforme a
+vida desce. Estilo profissional, borda escura, cantos arredondados.
+
+LOCAL: Player.render() - metodo de renderizacao do jogador. A barra deve
+ser desenhada no Canvas (ctx 2D), abaixo do nome e acima do circulo.
+
+POSICAO ATUAL DO NOME:
+  ctx.fillText(this.name, sx, sy - TILE_SIZE * 0.80);
+  (O nome fica acima do jogador a 0.80 * TILE_SIZE do centro)
+
+NOVA ORDEM DE RENDERIZACAO (de cima para baixo):
+  1. Nome (ja existe, sy - TILE_SIZE * 0.80)
+  2. Barra de HP (NOVO, sy - TILE_SIZE * 0.38)  <-- entre nome e circulo
+  3. Circulo do jogador (ja existe, sy central)
+
+IMPLEMENTACAO (adicionar APOS ctx.fillText(this.name, ...) e ANTES de
+ctx.textAlign = 'start'):
+
+  // HP Bar
+  var barWidth = TILE_SIZE;
+  var barHeight = Math.max(4, Math.floor(TILE_SIZE * 0.2)); // ~6px, min 4px
+  var barX = sx - barWidth / 2;
+  var barY = sy - TILE_SIZE * 0.38;
+  var hpRatio = Math.max(0, this.hp / this.maxHp);
+
+  // Fundo escuro da barra
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.beginPath();
+  ctx.roundRect(barX - 1, barY - 1, barWidth + 2, barHeight + 2, 2);
+  ctx.fill();
+
+  // Borda
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(barX - 1, barY - 1, barWidth + 2, barHeight + 2, 2);
+  ctx.stroke();
+
+  // Barra de HP com gradiente verde -> vermelho
+  var hpGrad = ctx.createLinearGradient(barX, 0, barX + barWidth, 0);
+  if (hpRatio > 0.5) {
+    // Verde -> Amarelo (100% a 50%)
+    var t = (hpRatio - 0.5) * 2; // 0 a 1
+    hpGrad.addColorStop(0, '#00ff00');
+    hpGrad.addColorStop(1, '#ffff00');
+  } else {
+    // Amarelo -> Vermelho (50% a 0%)
+    var t = hpRatio * 2; // 0 a 1
+    hpGrad.addColorStop(0, '#ffff00');
+    hpGrad.addColorStop(1, '#ff0000');
+  }
+  ctx.fillStyle = hpGrad;
+  ctx.beginPath();
+  ctx.roundRect(barX, barY, barWidth * hpRatio, barHeight, 1.5);
+  ctx.fill();
+
+NOTA: O metodo ctx.roundRect() pode nao existir em navegadores antigos.
+Se nao estiver disponivel, use fillRect simples com cantos retos.
+Alternativa: usar ctx.roundRect apenas se existir, senao fallback
+para fillRect simples.
+
+TESTE:
+  1. Jogador com HP=100: barra verde cheia (100% largura).
+  2. Jogador com HP=50: barra amarela na metade.
+  3. Jogador com HP=10: barra vermelha curta.
+  4. Verificar se barra NAO aparece quando jogador esta morto (!alive).
+  5. Verificar se barra aparece em todos os modos (single e multiplayer).
+
+================================================================================
+ITEM 4: CONCEDER MOEDAS A CADA ROUND
+================================================================================
+
+CONCEITO: Ao final de cada round (quando todos os artefatos sao coletados
+e o monstro morre), todos os jogadores ganham moedas automaticamente:
+  - Easy: 5 moedas
+  - Medium: 10 moedas
+  - Hard: 15 moedas
+
+LOCAL: Game.checkGameState() - metodo que e chamado quando todos os
+artefatos foram coletados. Procure pelo bloco onde a recompensa de round
+(random item) e distribuida.
+
+ALTERACAO: Adicionar a concessao de moedas ANTES do bloco de recompensa
+de itens (antes do 'for (const p of this.players)' que da itens aleatorios).
+
+CODIGO A ADICIONAR (antes do bloco 'Round reward: random item by rarity'):
+
+  // Round coins reward
+  var coinReward = 0;
+  if (this.difficulty === 'easy') coinReward = 5;
+  else if (this.difficulty === 'medium') coinReward = 10;
+  else if (this.difficulty === 'hard') coinReward = 15;
+  this.currency += coinReward;
+  this.showMessage('Round ' + this.roundNumber + ' complete! +' + coinReward + ' coins!');
+
+IMPORTANTE: Esta mensagem substitui a mensagem atual 'Round X complete!
+Monster defeated!'. Se quiser manter ambas, concatene as mensagens ou
+substitua a existente.
+
+TESTE:
+  1. Modo Easy: completar round, verificar +5 moedas.
+  2. Modo Medium: completar round, verificar +10 moedas.
+  3. Modo Hard: completar round, verificar +15 moedas.
+  4. Moedas sao adicionadas ao saldo global (compartilhado).
+
+================================================================================
+ITEM 5: MODIFICAR BUFF DE VELOCIDADE DO MONSTRO + NERF BASE
+================================================================================
+
+CONCEITO: Duas mudancas no sistema de velocidade do monstro:
+  A) Nerfar a velocidade BASE do monstro em 20 pontos (de 70 para 50).
+  B) A cada round, o bonus percentual muda:
+     - Easy: +5% da velocidade base por round (antes era +5%)
+     - Medium: +8% da velocidade base por round (antes era +10%)
+     - Hard: +12% da velocidade base por round (antes era +20%)
+
+================================================================================
+ITEM 5A: NERFAR VELOCIDADE BASE DE 70 PARA 50
+================================================================================
+
+LOCAL: Game constructor e/ou propriedade baseMonsterSpeed.
+
+ALTERACAO: Mudar o valor padrao de baseMonsterSpeed de 70 para 50.
+
+CODIGO ATUAL (no constructor da classe Game):
+  this.baseMonsterSpeed = 70;
+
+CODIGO NOVO:
+  this.baseMonsterSpeed = 50;
+
+VERIFICAR: Em loadMap() e restart(), o baseMonsterSpeed nao e redefinido.
+Precisa garantir que nao haja redefinicao para 70 em lugar nenhum.
+Procure por 'baseMonsterSpeed' em todo o arquivo e verifique se ha
+atribuicao = 70 em outro lugar alem do constructor.
+
+NOTA: A velocidade do primeiro summon sera 50 (era 70).
+Com bonus de round: Round 1 = 50, Round 2 Easy = 52.5, etc.
+
+================================================================================
+ITEM 5B: ALTERAR BONUS PERCENTUAL POR ROUND
+================================================================================
+
+LOCAL: Game.getMonsterSpeed() - metodo que calcula a velocidade base
+do monstro com bonus por round.
+
+CODIGO ATUAL:
+  getMonsterSpeed() {
+    let bonus = 0;
+    if (this.difficulty === 'easy') bonus = 5;
+    else if (this.difficulty === 'medium') bonus = 10;
+    else bonus = 20;
+    return this.baseMonsterSpeed * (1 + bonus * this.roundNumber / 100);
+  }
+
+CODIGO NOVO:
+  getMonsterSpeed() {
+    let bonus = 0;
+    if (this.difficulty === 'easy') bonus = 5;
+    else if (this.difficulty === 'medium') bonus = 8;
+    else bonus = 12;
+    return this.baseMonsterSpeed * (1 + bonus * this.roundNumber / 100);
+  }
+
+LOCAL: Game.getSpeedBonusPercent() - metodo que retorna o percentual
+de bonus para exibicao no HUD.
+
+CODIGO ATUAL:
+  getSpeedBonusPercent() {
+    if (this.difficulty === 'easy') return this.roundNumber * 5;
+    else if (this.difficulty === 'medium') return this.roundNumber * 10;
+    else return this.roundNumber * 20;
+  }
+
+CODIGO NOVO:
+  getSpeedBonusPercent() {
+    if (this.difficulty === 'easy') return this.roundNumber * 5;
+    else if (this.difficulty === 'medium') return this.roundNumber * 8;
+    else return this.roundNumber * 12;
+  }
+
+TESTE:
+  1. Easy, Round 0: getMonsterSpeed() = 50 * (1 + 5*0/100) = 50. OK.
+  2. Easy, Round 1: getMonsterSpeed() = 50 * (1 + 5*1/100) = 52.5. OK.
+  3. Medium, Round 3: getMonsterSpeed() = 50 * (1 + 8*3/100) = 62. OK.
+  4. Hard, Round 5: getMonsterSpeed() = 50 * (1 + 12*5/100) = 80. OK.
+  5. HUD mostra Speed Bonus correto: Easy +5%, Medium +8%, Hard +12%.
+
+================================================================================
+ITEM 6: LUCKY SPENDER AGORA TEM 85% DE CHANCE DE DUPLICAR
+================================================================================
+
+CONCEITO: A classe Lucky Spender atualmente tem 40% de chance de duplicar
+itens ao comprar na loja. Alterar para 85%.
+
+LOCAL: Game.buyFromShop(), no bloco que verifica a classe luckyspender
+(procure por 'luckyspender' e 'Math.random() < 0.4').
+
+CODIGO ATUAL (aproximado):
+  if (player.playerClass === 'luckyspender' && player.countEmptySlots() >= 2
+      && Math.random() < 0.4) {
+
+CODIGO NOVO:
+  if (player.playerClass === 'luckyspender' && player.countEmptySlots() >= 2
+      && Math.random() < 0.85) {
+
+TESTE:
+  1. Lucky Spender compra 20 itens em modo F1 (debug).
+  2. Contar quantas duplicacoes ocorreram.
+  3. Verificar se ~85% das compras resultaram em duplicacao.
+  4. Itens duplicados continuam nao podendo ser vendidos.
+
+================================================================================
+ITEM 7: FIX BALLERINA - SO CONGELA NO CAMPO DE VISAO RAYCAST
+================================================================================
+
+CONCEITO: A Ballerina atualmente congela quando QUALQUER jogador esta
+virado em direcao a ela (isPlayerLooking). A correcao e: ela so deve
+congelar se o jogador que esta olhando para ela TAMBEM a tem dentro do
+campo de visao iluminado (isPointVisible). Se o jogador esta virado para
+ela mas NAO a ve (atras de uma parede, fora do alcance de visao), ela
+continua andando.
+
+LOCAL: MonsterEntity.isBeingWatched() - metodo que verifica se PELO MENOS
+UM jogador vivo esta olhando para a Ballerina.
+
+CODIGO ATUAL:
+  isBeingWatched() {
+    for (const p of this.game.players) {
+      if (p.alive && this.isPlayerLooking(p)) return true;
+    }
+    return false;
+  }
+
+CODIGO NOVO:
+  isBeingWatched() {
+    for (const p of this.game.players) {
+      if (!p.alive) continue;
+      if (!this.isPlayerLooking(p)) continue;
+      // Verificar se a Ballerina esta dentro do campo de visao do jogador
+      if (this.game.isPointVisible(this.px, this.py)) return true;
+    }
+    return false;
+  }
+
+EXPLICACAO: isPointVisible(px, py) verifica se o ponto (monstro) esta
+dentro de algum poligono de visibilidade de qualquer jogador. Como
+isPointVisible ja verifica TODOS os poligonos de TODOS os jogadores
+vivos (uniao de visoes), o resultado e: a Ballerina so congela se
+ALGUM jogador pode ve-la (esta no campo de visao iluminado).
+
+IMPORTANTE: Isso significa que em modo multiplayer, se um jogador P1
+esta olhando para a Ballerina mas NAO a tem no campo de visao, e P2
+tambem nao a ve, a Ballerina continua andando. Se P2 tem a Ballerina
+no campo de visao (mesmo sem olhar para ela), isPointVisible retorna
+true para o ponto dela (porque isPointVisible verifica se QUALQUER
+jogador ilumina o ponto). Neste caso, a Ballerina congelaria se P1
+esta olhando e P2 ilumina o ponto. Este comportamento esta CORRETO -
+a logica e: "Alguem pode me ver?" (isPointVisible) + "Alguem esta
+olhando para mim?" (isPlayerLooking). Se ambas as condicoes sao
+verdadeiras para o MESMO jogador ou jogadores diferentes, ela congela.
+
+TESTE:
+  1. Ballerina visivel, jogador olhando para ela: CONGELADA.
+  2. Ballerina atras de parede, jogador olhando na direcao dela: ANDANDO.
+  3. Ballerina visivel, jogador de costas: ANDANDO.
+  4. Ballerina fora do campo de visao (distante): ANDANDO.
+
+================================================================================
+ITEM 8: FIX DYING GUY - 8 SEGUNDOS DE INVISIBILIDADE
+================================================================================
+
+CONCEITO: A habilidade "Fingir de Morto" do Dying Guy deve conceder
+8 segundos de invisibilidade. Atualmente concede apenas 3 segundos.
+
+LOCAL: Funcao activateAbility(), bloco do dyingguy (procure por
+'dyingguy' na funcao activateAbility).
+
+CODIGO ATUAL (aproximado):
+  if (p.playerClass === 'dyingguy') {
+    p.invisible = true;
+    p.invisibleTimer = 3;
+    for (var mi2 = 0; mi2 < game.activeMonsters.length; mi2++) {
+      ...
+    }
+  }
+
+CODIGO NOVO:
+  if (p.playerClass === 'dyingguy') {
+    p.invisible = true;
+    p.invisibleTimer = 8;
+    for (var mi2 = 0; mi2 < game.activeMonsters.length; mi2++) {
+      var m2 = game.activeMonsters[mi2];
+      if (m2.state === 'chase' || m2.state === 'search') {
+        m2.state = 'patrol';
+        m2.path = null;
+        m2.chaseTimer = 0;
+        m2.searchTimer = 0;
+      }
+    }
+  }
+
+VERIFICAR: Confirme que a duracao da classe (PlayerClasses.dyingguy.duration)
+tambem esta correta. Deve ser 8 para consistencia. Procure a definicao da
+classe em PlayerClasses e altere:
+
+  dyingguy: {
+    name: 'Dying Guy',
+    desc: 'Fica invisivel para o monstro por 8s. O monstro perde o rastro.',
+    abilityName: 'Fingir de Morto',
+    cooldown: 20,
+    duration: 8,   // <-- alterar de 6 para 8
+    icon: 'D'
+  },
+
+NOTA: O cooldown total sera cooldown + duration = 20 + 8 = 28 segundos.
+A duracao afeta o abilityCooldown (cooldown + duration) e o abilityTimer.
+
+TESTE:
+  1. Ativar habilidade Dying Guy.
+  2. Verificar invisibleTimer = 8 (era 3).
+  3. Verificar abilityTimer = 8 (duration da classe).
+  4. Verificar abilityCooldown = 28 (20 + 8).
+  5. Monstro perde rastro e volta para patrol.
+
+================================================================================
+ITEM 9: MODO ADMIN (F1) - EXIBIR RAIOS DE RAYCAST DE VISAO DO JOGADOR
+================================================================================
+
+CONCEITO: No modo debug (F1), exibir linhas AMARELAS representando os
+raios de raycast de iluminacao do jogador. Essas linhas mostram ate onde
+o jogador ilumina e como a luz se comporta. Os raios sao os mesmos usados
+pelo buildVisibilityPolygon() para definir o poligono de visibilidade.
+
+LOCAL: Game.renderDebug() - metodo que renderiza informacoes de debug.
+Adicionar a renderizacao dos raios DENTRO do loop de visibilityPolygons.
+
+IMPLEMENTACAO:
+
+No metodo renderDebug(), apos o bloco que desenha waypoints e ANTES do
+bloco de FPS, adicionar:
+
+  // Player raycast rays (yellow)
+  for (var vpi = 0; vpi < this.visibilityPolygons.length; vpi++) {
+    var vp = this.visibilityPolygons[vpi];
+    var pl = vp.player;
+    if (!pl || !pl.alive) continue;
+    var psx = pl.px - this.camX;
+    var psy = pl.py - this.camY;
+
+    ctx.strokeStyle = 'rgba(255, 255, 0, 0.25)';
+    ctx.lineWidth = 0.5;
+
+    // Desenhar linhas do jogador ate cada ponto do poligono
+    // Apenas uma a cada 8 raios para nao poluir visualmente
+    for (var ri = 0; ri < vp.points.length; ri += 8) {
+      var pt = vp.points[ri];
+      ctx.beginPath();
+      ctx.moveTo(psx, psy);
+      ctx.lineTo(pt.x - this.camX, pt.y - this.camY);
+      ctx.stroke();
+    }
+
+    // Pequeno ponto amarelo no final de cada raio desenhado
+    ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+    for (var ri2 = 0; ri2 < vp.points.length; ri2 += 8) {
+      var pt2 = vp.points[ri2];
+      var epx = pt2.x - this.camX;
+      var epy = pt2.y - this.camY;
+      ctx.fillRect(epx - 1, epy - 1, 2, 2);
+    }
+  }
+
+DETALHES VISUAIS:
+  - Cor: amarelo rgba(255, 255, 0, 0.25) para linhas.
+  - Linhas finas: lineWidth = 0.5.
+  - Apenas 1 a cada 8 raios desenhados (220/8 = ~27 raios por jogador).
+  - Pequenos pontos amarelos nos endpoints de cada raio.
+  - Suporta multiplayer: raios de todos os jogadores vivos sao exibidos.
+  - Cada jogador tem seus proprios raios partindo de sua posicao.
+
+NOTA: visibilityPolygons ja e populado por buildLightmap() durante o
+render(). O array contem objetos { player, points } onde points e o
+array de coordenadas {x, y} dos endpoints dos raios no espaco do mundo.
+
+TESTE:
+  1. Ativar F1. Verificar linhas amarelas saindo do jogador.
+  2. Andar pelo mapa. Verificar raios atualizando em tempo real.
+  3. Raios devem ser bloqueados por paredes (nao atravessam tiles 'O').
+  4. Raios devem ser bloqueados por portas fechadas.
+  5. Modo noturno: raios mais curtos (160px vs 384px).
+  6. Dois jogadores: raios de ambos aparecem simultaneamente.
+
+================================================================================
+ITEM 10: ICONES DA HOTBAR IGUAIS AOS DA LOJA (UNIFICAR RENDERIZACAO)
+================================================================================
+
+CONCEITO: Atualmente os icones da loja usam funcoes Canvas 2D
+(ItemIcons[it.icon]) enquanto os icones da hotbar usam classes CSS
+(.item-icon.icon-beartrap). E necessario unificar: a hotbar deve
+usar os MESMOS icones Canvas 2D que a loja usa, garantindo aparencia
+identica. Deve-se lidar com o problema de escala (os slots da hotbar
+tem tamanhos variaveis dependendo de hotbarSize e layout).
+
+================================================================================
+ESTRATEGIA DE IMPLEMENTACAO
+================================================================================
+
+A hotbar e renderizada via innerHTML (DOM). Para usar icones Canvas 2D,
+cada slot ocupado da hotbar deve conter um elemento <canvas> em vez de
+<span class="item-icon icon-...">. Apos definir o innerHTML, os canvases
+devem ser desenhados com a respectiva funcao ItemIcons.
+
+PASSO 1: Na funcao updateHotbarHUD(), alterar a geracao de HTML dos slots.
+
+CODIGO ATUAL (para slot com item, dentro do loop de slots):
+  if (it) {
+    html += '<span class="item-icon icon-' + it.icon + '"></span>';
+  }
+
+CODIGO NOVO:
+  if (it) {
+    html += '<canvas class="item-canvas" data-item="' + item +
+      '" width="' + slotSize + '" height="' + slotSize +
+      '" style="width:' + slotSize + 'px;height:' + slotSize + 'px;"></canvas>';
+  }
+
+IMPORTANTE: O atributo data-item deve conter a CHAVE do item (ex: 'beartrap',
+'landmine', etc.), nao o objeto item. Use a variavel 'item' que ja e a
+string da chave.
+
+PASSO 2: Apos definir container.innerHTML, desenhar os icones nos canvases.
+
+Adicionar o seguinte bloco APOS a linha 'container.innerHTML = html;'
+no final de updateHotbarHUD():
+
+  // Render ItemIcons on hotbar canvases
+  var canvases = container.querySelectorAll('.item-canvas');
+  for (var ci = 0; ci < canvases.length; ci++) {
+    var cvs = canvases[ci];
+    var itemKey = cvs.getAttribute('data-item');
+    if (!itemKey) continue;
+    var iconFn = ItemIcons[itemKey];
+    if (!iconFn) continue;
+    var ctx2 = cvs.getContext('2d');
+    var cw = cvs.width;
+    var ch = cvs.height;
+    ctx2.clearRect(0, 0, cw, ch);
+    // Centralizar o icone no canvas, com margem de 15% para padding
+    var iconSize = Math.min(cw, ch) * 0.7;
+    iconFn(ctx2, cw / 2, ch / 2, iconSize);
+  }
+
+EXPLICACAO:
+  - Cada canvas tem width/height = slotSize (definido pelo sistema de hotbar).
+  - O canvas e criado com o tamanho exato do slot.
+  - ItemIcons[itemKey] e a funcao que desenha o icone (ex: ItemIcons.beartrap).
+  - iconSize = 70% do tamanho do slot para dar padding (mesmo comportamento
+    visual da loja que usa size=22 em slots maiores).
+  - ctx2.clearRect limpa o canvas antes de desenhar (evita acumulo).
+  - O centro do canvas e (cw/2, ch/2).
+
+PASSO 3 (OPCIONAL): Remover as classes CSS de icones antigos (.icon-beartrap,
+.icon-landmine, etc.) se nao forem mais usadas em nenhum outro lugar.
+VERIFIQUE se as classes CSS de icones sao usadas em outros lugares alem
+da hotbar (ex: tela de selecao de classes). Se forem usadas apenas na
+hotbar, podem ser removidas do CSS.
+
+ATENCAO: As classes CSS de icones de ITENS (.icon-beartrap, .icon-landmine,
+etc.) sao DIFERENTES das classes CSS de icones de CLASSES (.class-icon-oracle,
+.class-icon-scout, etc.). NAO remova as classes de icones de classes.
+
+================================================================================
+COMPATIBILIDADE COM LAYOUTS
+================================================================================
+
+O sistema de canvas se adapta automaticamente ao layout horizontal e
+vertical, pois o slotSize ja e calculado dinamicamente:
+
+  slotSize = isVertical ? 36 : Math.max(18, Math.min(80,
+    Math.floor(55 * game.hotbarSize / 100)));
+
+Os canvases terao width/height = slotSize, e o iconSize sera
+slotSize * 0.7, garantindo proporcao correta em todos os tamanhos.
+
+TESTE:
+  1. Layout horizontal, hotbarSize=100: icones com tamanho correto.
+  2. Layout vertical, hotbarSize=100: icones reduzidos corretamente.
+  3. Layout horizontal, hotbarSize=200: icones grandes, sem distorcao.
+  4. Layout horizontal, hotbarSize=50: icones pequenos, legiveis.
+  5. Comparar visualmente um icone na loja com o mesmo icone na hotbar.
+     Devem ser identicos em design (apenas tamanho pode variar).
+  6. Verificar se nao ha acumulo de canvases (um por slot ocupado).
+  7. Slots vazios continuam mostrando '-' sem canvas.
+
+================================================================================
+RESUMO DAS ALTERACOES
+================================================================================
+
+ 1. Player.takeDamage(): limpar inventario ao morrer.
+ 2. Mighty Tinkerer (3 sub-itens):
+    2A. monsterSpeed: 70 -> 60 + aplicar zona no MonsterEntity.update().
+    2B. findNearestPlayer(): pular jogadores em zonas ativas.
+    2C. Bloco de ataque do monstro: nao causar dano a jogadores em zonas.
+ 3. Player.render(): barra de HP com gradiente verde->vermelho, 1 tile largura.
+ 4. Game.checkGameState(): conceder moedas por round (Easy=5, Medium=10, Hard=15).
+ 5. Velocidade do monstro:
+    5A. baseMonsterSpeed: 70 -> 50.
+    5B. getMonsterSpeed()/getSpeedBonusPercent(): Medium 10->8, Hard 20->12.
+ 6. Game.buyFromShop(): Lucky Spender 0.4 -> 0.85.
+ 7. MonsterEntity.isBeingWatched(): adicionar verificacao isPointVisible.
+ 8. activateAbility() dyingguy: invisibleTimer 3 -> 8; PlayerClasses.duration 6 -> 8.
+ 9. Game.renderDebug(): linhas amarelas de raios de raycast (1 a cada 8 raios).
+10. updateHotbarHUD(): substituir spans CSS por canvases com ItemIcons.
+
+================================================================================
+REGISTRO NA DOCUMENTACAO (OBRIGATORIO)
+================================================================================
+
+Apos implementar TODOS os itens, registrar na Documentacao_Completa.txt
+seguindo o formato de changelog existente:
+
+  ================================================================================
+  CHANGELOG - MAIO 2026 (10 FIXES E FEATURES)
+  ================================================================================
+
+  ALTERACAO XX - (titulo descritivo)
+
+  A) DESCRICAO DO PROBLEMA: (breve explicacao do que estava errado/faltando)
+
+  B) SOLUCAO IMPLEMENTADA: (o que foi feito, onde, como)
+
+  C) MUDANCAS NO CODIGO: (lista de metodos/classes/secoes alterados)
+
+  D) SISTEMAS AFETADOS: (lista de sistemas impactados)
+
+  E) TESTES: (tabela com resultados, usando valores ficticios)
+
+  F) NOTAS DE PERFORMANCE: (impacto, se houver)
+
+  ================================================================================
+  SECAO XX — (titulo da nova secao)
+  ================================================================================
+
+  (documentacao detalhada da nova funcionalidade/sistema)
+
+Cada item (1 a 10) deve ter sua propria entrada no changelog.
+
+================================================================================
+VERIFICACAO FINAL
+================================================================================
+
+- [ ] Item 1: Inventario limpo ao morrer?
+- [ ] Item 2A: Velocidade do monstro = 60 dentro da zona?
+- [ ] Item 2B: Monstro ignora jogadores dentro da zona?
+- [ ] Item 2C: Jogadores na zona nao tomam dano?
+- [ ] Item 3: Barra de HP visivel, gradiente verde->vermelho?
+- [ ] Item 4: Moedas concedidas por round (5/10/15)?
+- [ ] Item 5: Velocidade base = 50, bonus 5/8/12%?
+- [ ] Item 6: Lucky Spender 85% de duplicar?
+- [ ] Item 7: Ballerina so congela no campo de visao raycast?
+- [ ] Item 8: Dying Guy 8 segundos de invisibilidade?
+- [ ] Item 9: Raios amarelos visiveis no modo F1?
+- [ ] Item 10: Icones da hotbar identicos aos da loja?
+- [ ] Documentacao_Completa.txt atualizada para todos os itens?
+- [ ] Sem erros no console do navegador?
+- [ ] Sem caracteres bugados/corrompidos?
+- [ ] Nenhum arquivo novo criado?
+- [ ] Nenhum sistema refeito do zero?
+- [ ] Compatibilidade multiplayer mantida?
+- [ ] Compatibilidade save/load mantida?
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================
