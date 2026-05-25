@@ -1,2 +1,41 @@
 To-do
  
+[ ] adicionar atributos as classes(stealth, task, speed)
+[ ] add backrooms
+[ ] modo de round especial a cada round multiplo de 3, ao vencer um round especial, conceder aos jogadores alguma dessas recompensas: um item super raro, ou um escudo de um hit, ou heal de 75hp. Hud de interface de missões:
+═════════════════════════
+📋 MISSÕES                      
+═════════════════════════
+🪙 Colete 3 moedas       2/3  
+👁 Sobreviva 30s visível  18/30s  
+═════════════════════════
+✅ Missões concluídas: 2
+Notificação ao concluir:
+- Brilho dourado na borda da tela
+- "MISSÃO CONCLUÍDA!" no centro (igual showMessage mas com cor dourada #ffd700)
+- Partículas douradas (reaproveitar sistema de this.particles)
+Rounds especiais
+1) Ficar 15 segundos em um comodo especifico
+2) 2 artefatos a mais
+3) coletar 3 moedas que spawnam aleatoriamente pelo mapa(no floor ou no grass), cada moeda concede 5 dinheiros
+4) visite todos os comodos do mapa(banheiro, quarto, corredor, sala, jardim)
+5) se houver 2 ou mais jogadores, um deles ficará com nerf de velocidade de 50%
+6) ao coletar todos os artefatos, todos os jogadores devem comparecer na sala do altar
+7) todas as portas tem q estar fechadas
+8) stunnar o monstro 3 vezes(esse round só será escolhido se houver ao menos 3 traps no jogo(na hotbar dos jogadores e no chão))
+9) pra vencer deve ao menos receber 1 hit do monstro
+10) use 3 itens(esse round só será escolhido se houver ao menos 3 itens na hotbar dos jogadores)
+11) todos da equipe devem ficar perto por 20 segundos
+12) sair de um chase do monstro 1 vez
+13) toda vez q um artefato é coletado, os outros artefatos mudam de posição
+14) se o monstro for stunnado, os players também serão stunnados pela metade do tempo
+15) o monstro ganha 150% de velocidade e irá apenas atacar 1 player(ele sabe a posição desse player e ao matar ele, ele retorna ao altar e fica parado o resto do round), que é o player com mais itens no inventário
+16) para enxergar os artefatos precisa chegar perto deles num raio de 4x4 tiles de tamanho(se aplica ao artefato falso também)
+
+[ ] todo round, spawnar 2 baús aleatorios no mapa que contém itens aleatórios(os itens tem suas chances de raridades ao coletar o bau)
+[ ] pra fazer um mapa, precisa de 2 arrays, um para os tiles, e outro para definir as zonas(quarto, sala, banheiro etc)
+[ ] add monster: Mithrix: tira metade dos itens dos players, e ao ser derrotado, devolve os itens. Speedscale: a cada 7 segundos, o monstro ganha 2 de velocidade. Acrid: a todo momento ele contamina o tile que ele pisar, o player tomará 1 de dano a cada segundo. Berserker: a cada vez q é stunnado, ganha 15 pontos de velocidade. Wanderer — Não tem waypoints fixos. Anda em linha reta até bater em parede, então escolhe direção aleatória, 50% de boost de velocidade. Hoarder — Começa com 1 "escudo" visual, primeiro stun não terá efeito, Após perder escudo, fica 20% mais lerdo. Bomber — A cada 7s, deixa uma "bomba" no tile atual, Se jogador pisar, toma 15 HP de dano, Bomba some após 10s, Máximo 10 bombas ativas. Vampire — Dentro de casa ele é 40% mais lento, e fora de casa ele é 40% mais rapido. Shapeshifter: Copia o visual do player(cor, nome, barra de hp, pra parecer um player real), quando não estiver sendo visto, ganhará um boost de 50% de velocidade, mas quando estiver sendo observado, terá a mesma velocidade de um player comum. Sentinel — Fica parado em patrol (speedMod: 0 na patrol), Só chase, Mas tem visão 360° e detecta jogadores a 5 tiles mesmo de costas, Quando chase termina, volta a ser estátua. Blind: se o player ficar 2 segundos parado, ele será consideirado invisivel pro monstro. Spider: anda por cima de furniture.
+[ ] add items: Totem: se o player morrer enquanto estiver com o totem selecionado na hotbar, ele renascerá com 5 segundos de invulnerabilidade no spawn dos players, raridade épica 20$. Shield Potion: absorve 1 hit do monstro, poderá acumular até 2 hits, raridade épica, 20$. Smoke Bomb: gera um circulo de fumaça de 3x3 tiles, que dura 4 segundos, todos os players dentro do circulo estarão invisiveis mas ainda assim tomarão dano se o monstro encostar, raridade rara, 10$. Phase: escolhe a parece(tile C) e muda a cor dela pra um azul bebe, podendo assim os players atravessar essa parede(Vex-Like), o efeito disso dura 10s, os players ficam invisiveis para o monstro enquanto estão dentro dessa parede fantasmagorica, raridade super rara 15$. Lucky Charm: O proximo item comprado é duplicado(se usar varios não ira acumular), raridade épica 20$. Gene's Hand: teleporta o player que está mais perto do monstro pra posição do usuario, raridade épica 25$. Healing Aura: todos os jogadores perto do usuario num raio 3x3 vão receber cura de 5 a cada segundo por 7 segundos, o usuario ganha lentidão de 80%, raridade super raro 18$
+[ ] add classe: Ally Warp: a cada summon, consegue teleportar pro aliado mais longe(o aliado distante tem q estar pelo menos mais longe doq 34x34 tiles), 2 usos. Bum Dude: com o botão da habilidade, consegue pegar uma trap no chão e colocar no inventario.
+[ ] balancear o locker guy. ao morrer, destrancar a porta
+[ ] façar a hotbar ser uma só, e os players poderem selecionar o item q eles quiserem independenmente

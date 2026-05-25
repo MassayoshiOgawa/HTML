@@ -1,0 +1,84 @@
+SISTEMA DE INVOCAÇÃO INVERTIDA (Reverse Summoning)
+Em vez de apenas usar o altar para invocar o monstro, cada altar tem múltiplos modos de invocação que os jogadores descobrem e escolhem.
+Modos de Altar
+Modo	Como Ativar
+Invocação Padrão	Interagir normalmente
+Invocação Silenciosa	Interagir + segurar Shift
+Invocação Dupla	2 players interagem simultaneamente
+Invocação Blindada	Interagir com um item no inventário
+Invocação Vazia	Interagir com 0 moedas e 0 itens
+Selar o Altar	Interagir após coletar artefatos (modo escape)
+Interface do Altar
+Ao chegar no altar ANTES da invocação, o jogador vê um mini-menu:
+═══ ALTAR DAS SOMBRAS ═══
+[1] Invocação Padrão
+[2] Invocação Silenciosa  (3 coins)
+[3] Invocação Dupla        (5 coins cada)
+[4] Invocação Blindada     (sacrifica 1 item)
+[5] Invocação Vazia        (0 coins, sem monstro)
+─────────────────────────
+Moedas: 8 | Itens: 3
+
+2. SISTEMA DE CONTAMINAÇÃO (Altar Corruption)
+Cada vez que um altar é usado, ele acumula níveis de corrupção. A corrupção afeta rounds futuros.
+Como funciona
+- O altar começa "Puro" (0 corrupção)
+- Cada invocação adiciona +1 de corrupção
+- A corrupção NÃO reseta entre partidas (persiste em localStorage)
+- A cada 3 de corrupção, o nível do altar sobe
+Níveis de Corrupção
+Nível	Corrupção	Efeito no Jogo
+Puro	0-2	Normal
+Manchado	3-5	Monstro tem +10% speed, mas dropa 1 item ao ser derrotado
+Profano	6-8	Monstro tem +20% speed, artefatos brilham em dobro (mais visíveis), item extra de recompensa
+Corrompido	9-11	Monstro tem +30% speed, spawna 1 mini-monstro adicional, mas baús dão loot raro
+Abissal	12+	Monstro tem +50% speed, 2 mini-monstros, MAS todos os jogadores começam com 1 item épico
+Purificação
+Jogadores podem purificar o altar gastando moedas:
+Nível	Custo pra Purificar
+Manchado	15 moedas
+Profano	30 moedas
+Corrompido	50 moedas
+Abissal	100 moedas
+Purificar reseta a corrupção para 0, mas NÃO reseta entre partidas — é uma decisão estratégica: "gasto moedas agora ou enfrento o altar abissal no próximo jogo?"
+Elementos Visuais
+- Puro: altar azul claro com brilho suave
+- Manchado: altar azul com manchas escuras
+- Profano: altar vermelho-escuro, fumaça saindo
+- Corrompido: altar preto com veios vermelhos, chamas roxas
+- Abissal: altar preto com olhos, sombras se movendo ao redor
+
+4. SISTEMA DE PROFECIAS (Prophecy / Vision System)
+Antes de cada round, 1 profecia é revelada para TODOS os jogadores. A profecia é um presságio sobre o round que está por vir. Pode ser boa, má ou neutra.
+Tipos de Profecia
+Profecia Boa (30% de chance):
+Profecia	Efeito
+"O chão mostrará o caminho"	Artefatos piscam a cada 10s por 1s
+"O monstro tropeçará na escuridão"	Monstro começa com 15% menos speed
+"Os espíritos protegem os corajosos"	Todos começam com escudo de 1 hit
+"O tempo estará ao seu lado"	Cooldowns de habilidades são 30% mais rápidos
+"A sorte sorri para os audazes"	1 baú extra aparece no mapa com item raro
+Profecia Má (30% de chance):
+Profecia	Efeito
+"A fome consumirá os fracos"	Todos perdem 1 HP a cada 30s
+"O monstro sente seu medo"	Range de detecção do monstro aumentado em 20%
+"As paredes ouvirão seus passos"	Passos fazem 2x mais barulho
+"A escuridão se aproxima"	Visão inicial reduzida em 30%
+"Um de vocês será marcado"	1 jogador aleatório começa com 50% HP
+Profecia Neutra (40% de chance):
+Profecia	Efeito
+"O altar exige um tributo"	1º artefato coletado é automaticamente sacrificado (volta pro mapa)
+"Os caminhos se fecharão"	2 portas aleatórias se trancam. Precisam de chave (nova: item 'key')
+"O eco do passado"	O fantasma do último round anterior aparece como NPC neutro por 20s
+"A troca é justa"	Ao pegar um artefato, UM item do inventário é dropado no chão
+Exibição da Profecia
+Ao iniciar o round (antes do monstro spawnar):
+══════ PROFECIA DO ROUND ══════
+"O monstro tropeçará na escuridão"
+➜ Monstro começa 15% mais lento
+════════════════════════════════
+A profecia fica visível por 5s e depois some. Durante o round, o jogador pode pressionar P para rever a profecia atual.
+Skill de Classe: Profeta
+Nova classe que pode ser adicionada:
+Classe	Habilidade
+Profeta	Vê a profecia do PRÓXIMO round antes de ele começar — pode se preparar. Também pode rerrolar a profecia 1x por partida
