@@ -1,0 +1,903 @@
+================================================================================
+MEGA PROMPT - IMPLEMENTACAO COMPLETA SUMONGAME V3
+Data: Maio 2026
+Arquivo alvo: SummonGame.html (UNICO arquivo a ser modificado)
+Documentacao: Documentacao_Completa.txt (deve ser atualizada apos alteracoes)
+================================================================================
+
+================================================================================
+REGRA ABSOLUTA #1 - CHARSET UTF-8
+================================================================================
+E PROIBIDO usar QUALQUER caractere bugado, quebrado ou nao-UTF-8 no codigo.
+Caracteres como ðâï¿½ðâ¤, ou qualquer sequencia de bytes invalida, NAO devem
+aparecer no codigo HTML/JS/CSS. Todo o texto deve ser escrito com caracteres
+ASCII ou UTF-8 validos. Sempre use &lt;meta charset="UTF-8"&gt; no HTML.
+Strings com acentos devem usar acentos reais (á, é, í, ó, ú, ã, õ, ç) ou
+entidades HTML (&aacute; etc). NUNCA use caracteres corrompidos.
+
+================================================================================
+REGRA ABSOLUTA #2 - ARQUIVO UNICO
+================================================================================
+TODAS as alteracoes devem ser feitas EXCLUSIVAMENTE no arquivo SummonGame.html.
+NAO crie arquivos .css, .js, .py, .java, .cpp, .c, .cs ou qualquer outro arquivo
+de codigo separado. O jogo eh single-file e deve permanecer single-file.
+A UNICA excecao eh a atualizacao do arquivo Documentacao_Completa.txt
+para registrar as mudancas.
+
+================================================================================
+REGRA ABSOLUTA #3 - DOCUMENTACAO
+================================================================================
+Apos implementar as alteracoes no SummonGame.html, atualize OBRIGATORIAMENTE
+o arquivo Documentacao_Completa.txt com:
+- Novas secoes descrevendo cada sistema adicionado
+- Atualizacao do changelog com data e descricao das mudancas
+- Referencias de linhas de codigo (aproximadas)
+- Nao registrar testes na documentacao
+
+================================================================================
+REGRA ABSOLUTA #4 - TESTES COM VALORES FICTICIOS
+================================================================================
+Apos implementar cada funcionalidade, faca testes mentais com valores ficticios
+para PROVAR que o codigo funciona. Exemplo de teste:
+- "Se o Mithrix spawna e o player tem 3 itens nos slots [beartrap, null, medkit],
+  o Mithrix deve roubar ceil(3/2)=2 itens aleatorios. Apos roubo, o player fica
+  com 2 slots ocupados. Quando o Mithrix morre, os 2 itens voltam."
+NAO registre os testes na documentacao.
+
+================================================================================
+REGRA ABSOLUTA #5 - NAO REFATORAR SISTEMAS INTEIROS
+================================================================================
+CUIDADO para nao reescrever sistemas inteiros do zero. As implementacoes devem
+ser ADICOES ao codigo existente, nao substituicoes. Se for necessario adicionar
+uma mecanica a um sistema existente, faça a menor modificacao possivel.
+Exemplo: ao adicionar um novo tipo de monstro, adicione a entrada no objeto
+MonsterTypes e o comportamento especifico no update() do MonsterEntity.
+NAO reescreva todo o sistema de IA do monstro.
+
+================================================================================
+REGRA ABSOLUTA #6 - CSS PROFISSIONAL E MINIMALISTA
+================================================================================
+Todo CSS deve ser profissional, limpo e minimalista. Use o padrao existente:
+- Fontes: 'Courier New', monospace
+- Cores escuras com contraste suave
+- Bordas arredondadas (border-radius: 3-6px)
+- Sem animacoes exageradas
+- Sempre use ::before e ::after para icones CSS (padrao do projeto)
+
+================================================================================
+REGRA ABSOLUTA #7 - ESCALABILIDADE
+================================================================================
+Todo codigo deve ser escrito pensando em escalabilidade futura:
+- Use objetos/arrays para dados que podem crescer (ex: MonsterTypes, Items)
+- Evite hardcoding de valores em condicoes
+- Prefira funcoes reutilizaveis
+- Use parametros em vez de constantes magicas
+- Documente com comentarios inline APENAS quando necessario
+
+================================================================================
+1. CONTEXTO TECNICO DO PROJETO (LEIA COM ATENCAO)
+================================================================================
+
+O SummonGame eh um jogo top-down 2D single-file HTML5 Canvas (~7283 linhas).
+NAO use frameworks externos. Tudo eh vanilla JS + Canvas 2D.
+
+ARQUITETURA:
+- Game Loop: requestAnimationFrame -> update(dt) -> render()
+- Classe Game central orquestra tudo
+- Entidades: Player, MonsterEntity, DoorEntity, ArtifactEntity, Particle
+- FSM do monstro: patrol -> chase -> search -> taunted
+- Pathfinding: BFS em grid
+- Fog of War: Bresenham raycasting + visibilityGrid/visibilityAge
+- Colisao: 4-point corner check (margem 4px player, 3px monstro)
+
+ESTRUTURA DO ARQUIVO (ordem das secoes):
+1. <style> - CSS para HUD, botoes, icones de classes, icones de itens
+2. <body> - Estrutura DOM (canvas, paineis, overlays)
+3. <script> - Todo o JS:
+   - CONFIGURATION (const TILE_SIZE, cores, DEFAULT_KEYBINDS)
+   - ITEMS (objeto Items com 9 itens: beartrap, landmine, crucifix, bloxy_cola,
+     cake, witches_brew, medkit, apple, noise_maker)
+   - ITEM ICONS (funcoes canvas para renderizar icones)
+   - ITEM RARITY (weightedRandomRarity, getRandomItemByRarity)
+   - MONSTER TYPES (objeto MonsterTypes com 12 tipos)
+   - PLAYER CLASSES (objeto PlayerClasses com 20 classes)
+   - DEFAULT MAP (array de strings 37x18)
+   - MAP PARSER (funcao parseMap)
+   - PARTICLE SYSTEM (classe Particle)
+   - DOOR ENTITY (classe DoorEntity com grupos de portas)
+   - ARTIFACT ENTITY (classe ArtifactEntity)
+   - PLAYER (classe Player com inventario, interacao, habilidade)
+   - MONSTER (classe MonsterEntity com FSM, BFS, visao, ataque)
+   - GAME CLASS (classe Game com ~4000 linhas: loadMap, loops, shop, save/load)
+   - INPUT HANDLING, UI HANDLERS, INITIALIZATION
+
+OBJETOS PRINCIPAIS E SUAS PROPRIEDADES RELEVANTES:
+
+MonsterTypes[type]: {
+  name, desc, weight, chaseLoseTime, searchDuration, spawnCount,
+  color, strokeColor, speedMod, randomSpawn
+}
+
+PlayerClasses[class]: {
+  name, desc, abilityName, cooldown, duration, icon
+}
+
+Items[itemKey]: {
+  name, price, desc, icon, color, rarity ('common'|'rare'|'super_rare'),
+  type ('trap'|'consumable'), giveOnRoundEnd (boolean),
+  stun (number|undefined), tauntDuration (number|undefined),
+  effect: { type ('speed'|'invuln'|'heal'), ... } (para consumables)
+}
+
+Player: {
+  playerIndex, name, tileX, tileY, px, py, speed, baseSpeed, hp, maxHp,
+  alive, interacting, interactTimer, interactTarget, interactType,
+  invulnTimer, playerClass, abilityCooldown, abilityActive, abilityTimer,
+  keybinds, inventory (array[5]), selectedSlot, useTimer, using,
+  useTapPending, speedItemTimer, speedItemMult, commandYellMult,
+  invisible, uniqueAbilities, phasing, wiredGirlUsed, helpfulpriestUsed,
+  timeTravelUsed, rerrolerUsed, duplicatedSlots, currency
+}
+
+MonsterEntity: {
+  tileX, tileY, px, py, speed, alive, state ('patrol'|'chase'|'search'|'taunted'),
+  currentWaypoint, waypointOrder, facingAngle, chaseTimer, searchTimer,
+  lastKnownPlayerPos, attackCooldown, game, path, pathTarget, pathRecalc,
+  type, chaseLoseTime, searchDuration, bodyColor, bodyStroke, name,
+  stunTimer, tauntTimer, tauntTarget, preTauntState, trapSeeking,
+  frozen, isTransformed, ghostTimer, ghostVisible, rushSpeedBonus,
+  decoySpeedBoostTimer, jesterPathRecalc
+}
+
+Game: {
+  canvas, ctx, tiles[][], mapWidth, mapHeight, doorEntities[], artifactEntities[],
+  waypoints[], altarGroups[], altarSingles[], playerSpawn, monsterSpawn,
+  players[], playerCount, playerNames[], playerClasses[],
+  activeMonsters[], monsterSpawnType, summonPhase, particles[],
+  camX, camY, summonCount, roundNumber, difficulty, baseMonsterSpeed,
+  currency, traps[], shopItems[], randomMonsterSpawnPoints[],
+  nightTransition, isNight, roofAlpha, targetRoofAlpha, debugMode, paused,
+  visibilityGrid[][], visibilityAge[][], artifactCount, collectedArtifacts,
+  summoning, summonTimer, summonDelay, hotbarSize, hotbarLayout, hotbarGap,
+  activeClones[], activeWalls[], lockedDoor, debugSelectedMonster,
+  selectedMonsterType, pendingMonsterType, ratEntities[], activeZones[],
+  interactDisplay, interactDuration, playerVisionRange[], zones[][]
+}
+
+FLUXO DE ROUND:
+1. Player segura E no altar (tile 'A') -> ritual inicia (summonDelay=5)
+2. Apos summonDelay, spawnMonster() eh chamado
+3. Monstro ativo -> jogadores coletam artefatos (tiles 'F')
+4. Todos artefatos coletados -> monstro morre, round termina
+5. GOTO 1 para proximo round
+
+SHOP SYSTEM:
+- Tiles 'S' no mapa = shops
+- Cada shop gera 1 item aleatorio por round no initShops()
+- Player segura E perto do shop -> buyFromShop() -> verifica currency e espaco
+- Tiles 'T' no mapa = trash (vender itens)
+- LuckySpender: 85% chance de duplicar item comprado
+
+ITEM USAGE:
+- Tap R (<0.3s) = ciclo de slots
+- Hold R (>=1s) = usar item no slot selecionado
+- Traps: colocados no chao na posicao do player
+- Consumables: efeito aplicado imediatamente
+
+ROUND END:
+- getRandomItemByRarity() escolhe item com giveOnRoundEnd: true
+- Item gratuito dado a cada jogador vivo ao final do round
+
+MAPA DEFAULT (37x18 tiles):
+  O=Wall, C=Floor, G=Grass, d=Door, A=Altar, P=PlayerSpawn,
+  M=MonsterSpawn, F=Artifact, U=Waypoint, W=Furniture,
+  S=Shop, T=Trash, m=RandomMonsterSpawn
+
+================================================================================
+2. NOVOS TIPOS DE MONSTRO (12 TIPOS)
+================================================================================
+
+Adicione ao objeto MonsterTypes as seguintes entradas. Cada monstro deve
+ter seu comportamento especifico implementado no metodo update() da classe
+MonsterEntity e/ou em metodos auxiliares.
+
+2.1 - MITHRIX
+  name: 'Mithrix'
+  desc: 'Steals half of each player items when spawned. Returns them on death.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#ffaa00', strokeColor: '#885500', speedMod: 1.0, randomSpawn: false
+  COMPORTAMENTO:
+  - Assim que spawnar (no metodo spawn() ou logo apos), rouba itens de TODOS
+    os jogadores vivos
+  - Quantidade roubada por jogador = Math.ceil(itens_do_jogador / 2)
+    Exemplo: 3 itens -> rouba 2; 1 item -> rouba 1; 0 itens -> rouba 0
+  - Itens roubados sao escolhidos ALEATORIAMENTE entre os slots ocupados
+  - Itens roubados sao armazenados em uma propriedade do monstro:
+    this.stolenItems = [{playerIndex, itemKey, slotIndex}, ...]
+  - Os slots roubados ficam vazios (null) no inventario do player
+  - Quando o Mithrix morre (metodo die() ou antes de die()), devolve TODOS
+    os itens roubados para seus respectivos players/slots
+  - CUIDADO: O item gratuito dado ao final do round (giveOnRoundEnd) NAO deve
+    ser roubado. O roubo ocorre apenas no momento do spawn, e o item gratuito
+    eh dado APENAS quando o round termina (monstro morre). Nao ha conflito
+    desde que o roubo seja implementado no spawn e a devolucao na morte.
+  - Se o slot original estiver ocupado na devolucao (improvável mas possivel),
+    coloca no primeiro slot vazio. Se nao houver slot vazio, o item eh perdido.
+
+2.2 - SPEEDSCALE
+  name: 'Speedscale'
+  desc: 'Gains 2 speed every 7 seconds. Resets on death.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#00ff88', strokeColor: '#008844', speedMod: 1.0, randomSpawn: false
+  COMPORTAMENTO:
+  - Adicionar propriedade: this.speedScaleTimer = 0, this.speedScaleBonus = 0
+  - No update(), acumular dt em speedScaleTimer
+  - A cada 7 segundos acumulados: speedScaleBonus += 2, speedScaleTimer -= 7
+  - A velocidade efetiva do monstro = (mt.speedMod * game.getMonsterSpeed())
+    + rushSpeedBonus + speedScaleBonus
+  - O bonus eh cumulativo e so reseta quando o monstro morre
+  - No die(), resetar speedScaleBonus = 0 e speedScaleTimer = 0
+
+2.3 - ACRID
+  name: 'Acrid'
+  desc: 'Contaminates tiles it walks on. Players take 1 HP/s on infected tiles.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#00ff44', strokeColor: '#00aa22', speedMod: 1.0, randomSpawn: false
+  COMPORTAMENTO:
+  - Adicionar ao Game: this.contaminatedTiles = [] (array de {tileX, tileY, timer})
+  - No update() do Acrid, a cada frame:
+    - Obter tile atual do monstro (tileX, tileY)
+    - Se o tile ainda nao estiver contaminado, adicionar contaminatedTiles.push({
+      tileX: m.tileX, tileY: m.tileY, timer: 10.0 })
+    - Se ja estiver contaminado, resetar o timer para 10.0
+  - No Game.update(), decrementar contaminatedTiles[].timer -= dt
+    e remover quando timer <= 0
+  - No Game.update(), verificar se algum player esta sobre um tile contaminado:
+    - Se estiver, player.hp -= 1 * dt (1 HP por segundo)
+  - RENDERIZACAO (CSS/canvas):
+    - Cada tile contaminado deve ser renderizado com cor verde neon (#00ff44)
+    - Adicionar efeito de fumaca/particulas: pequenas bolhas verdes subindo
+    - Usar canvas para desenhar: fillRect verde neon semi-transparente no tile
+      + particulas de bolhas (circulos pequenos verdes com opacidade variando)
+    - As particulas devem ser gerenciadas separadamente (podem usar o sistema
+      de particulas existente ou um array proprio)
+    - A fumaca sobe (movimento vertical negativo) e dissipa (fade out)
+    - Estilo CSS PROFISSIONAL e minimalista
+
+2.4 - BERSERKER
+  name: 'Berserker'
+  desc: 'Gains 15 speed every time it is stunned. Permanent until death.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#ff2200', strokeColor: '#991100', speedMod: 1.0, randomSpawn: false
+  COMPORTAMENTO:
+  - Adicionar propriedade: this.berserkerBonus = 0
+  - Toda vez que o monstro recebe stun (stunTimer > 0 iniciado):
+    - Incrementar berserkerBonus += 15
+  - A velocidade efetiva = (mt.speedMod * game.getMonsterSpeed())
+    + rushSpeedBonus + berserkerBonus
+  - No die(), resetar berserkerBonus = 0
+  - O local exato para incrementar eh onde o stunTimer eh definido
+    (provavelmente na deteccao de traps ou no proprio update)
+
+2.5 - WANDERER
+  name: 'Wanderer'
+  desc: 'No fixed waypoints. Walks straight until hitting a wall, then random direction.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#888888', strokeColor: '#555555', speedMod: 1.5, randomSpawn: false
+  COMPORTAMENTO:
+  - NAO usa waypoints. No estado 'patrol':
+    - Anda em linha reta na direcao atual (facingAngle)
+    - Quando bate em parede/tile solido:
+      - Escolhe uma nova direcao aleatoria (0, PI/2, PI, 3*PI/2 ou aleatoria total)
+      - Continua andando nessa nova direcao
+    - A velocidade base ja tem +50% (speedMod: 1.5)
+    - Implementar updateWanderer(dt) como metodo separado
+    - Usar canMoveTo() para detectar colisao e mudar direcao
+  - Estados chase e search funcionam normalmente (usa BFS)
+
+2.6 - HOARDER
+  name: 'Hoarder'
+  desc: 'Has a visual shield that negates the first stun. 20% slower after shield breaks.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#ccaa00', strokeColor: '#887700', speedMod: 1.0, randomSpawn: false
+  COMPORTAMENTO:
+  - Adicionar propriedade: this.shieldActive = true
+  - Quando o monstro receberia stun:
+    - Se shieldActive === true: shieldActive = false, stun NAO aplicado
+      (stunTimer nao eh setado). Apenas o escudo quebra visualmente.
+    - Se shieldActive === false: stun aplicado normalmente
+  - Apos o escudo quebrar: speedMod efetivo = 0.8 (-20%)
+    - Implementar como: se !shieldActive, this.speed = baseSpeed * 0.8
+  - RENDERIZACAO do escudo:
+    - Quando shieldActive === true, desenhar um circulo/aura protetora ao
+      redor do monstro (ex: strokeStyle dourado semi-transparente,
+      lineWidth 2-3px, raio ~TILE_SIZE * 0.7)
+    - Quando shieldActive === false, nao desenhar o escudo
+  - No die(), resetar shieldActive = true
+
+2.7 - BOMBER
+  name: 'Bomber'
+  desc: 'Drops a bomb every 7 seconds. Player takes 15 HP on contact. Bombs last 10s. Max 10 active.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#ff6600', strokeColor: '#993300', speedMod: 1.0, randomSpawn: false
+  COMPORTAMENTO:
+  - Adicionar ao Game: this.activeBombs = [] (array de {tileX, tileY, timer, ownerRef})
+  - No update() do Bomber:
+    - Adicionar propriedade: this.bombTimer = 0
+    - bombTimer += dt
+    - Quando bombTimer >= 7: bombTimer -= 7, spawna bomba no tile atual
+    - A bomba eh adicionada a game.activeBombs
+    - Maximo 10 bombas ativas por Bomber (verificar antes de spawnar)
+  - No Game.update():
+    - Decrementar timer de cada bomba (timer -= dt)
+    - Remover quando timer <= 0
+    - Verificar se algum player esta no mesmo tile da bomba:
+      - Se estiver: player.takeDamage(15, game), remove a bomba
+  - RENDERIZACAO das bombas (CSS/canvas profissional):
+    - Cada bomba eh um circulo escuro com um pavio/lume aceso no topo
+    - Corpo: gradiente radial de #333 (borda) a #111 (centro)
+    - Pavio: linha laranja/amarela saindo do topo com spark/faisca
+    - A bomba deve piscar levemente (opacidade do spark varia com Math.sin)
+    - Tamanho: ~TILE_SIZE * 0.4 de raio
+    - Visual unico e profissional
+
+2.8 - VAMPIRE
+  name: 'Vampire'
+  desc: '40% slower inside (tile C), 40% faster outside (tile G).'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#880000', strokeColor: '#440000', speedMod: 1.0, randomSpawn: false
+  COMPORTAMENTO:
+  - No update(), verificar o tile atual do monstro:
+    - tile === 'C' (interior): speedMultiplier = 0.6 (-40%)
+    - tile === 'G' (exterior): speedMultiplier = 1.4 (+40%)
+    - Para tiles 'F', 'U', 'm' que estao em area exterior (rodeados por 'G'
+      ou resolvidos como 'G' pelo resolveBaseTile): speedMultiplier = 1.4
+    - Para tiles 'd', 'A' (interior): speedMultiplier = 0.6
+  - Usar getEffectiveTile() ou resolveBaseTile() para determinar se F/U/m
+    estao em area interior ou exterior
+  - A velocidade efetiva = baseSpeed * speedMultiplier
+
+2.9 - SHAPESHIFTER
+  name: 'Shapeshifter'
+  desc: 'Copies a random player appearance. +50% speed when unseen, normal speed when observed.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#ffffff', strokeColor: '#aaaaaa', speedMod: 1.0, randomSpawn: false
+  COMPORTAMENTO:
+  - No spawn(), escolher um player aleatorio vivo para copiar:
+    this.copiedPlayer = game.players[Math.floor(Math.random() * count)] (apenas vivos)
+    this.copiedColor = cor do player copiado
+    this.copiedName = nome do player copiado
+  - No update():
+    - Verificar se algum player tem linha de visao para o Shapeshifter:
+      this.isObserved = algum player pode ver este monstro
+      (usar hasLineOfSight de cada player para este monstro)
+    - Se NAO observado: speedMultiplier = 1.5 (+50%)
+    - Se observado: speedMultiplier = 1.0 (velocidade normal de player)
+  - RENDERIZACAO:
+    - Quando observado: desenhar como um player falso (circulo da cor do
+      player copiado, com nome flutuando acima como os players reais)
+    - Quando nao observado: desenhar normalmente como monstro
+    - Adicionar uma leve distorcao visual (opcional) para jogadores
+      atentos perceberem que nao eh um player real
+    - A barra de HP falsa deve aparecer (igual ao player copiado)
+
+2.10 - SENTINEL
+  name: 'Sentinel'
+  desc: 'Stationary in patrol. Only chases. 360 vision, max detection distance. Random spawn.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#444466', strokeColor: '#222244', speedMod: 0, randomSpawn: true
+  COMPORTAMENTO:
+  - speedMod: 0 -> no estado patrol, velocidade = 0 (fica parado)
+  - Nao se move durante patrol (metodo updatePatrol nao executa movimento,
+    ou executa com speed 0)
+  - Visao 360 graus: modificar canSeePlayer() para ignorar o cone de visao
+    (remover a verificacao de angulo). Deteccao maxima = 250 pixels ou mais.
+  - Spawna em posicao aleatoria (randomSpawn: true = usar randomMonsterSpawnPoints)
+  - Estado chase: move-se normalmente com velocidade chase (speed * 1.4)
+  - Quando chase termina (perde jogador de vista), volta a ser estatua (patrol,
+    velocidade 0)
+  - RENDERIZACAO:
+    - Em patrol: aparência de estatua (cor cinza pedra, forma angular/quadrada)
+    - Em chase: aparencia normal de monstro (cor #444466, forma circular)
+
+2.11 - BLIND
+  name: 'Blind'
+  desc: 'Cannot see players that stand still for 2+ seconds. Still deals damage on contact.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#666666', strokeColor: '#333333', speedMod: 1.0, randomSpawn: false
+  COMPORTAMENTO:
+  - Adicionar ao Player: this.stationaryTimer = 0
+  - No Player.update():
+    - Se o player nao se moveu neste frame (dx === 0 && dy === 0):
+      stationaryTimer += dt
+    - Senao: stationaryTimer = 0
+  - No canSeePlayer() do Blind:
+    - Para cada player: se player.stationaryTimer >= 2.0, esse player eh
+      considerado INVISIVEL para o Blind (pular esse player na deteccao)
+    - Players em movimento (stationaryTimer < 2.0) sao detectados normalmente
+  - IMPORTANTE: O Blind ainda causa dano se passar por cima de um player
+    "invisivel" (o sistema de ataque por proximidade continua funcionando)
+
+2.12 - SPIDER
+  name: 'Spider'
+  desc: 'Walks over furniture (W). Sees players through furniture.'
+  weight: 1, chaseLoseTime: 1.0, searchDuration: 2.0, spawnCount: 1
+  color: '#442288', strokeColor: '#221144', speedMod: 1.0, randomSpawn: false
+  COMPORTAMENTO:
+  - No canMoveTo(): tiles 'W' NAO sao solidos para a Spider
+    (adicionar verificacao: if (tile === 'W' && this.type === 'spider') continue)
+  - No hasLineOfSight(): tiles 'W' NAO bloqueiam linha de visao para a Spider
+    (adicionar verificacao similar)
+  - No findPath() do Game: tiles 'W' sao transitaveis para a Spider
+    (precisa passar o tipo do monstro ou verificar de outra forma)
+  - RENDERIZACAO: Quando a Spider esta sobre um tile W, desenhar com leve
+    transparencia ou com patas extras (CSS/canvas)
+
+================================================================================
+3. SISTEMA DE BAU (CHEST)
+================================================================================
+
+3.1 - COMPORTAMENTO
+  - Adicionar ao Game: this.chests = [] (array de objetos chest)
+  - Cada chest: {
+      tileX, tileY, opened: false,
+      colorVariant: 'classic'|'patati'|'patata'|'clown'|'red'|'random',
+      itemKey: string (definido quando aberto)
+    }
+  - TIMING:
+    - O primeiro bau spawna assim que o altar eh ativado (quando summoning=true
+      e summonDelay comeca a contar)
+    - A cada 60 segundos, tenta spawnar um novo bau
+    - Maximo de 3 baus simultaneos no mapa
+    - Ao atingir 3 baus ativos, o timer de 60s PAUSA (nao acumula spawns pendentes)
+    - Quando o monstro morre (todos artefatos coletados), TODOS os baus
+      (abertos e fechados) sao removidos
+  - SPAWN:
+    - Posicao aleatoria em tiles 'C' ou 'G' (usando game.tiles)
+    - Nao pode spawnar em cima de: portas, altar, artifacts, shop, player, monstro
+    - Verificar se o tile escolhido esta livre
+  - INTERACAO:
+    - Player encosta no bau (distancia < 1 tile = TILE_SIZE * 0.8)
+    - Automaticamente concede 1 item aleatorio na hotbar
+    - Se o inventario estiver cheio, mostra mensagem e nao abre
+    - Apos aberto: opened = true, muda visual
+    - Cada bau so pode ser aberto UMA vez
+  - ITEM DO BAU:
+    - Escolhido aleatoriamente entre TODOS os itens (Items existentes + novos)
+    - Todos os itens tem a MESMA chance de serem escolhidos
+    - Usar: const keys = Object.keys(Items);
+            const key = keys[Math.floor(Math.random() * keys.length)]
+  - VISIBILIDADE:
+    - O bau so eh visivel se estiver dentro do raio de visao/iluminacao do player
+    - Usar visibilityGrid: se visibilityGrid[tileY][tileX] < 2, nao renderizar
+    - Se nenhum player ve o bau, ele nao aparece na tela
+
+3.2 - VISUAL CSS DO BAU (7+ SECOES)
+  O bau deve ser renderizado no canvas (nao DOM) com estilo profissional.
+  Cada bau tem VARIAS secoes com cores diferentes:
+
+  SECOES MINIMAS (7+):
+  1. Tampa superior (top lid)
+  2. Frente da tampa (lid front)
+  3. Corpo superior (upper body)
+  4. Corpo inferior (lower body)
+  5. Moldura/friso horizontal (horizontal trim)
+  6. Fechadura/cadeado (lock)
+  7. Base/pes (base)
+
+  VARIACOES DE CORES (colorVariant):
+  - 'classic': Madeira marrom com cadeado dourado
+    tampa: #8B5E3C, corpo: #6B3E1C, friso: #A07040, cadeado: #FFD700
+  - 'patati': Cores do palhaco Patati (azul e amarelo)
+    tampa: #2266CC, corpo: #FFDD00, friso: #FF9900, cadeado: #CC2200
+  - 'patata': Cores do palhaco Patata (vermelho e branco)
+    tampa: #CC2222, corpo: #FFFFFF, friso: #FF6600, cadeado: #FFD700
+  - 'clown': Cores de palhaco generico (colorido, vibrante)
+    tampa: #FF4488, corpo: #44FF88, friso: #FFAA00, cadeado: #8844FF
+  - 'red': Vermelho com detalhes escuros
+    tampa: #CC1111, corpo: #880000, friso: #FF3333, cadeado: #FFD700
+  - 'random': Cores aleatorias geradas proceduralmente
+    Usar Math.random() para gerar cores vibrantes e harmoniosas
+
+  QUANDO ABERTO (opened === true):
+  - A tampa aparece deslocada/aberta (rotacionada ou transladada visualmente)
+  - O interior aparece escuro/vazio
+  - Mantem a mesma paleta de cores (so altera posicao da tampa)
+
+  RENDERIZACAO:
+  - Funcao renderChest(ctx, chest, camX, camY) no Game
+  - Desenhar retangulos e formas geometricas para as secoes
+  - Usar gradientes e sombras para profundidade
+  - Tamanho: ~TILE_SIZE * 0.6 de largura, ~TILE_SIZE * 0.5 de altura
+  - Centralizado no tile
+
+================================================================================
+4. SISTEMA DE ZONAS (DEFAULT_ZONES)
+================================================================================
+
+4.1 - CONCEITO
+  Um segundo array bidimensional, de mesmas dimensoes que DEFAULT_MAP,
+  que define ZONAS/REGIOES do mapa. NAO eh visual - serve apenas para
+  consultas de codigo como "em qual zona o player esta?".
+
+  ARRAY EXATO A SER USADO:
+
+  const DEFAULT_ZONES = [
+  'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO',
+  'OBBBBBBOCCCOAAAAAAAAAAAAAAOGGGGGGGO',
+  'OBBBBBBdCCCOAAAAAAAAAAAAAAOGGGGGGGO',
+  'OBBBBBBdCCCOAAAAAAAAAAAAAAOGGGGGGGO',
+  'OBBBBBBOCCCOAAAAAAAAAAAAAAOGGGGGGGO',
+  'OOOOOOOOCCCOAAAAAAAAAAAAAAOGGGGGGGO',
+  'OQQQQQQOCCCdAAAAAAAAAAAAAAOGGGGGGGO',
+  'OQQQQQQOCCCdAAAAAAAAAAAAAAOGGGGGGGO',
+  'OQQQQQQOCCCOAAAAAAAAAAAAAAOGGGGGGGO',
+  'OQQQQQQOCCCOOOOOOOddOOOOOOOGGGGGGGO',
+  'OQQQQQQOCCCCCCCCCCCCCCCCCCOGGGGGGGO',
+  'OQQQQQQdCCCCCCCCCCCCCCCCCCdGGGGGGGO',
+  'OQQQQQQdCCCCCCCCCCCCCCCCCCdGGGGGGGO',
+  'OQQQQQQOCCCCCCCCCCCCCCCCCCOGGGGGGGO',
+  'OOOOOOOOOOOOOOOOddOOOOOOOOOGGGGGGGO',
+  'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+  'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+  'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+  'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+  'OGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGO',
+  'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'
+  ];
+
+  SIGNIFICADO DOS TILES DE ZONA:
+  'O' = Parede (Wall)
+  'B' = Banheiro (Bathroom)
+  'Q' = Quarto (Bedroom)
+  'C' = Corredor (Corridor)
+  'A' = Sala do Altar (Altar Room)
+  'G' = Area externa/Jardim (Outside/Garden)
+  'd' = Porta (Door)
+
+4.2 - IMPLEMENTACAO
+  - Adicionar DEFAULT_ZONES como constante (junto com DEFAULT_MAP)
+  - Adicionar this.zones = [] no constructor do Game
+  - Em loadMap(), carregar this.zones a partir de DEFAULT_ZONES
+    (parseZones ou simplesmente converter para matriz 2D)
+  - Como DEFAULT_ZONES tem as MESMAS dimensoes e alinhamento do DEFAULT_MAP,
+    cada coordenada [y][x] nas zonas corresponde ao mesmo [y][x] no mapa
+  - As portas no array de zonas sao 'd' (minusculo), igual ao mapa
+  - Funcao auxiliar: getZoneName(tileX, tileY) -> string
+    Retorna o nome da zona baseado no caractere em zones[tileY][tileX]:
+    'O' -> 'Wall'
+    'B' -> 'Bathroom'
+    'Q' -> 'Bedroom'
+    'C' -> 'Corridor'
+    'A' -> 'Altar Room'
+    'G' -> 'Outside'
+    'd' -> 'Door'
+    undefined/fora dos bounds -> 'Unknown'
+
+4.3 - DEBUG MODE (F1) - ADICIONAR ZONA
+  ATENCAO: Apenas ADICIONE esta feature ao modo debug. NAO remova nada existente.
+
+  Na linha onde mostra as informacoes do player (atualmente):
+    ctx.fillText(p.name + ' Tile: ' + p.tileX + ',' + p.tileY +
+      ' HP:' + p.hp + ' Class:' + p.playerClass + ' VisRng:' + (vr | 0), 10, yOff);
+
+  MODIFICAR para incluir o nome da zona:
+    ctx.fillText(p.name + ' Tile: ' + p.tileX + ',' + p.tileY +
+      ' HP:' + p.hp + ' Class:' + p.playerClass +
+      ' VisRng:' + (vr | 0) +
+      ' Zone:' + this.getZoneName(p.tileX, p.tileY), 10, yOff);
+
+================================================================================
+5. NOVOS ITENS (7 ITENS)
+================================================================================
+
+Adicione ao objeto Items as seguintes entradas. Para cada item, crie
+o icone CSS (classe .icon-*) e a funcao de renderizacao canvas em ItemIcons.
+
+5.1 - TOTEM
+  name: 'Totem', price: 20, desc: 'If selected when dying, respawns you at player spawn with 5 seconds of invulnerability.',
+  icon: 'totem', color: '#ffd700', rarity: 'epic', type: 'passive', giveOnRoundEnd: false
+  COMPORTAMENTO:
+  - Tipo 'passive' (NOVO tipo): o item nao eh "usado" ativamente, fica no slot
+  - Se o player morrer (hp <= 0) ENQUANTO o totem estiver no slot SELECIONADO
+    (selectedSlot), o player nao morre:
+    - player.hp = 50 (ou maxHp/2)
+    - player.alive = true (nao setar como false)
+    - Se ja estiver false, reverter
+    - Teleportar para playerSpawn (px, py = spawn.x * TILE_SIZE + TILE_SIZE/2)
+    - player.invulnTimer = 5 (5 segundos de invulnerabilidade)
+    - Remover o totem do inventario (slot fica null)
+    - Mostrar mensagem: player.name + ' was saved by the Totem!'
+  - ONDE implementar: no metodo takeDamage() do Player, verificar antes de matar
+    se o item no selectedSlot === 'totem'
+  - VISUAL: Igual ao Totem da Imortalidade do Minecraft:
+    - Corpo: estatueta dourada (#FFD700) com olhos (#44FF44)
+    - Forma: retangular com asas laterais
+    - CSS profissional, consistente com outros itens
+
+5.2 - SHIELD POTION
+  name: 'Shield Potion', price: 20, desc: 'Absorbs 1 monster hit. Can stack up to 2 shields.',
+  icon: 'shield_potion', color: '#4488ff', rarity: 'epic', type: 'consumable', giveOnRoundEnd: false,
+  effect: { type: 'shield', amount: 1 }
+  COMPORTAMENTO:
+  - Adicionar ao Player: this.shieldCharges = 0 (maximo 2)
+  - Ao usar: shieldCharges = Math.min(2, shieldCharges + 1)
+  - Ao receber dano do monstro (takeDamage):
+    - Se shieldCharges > 0: shieldCharges--, dano NAO aplicado
+    - Senao: dano aplicado normalmente
+  - VISUAL DO ITEM: Identico ao Witches Brew (frasco), mas AZUL em vez de verde
+    - Copiar o CSS de .icon-witches_brew e alterar cores para azul:
+    - Liquido: gradiente de #224488 a #4488ff
+    - Tampa: #8b6914 (manter igual)
+    - Brilho: rgba(100,150,255,0.4)
+  - VISUAL DA BARRA DE ESCUDO:
+    - Adicionar barra azul na parte INFERIOR da barra de HP
+    - A barra de escudo ocupa METADE da altura da barra de HP
+    - Fica abaixo da barra de HP (metade inferior)
+    - Gradiente vertical: ciano (#00ffff) em baixo, azul (#0044ff) em cima
+    - Largura proporcional: 1 shield = 50% width, 2 shields = 100% width
+    - Quando shieldCharges === 0, barra invisivel
+    - Renderizar no HUD junto com a barra de HP existente
+    - CSS profissional e minimalista
+
+5.3 - SMOKE BOMB
+  name: 'Smoke Bomb', price: 10, desc: 'Creates a 3x3 smoke cloud for 5 seconds. Players inside are invisible but still take damage.',
+  icon: 'smoke_bomb', color: '#888888', rarity: 'rare', type: 'consumable', giveOnRoundEnd: true,
+  effect: { type: 'smoke', duration: 5, radius: 3 }
+  COMPORTAMENTO:
+  - Adicionar ao Game: this.smokeClouds = [] (array de {tileX, tileY, timer, radius})
+  - Ao usar: cria smokeCloud no tile do player
+  - Enquanto o player esta dentro de um smokeCloud:
+    - player.invisible = true (monstro nao detecta)
+    - Mas ainda toma dano se o monstro encostar
+  - A nuvem dura 5 segundos
+  - Renderizacao: circulo cinza com 70% transparencia (rgba(128,128,128,0.3))
+    - Raio: 1.5 tiles (3x3 area = 1.5 tile radius)
+    - Borda difusa (feathering com gradiente radial)
+  - VISUAL DO ITEM: Igual a Smoke Bomb do CS2
+    - Corpo: cilindro verde-oliva escuro (#4a5a2a)
+    - Detalhes: faixas/linhas militares
+    - Formato: retangular com pin na lateral (icone classico de granada de fumaca)
+    - CSS profissional
+
+5.4 - PHASE
+  name: 'Phase', price: 15, desc: 'Turns nearest wall phaseable for 10 seconds. Players inside walls are invisible to the monster.',
+  icon: 'phase', color: '#8844cc', rarity: 'super_rare', type: 'consumable', giveOnRoundEnd: true,
+  effect: { type: 'phase', duration: 10 }
+  COMPORTAMENTO:
+  - Ao usar:
+    - Encontrar a parede (tile 'O') mais proxima do player
+    - Distancia euclidiana do centro do player ao centro do tile da parede
+    - INDEPENDENTE da direcao que o player esta olhando
+    - A parede escolhida muda de cor para azul bebe neon transparente
+      (rgba(100, 180, 255, 0.4))
+    - Armazenar em game.phasedWalls[]: {tileX, tileY, timer: 10}
+  - EFEITOS enquanto ativo:
+    - Players podem atravessar a parede (canMoveTo ignora tile 'O' se estiver
+      em phasedWalls)
+    - Players DENTRO da parede (tileX,tileY coincidem com a phasedWall):
+      - player.invisible = true (monstro nao detecta)
+      - player.phasing = true (para renderizacao)
+    - O MONSTRO NAO pode atravessar a parede (continua solida para ele)
+  - Quando o timer expira (10s):
+    - Se algum player estiver dentro da parede: EJETAR o player para o tile
+      de 'C' ou 'G' mais proximo. Se nao houver, usar qualquer tile nao-parede.
+    - Remover a phasedWall do array
+  - VISUAL DO ITEM:
+    - Coracao roxo escuro (#6633aa) com bordas neon (#aa66ff)
+    - Tentaculos saindo do coracao (mesma cor do coracao, porem mais claros)
+    - Os tentaculos devem ser linhas curvas onduladas
+    - CSS profissional usando ::before e ::after e box-shadow para criar tentaculos
+    - OU renderizar via canvas no ItemIcons
+
+5.5 - LUCKY CHARM
+  name: 'Lucky Charm', price: 20, desc: 'Next purchased item is duplicated. Does not stack.',
+  icon: 'lucky_charm', color: '#ffcc00', rarity: 'epic', type: 'passive', giveOnRoundEnd: false
+  COMPORTAMENTO:
+  - Tipo 'passive': armazenado na hotbar, verificado ao comprar
+  - Adicionar ao Player: this.luckyCharmActive = false
+  - Quando o player compra um item (buyFromShop):
+    - Se luckyCharmActive === true:
+      - Adicionar o item DUAS vezes ao inventario (comprar 1, receber 2)
+      - Se nao houver espaco para o segundo: so recebe 1
+      - luckyCharmActive = false
+      - Remover Lucky Charm do inventario (consumir o item)
+    - Senao: compra normal (1 item)
+  - Varios Lucky Charms NAO acumulam (se ja tiver luckyCharmActive=true,
+    usar outro Lucky Charm nao faz nada / mostra mensagem)
+  - VISUAL DO ITEM:
+    - Colar/necklace com uma moeda retangular no meio
+    - Corrente: fina, dourada
+    - Moeda: retangular, dourada com bordas
+    - CSS profissional
+
+5.6 - GENE'S HAND
+  name: "Gene's Hand", price: 25, desc: 'Teleports the player closest to the monster to your position.',
+  icon: 'genes_hand', color: '#cc88ff', rarity: 'epic', type: 'consumable', giveOnRoundEnd: false,
+  effect: { type: 'genes_hand' }
+  COMPORTAMENTO:
+  - Disponivel apenas em partidas com 2+ jogadores
+  - Singleplayer: item nao dropa/não pode ser comprado (ou se obtido, mostra
+    mensagem "Gene's Hand requires 2+ players!" e nao consome)
+  - Ao usar:
+    - Encontrar o player (vivo, != usuario) mais proximo do monstro
+    - Se o usuario for o mais proximo: encontrar o SEGUNDO mais proximo
+    - Teleportar esse player para a posicao do usuario (px, py)
+    - Mostrar mensagem: player.name + ' was pulled by Gene\'s Hand!'
+  - VISUAL DO ITEM: Mao roxa clara (#cc88ff)
+    - Dedo aberto/esticado
+    - CSS profissional
+
+5.7 - HEALING AURA
+  name: 'Healing Aura', price: 18, desc: 'Heals 5 HP/s to all players in 3x3 area for 7 seconds. User is 80% slower.',
+  icon: 'healing_aura', color: '#44ff44', rarity: 'super_rare', type: 'consumable', giveOnRoundEnd: false,
+  effect: { type: 'healing_aura', duration: 7, healPerSec: 5, slowAmount: 0.8 }
+  COMPORTAMENTO:
+  - Disponivel apenas em partidas com 2+ jogadores
+  - Singleplayer: item nao dropa/não pode ser comprado (ou se obtido, mostra
+    mensagem "Healing Aura requires 2+ players!" e nao consome)
+  - Ao usar:
+    - Adicionar ao Game: this.activeAuras = [] (array de {player, timer, radius, healRate})
+    - Raio 3x3 tiles = 1.5 tile radius
+    - O USUARIO tambem eh curado
+    - Por 7 segundos:
+      - Todos os players dentro do raio de 1.5 tiles do usuario recebem
+        5 HP por segundo (hp += 5 * dt)
+      - O USUARIO tem velocidade reduzida em 80%:
+        player.speed = player.baseSpeed * 0.2
+    - Apos 7 segundos: remover aura, restaurar velocidade do usuario
+  - VISUAL DO ITEM:
+    - Circulo verde transparente (#44ff44 com 60% opacidade) no meio
+    - 5 simbolos de "+" verdes ao redor do circulo
+    - Dispostos em pentagono ao redor do centro
+    - CSS profissional
+
+================================================================================
+6. NOVAS CLASSES (2 CLASSES)
+================================================================================
+
+6.1 - ALLY WARP
+  name: 'Ally Warp',
+  desc: 'Teleport to the most distant ally (min 34 tiles away). 2 uses per summon.',
+  abilityName: 'Ally Warp',
+  cooldown: 5,
+  duration: 0,
+  icon: 'AW'
+  COMPORTAMENTO:
+  - Adicionar ao Player: this.allyWarpUses = 0 (resetado a cada summon)
+  - No momento do summon (quando o altar eh ativado): resetar allyWarpUses = 2
+  - Quando a habilidade eh ativada (tecla de ability):
+    - Se allyWarpUses <= 0: mostrar "No Ally Warp uses remaining!"
+    - Encontrar o aliado (vivo, != usuario) MAIS DISTANTE do usuario
+    - Calcular distancia em tiles: Math.sqrt((dx/TILE_SIZE)^2 + (dy/TILE_SIZE)^2)
+    - Se distancia < 34 tiles: mostrar "No ally is far enough (need 34+ tiles)!"
+    - Se distancia >= 34 tiles: teleportar o usuario para a posicao do aliado
+    - allyWarpUses--
+    - Particulas de teleporte (similares ao Wired Girl)
+  - Reset no summon: em updateInteraction() onde reseta wiredGirlUsed, etc.,
+    adicionar: rp.allyWarpUses = 2
+
+6.2 - BUM DUDE
+  name: 'Bum Dude',
+  desc: 'Pick up a nearby trap from the ground into your inventory.',
+  abilityName: 'Pick Up Trap',
+  cooldown: 1,
+  duration: 0,
+  icon: 'BD'
+  COMPORTAMENTO:
+  - Quando a habilidade eh ativada:
+    - Encontrar a trap mais proxima dentro de um raio de 1.5 tiles
+    - Se nao houver trap: mostrar "No trap nearby!"
+    - Verificar se ha espaco no inventario (!player.hasSpace()): mostrar
+      "Inventory is full!"
+    - Pegar a trap: adicionar o item da trap ao inventario
+      (player.addToInventory(trap.item))
+    - Remover a trap do chao (game.traps.splice(index, 1))
+    - Mostrar mensagem: player.name + ' picked up ' + Items[trap.item].name
+  - Cooldown de 1 segundo (abilityCooldown = 1)
+
+================================================================================
+7. BALANCEAMENTO DO LOCKER GUY
+================================================================================
+
+ATUAL: O cadeado do Locker Guy eh permanente ate remocao manual.
+MUDANCAS:
+
+7.1 - Duracao do cadeado: 2 segundos
+  - Apos 2 segundos, o cadeado eh removido AUTOMATICAMENTE
+  - Adicionar propriedade ao lockedDoor: this.lockedDoor.timer (float, 2.0)
+  - No Game.update(), decrementar lockedDoor.timer -= dt
+  - Quando timer <= 0: remover cadeado (game.lockedDoor = null)
+
+7.2 - Remocao manual apos 1 segundo
+  - Apos 1 segundo de cadeado ativo, o Locker Guy pode remove-lo manualmente
+  - Ou seja: so pode remover se lockedDoor.timer <= 1.0
+  - Ao pressionar habilidade na porta cadeada: se lockedDoor.timer <= 1.0,
+    remover o cadeado (lockedDoor = null)
+
+7.3 - Cooldown de 1 segundo para recolocar na MESMA porta
+  - Apos remover o cadeado (manual ou automatico), a MESMA porta nao pode
+    ser trancada novamente por 1 segundo
+  - Adicionar ao DoorEntity: this.lockCooldown = 0
+  - Ao remover cadeado: door.lockCooldown = 1.0
+  - No update() do DoorEntity: decrementar lockCooldown
+  - Ao tentar trancar: se door.lockCooldown > 0, mostrar "This door was recently unlocked!"
+
+7.4 - Morte do Locker Guy remove cadeado
+  - No momento em que o player morre (takeDamage ou set alive=false):
+    - Se game.lockedDoor existir e o player que morreu for o Locker Guy
+      que colocou o cadeado:
+    - game.lockedDoor = null
+  - Para isso, armazenar no lockedDoor: { tiles, timer, lockedByPlayerIndex }
+  - Ao setar lockedDoor: lockedByPlayerIndex = p.playerIndex
+
+================================================================================
+8. CHECKLIST DE IMPLEMENTACAO
+================================================================================
+
+[ ] 1. Adicionar 12 novas entradas ao objeto MonsterTypes
+[ ] 2. Implementar comportamento do Mithrix (roubo/devolucao de itens)
+[ ] 3. Implementar comportamento do Speedscale (timer + bonus cumulativo)
+[ ] 4. Implementar comportamento do Acrid (contaminacao de tiles + CSS)
+[ ] 5. Implementar comportamento do Berserker (bonus por stun)
+[ ] 6. Implementar comportamento do Wanderer (movimento reto, sem waypoints)
+[ ] 7. Implementar comportamento do Hoarder (escudo + lentidao apos quebra)
+[ ] 8. Implementar comportamento do Bomber (bombas + CSS)
+[ ] 9. Implementar comportamento do Vampire (speed baseado em tile interior/exterior)
+[ ] 10. Implementar comportamento do Shapeshifter (copia visual + speed condicional)
+[ ] 11. Implementar comportamento do Sentinel (patrol parado, 360 visao, random spawn)
+[ ] 12. Implementar comportamento do Blind (invisibilidade para players parados)
+[ ] 13. Implementar comportamento do Spider (atravessa furniture W)
+[ ] 14. Criar sistema de baus (chests): spawn, timer, interacao, itens aleatorios
+[ ] 15. Criar renderizacao CSS/canvas dos baus com 7+ secoes e variacoes de cor
+[ ] 16. Criar array DEFAULT_ZONES e carregar no Game
+[ ] 17. Implementar funcao getZoneName() e adicionar zona ao debug mode (F1)
+[ ] 18. Adicionar 7 novos itens ao objeto Items
+[ ] 19. Criar icones CSS (.icon-*) para os 7 novos itens
+[ ] 20. Criar funcoes ItemIcons canvas para os 7 novos itens
+[ ] 21. Implementar comportamento do Totem (respawn no slot selecionado)
+[ ] 22. Implementar comportamento do Shield Potion (escudo, barra azul)
+[ ] 23. Implementar comportamento do Smoke Bomb (nuvem, invisibilidade)
+[ ] 24. Implementar comportamento do Phase (parede fantasma, ejetar player)
+[ ] 25. Implementar comportamento do Lucky Charm (duplicar proxima compra)
+[ ] 26. Implementar comportamento do Gene's Hand (teleportar aliado mais proximo do monstro)
+[ ] 27. Implementar comportamento do Healing Aura (cura em area + lentidao)
+[ ] 28. Adicionar 2 novas classes ao PlayerClasses
+[ ] 29. Implementar Ally Warp (2 usos por summon, teleporte para aliado distante)
+[ ] 30. Implementar Bum Dude (pegar trap do chao)
+[ ] 31. Balancear Locker Guy (duracao 2s, cooldown 1s, morte remove cadeado)
+[ ] 32. Atualizar Documentacao_Completa.txt com todas as mudancas
+[ ] 33. Testar cada funcionalidade com valores ficticios
+
+================================================================================
+9. NOTAS IMPORTANTES
+================================================================================
+
+- O sistema de save/load (localStorage) ja existe. Ao adicionar novas propriedades
+  ao Game, Player, MonsterEntity, etc., ATUALIZE os metodos saveGame/loadGame para
+  serializar/deserializar essas novas propriedades.
+
+- O metodo spawnMonster() no Game escolhe o tipo de monstro. Os novos tipos
+  devem ser incluidos no weightedRandom (todos com weight: 1).
+
+- Para o Vampire, a determinacao de "dentro" vs "fora" de casa deve considerar:
+  - tile 'C' = dentro
+  - tile 'G' = fora
+  - tiles 'F', 'U', 'm' = usar getEffectiveTile() ou resolveBaseTile() para
+    determinar se estao em contexto interior ou exterior
+
+- A funcao weightedRandom ja existe e funciona com o objeto MonsterTypes.
+  Basta adicionar as novas entradas com weight: 1.
+
+- O sistema de particulas existente (classe Particle) pode ser reutilizado
+  para os efeitos visuais do Acrid, bomba, etc.
+
+- Para itens do tipo 'passive', o useItem() nao deve consumi-los. Eles devem
+  ser verificados em momentos especificos (morte, compra, etc.).
+
+- CUIDADO com a ordem de atualizacao no Game.update(). Novos sistemas devem
+  ser integrados na ordem correta.
+
+================================================================================
+FIM DO MEGA PROMPT
+================================================================================
