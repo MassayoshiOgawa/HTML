@@ -6882,4 +6882,97 @@ E) TESTES:
    | 4 | Gastar moedas na loja abaixo de 30     | Volta a receber        |
 
 ================================================================================
+CHANGELOG - MAIO 2026 - IMPLEMENTACAO V3
+================================================================================
+
+Data: Maio 2026
+
+MUDANCAS REALIZADAS:
+
+1. NOVOS TIPOS DE MONSTRO (12 novos):
+   - mithrix: Rouba metade dos itens dos players ao spawnar, devolve ao morrer
+   - speedscale: Ganha +2 de velocidade a cada 7 segundos (cumulativo ate morrer)
+   - acrid: Contamina tiles por onde passa. Players tomam 1 HP/s em tiles infectados.
+            Tiles ficam verde neon com particulas de bolhas. Duracao 10s.
+   - berserker: Ganha +15 de velocidade a cada stun recebido (permanente ate morrer)
+   - wanderer: Nao usa waypoints. Anda em linha reta ate bater em parede,
+               entao escolhe direcao aleatoria. +50% velocidade base.
+   - hoarder: Comeca com escudo visual que nega o primeiro stun.
+              Apos perder escudo, fica 20% mais lento.
+   - bomber: Solta uma bomba a cada 7s (max 10 ativas). Bombas duram 10s,
+             causam 15 HP ao player que pisar.
+   - vampire: 40% mais lento em tiles interiores (C), 40% mais rapido em exteriores (G)
+   - shapeshifter: Copia aparencia de um player aleatorio. +50% velocidade quando
+                   nao observado, velocidade normal quando no campo de visao.
+   - sentinel: Parado no patrol (speedMod 0). Visao 360 graus, alcance 400px.
+               Spawna em posicao aleatoria. Aparencia de estatua no patrol.
+   - blind: Players parados por 2s+ sao invisiveis para ele. Ainda causa dano ao encostar.
+   - spider: Anda sobre furniture (W). Ve players atraves de furniture.
+             W nao bloqueia movimento, visao ou pathfinding.
+
+2. SISTEMA DE BAU (CHEST):
+   - Primeiro bau spawna ao ativar o altar
+   - Novo bau a cada 60s (max 3 ativos)
+   - Todos os baus somem quando o monstro morre
+   - Spawn aleatorio em tiles C ou G
+   - 6 variacoes de cores: classic, patati, patata, clown, red, random
+   - 7+ secoes visuais: tampa, frente, corpo superior, corpo inferior, friso, cadeado, base
+   - Concede 1 item aleatorio (todos itens com mesma chance)
+   - Bau aberto muda aparencia (tampa deslocada)
+   - Visivel apenas dentro do raio de iluminacao do player
+
+3. SISTEMA DE ZONAS (DEFAULT_ZONES):
+   - Segundo array 37x18 definindo regioes do mapa
+   - Tiles: O=Wall, B=Bathroom, Q=Bedroom, C=Corridor, A=Altar Room, G=Outside, d=Door
+   - Funcao getZoneName() retorna nome da zona para coordenada
+   - Modo debug (F1) agora mostra zona do player (ex: "Zone:Bathroom")
+
+4. NOVOS ITENS (7):
+   - totem (epico, $20, passive): Se selecionado ao morrer, renasce no spawn com 5s invuln
+   - shield_potion (epico, $20): Absorve 1 hit do monstro. Max 2 cargas.
+     Barra azul na metade inferior da barra de HP.
+   - smoke_bomb (raro, $10): Circulo 3x3 de fumaca por 5s. Players dentro invisiveis.
+   - phase (super_raro, $15): Parede mais proxima vira azul neon por 10s.
+     Players atravessam e ficam invisiveis dentro da parede.
+   - lucky_charm (epico, $20): Proximo item comprado e duplicado. Nao acumula.
+   - genes_hand (epico, $25): Teleporta player mais proximo do monstro para o usuario.
+     Requer 2+ jogadores.
+   - healing_aura (super_raro, $18): Cura 5 HP/s em area 3x3 por 7s.
+     Usuario fica 80% mais lento. Requer 2+ jogadores.
+
+5. NOVAS CLASSES (2):
+   - allywarp (Ally Warp): 2 usos por summon, cooldown 5s.
+     Teleporta para o aliado mais distante (min 34 tiles).
+   - bumdude (Bum Dude): Cooldown 1s.
+     Pega a trap mais proxima (raio 1.5 tiles) e coloca no inventario.
+
+6. BALANCEAMENTO DO LOCKER GUY:
+   - Cadeado agora dura 2 segundos (remove automaticamente)
+   - Pode remover manualmente apos 1 segundo
+   - Cooldown de 1s para recolocar na mesma porta apos remocao
+   - Morte do Locker Guy remove o cadeado (lockedByPlayerIndex)
+   - DoorEntity ganhou propriedade lockCooldown
+
+7. NOVAS PROPRIEDADES NO PLAYER:
+   - shieldCharges, luckyCharmActive, allyWarpUses, stationaryTimer, healingAuraSlow
+
+8. NOVAS PROPRIEDADES NO MONSTERENTITY:
+   - stolenItems, speedScaleBonus, speedScaleTimer, berserkerBonus,
+     shieldActive, bombTimer, copiedPlayer, copiedColor, copiedName, isObserved
+
+9. NOVAS PROPRIEDADES NO GAME:
+   - chests, chestSpawnTimer, chestFirstSpawned, contaminatedTiles,
+     contaminatedParticles, activeBombs, smokeClouds, phasedWalls,
+     activeAuras, zones
+
+10. RARIDADE 'EPIC' ADICIONADA:
+    - dropChance: 0.10 (10%)
+
+11. SAVE/LOAD ATUALIZADO:
+    - Serializacao inclui novas propriedades de Player, MonsterEntity,
+      Game e lockedDoor com timer e lockedByPlayerIndex
+
+================================================================================
+FIM DO CHANGELOG
+================================================================================
 
