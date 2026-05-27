@@ -2,7 +2,7 @@ To-do
  
 [ ] adicionar atributos as classes(stealth, task, speed)
 [ ] add backrooms
-[ ] modo de round especial a cada round multiplo de 3, ao vencer um round especial, conceder aos jogadores alguma dessas recompensas: um item super raro, ou um escudo de um hit, ou heal de 75hp. Hud de interface de missões:
+[ ] Rounds especial que contem missões especiais, que aparecem a cada round multiplo de 3. Ao vencer um round especial, conceder aos jogadores alguma dessas recompensas: um item super raro ou épico, ou um escudo de um hit, ou heal de 75hp. Hud de interface de missões(isso é só um exemplo, a interface de missões deve ser feita com css profissional, organizado e detalhado. ela ficará localizada no canto superior direito, debaixo do botão das configurações):
 ═════════════════════════
 📋 MISSÕES                      
 ═════════════════════════
@@ -13,25 +13,43 @@ To-do
 Notificação ao concluir:
 - Brilho dourado na borda da tela
 - "MISSÃO CONCLUÍDA!" no centro (igual showMessage mas com cor dourada #ffd700)
-- Partículas douradas (reaproveitar sistema de this.particles)
-Rounds especiais
+- Partículas douradas (reaproveitar sistema de this.particles).
+
+Algumas missões podem dar conflito com as outras(pode acabar deixando impossivel ganhar ou pode rolar um bug de conflito entre as missões), então você vai ter que decidir por conta própria quais missões não poderão colidir
+A cada 10 rounds especiais, adicionar uma missão especial(do primeiro até o nono round terá apenas uma missão especial, do 10 ao 19 terão 2 missões especiais e por aí vai, máximo de 3 missões), as Missões especiais seriam essas:
 1) Ficar 15 segundos em um comodo especifico
 2) 2 artefatos a mais
-3) coletar 3 moedas que spawnam aleatoriamente pelo mapa(no floor ou no grass), cada moeda concede 5 dinheiros
+3) coletar 3 moedas que spawnam aleatoriamente pelo mapa(no floor ou no grass), cada moeda concede 5 dinheiros(essas moedas tem q ter um design unico e especial pra elas, com 35% do tamanho de um tile, centralizada no tile em que spawnou)
 4) visite todos os comodos do mapa(banheiro, quarto, corredor, sala, jardim)
-5) se houver 2 ou mais jogadores, um deles ficará com nerf de velocidade de 50%
+5) se houver 2 ou mais jogadores, um deles ficará com nerf de velocidade de 25%
 6) ao coletar todos os artefatos, todos os jogadores devem comparecer na sala do altar
-7) todas as portas tem q estar fechadas
-8) stunnar o monstro 3 vezes(esse round só será escolhido se houver ao menos 3 traps no jogo(na hotbar dos jogadores e no chão))
+7) todas as portas tem q estar fechadas(esse round especial só poderá aparecer antes do round 10)
+8) stunnar o monstro 3 vezes(esse round só será escolhido se houver ao menos 3 traps no jogo(no caso seria traps na hotbar dos jogadores + no chão))
 9) pra vencer deve ao menos receber 1 hit do monstro
 10) use 3 itens(esse round só será escolhido se houver ao menos 3 itens na hotbar dos jogadores)
-11) todos da equipe devem ficar perto por 20 segundos
-12) sair de um chase do monstro 1 vez
+11) todos da equipe devem ficar perto por 20 segundos em um raio de 7x7 tiles de tamanho circular
+12) sair de um chase do monstro 2 vezes
 13) toda vez q um artefato é coletado, os outros artefatos mudam de posição
 14) se o monstro for stunnado, os players também serão stunnados pela metade do tempo
 15) o monstro ganha 150% de velocidade e irá apenas atacar 1 player(ele sabe a posição desse player e ao matar ele, ele retorna ao altar e fica parado o resto do round), que é o player com mais itens no inventário
 16) para enxergar os artefatos precisa chegar perto deles num raio de 4x4 tiles de tamanho(se aplica ao artefato falso também)
+17) fique no jardim(tile G outside) por 20 segundos consecutivos
+18) todas as portas devem ser interagidas pelo menos uma vez no round.
+19) portas não fecham mais(dura até o monstro morrer)
+20) todos os jogadores recebem 1 de dano a cada 3 segundos
+21) todos os jogadores tem colisão entre si(não disponivel no modo single player)
+22) o monstro ignora traps caso ele esteja em patrol, se ele estiver em search ou chase, as traps voltam a funcionar e conseguem stunnar o monstro.
+23) o round só acaba quando todos os players tiverem 75 de hp ou menos.
+24) 2 monstros iguais irão spawnar, mas um deles de 50% a menos de velocidade
+25) todos os artefatos spawnam aleatoriamente no tile G
+26) um arfato dourado irá aparecer em um tile C ou G aleatório, e o tem o dobro de tempo de coleta
+27) ande 100 tiles(aumenta 100 tiles pra cada jogador. todos os jogadores contribuem pra essa missão).
+28) Artefatos trocam de posição entre si a cada 20s 
+29) ao summonar o monstro, os artefatos irão demorar 20 segundos para serem spawnados
+30) apenas 1 jogador consegue coletar os artefatos(será escolhido o jogador com mais vida)
 
 [ ] fazer com que as dificuldades alterem o conteúdo do jogo, exemplo: no fácil não tem itens épicos etc etc
 
 [ ] Add novas classes: Mimic: Passiva de se ficar parado por 2 segundos, o monstro ignorará o usuario. Lamplighter: 
+
+[ ] fazer o search do monstro durar metade do tempo
