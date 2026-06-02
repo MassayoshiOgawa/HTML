@@ -1,14 +1,15 @@
-================================================================================
-               DOCUMENTACAO COMPLETA —    DeutschMeister v3.3
-            Plataforma Interativa de Aprendizado de Alemão
-   Documentação Técnica — Junho 2026 (Modo Montar Frases)
+===============================================================================
+                DOCUMENTACAO COMPLETA — DeutschMeister v3.3
+             Plataforma Interativa de Aprendizado de Alemão
+   Documentação Técnica — Junho 2026 (Modo Montar Frases implementado)
 ================================================================================
 
-  Arquivo Fonte:  deutsch-meister.html (~7217 linhas, ~1.2M caracteres)
+  Arquivo Fonte:  deutsch-meister.html (~8700 linhas, ~1.2M caracteres)
   Tipo:           SPA (Single Page Application) — HTML + CSS + JS vanilla
   Objetivo:       Ensinar alemão A1→B1 seguindo padrão CEFR
-  Arquitetura:    MULTIMODO — 9 modos/guias com sidebar dinâmica adaptativa
+  Arquitetura:    MULTIMODO — 10 modos/guias com sidebar dinâmica adaptativa
                   Modo Música implementado com lobby premium e detail view
+                  Modo Montar Frases implementado com drag-drop e explicações
   Persistência:   localStorage (chave única: deutschmeister_state)
   Idiomas:        Português (pt) / English (en)
   Navegadores:    Chrome, Firefox, Edge, Safari (modernos)
@@ -51,6 +52,13 @@
   32. MODO MÚSICA — LOBBY MUSICAL PREMIUM
   33. NAVEGAÇÃO DO MODO MÚSICA — SISTEMA DE RETORNO
   34. CATÁLOGO MUSICAL — ESTRUTURA E EXPANSÃO
+  35. MODO MONTAR FRASES — SENTENCE BUILDER
+  36. BANCO DE FRASES — SB_PHRASES
+  37. ALGORITMO DE PROGRESSÃO — STREAK E DIFICULDADE
+  38. SISTEMA DE EXPLICAÇÕES — EXPLICAÇÕES POR FRASE
+  39. INTEGRAÇÃO COM GPS — MÉTRICAS DE SINTAXE
+  40. RESPONSIVIDADE — DRAG-DROP MOBILE/DESKTOP
+  41. ESTRUTURA DOS DADOS — SENTENCE BUILDER STATE
 
 ================================================================================
   1. VISÃO GERAL E ARQUITETURA
@@ -1146,14 +1154,18 @@
 
   31.2 MODOS DISPONÍVEIS
   ----------------------------------------------------------------------------
-   | Modo           | Ícone | View Container        | Status              |
-   |----------------|-------|-----------------------|---------------------|
-   | chapters       | 📚    | #mode-chapters        | COMPLETO (original) |
-   | music          | 🎵    | #mode-music           | LOBBY MUSICAL       |
-   | exercises      | 🧠    | #mode-exercises       | HUB (placeholder)   |
-   | vocabulary     | 📖    | #mode-vocabulary      | HUB (placeholder)   |
-   | evolution      | 🧬    | #mode-evolution       | HUB (placeholder)   |
-   | conversation   | 💬    | #mode-conversation    | HUB (placeholder)   |
+   | Modo            | Ícone | View Container            | Status              |
+   |-----------------|-------|---------------------------|---------------------|
+   | chapters        | 📚    | #mode-chapters            | COMPLETO (original) |
+   | music           | 🎵    | #mode-music               | LOBBY MUSICAL       |
+   | exercises       | 🧠    | #mode-exercises           | HUB (placeholder)   |
+   | vocabulary      | 📖    | #mode-vocabulary          | HUB (placeholder)   |
+   | evolution       | 🧬    | #mode-evolution           | HUB (placeholder)   |
+   | review          | 🔥    | #mode-review              | HUB (placeholder)   |
+   | engineering     | 🏗️    | #mode-engineering         | HUB (placeholder)   |
+   | listening       | 🎧    | #mode-listening           | HUB (placeholder)   |
+   | conversation    | 💬    | #mode-conversation        | HUB (placeholder)   |
+   | sentenceBuilder | 🧩    | #mode-sentenceBuilder     | COMPLETO (Montar Frases) |
 
   31.3 ARQUITETURA DE VIEWS
   ----------------------------------------------------------------------------
@@ -1226,13 +1238,15 @@
     </div>
   </aside>
 
-  Cada container de modo tem seu próprio conteúdo:
-    - chapters:    #sidebar-search + #sidebar-list (lista de capítulos)
-    - music:       #sidebar-music-list (músicas disponíveis)
-    - vocabulary:  #sidebar-vocab-list (categorias do glossário)
-    - exercises:   #sidebar-exercises-list (tipos de exercício)
-    - evolution:   #sidebar-evo-list (métricas)
-    - conversation: usa sidebar de capítulos
+   Cada container de modo tem seu próprio conteúdo:
+     - chapters:        #sidebar-search + #sidebar-list (lista de capítulos)
+     - music:           #sidebar-music-list (músicas disponíveis)
+     - vocabulary:      #sidebar-vocab-list (categorias do glossário)
+     - exercises:       #sidebar-exercises-list (tipos de exercício)
+     - evolution:       #sidebar-evo-list (métricas)
+     - review:          #sidebar-review-list (opções de revisão)
+     - sentenceBuilder: #sidebar-sb-list (estatísticas do modo)
+     - conversation:    usa sidebar de capítulos
 
   31.7 SISTEMA DE ESTADO E PERSISTÊNCIA
   ----------------------------------------------------------------------------
@@ -1257,13 +1271,17 @@
 
   31.9 ESCALABILIDADE
   ----------------------------------------------------------------------------
-  Para adicionar um novo modo:
-  1. Adicionar entrada ao MODE_DEFS no GermanModeCore
-  2. Criar o container .mode-view no HTML
-  3. Criar o container de sidebar-content no HTML
-  4. Adicionar botão .mode-btn no #sidebar-mode-nav
-  5. Implementar a função _renderXXXSidebar() (se necessário)
-  6. O conteúdo do modo pode ser populado sob demanda
+   Para adicionar um novo modo (exemplo: Montar Frases, implementado):
+   1. Adicionar entrada ao MODE_DEFS no GermanModeCore
+   2. Criar o container .mode-view no HTML
+   3. Criar o container de sidebar-content no HTML
+   4. Adicionar botão .mode-btn no #sidebar-mode-nav
+   5. Implementar a função _renderXXXSidebar() no GermanModeCore
+   6. Adicionar hook no _onModeActivated()
+   7. Criar IIFE do modo (ex: GermanSentenceBuilderCore)
+   8. Expor API via window.NomeDoModo
+   9. Integrar com state, saveState, GPS
+   10. Adicionar CSS específico do modo
 
   NÃO é necessário:
     - Modificar o sistema de modo existente
@@ -1517,7 +1535,352 @@
    Para adicionar uma nova música:
      1. Adicionar entrada ao array SONGS no GermanMusicCore
      2. Fornecer thumbnail, youtubeId, lyrics
-     3. NENHUMA outra modificação necessária
+      3. NENHUMA outra modificação necessária
+
+================================================================================
+    35. MODO MONTAR FRASES — SENTENCE BUILDER
+================================================================================
+
+   35.1 VISÃO GERAL
+   ----------------------------------------------------------------------------
+   O Modo Montar Frases é um sistema pedagógico de construção de frases
+   por blocos (drag and drop). O usuário recebe uma frase em português
+   (ou alemão) e blocos de palavras embaralhadas, e deve montar a frase
+   na ordem correta.
+
+   Objetivo pedagógico: treinar ordem das palavras, estrutura frasal,
+   conjugação, tempos verbais, sintaxe, casos e formação de frases reais
+   — ensinando COMO o alemão é construído.
+
+   Namespace: GermanSentenceBuilderCore (IIFE)
+   API pública: window.GermanSentenceBuilder
+   Container: #mode-sentenceBuilder
+
+   35.2 ARQUITETURA INTERNA
+   ----------------------------------------------------------------------------
+   O GermanSentenceBuilderCore é uma IIFE isolada com:
+     - Banco de frases (SB_PHRASES): organizado por contagem de palavras (2-15)
+     - Estado interno (_sbState): dificuldade, streak, erros, histórico
+     - Sistema de drag and drop: mouse + touch (mobile/tablet)
+     - Sistema de verificação: comparação textual palavra por palavra
+     - Sistema de explicações: explicação completa por frase com 15 seções
+     - Integração com GPS: trackEvo para métricas de sintaxe
+     - Persistência: state.sentenceBuilderState via saveState()
+
+   Funções principais:
+     - onModeEnter()        — Chamada ao entrar no modo (GermanModeCore)
+     - _renderSidebar()     — Popula a sidebar com estatísticas
+     - _pickPhrase()        — Seleciona frase aleatória (com anti-repetição)
+     - _renderBlocks()      — Renderiza blocos arrastáveis
+     - _verify()            — Verifica resposta do usuário
+     - _renderExplanation() — Renderiza explicação completa
+     - _nextPhrase()        — Avança para próxima frase
+     - _advanceDifficulty() — Aumenta dificuldade (streak)
+     - _reduceDifficulty()  — Reduz dificuldade (erros consecutivos)
+     - resetBuilder()       — Reseta estado interno
+
+   35.3 INTERFACE DO USUÁRIO
+   ----------------------------------------------------------------------------
+   Componentes da tela:
+     1. Cabeçalho do modo (ícone 🧩, título, descrição)
+     2. Barra de estatísticas: palavras atuais, streak, erros consecutivos
+     3. Slider de configuração: streak necessária para avançar (1-100, padrão 5)
+     4. Card da frase: mostra a frase a ser traduzida
+     5. Área de resposta (sb-answer-area): zona de drop para blocos
+     6. Banco de palavras (sb-word-bank): blocos embaralhados
+     7. Botões: Verificar, Resetar, Continuar
+     8. Área de explicação: 15 seções de análise da frase
+
+   35.4 FLUXO DE USO
+   ----------------------------------------------------------------------------
+   1. Usuário vê frase em português (ou alemão — alterna a cada acerto)
+   2. Arrasta blocos do banco para a área de resposta (ou clica)
+   3. Clica "Verificar"
+   4. Sistema mostra explicação completa (acertando ou errando)
+   5. Clica "Continuar" para próxima frase
+
+   Alternância de direção:
+     - ptToDe: frase em português → montar em alemão
+     - deToPt: frase em alemão → montar em português
+     - Alterna automaticamente a cada acerto
+
+   35.5 PERSISTÊNCIA
+   ----------------------------------------------------------------------------
+   Campos em state.sentenceBuilderState:
+     - wordCount:       número atual de palavras (2-15, padrão 2)
+     - streak:          acertos consecutivos atuais
+     - errorsInARow:    erros consecutivos atuais
+     - streakNeeded:    streak necessária para avançar (padrão 5)
+     - history:         últimas 20 frases usadas (anti-repetição)
+     - totalCorrect:    total de acertos no modo
+     - totalAttempts:   total de tentativas
+     - lastDirection:   'ptToDe' ou 'deToPt'
+
+   Salvamento ocorre em:
+     - Cada acerto (_advanceDifficulty)
+     - Cada erro (_reduceDifficulty)
+     - Cada nova frase (_nextPhrase)
+     - Cada mudança de slider
+     - Ao entrar no modo (_loadState)
+
+   35.6 INTEGRAÇÃO COM GERMAN MODE CORE
+   ----------------------------------------------------------------------------
+   Adições ao GermanModeCore:
+     1. MODE_DEFS.sentenceBuilder: definição do modo
+     2. _onModeActivated: hook para GermanSentenceBuilder.onModeEnter()
+     3. _renderModeSidebarContent: case 'sentenceBuilder'
+     4. _renderSentenceBuilderSidebar(): delega para GermanSentenceBuilder
+
+   O modo é ativado pelo botão 🧩 Montar Frases na sidebar.
+   A sidebar do modo mostra estatísticas em tempo real.
+
+================================================================================
+    36. BANCO DE FRASES — SB_PHRASES
+================================================================================
+
+   36.1 ESTRUTURA
+   ----------------------------------------------------------------------------
+   SB_PHRASES é um objeto indexado por contagem de palavras:
+
+   SB_PHRASES = {
+     2: [ {de, pt, deWords, ptWords, cat, tense, expl}, ... ],
+     3: [ ... ],
+     ...
+     15: [ ... ]
+   }
+
+   Cada entrada possui:
+     - de:          frase em alemão
+     - pt:          tradução em português
+     - deWords:     array de palavras em alemão (ordem correta)
+     - ptWords:     array de palavras em português (ordem correta)
+     - cat:         categoria/tema (Casa, Escola, Trabalho, etc.)
+     - tense:       tempo verbal (Präsens, Perfekt, Konjunktiv II, etc.)
+     - expl:        objeto com explicação completa (15 seções)
+
+   36.2 CATEGORIAS/TEMAS COBERTOS
+   ----------------------------------------------------------------------------
+   Casa, Escola, Trabalho, Restaurante, Compras, Viagem, Tecnologia,
+   Rotina, Clima, Lazer, Amigos, Família, Transporte, Saúde, Emergência,
+   Conversação cotidiana, Universidade, Hotel, Mercado
+
+   36.3 PROGRESSÃO GRAMATICAL
+   ----------------------------------------------------------------------------
+   Frases de 2 palavras:  Präsens simples (SV básico)
+   Frases de 3 palavras:  Präsens + modais simples
+   Frases de 4 palavras:  Akkusativ, verbos separáveis
+   Frases de 5 palavras:  Dativ, Perfekt
+   Frases de 6-7 palavras: Perfekt avançado, Konjunktiv II, orações subordinadas
+   Frases de 8+ palavras: estruturas complexas, múltiplos complementos
+
+   36.4 ANTI-REPETIÇÃO
+   ----------------------------------------------------------------------------
+   O sistema mantém um histórico (_sbState.history) com as últimas 20
+   frases utilizadas (identificadas pelo texto em alemão). Ao selecionar
+   nova frase, frases no histórico são filtradas. Se todas as frases do
+   grupo estiverem no histórico, o histórico é reutilizado (fallback).
+
+================================================================================
+    37. ALGORITMO DE PROGRESSÃO — STREAK E DIFICULDADE
+================================================================================
+
+   37.1 PROGRESSÃO DE DIFICULDADE
+   ----------------------------------------------------------------------------
+   Início: 2 palavras
+   Ao atingir streak necessária (padrão 5 acertos consecutivos):
+     → +1 palavra (até máximo de 15)
+   Streak é resetada a cada avanço de nível.
+
+   Após atingir 15 palavras:
+     → continua indefinidamente em frases de 15 palavras
+     → streak continua contando, mas não avança mais
+
+   37.2 REDUÇÃO DE DIFICULDADE
+   ----------------------------------------------------------------------------
+   Se o usuário errar 2 vezes consecutivas:
+     → -1 palavra (nunca abaixo de 2)
+     → erros consecutivos resetam para 0
+
+   37.3 CONFIGURAÇÃO DE STREAK
+   ----------------------------------------------------------------------------
+   Slider na interface (1-100, padrão 5):
+     - Controla quantos acertos consecutivos são necessários
+     - Permite progressão mais rápida (1-2) ou mais lenta (10+)
+     - Persistido em state.sentenceBuilderState.streakNeeded
+
+   37.4 INDICADORES
+   ----------------------------------------------------------------------------
+   Mostrados na barra de estatísticas:
+     - Palavras atuais: X (número de palavras na frase atual)
+     - Streak: Y/Z (acertos atuais / necessários para avançar)
+     - Erros consecutivos: N
+
+================================================================================
+    38. SISTEMA DE EXPLICAÇÕES — EXPLICAÇÕES POR FRASE
+================================================================================
+
+   38.1 ESTRUTURA DA EXPLICAÇÃO
+   ----------------------------------------------------------------------------
+   Cada frase possui um objeto `expl` com 15 seções de análise:
+
+   1.  literal:       Tradução literal palavra por palavra
+   2.  natural:       Tradução natural idiomática
+   3.  words:         Array de {w (palavra), g (classe gramatical), f (função)}
+   4.  order:         Explicação da ordem das palavras
+   5.  conj:          Conjugação completa do verbo
+   6.  verb:          Infinitivo original e tipo do verbo
+   7.  tenseLab:      Tempo verbal com explicação
+   8.  cases:         Casos gramaticais utilizados
+   9.  decl:          Declinações de artigos/substantivos
+   10. reason:        Motivo da construção frasal
+   11. nuance:        Nuances de uso e significado
+   12. pron:          Pronúncia relevante (IPA aproximado)
+   13. commonErr:     Erros comuns de brasileiros
+   14. extra:         Observações extras e curiosidades
+   (15. implícito:    Tudo integrado ao fluxo de resposta)
+
+   38.2 RENDERIZAÇÃO
+   ----------------------------------------------------------------------------
+   As explicações são renderizadas em seções coloridas:
+     - translation:    roxo claro (borda primária) — traduções
+     - grammar:        ciano claro (borda accent) — classes gramaticais
+     - word-order:     verde claro (borda success) — ordem das palavras
+     - cases:          amarelo claro (borda warn) — casos e declinações
+     - common-errors:  vermelho claro (borda error) — erros comuns
+     - pronunciation:  lilás claro (borda #8b5cf6) — pronúncia
+     - conjugation:    ciano (borda accent2) — conjugação e tempos
+
+   Cada seção possui um label em maiúsculas com ícone para rápida
+   identificação visual.
+
+   38.3 EXIBIÇÃO
+   ----------------------------------------------------------------------------
+   A explicação é mostrada:
+     - Ao acertar (ícone ✅ "Correto!")
+     - Ao errar (ícone ❌ "Incorreto — veja a resposta")
+   Sempre. Nunca é pulada. O botão "Continuar" aparece junto.
+
+================================================================================
+    39. INTEGRAÇÃO COM GPS — MÉTRICAS DE SINTAXE
+================================================================================
+
+   39.1 TRACKING DE EVOLUÇÃO
+   ----------------------------------------------------------------------------
+   Cada verificação chama trackEvo() com:
+     - Exercício simulado tipo 'o' (ordenação)
+     - chapterId: 'sentBuilder' (identificador do modo)
+     - correct: boolean (acerto/erro)
+
+   O GPS processa e atualiza métricas de:
+     - Ordem Frasal (wordOrder)
+     - Construção de Frases (sentenceStructure)
+     - Tempos Verbais (tenses)
+     - Casos (cases)
+     - Sintaxe (sentenceStructure)
+
+   Estas métricas alimentam o dashboard de evolução (renderEvoDashboard).
+
+================================================================================
+    40. RESPONSIVIDADE — DRAG-DROP MOBILE/DESKTOP
+================================================================================
+
+   40.1 DESKTOP
+   ----------------------------------------------------------------------------
+   - Drag and drop com mouse (HTML5 Drag and Drop API)
+   - Eventos: dragstart, dragend, dragover, dragleave, drop
+   - Elemento arrastado recebe classe .dragging (opacidade reduzida)
+   - Zonas de drop destacam com .drag-over
+
+   40.2 MOBILE/TABLET
+   ----------------------------------------------------------------------------
+   - Touch events: touchstart, touchmove, touchend
+   - Clone visual (fantasma) segue o dedo durante o arrasto
+   - Ao soltar, detecta elemento sob o ponto de toque (elementFromPoint)
+   - Determina se caiu na área de resposta ou banco de palavras
+   - Fallback: clique para mover blocos entre áreas (funciona em qualquer dispositivo)
+
+   40.3 CSS RESPONSIVO
+   ----------------------------------------------------------------------------
+   Desktop: container max-width 800px, blocos confortáveis
+   Tablet (<768px): padding reduzido, estatísticas compactas
+   Mobile (<480px): padding mínimo, blocos menores, fonte reduzida
+
+================================================================================
+    41. ESTRUTURA DOS DADOS — SENTENCE BUILDER STATE
+================================================================================
+
+   41.1 ESTADO INTERNO (_sbState)
+   ----------------------------------------------------------------------------
+   {
+     wordCount: 2,           // Dificuldade atual (2-15 palavras)
+     streak: 0,              // Acertos consecutivos atuais
+     errorsInARow: 0,        // Erros consecutivos atuais
+     streakNeeded: 5,        // Streak necessária para avançar
+     history: [],            // Últimas 20 frases (anti-repetição)
+     totalCorrect: 0,        // Total de acertos no modo
+     totalAttempts: 0,       // Total de tentativas
+     lastDirection: 'ptToDe' // Direção atual da tradução
+   }
+
+   41.2 ESTRUTURA DE FRASE (SB_PHRASES entry)
+   ----------------------------------------------------------------------------
+   {
+     de: "Ich wohne",
+     pt: "Eu moro",
+     deWords: ["Ich", "wohne"],
+     ptWords: ["Eu", "moro"],
+     cat: "Casa",
+     tense: "Präsens",
+     expl: {
+       literal: "...",
+       natural: "...",
+       words: [{w:"Ich", g:"Pronome...", f:"Sujeito"}, ...],
+       order: "...",
+       conj: "...",
+       verb: "...",
+       tenseLab: "...",
+       cases: "...",
+       decl: "...",
+       reason: "...",
+       nuance: "...",
+       pron: "...",
+       commonErr: "...",
+       extra: "..."
+     }
+   }
+
+   41.3 FLUXO PEDAGÓGICO
+   ----------------------------------------------------------------------------
+   1. Usuário inicia com 2 palavras — frases simples no presente
+   2. A cada 5 acertos consecutivos, +1 palavra
+   3. Progressão gramatical: presente → modais → acusativo → dativo →
+      separáveis → Perfekt → Konjunktiv II → subordinadas → avançado
+   4. Erros consecutivos reduzem a dificuldade
+   5. Máximo de 15 palavras — continua infinitamente
+   6. Alternância automática PT→DE e DE→PT a cada acerto
+   7. Explicações completas em cada resposta (acerto ou erro)
+   8. Anti-repetição: últimas 20 frases não se repetem
+   9. Integração com GPS: métricas alimentam o dashboard de evolução
+   10. Persistência completa: estado salvo automaticamente
+
+   41.4 INTEGRAÇÃO COM SAVE/IMPORT/EXPORT/RESET
+   ----------------------------------------------------------------------------
+   - state.sentenceBuilderState incluso no saveState() central
+   - Export contém o estado completo do modo
+   - Import migra estado ausente automaticamente (campo default)
+   - Reset zera para valores padrão (2 palavras, streak 0, etc.)
+   - loadState() restaura ao carregar a página
+
+   41.5 SEGURANÇA E ISOLAMENTO
+   ----------------------------------------------------------------------------
+   - IIFE (GermanSentenceBuilderCore): sem variáveis globais
+   - window.GermanSentenceBuilder: API pública controlada
+   - Sem redeclaração de const/let existentes
+   - Sem listeners duplicados (botões usam cloneNode + replaceChild)
+   - Sem conflitos com Music, Evolution, Exercises, Vocabulary,
+     Conversation, Chapters
+   - Sem quebra de save, import/export, i18n, sidebar, dark mode
+   - Drag and drop usa HTML5 API + Touch Events sem bibliotecas externas
      4. Cards, detail view, sidebar são gerados automaticamente
 
    Para adicionar uma nova sub-view (ex: exercícios musicais):

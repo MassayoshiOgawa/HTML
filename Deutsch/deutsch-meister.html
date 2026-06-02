@@ -744,8 +744,8 @@ i{font-style:normal}
 .mode-hub-card p{font-size:.75rem;color:var(--text3);margin:0}
 /* Mode-aware sidebar sections */
 #sidebar-mode-content{flex:1;display:flex;flex-direction:column;overflow-y:auto}
-#sidebar-chapters-content,#sidebar-music-content,#sidebar-vocabulary-content,#sidebar-exercises-content,#sidebar-evolution-content,#sidebar-review-content,#sidebar-sentencebuilder-content{display:none;flex-direction:column;flex:1}
-#sidebar-chapters-content.active,#sidebar-music-content.active,#sidebar-vocabulary-content.active,#sidebar-exercises-content.active,#sidebar-evolution-content.active,#sidebar-review-content.active,#sidebar-sentencebuilder-content.active{display:flex}
+#sidebar-chapters-content,#sidebar-music-content,#sidebar-vocabulary-content,#sidebar-exercises-content,#sidebar-evolution-content,#sidebar-review-content,#sidebar-sb-content{display:none;flex-direction:column;flex:1}
+#sidebar-chapters-content.active,#sidebar-music-content.active,#sidebar-vocabulary-content.active,#sidebar-exercises-content.active,#sidebar-evolution-content.active,#sidebar-review-content.active,#sidebar-sb-content.active{display:flex}
 /* Sidebar music list */
 .sidebar-music-item{display:flex;align-items:center;gap:8px;padding:8px 16px;color:var(--text2);font-size:.8rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
 .sidebar-music-item:hover{background:var(--primary3);color:var(--primary)}
@@ -859,65 +859,94 @@ i{font-style:normal}
   .music-back-section{padding:18px 0 32px}
   .music-back-btn{padding:10px 18px;font-size:.78rem}
 }
-.sb-container{padding:60px 24px 80px;max-width:750px;margin:0 auto}
-.sb-header{text-align:center;margin-bottom:28px}
+/* ===== MODO MONTAR FRASES — SENTENCE BUILDER ===== */
+.sb-container{max-width:800px;margin:0 auto;padding:48px 24px 60px}
+.sb-header{text-align:center;margin-bottom:32px}
 .sb-header-icon{font-size:3rem;margin-bottom:8px}
-.sb-header h2{font-size:1.7rem;font-weight:800;margin-bottom:4px}
-.sb-header p{color:var(--text2);font-size:.92rem;max-width:480px;margin:0 auto}
-.sb-stats-bar{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px}
-.sb-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 16px;font-size:.8rem;color:var(--text2);display:flex;align-items:center;gap:6px;font-weight:500}
-.sb-stat strong{color:var(--primary)}
-.sb-stat.streak-ok strong{color:var(--success)}
-.sb-stat.streak-warn strong{color:var(--warn)}
-.sb-stat.erros strong{color:var(--error)}
-.sb-diff-row{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
-.sb-diff-row label{font-size:.78rem;color:var(--text3);font-weight:600;white-space:nowrap}
-.sb-diff-row input[type=range]{width:120px;accent-color:var(--primary)}
-.sb-diff-row span{font-size:.8rem;color:var(--text2);font-weight:600;min-width:24px;text-align:center}
-.sb-toggle-btn{padding:4px 14px;border-radius:8px;border:1.5px solid var(--primary);background:var(--primary3);color:var(--primary);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font)}
-.sb-toggle-btn:hover{background:var(--primary);color:#fff}
-.sb-toggle-btn.flipped{background:rgba(0,206,201,0.12);border-color:var(--accent);color:var(--accent2)}
-.sb-toggle-btn.flipped:hover{background:var(--accent);color:#fff}
-.sb-progress-bar{height:6px;background:var(--border);border-radius:6px;margin:12px 0 20px;overflow:hidden}
-.sb-progress-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:6px;transition:width .4s}
-.sb-direction-badge{display:inline-block;padding:3px 12px;border-radius:14px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px}
-.sb-direction-badge.pt-de{background:var(--primary3);color:var(--primary)}
-.sb-direction-badge.de-pt{background:rgba(0,206,201,0.12);color:var(--accent2)}
-.sb-prompt-text{text-align:center;font-size:1.15rem;font-weight:600;color:var(--text);margin-bottom:14px;min-height:28px}
-.sb-target-area{background:var(--bg2);border:2px dashed var(--border);border-radius:var(--radius);min-height:60px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-bottom:20px;transition:border-color .2s}
-.sb-target-area.drag-over{border-color:var(--primary);background:var(--primary3)}
-.sb-target-area .sb-slot{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:.9rem;font-weight:500;color:var(--text)}
-.sb-target-area .sb-slot .sb-remove{font-size:.75rem;color:var(--text3);cursor:pointer;margin-left:4px;opacity:.6;transition:opacity .15s}
-.sb-target-area .sb-slot .sb-remove:hover{opacity:1;color:var(--error)}
-.sb-blocks-area{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:20px;min-height:44px}
-.sb-block{display:inline-flex;align-items:center;padding:8px 18px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;font-weight:600;color:var(--text);cursor:grab;transition:all .2s;user-select:none;touch-action:manipulation}
+.sb-header h2{font-size:1.7rem;font-weight:800;color:var(--primary);margin-bottom:4px}
+.sb-header p{color:var(--text2);font-size:.92rem;max-width:500px;margin:0 auto}
+.sb-stats-bar{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+.sb-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 20px;text-align:center;min-width:100px;transition:all var(--transition)}
+.sb-stat:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(108,92,231,0.06)}
+.sb-stat .sb-stat-val{font-size:1.3rem;font-weight:800;color:var(--primary)}
+.sb-stat .sb-stat-label{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+.sb-stat.streak .sb-stat-val{color:var(--accent2)}
+.sb-stat.errors .sb-stat-val{color:var(--error)}
+.sb-settings-row{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:28px;font-size:.82rem;color:var(--text2)}
+.sb-settings-row input[type="range"]{width:120px;accent-color:var(--primary)}
+.sb-diff-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;background:var(--primary3);color:var(--primary)}
+.sb-phrase-card{background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius);padding:28px 24px;margin-bottom:20px;transition:all var(--transition);text-align:center;position:relative}
+.sb-phrase-card:hover{border-color:var(--primary);box-shadow:var(--shadow)}
+.sb-phrase-label{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:8px;font-weight:600}
+.sb-phrase-text{font-size:1.5rem;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:4px;letter-spacing:-0.3px}
+.sb-phrase-hint{font-size:.8rem;color:var(--text3);font-style:italic}
+.sb-blocks-area{min-height:54px;padding:14px;background:var(--bg3);border:2px dashed var(--border);border-radius:var(--radius-sm);display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px;transition:all .2s;justify-content:center}
+.sb-blocks-area.drag-over{border-color:var(--primary);background:var(--primary3)}
+.sb-blocks-area.correct-flash{border-color:var(--success);background:rgba(0,184,148,0.06)}
+.sb-blocks-area.wrong-flash{border-color:var(--error);background:rgba(225,112,85,0.06)}
+.sb-block{display:inline-flex;align-items:center;padding:8px 16px;border-radius:10px;background:var(--primary);color:#fff;font-weight:700;font-size:.88rem;cursor:grab;user-select:none;transition:all .2s;border:2px solid transparent;white-space:nowrap;font-family:var(--font)}
 .sb-block:active{cursor:grabbing}
-.sb-block:hover{border-color:var(--primary);background:var(--primary3);color:var(--primary);transform:translateY(-2px);box-shadow:0 4px 12px rgba(108,92,231,0.12)}
-.sb-block.used{opacity:.3;pointer-events:none;border-style:dashed}
+.sb-block:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(108,92,231,0.2)}
 .sb-block.dragging{opacity:.5;transform:scale(.95)}
-.sb-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
-.sb-verify-btn{padding:10px 36px;border-radius:10px;border:none;background:var(--primary);color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font)}
-.sb-verify-btn:hover{background:var(--primary2);transform:translateY(-2px);box-shadow:0 6px 18px rgba(108,92,231,0.25)}
-.sb-verify-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
-.sb-reset-btn{padding:10px 20px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text2);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font)}
-.sb-reset-btn:hover{border-color:var(--text3);color:var(--text)}
-.sb-feedback{text-align:center;padding:12px 20px;border-radius:var(--radius-sm);margin-bottom:16px;font-weight:700;font-size:.95rem;display:none}
-.sb-feedback.correct{display:block;background:rgba(0,184,148,0.12);color:var(--success);border:1px solid rgba(0,184,148,0.3)}
-.sb-feedback.wrong{display:block;background:rgba(225,112,85,0.1);color:var(--error);border:1px solid rgba(225,112,85,0.25)}
-.sb-explain-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:0;margin-bottom:20px;overflow:hidden;display:none}
-.sb-explain-panel.open{display:block}
-.sb-explain-header{background:var(--primary3);padding:12px 20px;font-weight:700;font-size:.9rem;color:var(--primary);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-.sb-explain-body{max-height:500px;overflow-y:auto;font-size:.82rem;line-height:1.7;color:var(--text);padding:16px 20px}
-.sb-explain-body h5{font-size:.85rem;margin:12px 0 6px;color:var(--primary)}
-.sb-explain-body .sb-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.7rem;font-weight:600;margin:2px 3px}
-.sb-explain-body .sb-tag.gram{background:rgba(108,92,231,0.1);color:var(--primary)}
-.sb-explain-body .sb-tag.case{background:rgba(0,206,201,0.1);color:var(--accent2)}
-.sb-explain-body .sb-tag.warn{background:rgba(253,203,110,0.15);color:#b8860b}
-.sb-continue-btn{display:none;margin:0 auto;padding:10px 36px;border-radius:10px;border:none;background:var(--success);color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font)}
-.sb-continue-btn.visible{display:block}
-.sb-continue-btn:hover{opacity:.9;transform:translateY(-2px)}
-@media(max-width:768px){.sb-container{padding:40px 16px 60px}.sb-header h2{font-size:1.4rem}.sb-block{padding:7px 14px;font-size:.82rem}.sb-target-area{min-height:50px;padding:10px 12px}.sb-stats-bar{gap:8px}.sb-stat{padding:6px 12px;font-size:.74rem}.sb-explain-body{max-height:380px;font-size:.78rem}}
-@media(max-width:480px){.sb-container{padding:30px 10px 50px}.sb-block{padding:6px 10px;font-size:.76rem}.sb-target-area{padding:8px 10px;gap:4px}}
+.sb-word-bank{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px;min-height:44px;padding:8px;align-items:center}
+.sb-word-bank .sb-block{background:var(--bg);color:var(--text);border:2px solid var(--border);cursor:pointer}
+.sb-word-bank .sb-block:hover{background:var(--primary3);border-color:var(--primary);color:var(--primary)}
+.sb-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.sb-explanation{display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:0;margin-bottom:20px;overflow:hidden;animation:sbExplainIn .35s ease}
+.sb-explanation.show{display:block}
+@keyframes sbExplainIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sb-explanation-header{padding:16px 20px;border-bottom:1px solid var(--border);background:var(--primary3);display:flex;align-items:center;gap:8px}
+.sb-explanation-header .sb-ex-icon{font-size:1.2rem}
+.sb-explanation-header .sb-ex-title{font-weight:700;color:var(--primary);font-size:.95rem}
+.sb-explanation-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.sb-ex-section{padding:12px 16px;border-radius:var(--radius-sm);font-size:.82rem;line-height:1.55;border-left:3px solid}
+.sb-ex-section.translation{background:rgba(108,92,231,0.04);border-color:var(--primary)}
+.sb-ex-section.grammar{background:rgba(0,206,201,0.04);border-color:var(--accent)}
+.sb-ex-section.word-order{background:rgba(0,184,148,0.04);border-color:var(--success)}
+.sb-ex-section.cases{background:rgba(253,203,110,0.05);border-color:var(--warn)}
+.sb-ex-section.common-errors{background:rgba(225,112,85,0.04);border-color:var(--error)}
+.sb-ex-section.pronunciation{background:rgba(139,92,246,0.04);border-color:#8b5cf6}
+.sb-ex-section.conjugation{background:rgba(0,206,201,0.06);border-color:var(--accent2)}
+.sb-ex-section .sb-ex-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;color:var(--text2)}
+.sb-ex-section strong{color:var(--text)}
+.sb-word-breakdown{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.sb-word-tag{display:inline-flex;flex-direction:column;align-items:center;padding:6px 12px;border-radius:8px;font-size:.75rem;font-weight:600}
+.sb-word-tag .wt-word{font-size:.82rem;color:var(--text)}
+.sb-word-tag .wt-grammar{font-size:.65rem;color:var(--text3);margin-top:1px}
+.sb-word-tag.subj{background:rgba(108,92,231,0.1);border:1px solid rgba(108,92,231,0.2)}
+.sb-word-tag.verb{background:rgba(0,206,201,0.1);border:1px solid rgba(0,206,201,0.2)}
+.sb-word-tag.obj{background:rgba(0,184,148,0.1);border:1px solid rgba(0,184,148,0.2)}
+.sb-word-tag.adv{background:rgba(253,203,110,0.12);border:1px solid rgba(253,203,110,0.2)}
+.sb-word-tag.prep{background:rgba(108,92,231,0.06);border:1px solid rgba(108,92,231,0.15)}
+.sb-word-tag.neg{background:rgba(225,112,85,0.08);border:1px solid rgba(225,112,85,0.15)}
+.sb-word-tag.conj{background:rgba(108,92,231,0.06);border:1px solid rgba(108,92,231,0.12)}
+.sb-empty-hint{color:var(--text3);font-size:.85rem;font-style:italic}
+.sb-progress-bar{width:100%;height:6px;background:var(--border);border-radius:6px;overflow:hidden;margin:8px 0}
+.sb-progress-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:6px;transition:width .5s}
+.sb-streak-bar{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--text2)}
+.sb-streak-bar .sb-streak-dots{display:flex;gap:3px}
+.sb-streak-dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:all .3s}
+.sb-streak-dot.filled{background:var(--accent2);box-shadow:0 0 6px rgba(0,206,201,0.3)}
+/* Drag ghost */
+.sb-drag-ghost{position:fixed;pointer-events:none;z-index:9999;opacity:.85;transform:translate(-50%,-50%);padding:8px 16px;background:var(--primary);color:#fff;border-radius:10px;font-weight:700;font-size:.88rem;box-shadow:0 8px 24px rgba(108,92,231,0.3)}
+@media(max-width:768px){
+  .sb-container{padding:32px 16px 48px}
+  .sb-header h2{font-size:1.4rem}
+  .sb-phrase-text{font-size:1.2rem}
+  .sb-stats-bar{gap:10px}
+  .sb-stat{padding:10px 14px;min-width:80px}
+  .sb-stat .sb-stat-val{font-size:1.1rem}
+  .sb-block{padding:7px 12px;font-size:.82rem}
+  .sb-ex-section{font-size:.78rem;padding:10px 14px}
+}
+@media(max-width:480px){
+  .sb-container{padding:24px 10px 40px}
+  .sb-stats-bar{gap:6px}
+  .sb-stat{padding:8px 10px;min-width:70px}
+  .sb-stat .sb-stat-val{font-size:1rem}
+  .sb-stat .sb-stat-label{font-size:.62rem}
+  .sb-ex-section{font-size:.75rem}
+}
 </style>
 </head>
 <body>
@@ -948,8 +977,8 @@ i{font-style:normal}
 <button class="mode-btn" data-mode="exercises"><span class="mode-icon">🧠</span> Exercícios</button>
 <button class="mode-btn" data-mode="vocabulary"><span class="mode-icon">📖</span> Vocabulário</button>
 <button class="mode-btn" data-mode="evolution"><span class="mode-icon">🧬</span> Evolução</button>
-  <button class="mode-btn" data-mode="conversation"><span class="mode-icon">💬</span> Conversação</button>
-  <button class="mode-btn" data-mode="sentenceBuilder"><span class="mode-icon">🧩</span> Montar Frases</button>
+<button class="mode-btn" data-mode="conversation"><span class="mode-icon">💬</span> Conversação</button>
+<button class="mode-btn" data-mode="sentenceBuilder"><span class="mode-icon">🧩</span> Montar Frases</button>
 </div>
 <div id="sidebar-mode-content">
 <div id="sidebar-chapters-content" class="active">
@@ -976,9 +1005,9 @@ i{font-style:normal}
 <div id="sidebar-section-title">🔥 Revisão</div>
 <div id="sidebar-review-list"></div>
 </div>
-<div id="sidebar-sentencebuilder-content">
+<div id="sidebar-sb-content">
 <div id="sidebar-section-title">🧩 Montar Frases</div>
-<div id="sidebar-sentencebuilder-list"></div>
+<div id="sidebar-sb-list"></div>
 </div>
 </div>
 </aside>
@@ -1321,50 +1350,46 @@ i{font-style:normal}
 
 <!-- ===== MODO: MONTAR FRASES ===== -->
 <div id="mode-sentenceBuilder" class="mode-view">
-<div id="sb-mode" class="sb-container">
-  <div class="sb-header">
-    <div class="sb-header-icon">🧩</div>
-    <h2>Montar Frases</h2>
-    <p>Monte frases em alemão na ordem correta — aprenda como o alemão é construído</p>
-  </div>
-  <div class="sb-stats-bar" id="sb-stats">
-    <div class="sb-stat" id="sb-words-stat"><span>📝 Palavras:</span> <strong id="sb-word-count">2</strong></div>
-    <div class="sb-stat streak-ok" id="sb-streak-stat"><span>🔥 Streak:</span> <strong id="sb-streak">0/5</strong></div>
-    <div class="sb-stat erros" id="sb-erros-stat"><span>❌ Erros consecutivos:</span> <strong id="sb-consec-errors">0</strong></div>
-  </div>
-  <div class="sb-diff-row" style="margin-bottom:20px">
-    <label>Streak para subir:</label>
-    <input type="range" id="sb-streak-needed" min="1" max="100" value="5" oninput="document.getElementById('sb-streak-needed-val').textContent=this.value;if(typeof GermanSentenceBuilderCore!=='undefined')GermanSentenceBuilderCore._onStreakNeededChange(this.value)">
-    <span id="sb-streak-needed-val">5</span>
-  </div>
-  <div class="sb-diff-row" style="margin-bottom:10px">
-    <label>Direção:</label>
-    <button class="sb-toggle-btn" id="sb-direction-toggle" onclick="if(typeof GermanSentenceBuilderCore!=='undefined')GermanSentenceBuilderCore._toggleDirection()">PT → DE</button>
-  </div>
-  <div class="sb-diff-row" style="margin-bottom:20px">
-    <label>Modo rápido:</label>
-    <label class="toggle" style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.78rem">
-      <input type="checkbox" id="sb-fastmode-toggle" onchange="if(typeof GermanSentenceBuilderCore!=='undefined')GermanSentenceBuilderCore._toggleFastMode(this.checked)">
-      <span class="slider"></span>
-      <span style="font-size:.72rem;color:var(--text3)">Pular explicações ao acertar</span>
-    </label>
-  </div>
-  <div class="sb-progress-bar"><span id="sb-session-bar" style="width:0%"></span></div>
-  <div class="sb-direction-badge pt-de" id="sb-direction-badge">PT → DE</div>
-  <div id="sb-prompt-text" class="sb-prompt-text"></div>
-  <div class="sb-feedback" id="sb-feedback"></div>
-  <div id="sb-target" class="sb-target-area"></div>
-  <div id="sb-blocks" class="sb-blocks-area"></div>
-  <div class="sb-actions">
-    <button class="sb-verify-btn" id="sb-verify-btn" disabled>✅ Verificar</button>
-    <button class="sb-reset-btn" id="sb-reset-btn">🔄 Refazer</button>
-    <button class="sb-reset-btn" id="sb-resetgame-btn" style="border-color:var(--warn);color:#b8860b">🔁 Reiniciar Jogo</button>
-  </div>
-  <div class="sb-explain-panel" id="sb-explain-panel">
-    <div class="sb-explain-header" id="sb-explain-header">📖 Explicação <span>▼</span></div>
-    <div class="sb-explain-body" id="sb-explain-body"></div>
-  </div>
-  <button class="sb-continue-btn" id="sb-continue-btn">▶ Continuar</button>
+<div class="sb-container" id="sb-root">
+<div class="sb-header">
+<div class="sb-header-icon">🧩</div>
+<h2>Montar Frases</h2>
+<p>Construa frases em alemão bloco por bloco — domine a estrutura, ordem e gramática.</p>
+</div>
+<div class="sb-stats-bar" id="sb-stats-bar">
+<div class="sb-stat"><div class="sb-stat-val" id="sb-word-count">2</div><div class="sb-stat-label">Palavras</div></div>
+<div class="sb-stat streak"><div class="sb-stat-val" id="sb-streak-val">0/5</div><div class="sb-stat-label">Streak</div></div>
+<div class="sb-stat errors"><div class="sb-stat-val" id="sb-errors-val">0</div><div class="sb-stat-label">Erros</div></div>
+</div>
+<div class="sb-settings-row">
+<span>Streak para avançar:</span>
+<input type="range" id="sb-streak-needed" min="1" max="100" value="5" step="1">
+<span id="sb-streak-needed-val">5</span>
+<span class="sb-diff-badge" id="sb-diff-badge">⚡ 2 palavras</span>
+</div>
+<div class="sb-phrase-card" id="sb-phrase-card">
+<div class="sb-phrase-label" id="sb-phrase-label">Traduza para o Alemão</div>
+<div class="sb-phrase-text" id="sb-phrase-text">—</div>
+<div class="sb-phrase-hint" id="sb-phrase-hint"></div>
+</div>
+<div class="sb-blocks-area" id="sb-answer-area">
+<span class="sb-empty-hint" id="sb-empty-hint">Arraste os blocos para cá ou clique neles</span>
+</div>
+<div class="sb-word-bank" id="sb-word-bank"></div>
+<div class="sb-actions">
+<button class="btn btn-primary" id="sb-verify-btn" disabled>✅ Verificar</button>
+<button class="btn btn-outline btn-sm" id="sb-reset-btn">🔄 Resetar</button>
+</div>
+<div class="sb-explanation" id="sb-explanation">
+<div class="sb-explanation-header">
+<span class="sb-ex-icon" id="sb-ex-icon">📖</span>
+<span class="sb-ex-title" id="sb-ex-title">Explicação</span>
+</div>
+<div class="sb-explanation-body" id="sb-explanation-body"></div>
+</div>
+<div class="sb-actions">
+<button class="btn btn-success" id="sb-continue-btn" style="display:none">▶️ Continuar</button>
+</div>
 </div>
 </div><!-- /#mode-sentenceBuilder -->
 
@@ -2722,7 +2747,7 @@ function applyLang(){
   renderChapters();renderTOC();renderSidebar();renderGlossCats();renderGlossary();
   if(typeof GermanModeCore !== 'undefined') GermanModeCore.renderModeSidebar();
 }
-let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'},sentenceBuilderState:{wordCount:2,streak:0,streakNeeded:5,consecErrors:0,recentHistory:[],totalCorrect:0,totalAttempts:0,fastMode:false}};
+let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'},sentenceBuilderState:{wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe'}};
 function loadState(){try{const r=localStorage.getItem('deutschmeister_state');if(r){const p=JSON.parse(r);state={...state,...p}}}catch(e){}}
 function saveState(){try{localStorage.setItem('deutschmeister_state',JSON.stringify(state))}catch(e){}}
 function $(s,c){return(c||document).querySelector(s)}
@@ -6604,7 +6629,7 @@ const GermanModeCore = (() => {
     engineering:  { id:'engineering',  icon:'🏗️', name:'Engenharia',    viewId:'mode-engineering',  sidebarId:'sidebar-chapters-content',    sidebarTitle:'Engenharia' },
     listening:    { id:'listening',    icon:'🎧', name:'Escuta',        viewId:'mode-listening',    sidebarId:'sidebar-chapters-content',    sidebarTitle:'Escuta' },
     conversation: { id:'conversation', icon:'💬', name:'Conversação',   viewId:'mode-conversation', sidebarId:'sidebar-chapters-content',    sidebarTitle:'Conversação' },
-    sentenceBuilder: { id:'sentenceBuilder', icon:'🧩', name:'Montar Frases', viewId:'mode-sentenceBuilder', sidebarId:'sidebar-sentencebuilder-content', sidebarTitle:'Montar Frases' }
+    sentenceBuilder: { id:'sentenceBuilder', icon:'🧩', name:'Montar Frases', viewId:'mode-sentenceBuilder', sidebarId:'sidebar-sb-content', sidebarTitle:'Montar Frases' }
   };
 
   let currentMode = 'chapters';
@@ -6706,8 +6731,8 @@ const GermanModeCore = (() => {
       }
     }
     if(mode === 'sentenceBuilder'){
-      if(typeof GermanSentenceBuilderCore !== 'undefined' && typeof GermanSentenceBuilderCore.onModeEnter === 'function'){
-        GermanSentenceBuilderCore.onModeEnter();
+      if(typeof GermanSentenceBuilder !== 'undefined' && typeof GermanSentenceBuilder.onModeEnter === 'function'){
+        GermanSentenceBuilder.onModeEnter();
       }
     }
     if(mode !== 'chapters'){
@@ -6831,12 +6856,8 @@ const GermanModeCore = (() => {
   }
 
   function _renderSentenceBuilderSidebar(){
-    var list = document.getElementById('sidebar-sentencebuilder-list');
-    if(!list) return;
-    if(typeof GermanSentenceBuilderCore !== 'undefined' && typeof GermanSentenceBuilderCore._renderSidebarContent === 'function'){
-      GermanSentenceBuilderCore._renderSidebarContent();
-    } else {
-      list.innerHTML = '<div class="sidebar-link-item"><span class="link-icon">📝</span><span>Modo Montar Frases</span></div>';
+    if(typeof GermanSentenceBuilder !== 'undefined' && typeof GermanSentenceBuilder._renderSidebar === 'function'){
+      GermanSentenceBuilder._renderSidebar();
     }
   }
 
@@ -7250,76 +7271,774 @@ Object.assign(window.GermanMusicMode, {
   SONGS: GermanMusicCore.SONGS
 });
 
+// ===== GERMAN SENTENCE BUILDER — MODO MONTAR FRASES =====
+window.GermanSentenceBuilder = window.GermanSentenceBuilder || {};
+const GermanSentenceBuilderCore = (() => {
+  const SB_PHRASES = {};
+  
+  function _add(phrases){
+    phrases.forEach(p => {
+      const wc = p.de.split(' ').length;
+      if(!SB_PHRASES[wc]) SB_PHRASES[wc] = [];
+      SB_PHRASES[wc].push(p);
+    });
+  }
 
-// === DATABASE (PT+DE+EN, 25 key phrases) ===
-_reg(2,'Casa','Eu moro aqui.','Ich wohne hier.','I live here.',_xf(['Eu moro aqui.','I live here.','I live here.'],['Eu moro aqui.','I live here.','I live here.'],[['Ich','Pronome','Sujeito','','','','Nominativ','ich'],['wohne','Verbo','V2','wohne (ich)','wohnen','Prasens','','ich wohne'],['hier','AdvÃ©rbio','Local','','','','','invariÃ¡vel']],['Sâ†’Vâ†’Adv. SVO.','Sâ†’Vâ†’Adv. SVO.','Subjectâ†’Verbâ†’Adverb. SVO.'],['Wohnen regular.','Wohnen regular.','Wohnen is regular.'],['Hier=dort.','Hier=dort.','Hier=dort.'],['Ich=guttural. Wohne: W=v.','Ich=guttural. Wohne: W=v.','Ich=guttural. Wohne: W=v.'],['Erro: Ich hier wohne â€” V2!','Error: Ich hier wohne â€” V2!','Error: inverting word order! V2!'],['V2: verbo sempre pos 2.','V2: verb always pos 2.','V2: conjugated verb always position 2.']),'moradia');
-_reg(2,'Escola','Eu aprendo alemÃ£o.','Ich lerne Deutsch.','I learn German.',_xf(['Eu aprendo.','I learn.','I learn.'],['Eu aprendo alemÃ£o.','I learn German.','I learn German.'],[['Ich','Pronome','Sujeito','','','','Nominativ','ich'],['lerne','Verbo','V2','lerne (ich)','lernen','Prasens','','ich lerne'],['Deutsch','Subst','Obj akk','','','','Akkusativ','']],['Sâ†’Vâ†’Obj.','Sâ†’Vâ†’Obj.','Subjectâ†’Verbâ†’Object.'],['Lernen regular.','Lernen regular.','Lernen is regular.'],['Lernen=aprender.','Lernen=learn.','Lernen=learn.'],['Lerne: r uvular.','Lerne: uvular r.','Lerne: uvular r.'],['Erro: Ich lernen ou Ich Deutsch lerne.','Error: conjugation or order.','Error: conjugation or inverted order.'],['V2: posicao 2 sempre.','V2: position 2.','V2: always position 2.']),'educaÃ§Ã£o');
-_reg(2,'Rotina','Eu como pÃ£o.','Ich esse Brot.','I eat bread.',_xf(['Eu como pÃ£o.','I eat bread.','I eat bread.'],['Eu como pÃ£o.','I eat bread.','I eat bread.'],[['Ich','Pronome','Sujeito','','','','Nominativ','ich'],['esse','Verbo','V2','esse (ich)','essen','Prasens','','ich esse'],['Brot','Subst','Obj neutro','','','','Akkusativ','das Brot']],['Sâ†’Vâ†’Obj.','Sâ†’Vâ†’Obj.','Subjectâ†’Verbâ†’Object.'],['Essen forte: eâ†’i em du/er.','Essen strong: eâ†’i.','Essen strong: eâ†’i in du/er.'],['Acusativo: so masc muda.','Accusative: only masc.','Accusative: only masculine changes.'],['Esse: s=z.','Esse: voiced s.','Esse: voiced s.'],['Erro: Ich isst Brot â€” 3p para 1p.','Error: 3rd p for 1st.','Error: 3rd person for 1st.'],['Perfekt: gegessen.','Perfekt: gegessen.','Perfekt: gegessen.']),'alimentaÃ§Ã£o');
-_reg(2,'Rotina','Ele dorme bem.','Er schlÃ¤ft gut.','He sleeps well.',_xf(['Ele dorme bem.','He sleeps well.','He sleeps well.'],['Ele dorme bem.','He sleeps well.','He sleeps well.'],[['Er','Pronome','Sujeito','','','','Nominativ','er'],['schlÃ¤ft','Verbo','V2 Umlaut','schlÃ¤ft (er)','schlafen','Prasens','','er schlÃ¤ft'],['gut','AdvÃ©rbio','Modo','','','','','invariÃ¡vel']],['Sâ†’V(Umlaut)â†’Adv.','Sâ†’V(Umlaut)â†’Adv.','Sâ†’V(Umlaut)â†’Adv.'],['Schlafen aâ†’Ã¤.','Schlafen aâ†’Ã¤.','Schlafen: aâ†’Ã¤ in du/er.'],['aâ†’Ã¤: schlafen, fahren.','aâ†’Ã¤: schlafen, fahren.','aâ†’Ã¤ verbs: schlafen, fahren.'],['SchlÃ¤ft: sch=sh, Ã¤=Ã©.','SchlÃ¤ft: sch=sh, Ã¤=e.','SchlÃ¤ft: sch=sh, Ã¤=e.'],['Erro: Er schlaft â€” Umlaut!','Error: forget Umlaut!','Error: forgetting the Umlaut.'],['Perfekt: geschlafen.','Perfekt: geschlafen.','Perfekt: geschlafen.']),'cotidiano');
-_reg(2,'Casa','A casa Ã© grande.','Das Haus ist groÃŸ.','The house is big.',_xf(['A casa Ã© grande.','The house is big.','The house is big.'],['A casa Ã© grande.','The house is big.','The house is big.'],[['Das','Artigo','Neutro nom','','','','Nominativ','das'],['Haus','Subst','Sujeito','','','','Nominativ','das Haus'],['ist','Verbo','CÃ³pula','ist','sein','Prasens','','er ist'],['groÃŸ','Adj','Predicativo','','','','','invariÃ¡vel']],['Sâ†’Copâ†’Adj.','Sâ†’Copâ†’Adj.','Subjectâ†’Copulaâ†’Adj.'],['Adj predicativo=invariÃ¡vel.','Predicative adj=invariable.','Predicative adjs never decline.'],['ÃŸ=ss. Vogal longa=ÃŸ.','ÃŸ=ss. Long vowel=ÃŸ.','ÃŸ (Eszett)=ss sound.'],['GroÃŸ: o longo+ÃŸ.','GroÃŸ: long o+ÃŸ.','GroÃŸ: long o+ÃŸ.'],['Erro: Das Haus ist groÃŸe â€” NUNCA!','Error: NEVER decline!','Error: adding ending to predicative adj!'],['Predicativos com sein/werden/bleiben=invariÃ¡veis.','Predicatives never decline.','Predicatives never get endings.']),'moradia');
-_reg(2,'Clima','EstÃ¡ frio.','Es ist kalt.','It is cold.',_xf(['EstÃ¡ frio.','It is cold.','It is cold.'],['EstÃ¡ frio.','It is cold.','It is cold.'],[['Es','Pronome','Suj impessoal','','','','Nominativ','es'],['ist','Verbo','CÃ³pula','ist','sein','Prasens','','es ist'],['kalt','Adj','Predicativo','','','','','invariÃ¡vel']],['Suj impâ†’Copâ†’Adj.','Impersâ†’Copâ†’Adj.','Impersonalâ†’Copulaâ†’Adj.'],['AlemÃ£o EXIGE sujeito!','German REQUIRES subject!','German REQUIRES explicit subject!'],['Clima: es regnet, es schneit.','Weather: es regnet.','Weather: es regnet, es schneit.'],['Kalt: a curto.','Kalt: short a.','Kalt: short a.'],['Erro: Ist kalt â€” sem es!','Error: no es!','Error: missing es!'],['Es impessoal = marca do alemÃ£o.','Impersonal es = German hallmark.','Impersonal es is a German hallmark.']),'clima');
-_reg(2,'FamÃ­lia','Meu pai Ã© mÃ©dico.','Mein Vater ist Arzt.','My father is a doctor.',_xf(['Meu pai Ã© mÃ©dico.','My father is a doctor.','My father is a doctor.'],['Meu pai Ã© mÃ©dico.','My father is a doctor.','My father is a doctor.'],[['Mein','Poss','Masc nom','','','','Nominativ','mein'],['Vater','Subst','Sujeito','','','','Nominativ','der Vater'],['ist','Verbo','CÃ³pula','ist','sein','Prasens','','er ist'],['Arzt','Subst','Pred SEM artigo!','','','','','']],['Poss+Sâ†’Copâ†’Prof(sem artigo).','Poss+Sâ†’Copâ†’Prof(no art).','Poss+Sâ†’Copâ†’Profession(no article!).'],['CRÃTICO: ProfissÃµes apÃ³s sein NUNCA levam artigo!','CRITICAL: Never article after sein!','CRITICAL: Professions after sein NEVER take article!'],['Com adj: ein guter Arzt.','With adj: ein guter Arzt.','With adjective: ein guter Arzt.'],['Arzt: z=ts.','Arzt: z=ts.','Arzt: z=ts.'],['Erro: ein Arzt â€” NUNCA artigo!','Error: NEVER article!','Error: using article for profession!'],['Regra: profissÃµes, nacionalidades sem artigo.','Rule: no article.','Rule: professions, nationalities without article.']),'famÃ­lia');
-_reg(3,'Escola','O que vocÃª aprende?','Was lernst du?','What do you learn?',_xf(['O que aprendes?','What do you learn?','What do you learn?'],['O que vocÃª aprende?','What do you learn?','What do you learn?'],[['Was','Pron W','W-Frage','','','','Akkusativ','was'],['lernst','Verbo','V2','lernst (du)','lernen','Prasens','','du lernst'],['du','Pron','Sujeito','','','','Nominativ','du']],['Wâ†’Vâ†’S. W-Frage=V2.','Wâ†’Vâ†’S. W-question=V2.','Wâ†’Vâ†’S. W-questions use V2.'],['W-Fragen: palavra-W+verbo+sujeito.','W-Fragen: W-word+verb+subject.','W-questions: question word+verb+subject.'],['W: Wer, Was, Wo, Wie, Wann.','W: Wer, Was, Wo.','W-words: Wer, Was, Wo, Wie, Wann.'],['Was: W=v.','Was: W=v.','Was: W=v.'],['Erro: Was du lernst? â€” V2!','Error: verb after subject!','Error: placing verb after subject.'],['W-Fragen=V2. Sim/NÃ£o=V1.','W-questions=V2. Yes/No=V1.','W-questions=V2. Yes/no=V1.']),'educaÃ§Ã£o');
-_reg(3,'Trabalho','Eu trabalho aqui.','Ich arbeite hier.','I work here.',_xf(['Eu trabalho aqui.','I work here.','I work here.'],['Eu trabalho aqui.','I work here.','I work here.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['arbeite','Verbo','V2 (-t stem)','arbeite (ich)','arbeiten','Prasens','','ich arbeite'],['hier','Adv','Lugar','','','','','invariÃ¡vel']],['Sâ†’V(-t)â†’Adv.','Sâ†’V(-t)â†’Adv.','Subjectâ†’Verb(-t)â†’Adverb.'],['Arbeiten: -t radical â†’ -e- extra.','Arbeiten: -t stem â†’ extra -e-.','Arbeiten: stem in -t needs extra -e-.'],['-e- extra: -t,-d,-n,-m stems.','Extra -e-: -t,-d,-n,-m.','Extra -e- with -t,-d,-n,-m stems.'],['Arbeite: ei=ai.','Arbeite: ei=ai.','Arbeite: ei=ai.'],['Erro: Ich arbeit hier â€” -e!','Error: forget -e.','Error: forgetting -e ending.'],['Perfekt: gearbeitet.','Perfekt: gearbeitet.','Perfekt: gearbeitet (extra -et).']),'trabalho');
-_reg(4,'Casa','Eu moro em Berlim.','Ich wohne in Berlin.','I live in Berlin.',_xf(['Eu moro em Berlim.','I live in Berlin.','I live in Berlin.'],['Eu moro em Berlim.','I live in Berlin.','I live in Berlin.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['wohne','Verbo','V2','wohne (ich)','wohnen','Prasens','','ich wohne'],['in','Prep','Lugar(dat)','','','','Dativ','in'],['Berlin','Nome','Compl','','','','Dativ','Berlin']],['Sâ†’Vâ†’Prep+Compl. In+city=dat.','Sâ†’Vâ†’Prep+Compl. In+city=dat.','Subjectâ†’Verbâ†’Prep+Complement. In+city=dative.'],['In+city=dat(pos). Nach+city=dir.','In+city=dat. Nach+city=dir.','In+city=dative. Nach+city=direction.'],['In Berlin vs nach Berlin.','In Berlin vs nach Berlin.','In Berlin(position) vs nach Berlin(direction).'],['Berlin: stress -lin.','Berlin: stress -lin.','Berlin: stress on -lin.'],['Erro: im Berlin â€” NUNCA!','Error: im Berlin â€” NEVER!','Error: contracted article with city!'],['Cidades sem artigo: in diretamente.','Cities without article: in directly.','Cities: use in directly, no article.']),'moradia');
-_reg(5,'Restaurante','Eu gostaria de um cafÃ©, por favor.','Ich mÃ¶chte einen Kaffee, bitte.','I would like a coffee, please.',_xf(['Eu gostaria um cafÃ©, por favor.','I would like a coffee, please.','I would like a coffee, please.'],['Eu gostaria de um cafÃ©, por favor.','I would like a coffee, please.','I would like a coffee, please.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['mÃ¶chte','Verbo','Konj II','mÃ¶chte (ich)','mÃ¶gen','Konjunktiv II','','ich mÃ¶chte'],['einen','Art ind','AKK MASC!','','','','Akkusativ','einâ†’einen'],['Kaffee','Subst','Obj masc','','','','Akkusativ','der Kaffee'],['bitte','Part','Cortesia','','','','','invariÃ¡vel']],['Sâ†’KonjIIâ†’AKKmasc+Objâ†’Part.','Sâ†’KonjIIâ†’AKKmasc+Objâ†’Part.','Sâ†’KonjIIâ†’MascACC+Objâ†’Particle.'],['CRÃTICO: einen (einâ†’einen!). Kaffee=masc.','CRITICAL: einen! Kaffee=masc.','CRITICAL: einen (einâ†’einen!). Kaffee is masculine.'],['Bitte=por favor/de nada/como?','Bitte=please/pardon.','Bitte=please/youre welcome/pardon.'],['MÃ¶chte: Ã¶. Einen: ei=ai.','MÃ¶chte: Ã¶. Einen: ei=ai.','MÃ¶chte: Ã¶. Einen: ei=ai.'],['Erro CRÃTICO: ein Kaffee â€” einen!','CRITICAL: einâ†’einen!','CRITICAL error: ein Kaffee â€” must be einen!'],['Acusativo: sÃ³ masc muda: derâ†’den, einâ†’einen.','Only masc: derâ†’den, einâ†’einen.','Only masculine changes in accusative.']),'alimentaÃ§Ã£o');
-_reg(6,'Trabalho','Eu preciso trabalhar mais no escritÃ³rio hoje.','Ich muss heute lÃ¤nger im BÃ¼ro arbeiten.','I have to work longer at the office today.',_xf(['Eu preciso hoje mais no escritÃ³rio trabalhar.','I must work longer at the office today.','I must work longer at the office today.'],['Eu preciso trabalhar mais no escritÃ³rio hoje.','I have to work longer at the office today.','I have to work longer at the office today.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['muss','Modal','V2','muss (ich)','mÃ¼ssen','Prasens','','ich muss'],['heute','Adv','Tempo','','','','','invariÃ¡vel'],['lÃ¤nger','Adv comp','langâ†’lÃ¤nger','','','','','langâ†’lÃ¤nger'],['im','Prep','in+dem','','','','Dativ','im'],['BÃ¼ro','Subst','Lugar','','','','Dativ','das BÃ¼ro'],['arbeiten','V princ','INFINITIVO NO FINAL!','','arbeiten','Infinitiv','','infinitivo']],['Sâ†’Modal(V2)â†’Advâ†’Complâ†’Vprincipal NO FINAL!','Sâ†’Modal(V2)â†’Advâ†’Complâ†’MainV AT END!','Subjectâ†’Modal(V2)â†’Advâ†’Complâ†’Main verb AT END!'],['ESTRUTURA MODAL: Modal(pos2)+...+Verbo principal no FINAL.','MODAL: Modal(pos2)+...+MainV at END.','MODAL STRUCTURE: Modal(pos2)+...+Main verb at END.'],['Modais: kÃ¶nnen, mÃ¼ssen, dÃ¼rfen, sollen, wollen.','Modals: kÃ¶nnen, mÃ¼ssen, dÃ¼rfen.','Modals: kÃ¶nnen, mÃ¼ssen, dÃ¼rfen, sollen, wollen.'],['Muss: u curto.','Muss: short u.','Muss: short u.'],['Erro: Ich muss arbeite â€” conjugar Vprincipal!','Error: conjugating main verb!','Error: conjugating the main verb â€” it stays infinitive!'],['Modal(V2)+...+Infinitivo(final). Mesmo padrÃ£o.','Modal(V2)+...+Infinitive(end).','Modal(V2)+...+Infinitive(end). Same pattern.']),'trabalho');
-_reg(7,'ConversaÃ§Ã£o','Com licenÃ§a, pode me mostrar o caminho?','Entschuldigung, kÃ¶nnen Sie mir bitte den Weg zeigen?','Excuse me, can you show me the way?',_xf(['Desculpe, podem me mostrar o caminho?','Excuse me, can you show me the way?','Excuse me, can you show me the way?'],['Com licenÃ§a, pode me mostrar o caminho?','Excuse me, can you show me the way?','Excuse me, can you show me the way?'],[['Entschuldigung','Interj','Cortesia','','','','','invariÃ¡vel'],['kÃ¶nnen','Modal','V2','kÃ¶nnen (Sie)','kÃ¶nnen','Prasens','','Sie kÃ¶nnen'],['Sie','Pron','Suj formal','','','','Nominativ','Sie'],['mir','Pron','DATIVO!','','','','Dativ','ichâ†’mir'],['bitte','Part','Cortesia','','','','','invariÃ¡vel'],['den','Art','AKK masc','','','','Akkusativ','derâ†’den'],['Weg','Subst','Obj','','','','Akkusativ','der Weg'],['zeigen','V princ','INFINITIVO FINAL!','','zeigen','Infinitiv','','infinitivo']],['Interjâ†’Modalâ†’Sâ†’DATâ†’Partâ†’AKKâ†’V(FINAL).','Interjâ†’Modalâ†’Sâ†’DATâ†’Partâ†’AKKâ†’V(END).','Interjâ†’Modalâ†’Subjâ†’DATâ†’Particleâ†’ACCâ†’MainV(END).'],['FRASE OURO! Modal+dativo+acusativo. Zeigen=dat+akk.','GOLD! Modal+dative+accusative.','GOLDEN! Modal+dative+accusative together.'],['Casos: mir(dat)+den Weg(akk).','Cases: mir(dat)+den Weg(akk).','Case interaction: dative+accusative.'],['Entschuldigung: 4 sÃ­labas.','Entschuldigung: 4 syllables.','Entschuldigung: 4 syllables.'],['Erro: sem modal=ordem! Use kÃ¶nnen Sie.','Error: without modal=command!','Error: without modal sounds commanding!'],['FÃ³rmula: KÃ¶nnen Sie mir/uns bitte + verbo?','Formula: KÃ¶nnen Sie mir/uns bitte + verb?','Magic formula for polite requests.']),'conversaÃ§Ã£o');
-_reg(8,'Trabalho','Eu trabalhei o dia inteiro no escritÃ³rio ontem.','Ich habe gestern den ganzen Tag im BÃ¼ro gearbeitet.','I worked all day at the office yesterday.',_xf(['Eu tenho ontem o dia inteiro no escritÃ³rio trabalhado.','I worked the whole day at the office yesterday.','I worked the whole day at the office yesterday.'],['Eu trabalhei o dia inteiro no escritÃ³rio ontem.','I worked all day at the office yesterday.','I worked all day at the office yesterday.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['habe','Aux','V2 Perfekt','habe (ich)','haben','Prasens','','ich habe'],['gestern','Adv','Tempo','','','','','invariÃ¡vel'],['den','Art','AKK masc','','','','Akkusativ','derâ†’den'],['ganzen','Adj','Atrib AKK','','','','Akkusativ','ganzâ†’ganzen'],['Tag','Subst','Tempo AKK','','','','Akkusativ','der Tag'],['im','Prep','in+dem DAT','','','','Dativ','im'],['BÃ¼ro','Subst','Lugar','','','','Dativ','das BÃ¼ro'],['gearbeitet','Part II','PARTIZIP II NO FINAL!','','arbeiten','Perfekt','','gearbeitet']],['Sâ†’Aux(V2)â†’Complâ†’PARTIZIP II NO FINAL. PERFEKT!','Sâ†’Aux(V2)â†’Complâ†’PART II AT END. PERFEKT!','Subjectâ†’Aux(V2)â†’Complementsâ†’PARTIZIP II AT END. PERFEKT!'],['PERFEKT: Aux(V2) + Partizip II no FINAL.','PERFEKT: Aux(V2) + Partizip II at END.','PERFEKT: Aux haben/sein(V2) + Partizip II at end.'],['Arbeitenâ†’gearbeitet. -et extra (stem -t).','Arbeitenâ†’gearbeitet. Extra -et.','Arbeitenâ†’gearbeitet. Extra -et for stem -t.'],['Gearbeitet: 4 sÃ­labas.','Gearbeitet: 4 syllables.','Gearbeitet: 4 syllables.'],['Erro: Partizip antes do final!','Error: Partizip before end!','Error: Partizip II before the end!'],['Perfekt: haben/sein(V2)+...+Partizip II(final).','Perfekt: haben/sein(V2)+...+Partizip II(end).','Perfekt pattern: Aux(V2)+...+Partizip(end).']),'trabalho');
-_reg(10,'Viagem','Eu gostaria de viajar para a Alemanha porque amo a cultura.','Ich mÃ¶chte nÃ¤chstes Jahr nach Deutschland reisen, weil ich die Kultur liebe.','I would like to travel to Germany because I love the culture.',_xf(['Eu gostaria prÃ³ximo ano para Alemanha viajar, porque amo a cultura.','I would like to travel to Germany next year because I love the culture.','I would like to travel to Germany next year because I love the culture.'],['Eu gostaria de viajar para a Alemanha porque amo a cultura.','I would like to travel to Germany because I love the culture.','I would like to travel to Germany because I love the culture.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['mÃ¶chte','Modal','Konj II','mÃ¶chte (ich)','mÃ¶gen','Konjunktiv II','','ich mÃ¶chte'],['nÃ¤chstes','Adj','AKK neutro','','','','Akkusativ','nÃ¤chstâ†’nÃ¤chstes'],['Jahr','Subst','Tempo','','','','Akkusativ','das Jahr'],['nach','Prep','DireÃ§Ã£o','','','','Dativ','nach'],['Deutschland','Nome','Destino','','','','Dativ','Deutschland'],['reisen','V princ','Infinitivo FINAL','','reisen','Infinitiv','','infinitivo'],['weil','Conj','SUBORDINATIVA!','','','','','invariÃ¡vel'],['ich','Pron','Suj sub','','','','Nominativ','ich'],['die','Art','AKK fem','','','','Akkusativ','die'],['Kultur','Subst','Obj','','','','Akkusativ','die Kultur'],['liebe','Verbo sub','V NO FINAL DA SUB!','liebe (ich)','lieben','Prasens','','ich liebe']],['Principal(Modal+...+Vfinal) + Sub(weil+...+V FINAL).','Main(Modal+...+Vend) + Sub(weil+...+V END).','Main(Modal+...+Vend) + Sub(weil+...+V END).'],['Combina: Modal+Inf final + Subordinada+V final.','Combines: Modal + Subordinate.','Combines modal and subordinate clauses.'],['Dois Vs no final: razÃµes diferentes.','Two Vs at end: different reasons.','Two verbs at end for different structural reasons.'],['NÃ¤chstes: Ã¤=e.','NÃ¤chstes: Ã¤=e.','NÃ¤chstes: Ã¤=e.'],['Erro: weil ich liebe die Kultur â€” V no final!','Error: verb not at end after weil!','Error: verb before end in weil clause!'],['Weil sempre envia verbo ao final.','Weil always sends verb to end.','Weil (because) always sends verb to clause end.']),'viagem');
+  // Build the phrase database organized by word count
+  _add([
+    // ===== 2 PALAVRAS — Presente simples =====
+    {de:"Ich wohne",pt:"Eu moro",deWords:["Ich","wohne"],ptWords:["Eu","moro"],cat:"Casa",tense:"Präsens",expl:{literal:"Ich=Eu, wohne=moro",natural:"Eu moro",words:[{w:"Ich",g:"Pronome pessoal 1ª pessoa singular, Nominativ",f:"Sujeito da frase"}, {w:"wohne",g:"Verbo 'wohnen' (morar), conjugado 1ª pessoa singular Präsens",f:"Verbo conjugado — posição 2"}],order:"Sujeito (1ª posição) + Verbo conjugado (2ª posição) — estrutura SV básica do alemão.",conj:"wohnen (infinitivo) → ich wohne, du wohnst, er/sie/es wohnt, wir wohnen, ihr wohnt, sie/Sie wohnen",verb:"wohnen — verbo regular fraco, sem alteração de radical",tenseLab:"Präsens (presente simples). Em alemão, NÃO existe diferença entre 'eu moro' e 'eu estou morando' — ambos são 'ich wohne'.",cases:"Nominativ para o sujeito 'Ich'. Nenhum objeto para caso acusativo/dativo aqui.",decl:"'Ich' é Nominativ. 'wohne' não rege caso específico — é intransitivo neste uso.",reason:"Frase declarativa alemã básica: Sujeito → Verbo. A posição 2 do verbo é a regra mais fundamental do alemão.",nuance:"'Ich wohne' pode significar tanto 'eu moro' quanto 'eu estou morando'. O alemão não distingue presente simples do presente contínuo.",pron:"'Ich' pronuncia-se /ɪç/ — o 'ch' é suave, como um sopro. 'wohne' pronuncia-se /ˈvoːnə/ — o 'w' é 'v', o 'h' é mudo.",commonErr:"Brasileiros frequentemente dizem 'Ich bin wohne' (tentando usar 'estar' + gerúndio) — isso NÃO existe em alemão! É apenas 'Ich wohne'.",extra:"O verbo 'wohnen' é REGULAR (fraco). Isso significa que não há mudança de vogal no radical em nenhuma pessoa do presente."}},
+    {de:"Du lernst",pt:"Tu aprendes",deWords:["Du","lernst"],ptWords:["Tu","aprendes"],cat:"Escola",tense:"Präsens",expl:{literal:"Du=Tu, lernst=aprendes",natural:"Você aprende / Tu aprendes",words:[{w:"Du",g:"Pronome pessoal 2ª pessoa singular, Nominativ",f:"Sujeito"}, {w:"lernst",g:"Verbo 'lernen' (aprender), conjugado 2ª pessoa singular Präsens",f:"Verbo conjugado"}],order:"Sujeito + Verbo conjugado (SV). Em perguntas seria Verbo + Sujeito: 'Lernst du?'",conj:"lernen → ich lerne, du lernst, er/sie/es lernt, wir lernen, ihr lernt, sie/Sie lernen",verb:"lernen — regular, terminação -en. Conjugação: radical 'lern-' + terminações -e, -st, -t, -en, -t, -en",tenseLab:"Präsens. A terminação -st é exclusiva da 2ª pessoa singular (du).",cases:"Nominativ para 'Du'.",decl:"Du sempre é Nominativ como sujeito.",reason:"O -st é a marca registrada de 'du' no presente alemão. TODO verbo (exceto modais) recebe -st com 'du'.",nuance:"Em alemão moderno, 'du' é informal (usado com amigos, família). 'Sie' (maiúsculo) é formal.",pron:"'Du' /duː/, 'lernst' /lɛʁnst/ — note o 'r' gutural e o encontro consonantal -rnst.",commonErr:"Esquecer o -st: 'Du lern' está ERRADO. A terminação -st é obrigatória para 'du'.",extra:"'Du' + -st é um dos padrões mais importantes do alemão. Memorize: du machST, du gehST, du kommST."}},
+    {de:"Er schläft",pt:"Ele dorme",deWords:["Er","schläft"],ptWords:["Ele","dorme"],cat:"Rotina",tense:"Präsens",expl:{literal:"Er=Ele, schläft=dorme",natural:"Ele dorme / Ele está dormindo",words:[{w:"Er",g:"Pronome pessoal 3ª pessoa singular masculino, Nominativ",f:"Sujeito"}, {w:"schläft",g:"Verbo 'schlafen' (dormir), conjugado 3ª pessoa singular Präsens — irregular com mudança vocálica a→ä",f:"Verbo conjugado"}],order:"SV padrão. Sujeito (er) + verbo conjugado (schläft).",conj:"schlafen → ich schlafe, du schläfst, er schläft, wir schlafen, ihr schlaft, sie schlafen",verb:"schlafen — verbo FORTE (irregular). Mudança vocálica: a → ä em du/er. Classe: schlafen-schlief-geschlafen",tenseLab:"Präsens de verbo forte. Verbos fortes mudam a vogal do radical na 2ª e 3ª pessoa do singular.",cases:"Nominativ para 'Er'.",decl:"Er = Nominativ singular masculino.",reason:"O Umlaut (ä) indica que este é um verbo forte. A→Ä é uma das mudanças vocálicas mais comuns do alemão.",nuance:"Muitos verbos com 'a' no radical mudam para 'ä' em du/er: fahren→fährt, schlafen→schläft, tragen→trägt, waschen→wäscht.",pron:"'schläft' /ʃlɛːft/ — 'sch' é 'x', 'ä' é 'é' aberto e longo, 'ft' final.",commonErr:"Dizer 'Er schlaft' sem o Umlaut — ERRADO. O ä é obrigatório e muda completamente a pronúncia.",extra:"Padrão a→ä: fahren (fährt), schlafen (schläft), tragen (trägt), waschen (wäscht), fallen (fällt), lassen (lässt)."}},
+    {de:"Es regnet",pt:"Está chovendo",deWords:["Es","regnet"],ptWords:["Está","chovendo"],cat:"Clima",tense:"Präsens",expl:{literal:"Es=Isso, regnet=chove",natural:"Está chovendo / Chove",words:[{w:"Es",g:"Pronome impessoal 3ª pessoa singular neutro, Nominativ",f:"Sujeito impessoal (expletivo)"}, {w:"regnet",g:"Verbo 'regnen' (chover), conjugado 3ª pessoa singular Präsens",f:"Verbo conjugado — verbo impessoal"}],order:"Sujeito impessoal + Verbo. O 'es' é obrigatório em alemão mesmo quando não há sujeito real.",conj:"regnen → es regnet (apenas 3ª pessoa — é verbo impessoal)",verb:"regnen — verbo impessoal. Só se conjuga na 3ª pessoa do singular.",tenseLab:"Präsens impessoal. 'Es' funciona como sujeito gramatical obrigatório (expletivo).",cases:"Nominativ para 'es'. Nenhum objeto.",decl:"Es = Nominativ singular neutro. Função de sujeito formal.",reason:"Em alemão, TODA oração precisa de um sujeito gramatical. Verbos meteorológicos usam 'es' como sujeito vazio.",nuance:"Também usado em: Es schneit (neva), Es donnert (troveja), Es ist kalt (está frio), Es gibt (há/existe).",pron:"'es' /ɛs/, 'regnet' /ˈʁeːɡnət/ — o 'g' antes de 'n' pode soar quase mudo na fala rápida.",commonErr:"Omitir o 'es': 'Regnet' sozinho está ERRADO como frase completa. O alemão exige sujeito explícito.",extra:"O 'es' impessoal alemão é diferente do 'it' inglês: em alemão, usa-se 'es' também para 'Es gibt' (há/existe) e 'Es geht' (está indo/vai)."}},
+    {de:"Wir kochen",pt:"Nós cozinhamos",deWords:["Wir","kochen"],ptWords:["Nós","cozinhamos"],cat:"Casa",tense:"Präsens",expl:{literal:"Wir=Nós, kochen=cozinhamos",natural:"Nós cozinhamos / Estamos cozinhando",words:[{w:"Wir",g:"Pronome pessoal 1ª pessoa plural, Nominativ",f:"Sujeito"}, {w:"kochen",g:"Verbo 'kochen' (cozinhar), conjugado 1ª pessoa plural Präsens",f:"Verbo conjugado"}],order:"SV padrão. Sujeito plural + verbo na forma plural.",conj:"kochen → ich koche, du kochst, er/sie/es kocht, wir kochen, ihr kocht, sie/Sie kochen",verb:"kochen — regular. A 1ª e 3ª pessoa do plural (wir/sie) usam a mesma forma do infinitivo: -en.",tenseLab:"Präsens plural. Formas plurais são mais simples: wir = infinitivo, ihr = radical + -t, sie/Sie = infinitivo.",cases:"Nominativ para 'Wir'.",decl:"Wir = Nominativ 1ª pessoa plural.",reason:"A forma 'wir' + verbo no infinitivo é idêntica para verbos regulares. Padrão muito produtivo.",nuance:"'Kochen' pode ser tanto 'cozinhar' quanto 'ferver': Das Wasser kocht (A água está fervendo).",pron:"'wir' /viːɐ̯/, 'kochen' /ˈkɔxn̩/ — 'ch' após 'o' é gutural como 'rr'.",commonErr:"Tentar conjugar 'wir' como se fosse 'ich': 'Wir koche' está ERRADO. A terminação de wir é -en (igual ao infinitivo).",extra:"Decorar: ich kochE / du kochST / er kochT / wir kochEN / ihr kochT / sie kochEN. Note que 'er' e 'ihr' compartilham -t, mas wir e sie compartilham -en."}},
+    // ===== 3 PALAVRAS — Presente + modais simples =====
+    {de:"Ich bin müde",pt:"Estou cansado",deWords:["Ich","bin","müde"],ptWords:["Estou","cansado"],cat:"Rotina",tense:"Präsens",expl:{literal:"Ich=Eu, bin=sou/estou, müde=cansado/cansada",natural:"Eu estou cansado(a)",words:[{w:"Ich",g:"Pronome pessoal 1ª pessoa singular Nominativ",f:"Sujeito"}, {w:"bin",g:"Verbo 'sein' (ser/estar), 1ª pessoa singular Präsens — irregular",f:"Verbo de ligação (copulativo)"}, {w:"müde",g:"Adjetivo predicativo — sem flexão porque está após sein",f:"Predicativo do sujeito"}],order:"SV + Predicativo. Sujeito → verbo (2ª posição) → adjetivo (final).",conj:"sein → ich bin, du bist, er/sie/es ist, wir sind, ihr seid, sie/Sie sind",verb:"sein — verbo AUXILIAR e COPULATIVO mais importante do alemão. Altamente irregular.",tenseLab:"Präsens com verbo copulativo. 'Sein' é o verbo mais irregular do alemão — não segue nenhum padrão.",cases:"Nominativ para sujeito (Ich) e predicativo (müde) — o verbo 'sein' rege Nominativ em ambos os lados.",decl:"Adjetivo após 'sein' NÃO declina. Compare: 'der müde Mann' (o homem cansado — atributivo, declinado) vs 'Der Mann ist müde' (predicativo, sem declinação).",reason:"'Sein' é um verbo de ligação — o adjetivo predicativo permanece invariável. Esta é uma diferença importante em relação ao uso atributivo.",nuance:"'Müde' também pode significar 'com sono' — contexto define. Em português, 'cansado' e 'com sono' são diferentes, mas 'müde' cobre ambos.",pron:"'müde' /ˈmyːdə/ — o 'ü' é o som que não existe em português: boca de 'u', língua de 'i'.",commonErr:"Declinar o adjetivo após 'sein': 'Ich bin müder' (com -r) está ERRADO se a intenção é apenas 'estou cansado'. 'Müder' seria o comparativo (mais cansado).",extra:"A conjugação de 'sein' precisa ser MEMORIZADA — não segue padrão algum: bin, bist, ist, sind, seid, sind."}},
+    {de:"Ich habe Hunger",pt:"Tenho fome",deWords:["Ich","habe","Hunger"],ptWords:["Tenho","fome"],cat:"Restaurante",tense:"Präsens",expl:{literal:"Ich=Eu, habe=tenho, Hunger=fome",natural:"Eu tenho fome / Estou com fome",words:[{w:"Ich",g:"Pronome Nominativ 1ª pessoa singular",f:"Sujeito"}, {w:"habe",g:"Verbo 'haben' (ter), 1ª pessoa singular Präsens",f:"Verbo transitivo"}, {w:"Hunger",g:"Substantivo masculino, Akkusativ, sem artigo (expressão fixa)",f:"Objeto direto"}],order:"SV + Objeto. Sujeito → Verbo → Objeto direto no Akkusativ.",conj:"haben → ich habe, du hast, er/sie/es hat, wir haben, ihr habt, sie/Sie haben",verb:"haben — verbo AUXILIAR e transitivo. Irregular: perde o 'b' em du hast, er hat.",tenseLab:"Präsens com verbo transitivo. 'Haben' + substantivo é uma estrutura muito comum para expressar estados físicos.",cases:"Akkusativ: 'Hunger' é o objeto direto (Akkusativ masculino, sem artigo). O artigo seria 'den Hunger', mas a expressão é idiomática e vai sem artigo.",decl:"Hunger (masc.) — Akkusativ: den Hunger. Na expressão fixa, o artigo é omitido.",reason:"Expressão idiomática alemã: usa-se 'haben' + substantivo para sensações, diferente do português que usa 'ter' (mais próximo) ou 'estar com'.",nuance:"Outras expressões com 'haben': Ich habe Durst (tenho sede), Ich habe Angst (tenho medo), Ich habe Zeit (tenho tempo), Ich habe Glück (tenho sorte).",pron:"'Hunger' /ˈhʊŋɐ/ — o 'u' é curto, o 'ng' é como em inglês 'singer' (sem o 'g' duro).",commonErr:"Dizer 'Ich bin Hunger' — palavra por palavra do 'estou com fome'. Em alemão é SEMPRE 'Ich habe Hunger'.",extra:"Padrão 'haben + substantivo (sem artigo)' para sensações: Hunger, Durst, Angst, Zeit, Lust, Glück, Pech, Recht."}},
+    {de:"Kannst du kommen",pt:"Podes vir",deWords:["Kannst","du","kommen"],ptWords:["Podes","vir"],cat:"Trabalho",tense:"Präsens modal",expl:{literal:"Kannst=podes, du=tu, kommen=vir",natural:"Você pode vir?",words:[{w:"Kannst",g:"Verbo modal 'können' (poder), 2ª pessoa singular Präsens",f:"Verbo modal conjugado (posição 1 em pergunta)"}, {w:"du",g:"Pronome Nominativ 2ª pessoa singular",f:"Sujeito"}, {w:"kommen",g:"Verbo principal 'kommen' (vir) no INFINITIVO",f:"Verbo principal no final"}],order:"Pergunta Sim/Não: Verbo modal conjugado (1ª posição) → Sujeito → ... → Verbo principal no infinitivo (FINAL).",conj:"können → ich kann, du kannst, er/sie/es kann, wir können, ihr könnt, sie/Sie können",verb:"können — verbo MODAL. Irreg.: ich/er kann (sem terminação), du kannst, wir können (Umlaut).",tenseLab:"Präsens com verbo modal. O verbo modal ocupa a posição conjugada, e o verbo principal vai para o FINAL da frase no infinitivo.",cases:"Nominativ: Kannst (verbo concorda com du), du (sujeito). Nenhum objeto nesta frase.",decl:"N/A — sem substantivos nesta frase.",reason:"A estrutura com verbo modal é fundamental: Modal conjugado + Infinitivo no final. Em perguntas, o modal vai para posição 1. Esta é a 'Satzklammer' (estrutura de parênteses) do alemão.",nuance:"'Können' expressa capacidade/possibilidade, não permissão formal (para permissão, usa-se 'dürfen'). 'Kannst du kommen?' pode ser convite ou pergunta sobre disponibilidade.",pron:"'kannst' /kanst/, 'kommen' /ˈkɔmən/ — 'o' curto e aberto.",commonErr:"Colocar 'kommen' na posição 2: 'Du kannst kommen' está certo (declarativa), mas 'Du kommen kannst' está ERRADO. O verbo principal SEMPRE vai para o final com modais.",extra:"Regra de ouro dos modais: Modal conjugado na posição 2 (ou 1 em perguntas), verbo principal no FINAL. Esta é a estrutura mais importante para frases com mais de um verbo."}},
+    {de:"Sie können tanzen",pt:"Eles sabem dançar",deWords:["Sie","können","tanzen"],ptWords:["Eles","sabem","dançar"],cat:"Lazer",tense:"Präsens modal",expl:{literal:"Sie=Eles/Elas, können=podem/sabem, tanzen=dançar",natural:"Eles sabem dançar / Eles podem dançar",words:[{w:"Sie",g:"Pronome 3ª pessoa plural Nominativ",f:"Sujeito"}, {w:"können",g:"Verbo modal 'können', 3ª pessoa plural Präsens",f:"Modal conjugado (posição 2)"}, {w:"tanzen",g:"Verbo principal no INFINITIVO",f:"Verbo principal no final da frase"}],order:"Declarativa com modal: Sujeito → Modal conjugado (pos 2) → ... → Infinitivo (final).",conj:"können → ich kann, du kannst, er kann, wir können, ihr könnt, sie können",verb:"können — modal. Plural: wir/sie können = mesma forma do infinitivo. Singular é irregular.",tenseLab:"Präsens com modal. O modal 'können' na 3ª pessoa plural permanece igual ao infinitivo. Já no singular (kann) há perda do Umlaut.",cases:"Nominativ para 'Sie' (plural).",decl:"Sie (plural) = Nominativ. Não confundir com Sie (formal singular/plural) — contexto diferencia.",reason:"Demonstra a estrutura de parênteses (Satzklammer): Modal na posição 2 'abra', infinitivo no final 'fecha'. Tudo entre eles são complementos.",nuance:"'Können' com verbo de habilidade significa 'saber fazer': Sie können tanzen = Eles sabem dançar. Para 'poder' no sentido de permissão, usa-se 'dürfen'.",pron:"'tanzen' /ˈtantsən/ — o 'z' é 'ts' como em 'pizza'.",commonErr:"Esquecer que 'sie' (plural, eles) tem conjugação diferente de 'sie' (singular, ela): sie kann (ela pode) vs sie können (eles podem).",extra:"A estrutura [Modal + Infinitivo no final] se aplica a TODOS os 6 verbos modais: können, müssen, dürfen, sollen, wollen, mögen."}},
+    {de:"Ich muss gehen",pt:"Preciso ir",deWords:["Ich","muss","gehen"],ptWords:["Preciso","ir"],cat:"Rotina",tense:"Präsens modal",expl:{literal:"Ich=Eu, muss=preciso/devo, gehen=ir",natural:"Eu preciso ir / Tenho que ir",words:[{w:"Ich",g:"Pronome Nominativ 1ª pessoa singular",f:"Sujeito"}, {w:"muss",g:"Verbo modal 'müssen' (precisar/ter que), 1ª pessoa singular Präsens",f:"Modal conjugado (posição 2)"}, {w:"gehen",g:"Verbo principal 'gehen' (ir) no INFINITIVO",f:"Verbo principal no final"}],order:"Sujeito → Modal conjugado → Infinitivo no final.",conj:"müssen → ich muss, du musst, er/sie/es muss, wir müssen, ihr müsst, sie/Sie müssen",verb:"müssen — modal de obrigação/necessidade. Singular perde o Umlaut (muss), plural mantém (müssen).",tenseLab:"Präsens modal. 'Müssen' expressa necessidade objetiva ou obrigação.",cases:"Nominativ para 'Ich'.",decl:"N/A.",reason:"'Müssen' é o modal mais direto para expressar necessidade. Diferente de 'sollen' (dever moral/recomendação), 'müssen' indica obrigação real.",nuance:"Importante diferença: 'Ich muss gehen' = Preciso ir (necessidade real), 'Ich soll gehen' = Devo ir (alguém mandou/recomendou).",pron:"'muss' /mʊs/ — 'u' curto, 'ss' forte.",commonErr:"Confundir 'müssen' com 'sollen': 'Ich muss' = tenho que (obrigação), 'Ich soll' = devo (conselho/ordem de outro).",extra:"'Müssen' é essencial para a vida cotidiana: Ich muss arbeiten (preciso trabalhar), Ich muss nach Hause (preciso ir para casa)."}},
+    // ===== 4 PALAVRAS — Acusativo, verbos separáveis =====
+    {de:"Ich sehe den Hund",pt:"Eu vejo o cachorro",deWords:["Ich","sehe","den","Hund"],ptWords:["Eu","vejo","o","cachorro"],cat:"Casa",tense:"Präsens",expl:{literal:"Ich=Eu, sehe=vejo, den=o (Akkusativ), Hund=cachorro",natural:"Eu vejo o cachorro",words:[{w:"Ich",g:"Pronome Nominativ 1ª pessoa singular",f:"Sujeito"}, {w:"sehe",g:"Verbo 'sehen' (ver), 1ª pessoa singular Präsens — irregular e→ie",f:"Verbo conjugado"}, {w:"den",g:"Artigo definido masculino AKKUSATIV (Nominativ seria 'der')",f:"Determinante do objeto direto"}, {w:"Hund",g:"Substantivo masculino, Akkusativ singular",f:"Objeto direto"}],order:"Sujeito → Verbo → Artigo Akkusativ → Substantivo (Objeto). SVO com marcação de caso.",conj:"sehen → ich sehe, du siehst, er/sie/es sieht, wir sehen, ihr seht, sie/Sie sehen",verb:"sehen — verbo FORTE (irregular). Mudança vocálica: e → ie em du/er. Classe: sehen-sah-gesehen.",tenseLab:"Präsens com objeto direto no Akkusativ. O artigo muda de 'der' para 'den' para marcar o objeto.",cases:"Akkusativ: 'den Hund' é o objeto direto. O artigo masculino muda de der (Nominativ) → den (Akkusativ).",decl:"Artikel masculino: N=der, A=den, D=dem, G=des. Substantivo 'Hund': N=der Hund, A=den Hund, D=dem Hund, G=des Hundes.",reason:"Esta frase demonstra o sistema de CASOS em ação: 'der Hund' vira 'den Hund' porque é o objeto direto (Akkusativ). Esta é a função mais importante do Akkusativ.",nuance:"'Sehen' rege Akkusativ. Verbos transitivos em alemão SEMPRE pedem Akkusativ para o objeto direto.",pron:"'sehe' /ˈzeːə/ — o 's' inicial é sonoro como 'z', o 'h' é mudo.",commonErr:"Manter 'der' no objeto direto: 'Ich sehe der Hund' está ERRADO. Objeto direto masculino exige Akkusativ: 'den Hund'.",extra:"A mudança der→den é a diferença mais visível do sistema de casos. Sempre que o substantivo masculino for objeto direto, use 'den'."}},
+    {de:"Er kauft den Apfel",pt:"Ele compra a maçã",deWords:["Er","kauft","den","Apfel"],ptWords:["Ele","compra","a","maçã"],cat:"Compras",tense:"Präsens",expl:{literal:"Er=Ele, kauft=compra, den=a (Akkusativ masc), Apfel=maçã",natural:"Ele compra a maçã",words:[{w:"Er",g:"Pronome Nominativ 3ª pessoa singular masculino",f:"Sujeito"}, {w:"kauft",g:"Verbo 'kaufen' (comprar), 3ª pessoa singular Präsens, regular",f:"Verbo conjugado"}, {w:"den",g:"Artigo definido masculino Akkusativ",f:"Marcador de objeto direto"}, {w:"Apfel",g:"Substantivo masculino, Akkusativ singular",f:"Objeto direto"}],order:"SVO com Akkusativ: Sujeito → Verbo → Artikel(Akk) → Objekt.",conj:"kaufen → ich kaufe, du kaufst, er kauft, wir kaufen, ihr kauft, sie kaufen",verb:"kaufen — verbo REGULAR. Sem mudanças de radical. Conjugação previsível.",tenseLab:"Präsens regular + Akkusativ. Verbo regular: radical 'kauf-' + terminações padrão.",cases:"Akkusativ: 'den Apfel'. 'Apfel' é masculino (der Apfel), então o artigo no Akkusativ é 'den'.",decl:"Apfel (masc.): N=der Apfel, A=den Apfel, D=dem Apfel, G=des Apfels.",reason:"Demonstra que mesmo substantivos femininos em português ('a maçã') podem ser masculinos em alemão ('der Apfel'). O gênero NÃO corresponde entre idiomas.",nuance:"'Apfel' (maçã) é masculino em alemão. Gênero de substantivos deve ser memorizado com o artigo: sempre aprenda 'der Apfel', não apenas 'Apfel'.",pron:"'kauft' /kaʊft/ — ditongo 'au' como 'au' em 'kauft' (alemão). 'Apfel' /ˈapfəl/ — 'pf' é o som que não existe em português (lábios se fecham com sopro).",commonErr:"Usar artigo feminino por causa do português: 'die Apfel' está ERRADO. É 'der Apfel' (masculino).",extra:"Sempre aprenda substantivos alemães COM o artigo: der Apfel, die Banane, das Brot."}},
+    {de:"Ich stehe früh auf",pt:"Eu me levanto cedo",deWords:["Ich","stehe","früh","auf"],ptWords:["Eu","me","levanto","cedo"],cat:"Rotina",tense:"Präsens separável",expl:{literal:"Ich=Eu, stehe=levantar (raiz conjugada), früh=cedo, auf=para cima (prefixo separado)",natural:"Eu me levanto cedo",words:[{w:"Ich",g:"Pronome Nominativ 1ª pessoa singular",f:"Sujeito"}, {w:"stehe",g:"Raiz conjugada do verbo separável 'aufstehen' (levantar-se)",f:"Verbo conjugado (posição 2)"}, {w:"früh",g:"Advérbio de tempo",f:"Circunstância temporal"}, {w:"auf",g:"Prefixo separável do verbo 'aufstehen' — vai para o FINAL da frase",f:"Prefixo separado (parte da Satzklammer)"}],order:"Sujeito → Verbo conjugado (raiz) → Advérbio → Prefixo separável (FINAL). Estrutura de parênteses: 'stehe...auf'.",conj:"aufstehen → ich stehe auf, du stehst auf, er steht auf, wir stehen auf, ihr steht auf, sie stehen auf",verb:"aufstehen — verbo SEPARÁVEL. auf (prefixo) + stehen (verbo base). No presente, o prefixo vai para o final.",tenseLab:"Präsens de verbo separável. O prefixo 'auf' se destaca do verbo e vai para o final da frase — esta é a 'Satzklammer' (estrutura de parênteses).",cases:"Nominativ para 'Ich'. Nenhum objeto.",decl:"N/A.",reason:"Verbos separáveis são UMA DAS CARACTERÍSTICAS MAIS DISTINTIVAS DO ALEMÃO. O prefixo sempre vai para o FINAL da oração principal.",nuance:"Todos os verbos com prefixos como auf-, an-, ein-, mit-, ab-, zu-, los-, vor-, nach- são separáveis. Apenas prefixos como be-, ver-, er-, ent-, zer-, ge-, miss- são INseparáveis.",pron:"'stehe' /ˈʃteːə/, 'früh' /fʁyː/, 'auf' /aʊf/.",commonErr:"Manter o prefixo junto ao verbo: 'Ich aufstehe früh' está ERRADO. O prefixo DEVE ir para o final: 'Ich stehe früh auf'.",extra:"Regra prática para identificar separáveis: se o prefixo pode existir como palavra independente (auf, an, ein, mit...), o verbo É separável."}},
+    {de:"Er ruft mich an",pt:"Ele me liga",deWords:["Er","ruft","mich","an"],ptWords:["Ele","me","liga"],cat:"Tecnologia",tense:"Präsens separável",expl:{literal:"Er=Ele, ruft=chama (raiz), mich=me (Akkusativ), an=para (prefixo separado)",natural:"Ele me liga / Ele me telefona",words:[{w:"Er",g:"Pronome Nominativ 3ª pessoa singular masculino",f:"Sujeito"}, {w:"ruft",g:"Raiz conjugada de 'anrufen' (telefonar), 3ª pessoa singular Präsens",f:"Verbo conjugado (posição 2)"}, {w:"mich",g:"Pronome pessoal 1ª pessoa singular AKKUSATIV (acusativo de 'ich')",f:"Objeto direto"}, {w:"an",g:"Prefixo separável de 'anrufen'",f:"Prefixo no final da frase"}],order:"Sujeito → Verbo (raiz) → Pronome Akkusativ → Prefixo (final).",conj:"anrufen → ich rufe an, du rufst an, er ruft an, wir rufen an, ihr ruft an, sie rufen an",verb:"anrufen — verbo SEPARÁVEL. an + rufen. 'Rufen' = chamar, 'anrufen' = telefonar.",tenseLab:"Präsens de verbo separável + pronome no Akkusativ.",cases:"Akkusativ: 'mich' é o pronome acusativo de 'ich'. O verbo 'anrufen' rege Akkusativ: jemanden (Akk) anrufen.",decl:"Pronomes pessoais no Akkusativ: ich→mich, du→dich, er→ihn, sie→sie, es→es, wir→uns, ihr→euch, sie→sie.",reason:"Combinação de duas características alemãs: verbo separável (anrufen → ruft...an) + pronome no Akkusativ (mich).",nuance:"'Anrufen' é o verbo padrão para 'telefonar'. 'Telefonieren' também existe mas é mais formal ou genérico.",pron:"'ruft' /ʁuːft/, 'mich' /mɪç/, 'an' /an/.",commonErr:"Esquecer que pronomes mudam no Akkusativ: 'Er ruft ich an' está ERRADO. O correto é 'mich'.",extra:"Pronomes Akkusativ: ich→mich, du→dich, er→ihn, sie(Ela)→sie, es→es, wir→uns, ihr→euch, sie(Eles)→sie, Sie(Formal)→Sie."}},
+    {de:"Wir kaufen heute ein",pt:"Fazemos compras hoje",deWords:["Wir","kaufen","heute","ein"],ptWords:["Fazemos","compras","hoje"],cat:"Compras",tense:"Präsens separável",expl:{literal:"Wir=Nós, kaufen=compramos (raiz), heute=hoje, ein=em (prefixo separado)",natural:"Nós fazemos compras hoje",words:[{w:"Wir",g:"Pronome Nominativ 1ª pessoa plural",f:"Sujeito"}, {w:"kaufen",g:"Raiz de 'einkaufen' (fazer compras), 1ª pessoa plural Präsens",f:"Verbo conjugado"}, {w:"heute",g:"Advérbio de tempo",f:"Circunstância temporal"}, {w:"ein",g:"Prefixo separável de 'einkaufen'",f:"Prefixo no final"}],order:"Sujeito → Verbo → Advérbio → Prefixo (final).",conj:"einkaufen → ich kaufe ein, du kaufst ein, er kauft ein, wir kaufen ein, ihr kauft ein, sie kaufen ein",verb:"einkaufen — verbo SEPARÁVEL. ein + kaufen. Significa 'fazer compras' (especificamente compras de supermercado/mercado).",tenseLab:"Präsens de verbo separável com advérbio de tempo.",cases:"Nominativ para 'Wir'.",decl:"N/A.",reason:"O verbo 'einkaufen' é culturalmente importante: alemães 'gehen einkaufen' (vão fazer compras) como atividade distinta. Note que 'einkaufen' é uma palavra só, mas se comporta como duas na frase.",nuance:"'Einkaufen' ≠ 'kaufen'. 'Einkaufen' = fazer compras (abastecimento), 'kaufen' = comprar (algo específico).",pron:"'heute' /ˈhɔʏtə/, 'ein' /aɪn/.",commonErr:"Não separar: 'Wir einkaufen heute' está ERRADO. O prefixo DEVE ir para o final na oração principal.",extra:"Padrão dos separáveis: prefixo NO FINAL da oração principal. Isso cria a 'moldura verbal' (Satzklammer) do alemão."}},
+    // ===== 5 PALAVRAS — Dativo, Perfekt =====
+    {de:"Ich helfe dem Mann",pt:"Ajudo o homem",deWords:["Ich","helfe","dem","Mann"],ptWords:["Ajudo","o","homem"],cat:"Trabalho",tense:"Präsens",expl:{literal:"Ich=Eu, helfe=ajudo, dem=ao (Dativ), Mann=homem",natural:"Eu ajudo o homem",words:[{w:"Ich",g:"Pronome Nominativ 1ª pessoa singular",f:"Sujeito"}, {w:"helfe",g:"Verbo 'helfen' (ajudar), 1ª pessoa singular Präsens — irregular e→i",f:"Verbo conjugado (rege DATIV)"}, {w:"dem",g:"Artigo definido masculino DATIV (Nominativ=der, Akk=den)",f:"Determinante — marca o objeto indireto"}, {w:"Mann",g:"Substantivo masculino, Dativ singular",f:"Objeto indireto (Dativ)"}],order:"Sujeito → Verbo → Artigo Dativ → Substantivo (Objeto indireto).",conj:"helfen → ich helfe, du hilfst, er/sie/es hilft, wir helfen, ihr helft, sie/Sie helfen",verb:"helfen — verbo FORTE com mudança e→i em du/er. REGE DATIV (não Akkusativ!).",tenseLab:"Präsens + Dativ. Este é um dos verbos mais importantes que regem Dativ em vez de Akkusativ.",cases:"Dativ: 'helfen' rege Dativ! 'dem Mann' está no Dativ (Nominativ seria 'der Mann'). O artigo muda: der(N)→den(A)→dem(D).",decl:"Mann (masc.): N=der Mann, A=den Mann, D=dem Mann, G=des Mannes.",reason:"'Helfen' é um verbo Dativ — uma das exceções mais importantes à regra 'objeto direto = Akkusativ'. Memorize: 'helfen + Dativ'.",nuance:"Em português, 'ajudar' pede objeto direto. Em alemão, 'helfen' pede DATIV. Isso é contraintuitivo para brasileiros. Pense: 'dar ajuda A alguém' → Dativ.",pron:"'helfe' /ˈhɛlfə/, 'dem' /deːm/, 'Mann' /man/.",commonErr:"Usar Akkusativ: 'Ich helfe den Mann' está ERRADO. O verbo 'helfen' rege DATIV: 'Ich helfe dem Mann'.",extra:"Verbos comuns que regem Dativ: helfen, danken (agradecer), gefallen (agradar), gehören (pertencer), antworten (responder), folgen (seguir)."}},
+    {de:"Ich habe Deutsch gelernt",pt:"Eu aprendi alemão",deWords:["Ich","habe","Deutsch","gelernt"],ptWords:["Eu","aprendi","alemão"],cat:"Escola",tense:"Perfekt",expl:{literal:"Ich=Eu, habe=tenho (auxiliar), Deutsch=alemão, gelernt=aprendido (Partizip II)",natural:"Eu aprendi alemão / Eu tenho aprendido alemão",words:[{w:"Ich",g:"Pronome Nominativ 1ª pessoa singular",f:"Sujeito"}, {w:"habe",g:"Verbo auxiliar 'haben', 1ª pessoa singular Präsens",f:"Auxiliar conjugado (posição 2)"}, {w:"Deutsch",g:"Substantivo neutro, aqui sem artigo (nome de língua)",f:"Objeto"}, {w:"gelernt",g:"Partizip II de 'lernen' — prefixo ge- + radical lern- + sufixo -t",f:"Partizip II no FINAL da frase"}],order:"Sujeito → Auxiliar conjugado → Objeto → Partizip II (FINAL). Estrutura do Perfekt.",conj:"lernen (Perfekt): ich habe gelernt, du hast gelernt, er hat gelernt, wir haben gelernt, ihr habt gelernt, sie haben gelernt",verb:"lernen — verbo REGULAR. Partizip II: ge-lern-t (regra: ge + radical + t). Auxiliar: haben.",tenseLab:"Perfekt (passado conversacional). É o tempo de passado MAIS USADO na fala cotidiana alemã. O Präteritum é mais usado na escrita.",cases:"Akkusativ: 'Deutsch' como objeto (substantivos de línguas podem ser usados sem artigo).",decl:"Deutsch (neutro) como nome de língua: geralmente sem artigo quando objeto.",reason:"O Perfekt é formado com: haben/sein (conjugado na posição 2) + Partizip II (no final). Esta é a estrutura MAIS IMPORTANTE para falar sobre o passado em alemão.",nuance:"O Perfekt alemão NÃO equivale ao 'pretérito perfeito composto' português em uso — ele é usado para QUALQUER passado na fala, substituindo o pretérito perfeito simples.",pron:"'gelernt' /ɡəˈlɛʁnt/ — o 'ge-' é átono, a tônica cai no radical.",commonErr:"Esquecer o 'ge-': 'Ich habe lernt' está ERRADO. O Partizip II de verbos regulares é ge- + radical + -t. Colocar o Partizip II na posição 2 em vez do final: ERRADO.",extra:"Formação do Partizip II regular: ge + radical + t. Exemplos: gemacht, gespielt, gewohnt, gearbeitet (verbos em -ieren NÃO recebem ge-: studiert, telefoniert)."}},
+    {de:"Ich bin nach Hause gegangen",pt:"Fui para casa",deWords:["Ich","bin","nach","Hause","gegangen"],ptWords:["Fui","para","casa"],cat:"Casa",tense:"Perfekt",expl:{literal:"Ich=Eu, bin=sou/estou (auxiliar), nach=para, Hause=casa (Dativ), gegangen=ido (Partizip II)",natural:"Eu fui para casa",words:[{w:"Ich",g:"Pronome Nominativ 1ª pessoa singular",f:"Sujeito"}, {w:"bin",g:"Auxiliar 'sein', 1ª pessoa singular Präsens",f:"Auxiliar conjugado (verbos de movimento usam sein)"}, {w:"nach",g:"Preposição que rege DATIV, indica direção",f:"Preposição"}, {w:"Hause",g:"Substantivo 'Haus' no DATIV (forma fixa na expressão 'nach Hause')",f:"Complemento de direção (Dativ)"}, {w:"gegangen",g:"Partizip II de 'gehen' (ir) — FORTE: ge-gang-en",f:"Partizip II no FINAL"}],order:"Sujeito → Auxiliar sein → Preposição + Substantivo → Partizip II (final).",conj:"gehen (Perfekt): ich bin gegangen, du bist gegangen, er ist gegangen, wir sind gegangen, ihr seid gegangen, sie sind gegangen",verb:"gehen — verbo FORTE de movimento. Perfekt com SEIN (não haben!). Partizip II: gegangen (irregular).",tenseLab:"Perfekt com 'sein'. Verbos de movimento (gehen, fahren, kommen, laufen...) e verbos de mudança de estado (werden, sterben, einschlafen...) usam SEIN como auxiliar.",cases:"Dativ: 'nach' rege Dativ. 'nach Hause' é uma expressão fixa — 'Hause' é uma forma antiga de Dativ (hoje seria 'dem Haus').",decl:"nach + Dativ: nach dem Haus → nach Hause (forma contraída idiomática). Compare: 'zu Hause' (em casa, estático) vs 'nach Hause' (para casa, direção).",reason:"O Perfekt com 'sein' é uma das estruturas mais importantes. Verbos que indicam MOVIMENTO de A para B usam 'sein'. Esta é uma diferença fundamental do português.",nuance:"'Nach Hause' vs 'zu Hause': nach Hause = direção (para casa), zu Hause = localização (em casa). Esta distinção é crucial.",pron:"'gegangen' /ɡəˈɡaŋən/ — o 'ng' é como 'singer' em inglês, sem o 'g' duro.",commonErr:"Usar 'haben' com 'gehen': 'Ich habe gegangen' está ERRADO. Verbos de movimento usam SEIN. Dizer 'nach Haus' sem o -e final — a expressão fixa é 'nach Hause'.",extra:"Regra do Perfekt com sein: verbos que indicam movimento (gehen, fahren, kommen, laufen, reisen, fliegen) + verbos de mudança de estado (werden, sterben, einschlafen, aufwachen, wachsen)."}},
+    {de:"Er hat den Brief geschrieben",pt:"Ele escreveu a carta",deWords:["Er","hat","den","Brief","geschrieben"],ptWords:["Ele","escreveu","a","carta"],cat:"Trabalho",tense:"Perfekt",expl:{literal:"Er=Ele, hat=tem (auxiliar), den=a (Akkusativ), Brief=carta, geschrieben=escrito (Partizip II)",natural:"Ele escreveu a carta",words:[{w:"Er",g:"Pronome Nominativ 3ª pessoa singular masculino",f:"Sujeito"}, {w:"hat",g:"Auxiliar 'haben', 3ª pessoa singular Präsens — irregular",f:"Auxiliar conjugado"}, {w:"den",g:"Artigo definido masculino Akkusativ",f:"Determinante do objeto"}, {w:"Brief",g:"Substantivo masculino, Akkusativ",f:"Objeto direto"}, {w:"geschrieben",g:"Partizip II de 'schreiben' (escrever) — FORTE: ge-schrieb-en",f:"Partizip II no FINAL"}],order:"Sujeito → Auxiliar → Artigo Akk + Substantivo → Partizip II (final).",conj:"schreiben → ich habe geschrieben, du hast geschrieben, er hat geschrieben, wir haben geschrieben, ihr habt geschrieben, sie haben geschrieben",verb:"schreiben — verbo FORTE. Partizip II: geschrieben (mudança ei→ie). Usa haben como auxiliar (verbo transitivo).",tenseLab:"Perfekt com 'haben' + objeto no Akkusativ. A maioria dos verbos transitivos usa 'haben'.",cases:"Akkusativ: 'den Brief' — artigo masculino no Akkusativ (Nominativ: der Brief).",decl:"Brief (masc.): N=der Brief, A=den Brief, D=dem Brief, G=des Briefes.",reason:"Demonstra o Perfekt com verbo transitivo (tem objeto direto). Note que o Partizip II vai para o FINAL absoluto da frase.",nuance:"Partizip II de verbos fortes geralmente muda a vogal e termina em -en: schreiben→geschrieben, finden→gefunden, singen→gesungen, trinken→getrunken.",pron:"'geschrieben' /ɡəˈʃʁiːbən/ — 'sch' é 'x', 'ie' é 'i' longo.",commonErr:"Colocar o Partizip II antes do objeto: 'Er hat geschrieben den Brief' está ERRADO. O Partizip II vai no FINAL.",extra:"Particípios fortes comuns: essen→gegessen, trinken→getrunken, finden→gefunden, singen→gesungen, helfen→geholfen, sprechen→gesprochen."}},
+    // ===== 6+ PALAVRAS =====
+    {de:"Ich möchte ein Glas Wasser trinken",pt:"Eu gostaria de beber um copo de água",deWords:["Ich","möchte","ein","Glas","Wasser","trinken"],ptWords:["Eu","gostaria","de","beber","um","copo","de","água"],cat:"Restaurante",tense:"Konjunktiv II",expl:{literal:"Ich=Eu, möchte=gostaria (Konjunktiv II de mögen), ein=um, Glas=copo, Wasser=água, trinken=beber (infinitivo no final)",natural:"Eu gostaria de beber um copo de água",words:[{w:"Ich",g:"Pronome Nominativ",f:"Sujeito"}, {w:"möchte",g:"Konjunktiv II de 'mögen' — expressa desejo polido",f:"Modal conjugado"}, {w:"ein",g:"Artigo indefinido neutro Akkusativ",f:"Determinante"}, {w:"Glas",g:"Substantivo neutro Akkusativ",f:"Objeto"}, {w:"Wasser",g:"Substantivo neutro Akkusativ (aposição/medida)",f:"Complemento"}, {w:"trinken",g:"Verbo principal no INFINITIVO",f:"Verbo no final"}],order:"Modal (pos 2) + complementos + Infinitivo (final). Estrutura com Konjunktiv II.",conj:"mögen (Konjunktiv II): ich möchte, du möchtest, er möchte, wir möchten, ihr möchtet, sie möchten",verb:"mögen → möchte (Konjunktiv II, forma de cortesia). Usado como modal para desejos polidos.",tenseLab:"Konjunktiv II de 'mögen' expressa desejo educado — equivalente a 'gostaria'. NÃO é passado — é presente com tom de cortesia.",cases:"Akkusativ: 'ein Glas Wasser' — objetos diretos no Akkusativ. Artigos neutros não mudam entre Nominativ e Akkusativ (ein → ein).",decl:"Glas (neutro): N=das Glas, A=das Glas, D=dem Glas, G=des Glases. Artigo indefinido neutro não muda N→A: ein Glas.",reason:"'Möchte' é uma das palavras mais úteis do alemão para situações sociais. Expressa desejo de forma polida, como 'gostaria' em português.",nuance:"'Möchte' é presente (desejo agora), não passado. Para passado de mögen, usa-se 'mochte' (sem Umlaut) ou 'haben gemocht'.",pron:"'möchte' /ˈmœçtə/ — 'ö' como em 'schön', 'ch' após ö é o 'ch' suave.",commonErr:"Confundir 'möchte' (gostaria) com 'mochte' (gostava, passado). A diferença é o Umlaut: möchten (Konjunktiv, presente) vs mochten (Präteritum, passado).",extra:"Frases essenciais com 'möchte': Ich möchte bezahlen (gostaria de pagar), Ich möchte bestellen (gostaria de pedir), Was möchten Sie? (O que o senhor gostaria?)."}},
+    {de:"Ich habe gestern einen Film gesehen",pt:"Ontem eu vi um filme",deWords:["Ich","habe","gestern","einen","Film","gesehen"],ptWords:["Ontem","eu","vi","um","filme"],cat:"Lazer",tense:"Perfekt",expl:{literal:"Ich=Eu, habe=tenho(aux), gestern=ontem, einen=um(Akk), Film=filme, gesehen=visto(Partizip II)",natural:"Ontem eu vi um filme",words:[{w:"Ich",g:"Pronome Nominativ",f:"Sujeito"}, {w:"habe",g:"Auxiliar 'haben' 1ª pessoa singular",f:"Auxiliar conjugado"}, {w:"gestern",g:"Advérbio de tempo",f:"Circunstância temporal"}, {w:"einen",g:"Artigo indefinido masculino Akkusativ (Nominativ=ein)",f:"Determinante do objeto"}, {w:"Film",g:"Substantivo masculino Akkusativ",f:"Objeto direto"}, {w:"gesehen",g:"Partizip II de 'sehen' (ver) — FORTE: ge-seh-en",f:"Partizip II no FINAL"}],order:"Perfekt: Auxiliar (pos 2) + Advérbio + Objeto + Partizip II (final).",conj:"sehen → ich habe gesehen, du hast gesehen, er hat gesehen...",verb:"sehen — FORTE. Partizip II: gesehen (perde o 'h' intermediário). Acentua e→e no Partizip.",tenseLab:"Perfekt com advérbio de tempo e objeto no Akkusativ.",cases:"Akkusativ: 'einen Film' — artigo indefinido masculino no Akkusativ (ein→einen).",decl:"ein (artigo indefinido masc.): N=ein Film, A=einen Film, D=einem Film, G=eines Films.",reason:"Note que o artigo indefinido 'ein' se comporta como 'der' no Akkusativ: ein→einen (mesmo padrão: der→den).",nuance:"A posição de 'gestern' é flexível: pode vir antes ou depois do sujeito. Se colocado na posição 1, o sujeito vai para posição 3: 'Gestern habe ich einen Film gesehen'.",pron:"'gestern' /ˈɡɛstɐn/, 'Film' /fɪlm/, 'gesehen' /ɡəˈzeːən/.",commonErr:"Usar 'ein' em vez de 'einen' no Akkusativ masculino: 'Ich habe ein Film gesehen' está ERRADO. Masculino Akkusativ é 'einen'.",extra:"A regra do artigo indefinido no Akkusativ: masculino ein→einen, neutro ein→ein (não muda), feminino eine→eine (não muda). Apenas o masculino muda."}},
+    {de:"Ich kann morgen nicht zur Arbeit kommen",pt:"Não posso vir ao trabalho amanhã",deWords:["Ich","kann","morgen","nicht","zur","Arbeit","kommen"],ptWords:["Não","posso","vir","ao","trabalho","amanhã"],cat:"Trabalho",tense:"Präsens modal",expl:{literal:"Ich=Eu, kann=posso, morgen=amanhã, nicht=não, zur=para a(Dativ), Arbeit=trabalho, kommen=vir(infinitivo)",natural:"Eu não posso vir ao trabalho amanhã",words:[{w:"Ich",g:"Pronome Nominativ",f:"Sujeito"}, {w:"kann",g:"Modal 'können' 1ª pessoa singular",f:"Modal conjugado"}, {w:"morgen",g:"Advérbio de tempo",f:"Tempo"}, {w:"nicht",g:"Partícula de negação",f:"Negação — nega o verbo 'kommen'"}, {w:"zur",g:"Contração: zu + der (Dativ feminino). Preposição 'zu' + artigo Dativ 'der'",f:"Preposição contraída"}, {w:"Arbeit",g:"Substantivo feminino Dativ",f:"Complemento"}, {w:"kommen",g:"Verbo principal no INFINITIVO",f:"Verbo no final"}],order:"Modal + Advérbio + Negação + Preposição + Substantivo + Infinitivo (final).",conj:"können → ich kann, du kannst, er kann...",verb:"können + kommen = construção modal.",tenseLab:"Präsens com modal + negação + preposição contraída.",cases:"Dativ: 'zur Arbeit' = zu der Arbeit. 'zu' rege Dativ. A contração 'zur' é obrigatória na fala cotidiana.",decl:"Arbeit (fem.): N=die Arbeit, D=der Arbeit. Preposição 'zu' + Dativ: zu der → zur (contração).",reason:"Combina múltiplas estruturas: modal + negação + preposição contraída. A negação 'nicht' posiciona-se antes do complemento preposicional.",nuance:"Contrações são comuns e obrigatórias na fala: zu+der=zur, zu+dem=zum, in+dem=im, in+das=ins, an+dem=am.",pron:"'zur' /tsuːɐ̯/, 'Arbeit' /ˈaʁbaɪt/.",commonErr:"Não contrair: 'zu der Arbeit' é gramaticalmente correto mas soa artificial na fala. Use 'zur Arbeit'.",extra:"Padrão de negação com 'nicht': nega o que vem DEPOIS. 'nicht zur Arbeit kommen' = nega 'zur Arbeit kommen'. Se fosse 'nicht morgen', negaria o tempo."}},
+    {de:"Letzte Woche bin ich nach Berlin gefahren",pt:"Semana passada fui para Berlim",deWords:["Letzte","Woche","bin","ich","nach","Berlin","gefahren"],ptWords:["Semana","passada","fui","para","Berlim"],cat:"Viagem",tense:"Perfekt",expl:{literal:"Letzte=passada, Woche=semana, bin=estou(aux), ich=eu, nach=para, Berlin=Berlim, gefahren=viajado(dirigido)",natural:"Semana passada eu fui para Berlim",words:[{w:"Letzte",g:"Adjetivo 'letzt-' (passado/último), feminino Nominativ",f:"Atributo de 'Woche'"}, {w:"Woche",g:"Substantivo feminino Nominativ",f:"Expressão temporal na posição 1 (Tópico)"}, {w:"bin",g:"Auxiliar 'sein' 1ª pessoa singular",f:"Auxiliar (verbo de movimento usa sein)"}, {w:"ich",g:"Pronome Nominativ",f:"Sujeito (posição 3 porque posição 1 está ocupada)"}, {w:"nach",g:"Preposição de direção + Dativ",f:"Preposição"}, {w:"Berlin",g:"Nome próprio neutro (cidades são neutras, sem artigo)",f:"Destino"}, {w:"gefahren",g:"Partizip II de 'fahren' (ir de veículo/viajar) — FORTE: ge-fahr-en",f:"Partizip II no FINAL"}],order:"Tópico temporal (pos 1) → Auxiliar (pos 2) → Sujeito (pos 3) → Preposição + Destino → Partizip II (final). INVERSÃO!",conj:"fahren → ich bin gefahren, du bist gefahren, er ist gefahren...",verb:"fahren — verbo FORTE de movimento. Perfekt com SEIN. Partizip II: gefahren (sem mudança vocálica: a→a).",tenseLab:"Perfekt com inversão: quando a posição 1 é ocupada por um complemento (tempo), o sujeito vai para a posição 3. O verbo SEMPRE fica na posição 2!",cases:"Dativ: 'nach Berlin'. Nomes de cidades não levam artigo. 'Nach' rege Dativ (implícito).",decl:"Berlin — nomes de cidades são neutros e usados sem artigo na maioria dos contextos.",reason:"ESTA É UMA DAS ESTRUTURAS MAIS IMPORTANTES DO ALEMÃO: A inversão. Quando algo ocupa a posição 1 (que não seja o sujeito), o sujeito vai para DEPOIS do verbo (posição 3). O verbo permanece FIXO na posição 2.",nuance:"A inversão é obrigatória: não existe 'Letzte Woche ich bin...' — isso está ERRADO. O verbo SEMPRE é o segundo elemento da oração principal.",pron:"'gefahren' /ɡəˈfaːʁən/ — 'ah' longo, 'r' gutural.",commonErr:"Manter ordem SV após expressão temporal: 'Letzte Woche ich bin...' está ERRADO. A inversão é obrigatória: 'Letzte Woche bin ich...'.",extra:"Inversão (Inversion): Sempre que a posição 1 tem algo que não é o sujeito, o sujeito vai para posição 3. Esta é a regra V2 (Verb-zweit-Stellung)."}},
+    {de:"Weil es regnet bleibe ich zu Hause",pt:"Como está chovendo fico em casa",deWords:["Weil","es","regnet","bleibe","ich","zu","Hause"],ptWords:["Como","está","chovendo","fico","em","casa"],cat:"Clima",tense:"Präsens + subordinada",expl:{literal:"Weil=porque/como, es=está, regnet=chovendo, bleibe=fico, ich=eu, zu=em, Hause=casa",natural:"Como está chovendo, fico em casa",words:[{w:"Weil",g:"Conjunção subordinativa 'porque/como'",f:"Introduz oração subordinada"}, {w:"es",g:"Pronome impessoal Nominativ",f:"Sujeito da subordinada"}, {w:"regnet",g:"Verbo 'regnen' 3ª pessoa singular — VERBO NO FINAL da subordinada!",f:"Verbo conjugado no FINAL (porque é subordinada)"}, {w:"bleibe",g:"Verbo 'bleiben' (ficar/permanecer), 1ª pessoa singular — verbo da oração principal na posição 2",f:"Verbo conjugado da principal"}, {w:"ich",g:"Pronome Nominativ",f:"Sujeito da principal"}, {w:"zu",g:"Preposição + Dativ",f:"Preposição"}, {w:"Hause",g:"Substantivo 'Haus' no Dativ (expressão fixa)",f:"Complemento de lugar"}],order:"SUBORDINADA: Conjunção weil → Sujeito → ... → Verbo no FINAL. PRINCIPAL: Verbo (pos 1, porque a subordinada ocupa posição 1) → Sujeito.",conj:"bleiben → ich bleibe, du bleibst, er bleibt...",verb:"bleiben — FORTE. Significa 'ficar, permanecer'.",tenseLab:"Präsens com oração subordinada (weil). Esta é a estrutura de subordinação mais importante do alemão.",cases:"Dativ: 'zu Hause' — expressão fixa. 'zu' rege Dativ.",decl:"Hause: forma fixa de Dativ de 'Haus'. 'zu Hause' = em casa (locativo). Compare: 'nach Hause' = para casa (direcional).",reason:"ORAÇÕES SUBORDINADAS são o maior desafio da sintaxe alemã. Com 'weil', o verbo conjugado vai para o FINAL ABSOLUTO da oração subordinada. É a característica mais marcante do alemão.",nuance:"Na oração principal após a subordinada, o verbo fica na posição 1 (porque toda a subordinada ocupa a posição 1). Isso é obrigatório.",pron:"'weil' /vaɪl/, 'bleibe' /ˈblaɪbə/.",commonErr:"Manter o verbo na posição 2 na subordinada: 'Weil es regnet...' está CERTO (regnet no final). Mas 'Weil regnet es...' está ERRADO. O verbo da subordinada SEMPRE vai para o final.",extra:"Conjunções subordinativas que mandam o verbo para o final: weil, dass, wenn, als, ob, damit, obwohl, nachdem, bevor, während, seitdem."}},
+    {de:"Gestern habe ich meine Freundin im Café getroffen",pt:"Ontem encontrei minha namorada no café",deWords:["Gestern","habe","ich","meine","Freundin","im","Café","getroffen"],ptWords:["Ontem","encontrei","minha","namorada","no","café"],cat:"Amigos",tense:"Perfekt",expl:{literal:"Gestern=ontem, habe=tenho(aux), ich=eu, meine=minha(Akk), Freundin=namorada/amiga, im=no(Dativ), Café=café, getroffen=encontrado",natural:"Ontem eu encontrei minha namorada no café",words:[{w:"Gestern",g:"Advérbio de tempo",f:"Tópico (posição 1)"}, {w:"habe",g:"Auxiliar 'haben'",f:"Auxiliar (pos 2)"}, {w:"ich",g:"Pronome Nominativ",f:"Sujeito (pos 3 — inversão!)"}, {w:"meine",g:"Pronome possessivo feminino Akkusativ (Nominativ=meine, sem mudança)",f:"Possessivo"}, {w:"Freundin",g:"Substantivo feminino Akkusativ",f:"Objeto direto"}, {w:"im",g:"Contração: in + dem (Dativ). Indica localização",f:"Preposição contraída"}, {w:"Café",g:"Substantivo neutro Dativ",f:"Lugar"}, {w:"getroffen",g:"Partizip II de 'treffen' (encontrar) — FORTE: ge-troff-en",f:"Partizip II no FINAL"}],order:"Tempo(pos1) → Auxiliar → Sujeito → Obj Akk + Locativo Dativ → Partizip II(final).",conj:"treffen → ich habe getroffen...",verb:"treffen — FORTE. Partizip II: getroffen (e→o, terminação -en).",tenseLab:"Perfekt com inversão temporal + objeto Akkusativ + locativo Dativ.",cases:"Akkusativ: 'meine Freundin' (feminino, sem mudança N→A). Dativ: 'im Café' = in dem Café (Dativ, localização).",decl:"in + Dativ = localização (Wo? Onde?). in + Akkusativ = direção (Wohin? Para onde?).",reason:"Demonstra a diferença entre 'in' + Dativ (localização) e 'in' + Akkusativ (direção). 'Im Café' = no café (onde? → Dativ). 'Ins Café' = para o café (para onde? → Akkusativ).",nuance:"Wechselpräpositionen (preposições de duas vias): in, an, auf, vor, hinter, über, unter, neben, zwischen. Usam Dativ para localização (Wo?) e Akkusativ para direção (Wohin?).",pron:"'getroffen' /ɡəˈtʁɔfən/.",commonErr:"Usar Akkusativ com 'in' para localização: 'in das Café' (ins Café) significa 'para dentro do café' (direção), não 'no café' (localização).",extra:"Preposições de duas vias: Dativ=Wo? (local), Akkusativ=Wohin? (direção). Ex: im Kino (no cinema) vs ins Kino (para o cinema), am Tisch (na mesa) vs auf den Tisch (para a mesa)."}},
+    {de:"Ich würde gern einmal nach Deutschland reisen",pt:"Eu gostaria de viajar para a Alemanha um dia",deWords:["Ich","würde","gern","einmal","nach","Deutschland","reisen"],ptWords:["Eu","gostaria","de","viajar","para","a","Alemanha","um","dia"],cat:"Viagem",tense:"Konjunktiv II",expl:{literal:"Ich=Eu, würde=iria(aux Konjunktiv II), gern=com prazer, einmal=uma vez/um dia, nach=para, Deutschland=Alemanha, reisen=viajar(infinitivo)",natural:"Eu gostaria de viajar para a Alemanha um dia",words:[{w:"Ich",g:"Pronome Nominativ",f:"Sujeito"}, {w:"würde",g:"Konjunktiv II de 'werden' (tornar-se) — auxiliar para formar futuro do pretérito/condicional",f:"Auxiliar Konjunktiv II (pos 2)"}, {w:"gern",g:"Advérbio 'com prazer' — expressa gosto/vontade",f:"Advérbio modal"}, {w:"einmal",g:"Advérbio 'uma vez, algum dia'",f:"Advérbio temporal"}, {w:"nach",g:"Preposição de direção + Dativ",f:"Preposição"}, {w:"Deutschland",g:"Nome próprio neutro (países neutros sem artigo)",f:"Destino"}, {w:"reisen",g:"Verbo principal no INFINITIVO",f:"Verbo no FINAL"}],order:"Auxiliar Konjunktiv II (pos 2) + Advérbios + Complemento + Infinitivo (final).",conj:"würde + infinitivo = forma mais comum de Konjunktiv II para verbos regulares e maioria dos irregulares.",verb:"reisen — regular. Usa 'würde + reisen' para Konjunktiv II (forma composta).",tenseLab:"Konjunktiv II com 'würde'. Esta é a forma MAIS COMUM de expressar condicional/futuro do pretérito em alemão moderno.",cases:"Dativ: 'nach Deutschland'. Países sem artigo (a maioria) usam 'nach' + nome do país.",decl:"Deutschland (neutro) = Alemanha. Países sem artigo: nach Deutschland, nach Brasilien, nach Frankreich. Países COM artigo: in die Schweiz, in die Türkei, in den Iran.",reason:"'Würde + infinitivo' é a estrutura mais produtiva para expressar desejos e hipóteses. Substitui o Konjunktiv II simples para a maioria dos verbos na fala cotidiana.",nuance:"'Gern' expressa prazer: ich mache gern (eu gosto de fazer), ich würde gern (eu gostaria de). 'Lieber' = preferência: ich würde lieber (eu preferiria).",pron:"'würde' /ˈvʏʁdə/, 'gern' /ɡɛʁn/.",commonErr:"Esquecer que 'würde' manda o verbo principal para o final: 'Ich würde reisen nach Deutschland' está ERRADO. O infinitivo vai no FINAL.",extra:"Konjunktiv II tem duas formas: simples (ich käme, ich ginge — formal/escrita) e composta com 'würde' (ich würde kommen — comum/falada). Na fala, usa-se 'würde' em 90% dos casos."}}
+  ]);
 
-// === CORE LOGIC ===
-let _wordCount=2,_streak=0,_streakNeeded=5,_consecErrors=0,_recentHistory=[],_totalCorrect=0,_totalAttempts=0;
-let _currentPhrase=null,_currentDirection='pt_de',_currentCategory=null,_slots=[],_verified=false,_correct=false;
-let _listenersReady=false,_fastMode=false;
-const MAX_WORDS=15,MIN_WORDS=2,HISTORY_SIZE=30;
+  // ===== STATE =====
+  let _sbState = {
+    wordCount: 2,
+    streak: 0,
+    errorsInARow: 0,
+    streakNeeded: 5,
+    history: [],
+    totalCorrect: 0,
+    totalAttempts: 0,
+    lastDirection: 'ptToDe'
+  };
+  let _currentPhrase = null;
+  let _answerBlocks = [];
+  let _bankBlocks = [];
+  let _verified = false;
+  let _rendered = false;
 
-function _getState(){ if(typeof state!=='undefined'&&state){ if(!state.sentenceBuilderState) state.sentenceBuilderState={wordCount:2,streak:0,streakNeeded:5,consecErrors:0,recentHistory:[],totalCorrect:0,totalAttempts:0,fastMode:false}; return state.sentenceBuilderState; } return {wordCount:2,streak:0,streakNeeded:5,consecErrors:0,recentHistory:[],totalCorrect:0,totalAttempts:0,fastMode:false}; }
-function _loadState(){ var s=_getState(); _wordCount=s.wordCount||2; _streak=s.streak||0; _streakNeeded=s.streakNeeded||5; _consecErrors=s.consecErrors||0; _recentHistory=s.recentHistory||[]; _totalCorrect=s.totalCorrect||0; _totalAttempts=s.totalAttempts||0; _fastMode=s.fastMode||false; }
-function _saveState(){ if(typeof state!=='undefined'&&state){ state.sentenceBuilderState={wordCount:_wordCount,streak:_streak,streakNeeded:_streakNeeded,consecErrors:_consecErrors,recentHistory:_recentHistory.slice(-HISTORY_SIZE),totalCorrect:_totalCorrect,totalAttempts:_totalAttempts,fastMode:_fastMode}; if(typeof saveState==='function') saveState(); } }
-function _onStreakNeededChange(val){ _streakNeeded=parseInt(val)||5; _streak=0; _consecErrors=0; _saveState(); _updateStatsDisplay(); }
-function _toggleFastMode(checked){ _fastMode=!!checked; _saveState(); }
+  function _loadState(){
+    if(typeof state !== 'undefined' && state && state.sentenceBuilderState){
+      _sbState = {..._sbState, ...state.sentenceBuilderState};
+    }
+  }
 
-function _selectPhrase(){ var dir=_currentDirection; var maxCount=Math.min(_wordCount,MAX_WORDS); var candidates=[]; for(var c=MIN_WORDS;c<=maxCount;c++){ if(!SB_DB[c]||!SB_DB[c][dir]) continue; for(var cat in SB_DB[c][dir]){ var phrases=SB_DB[c][dir][cat]; for(var i=0;i<phrases.length;i++){ var p=phrases[i]; if(_recentHistory.indexOf(p.de+'|'+p.pt)===-1) candidates.push({count:c,cat:cat,phrase:p}); } } } if(candidates.length===0){ _recentHistory=_recentHistory.slice(-5); for(var c2=MIN_WORDS;c2<=maxCount;c2++){ if(!SB_DB[c2]||!SB_DB[c2][dir]) continue; for(var cat2 in SB_DB[c2][dir]){ var phrases2=SB_DB[c2][dir][cat2]; for(var j=0;j<phrases2.length;j++){ var p2=phrases2[j]; if(_recentHistory.indexOf(p2.de+'|'+p2.pt)===-1) candidates.push({count:c2,cat:cat2,phrase:p2}); } } } } if(candidates.length===0){ if(SB_DB[_wordCount]&&SB_DB[_wordCount][dir]){ var cats=Object.keys(SB_DB[_wordCount][dir]); if(cats.length>0){ var phr=SB_DB[_wordCount][dir][cats[0]][0]; if(phr) candidates.push({count:_wordCount,cat:cats[0],phrase:phr}); } } } if(candidates.length===0) return false; var sel=candidates[Math.floor(Math.random()*candidates.length)]; _currentPhrase=sel.phrase; _currentCategory=sel.cat; return true; }
+  function _saveState(){
+    if(typeof state !== 'undefined' && state){
+      state.sentenceBuilderState = {..._sbState};
+      if(typeof saveState === 'function') saveState();
+    }
+  }
 
-function _renderPhrase(){ if(!_currentPhrase) return false; _slots=[]; _verified=false; _correct=false; var lang=(typeof state!=='undefined'&&state)?state.lang:'pt'; var srcText=(lang==='en'&&_currentPhrase.en)?_currentPhrase.en:_currentPhrase.pt; var promptText,targetWords; if(_currentDirection==='pt_de'){ promptText=srcText; targetWords=_tokenizeDe(_currentPhrase.de); } else { promptText=_currentPhrase.de; targetWords=_tokenizePt(srcText); } var promptEl=document.getElementById('sb-prompt-text'); if(promptEl) promptEl.textContent=promptText; var blockWords=targetWords.map(function(w,i){return{id:i,text:w};}); _shuffleArray(blockWords); var blocksArea=document.getElementById('sb-blocks'); if(blocksArea){ blocksArea.innerHTML=''; blockWords.forEach(function(bw){ var el=document.createElement('div'); el.className='sb-block'; el.textContent=bw.text; el.setAttribute('data-id',bw.id); el.setAttribute('draggable','true'); el.addEventListener('dragstart',_onDragStart); el.addEventListener('dragend',_onDragEnd); el.addEventListener('touchstart',_onTouchStart,{passive:false}); el.addEventListener('touchmove',_onTouchMove,{passive:false}); el.addEventListener('touchend',_onTouchEnd); blocksArea.appendChild(el); }); } var targetArea=document.getElementById('sb-target'); if(targetArea){ targetArea.innerHTML='<span class="sb-placeholder" style="color:var(--text3);font-size:.85rem">Arraste os blocos aqui para montar a frase</span>'; } var verifyBtn=document.getElementById('sb-verify-btn'); if(verifyBtn) verifyBtn.disabled=true; var feedbackEl=document.getElementById('sb-feedback'); if(feedbackEl){feedbackEl.className='sb-feedback';feedbackEl.textContent='';} var explainPanel=document.getElementById('sb-explain-panel'); if(explainPanel) explainPanel.classList.remove('open'); var explainBody=document.getElementById('sb-explain-body'); if(explainBody) explainBody.innerHTML=''; var continueBtn=document.getElementById('sb-continue-btn'); if(continueBtn) continueBtn.classList.remove('visible'); _updateDirectionLabel(); _updateStatsDisplay(); return true; }
-function _shuffleArray(arr){ for(var i=arr.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var temp=arr[i]; arr[i]=arr[j]; arr[j]=temp; } }
+  function _getPhrasesForWordCount(wc){
+    const all = SB_PHRASES[wc] || [];
+    // Filter out recently used phrases (history)
+    const available = all.filter(p => !_sbState.history.includes(p.de));
+    if(available.length === 0) return all; // fallback: reuse all if none available
+    return available;
+  }
 
-var _dragData=null;
-function _onDragStart(e){ _dragData={id:e.target.getAttribute('data-id'),text:e.target.textContent,el:e.target}; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',e.target.textContent); }
-function _onDragEnd(e){ e.target.classList.remove('dragging'); _dragData=null; }
-function _onDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect='move'; e.currentTarget.classList.add('drag-over'); }
-function _onDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
-function _onDrop(e){ e.preventDefault(); e.currentTarget.classList.remove('drag-over'); var id=_dragData?_dragData.id:'-1'; _addToSlots(id,e.dataTransfer.getData('text/plain')); _dragData=null; }
+  function _pickPhrase(){
+    const wc = Math.min(_sbState.wordCount, 15);
+    const available = _getPhrasesForWordCount(wc);
+    if(available.length === 0){
+      // Try to find any phrase at this word count
+      const all = SB_PHRASES[wc] || [];
+      if(all.length === 0) return null;
+      _sbState.history = [];
+      return all[Math.floor(Math.random() * all.length)];
+    }
+    return available[Math.floor(Math.random() * available.length)];
+  }
 
-var _touchData=null,_touchClone=null;
-function _onTouchStart(e){ if(e.target.classList.contains('sb-block')&&!e.target.classList.contains('used')){ e.preventDefault(); var t=e.touches[0]; _touchData={id:e.target.getAttribute('data-id'),text:e.target.textContent,el:e.target,startX:t.clientX,startY:t.clientY}; } }
-function _onTouchMove(e){ if(!_touchData) return; e.preventDefault(); var t=e.touches[0]; if(!_touchClone){ _touchClone=document.createElement('div'); _touchClone.className='sb-block dragging'; _touchClone.textContent=_touchData.text; _touchClone.style.position='fixed'; _touchClone.style.zIndex='9999'; _touchClone.style.pointerEvents='none'; document.body.appendChild(_touchClone); _touchData.el.classList.add('dragging'); } _touchClone.style.left=(t.clientX-40)+'px'; _touchClone.style.top=(t.clientY-20)+'px'; var target=document.getElementById('sb-target'); if(target){ var rect=target.getBoundingClientRect(); if(t.clientX>=rect.left&&t.clientX<=rect.right&&t.clientY>=rect.top&&t.clientY<=rect.bottom){target.classList.add('drag-over')}else{target.classList.remove('drag-over')} } }
-function _onTouchEnd(e){ if(!_touchData) return; if(_touchClone){_touchClone.remove();_touchClone=null;} _touchData.el.classList.remove('dragging'); var target=document.getElementById('sb-target'); if(target) target.classList.remove('drag-over'); var t=(e.changedTouches&&e.changedTouches.length>0)?e.changedTouches[0]:null; if(t&&target){ var rect=target.getBoundingClientRect(); if(t.clientX>=rect.left&&t.clientX<=rect.right&&t.clientY>=rect.top&&t.clientY<=rect.bottom){_addToSlots(_touchData.id,_touchData.text)} } _touchData=null; }
+  function _getWords(phrase){
+    if(_sbState.lastDirection === 'deToPt'){
+      return phrase.ptWords;
+    } else {
+      return phrase.deWords;
+    }
+  }
 
-function _addToSlots(id,text){ if(_verified) return; var targetArea=document.getElementById('sb-target'); if(!targetArea) return; var placeholder=targetArea.querySelector('.sb-placeholder'); if(placeholder) placeholder.remove(); var slotEl=document.createElement('span'); slotEl.className='sb-slot'; slotEl.setAttribute('data-id',id); slotEl.innerHTML=text+'<span class="sb-remove" onclick="GermanSentenceBuilderCore._removeSlot(this.parentElement)">&times;</span>'; targetArea.appendChild(slotEl); _slots.push({id:id,text:text}); var block=document.querySelector('.sb-block[data-id="'+id+'"]'); if(block) block.classList.add('used'); _updateVerifyButton(); }
-function _removeSlot(el){ if(_verified) return; var id=el.getAttribute('data-id'); var targetArea=document.getElementById('sb-target'); if(targetArea) targetArea.removeChild(el); _slots=_slots.filter(function(s){return s.id!==id;}); var block=document.querySelector('.sb-block[data-id="'+id+'"]'); if(block) block.classList.remove('used'); if(_slots.length===0&&targetArea){ targetArea.innerHTML='<span class="sb-placeholder" style="color:var(--text3);font-size:.85rem">Arraste os blocos aqui para montar a frase</span>'; } _updateVerifyButton(); }
-function _updateVerifyButton(){ var btn=document.getElementById('sb-verify-btn'); if(btn) btn.disabled=_slots.length===0; }
+  function _getShuffledWords(words){
+    const arr = words.map((w, i) => ({text: w, id: 'sbw_' + i + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)}));
+    // Fisher-Yates shuffle
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
 
-function _verify(){ if(_verified||_slots.length===0) return; _verified=true; _totalAttempts++; var userText=_slots.map(function(s){return s.text;}).join(' '); var correctText,lang=(typeof state!=='undefined'&&state)?state.lang:'pt'; if(_currentDirection==='pt_de'){ correctText=_tokenizeDe(_currentPhrase.de).join(' '); } else { var srcText=(lang==='en'&&_currentPhrase.en)?_currentPhrase.en:_currentPhrase.pt; correctText=_tokenizePt(srcText).join(' '); } _correct=(userText.toLowerCase().trim()===correctText.toLowerCase().trim()); var feedbackEl=document.getElementById('sb-feedback'),verifyBtn=document.getElementById('sb-verify-btn'),continueBtn=document.getElementById('sb-continue-btn'); if(_correct){ _totalCorrect++; _streak++; _consecErrors=0; if(feedbackEl){feedbackEl.className='sb-feedback correct';feedbackEl.textContent='Correct! Sehr gut!';} if(verifyBtn) verifyBtn.style.display='none'; if(!_fastMode&&continueBtn) continueBtn.classList.add('visible'); if(_streak>=_streakNeeded&&_wordCount<MAX_WORDS){_wordCount++;_streak=0;} _currentDirection=(_currentDirection==='pt_de')?'de_pt':'pt_de'; } else { _consecErrors++; _streak=0; if(feedbackEl){feedbackEl.className='sb-feedback wrong';feedbackEl.textContent='Incorrect! See explanation below.';} if(verifyBtn) verifyBtn.style.display='none'; if(continueBtn) continueBtn.classList.add('visible'); if(_consecErrors>=2&&_wordCount>MIN_WORDS){_wordCount--;_consecErrors=0;} } var uid=_currentPhrase.de+'|'+_currentPhrase.pt; _recentHistory.push(uid); if(_recentHistory.length>HISTORY_SIZE) _recentHistory.shift(); if(!_fastMode||!_correct){ _showExplanation(); } var bar=document.getElementById('sb-session-bar'); if(bar) bar.style.width=Math.round(_totalCorrect/Math.max(1,_totalAttempts)*100)+'%'; _updateStatsDisplay(); _saveState(); _updateGPSEvo(); if(_fastMode&&_correct){ setTimeout(function(){_continue();},600); } }
-function _showExplanation(){ var panel=document.getElementById('sb-explain-panel'),body=document.getElementById('sb-explain-body'); if(!panel||!body) return; if(_currentPhrase&&_currentPhrase.explanation){ body.innerHTML=_buildExplanationHTML(_currentPhrase.explanation); }else{body.innerHTML='<p>No detailed explanation for this phrase.</p>';} panel.classList.add('open'); }
-function _continue(){ var feedbackEl=document.getElementById('sb-feedback'); if(feedbackEl) feedbackEl.className='sb-feedback'; var verifyBtn=document.getElementById('sb-verify-btn'); if(verifyBtn){verifyBtn.style.display='';verifyBtn.disabled=true;} var continueBtn=document.getElementById('sb-continue-btn'); if(continueBtn) continueBtn.classList.remove('visible'); var panel=document.getElementById('sb-explain-panel'); if(panel) panel.classList.remove('open'); var sel=_selectPhrase(); if(sel) _renderPhrase(); }
+  function _advanceDifficulty(){
+    _sbState.streak++;
+    _sbState.errorsInARow = 0;
+    _sbState.totalCorrect++;
+    if(_sbState.streak >= _sbState.streakNeeded && _sbState.wordCount < 15){
+      _sbState.wordCount++;
+      _sbState.streak = 0;
+    }
+    // Alternate direction
+    _sbState.lastDirection = (_sbState.lastDirection === 'ptToDe') ? 'deToPt' : 'ptToDe';
+    // Add to history, keep last 20
+    if(_currentPhrase){
+      _sbState.history.push(_currentPhrase.de);
+      if(_sbState.history.length > 20) _sbState.history.shift();
+    }
+    _saveState();
+  }
 
-function _updateStatsDisplay(){ var wcEl=document.getElementById('sb-word-count'); if(wcEl) wcEl.textContent=_wordCount; var streakEl=document.getElementById('sb-streak'); if(streakEl) streakEl.textContent=_streak+'/'+_streakNeeded; var errEl=document.getElementById('sb-consec-errors'); if(errEl) errEl.textContent=_consecErrors; var snEl=document.getElementById('sb-streak-needed'); if(snEl) snEl.value=_streakNeeded; var snvEl=document.getElementById('sb-streak-needed-val'); if(snvEl) snvEl.textContent=_streakNeeded; var streakStat=document.getElementById('sb-streak-stat'); if(streakStat){ streakStat.className='sb-stat '+(_streak>=_streakNeeded?'streak-ok':(_streak>0?'streak-warn':'')); } }
-function _resetCurr(){ _slots=[]; _verified=false; _correct=false; var targetArea=document.getElementById('sb-target'); if(targetArea) targetArea.innerHTML='<span class="sb-placeholder" style="color:var(--text3);font-size:.85rem">Arraste os blocos aqui para montar a frase</span>'; var blocks=document.querySelectorAll('.sb-block'); blocks.forEach(function(b){b.classList.remove('used');}); var verifyBtn=document.getElementById('sb-verify-btn'); if(verifyBtn){verifyBtn.style.display='';verifyBtn.disabled=true;} var feedbackEl=document.getElementById('sb-feedback'); if(feedbackEl) feedbackEl.className='sb-feedback'; var panel=document.getElementById('sb-explain-panel'); if(panel) panel.classList.remove('open'); var continueBtn=document.getElementById('sb-continue-btn'); if(continueBtn) continueBtn.classList.remove('visible'); }
-function _resetGame(){ _wordCount=2; _streak=0; _consecErrors=0; _recentHistory=[]; _totalCorrect=0; _totalAttempts=0; _currentPhrase=null; _currentDirection='pt_de'; _streakNeeded=5; _fastMode=false; _saveState(); _slots=[]; _verified=false; _correct=false; var targetArea=document.getElementById('sb-target'); if(targetArea) targetArea.innerHTML='<span class="sb-placeholder" style="color:var(--text3);font-size:.85rem">Arraste os blocos aqui para montar a frase</span>'; var blocks=document.querySelectorAll('.sb-block'); blocks.forEach(function(b){b.classList.remove('used');}); var verifyBtn=document.getElementById('sb-verify-btn'); if(verifyBtn){verifyBtn.style.display='';verifyBtn.disabled=true;} var feedbackEl=document.getElementById('sb-feedback'); if(feedbackEl) feedbackEl.className='sb-feedback'; var panel=document.getElementById('sb-explain-panel'); if(panel) panel.classList.remove('open'); var continueBtn=document.getElementById('sb-continue-btn'); if(continueBtn) continueBtn.classList.remove('visible'); var snEl=document.getElementById('sb-streak-needed'); if(snEl) snEl.value=5; var snvEl=document.getElementById('sb-streak-needed-val'); if(snvEl) snvEl.textContent='5'; var ftEl=document.getElementById('sb-fastmode-toggle'); if(ftEl) ftEl.checked=false; _updateDirectionLabel(); var sel=_selectPhrase(); if(sel) _renderPhrase(); _updateStatsDisplay(); }
+  function _reduceDifficulty(){
+    _sbState.errorsInARow++;
+    _sbState.streak = 0;
+    if(_sbState.errorsInARow >= 2 && _sbState.wordCount > 2){
+      _sbState.wordCount--;
+      _sbState.errorsInARow = 0;
+    }
+    _saveState();
+  }
 
-function _updateGPSEvo(){ if(typeof GPS==='undefined') return; if(_correct){ if(!GPS.skills.grammar.sentenceStructure) GPS.skills.grammar.sentenceStructure=0; GPS.skills.grammar.sentenceStructure=Math.min(100,GPS.skills.grammar.sentenceStructure+2); if(!GPS.skills.grammar.wordOrder) GPS.skills.grammar.wordOrder=0; GPS.skills.grammar.wordOrder=Math.min(100,GPS.skills.grammar.wordOrder+2); if(!GPS.skills.grammar.cases) GPS.skills.grammar.cases={nom:0,acc:0,dat:0}; if(_currentPhrase&&_currentPhrase.de){ if(/den\b|einen\b/.test(_currentPhrase.de)){ GPS.skills.grammar.cases.acc=Math.min(100,(GPS.skills.grammar.cases.acc||0)+2); } if(/dem\b|einem\b|im\b|zum\b|mir\b/.test(_currentPhrase.de)){ GPS.skills.grammar.cases.dat=Math.min(100,(GPS.skills.grammar.cases.dat||0)+2); } } if(_currentPhrase&&_currentPhrase.de&&/muss|kann|will|darf|soll|mÃ¶chte/.test(_currentPhrase.de)){ if(!GPS.skills.verbs) GPS.skills.verbs={regular:0,irregular:0,modal:0,separable:0,auxiliary:0}; GPS.skills.verbs.modal=Math.min(100,(GPS.skills.verbs.modal||0)+2); } if(_currentPhrase&&_currentPhrase.de&&/habe|hat|gearbeitet|gegangen|gefahren/.test(_currentPhrase.de)){ if(!GPS.skills.grammar.tenses) GPS.skills.grammar.tenses=0; GPS.skills.grammar.tenses=Math.min(100,GPS.skills.grammar.tenses+2); } } var ov=GPS.skills.overall||0; var g=GPS.skills.grammar; if(g&&g.sentenceStructure&&g.wordOrder){ ov=Math.round((g.sentenceStructure+g.wordOrder+(g.tenses||0)+(g.cases?((g.cases.nom||0)+(g.cases.acc||0)+(g.cases.dat||0))/3:0))/4); } GPS.skills.overall=Math.min(100,ov); if(typeof saveGPS==='function') saveGPS(); }
+  // ===== TRACK EVO =====
+  function _trackEvo(correct){
+    if(typeof trackEvo !== 'function') return;
+    const fakeEx = {
+      q: 'SB: ' + (_currentPhrase ? _currentPhrase.de : ''),
+      qPt: 'SB: ' + (_currentPhrase ? _currentPhrase.pt : ''),
+      t: 'o'
+    };
+    // Track with sentence structure categories
+    try {
+      trackEvo(fakeEx, 'sentBuilder', correct, 0);
+    } catch(e){}
+  }
 
-function init(){ if(_listenersReady) return; _loadState(); var modeView=document.getElementById('mode-sentenceBuilder'); if(!modeView) return; var verifyBtn=document.getElementById('sb-verify-btn'); if(verifyBtn) verifyBtn.addEventListener('click',_verify); var resetBtn=document.getElementById('sb-reset-btn'); if(resetBtn) resetBtn.addEventListener('click',_resetCurr); var resetGameBtn=document.getElementById('sb-resetgame-btn'); if(resetGameBtn) resetGameBtn.addEventListener('click',_resetGame); var continueBtn=document.getElementById('sb-continue-btn'); if(continueBtn) continueBtn.addEventListener('click',_continue); var targetArea=document.getElementById('sb-target'); if(targetArea){ targetArea.addEventListener('dragover',_onDragOver); targetArea.addEventListener('drop',_onDrop); targetArea.addEventListener('dragleave',_onDragLeave); } var explainHeader=document.getElementById('sb-explain-header'); if(explainHeader){ explainHeader.addEventListener('click',function(){ var panel=document.getElementById('sb-explain-panel'); if(panel) panel.classList.toggle('open'); }); } _listenersReady=true; }
-function onModeEnter(){ init(); _padDB(); _loadState(); _currentDirection='pt_de'; _updateDirectionLabel(); if(!_currentPhrase){ var sel=_selectPhrase(); if(!sel) return; } _renderPhrase(); _renderSidebarContent(); }
-function _toggleDirection(){ _currentDirection=(_currentDirection==='pt_de')?'de_pt':'pt_de'; _currentPhrase=null; _updateDirectionLabel(); var sel=_selectPhrase(); if(sel) _renderPhrase(); }
-function _updateDirectionLabel(){ var badge=document.getElementById('sb-direction-badge'); var toggle=document.getElementById('sb-direction-toggle'); var isPtDe=(_currentDirection==='pt_de'); if(badge){ badge.textContent=isPtDe?'PT â†’ DE':'DE â†’ PT'; badge.className='sb-direction-badge '+(isPtDe?'pt-de':'de-pt'); } if(toggle){ toggle.textContent=isPtDe?'PT â†’ DE':'DE â†’ PT'; if(isPtDe){toggle.classList.remove('flipped');}else{toggle.classList.add('flipped');} } }
-function _renderSidebarContent(){ var list=document.getElementById('sidebar-sentencebuilder-list'); if(!list) return; list.innerHTML='<div class="sidebar-link-item" style="cursor:default"><span class="link-icon">ðŸ“</span><span>Modo: Montar Frases</span></div><div class="sidebar-link-item" style="cursor:default"><span class="link-icon">ðŸ“Š</span><span>Palavras: '+_wordCount+' | Streak: '+_streak+'/'+_streakNeeded+'</span></div><div class="sidebar-link-item" style="cursor:default"><span class="link-icon">âœ…</span><span>Acertos: '+_totalCorrect+' | Tentativas: '+_totalAttempts+'</span></div>'; }
+  // ===== UI RENDERING =====
+  function _updateStatsUI(){
+    const wcEl = document.getElementById('sb-word-count');
+    const streakEl = document.getElementById('sb-streak-val');
+    const errorsEl = document.getElementById('sb-errors-val');
+    const diffBadge = document.getElementById('sb-diff-badge');
+    const streakNeededEl = document.getElementById('sb-streak-needed');
+    const streakNeededVal = document.getElementById('sb-streak-needed-val');
 
-return {init,onModeEnter,_onStreakNeededChange,_removeSlot,_verify,_resetCurr,_continue,_renderSidebarContent,_toggleDirection,_resetGame,_toggleFastMode};
+    if(wcEl) wcEl.textContent = _sbState.wordCount;
+    if(streakEl) streakEl.textContent = _sbState.streak + '/' + _sbState.streakNeeded;
+    if(errorsEl) errorsEl.textContent = _sbState.errorsInARow;
+    if(diffBadge) diffBadge.textContent = '⚡ ' + _sbState.wordCount + ' palavras';
+    if(streakNeededEl) streakNeededEl.value = _sbState.streakNeeded;
+    if(streakNeededVal) streakNeededVal.textContent = _sbState.streakNeeded;
+  }
+
+  function _renderPhraseCard(phrase){
+    const label = document.getElementById('sb-phrase-label');
+    const text = document.getElementById('sb-phrase-text');
+    const hint = document.getElementById('sb-phrase-hint');
+
+    if(label){
+      if(_sbState.lastDirection === 'deToPt'){
+        label.textContent = 'Traduza para o Português';
+      } else {
+        label.textContent = 'Traduza para o Alemão';
+      }
+    }
+    if(text){
+      if(_sbState.lastDirection === 'deToPt'){
+        text.textContent = phrase.de;
+      } else {
+        text.textContent = phrase.pt;
+      }
+    }
+    if(hint){
+      hint.textContent = _sbState.wordCount + ' palavras • ' + (phrase.cat || 'Geral');
+    }
+  }
+
+  function _renderBlocks(phrase){
+    const answerArea = document.getElementById('sb-answer-area');
+    const bankArea = document.getElementById('sb-word-bank');
+
+    _answerBlocks = [];
+    _bankBlocks = _getShuffledWords(_getWords(phrase));
+    _verified = false;
+
+    // Clear answer area
+    if(answerArea){
+      answerArea.classList.remove('correct-flash', 'wrong-flash');
+      answerArea.innerHTML = '';
+      // Add empty hint placeholder
+      const hint = document.createElement('span');
+      hint.className = 'sb-empty-hint';
+      hint.id = 'sb-empty-hint';
+      hint.textContent = 'Arraste os blocos para cá ou clique neles';
+      answerArea.appendChild(hint);
+    }
+
+    // Render word bank
+    if(bankArea){
+      bankArea.innerHTML = '';
+      _bankBlocks.forEach(block => {
+        const el = document.createElement('div');
+        el.className = 'sb-block';
+        el.textContent = block.text;
+        el.dataset.blockId = block.id;
+        el.draggable = true;
+
+        // Touch events
+        el.addEventListener('touchstart', _handleTouchStart, {passive: false});
+        el.addEventListener('touchmove', _handleTouchMove, {passive: false});
+        el.addEventListener('touchend', _handleTouchEnd, {passive: false});
+
+        // Mouse drag events
+        el.addEventListener('dragstart', _handleDragStart);
+        el.addEventListener('dragend', _handleDragEnd);
+
+        // Click to move
+        el.addEventListener('click', function(e){
+          if(_verified) return;
+          _moveBlockToAnswer(block);
+        });
+
+        bankArea.appendChild(el);
+      });
+    }
+
+    // Setup answer area as drop target
+    if(answerArea){
+      answerArea.addEventListener('dragover', function(e){
+        e.preventDefault();
+        if(!_verified) this.classList.add('drag-over');
+      });
+      answerArea.addEventListener('dragleave', function(){
+        this.classList.remove('drag-over');
+      });
+      answerArea.addEventListener('drop', function(e){
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        if(_verified) return;
+        const blockId = e.dataTransfer.getData('text/plain');
+        const block = _bankBlocks.find(b => b.id === blockId);
+        if(block) _moveBlockToAnswer(block);
+      });
+    }
+
+    // Setup bank as drop target (for returning blocks)
+    if(bankArea){
+      bankArea.addEventListener('dragover', function(e){ e.preventDefault(); });
+      bankArea.addEventListener('drop', function(e){
+        e.preventDefault();
+        if(_verified) return;
+        const blockId = e.dataTransfer.getData('text/plain');
+        const block = _answerBlocks.find(b => b.id === blockId);
+        if(block) _moveBlockToBank(block);
+      });
+    }
+
+    _updateVerifyButton();
+  }
+
+  function _moveBlockToAnswer(block){
+    if(_verified) return;
+    const idx = _bankBlocks.findIndex(b => b.id === block.id);
+    if(idx === -1) return;
+    _bankBlocks.splice(idx, 1);
+    _answerBlocks.push(block);
+    _refreshBlocksUI();
+    _updateVerifyButton();
+  }
+
+  function _moveBlockToBank(block){
+    if(_verified) return;
+    const idx = _answerBlocks.findIndex(b => b.id === block.id);
+    if(idx === -1) return;
+    _answerBlocks.splice(idx, 1);
+    _bankBlocks.push(block);
+    _refreshBlocksUI();
+    _updateVerifyButton();
+  }
+
+  function _refreshBlocksUI(){
+    const answerArea = document.getElementById('sb-answer-area');
+    const bankArea = document.getElementById('sb-word-bank');
+
+    // Render answer blocks
+    if(answerArea){
+      answerArea.innerHTML = '';
+      if(_answerBlocks.length === 0){
+        const hint = document.createElement('span');
+        hint.className = 'sb-empty-hint';
+        hint.id = 'sb-empty-hint';
+        hint.textContent = 'Arraste os blocos para cá ou clique neles';
+        answerArea.appendChild(hint);
+      }
+      _answerBlocks.forEach(block => {
+        const el = document.createElement('div');
+        el.className = 'sb-block';
+        el.textContent = block.text;
+        el.dataset.blockId = block.id;
+        el.draggable = true;
+
+        el.addEventListener('touchstart', _handleTouchStart, {passive: false});
+        el.addEventListener('touchmove', _handleTouchMove, {passive: false});
+        el.addEventListener('touchend', _handleTouchEnd, {passive: false});
+        el.addEventListener('dragstart', _handleDragStart);
+        el.addEventListener('dragend', _handleDragEnd);
+        el.addEventListener('click', function(){
+          if(_verified) return;
+          _moveBlockToBank(block);
+        });
+
+        answerArea.appendChild(el);
+      });
+    }
+
+    // Render bank blocks
+    if(bankArea){
+      bankArea.innerHTML = '';
+      _bankBlocks.forEach(block => {
+        const el = document.createElement('div');
+        el.className = 'sb-block';
+        el.textContent = block.text;
+        el.dataset.blockId = block.id;
+        el.draggable = true;
+
+        el.addEventListener('touchstart', _handleTouchStart, {passive: false});
+        el.addEventListener('touchmove', _handleTouchMove, {passive: false});
+        el.addEventListener('touchend', _handleTouchEnd, {passive: false});
+        el.addEventListener('dragstart', _handleDragStart);
+        el.addEventListener('dragend', _handleDragEnd);
+        el.addEventListener('click', function(e){
+          if(_verified) return;
+          _moveBlockToAnswer(block);
+        });
+
+        bankArea.appendChild(el);
+      });
+    }
+  }
+
+  // === DRAG & DROP HANDLERS ===
+  let _dragData = null;
+  let _dragGhost = null;
+
+  function _handleDragStart(e){
+    if(_verified) return;
+    const blockId = this.dataset.blockId;
+    e.dataTransfer.setData('text/plain', blockId);
+    e.dataTransfer.effectAllowed = 'move';
+    this.classList.add('dragging');
+    _dragData = blockId;
+  }
+
+  function _handleDragEnd(e){
+    this.classList.remove('dragging');
+    _dragData = null;
+  }
+
+  // Touch handlers
+  let _touchClone = null;
+  let _touchStartX = 0;
+  let _touchStartY = 0;
+  let _touchElement = null;
+  let _touchMoved = false;
+  let _touchBlockId = null;
+
+  function _handleTouchStart(e){
+    if(_verified) return;
+    _touchElement = this;
+    _touchBlockId = this.dataset.blockId;
+    _touchMoved = false;
+    const touch = e.touches[0];
+    _touchStartX = touch.clientX;
+    _touchStartY = touch.clientY;
+  }
+
+  function _handleTouchMove(e){
+    if(!_touchElement || _verified) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - _touchStartX;
+    const dy = touch.clientY - _touchStartY;
+    if(!_touchMoved && (Math.abs(dx) > 8 || Math.abs(dy) > 8)){
+      _touchMoved = true;
+      e.preventDefault();
+      // Create ghost
+      _touchClone = _touchElement.cloneNode(true);
+      _touchClone.style.position = 'fixed';
+      _touchClone.style.zIndex = '9999';
+      _touchClone.style.opacity = '0.85';
+      _touchClone.style.pointerEvents = 'none';
+      _touchClone.style.transform = 'translate(-50%, -50%)';
+      _touchClone.style.boxShadow = '0 8px 24px rgba(108,92,231,0.3)';
+      document.body.appendChild(_touchClone);
+      _touchElement.classList.add('dragging');
+    }
+    if(_touchMoved && _touchClone){
+      e.preventDefault();
+      _touchClone.style.left = touch.clientX + 'px';
+      _touchClone.style.top = touch.clientY + 'px';
+    }
+  }
+
+  function _handleTouchEnd(e){
+    if(_touchClone){
+      _touchClone.remove();
+      _touchClone = null;
+    }
+    if(_touchElement){
+      _touchElement.classList.remove('dragging');
+    }
+    if(_touchMoved && _touchBlockId){
+      e.preventDefault();
+      const touch = e.changedTouches[0];
+      const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+      const answerArea = document.getElementById('sb-answer-area');
+      const bankArea = document.getElementById('sb-word-bank');
+
+      // Determine if dropped in answer area
+      const isInAnswer = answerArea && (answerArea === dropTarget || answerArea.contains(dropTarget));
+      const isInBank = bankArea && (bankArea === dropTarget || bankArea.contains(dropTarget));
+
+      // Find the block
+      let blockInAnswer = _answerBlocks.find(b => b.id === _touchBlockId);
+      let blockInBank = _bankBlocks.find(b => b.id === _touchBlockId);
+
+      if(blockInAnswer && isInBank){
+        _moveBlockToBank(blockInAnswer);
+      } else if(blockInBank && isInAnswer){
+        _moveBlockToAnswer(blockInBank);
+      }
+      // If dropped on same area, do nothing
+    }
+    _touchElement = null;
+    _touchBlockId = null;
+    _touchMoved = false;
+  }
+
+  function _updateVerifyButton(){
+    const btn = document.getElementById('sb-verify-btn');
+    if(btn) btn.disabled = (_answerBlocks.length === 0 || _verified);
+  }
+
+  // ===== VERIFICATION =====
+  function _verify(){
+    if(_verified || !_currentPhrase) return;
+
+    const correctWords = (_sbState.lastDirection === 'deToPt')
+      ? _currentPhrase.ptWords
+      : _currentPhrase.deWords;
+
+    const userWords = _answerBlocks.map(b => b.text);
+
+    // Compare word by word (text comparison)
+    const isCorrect = userWords.length === correctWords.length &&
+      userWords.every((w, i) => w === correctWords[i]);
+
+    _sbState.totalAttempts++;
+
+    const answerArea = document.getElementById('sb-answer-area');
+    const explanationEl = document.getElementById('sb-explanation');
+    const continueBtn = document.getElementById('sb-continue-btn');
+    const verifyBtn = document.getElementById('sb-verify-btn');
+    const exIcon = document.getElementById('sb-ex-icon');
+    const exTitle = document.getElementById('sb-ex-title');
+
+    _verified = true;
+
+    if(answerArea){
+      answerArea.classList.add(isCorrect ? 'correct-flash' : 'wrong-flash');
+    }
+
+    if(isCorrect){
+      _advanceDifficulty();
+      if(exIcon) exIcon.textContent = '✅';
+      if(exTitle) exTitle.textContent = 'Correto!';
+      _trackEvo(true);
+    } else {
+      _reduceDifficulty();
+      if(exIcon) exIcon.textContent = '❌';
+      if(exTitle) exTitle.textContent = 'Incorreto — veja a resposta';
+      _trackEvo(false);
+    }
+
+    // Render explanation
+    _renderExplanation(isCorrect, correctWords);
+    if(explanationEl) explanationEl.classList.add('show');
+    if(continueBtn) continueBtn.style.display = 'inline-flex';
+    if(verifyBtn) verifyBtn.disabled = true;
+
+    _updateStatsUI();
+    _saveState();
+  }
+
+  function _renderExplanation(isCorrect, correctWords){
+    const body = document.getElementById('sb-explanation-body');
+    if(!body || !_currentPhrase || !_currentPhrase.expl) return;
+
+    const exp = _currentPhrase.expl;
+    const lang = (typeof state !== 'undefined' && state && state.lang === 'en') ? 'en' : 'pt';
+
+    let html = '';
+
+    // 1. Correct answer
+    html += '<div class="sb-ex-section translation">';
+    html += '<div class="sb-ex-label">📝 Resposta Correta</div>';
+    html += '<div style="font-size:1.1rem;font-weight:700;margin:6px 0">';
+    if(_sbState.lastDirection === 'deToPt'){
+      html += _currentPhrase.pt + ' ← ' + _currentPhrase.de;
+    } else {
+      html += _currentPhrase.de + ' ← ' + _currentPhrase.pt;
+    }
+    html += '</div></div>';
+
+    // 2. Literal + Natural translation
+    html += '<div class="sb-ex-section translation">';
+    html += '<div class="sb-ex-label">🔤 Tradução</div>';
+    html += '<div><strong>Literal:</strong> ' + exp.literal + '</div>';
+    html += '<div style="margin-top:4px"><strong>Natural:</strong> ' + exp.natural + '</div>';
+    html += '</div>';
+
+    // 3. Word-by-word breakdown
+    if(exp.words && exp.words.length > 0){
+      html += '<div class="sb-ex-section grammar">';
+      html += '<div class="sb-ex-label">🔍 Análise Palavra por Palavra</div>';
+      html += '<div class="sb-word-breakdown">';
+      exp.words.forEach(w => {
+        let tagClass = 'obj';
+        const g = (w.g || '').toLowerCase();
+        if(g.includes('sujeito') || g.includes('pronome') || g.includes('nominativ')) tagClass = 'subj';
+        else if(g.includes('verbo') || g.includes('auxiliar') || g.includes('modal')) tagClass = 'verb';
+        else if(g.includes('advérbio')) tagClass = 'adv';
+        else if(g.includes('preposição')) tagClass = 'prep';
+        else if(g.includes('negação')) tagClass = 'neg';
+        else if(g.includes('conjunção')) tagClass = 'conj';
+
+        html += '<div class="sb-word-tag ' + tagClass + '">';
+        html += '<span class="wt-word">' + w.w + '</span>';
+        html += '<span class="wt-grammar">' + (w.g || '') + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+      // Function of each word
+      html += '<div style="margin-top:8px;font-size:.78rem;color:var(--text2);line-height:1.5">';
+      exp.words.forEach(w => {
+        html += '<div><strong>' + w.w + '</strong>: ' + (w.f || '') + '</div>';
+      });
+      html += '</div></div>';
+    }
+
+    // 4. Word order
+    html += '<div class="sb-ex-section word-order">';
+    html += '<div class="sb-ex-label">📐 Ordem das Palavras</div>';
+    html += '<div>' + exp.order + '</div>';
+    html += '</div>';
+
+    // 5. Conjugation
+    html += '<div class="sb-ex-section conjugation">';
+    html += '<div class="sb-ex-label">🔧 Conjugação</div>';
+    html += '<div>' + exp.conj + '</div>';
+    html += '</div>';
+
+    // 6. Verb
+    html += '<div class="sb-ex-section grammar">';
+    html += '<div class="sb-ex-label">📖 Infinitivo Original</div>';
+    html += '<div>' + exp.verb + '</div>';
+    html += '</div>';
+
+    // 7. Tense
+    html += '<div class="sb-ex-section conjugation">';
+    html += '<div class="sb-ex-label">⏳ Tempo Verbal</div>';
+    html += '<div>' + exp.tenseLab + '</div>';
+    html += '</div>';
+
+    // 8. Cases
+    html += '<div class="sb-ex-section cases">';
+    html += '<div class="sb-ex-label">📋 Casos</div>';
+    html += '<div>' + exp.cases + '</div>';
+    html += '</div>';
+
+    // 9. Declinations
+    html += '<div class="sb-ex-section cases">';
+    html += '<div class="sb-ex-label">📎 Declinações</div>';
+    html += '<div>' + exp.decl + '</div>';
+    html += '</div>';
+
+    // 10. Reason for construction
+    html += '<div class="sb-ex-section word-order">';
+    html += '<div class="sb-ex-label">🧠 Motivo da Construção</div>';
+    html += '<div>' + exp.reason + '</div>';
+    html += '</div>';
+
+    // 11. Nuances
+    html += '<div class="sb-ex-section translation">';
+    html += '<div class="sb-ex-label">💡 Nuances</div>';
+    html += '<div>' + exp.nuance + '</div>';
+    html += '</div>';
+
+    // 12. Pronunciation
+    html += '<div class="sb-ex-section pronunciation">';
+    html += '<div class="sb-ex-label">🗣️ Pronúncia Relevante</div>';
+    html += '<div>' + exp.pron + '</div>';
+    html += '</div>';
+
+    // 13. Common Brazilian errors
+    html += '<div class="sb-ex-section common-errors">';
+    html += '<div class="sb-ex-label">⚠️ Erros Comuns de Brasileiros</div>';
+    html += '<div>' + exp.commonErr + '</div>';
+    html += '</div>';
+
+    // 14. Extra
+    if(exp.extra){
+      html += '<div class="sb-ex-section translation">';
+      html += '<div class="sb-ex-label">✨ Observações Extras</div>';
+      html += '<div>' + exp.extra + '</div>';
+      html += '</div>';
+    }
+
+    body.innerHTML = html;
+  }
+
+  function _resetPhrase(){
+    _answerBlocks = [];
+    _verified = false;
+    const explanationEl = document.getElementById('sb-explanation');
+    const continueBtn = document.getElementById('sb-continue-btn');
+    const verifyBtn = document.getElementById('sb-verify-btn');
+    const answerArea = document.getElementById('sb-answer-area');
+
+    if(explanationEl) explanationEl.classList.remove('show');
+    if(continueBtn) continueBtn.style.display = 'none';
+    if(verifyBtn) verifyBtn.disabled = true;
+    if(answerArea){
+      answerArea.classList.remove('correct-flash', 'wrong-flash');
+    }
+
+    if(_currentPhrase){
+      _renderBlocks(_currentPhrase);
+    }
+  }
+
+  function _nextPhrase(){
+    _sbState.totalAttempts++;
+    const phrase = _pickPhrase();
+    if(!phrase) return;
+    _currentPhrase = phrase;
+    _resetPhrase();
+    _renderPhraseCard(phrase);
+    _updateStatsUI();
+    _saveState();
+    // Scroll to top of builder
+    const root = document.getElementById('sb-root');
+    if(root) root.scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
+
+  // ===== INIT / MODE ENTER =====
+  function onModeEnter(){
+    _loadState();
+    _updateStatsUI();
+
+    // Set up streak slider
+    const slider = document.getElementById('sb-streak-needed');
+    if(slider){
+      slider.value = _sbState.streakNeeded;
+      slider.oninput = function(){
+        _sbState.streakNeeded = parseInt(this.value);
+        const val = document.getElementById('sb-streak-needed-val');
+        if(val) val.textContent = _sbState.streakNeeded;
+        _updateStatsUI();
+        _saveState();
+      };
+    }
+
+    // Set up verify button
+    const verifyBtn = document.getElementById('sb-verify-btn');
+    if(verifyBtn){
+      const newBtn = verifyBtn.cloneNode(true);
+      verifyBtn.parentNode.replaceChild(newBtn, verifyBtn);
+      newBtn.addEventListener('click', _verify);
+    }
+
+    // Set up reset button
+    const resetBtn = document.getElementById('sb-reset-btn');
+    if(resetBtn){
+      const newResetBtn = resetBtn.cloneNode(true);
+      resetBtn.parentNode.replaceChild(newResetBtn, resetBtn);
+      newResetBtn.addEventListener('click', function(){
+        if(_verified) return;
+        _resetPhrase();
+        _saveState();
+      });
+    }
+
+    // Set up continue button
+    const continueBtn = document.getElementById('sb-continue-btn');
+    if(continueBtn){
+      const newContinueBtn = continueBtn.cloneNode(true);
+      continueBtn.parentNode.replaceChild(newContinueBtn, continueBtn);
+      newContinueBtn.addEventListener('click', _nextPhrase);
+    }
+
+    if(!_rendered || !_currentPhrase){
+      _rendered = true;
+      _nextPhrase();
+    }
+  }
+
+  function _renderSidebar(){
+    const list = document.getElementById('sidebar-sb-list');
+    if(!list) return;
+    const items = [
+      {icon:'📊',name:'Palavras atuais: ' + _sbState.wordCount},
+      {icon:'🔥',name:'Streak: ' + _sbState.streak + '/' + _sbState.streakNeeded},
+      {icon:'✅',name:'Total correto: ' + _sbState.totalCorrect},
+      {icon:'🎯',name:'Tentativas: ' + _sbState.totalAttempts},
+      {icon:'🔄',name:'Direção: ' + (_sbState.lastDirection === 'ptToDe' ? 'PT→DE' : 'DE→PT')},
+    ];
+    list.innerHTML = items.map(item =>
+      '<div class="sidebar-link-item"><span class="link-icon">'+item.icon+'</span><span>'+item.name+'</span></div>'
+    ).join('');
+  }
+
+  // Reset function for external use
+  function resetBuilder(){
+    _sbState = {wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe'};
+    _currentPhrase = null;
+    _rendered = false;
+    _saveState();
+  }
+
+  return {
+    onModeEnter,
+    _renderSidebar,
+    resetBuilder,
+    getPhrases: function(wc){ return SB_PHRASES[wc] || []; },
+    getState: function(){ return {..._sbState}; }
+  };
 })();
-
+window.GermanSentenceBuilder = window.GermanSentenceBuilder || {};
+Object.assign(window.GermanSentenceBuilder, {
+  onModeEnter: GermanSentenceBuilderCore.onModeEnter,
+  _renderSidebar: GermanSentenceBuilderCore._renderSidebar,
+  resetBuilder: GermanSentenceBuilderCore.resetBuilder,
+  getPhrases: GermanSentenceBuilderCore.getPhrases,
+  getState: GermanSentenceBuilderCore.getState
+});
 
 function setup(){
   loadState();
@@ -7368,7 +8087,7 @@ function setup(){
     if(confirm(_t('reset.confirm'))){
       localStorage.removeItem('deutschmeister_state');
       localStorage.removeItem('deutschmeister_evo');
-      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'},sentenceBuilderState:{wordCount:2,streak:0,streakNeeded:5,consecErrors:0,recentHistory:[],totalCorrect:0,totalAttempts:0,fastMode:false}};
+      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'},sentenceBuilderState:{wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe'}};
       resetGPS();
       applyLang();
       GermanModeCore.init();
@@ -7434,7 +8153,7 @@ $('#import-file').onchange=function(e){
       if(!state.evo)state.evo=null;
       if(!state.currentMode)state.currentMode='chapters';
       if(!state.viewState)state.viewState={};if(!state.musicState)state.musicState={currentSong:null,currentView:'lobby',lobbyScrollY:0};
-      if(!state.sentenceBuilderState)state.sentenceBuilderState={wordCount:2,streak:0,streakNeeded:5,consecErrors:0,recentHistory:[],totalCorrect:0,totalAttempts:0,fastMode:false};
+      if(!state.sentenceBuilderState)state.sentenceBuilderState={wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe'};
       syncGPSFromState();
       saveState();
       applyLang();

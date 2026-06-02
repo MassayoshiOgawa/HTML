@@ -4,7 +4,7 @@ DOCUMENTACAO TECNICA COMPLETA - SUMMON GAME
 Arquivo: SummonGame.html
 Versao: Single-file HTML5 Canvas game
 Tecnologia: HTML + CSS + JavaScript (zero dependencias externas)
-Linhas totais: 1703
+Linhas totais: 9800+ (Special Round/Mission System added)
 ================================================================================
 
 
@@ -6972,7 +6972,30 @@ MUDANCAS REALIZADAS:
     - Serializacao inclui novas propriedades de Player, MonsterEntity,
       Game e lockedDoor com timer e lockedByPlayerIndex
 
-================================================================================
+=12. SPECIAL ROUND / MISSION SYSTEM:
+    - Special rounds triggered every 3rd round (rounds 3, 6, 9, 12, etc.)
+    - Mission scaling: 1 mission (rounds 1-9), 2 missions (10-19), 3 missions (20+)
+    - 30 mission definitions in MISSION_DEFS array
+    - Conflict validation prevents incompatible mission combinations
+    - Mission HUD displayed in top-right corner
+    - Mission admin panel available in F1/debug mode
+    - Mission states serialized/deserialized with save system
+    - Mission rewards: random item, shield potion, or 75 HP heal
+    - Shared stun (mission 14): when monster stunned, players also stunned for half duration
+    - Monster hunt (mission 15): +150% speed, wallhack, targets player with most items
+    - Hidden artifacts (mission 16): only visible within 4 tile range
+    - Doors stay open (mission 19): prevents closing doors until monster death
+    - Low HP finish (mission 23): round only completes when all players <= 75 HP
+    - One collector (mission 30): only player with most HP can collect artifacts
+    - Special coins (mission 3): gold coins that grant +5 currency each
+    - Golden artifact (mission 26): double collection time, gold visual
+    - Trap patrol immunity (mission 22): monster ignores traps in patrol state
+    - Player collision (mission 21): players collide with each other (multiplayer only)
+    - Artifact shuffle (mission 13): remaining artifacts teleport on collection
+    - Artifact swap (mission 28): artifacts swap positions every 20 seconds
+    - Delayed spawn (mission 29): artifacts appear 20 seconds after summon
+
+==============================================================================
 FIM DO CHANGELOG
-================================================================================
+===============================================================================
 

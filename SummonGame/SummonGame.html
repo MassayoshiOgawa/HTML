@@ -24,18 +24,80 @@ canvas {
   display: block;
   image-rendering: auto;
 }
-#hud {
+#round-counter {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffd700;
+  font-size: 16px;
+  font-family: 'Courier New', monospace;
+  z-index: 10;
+  pointer-events: none;
+  text-shadow: 0 0 6px rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.6);
+  padding: 4px 16px;
+  border-radius: 4px;
+}
+#money-display {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: #44ff44;
+  font-size: 16px;
+  font-family: 'Courier New', monospace;
+  z-index: 10;
+  pointer-events: none;
+  text-shadow: 0 0 6px rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.6);
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+#mission-panel {
   position: absolute;
   top: 10px;
   left: 10px;
-  color: #ccc;
-  font-size: 14px;
-  pointer-events: none;
   z-index: 10;
-  background: rgba(0,0,0,0.7);
+  background: rgba(10,12,18,0.9);
+  border: 1px solid #2a2a3a;
+  border-radius: 6px;
   padding: 8px 12px;
-  border-radius: 4px;
-  line-height: 1.6;
+  color: #ccc;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  min-width: 200px;
+  max-width: 280px;
+  pointer-events: none;
+}
+#mission-panel .mp-header {
+  color: #ffd700;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  border-bottom: 1px solid #333;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+#mission-panel .mp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+#mission-panel .mp-row .mp-name { flex: 1; font-size: 11px; }
+#mission-panel .mp-row .mp-prog { font-size: 11px; white-space: nowrap; }
+#mission-panel .mp-row.done .mp-name { color: #4fc3f7; }
+#mission-panel .mp-row.done .mp-prog { color: #4fc3f7; }
+#mission-panel .mp-no-missions { color: #555; text-align: center; font-size: 11px; padding: 4px 0; }
+#mission-panel .mp-footer {
+  text-align: center;
+  color: #ffd700;
+  font-size: 10px;
+  border-top: 1px solid #333;
+  padding-top: 4px;
+  margin-top: 4px;
 }
 #settings-btn {
   position: absolute;
@@ -838,12 +900,69 @@ canvas {
 
 .config-slot-btn { margin: 1px 0; font-size: 11px !important; padding: 5px 10px !important; }
 
+/* ============================================================
+   MISSION ADMIN STYLES
+   ============================================================ */
+#mission-admin {
+  position: absolute;
+  top: 320px;
+  right: 10px;
+  z-index: 25;
+  background: rgba(8,8,16,0.95);
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #ccc;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  min-width: 280px;
+  max-width: 360px;
+  max-height: 60vh;
+  overflow-y: auto;
+  display: none;
+}
+#mission-admin.active { display: block; }
+#mission-admin h3 {
+  color: #ffd700;
+  margin: 0 0 8px;
+  font-size: 13px;
+  text-align: center;
+}
+#mission-admin .admin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+}
+#mission-admin .admin-row label {
+  color: #aaa;
+  font-size: 11px;
+  flex: 1;
+}
+#mission-admin button {
+  background: #1a1a2e;
+  border: 1px solid #444;
+  color: #ccc;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  border-radius: 3px;
+  margin: 2px;
+  transition: all 0.2s;
+}
+#mission-admin button:hover { background: #2a2a3e; border-color: #4fc3f7; }
+#mission-admin button.force-btn { background: #2a1a1a; border-color: #833; color: #f88; }
+#mission-admin button.force-btn:hover { background: #3a1a1a; }
+
 </style>
 </head>
 <body>
 <div id="game-container">
   <canvas id="game"></canvas>
-  <div id="hud"></div>
+  <div id="round-counter">Summon: 0</div>
+  <div id="money-display">$0</div>
+  <div id="mission-panel"></div>
   <button id="settings-btn" title="Configuracoes">&#x2699;</button>
    <div id="settings-panel">
      <button id="btn-save-game">Save Game</button>
@@ -918,6 +1037,7 @@ canvas {
       <div class="panel-box" id="save-load-box"></div>
     </div>
     <div id="pause-overlay"><div class="pause-text">GAME PAUSED</div></div>
+    <div id="mission-admin"></div>
     <input type="file" id="save-file-input" accept=".json" style="display:none;">
  </div>
 
@@ -1673,7 +1793,7 @@ const MonsterTypes = {
   },
   acrid: {
     name: 'Acrid',
-    desc: 'Contaminates tiles it walks on. Players take 1 HP/s on infected tiles.',
+    desc: 'Contaminates tiles it walks on. Players take 3 HP/s on infected tiles.',
     weight: 1,
     chaseLoseTime: 1.0,
     searchDuration: 2.0,
@@ -1709,7 +1829,7 @@ const MonsterTypes = {
   },
   hoarder: {
     name: 'Hoarder',
-    desc: 'Has a visual shield that negates the first stun. 20% slower after shield breaks.',
+    desc: 'Has a visual shield that negates the first stun. 20% faster after shield breaks.',
     weight: 1,
     chaseLoseTime: 1.0,
     searchDuration: 2.0,
@@ -1721,7 +1841,7 @@ const MonsterTypes = {
   },
   bomber: {
     name: 'Bomber',
-    desc: 'Drops a bomb every 7 seconds. Player takes 15 HP on contact. Bombs last 10s. Max 10 active.',
+    desc: 'Drops a bomb every 2 seconds.',
     weight: 1,
     chaseLoseTime: 1.0,
     searchDuration: 2.0,
@@ -1733,7 +1853,7 @@ const MonsterTypes = {
   },
   vampire: {
     name: 'Vampire',
-    desc: '40% slower inside (tile C), 40% faster outside (tile G).',
+    desc: '40% slower inside, 60% faster outside.',
     weight: 1,
     chaseLoseTime: 1.0,
     searchDuration: 2.0,
@@ -1790,6 +1910,700 @@ function weightedRandom(types) {
     if (r <= 0) return key;
   }
   return entries[entries.length - 1][0];
+}
+
+// ============================================================
+// MISSION SYSTEM - SPECIAL ROUNDS
+// ============================================================
+const MISSION_DEFS = [
+  {
+    id: 1, name: 'Stay in Room', desc: 'Fique 15s consecutivos em um comodo especifico',
+    icon: '\u2302', type: 'room_stay', conflictGroup: 'room', maxRound: 99,
+    init: function(g) {
+      var rooms = ['Bathroom','Bedroom','Corridor','Altar Room'];
+      var target = rooms[Math.floor(Math.random()*rooms.length)];
+      g.missionStates[1] = { targetRoom: target, timer: 0, lastRoom: '', completed: false };
+    },
+    update: function(g, dt) {
+      var ms = g.missionStates[1]; if (!ms || ms.completed) return;
+      var allAlive = g.players.filter(function(p){return p.alive;});
+      var allInRoom = allAlive.length > 0;
+      for (var i=0;i<allAlive.length;i++) {
+        var z = g.getZoneName(allAlive[i].tileX, allAlive[i].tileY);
+        if (z !== ms.targetRoom) { allInRoom = false; break; }
+      }
+      if (allInRoom) { ms.timer += dt; if (ms.timer >= 15) ms.completed = true; }
+      else { ms.timer = 0; }
+      ms.lastRoom = allAlive.length>0 ? g.getZoneName(allAlive[0].tileX, allAlive[0].tileY) : '';
+    },
+    progress: function(g) {
+      var ms=g.missionStates[1]; if(!ms)return'';
+      var s=Math.min(15,ms.timer||0);
+      return (s|0)+'s/15s ['+ms.targetRoom+']';
+    }
+  },
+  {
+    id: 2, name: 'More Artifacts', desc: '+2 artefatos extras para coletar',
+    icon: '\u2726', type: 'artifact_extra', conflictGroup: 'artifact', maxRound: 99,
+    init: function(g) {
+      g.missionStates[2] = { extraCount: 2, spawned: false, completed: false };
+      var pool=[]; for(var y=0;y<g.mapHeight;y++)for(var x=0;x<g.mapWidth;x++){
+        var t=g.tiles[y][x]; if(t!=='C'&&t!=='G')continue;
+        var occ=false;
+        for(var ai=0;ai<g.artifactEntities.length;ai++){if(g.artifactEntities[ai].tileX===x&&g.artifactEntities[ai].tileY===y){occ=true;break;}}
+        if(!occ)pool.push({x:x,y:y});
+      }
+      var ms2=g.missionStates[2];
+      for(var i=0;i<2&&pool.length>0;i++){
+        var idx=Math.floor(Math.random()*pool.length);
+        var pos=pool[idx]; pool.splice(idx,1);
+        var art=new ArtifactEntity(pos.x,pos.y); art._missionExtra=true;
+        g.artifactEntities.push(art);
+      }
+      ms2.spawned=true;
+      g.artifactCount += 2;
+    },
+    update: function(g,dt){ var ms=g.missionStates[2]; if(ms&&ms.spawned){
+      var allCollected=true;
+      for(var i=0;i<g.artifactEntities.length;i++){if(!g.artifactEntities[i].collected&&!g.artifactEntities[i].isFake){allCollected=false;break;}}
+      if(allCollected)ms.completed=true;
+    }},
+    progress: function(g){ var ms=g.missionStates[2]; if(!ms||!ms.spawned)return'';
+      var extra=g.artifactEntities.filter(function(a){return a._missionExtra&&!a.collected;}).length;
+      var total=g.artifactEntities.filter(function(a){return a._missionExtra;}).length;
+      return 'Extra: '+(total-extra)+'/'+total;
+    }
+  },
+  {
+    id: 3, name: 'Collect Coins', desc: 'Colete 3 moedas especiais espalhadas pelo mapa',
+    icon: '\u2728', type: 'collect_coins', conflictGroup: 'coin', maxRound: 99,
+    init: function(g) {
+      g.missionStates[3] = { coins: [], collected: 0, completed: false };
+      var ms=g.missionStates[3];
+      var pool=[];
+      for(var y=0;y<g.mapHeight;y++)for(var x=0;x<g.mapWidth;x++){
+        var t=g.tiles[y][x]; if(t!=='C'&&t!=='G')continue;
+        var occ=false;
+        for(var ai=0;ai<g.artifactEntities.length;ai++){if(g.artifactEntities[ai].tileX===x&&g.artifactEntities[ai].tileY===y){occ=true;break;}}
+        for(var ci=0;ci<g.activeMonsters.length;ci++){var m=g.activeMonsters[ci];if(m.alive&&Math.floor(m.px/TILE_SIZE)===x&&Math.floor(m.py/TILE_SIZE)===y){occ=true;break;}}
+        var onDoor=false;
+        for(var di=0;di<g.doorEntities.length;di++){if(g.doorEntities[di].tileX===x&&g.doorEntities[di].tileY===y){onDoor=true;break;}}
+        if(!occ&&!onDoor)pool.push({x:x,y:y});
+      }
+      for(var i=0;i<3&&pool.length>0;i++){
+        var idx=Math.floor(Math.random()*pool.length);
+        ms.coins.push(pool[idx]); pool.splice(idx,1);
+      }
+    },
+    update: function(g, dt) {
+      var ms=g.missionStates[3]; if(!ms||ms.completed)return;
+      for(var i=0;i<g.players.length;i++){
+        var p=g.players[i]; if(!p.alive)continue;
+        for(var j=ms.coins.length-1;j>=0;j--){
+          var c=ms.coins[j]; if(p.tileX===c.x&&p.tileY===c.y){
+            ms.coins.splice(j,1); ms.collected++; g.currency+=5;
+            g.showMessage(p.name+' collected a special coin! +5');
+            for(var k=0;k<6;k++)g.particles.push(new Particle((c.x+0.5)*TILE_SIZE,(c.y+0.5)*TILE_SIZE,(Math.random()-0.5)*60,(Math.random()-0.5)*60,0.4,'#ffd700'));
+          }
+        }
+      }
+      if(ms.collected>=3)ms.completed=true;
+    },
+    progress: function(g){ var ms=g.missionStates[3]; if(!ms)return''; return ms.collected+'/3'; }
+  },
+  {
+    id: 4, name: 'Visit All Rooms', desc: 'Visite todos os comodos do mapa',
+    icon: '\u2606', type: 'visit_rooms', conflictGroup: 'room', maxRound: 99,
+    init: function(g) {
+      var targetRooms = ['Bathroom','Bedroom','Corridor','Altar Room','Outside'];
+      g.missionStates[4] = { visited: {}, completed: false, targetRooms: targetRooms };
+    },
+    update: function(g,dt){
+      var ms=g.missionStates[4]; if(!ms||ms.completed)return;
+      for(var i=0;i<g.players.length;i++){
+        var p=g.players[i]; if(!p.alive)continue;
+        var z=g.getZoneName(p.tileX,p.tileY);
+        ms.visited[z]=true;
+      }
+      var allVisited=true;
+      for(var j=0;j<ms.targetRooms.length;j++){if(!ms.visited[ms.targetRooms[j]]){allVisited=false;break;}}
+      if(allVisited)ms.completed=true;
+    },
+    progress: function(g){ var ms=g.missionStates[4]; if(!ms)return''; var count=0; for(var k in ms.visited){if(ms.visited[k])count++;} return count+'/'+ms.targetRooms.length; }
+  },
+  {
+    id: 5, name: 'Speed Nerf', desc: 'Um jogador aleatorio recebe -25% de velocidade',
+    icon: '\u26A0', type: 'speed_nerf', conflictGroup: 'nerf', maxRound: 99,
+    requires: function(g){ return g.playerCount>=2; },
+    init: function(g) {
+      var alive=g.players.filter(function(p){return p.alive;});
+      if(alive.length===0)return;
+      var target=alive[Math.floor(Math.random()*alive.length)];
+      g.missionStates[5] = { targetIndex: target.playerIndex, nerfApplied: false, completed: false };
+    },
+    update: function(g,dt){
+      var ms=g.missionStates[5]; if(!ms||ms.completed)return;
+      if(!ms.nerfApplied){
+        var p=g.players[ms.targetIndex];
+        if(p&&p.alive){ p.baseSpeed=Math.round(p.baseSpeed*0.75); ms.nerfApplied=true; ms.completed=true; }
+      }
+    },
+    progress: function(g){ var ms=g.missionStates[5]; if(!ms)return''; return ms.nerfApplied?'Active':''; }
+  },
+  {
+    id: 6, name: 'Gather at Altar', desc: 'Apos coletar artefatos, todos devem ir ao altar',
+    icon: '\u26E9', type: 'gather_altar', conflictGroup: 'gather', maxRound: 99,
+    init: function(g) { g.missionStates[6] = { allArtifactsCollected: false, completed: false }; },
+    update: function(g,dt){
+      var ms=g.missionStates[6]; if(!ms||ms.completed)return;
+      if(!ms.allArtifactsCollected){
+        var allCollected=true;
+        for(var i=0;i<g.artifactEntities.length;i++){if(!g.artifactEntities[i].collected&&!g.artifactEntities[i].isFake){allCollected=false;break;}}
+        if(allCollected)ms.allArtifactsCollected=true;
+      }
+      if(ms.allArtifactsCollected){
+        var altar=g.altarGroups.length>0?g.altarGroups[0]:null;
+        if(!altar&&g.altarSingles.length>0)altar={centerX:(g.altarSingles[0].x+0.5)*TILE_SIZE,centerY:(g.altarSingles[0].y+0.5)*TILE_SIZE};
+        if(!altar)return;
+        var allAtAltar=true;
+        for(var j=0;j<g.players.length;j++){
+          var p=g.players[j]; if(!p.alive)continue;
+          var dx=altar.centerX-p.px,dy=altar.centerY-p.py;
+          if(Math.sqrt(dx*dx+dy*dy)>TILE_SIZE*3){allAtAltar=false;break;}
+        }
+        if(allAtAltar)ms.completed=true;
+      }
+    },
+    progress: function(g){ var ms=g.missionStates[6]; if(!ms)return''; return ms.allArtifactsCollected?'At Altar':'Collect artifacts first'; }
+  },
+  {
+    id: 7, name: 'All Doors Closed', desc: 'Todas as portas devem estar fechadas',
+    icon: '\u1F6AA', type: 'doors_closed', conflictGroup: 'doors', maxRound: 9,
+    init: function(g){ g.missionStates[7]={completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[7]; if(!ms||ms.completed)return;
+      var allClosed=true;
+      for(var i=0;i<g.doorEntities.length;i++){if(g.doorEntities[i].open){allClosed=false;break;}}
+      if(allClosed)ms.completed=true;
+    },
+    progress: function(g){ var open=0; for(var i=0;i<g.doorEntities.length;i++){if(g.doorEntities[i].open)open++;} return open+' open'; }
+  },
+  {
+    id: 8, name: 'Stun Monster 3x', desc: 'Stunne o monstro 3 vezes',
+    icon: '\u26A1', type: 'stun_count', conflictGroup: 'combat', maxRound: 99,
+    requires: function(g){
+      var totalTraps=g.traps.length;
+      for(var i=0;i<g.players.length;i++){var p=g.players[i];if(p.alive)for(var j=0;j<p.inventory.length;j++){var it=p.inventory[j];if(it&&Items[it]&&Items[it].type==='trap')totalTraps++;}}
+      return totalTraps>=3;
+    },
+    init: function(g){ g.missionStates[8]={stunCount:0,completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[8]; if(!ms||ms.completed)return;
+      for(var i=0;i<g.activeMonsters.length;i++){
+        var m=g.activeMonsters[i]; if(!m.alive)continue;
+        if(m.stunTimer>0&&!m._lastStunFrame){
+          m._lastStunFrame=true; ms.stunCount++;
+          if(ms.stunCount>=3)ms.completed=true;
+        }
+        if(m.stunTimer<=0)m._lastStunFrame=false;
+      }
+    },
+    progress: function(g){ var ms=g.missionStates[8]; if(!ms)return''; return ms.stunCount+'/3'; }
+  },
+  {
+    id: 9, name: 'Take a Hit', desc: 'Ao menos 1 jogador deve receber dano do monstro',
+    icon: '\u2620', type: 'take_hit', conflictGroup: 'combat', maxRound: 99,
+    init: function(g){ g.missionStates[9]={completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[9]; if(!ms||ms.completed)return;
+      for(var i=0;i<g.players.length;i++){var p=g.players[i];if(p.alive&&p.hp<p.maxHp){ms.completed=true;break;}}
+    },
+    progress: function(g){ return g.missionStates[9]&&g.missionStates[9].completed?'Took hit!':'Waiting...'; }
+  },
+  {
+    id: 10, name: 'Use 3 Items', desc: 'Use 3 itens do inventario',
+    icon: '\u1F392', type: 'use_items', conflictGroup: 'items', maxRound: 99,
+    requires: function(g){
+      var total=0;
+      for(var i=0;i<g.players.length;i++){var p=g.players[i];if(p.alive)for(var j=0;j<p.inventory.length;j++){if(p.inventory[j])total++;}}
+      return total>=3;
+    },
+    init: function(g){ g.missionStates[10]={usedCount:0,completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[10]; if(!ms||ms.completed)return;
+    },
+    progress: function(g){ var ms=g.missionStates[10]; if(!ms)return''; return ms.usedCount+'/3'; }
+  },
+  {
+    id: 11, name: 'Stay Together', desc: 'Todos devem ficar perto por 20s (raio 7x7)',
+    icon: '\u2764', type: 'stay_together', conflictGroup: 'gather', maxRound: 99,
+    requires: function(g){ return g.playerCount>=2; },
+    init: function(g){ g.missionStates[11]={timer:0,completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[11]; if(!ms||ms.completed)return;
+      var alive=g.players.filter(function(p){return p.alive;});
+      if(alive.length<2){ms.timer=0;return;}
+      var closeEnough=true;
+      for(var i=0;i<alive.length;i++){
+        for(var j=i+1;j<alive.length;j++){
+          var dx=alive[i].px-alive[j].px,dy=alive[i].py-alive[j].py;
+          if(Math.sqrt(dx*dx+dy*dy)>TILE_SIZE*7){closeEnough=false;break;}
+        }
+        if(!closeEnough)break;
+      }
+      if(closeEnough){ms.timer+=dt;if(ms.timer>=20)ms.completed=true;}
+      else{ms.timer=0;}
+    },
+    progress: function(g){ var ms=g.missionStates[11]; if(!ms)return''; return (ms.timer|0)+'s/20s'; }
+  },
+  {
+    id: 12, name: 'Escape Chases', desc: 'Escape de 2 chases do monstro',
+    icon: '\u1F3C3', type: 'escape_chase', conflictGroup: 'combat', maxRound: 99,
+    init: function(g){ g.missionStates[12]={escapes:0,wasInChase:false,completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[12]; if(!ms||ms.completed)return;
+      for(var i=0;i<g.activeMonsters.length;i++){
+        var m=g.activeMonsters[i]; if(!m.alive)continue;
+        if(m.state==='chase')ms.wasInChase=true;
+        else if(ms.wasInChase&&(m.state==='patrol'||m.state==='search')){
+          ms.escapes++; ms.wasInChase=false;
+          if(ms.escapes>=2)ms.completed=true;
+        }
+      }
+    },
+    progress: function(g){ var ms=g.missionStates[12]; if(!ms)return''; return ms.escapes+'/2'; }
+  },
+  {
+    id: 13, name: 'Artifact Shuffle', desc: 'Artefatos trocam de posicao ao coletar um',
+    icon: '\u1F500', type: 'artifact_shuffle', conflictGroup: 'artifact', maxRound: 99,
+    init: function(g){ g.missionStates[13]={completed:false}; },
+    update: function(g,dt){ g.missionStates[13].completed=true; },
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 14, name: 'Shared Stun', desc: 'Se o monstro for stunnado, players tambem serao',
+    icon: '\u262F', type: 'shared_stun', conflictGroup: 'combat', maxRound: 99,
+    init: function(g){ g.missionStates[14]={completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[14]; if(!ms||ms.completed)return;
+      for(var i=0;i<g.activeMonsters.length;i++){
+        var m=g.activeMonsters[i]; if(!m.alive||m.stunTimer<=0)continue;
+        if(!m._wasStunnedThisFrame){
+          m._wasStunnedThisFrame=true;
+          var stunDuration=m.stunTimer*0.5;
+          for(var j=0;j<g.players.length;j++){var p=g.players[j];if(p.alive)p.invulnTimer=Math.max(p.invulnTimer,stunDuration);}
+        }
+      }
+      ms.completed=true;
+    },
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 15, name: 'Monster Hunt', desc: 'Monstro com 150% velocidade, ataca 1 player (mais itens)',
+    icon: '\u1F3AF', type: 'monster_hunt', conflictGroup: 'hunt', maxRound: 99,
+    init: function(g){
+      var target=null,maxItems=-1;
+      for(var i=0;i<g.players.length;i++){var p=g.players[i];if(!p.alive)continue;var cnt=0;for(var j=0;j<p.inventory.length;j++){if(p.inventory[j])cnt++;}if(cnt>maxItems){maxItems=cnt;target=p;}}
+      var ms=g.missionStates[15]={targetIndex:target?target.playerIndex:-1,completed:true,huntKilled:false};
+      for(var k=0;k<g.activeMonsters.length;k++){
+        var m=g.activeMonsters[k]; if(!m.alive)continue;
+        m._huntTarget=target; m._huntSpeedBoost=true;
+      }
+    },
+    update: function(g,dt){
+      var ms=g.missionStates[15]; if(!ms||ms.huntKilled)return;
+      var target=g.players[ms.targetIndex];
+      if(!target||!target.alive){
+        ms.huntKilled=true;
+        for(var k=0;k<g.activeMonsters.length;k++){
+          var m=g.activeMonsters[k]; if(!m.alive)continue;
+          m._huntReturnToAltar=true; m._huntTarget=null;
+          var altar=g.altarGroups.length>0?g.altarGroups[0]:null;
+          if(!altar&&g.altarSingles.length>0)altar={centerX:(g.altarSingles[0].x+0.5)*TILE_SIZE,centerY:(g.altarSingles[0].y+0.5)*TILE_SIZE};
+          if(altar){m.px=altar.centerX;m.py=altar.centerY;m.tileX=Math.floor(m.px/TILE_SIZE);m.tileY=Math.floor(m.py/TILE_SIZE);m.state='patrol';m.path=null;}
+        }
+      }
+    },
+    progress: function(g){ var ms=g.missionStates[15]; if(!ms)return''; var t=g.players[ms.targetIndex]; return t?t.name:''; }
+  },
+  {
+    id: 16, name: 'Hidden Artifacts', desc: 'Artefatos so aparecem a 4 tiles de distancia',
+    icon: '\u1F441', type: 'hidden_artifacts', conflictGroup: 'artifact', maxRound: 99,
+    init: function(g){ g.missionStates[16]={completed:false}; },
+    update: function(g,dt){ g.missionStates[16].completed=true; },
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 17, name: 'Stay Outside', desc: 'Fique no jardim (G) por 20 segundos consecutivos',
+    icon: '\u1F33F', type: 'stay_outside', conflictGroup: 'room', maxRound: 99,
+    init: function(g){ g.missionStates[17]={timer:0,completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[17]; if(!ms||ms.completed)return;
+      var allOutside=true;
+      for(var i=0;i<g.players.length;i++){var p=g.players[i];if(!p.alive)continue;var t=g.tiles[p.tileY]?g.tiles[p.tileY][p.tileX]:'G';var eff=g.baseTileResolved[p.tileY]?g.baseTileResolved[p.tileY][p.tileX]:t;if(eff!=='G'){allOutside=false;break;}}
+      if(allOutside){ms.timer+=dt;if(ms.timer>=20)ms.completed=true;}
+      else{ms.timer=0;}
+    },
+    progress: function(g){ var ms=g.missionStates[17]; if(!ms)return''; return (ms.timer|0)+'s/20s'; }
+  },
+  {
+    id: 18, name: 'Interact All Doors', desc: 'Interaja com todas as portas ao menos uma vez',
+    icon: '\u1F513', type: 'doors_interact', conflictGroup: 'doors', maxRound: 99,
+    init: function(g){ g.missionStates[18]={interacted:{},total:g.doorEntities.length,completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[18]; if(!ms||ms.completed)return;
+      for(var i=0;i<g.players.length;i++){var p=g.players[i];if(!p.alive)continue;var t=p.interactTarget;if(t&&t.tileX!==undefined&&t.tileY!==undefined&&p.interactType==='door'){ms.interacted[t.tileX+','+t.tileY]=true;}}
+      var count=0; for(var k in ms.interacted)count++;
+      if(count>=ms.total)ms.completed=true;
+    },
+    progress: function(g){ var ms=g.missionStates[18]; if(!ms)return''; var count=0;for(var k in ms.interacted)count++; return count+'/'+ms.total; }
+  },
+  {
+    id: 19, name: 'Doors Stay Open', desc: 'Portas nao fecham mais ate o monstro morrer',
+    icon: '\u1F6AA', type: 'doors_noclose', conflictGroup: 'doors', maxRound: 99,
+    init: function(g){
+      g.missionStates[19]={completed:false};
+      for(var i=0;i<g.doorEntities.length;i++){if(!g.doorEntities[i].open)g.doorEntities[i].toggle();}
+    },
+    update: function(g,dt){ g.missionStates[19].completed=true; },
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 20, name: 'Damage Over Time', desc: 'Todos recebem 1 de dano a cada 3 segundos',
+    icon: '\u1FA78', type: 'dot', conflictGroup: 'nerf', maxRound: 99,
+    init: function(g){ g.missionStates[20]={tickTimer:0,completed:true}; },
+    update: function(g,dt){
+      var ms=g.missionStates[20]; if(!ms)return;
+      ms.tickTimer+=dt;
+      while(ms.tickTimer>=3){
+        ms.tickTimer-=3;
+        for(var i=0;i<g.players.length;i++){var p=g.players[i];if(p.alive&&p.hp>1){p.hp-=1;}}
+      }
+    },
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 21, name: 'Player Collision', desc: 'Jogadores colidem entre si',
+    icon: '\u1F465', type: 'collision', conflictGroup: 'collision', maxRound: 99,
+    requires: function(g){ return g.playerCount>=2; },
+    init: function(g){ g.missionStates[21]={completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[21]; if(!ms||ms.completed)return;
+      for(var i=0;i<g.players.length;i++){
+        for(var j=i+1;j<g.players.length;j++){
+          var a=g.players[i],b=g.players[j];
+          if(!a.alive||!b.alive)continue;
+          var dx=a.px-b.px,dy=a.py-b.py,dist=Math.sqrt(dx*dx+dy*dy);
+          if(dist<TILE_SIZE*0.7&&dist>0.001){
+            var overlap=(TILE_SIZE*0.7-dist)/2;
+            var nx=dx/dist,ny=dy/dist;
+            a.px+=nx*overlap;a.py+=ny*overlap;
+            b.px-=nx*overlap;b.py-=ny*overlap;
+          }
+        }
+      }
+      ms.completed=true;
+    },
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 22, name: 'Trap Immunity', desc: 'Monstro ignora traps em patrol, funciona em search/chase',
+    icon: '\u1F6E1', type: 'trap_immune', conflictGroup: 'combat', maxRound: 99,
+    init: function(g){
+      g.missionStates[22]={completed:false};
+      for(var i=0;i<g.activeMonsters.length;i++){var m=g.activeMonsters[i];if(m.alive)m._trapPatrolImmune=true;}
+    },
+    update: function(g,dt){ g.missionStates[22].completed=true; },
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 23, name: 'Low HP Finish', desc: 'Round so acaba quando todos tiverem 75 HP ou menos',
+    icon: '\u2764\u200D\u1FA79', type: 'low_hp', conflictGroup: 'survival', maxRound: 99,
+    init: function(g){ g.missionStates[23]={completed:true}; },
+    update: function(g,dt){},
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 24, name: 'Twin Monsters', desc: '2 monstros iguais, um com -50% velocidade',
+    icon: '\u1F465', type: 'twin_monster', conflictGroup: 'hunt', maxRound: 99,
+    requires: function(g){ return g.monsterSpawnType!=='twins'; },
+    init: function(g){
+      var ms=g.missionStates[24]={completed:false,spawned:false};
+      if(!ms.spawned&&g.activeMonsters.length>0){
+        ms.spawned=true;
+        var base=g.activeMonsters[0];
+        var m2=new MonsterEntity(base.tileX,base.tileY,g,base.type);
+        m2.speed=base.speed*0.5; m2.spawn(); m2._twinSlow=true;
+        g.activeMonsters.push(m2);
+      }
+    },
+    update: function(g,dt){ g.missionStates[24].completed=true; },
+    progress: function(g){ return g.activeMonsters.length>=2?'Active':''; }
+  },
+  {
+    id: 25, name: 'Garden Artifacts', desc: 'Todos os artefatos spawnam no tile G',
+    icon: '\u1F33F', type: 'artifact_garden', conflictGroup: 'artifact', maxRound: 99,
+    init: function(g){
+      g.missionStates[25]={completed:false};
+      var gardenTiles=[];
+      for(var y=0;y<g.mapHeight;y++)for(var x=0;x<g.mapWidth;x++){var eff=g.baseTileResolved[y]?g.baseTileResolved[y][x]:g.tiles[y][x];if(eff==='G')gardenTiles.push({x:x,y:y});}
+      for(var i=0;i<g.artifactEntities.length;i++){
+        var art=g.artifactEntities[i]; if(art.collected||art.isFake||art._missionExtra)continue;
+        if(gardenTiles.length>0){
+          var idx=Math.floor(Math.random()*gardenTiles.length);
+          art.tileX=gardenTiles[idx].x; art.tileY=gardenTiles[idx].y;
+        }
+      }
+    },
+    update: function(g,dt){ g.missionStates[25].completed=true; },
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 26, name: 'Golden Artifact', desc: 'Um artefato dourado com dobro de tempo de coleta',
+    icon: '\u2B50', type: 'golden_artifact', conflictGroup: 'artifact', maxRound: 99,
+    init: function(g){
+      var ms=g.missionStates[26]={completed:false,goldenIndex:-1};
+      var valid=[];
+      for(var i=0;i<g.artifactEntities.length;i++){var art=g.artifactEntities[i];if(!art.isFake&&!art._missionExtra)valid.push(i);}
+      if(valid.length>0){
+        var idx=valid[Math.floor(Math.random()*valid.length)];
+        g.artifactEntities[idx]._golden=true;
+        g.artifactEntities[idx].displayName='Golden Artifact';
+        ms.goldenIndex=idx;
+      }
+    },
+    update: function(g,dt){ g.missionStates[26].completed=true; },
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 27, name: 'Walk Distance', desc: 'Ande uma distancia total pela equipe',
+    icon: '\u1F6B6', type: 'walk_distance', conflictGroup: 'movement', maxRound: 99,
+    init: function(g){
+      var total=100*g.playerCount;
+      g.missionStates[27]={distance:0,target:total,completed:false,lastPx:{}};
+      for(var i=0;i<g.players.length;i++){var p=g.players[i];g.missionStates[27].lastPx[i]={x:p.px,y:p.py};}
+    },
+    update: function(g,dt){
+      var ms=g.missionStates[27]; if(!ms||ms.completed)return;
+      for(var i=0;i<g.players.length;i++){
+        var p=g.players[i]; if(!p.alive)continue;
+        var last=ms.lastPx[i]; if(!last){ms.lastPx[i]={x:p.px,y:p.py};continue;}
+        var dx=p.px-last.x,dy=p.py-last.y;
+        var moved=Math.sqrt(dx*dx+dy*dy);
+        if(moved>0){ms.distance+=moved/TILE_SIZE; last.x=p.px; last.y=p.py;}
+      }
+      if(ms.distance>=ms.target)ms.completed=true;
+    },
+    progress: function(g){ var ms=g.missionStates[27]; if(!ms)return''; return (ms.distance|0)+'/'+ms.target; }
+  },
+  {
+    id: 28, name: 'Artifact Swap', desc: 'Artefatos trocam de posicao a cada 20 segundos',
+    icon: '\u1F503', type: 'artifact_swap', conflictGroup: 'artifact', maxRound: 99,
+    init: function(g){ g.missionStates[28]={timer:0,completed:false}; },
+    update: function(g,dt){
+      var ms=g.missionStates[28]; if(!ms||ms.completed)return;
+      ms.timer+=dt;
+      while(ms.timer>=20){
+        ms.timer-=20;
+        var uncollected=g.artifactEntities.filter(function(a){return !a.collected && !a.isFake && !a._missionExtra;});
+        if(uncollected.length>=2){
+          var a=uncollected[Math.floor(Math.random()*uncollected.length)];
+          var b; do{b=uncollected[Math.floor(Math.random()*uncollected.length)];}while(b===a);
+          var tx=a.tileX,ty=a.tileY;
+          a.tileX=b.tileX;a.tileY=b.tileY;b.tileX=tx;b.tileY=ty;
+        }
+      }
+      ms.completed=true;
+    },
+    progress: function(g){ return 'Active'; }
+  },
+  {
+    id: 29, name: 'Delayed Artifacts', desc: 'Artefatos demoram 20s para aparecer apos o summon',
+    icon: '\u23F3', type: 'delayed_spawn', conflictGroup: 'artifact', maxRound: 99,
+    init: function(g){
+      g.missionStates[29]={timer:0,completed:false,hidden:false};
+      for(var i=0;i<g.artifactEntities.length;i++){g.artifactEntities[i]._delayedHidden=true;}
+    },
+    update: function(g,dt){
+      var ms=g.missionStates[29]; if(!ms||ms.completed)return;
+      ms.timer+=dt;
+      if(ms.timer>=20&&!ms.hidden){
+        ms.hidden=true;
+        for(var i=0;i<g.artifactEntities.length;i++){g.artifactEntities[i]._delayedHidden=false;}
+      }
+      ms.completed=true;
+    },
+    progress: function(g){ var ms=g.missionStates[29]; if(!ms||!ms.hidden)return (ms?Math.min(20,(ms.timer|0))+'s/20s':'...'); return 'Spawned!'; }
+  },
+  {
+    id: 30, name: 'One Collector', desc: 'Apenas 1 jogador pode coletar artefatos (mais HP)',
+    icon: '\u1F947', type: 'one_collector', conflictGroup: 'artifact', maxRound: 99,
+    init: function(g){
+      var best=null,bestHp=-1;
+      for(var i=0;i<g.players.length;i++){var p=g.players[i];if(p.alive&&p.hp>bestHp){bestHp=p.hp;best=p;}}
+      g.missionStates[30]={collectorIndex:best?best.playerIndex:-1,completed:false};
+    },
+    update: function(g,dt){
+      var ms=g.missionStates[30]; if(!ms||ms.completed)return;
+      var collector=g.players[ms.collectorIndex];
+      if(!collector||!collector.alive){
+        var best=null,bestHp=-1;
+        for(var i=0;i<g.players.length;i++){var p=g.players[i];if(p.alive&&p.hp>bestHp){bestHp=p.hp;best=p;}}
+        if(best)ms.collectorIndex=best.playerIndex;else{ms.completed=true;return;}
+      }
+      ms.completed=true;
+    },
+    progress: function(g){ var ms=g.missionStates[30]; if(!ms)return''; var c=g.players[ms.collectorIndex]; return c?c.name:'None'; }
+  }
+];
+
+var MISSION_CONFLICT_MATRIX = {};
+(function buildConflictMatrix(){
+  var groups={};
+  for(var i=0;i<MISSION_DEFS.length;i++){
+    var m=MISSION_DEFS[i]; var g=m.conflictGroup;
+    if(!groups[g])groups[g]=[]; groups[g].push(m.id);
+  }
+  var allGroupIds=Object.keys(groups);
+  for(var gi=0;gi<allGroupIds.length;gi++){
+    for(var gj=gi+1;gj<allGroupIds.length;gj++){
+      var gid=allGroupIds[gi],gjd=allGroupIds[gj];
+      var knownConflicts={
+        'artifact':['hidden_artifacts','one_collector','artifact_garden','golden_artifact','artifact_swap','delayed_spawn'],
+        'doors':['doors_closed','doors_interact','doors_noclose'],
+        'room':['room_stay','visit_rooms','stay_outside'],
+        'gather':['gather_at_altar','stay_together'],
+        'combat':['stun_count','take_hit','escape_chase','shared_stun','trap_immune'],
+        'hunt':['monster_hunt','twin_monster'],
+        'nerf':['speed_nerf','dot'],
+        'movement':['walk_distance'],
+        'survival':['low_hp'],
+        'collision':['collision'],
+        'coin':['collect_coins'],
+        'items':['use_items']
+      };
+      var softConflicts={
+        'artifact_extra':['delayed_spawn','artifact_garden','artifact_swap'],
+        'delayed_spawn':['artifact_extra'],
+        'artifact_garden':['artifact_extra'],
+        'artifact_swap':['artifact_extra'],
+        'doors_closed':['doors_noclose','doors_interact'],
+        'doors_noclose':['doors_closed','doors_interact'],
+        'doors_interact':['doors_closed','doors_noclose'],
+        'monster_hunt':['twin_monster','low_hp'],
+        'twin_monster':['monster_hunt'],
+        'low_hp':['monster_hunt','take_hit','dot'],
+        'take_hit':['low_hp'],
+        'dot':['low_hp']
+      };
+      var members1=groups[gid],members2=groups[gjd];
+      for(var a=0;a<members1.length;a++){
+        for(var b=0;b<members2.length;b++){
+          var m1=members1[a],m2=members2[b];
+          if(!MISSION_CONFLICT_MATRIX[m1])MISSION_CONFLICT_MATRIX[m1]={};
+          if(!MISSION_CONFLICT_MATRIX[m2])MISSION_CONFLICT_MATRIX[m2]={};
+          var conflicts=false;
+          if(softConflicts[m1]&&softConflicts[m1].indexOf(m2)>=0)conflicts=true;
+          if(softConflicts[m2]&&softConflicts[m2].indexOf(m1)>=0)conflicts=true;
+          if(conflicts){
+            MISSION_CONFLICT_MATRIX[m1][m2]=true;
+            MISSION_CONFLICT_MATRIX[m2][m1]=true;
+          }
+        }
+      }
+    }
+  }
+})();
+
+function getAvailableMissions(game, count) {
+  var available=[];
+  for(var i=0;i<MISSION_DEFS.length;i++){
+    var md=MISSION_DEFS[i];
+    if(md.requires&&!md.requires(game))continue;
+    if(md.maxRound<game.roundNumber)continue;
+    available.push(md);
+  }
+  var selected=[];
+  while(selected.length<count&&available.length>0){
+    var idx=Math.floor(Math.random()*available.length);
+    var candidate=available[idx];
+    var hasConflict=false;
+    for(var j=0;j<selected.length;j++){
+      var sid=selected[j].id;
+      if(MISSION_CONFLICT_MATRIX[candidate.id]&&MISSION_CONFLICT_MATRIX[candidate.id][sid]){hasConflict=true;break;}
+      if(MISSION_CONFLICT_MATRIX[sid]&&MISSION_CONFLICT_MATRIX[sid][candidate.id]){hasConflict=true;break;}
+      if(candidate.conflictGroup===selected[j].conflictGroup&&
+         candidate.conflictGroup!=='generic'){hasConflict=true;break;}
+    }
+    if(hasConflict){available.splice(idx,1);continue;}
+    selected.push(candidate); available.splice(idx,1);
+  }
+  return selected;
+}
+
+function initMissions(game) {
+  var count=1;
+  if(game.roundNumber>=20)count=3;
+  else if(game.roundNumber>=10)count=2;
+  var missions;
+  if(game._forceMissions&&game._forceMissions.length>0){
+    missions=[]; for(var i=0;i<game._forceMissions.length;i++){var md=MISSION_DEFS.find(function(m){return m.id===game._forceMissions[i];});if(md)missions.push(md);}
+    game._forceMissions=[];
+  } else {
+    missions=getAvailableMissions(game,count);
+  }
+  game.activeMissions=missions;
+  game.missionStates={};
+  for(var i=0;i<missions.length;i++){if(missions[i].init)missions[i].init(game);}
+  if(missions.length>0){
+    game.specialRoundActive=true;
+  }
+}
+
+function updateMissions(game, dt) {
+  if(!game.activeMissions||game.activeMissions.length===0)return;
+  for(var i=0;i<game.activeMissions.length;i++){
+    if(game.activeMissions[i].update)game.activeMissions[i].update(game,dt);
+  }
+}
+
+function checkMissionCompletion(game) {
+  if(!game.activeMissions||game.activeMissions.length===0)return true;
+  for(var i=0;i<game.activeMissions.length;i++){
+    var ms=game.missionStates[game.activeMissions[i].id];
+    if(!ms||!ms.completed)return false;
+  }
+  return true;
+}
+
+function getMissionCompletionCount(game) {
+  if(!game.activeMissions)return 0;
+  var count=0;
+  for(var i=0;i<game.activeMissions.length;i++){
+    var ms=game.missionStates[game.activeMissions[i].id];
+    if(ms&&ms.completed)count++;
+  }
+  return count;
+}
+
+function giveMissionRewards(game) {
+  for(var i=0;i<game.players.length;i++){
+    var p=game.players[i]; if(!p.alive)continue;
+    var rewardType=Math.floor(Math.random()*3);
+    if(rewardType===0){
+      var key=getRandomItemByRarity(game);
+      if(key&&p.hasSpace()){p.addToInventory(key);game.showMessage(p.name+' received '+Items[key].name+' (mission reward)!');}
+    }else if(rewardType===1){
+      p.shieldCharges=Math.min(2,p.shieldCharges+1);
+      game.showMessage(p.name+' gained a shield charge!');
+    }else{
+      p.hp=Math.min(p.maxHp,p.hp+75);
+      game.showMessage(p.name+' healed 75 HP!');
+    }
+  }
+  game.specialRoundActive=false;
+  game.activeMissions=null;
+  game.missionStates={};
 }
 
 // ============================================================
@@ -2150,6 +2964,7 @@ class DoorEntity {
   toggle(skipPropagation) {
     if (this.animating || this.debounceTimer > 0) return;
     if (typeof game !== 'undefined' && game.lockedDoor && game.lockedDoor.tiles.some(function(t) { return t.doorRef === this; })) return;
+    if (this.open && typeof game !== 'undefined' && game.specialRoundActive && game.missionStates[19]) return;
     if (!skipPropagation && this.groupMembers) {
       for (let i = 0; i < this.groupMembers.length; i++) {
         const member = this.groupMembers[i];
@@ -2190,16 +3005,19 @@ class ArtifactEntity {
   update(dt) { this.glowPhase += dt * 3; }
   render(ctx, tx, ty, ts, camX, camY) {
     if (this.collected) return;
+    if (this._delayedHidden) return;
     const cx = tx * ts + ts / 2 - camX;
     const cy = ty * ts + ts / 2 - camY;
     const glow = 0.5 + 0.5 * Math.sin(this.glowPhase);
-    ctx.fillStyle = '#00cccc';
+    var color = '#00cccc';
+    if (this._golden) color = '#ffd700';
+    ctx.fillStyle = color;
     ctx.globalAlpha = 0.3 + glow * 0.7;
     ctx.beginPath();
     ctx.arc(cx, cy, ts * 0.3, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
-    ctx.fillStyle = '#00cccc';
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(cx, cy, ts * 0.12, 0, Math.PI * 2);
     ctx.fill();
@@ -3050,6 +3868,14 @@ class MonsterEntity {
       var stile = this.game.tiles[this.tileY] ? this.game.tiles[this.tileY][this.tileX] : '';
       if (stile === 'W') this.speed *= 1.35;
     }
+    // Mission 15: monster hunt speed boost
+    if (this._huntSpeedBoost) {
+      this.speed *= 2.5;
+    }
+    // Mission 15: return to altar after kill
+    if (this._huntReturnToAltar) {
+      this.speed = 0;
+    }
     // Bomber: drop bombs every 2 seconds
     if (this.type === 'bomber') {
       this.bombTimer += dt;
@@ -3098,6 +3924,32 @@ class MonsterEntity {
         this.tileY = Math.floor(this.py / TILE_SIZE);
       }
     }
+    // Mission 15: direct hunt targeting (wallhack)
+    if (this._huntTarget && this._huntTarget.alive) {
+      this.state = 'chase'; this.chaseTimer = 0; this.path = null;
+      this.lastKnownPlayerPos = { x: this._huntTarget.px, y: this._huntTarget.py };
+      var hstx = Math.floor(this.px / TILE_SIZE);
+      var hsty = Math.floor(this.py / TILE_SIZE);
+      var hgtx = Math.floor(this._huntTarget.px / TILE_SIZE);
+      var hgty = Math.floor(this._huntTarget.py / TILE_SIZE);
+      var hfound = this.game.findPath(hstx, hsty, hgtx, hgty, this.type === 'spider');
+      if (hfound && hfound.length > 0) {
+        this.path = hfound;
+        var hndx = this._huntTarget.px - this.px;
+        var hndy = this._huntTarget.py - this.py;
+        var hdist = Math.sqrt(hndx * hndx + hndy * hndy);
+        if (hdist > 0.001) {
+          this.facingAngle = Math.atan2(hndy, hndx);
+          var hspd = this.speed * 1.4;
+          var hnx = this.px + (hndx/hdist) * hspd * dt;
+          var hny = this.py + (hndy/hdist) * hspd * dt;
+          if (this.canMoveTo(hnx, this.py)) this.px = hnx;
+          if (this.canMoveTo(this.px, hny)) this.py = hny;
+        }
+      }
+      this.tileX = Math.floor(this.px / TILE_SIZE);
+      this.tileY = Math.floor(this.py / TILE_SIZE);
+    } else {
     this.checkNearbyDoors(dt);
     if (!(this.type === 'ballerina' && this.frozen)) {
       switch (this.state) {
@@ -3129,7 +3981,8 @@ class MonsterEntity {
       }
     }
     if (this.alive && !(this.type === 'jester' && this.trapSeeking)) {
-      const target = this.findNearestPlayer();
+      // Mission 15: only attack the hunt target
+      const target = this._huntTarget && this._huntTarget.alive ? this._huntTarget : this.findNearestPlayer();
       if (target) {
         const dx = target.px - this.px;
         const dy = target.py - this.py;
@@ -3153,6 +4006,7 @@ class MonsterEntity {
         }
       }
     }
+  }
   }
 
   checkNearbyDoors(dt) {
@@ -3731,7 +4585,12 @@ class Game {
     this.lightmapCanvas = null;
     this.chestPendingSpawn = false;
     this.chestPendingSpawnTimer = 0;
-  }
+      this.specialRoundActive = false;
+      this.activeMissions = null;
+      this.missionStates = {};
+      this._forceMissions = [];
+      this._nextRoundMissions = null;
+    }
 
   static tileHash(x, y) {
     let h = (x * 374761393 + y * 668265263) ^ 0x5bf03635;
@@ -3957,6 +4816,12 @@ class Game {
     this.hotbarLayout = 'horizontal';
     this.hotbarGap = 30;
     this.expandedHotkeyPlayers = new Set();
+    this.specialRoundActive = false;
+    this.activeMissions = null;
+    this.missionStates = {};
+    this._forceMissions = [];
+    this._missionCompletionNotified = false;
+    this._nextRoundMissions = null;
     preGameKeybinds = {};
   }
 
@@ -4053,6 +4918,12 @@ class Game {
     this.hotbarLayout = 'horizontal';
     this.hotbarGap = 30;
     this.expandedHotkeyPlayers = new Set();
+    this.specialRoundActive = false;
+    this.activeMissions = null;
+    this.missionStates = {};
+    this._forceMissions = [];
+    this._missionCompletionNotified = false;
+    this._nextRoundMissions = null;
     this.loadMap(parseMap(DEFAULT_MAP.join('\n')));
     this.showClassSelection();
   }
@@ -4572,14 +5443,18 @@ class Game {
     }
     // Check game state
     this.checkGameState();
+    // Update missions
+    if (this.specialRoundActive) updateMissions(this, dt);
     // Update player vision ranges (indoor/outdoor)
     this.updateVisionRanges(dt);
     // Camera
     this.updateCamera();
-    // Update HUD
-    updateHUD(this);
+    // Update UI
+    updateRoundCounter(this);
+    updateMoneyDisplay(this);
     updateAbilityHUD(this);
     updateHotbarHUD(this);
+    updateMissionPanel(this);
     // Consume justPressed
     for (const k in keysJustPressed) keysJustPressed[k] = false;
   }
@@ -5004,6 +5879,14 @@ class Game {
       if (!art.isFake && !art.collected) { allCollected = false; break; }
     }
     if (allCollected) {
+      // Mission 23: round can't end until all alive players have 75 HP or less
+      if (this.specialRoundActive && this.missionStates[23]) {
+        var allLowHp = true;
+        for (var lhi = 0; lhi < this.players.length; lhi++) {
+          if (this.players[lhi].alive && this.players[lhi].hp > 75) { allLowHp = false; break; }
+        }
+        if (!allLowHp) return;
+      }
       this.artifactEntities = this.artifactEntities.filter(art => !art.isFake);
       for (const m of this.activeMonsters) m.die();
       this.activeMonsters = [];
@@ -5087,6 +5970,15 @@ class Game {
         }
       }
       this.restockShops();
+      // Mission rewards
+      if (this.specialRoundActive && checkMissionCompletion(this)) {
+        this.showMessage('ALL MISSIONS COMPLETED! Extra rewards granted!', 4);
+        giveMissionRewards(this);
+      }
+      this.specialRoundActive = false;
+      this.activeMissions = null;
+      this.missionStates = {};
+      this._forceMissions = [];
     }
   }
 
@@ -5187,10 +6079,37 @@ class Game {
       fakeArt.decoyRef = decoyM;
       this.artifactEntities.push(fakeArt);
     }
+    // Special Round / Mission System
+    this._missionCompletionNotified = false;
+    this._nextRoundMissions = null;
+    if (this.roundNumber % 3 === 0) {
+      initMissions(this);
+      if (this.activeMissions && this.activeMissions.length > 0) {
+        var missionNames = this.activeMissions.map(function(m){return m.name;}).join(', ');
+        this.showMessage('SPECIAL ROUND! Missions: ' + missionNames, 6);
+      }
+    } else {
+      this.specialRoundActive = false;
+      this.activeMissions = null;
+      this.missionStates = {};
+      this._forceMissions = [];
+    }
   }
 
   collectArtifact(art) {
     if (art.collected) return;
+    // Mission 30: only designated collector can collect
+    if (this.specialRoundActive && this.missionStates[30] && this.missionStates[30].collectorIndex !== undefined) {
+      var interactingPlayer = null;
+      for (var ci = 0; ci < this.players.length; ci++) {
+        var cp = this.players[ci];
+        if (cp.interacting && cp.interactTarget === art) { interactingPlayer = cp; break; }
+      }
+      if (interactingPlayer && interactingPlayer.playerIndex !== this.missionStates[30].collectorIndex && !art.isFake && !art._missionExtra) {
+        this.showMessage('Only ' + this.players[this.missionStates[30].collectorIndex].name + ' can collect artifacts!');
+        return;
+      }
+    }
     if (art.isFake) {
       art.collected = true;
       this.showMessage('WARNING: It was a fake artifact! The Decoy is coming!');
@@ -5225,6 +6144,22 @@ class Game {
     art.collected = true;
     this.collectedArtifacts++;
     this.showMessage('Artifact collected! (' + this.collectedArtifacts + '/' + this.artifactCount + ')');
+    // Mission 13: shuffle remaining artifacts
+    if (this.specialRoundActive && this.missionStates[13] && this.missionStates[13].completed) {
+      var remaining = this.artifactEntities.filter(function(a){ return !a.collected && !a.isFake && !a._missionExtra; });
+      var positions = [];
+      for (var ri = 0; ri < remaining.length; ri++) {
+        positions.push({ x: remaining[ri].tileX, y: remaining[ri].tileY });
+      }
+      for (var ri2 = positions.length - 1; ri2 > 0; ri2--) {
+        var jj = Math.floor(Math.random() * (ri2 + 1));
+        var tmp = positions[ri2]; positions[ri2] = positions[jj]; positions[jj] = tmp;
+      }
+      for (var ri3 = 0; ri3 < remaining.length; ri3++) {
+        remaining[ri3].tileX = positions[ri3].x;
+        remaining[ri3].tileY = positions[ri3].y;
+      }
+    }
     for (let i = 0; i < 6; i++) {
       this.particles.push(new Particle(
         art.tileX * TILE_SIZE + TILE_SIZE / 2,
@@ -5244,16 +6179,37 @@ class Game {
     let duration = 0;
     if (type === 'door') duration = 0.3;
     else if (type === 'altar') duration = 2;
-    else if (type === 'artifact') duration = 1.5 + 2.5 * Math.max(0, this.playerCount - 1);
+    else if (type === 'artifact') {
+      duration = 1.5 + 2.5 * Math.max(0, this.playerCount - 1);
+      if (target && target._golden) duration *= 2;
+    }
     this.interactDisplay = { type, duration, target };
     this.interactDuration = duration;
     if (player.interactTimer >= duration) {
       player.interacting = false;
       player.interactTimer = 0;
-      if (type === 'door') target.toggle();
+      if (type === 'door') {
+        target.toggle();
+        // Mission 18: track door interactions
+        if (game.specialRoundActive && game.missionStates[18]) {
+          game.missionStates[18].interacted[target.tileX + ',' + target.tileY] = true;
+        }
+      }
       else if (type === 'altar' && !this.summoning) {
         this.summoning = true;
         this.summonDelay = 5;
+        var nextRound = this.roundNumber + 1;
+        if (nextRound % 3 === 0) {
+          var tmpRound = this.roundNumber;
+          var tmpForce = this._forceMissions;
+          this.roundNumber = nextRound;
+          this._nextRoundMissions = (this._forceMissions && this._forceMissions.length > 0)
+            ? this._forceMissions.map(function(id){return MISSION_DEFS.find(function(m){return m.id===id;});}).filter(Boolean)
+            : getAvailableMissions(this, nextRound < 10 ? 1 : (nextRound < 20 ? 2 : 3));
+          this.roundNumber = tmpRound;
+        } else {
+          this._nextRoundMissions = null;
+        }
         for (var ri = 0; ri < this.players.length; ri++) {
           var rp = this.players[ri];
           if (!rp.alive) continue;
@@ -5325,6 +6281,11 @@ class Game {
       this.applyItemEffect(player, item);
       player.removeEquipped();
       this.showMessage(player.name + ' used ' + it.name);
+      // Mission 10: count item usage
+      if (this.specialRoundActive && this.missionStates[10]) {
+        this.missionStates[10].usedCount++;
+        if (this.missionStates[10].usedCount >= 3) this.missionStates[10].completed = true;
+      }
     } else if (it.type === 'passive') {
       if (item === 'lucky_charm') {
         if (player.luckyCharmActive) { this.showMessage(player.name + ' already has a Lucky Charm active!'); return; }
@@ -5556,6 +6517,8 @@ class Game {
     // Handle stun traps: monster collision
     for (const m of this.activeMonsters) {
       if (!m.alive || m.stunTimer > 0) continue;
+      // Mission 22: monster ignores traps in patrol
+      if (m._trapPatrolImmune && m.state === 'patrol') continue;
       for (let i = this.traps.length - 1; i >= 0; i--) {
         const t = this.traps[i];
         if (!t.active || t.tauntDuration || t.lifetime) continue;
@@ -5915,6 +6878,8 @@ class Game {
     this.renderTiles(ctx);
     // Draw artifacts on floor
     this.renderArtifacts(ctx);
+    // Draw mission coins
+    if (this.specialRoundActive) renderMissionCoins(this, ctx);
     // Draw roof overlay
     this.renderRoof(ctx);
     // Raycast lightmap (replaces old fog)
@@ -6101,7 +7066,10 @@ class Game {
       }
     }
     // Debug
-    if (this.debugMode) this.renderDebug(ctx);
+    if (this.debugMode) {
+      this.renderDebug(ctx);
+      updateMissionAdmin(this);
+    }
     ctx.restore();
     // Message (DOM)
     this.renderMessage(ctx);
@@ -6381,6 +7349,20 @@ class Game {
   renderArtifacts(ctx) {
     for (const art of this.artifactEntities) {
       if (art.collected) continue;
+      // Mission 29: delayed artifact spawn
+      if (art._delayedHidden) continue;
+      // Mission 16: hidden artifacts (only visible within 4 tiles)
+      if (this.specialRoundActive && this.missionStates[16] && this.missionStates[16].completed) {
+        var nearAnyPlayer = false;
+        for (var hpi = 0; hpi < this.players.length; hpi++) {
+          var hp = this.players[hpi];
+          if (!hp.alive) continue;
+          var hdx = (art.tileX + 0.5) * TILE_SIZE - hp.px;
+          var hdy = (art.tileY + 0.5) * TILE_SIZE - hp.py;
+          if (Math.sqrt(hdx * hdx + hdy * hdy) <= TILE_SIZE * 4) { nearAnyPlayer = true; break; }
+        }
+        if (!nearAnyPlayer) continue;
+      }
       art.render(ctx, art.tileX, art.tileY, TILE_SIZE, this.camX, this.camY);
     }
   }
@@ -6392,11 +7374,27 @@ class Game {
     ctx.lineWidth = 3;
     for (const art of this.artifactEntities) {
       if (art.collected) continue;
+      if (art._delayedHidden) continue;
+      if (this.specialRoundActive && this.missionStates[16] && this.missionStates[16].completed) {
+        var nearAnyPlayer = false;
+        for (var hpi = 0; hpi < this.players.length; hpi++) {
+          var hp = this.players[hpi];
+          if (!hp.alive) continue;
+          var hdx = (art.tileX + 0.5) * TILE_SIZE - hp.px;
+          var hdy = (art.tileY + 0.5) * TILE_SIZE - hp.py;
+          if (Math.sqrt(hdx * hdx + hdy * hdy) <= TILE_SIZE * 4) { nearAnyPlayer = true; break; }
+        }
+        if (!nearAnyPlayer) continue;
+      }
       const cx = art.tileX * TILE_SIZE + TILE_SIZE / 2 - this.camX;
       const cy = art.tileY * TILE_SIZE + TILE_SIZE / 2 - this.camY - TILE_SIZE * 0.5;
       ctx.strokeStyle = '#000';
+      if (art._golden) {
+        ctx.fillStyle = '#ffd700';
+      } else {
+        ctx.fillStyle = '#fff';
+      }
       ctx.strokeText(art.displayName || 'Artifact', cx, cy);
-      ctx.fillStyle = '#fff';
       ctx.fillText(art.displayName || 'Artifact', cx, cy);
     }
     ctx.textAlign = 'start';
@@ -6825,6 +7823,19 @@ class Game {
     const totalRays = this.visibilityPolygons.reduce((s, vp) => s + vp.points.length, 0);
     ctx.fillText('Rays: ' + totalRays + ' | Diff: ' + this.difficulty + ' | Rnd: ' + this.roundNumber + ' | Spd:+' + this.getSpeedBonusPercent() + '%', 10, this.canvas.height - 30);
     ctx.fillText('Traps: ' + this.traps.length + ' | Shops: ' + this.shopItems.filter(s => !s.sold).length + ' | Cash: ' + this.currency, 10, this.canvas.height - 15);
+    // Mission status
+    if (this.specialRoundActive && this.activeMissions) {
+      var mY = this.canvas.height - 75;
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText('SPECIAL ROUND - Missions:', 10, mY);
+      for (var mi = 0; mi < this.activeMissions.length; mi++) {
+        var md = this.activeMissions[mi];
+        var ms = this.missionStates[md.id];
+        var done = ms && ms.completed;
+        ctx.fillStyle = done ? '#0f0' : '#f66';
+        ctx.fillText('  #' + md.id + ' ' + md.name + ' ' + (done ? 'DONE' : '...'), 10, mY + 15 + mi * 14);
+      }
+    }
     // Random spawn points
     for (const rp of this.randomMonsterSpawnPoints) {
       const sx = rp.x * TILE_SIZE + TILE_SIZE / 2 - this.camX;
@@ -6920,7 +7931,11 @@ class Game {
       debugSelectedMonster: this.debugSelectedMonster || null,
       summoning: this.summoning,
       summonDelay: this.summonDelay,
-      lockedDoorCheckTimer: this.lockedDoorCheckTimer || 0
+      lockedDoorCheckTimer: this.lockedDoorCheckTimer || 0,
+      specialRoundActive: this.specialRoundActive || false,
+      activeMissionIds: this.activeMissions ? this.activeMissions.map(function(m){return m.id;}) : null,
+      missionStates: this.missionStates ? JSON.parse(JSON.stringify(this.missionStates)) : {},
+      forceMissions: this._forceMissions ? this._forceMissions.slice() : []
     };
 
     // Players
@@ -7123,6 +8138,14 @@ class Game {
     this.summoning = gs.summoning || false;
     this.summonDelay = gs.summonDelay || 0;
     this.lockedDoorCheckTimer = gs.lockedDoorCheckTimer || 0;
+    this.specialRoundActive = gs.specialRoundActive || false;
+    this.missionStates = gs.missionStates || {};
+    this._forceMissions = gs.forceMissions || [];
+    if (gs.activeMissionIds) {
+      this.activeMissions = gs.activeMissionIds.map(function(id){ return MISSION_DEFS.find(function(m){return m.id===id;}); }).filter(Boolean);
+    } else {
+      this.activeMissions = null;
+    }
 
     // Restore doors first (needed for pathfinding)
     this.doorEntities = [];
@@ -7451,9 +8474,11 @@ class Game {
       }
 
       // Update UI
-      updateHUD(this);
+      updateRoundCounter(this);
+      updateMoneyDisplay(this);
       updateAbilityHUD(this);
       updateHotbarHUD(this);
+      updateMissionPanel(this);
       updateMonsterSelector(this);
       updateItemSelector(this);
       return true;
@@ -7820,6 +8845,7 @@ window.addEventListener('keydown', e => {
     game.debugMode = !game.debugMode;
     updateMonsterSelector(game);
     updateItemSelector(game);
+    updateMissionAdmin(game);
   }
   if (game && game.players) {
     for (const p of game.players) {
@@ -8127,26 +9153,53 @@ function activateAbility(game, player) {
 // ============================================================
 // UI HANDLERS
 // ============================================================
-function updateHUD(game) {
-  const hud = document.getElementById('hud');
-  const night = game.nightTransition > 0.3 ? 'NIGHT' : 'DAY';
-  const mt = game.monsterSpawnType;
-  const mtName = MonsterTypes[mt] ? MonsterTypes[mt].name : 'None';
-  let html = '';
-  for (const p of game.players) {
-    const clsName = PlayerClasses[p.playerClass] ? PlayerClasses[p.playerClass].name : 'Delivery Guy';
-    html += '<span style="color:' + (['#4488ff','#ff8844','#44ff44','#ff44ff'][p.playerIndex] || '#fff') + '">' + p.name + '</span>: ';
-    html += 'HP:' + Math.round(p.hp) + '/' + p.maxHp + ' ';
-    html += clsName + ' ';
-    html += (p.alive ? '' : 'DEAD ') + '<br>';
+function updateRoundCounter(game) {
+  var el = document.getElementById('round-counter');
+  if (!el) return;
+  var r = game.summoning ? game.roundNumber + 1 : game.roundNumber;
+  var special = (r % 3 === 0 && r > 0);
+  var html = 'Summon: ' + r;
+  if (special) html += ' <span style="color:#ff8800;font-size:12px;">[SPECIAL]</span>';
+  el.innerHTML = html;
+}
+
+function updateMoneyDisplay(game) {
+  var el = document.getElementById('money-display');
+  if (!el) return;
+  el.textContent = '$' + game.currency;
+}
+
+function updateMissionPanel(game) {
+  var panel = document.getElementById('mission-panel');
+  if (!panel) return;
+  var missions = game.activeMissions;
+  var showNext = game.summoning && game._nextRoundMissions;
+  if (showNext) missions = game._nextRoundMissions;
+  if ((!missions || missions.length === 0) && !showNext) {
+    panel.innerHTML = '<div class="mp-header">ROUND MISSIONS</div><div class="mp-no-missions">No special missions</div>';
+    return;
   }
-  html += 'Monster: ' + mtName + '<br>';
-  html += 'Difficulty: ' + game.difficulty + ' | Round: ' + game.roundNumber + '<br>';
-  html += 'Artefatos: ' + game.collectedArtifacts + '/' + game.artifactCount + '<br>';
-  html += 'Speed Bonus: +' + game.getSpeedBonusPercent() + '%<br>';
-  html += 'Coins: ' + game.currency + '<br>';
-  html += 'Estado: ' + night;
-  hud.innerHTML = html;
+  var html = '<div class="mp-header">ROUND MISSIONS</div>';
+  var prev = missions;
+  if (showNext) prev = game._nextRoundMissions;
+  if (prev && prev.length > 0) {
+    for (var i = 0; i < prev.length; i++) {
+      var pm = prev[i];
+      var pms = showNext ? null : game.missionStates[pm.id];
+      var pdone = !showNext && pms && pms.completed;
+      var pprog = !showNext && pm.progress ? pm.progress(game) : '';
+      if (showNext) pprog = '';
+      html += '<div class="mp-row' + (pdone ? ' done' : '') + '">';
+      html += '<span class="mp-name">' + (pm.icon||'') + ' ' + pm.name + '</span>';
+      html += '<span class="mp-prog">' + (pdone ? 'DONE' : pprog) + '</span>';
+      html += '</div>';
+    }
+    var cc = showNext ? 0 : getMissionCompletionCount(game);
+    if (!showNext && cc === prev.length && prev.length > 0) {
+      html += '<div class="mp-footer">ALL DONE!</div>';
+    }
+  }
+  panel.innerHTML = html;
 }
 
 function updateAbilityHUD(game) {
@@ -8297,6 +9350,42 @@ function updateHotbarHUD(game) {
 
 function updateHotbarInGame(game) { updateHotbarHUD(game); }
 updateHotbarHUD = updateHotbarHUD;
+
+function renderMissionCoins(game, ctx) {
+  var ms = game.missionStates[3];
+  if (!ms || ms.completed) return;
+  for (var i = 0; i < ms.coins.length; i++) {
+    var c = ms.coins[i];
+    var sx = c.x * TILE_SIZE + TILE_SIZE / 2 - game.camX;
+    var sy = c.y * TILE_SIZE + TILE_SIZE / 2 - game.camY;
+    if (sx < -50 || sx > game.canvas.width + 50 || sy < -50 || sy > game.canvas.height + 50) continue;
+    if (!game.debugMode && !game.isPointVisible(sx + game.camX, sy + game.camY)) continue;
+    var coinSize = TILE_SIZE * 0.35;
+    var bounce = Math.sin(Date.now() / 600 + c.x + c.y) * 2;
+    sy += bounce;
+    var grad = ctx.createRadialGradient(sx - coinSize * 0.3, sy - coinSize * 0.3, coinSize * 0.1, sx, sy, coinSize);
+    grad.addColorStop(0, '#ffee88');
+    grad.addColorStop(0.4, '#ffd700');
+    grad.addColorStop(0.7, '#cc9900');
+    grad.addColorStop(1, '#996600');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(sx, sy, coinSize, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#886600';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,200,0.6)';
+    ctx.beginPath();
+    ctx.arc(sx - coinSize * 0.15, sy - coinSize * 0.2, coinSize * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    var sparkAlpha = 0.4 + 0.3 * Math.sin(Date.now() / 400 + c.x);
+    ctx.fillStyle = 'rgba(255,255,255,' + sparkAlpha + ')';
+    ctx.beginPath();
+    ctx.arc(sx + coinSize * 0.2, sy - coinSize * 0.5, coinSize * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
 
 function updateMapEditor(game) {
   // Build legend
@@ -8701,6 +9790,71 @@ function giveDebugItem(itemKey) {
     p.addToInventory(itemKey);
   }
   game.showMessage('Gave ' + Items[itemKey].name + ' to all players!');
+}
+
+function updateMissionAdmin(game) {
+  var sel = document.getElementById('mission-admin');
+  if (!sel) return;
+  if (!game.debugMode) { sel.classList.remove('active'); sel.innerHTML = ''; return; }
+  sel.classList.add('active');
+  var html = '<h3>Mission Admin</h3>';
+  if (game.specialRoundActive && game.activeMissions) {
+    html += '<div style="color:#ffd700;font-size:11px;margin-bottom:6px;">Active Special Round</div>';
+    for (var i = 0; i < game.activeMissions.length; i++) {
+      var m = game.activeMissions[i];
+      var ms = game.missionStates[m.id];
+      html += '<div class="admin-row"><span>#' + m.id + ' ' + m.name + '</span><span style="color:' + (ms&&ms.completed?'#0f0':'#f66') + '">' + (ms&&ms.completed?'DONE':'...') + '</span></div>';
+    }
+    html += '<button onclick="completeAllMissions()">Force Complete All</button>';
+    html += '<button onclick="clearAllMissions()">Clear Missions</button>';
+  } else {
+    html += '<div style="color:#888;font-size:11px;">No active special round</div>';
+  }
+  html += '<div style="margin-top:6px;font-size:11px;color:#aaa;">Force Next Round:</div>';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:2px;">';
+  for (var fi = 0; fi < MISSION_DEFS.length; fi++) {
+    var md = MISSION_DEFS[fi];
+    html += '<button style="font-size:9px;padding:2px 4px;" onclick="forceMission(' + md.id + ')" title="' + md.desc + '">#' + md.id + '</button>';
+  }
+  html += '</div>';
+  html += '<button style="margin-top:4px;" onclick="clearForceMissions()">Clear Forced Queue</button>';
+  sel.innerHTML = html;
+}
+
+function forceMission(id) {
+  if (!game || !game.debugMode) return;
+  if (!game._forceMissions) game._forceMissions = [];
+  game._forceMissions.push(id);
+  game.showMessage('Mission #' + id + ' queued for next special round');
+  updateMissionAdmin(game);
+}
+
+function clearForceMissions() {
+  if (!game || !game.debugMode) return;
+  game._forceMissions = [];
+  game.showMessage('Mission queue cleared');
+  updateMissionAdmin(game);
+}
+
+function completeAllMissions() {
+  if (!game || !game.debugMode) return;
+  if (!game.specialRoundActive || !game.activeMissions) return;
+  for (var i = 0; i < game.activeMissions.length; i++) {
+    var ms = game.missionStates[game.activeMissions[i].id];
+    if (ms) ms.completed = true;
+  }
+  game.showMessage('All missions force-completed!');
+  updateMissionAdmin(game);
+}
+
+function clearAllMissions() {
+  if (!game || !game.debugMode) return;
+  game.specialRoundActive = false;
+  game.activeMissions = null;
+  game.missionStates = {};
+  game._forceMissions = [];
+  game.showMessage('Missions cleared');
+  updateMissionAdmin(game);
 }
 </script>
 </body>
