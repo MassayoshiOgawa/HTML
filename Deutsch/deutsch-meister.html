@@ -875,6 +875,11 @@ i{font-style:normal}
 .sb-settings-row{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:28px;font-size:.82rem;color:var(--text2)}
 .sb-settings-row input[type="range"]{width:120px;accent-color:var(--primary)}
 .sb-diff-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;background:var(--primary3);color:var(--primary)}
+.sb-toggles-row{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:20px}
+.sb-toggle-item{display:flex;align-items:center;gap:8px;font-size:.78rem}
+.sb-toggle-label{font-weight:600;color:var(--text);white-space:nowrap}
+.sb-toggle-desc{font-size:.7rem;color:var(--text3);white-space:nowrap}
+@media(max-width:768px){.sb-toggles-row{gap:12px}.sb-toggle-desc{display:none}}
 .sb-phrase-card{background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius);padding:28px 24px;margin-bottom:20px;transition:all var(--transition);text-align:center;position:relative}
 .sb-phrase-card:hover{border-color:var(--primary);box-shadow:var(--shadow)}
 .sb-phrase-label{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:8px;font-weight:600}
@@ -1366,6 +1371,18 @@ i{font-style:normal}
 <input type="range" id="sb-streak-needed" min="1" max="100" value="5" step="1">
 <span id="sb-streak-needed-val">5</span>
 <span class="sb-diff-badge" id="sb-diff-badge">⚡ 2 palavras</span>
+</div>
+<div class="sb-toggles-row" id="sb-toggles-row">
+<div class="sb-toggle-item">
+<label class="toggle"><input type="checkbox" id="sb-quick-toggle"><span class="slider"></span></label>
+<span class="sb-toggle-label" id="sb-quick-label">Modo Rápido</span>
+<span class="sb-toggle-desc" id="sb-quick-desc">Acertou → avança automático</span>
+</div>
+<div class="sb-toggle-item">
+<label class="toggle"><input type="checkbox" id="sb-direction-toggle"><span class="slider"></span></label>
+<span class="sb-toggle-label" id="sb-direction-label">Inverter Direção</span>
+<span class="sb-toggle-desc" id="sb-direction-desc">Frase no seu idioma → montar em alemão</span>
+</div>
 </div>
 <div class="sb-phrase-card" id="sb-phrase-card">
 <div class="sb-phrase-label" id="sb-phrase-label">Traduza para o Alemão</div>
@@ -2747,7 +2764,7 @@ function applyLang(){
   renderChapters();renderTOC();renderSidebar();renderGlossCats();renderGlossary();
   if(typeof GermanModeCore !== 'undefined') GermanModeCore.renderModeSidebar();
 }
-let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'},sentenceBuilderState:{wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe'}};
+let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'},sentenceBuilderState:{wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe',quickMode:false,directionInvert:false}};
 function loadState(){try{const r=localStorage.getItem('deutschmeister_state');if(r){const p=JSON.parse(r);state={...state,...p}}}catch(e){}}
 function saveState(){try{localStorage.setItem('deutschmeister_state',JSON.stringify(state))}catch(e){}}
 function $(s,c){return(c||document).querySelector(s)}
@@ -7315,7 +7332,12 @@ const GermanSentenceBuilderCore = (() => {
       sidebarDirection: 'Direção',
       diffBadge: 'palavras',
       modalName: 'Montar Frases',
-      modalSidebarTitle: 'Montar Frases'
+      modalSidebarTitle: 'Montar Frases',
+      quickMode: 'Modo Rápido',
+      quickModeDesc: 'Acertou → avança automático. Errou → explicação.',
+      directionInvert: 'Inverter Direção',
+      directionInvertDesc: 'Frase em alemão → montar no seu idioma',
+      directionNormalDesc: 'Frase no seu idioma → montar em alemão'
     },
     en: {
       title: 'Sentence Builder',
@@ -7355,7 +7377,12 @@ const GermanSentenceBuilderCore = (() => {
       sidebarDirection: 'Direction',
       diffBadge: 'words',
       modalName: 'Sentence Builder',
-      modalSidebarTitle: 'Sentence Builder'
+      modalSidebarTitle: 'Sentence Builder',
+      quickMode: 'Quick Mode',
+      quickModeDesc: 'Correct → auto advance. Wrong → show explanation.',
+      directionInvert: 'Invert Direction',
+      directionInvertDesc: 'German phrase → build in your language',
+      directionNormalDesc: 'Phrase in your language → build in German'
     }
   };
   function _sbT(key){
@@ -7415,7 +7442,9 @@ const GermanSentenceBuilderCore = (() => {
     history: [],
     totalCorrect: 0,
     totalAttempts: 0,
-    lastDirection: 'ptToDe'
+    lastDirection: 'ptToDe',
+    quickMode: false,
+    directionInvert: false
   };
   let _currentPhrase = null;
   let _answerBlocks = [];
@@ -7484,8 +7513,12 @@ const GermanSentenceBuilderCore = (() => {
       _sbState.wordCount++;
       _sbState.streak = 0;
     }
-    // Alternate direction
-    _sbState.lastDirection = (_sbState.lastDirection === 'ptToDe') ? 'deToPt' : 'ptToDe';
+    // Update direction based on lock state
+    if(_sbState.directionInvert){
+      _sbState.lastDirection = 'deToPt';
+    } else {
+      _sbState.lastDirection = 'ptToDe';
+    }
     // Add to history, keep last 20
     if(_currentPhrase){
       _sbState.history.push(_currentPhrase.de);
@@ -7866,14 +7899,22 @@ const GermanSentenceBuilderCore = (() => {
       _trackEvo(false);
     }
 
-    // Render explanation
-    _renderExplanation(isCorrect, correctWords);
-    if(explanationEl) explanationEl.classList.add('show');
-    if(continueBtn) continueBtn.style.display = 'inline-flex';
-    if(verifyBtn) verifyBtn.disabled = true;
-
-    _updateStatsUI();
-    _saveState();
+    // Quick mode: auto-advance on correct, show explanation only on error
+    if(isCorrect && _sbState.quickMode){
+      if(continueBtn) continueBtn.style.display = 'none';
+      if(explanationEl) explanationEl.classList.remove('show');
+      if(verifyBtn) verifyBtn.disabled = true;
+      _updateStatsUI();
+      _saveState();
+      setTimeout(function(){ _nextPhrase(); }, 700);
+    } else {
+      _renderExplanation(isCorrect, correctWords);
+      if(explanationEl) explanationEl.classList.add('show');
+      if(continueBtn) continueBtn.style.display = 'inline-flex';
+      if(verifyBtn) verifyBtn.disabled = true;
+      _updateStatsUI();
+      _saveState();
+    }
   }
 
   function _renderExplanation(isCorrect, correctWords){
@@ -8082,6 +8123,36 @@ const GermanSentenceBuilderCore = (() => {
       continueBtn.addEventListener('click', _nextPhrase);
     }
 
+    // Set up quick mode toggle (only on first init)
+    const quickToggle = document.getElementById('sb-quick-toggle');
+    if(quickToggle && !quickToggle._sbInitialized){
+      quickToggle._sbInitialized = true;
+      quickToggle.checked = _sbState.quickMode;
+      quickToggle.addEventListener('change', function(){
+        _sbState.quickMode = this.checked;
+        _refreshToggleDesc();
+        _saveState();
+      });
+    } else if(quickToggle){
+      quickToggle.checked = _sbState.quickMode;
+    }
+
+    // Set up direction invert toggle (only on first init)
+    const dirToggle = document.getElementById('sb-direction-toggle');
+    if(dirToggle && !dirToggle._sbInitialized){
+      dirToggle._sbInitialized = true;
+      dirToggle.checked = _sbState.directionInvert;
+      dirToggle.addEventListener('change', function(){
+        _sbState.directionInvert = this.checked;
+        _sbState.lastDirection = _sbState.directionInvert ? 'deToPt' : 'ptToDe';
+        _refreshToggleDesc();
+        if(_currentPhrase){ _renderPhraseCard(_currentPhrase); _updateStatsUI(); }
+        _saveState();
+      });
+    } else if(dirToggle){
+      dirToggle.checked = _sbState.directionInvert;
+    }
+
     // Always refresh all text (language may have changed)
     _refreshAllUIText();
     _updateStatsUI();
@@ -8124,6 +8195,22 @@ const GermanSentenceBuilderCore = (() => {
     modeBtns.forEach(btn => {
       btn.innerHTML = '<span class="mode-icon">🧩</span> ' + _sbT('modalName');
     });
+
+    // Toggle labels
+    const quickLabel = document.getElementById('sb-quick-label');
+    if(quickLabel) quickLabel.textContent = _sbT('quickMode');
+    const directionLabel = document.getElementById('sb-direction-label');
+    if(directionLabel) directionLabel.textContent = _sbT('directionInvert');
+    _refreshToggleDesc();
+  }
+
+  function _refreshToggleDesc(){
+    const quickDesc = document.getElementById('sb-quick-desc');
+    if(quickDesc) quickDesc.textContent = _sbT('quickModeDesc');
+    const directionDesc = document.getElementById('sb-direction-desc');
+    if(directionDesc){
+      directionDesc.textContent = _sbState.directionInvert ? _sbT('directionInvertDesc') : _sbT('directionNormalDesc');
+    }
   }
 
   function _renderSidebar(){
@@ -8150,7 +8237,7 @@ const GermanSentenceBuilderCore = (() => {
 
   // Reset function for external use
   function resetBuilder(){
-    _sbState = {wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe'};
+    _sbState = {wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe',quickMode:false,directionInvert:false};
     _currentPhrase = null;
     _rendered = false;
     _saveState();
@@ -8220,7 +8307,7 @@ function setup(){
     if(confirm(_t('reset.confirm'))){
       localStorage.removeItem('deutschmeister_state');
       localStorage.removeItem('deutschmeister_evo');
-      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'},sentenceBuilderState:{wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe'}};
+      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'},sentenceBuilderState:{wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe',quickMode:false,directionInvert:false}};
       resetGPS();
       applyLang();
       GermanModeCore.init();
@@ -8286,7 +8373,7 @@ $('#import-file').onchange=function(e){
       if(!state.evo)state.evo=null;
       if(!state.currentMode)state.currentMode='chapters';
       if(!state.viewState)state.viewState={};if(!state.musicState)state.musicState={currentSong:null,currentView:'lobby',lobbyScrollY:0};
-      if(!state.sentenceBuilderState)state.sentenceBuilderState={wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe'};
+      if(!state.sentenceBuilderState)state.sentenceBuilderState={wordCount:2,streak:0,errorsInARow:0,streakNeeded:5,history:[],totalCorrect:0,totalAttempts:0,lastDirection:'ptToDe',quickMode:false,directionInvert:false};
       syncGPSFromState();
       saveState();
       applyLang();
