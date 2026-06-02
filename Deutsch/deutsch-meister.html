@@ -8146,7 +8146,7 @@ const GermanSentenceBuilderCore = (() => {
         _sbState.directionInvert = this.checked;
         _sbState.lastDirection = _sbState.directionInvert ? 'deToPt' : 'ptToDe';
         _refreshToggleDesc();
-        if(_currentPhrase){ _renderPhraseCard(_currentPhrase); _updateStatsUI(); }
+        if(_currentPhrase){ _renderPhraseCard(_currentPhrase); _resetPhrase(); _updateStatsUI(); }
         _saveState();
       });
     } else if(dirToggle){
