@@ -744,8 +744,8 @@ i{font-style:normal}
 .mode-hub-card p{font-size:.75rem;color:var(--text3);margin:0}
 /* Mode-aware sidebar sections */
 #sidebar-mode-content{flex:1;display:flex;flex-direction:column;overflow-y:auto}
-#sidebar-chapters-content,#sidebar-music-content,#sidebar-vocabulary-content,#sidebar-exercises-content,#sidebar-evolution-content,#sidebar-review-content{display:none;flex-direction:column;flex:1}
-#sidebar-chapters-content.active,#sidebar-music-content.active,#sidebar-vocabulary-content.active,#sidebar-exercises-content.active,#sidebar-evolution-content.active,#sidebar-review-content.active{display:flex}
+#sidebar-chapters-content,#sidebar-music-content,#sidebar-vocabulary-content,#sidebar-exercises-content,#sidebar-evolution-content,#sidebar-review-content,#sidebar-sentencebuilder-content{display:none;flex-direction:column;flex:1}
+#sidebar-chapters-content.active,#sidebar-music-content.active,#sidebar-vocabulary-content.active,#sidebar-exercises-content.active,#sidebar-evolution-content.active,#sidebar-review-content.active,#sidebar-sentencebuilder-content.active{display:flex}
 /* Sidebar music list */
 .sidebar-music-item{display:flex;align-items:center;gap:8px;padding:8px 16px;color:var(--text2);font-size:.8rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
 .sidebar-music-item:hover{background:var(--primary3);color:var(--primary)}
@@ -859,6 +859,65 @@ i{font-style:normal}
   .music-back-section{padding:18px 0 32px}
   .music-back-btn{padding:10px 18px;font-size:.78rem}
 }
+.sb-container{padding:60px 24px 80px;max-width:750px;margin:0 auto}
+.sb-header{text-align:center;margin-bottom:28px}
+.sb-header-icon{font-size:3rem;margin-bottom:8px}
+.sb-header h2{font-size:1.7rem;font-weight:800;margin-bottom:4px}
+.sb-header p{color:var(--text2);font-size:.92rem;max-width:480px;margin:0 auto}
+.sb-stats-bar{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px}
+.sb-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 16px;font-size:.8rem;color:var(--text2);display:flex;align-items:center;gap:6px;font-weight:500}
+.sb-stat strong{color:var(--primary)}
+.sb-stat.streak-ok strong{color:var(--success)}
+.sb-stat.streak-warn strong{color:var(--warn)}
+.sb-stat.erros strong{color:var(--error)}
+.sb-diff-row{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.sb-diff-row label{font-size:.78rem;color:var(--text3);font-weight:600;white-space:nowrap}
+.sb-diff-row input[type=range]{width:120px;accent-color:var(--primary)}
+.sb-diff-row span{font-size:.8rem;color:var(--text2);font-weight:600;min-width:24px;text-align:center}
+.sb-toggle-btn{padding:4px 14px;border-radius:8px;border:1.5px solid var(--primary);background:var(--primary3);color:var(--primary);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.sb-toggle-btn:hover{background:var(--primary);color:#fff}
+.sb-toggle-btn.flipped{background:rgba(0,206,201,0.12);border-color:var(--accent);color:var(--accent2)}
+.sb-toggle-btn.flipped:hover{background:var(--accent);color:#fff}
+.sb-progress-bar{height:6px;background:var(--border);border-radius:6px;margin:12px 0 20px;overflow:hidden}
+.sb-progress-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:6px;transition:width .4s}
+.sb-direction-badge{display:inline-block;padding:3px 12px;border-radius:14px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px}
+.sb-direction-badge.pt-de{background:var(--primary3);color:var(--primary)}
+.sb-direction-badge.de-pt{background:rgba(0,206,201,0.12);color:var(--accent2)}
+.sb-prompt-text{text-align:center;font-size:1.15rem;font-weight:600;color:var(--text);margin-bottom:14px;min-height:28px}
+.sb-target-area{background:var(--bg2);border:2px dashed var(--border);border-radius:var(--radius);min-height:60px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-bottom:20px;transition:border-color .2s}
+.sb-target-area.drag-over{border-color:var(--primary);background:var(--primary3)}
+.sb-target-area .sb-slot{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:.9rem;font-weight:500;color:var(--text)}
+.sb-target-area .sb-slot .sb-remove{font-size:.75rem;color:var(--text3);cursor:pointer;margin-left:4px;opacity:.6;transition:opacity .15s}
+.sb-target-area .sb-slot .sb-remove:hover{opacity:1;color:var(--error)}
+.sb-blocks-area{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:20px;min-height:44px}
+.sb-block{display:inline-flex;align-items:center;padding:8px 18px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;font-weight:600;color:var(--text);cursor:grab;transition:all .2s;user-select:none;touch-action:manipulation}
+.sb-block:active{cursor:grabbing}
+.sb-block:hover{border-color:var(--primary);background:var(--primary3);color:var(--primary);transform:translateY(-2px);box-shadow:0 4px 12px rgba(108,92,231,0.12)}
+.sb-block.used{opacity:.3;pointer-events:none;border-style:dashed}
+.sb-block.dragging{opacity:.5;transform:scale(.95)}
+.sb-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.sb-verify-btn{padding:10px 36px;border-radius:10px;border:none;background:var(--primary);color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.sb-verify-btn:hover{background:var(--primary2);transform:translateY(-2px);box-shadow:0 6px 18px rgba(108,92,231,0.25)}
+.sb-verify-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.sb-reset-btn{padding:10px 20px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text2);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.sb-reset-btn:hover{border-color:var(--text3);color:var(--text)}
+.sb-feedback{text-align:center;padding:12px 20px;border-radius:var(--radius-sm);margin-bottom:16px;font-weight:700;font-size:.95rem;display:none}
+.sb-feedback.correct{display:block;background:rgba(0,184,148,0.12);color:var(--success);border:1px solid rgba(0,184,148,0.3)}
+.sb-feedback.wrong{display:block;background:rgba(225,112,85,0.1);color:var(--error);border:1px solid rgba(225,112,85,0.25)}
+.sb-explain-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:0;margin-bottom:20px;overflow:hidden;display:none}
+.sb-explain-panel.open{display:block}
+.sb-explain-header{background:var(--primary3);padding:12px 20px;font-weight:700;font-size:.9rem;color:var(--primary);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.sb-explain-body{max-height:500px;overflow-y:auto;font-size:.82rem;line-height:1.7;color:var(--text);padding:16px 20px}
+.sb-explain-body h5{font-size:.85rem;margin:12px 0 6px;color:var(--primary)}
+.sb-explain-body .sb-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.7rem;font-weight:600;margin:2px 3px}
+.sb-explain-body .sb-tag.gram{background:rgba(108,92,231,0.1);color:var(--primary)}
+.sb-explain-body .sb-tag.case{background:rgba(0,206,201,0.1);color:var(--accent2)}
+.sb-explain-body .sb-tag.warn{background:rgba(253,203,110,0.15);color:#b8860b}
+.sb-continue-btn{display:none;margin:0 auto;padding:10px 36px;border-radius:10px;border:none;background:var(--success);color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.sb-continue-btn.visible{display:block}
+.sb-continue-btn:hover{opacity:.9;transform:translateY(-2px)}
+@media(max-width:768px){.sb-container{padding:40px 16px 60px}.sb-header h2{font-size:1.4rem}.sb-block{padding:7px 14px;font-size:.82rem}.sb-target-area{min-height:50px;padding:10px 12px}.sb-stats-bar{gap:8px}.sb-stat{padding:6px 12px;font-size:.74rem}.sb-explain-body{max-height:380px;font-size:.78rem}}
+@media(max-width:480px){.sb-container{padding:30px 10px 50px}.sb-block{padding:6px 10px;font-size:.76rem}.sb-target-area{padding:8px 10px;gap:4px}}
 </style>
 </head>
 <body>
@@ -889,7 +948,8 @@ i{font-style:normal}
 <button class="mode-btn" data-mode="exercises"><span class="mode-icon">🧠</span> Exercícios</button>
 <button class="mode-btn" data-mode="vocabulary"><span class="mode-icon">📖</span> Vocabulário</button>
 <button class="mode-btn" data-mode="evolution"><span class="mode-icon">🧬</span> Evolução</button>
-<button class="mode-btn" data-mode="conversation"><span class="mode-icon">💬</span> Conversação</button>
+  <button class="mode-btn" data-mode="conversation"><span class="mode-icon">💬</span> Conversação</button>
+  <button class="mode-btn" data-mode="sentenceBuilder"><span class="mode-icon">🧩</span> Montar Frases</button>
 </div>
 <div id="sidebar-mode-content">
 <div id="sidebar-chapters-content" class="active">
@@ -915,6 +975,10 @@ i{font-style:normal}
 <div id="sidebar-review-content">
 <div id="sidebar-section-title">🔥 Revisão</div>
 <div id="sidebar-review-list"></div>
+</div>
+<div id="sidebar-sentencebuilder-content">
+<div id="sidebar-section-title">🧩 Montar Frases</div>
+<div id="sidebar-sentencebuilder-list"></div>
 </div>
 </div>
 </aside>
@@ -1254,6 +1318,55 @@ i{font-style:normal}
 </div>
 </div>
 </div><!-- /#mode-conversation -->
+
+<!-- ===== MODO: MONTAR FRASES ===== -->
+<div id="mode-sentenceBuilder" class="mode-view">
+<div id="sb-mode" class="sb-container">
+  <div class="sb-header">
+    <div class="sb-header-icon">🧩</div>
+    <h2>Montar Frases</h2>
+    <p>Monte frases em alemão na ordem correta — aprenda como o alemão é construído</p>
+  </div>
+  <div class="sb-stats-bar" id="sb-stats">
+    <div class="sb-stat" id="sb-words-stat"><span>📝 Palavras:</span> <strong id="sb-word-count">2</strong></div>
+    <div class="sb-stat streak-ok" id="sb-streak-stat"><span>🔥 Streak:</span> <strong id="sb-streak">0/5</strong></div>
+    <div class="sb-stat erros" id="sb-erros-stat"><span>❌ Erros consecutivos:</span> <strong id="sb-consec-errors">0</strong></div>
+  </div>
+  <div class="sb-diff-row" style="margin-bottom:20px">
+    <label>Streak para subir:</label>
+    <input type="range" id="sb-streak-needed" min="1" max="100" value="5" oninput="document.getElementById('sb-streak-needed-val').textContent=this.value;if(typeof GermanSentenceBuilderCore!=='undefined')GermanSentenceBuilderCore._onStreakNeededChange(this.value)">
+    <span id="sb-streak-needed-val">5</span>
+  </div>
+  <div class="sb-diff-row" style="margin-bottom:10px">
+    <label>Direção:</label>
+    <button class="sb-toggle-btn" id="sb-direction-toggle" onclick="if(typeof GermanSentenceBuilderCore!=='undefined')GermanSentenceBuilderCore._toggleDirection()">PT → DE</button>
+  </div>
+  <div class="sb-diff-row" style="margin-bottom:20px">
+    <label>Modo rápido:</label>
+    <label class="toggle" style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.78rem">
+      <input type="checkbox" id="sb-fastmode-toggle" onchange="if(typeof GermanSentenceBuilderCore!=='undefined')GermanSentenceBuilderCore._toggleFastMode(this.checked)">
+      <span class="slider"></span>
+      <span style="font-size:.72rem;color:var(--text3)">Pular explicações ao acertar</span>
+    </label>
+  </div>
+  <div class="sb-progress-bar"><span id="sb-session-bar" style="width:0%"></span></div>
+  <div class="sb-direction-badge pt-de" id="sb-direction-badge">PT → DE</div>
+  <div id="sb-prompt-text" class="sb-prompt-text"></div>
+  <div class="sb-feedback" id="sb-feedback"></div>
+  <div id="sb-target" class="sb-target-area"></div>
+  <div id="sb-blocks" class="sb-blocks-area"></div>
+  <div class="sb-actions">
+    <button class="sb-verify-btn" id="sb-verify-btn" disabled>✅ Verificar</button>
+    <button class="sb-reset-btn" id="sb-reset-btn">🔄 Refazer</button>
+    <button class="sb-reset-btn" id="sb-resetgame-btn" style="border-color:var(--warn);color:#b8860b">🔁 Reiniciar Jogo</button>
+  </div>
+  <div class="sb-explain-panel" id="sb-explain-panel">
+    <div class="sb-explain-header" id="sb-explain-header">📖 Explicação <span>▼</span></div>
+    <div class="sb-explain-body" id="sb-explain-body"></div>
+  </div>
+  <button class="sb-continue-btn" id="sb-continue-btn">▶ Continuar</button>
+</div>
+</div><!-- /#mode-sentenceBuilder -->
 
 </div><!-- /#mode-content -->
 <div id="footer-text" style="text-align:center;padding:24px;color:var(--text3);font-size:.8rem;border-top:1px solid var(--border)" data-i18n="footer">DeutschMeister © 2026 — Feito com 💜 para aprendizes de alemão</div>
@@ -2609,7 +2722,7 @@ function applyLang(){
   renderChapters();renderTOC();renderSidebar();renderGlossCats();renderGlossary();
   if(typeof GermanModeCore !== 'undefined') GermanModeCore.renderModeSidebar();
 }
-let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'}};
+let state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'},sentenceBuilderState:{wordCount:2,streak:0,streakNeeded:5,consecErrors:0,recentHistory:[],totalCorrect:0,totalAttempts:0,fastMode:false}};
 function loadState(){try{const r=localStorage.getItem('deutschmeister_state');if(r){const p=JSON.parse(r);state={...state,...p}}}catch(e){}}
 function saveState(){try{localStorage.setItem('deutschmeister_state',JSON.stringify(state))}catch(e){}}
 function $(s,c){return(c||document).querySelector(s)}
@@ -6490,7 +6603,8 @@ const GermanModeCore = (() => {
     review:       { id:'review',       icon:'🔥', name:'Revisão',       viewId:'mode-review',       sidebarId:'sidebar-review-content',      sidebarTitle:'Revisão' },
     engineering:  { id:'engineering',  icon:'🏗️', name:'Engenharia',    viewId:'mode-engineering',  sidebarId:'sidebar-chapters-content',    sidebarTitle:'Engenharia' },
     listening:    { id:'listening',    icon:'🎧', name:'Escuta',        viewId:'mode-listening',    sidebarId:'sidebar-chapters-content',    sidebarTitle:'Escuta' },
-    conversation: { id:'conversation', icon:'💬', name:'Conversação',   viewId:'mode-conversation', sidebarId:'sidebar-chapters-content',    sidebarTitle:'Conversação' }
+    conversation: { id:'conversation', icon:'💬', name:'Conversação',   viewId:'mode-conversation', sidebarId:'sidebar-chapters-content',    sidebarTitle:'Conversação' },
+    sentenceBuilder: { id:'sentenceBuilder', icon:'🧩', name:'Montar Frases', viewId:'mode-sentenceBuilder', sidebarId:'sidebar-sentencebuilder-content', sidebarTitle:'Montar Frases' }
   };
 
   let currentMode = 'chapters';
@@ -6591,6 +6705,11 @@ const GermanModeCore = (() => {
         GermanMusicCore.onModeEnter();
       }
     }
+    if(mode === 'sentenceBuilder'){
+      if(typeof GermanSentenceBuilderCore !== 'undefined' && typeof GermanSentenceBuilderCore.onModeEnter === 'function'){
+        GermanSentenceBuilderCore.onModeEnter();
+      }
+    }
     if(mode !== 'chapters'){
       const evo = document.getElementById('evo-dashboard');
       if(evo) evo.style.display = 'none';
@@ -6626,6 +6745,9 @@ const GermanModeCore = (() => {
         break;
       case 'conversation':
         _renderConversationSidebar();
+        break;
+      case 'sentenceBuilder':
+        _renderSentenceBuilderSidebar();
         break;
       default:
         _renderPlaceholderSidebar('Conteúdo em desenvolvimento');
@@ -6706,6 +6828,16 @@ const GermanModeCore = (() => {
 
   function _renderConversationSidebar(){
     _renderChaptersDefaultForMode();
+  }
+
+  function _renderSentenceBuilderSidebar(){
+    var list = document.getElementById('sidebar-sentencebuilder-list');
+    if(!list) return;
+    if(typeof GermanSentenceBuilderCore !== 'undefined' && typeof GermanSentenceBuilderCore._renderSidebarContent === 'function'){
+      GermanSentenceBuilderCore._renderSidebarContent();
+    } else {
+      list.innerHTML = '<div class="sidebar-link-item"><span class="link-icon">📝</span><span>Modo Montar Frases</span></div>';
+    }
   }
 
   function _renderChaptersDefaultForMode(){
@@ -7118,6 +7250,77 @@ Object.assign(window.GermanMusicMode, {
   SONGS: GermanMusicCore.SONGS
 });
 
+
+// === DATABASE (PT+DE+EN, 25 key phrases) ===
+_reg(2,'Casa','Eu moro aqui.','Ich wohne hier.','I live here.',_xf(['Eu moro aqui.','I live here.','I live here.'],['Eu moro aqui.','I live here.','I live here.'],[['Ich','Pronome','Sujeito','','','','Nominativ','ich'],['wohne','Verbo','V2','wohne (ich)','wohnen','Prasens','','ich wohne'],['hier','AdvÃ©rbio','Local','','','','','invariÃ¡vel']],['Sâ†’Vâ†’Adv. SVO.','Sâ†’Vâ†’Adv. SVO.','Subjectâ†’Verbâ†’Adverb. SVO.'],['Wohnen regular.','Wohnen regular.','Wohnen is regular.'],['Hier=dort.','Hier=dort.','Hier=dort.'],['Ich=guttural. Wohne: W=v.','Ich=guttural. Wohne: W=v.','Ich=guttural. Wohne: W=v.'],['Erro: Ich hier wohne â€” V2!','Error: Ich hier wohne â€” V2!','Error: inverting word order! V2!'],['V2: verbo sempre pos 2.','V2: verb always pos 2.','V2: conjugated verb always position 2.']),'moradia');
+_reg(2,'Escola','Eu aprendo alemÃ£o.','Ich lerne Deutsch.','I learn German.',_xf(['Eu aprendo.','I learn.','I learn.'],['Eu aprendo alemÃ£o.','I learn German.','I learn German.'],[['Ich','Pronome','Sujeito','','','','Nominativ','ich'],['lerne','Verbo','V2','lerne (ich)','lernen','Prasens','','ich lerne'],['Deutsch','Subst','Obj akk','','','','Akkusativ','']],['Sâ†’Vâ†’Obj.','Sâ†’Vâ†’Obj.','Subjectâ†’Verbâ†’Object.'],['Lernen regular.','Lernen regular.','Lernen is regular.'],['Lernen=aprender.','Lernen=learn.','Lernen=learn.'],['Lerne: r uvular.','Lerne: uvular r.','Lerne: uvular r.'],['Erro: Ich lernen ou Ich Deutsch lerne.','Error: conjugation or order.','Error: conjugation or inverted order.'],['V2: posicao 2 sempre.','V2: position 2.','V2: always position 2.']),'educaÃ§Ã£o');
+_reg(2,'Rotina','Eu como pÃ£o.','Ich esse Brot.','I eat bread.',_xf(['Eu como pÃ£o.','I eat bread.','I eat bread.'],['Eu como pÃ£o.','I eat bread.','I eat bread.'],[['Ich','Pronome','Sujeito','','','','Nominativ','ich'],['esse','Verbo','V2','esse (ich)','essen','Prasens','','ich esse'],['Brot','Subst','Obj neutro','','','','Akkusativ','das Brot']],['Sâ†’Vâ†’Obj.','Sâ†’Vâ†’Obj.','Subjectâ†’Verbâ†’Object.'],['Essen forte: eâ†’i em du/er.','Essen strong: eâ†’i.','Essen strong: eâ†’i in du/er.'],['Acusativo: so masc muda.','Accusative: only masc.','Accusative: only masculine changes.'],['Esse: s=z.','Esse: voiced s.','Esse: voiced s.'],['Erro: Ich isst Brot â€” 3p para 1p.','Error: 3rd p for 1st.','Error: 3rd person for 1st.'],['Perfekt: gegessen.','Perfekt: gegessen.','Perfekt: gegessen.']),'alimentaÃ§Ã£o');
+_reg(2,'Rotina','Ele dorme bem.','Er schlÃ¤ft gut.','He sleeps well.',_xf(['Ele dorme bem.','He sleeps well.','He sleeps well.'],['Ele dorme bem.','He sleeps well.','He sleeps well.'],[['Er','Pronome','Sujeito','','','','Nominativ','er'],['schlÃ¤ft','Verbo','V2 Umlaut','schlÃ¤ft (er)','schlafen','Prasens','','er schlÃ¤ft'],['gut','AdvÃ©rbio','Modo','','','','','invariÃ¡vel']],['Sâ†’V(Umlaut)â†’Adv.','Sâ†’V(Umlaut)â†’Adv.','Sâ†’V(Umlaut)â†’Adv.'],['Schlafen aâ†’Ã¤.','Schlafen aâ†’Ã¤.','Schlafen: aâ†’Ã¤ in du/er.'],['aâ†’Ã¤: schlafen, fahren.','aâ†’Ã¤: schlafen, fahren.','aâ†’Ã¤ verbs: schlafen, fahren.'],['SchlÃ¤ft: sch=sh, Ã¤=Ã©.','SchlÃ¤ft: sch=sh, Ã¤=e.','SchlÃ¤ft: sch=sh, Ã¤=e.'],['Erro: Er schlaft â€” Umlaut!','Error: forget Umlaut!','Error: forgetting the Umlaut.'],['Perfekt: geschlafen.','Perfekt: geschlafen.','Perfekt: geschlafen.']),'cotidiano');
+_reg(2,'Casa','A casa Ã© grande.','Das Haus ist groÃŸ.','The house is big.',_xf(['A casa Ã© grande.','The house is big.','The house is big.'],['A casa Ã© grande.','The house is big.','The house is big.'],[['Das','Artigo','Neutro nom','','','','Nominativ','das'],['Haus','Subst','Sujeito','','','','Nominativ','das Haus'],['ist','Verbo','CÃ³pula','ist','sein','Prasens','','er ist'],['groÃŸ','Adj','Predicativo','','','','','invariÃ¡vel']],['Sâ†’Copâ†’Adj.','Sâ†’Copâ†’Adj.','Subjectâ†’Copulaâ†’Adj.'],['Adj predicativo=invariÃ¡vel.','Predicative adj=invariable.','Predicative adjs never decline.'],['ÃŸ=ss. Vogal longa=ÃŸ.','ÃŸ=ss. Long vowel=ÃŸ.','ÃŸ (Eszett)=ss sound.'],['GroÃŸ: o longo+ÃŸ.','GroÃŸ: long o+ÃŸ.','GroÃŸ: long o+ÃŸ.'],['Erro: Das Haus ist groÃŸe â€” NUNCA!','Error: NEVER decline!','Error: adding ending to predicative adj!'],['Predicativos com sein/werden/bleiben=invariÃ¡veis.','Predicatives never decline.','Predicatives never get endings.']),'moradia');
+_reg(2,'Clima','EstÃ¡ frio.','Es ist kalt.','It is cold.',_xf(['EstÃ¡ frio.','It is cold.','It is cold.'],['EstÃ¡ frio.','It is cold.','It is cold.'],[['Es','Pronome','Suj impessoal','','','','Nominativ','es'],['ist','Verbo','CÃ³pula','ist','sein','Prasens','','es ist'],['kalt','Adj','Predicativo','','','','','invariÃ¡vel']],['Suj impâ†’Copâ†’Adj.','Impersâ†’Copâ†’Adj.','Impersonalâ†’Copulaâ†’Adj.'],['AlemÃ£o EXIGE sujeito!','German REQUIRES subject!','German REQUIRES explicit subject!'],['Clima: es regnet, es schneit.','Weather: es regnet.','Weather: es regnet, es schneit.'],['Kalt: a curto.','Kalt: short a.','Kalt: short a.'],['Erro: Ist kalt â€” sem es!','Error: no es!','Error: missing es!'],['Es impessoal = marca do alemÃ£o.','Impersonal es = German hallmark.','Impersonal es is a German hallmark.']),'clima');
+_reg(2,'FamÃ­lia','Meu pai Ã© mÃ©dico.','Mein Vater ist Arzt.','My father is a doctor.',_xf(['Meu pai Ã© mÃ©dico.','My father is a doctor.','My father is a doctor.'],['Meu pai Ã© mÃ©dico.','My father is a doctor.','My father is a doctor.'],[['Mein','Poss','Masc nom','','','','Nominativ','mein'],['Vater','Subst','Sujeito','','','','Nominativ','der Vater'],['ist','Verbo','CÃ³pula','ist','sein','Prasens','','er ist'],['Arzt','Subst','Pred SEM artigo!','','','','','']],['Poss+Sâ†’Copâ†’Prof(sem artigo).','Poss+Sâ†’Copâ†’Prof(no art).','Poss+Sâ†’Copâ†’Profession(no article!).'],['CRÃTICO: ProfissÃµes apÃ³s sein NUNCA levam artigo!','CRITICAL: Never article after sein!','CRITICAL: Professions after sein NEVER take article!'],['Com adj: ein guter Arzt.','With adj: ein guter Arzt.','With adjective: ein guter Arzt.'],['Arzt: z=ts.','Arzt: z=ts.','Arzt: z=ts.'],['Erro: ein Arzt â€” NUNCA artigo!','Error: NEVER article!','Error: using article for profession!'],['Regra: profissÃµes, nacionalidades sem artigo.','Rule: no article.','Rule: professions, nationalities without article.']),'famÃ­lia');
+_reg(3,'Escola','O que vocÃª aprende?','Was lernst du?','What do you learn?',_xf(['O que aprendes?','What do you learn?','What do you learn?'],['O que vocÃª aprende?','What do you learn?','What do you learn?'],[['Was','Pron W','W-Frage','','','','Akkusativ','was'],['lernst','Verbo','V2','lernst (du)','lernen','Prasens','','du lernst'],['du','Pron','Sujeito','','','','Nominativ','du']],['Wâ†’Vâ†’S. W-Frage=V2.','Wâ†’Vâ†’S. W-question=V2.','Wâ†’Vâ†’S. W-questions use V2.'],['W-Fragen: palavra-W+verbo+sujeito.','W-Fragen: W-word+verb+subject.','W-questions: question word+verb+subject.'],['W: Wer, Was, Wo, Wie, Wann.','W: Wer, Was, Wo.','W-words: Wer, Was, Wo, Wie, Wann.'],['Was: W=v.','Was: W=v.','Was: W=v.'],['Erro: Was du lernst? â€” V2!','Error: verb after subject!','Error: placing verb after subject.'],['W-Fragen=V2. Sim/NÃ£o=V1.','W-questions=V2. Yes/No=V1.','W-questions=V2. Yes/no=V1.']),'educaÃ§Ã£o');
+_reg(3,'Trabalho','Eu trabalho aqui.','Ich arbeite hier.','I work here.',_xf(['Eu trabalho aqui.','I work here.','I work here.'],['Eu trabalho aqui.','I work here.','I work here.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['arbeite','Verbo','V2 (-t stem)','arbeite (ich)','arbeiten','Prasens','','ich arbeite'],['hier','Adv','Lugar','','','','','invariÃ¡vel']],['Sâ†’V(-t)â†’Adv.','Sâ†’V(-t)â†’Adv.','Subjectâ†’Verb(-t)â†’Adverb.'],['Arbeiten: -t radical â†’ -e- extra.','Arbeiten: -t stem â†’ extra -e-.','Arbeiten: stem in -t needs extra -e-.'],['-e- extra: -t,-d,-n,-m stems.','Extra -e-: -t,-d,-n,-m.','Extra -e- with -t,-d,-n,-m stems.'],['Arbeite: ei=ai.','Arbeite: ei=ai.','Arbeite: ei=ai.'],['Erro: Ich arbeit hier â€” -e!','Error: forget -e.','Error: forgetting -e ending.'],['Perfekt: gearbeitet.','Perfekt: gearbeitet.','Perfekt: gearbeitet (extra -et).']),'trabalho');
+_reg(4,'Casa','Eu moro em Berlim.','Ich wohne in Berlin.','I live in Berlin.',_xf(['Eu moro em Berlim.','I live in Berlin.','I live in Berlin.'],['Eu moro em Berlim.','I live in Berlin.','I live in Berlin.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['wohne','Verbo','V2','wohne (ich)','wohnen','Prasens','','ich wohne'],['in','Prep','Lugar(dat)','','','','Dativ','in'],['Berlin','Nome','Compl','','','','Dativ','Berlin']],['Sâ†’Vâ†’Prep+Compl. In+city=dat.','Sâ†’Vâ†’Prep+Compl. In+city=dat.','Subjectâ†’Verbâ†’Prep+Complement. In+city=dative.'],['In+city=dat(pos). Nach+city=dir.','In+city=dat. Nach+city=dir.','In+city=dative. Nach+city=direction.'],['In Berlin vs nach Berlin.','In Berlin vs nach Berlin.','In Berlin(position) vs nach Berlin(direction).'],['Berlin: stress -lin.','Berlin: stress -lin.','Berlin: stress on -lin.'],['Erro: im Berlin â€” NUNCA!','Error: im Berlin â€” NEVER!','Error: contracted article with city!'],['Cidades sem artigo: in diretamente.','Cities without article: in directly.','Cities: use in directly, no article.']),'moradia');
+_reg(5,'Restaurante','Eu gostaria de um cafÃ©, por favor.','Ich mÃ¶chte einen Kaffee, bitte.','I would like a coffee, please.',_xf(['Eu gostaria um cafÃ©, por favor.','I would like a coffee, please.','I would like a coffee, please.'],['Eu gostaria de um cafÃ©, por favor.','I would like a coffee, please.','I would like a coffee, please.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['mÃ¶chte','Verbo','Konj II','mÃ¶chte (ich)','mÃ¶gen','Konjunktiv II','','ich mÃ¶chte'],['einen','Art ind','AKK MASC!','','','','Akkusativ','einâ†’einen'],['Kaffee','Subst','Obj masc','','','','Akkusativ','der Kaffee'],['bitte','Part','Cortesia','','','','','invariÃ¡vel']],['Sâ†’KonjIIâ†’AKKmasc+Objâ†’Part.','Sâ†’KonjIIâ†’AKKmasc+Objâ†’Part.','Sâ†’KonjIIâ†’MascACC+Objâ†’Particle.'],['CRÃTICO: einen (einâ†’einen!). Kaffee=masc.','CRITICAL: einen! Kaffee=masc.','CRITICAL: einen (einâ†’einen!). Kaffee is masculine.'],['Bitte=por favor/de nada/como?','Bitte=please/pardon.','Bitte=please/youre welcome/pardon.'],['MÃ¶chte: Ã¶. Einen: ei=ai.','MÃ¶chte: Ã¶. Einen: ei=ai.','MÃ¶chte: Ã¶. Einen: ei=ai.'],['Erro CRÃTICO: ein Kaffee â€” einen!','CRITICAL: einâ†’einen!','CRITICAL error: ein Kaffee â€” must be einen!'],['Acusativo: sÃ³ masc muda: derâ†’den, einâ†’einen.','Only masc: derâ†’den, einâ†’einen.','Only masculine changes in accusative.']),'alimentaÃ§Ã£o');
+_reg(6,'Trabalho','Eu preciso trabalhar mais no escritÃ³rio hoje.','Ich muss heute lÃ¤nger im BÃ¼ro arbeiten.','I have to work longer at the office today.',_xf(['Eu preciso hoje mais no escritÃ³rio trabalhar.','I must work longer at the office today.','I must work longer at the office today.'],['Eu preciso trabalhar mais no escritÃ³rio hoje.','I have to work longer at the office today.','I have to work longer at the office today.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['muss','Modal','V2','muss (ich)','mÃ¼ssen','Prasens','','ich muss'],['heute','Adv','Tempo','','','','','invariÃ¡vel'],['lÃ¤nger','Adv comp','langâ†’lÃ¤nger','','','','','langâ†’lÃ¤nger'],['im','Prep','in+dem','','','','Dativ','im'],['BÃ¼ro','Subst','Lugar','','','','Dativ','das BÃ¼ro'],['arbeiten','V princ','INFINITIVO NO FINAL!','','arbeiten','Infinitiv','','infinitivo']],['Sâ†’Modal(V2)â†’Advâ†’Complâ†’Vprincipal NO FINAL!','Sâ†’Modal(V2)â†’Advâ†’Complâ†’MainV AT END!','Subjectâ†’Modal(V2)â†’Advâ†’Complâ†’Main verb AT END!'],['ESTRUTURA MODAL: Modal(pos2)+...+Verbo principal no FINAL.','MODAL: Modal(pos2)+...+MainV at END.','MODAL STRUCTURE: Modal(pos2)+...+Main verb at END.'],['Modais: kÃ¶nnen, mÃ¼ssen, dÃ¼rfen, sollen, wollen.','Modals: kÃ¶nnen, mÃ¼ssen, dÃ¼rfen.','Modals: kÃ¶nnen, mÃ¼ssen, dÃ¼rfen, sollen, wollen.'],['Muss: u curto.','Muss: short u.','Muss: short u.'],['Erro: Ich muss arbeite â€” conjugar Vprincipal!','Error: conjugating main verb!','Error: conjugating the main verb â€” it stays infinitive!'],['Modal(V2)+...+Infinitivo(final). Mesmo padrÃ£o.','Modal(V2)+...+Infinitive(end).','Modal(V2)+...+Infinitive(end). Same pattern.']),'trabalho');
+_reg(7,'ConversaÃ§Ã£o','Com licenÃ§a, pode me mostrar o caminho?','Entschuldigung, kÃ¶nnen Sie mir bitte den Weg zeigen?','Excuse me, can you show me the way?',_xf(['Desculpe, podem me mostrar o caminho?','Excuse me, can you show me the way?','Excuse me, can you show me the way?'],['Com licenÃ§a, pode me mostrar o caminho?','Excuse me, can you show me the way?','Excuse me, can you show me the way?'],[['Entschuldigung','Interj','Cortesia','','','','','invariÃ¡vel'],['kÃ¶nnen','Modal','V2','kÃ¶nnen (Sie)','kÃ¶nnen','Prasens','','Sie kÃ¶nnen'],['Sie','Pron','Suj formal','','','','Nominativ','Sie'],['mir','Pron','DATIVO!','','','','Dativ','ichâ†’mir'],['bitte','Part','Cortesia','','','','','invariÃ¡vel'],['den','Art','AKK masc','','','','Akkusativ','derâ†’den'],['Weg','Subst','Obj','','','','Akkusativ','der Weg'],['zeigen','V princ','INFINITIVO FINAL!','','zeigen','Infinitiv','','infinitivo']],['Interjâ†’Modalâ†’Sâ†’DATâ†’Partâ†’AKKâ†’V(FINAL).','Interjâ†’Modalâ†’Sâ†’DATâ†’Partâ†’AKKâ†’V(END).','Interjâ†’Modalâ†’Subjâ†’DATâ†’Particleâ†’ACCâ†’MainV(END).'],['FRASE OURO! Modal+dativo+acusativo. Zeigen=dat+akk.','GOLD! Modal+dative+accusative.','GOLDEN! Modal+dative+accusative together.'],['Casos: mir(dat)+den Weg(akk).','Cases: mir(dat)+den Weg(akk).','Case interaction: dative+accusative.'],['Entschuldigung: 4 sÃ­labas.','Entschuldigung: 4 syllables.','Entschuldigung: 4 syllables.'],['Erro: sem modal=ordem! Use kÃ¶nnen Sie.','Error: without modal=command!','Error: without modal sounds commanding!'],['FÃ³rmula: KÃ¶nnen Sie mir/uns bitte + verbo?','Formula: KÃ¶nnen Sie mir/uns bitte + verb?','Magic formula for polite requests.']),'conversaÃ§Ã£o');
+_reg(8,'Trabalho','Eu trabalhei o dia inteiro no escritÃ³rio ontem.','Ich habe gestern den ganzen Tag im BÃ¼ro gearbeitet.','I worked all day at the office yesterday.',_xf(['Eu tenho ontem o dia inteiro no escritÃ³rio trabalhado.','I worked the whole day at the office yesterday.','I worked the whole day at the office yesterday.'],['Eu trabalhei o dia inteiro no escritÃ³rio ontem.','I worked all day at the office yesterday.','I worked all day at the office yesterday.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['habe','Aux','V2 Perfekt','habe (ich)','haben','Prasens','','ich habe'],['gestern','Adv','Tempo','','','','','invariÃ¡vel'],['den','Art','AKK masc','','','','Akkusativ','derâ†’den'],['ganzen','Adj','Atrib AKK','','','','Akkusativ','ganzâ†’ganzen'],['Tag','Subst','Tempo AKK','','','','Akkusativ','der Tag'],['im','Prep','in+dem DAT','','','','Dativ','im'],['BÃ¼ro','Subst','Lugar','','','','Dativ','das BÃ¼ro'],['gearbeitet','Part II','PARTIZIP II NO FINAL!','','arbeiten','Perfekt','','gearbeitet']],['Sâ†’Aux(V2)â†’Complâ†’PARTIZIP II NO FINAL. PERFEKT!','Sâ†’Aux(V2)â†’Complâ†’PART II AT END. PERFEKT!','Subjectâ†’Aux(V2)â†’Complementsâ†’PARTIZIP II AT END. PERFEKT!'],['PERFEKT: Aux(V2) + Partizip II no FINAL.','PERFEKT: Aux(V2) + Partizip II at END.','PERFEKT: Aux haben/sein(V2) + Partizip II at end.'],['Arbeitenâ†’gearbeitet. -et extra (stem -t).','Arbeitenâ†’gearbeitet. Extra -et.','Arbeitenâ†’gearbeitet. Extra -et for stem -t.'],['Gearbeitet: 4 sÃ­labas.','Gearbeitet: 4 syllables.','Gearbeitet: 4 syllables.'],['Erro: Partizip antes do final!','Error: Partizip before end!','Error: Partizip II before the end!'],['Perfekt: haben/sein(V2)+...+Partizip II(final).','Perfekt: haben/sein(V2)+...+Partizip II(end).','Perfekt pattern: Aux(V2)+...+Partizip(end).']),'trabalho');
+_reg(10,'Viagem','Eu gostaria de viajar para a Alemanha porque amo a cultura.','Ich mÃ¶chte nÃ¤chstes Jahr nach Deutschland reisen, weil ich die Kultur liebe.','I would like to travel to Germany because I love the culture.',_xf(['Eu gostaria prÃ³ximo ano para Alemanha viajar, porque amo a cultura.','I would like to travel to Germany next year because I love the culture.','I would like to travel to Germany next year because I love the culture.'],['Eu gostaria de viajar para a Alemanha porque amo a cultura.','I would like to travel to Germany because I love the culture.','I would like to travel to Germany because I love the culture.'],[['Ich','Pron','Sujeito','','','','Nominativ','ich'],['mÃ¶chte','Modal','Konj II','mÃ¶chte (ich)','mÃ¶gen','Konjunktiv II','','ich mÃ¶chte'],['nÃ¤chstes','Adj','AKK neutro','','','','Akkusativ','nÃ¤chstâ†’nÃ¤chstes'],['Jahr','Subst','Tempo','','','','Akkusativ','das Jahr'],['nach','Prep','DireÃ§Ã£o','','','','Dativ','nach'],['Deutschland','Nome','Destino','','','','Dativ','Deutschland'],['reisen','V princ','Infinitivo FINAL','','reisen','Infinitiv','','infinitivo'],['weil','Conj','SUBORDINATIVA!','','','','','invariÃ¡vel'],['ich','Pron','Suj sub','','','','Nominativ','ich'],['die','Art','AKK fem','','','','Akkusativ','die'],['Kultur','Subst','Obj','','','','Akkusativ','die Kultur'],['liebe','Verbo sub','V NO FINAL DA SUB!','liebe (ich)','lieben','Prasens','','ich liebe']],['Principal(Modal+...+Vfinal) + Sub(weil+...+V FINAL).','Main(Modal+...+Vend) + Sub(weil+...+V END).','Main(Modal+...+Vend) + Sub(weil+...+V END).'],['Combina: Modal+Inf final + Subordinada+V final.','Combines: Modal + Subordinate.','Combines modal and subordinate clauses.'],['Dois Vs no final: razÃµes diferentes.','Two Vs at end: different reasons.','Two verbs at end for different structural reasons.'],['NÃ¤chstes: Ã¤=e.','NÃ¤chstes: Ã¤=e.','NÃ¤chstes: Ã¤=e.'],['Erro: weil ich liebe die Kultur â€” V no final!','Error: verb not at end after weil!','Error: verb before end in weil clause!'],['Weil sempre envia verbo ao final.','Weil always sends verb to end.','Weil (because) always sends verb to clause end.']),'viagem');
+
+// === CORE LOGIC ===
+let _wordCount=2,_streak=0,_streakNeeded=5,_consecErrors=0,_recentHistory=[],_totalCorrect=0,_totalAttempts=0;
+let _currentPhrase=null,_currentDirection='pt_de',_currentCategory=null,_slots=[],_verified=false,_correct=false;
+let _listenersReady=false,_fastMode=false;
+const MAX_WORDS=15,MIN_WORDS=2,HISTORY_SIZE=30;
+
+function _getState(){ if(typeof state!=='undefined'&&state){ if(!state.sentenceBuilderState) state.sentenceBuilderState={wordCount:2,streak:0,streakNeeded:5,consecErrors:0,recentHistory:[],totalCorrect:0,totalAttempts:0,fastMode:false}; return state.sentenceBuilderState; } return {wordCount:2,streak:0,streakNeeded:5,consecErrors:0,recentHistory:[],totalCorrect:0,totalAttempts:0,fastMode:false}; }
+function _loadState(){ var s=_getState(); _wordCount=s.wordCount||2; _streak=s.streak||0; _streakNeeded=s.streakNeeded||5; _consecErrors=s.consecErrors||0; _recentHistory=s.recentHistory||[]; _totalCorrect=s.totalCorrect||0; _totalAttempts=s.totalAttempts||0; _fastMode=s.fastMode||false; }
+function _saveState(){ if(typeof state!=='undefined'&&state){ state.sentenceBuilderState={wordCount:_wordCount,streak:_streak,streakNeeded:_streakNeeded,consecErrors:_consecErrors,recentHistory:_recentHistory.slice(-HISTORY_SIZE),totalCorrect:_totalCorrect,totalAttempts:_totalAttempts,fastMode:_fastMode}; if(typeof saveState==='function') saveState(); } }
+function _onStreakNeededChange(val){ _streakNeeded=parseInt(val)||5; _streak=0; _consecErrors=0; _saveState(); _updateStatsDisplay(); }
+function _toggleFastMode(checked){ _fastMode=!!checked; _saveState(); }
+
+function _selectPhrase(){ var dir=_currentDirection; var maxCount=Math.min(_wordCount,MAX_WORDS); var candidates=[]; for(var c=MIN_WORDS;c<=maxCount;c++){ if(!SB_DB[c]||!SB_DB[c][dir]) continue; for(var cat in SB_DB[c][dir]){ var phrases=SB_DB[c][dir][cat]; for(var i=0;i<phrases.length;i++){ var p=phrases[i]; if(_recentHistory.indexOf(p.de+'|'+p.pt)===-1) candidates.push({count:c,cat:cat,phrase:p}); } } } if(candidates.length===0){ _recentHistory=_recentHistory.slice(-5); for(var c2=MIN_WORDS;c2<=maxCount;c2++){ if(!SB_DB[c2]||!SB_DB[c2][dir]) continue; for(var cat2 in SB_DB[c2][dir]){ var phrases2=SB_DB[c2][dir][cat2]; for(var j=0;j<phrases2.length;j++){ var p2=phrases2[j]; if(_recentHistory.indexOf(p2.de+'|'+p2.pt)===-1) candidates.push({count:c2,cat:cat2,phrase:p2}); } } } } if(candidates.length===0){ if(SB_DB[_wordCount]&&SB_DB[_wordCount][dir]){ var cats=Object.keys(SB_DB[_wordCount][dir]); if(cats.length>0){ var phr=SB_DB[_wordCount][dir][cats[0]][0]; if(phr) candidates.push({count:_wordCount,cat:cats[0],phrase:phr}); } } } if(candidates.length===0) return false; var sel=candidates[Math.floor(Math.random()*candidates.length)]; _currentPhrase=sel.phrase; _currentCategory=sel.cat; return true; }
+
+function _renderPhrase(){ if(!_currentPhrase) return false; _slots=[]; _verified=false; _correct=false; var lang=(typeof state!=='undefined'&&state)?state.lang:'pt'; var srcText=(lang==='en'&&_currentPhrase.en)?_currentPhrase.en:_currentPhrase.pt; var promptText,targetWords; if(_currentDirection==='pt_de'){ promptText=srcText; targetWords=_tokenizeDe(_currentPhrase.de); } else { promptText=_currentPhrase.de; targetWords=_tokenizePt(srcText); } var promptEl=document.getElementById('sb-prompt-text'); if(promptEl) promptEl.textContent=promptText; var blockWords=targetWords.map(function(w,i){return{id:i,text:w};}); _shuffleArray(blockWords); var blocksArea=document.getElementById('sb-blocks'); if(blocksArea){ blocksArea.innerHTML=''; blockWords.forEach(function(bw){ var el=document.createElement('div'); el.className='sb-block'; el.textContent=bw.text; el.setAttribute('data-id',bw.id); el.setAttribute('draggable','true'); el.addEventListener('dragstart',_onDragStart); el.addEventListener('dragend',_onDragEnd); el.addEventListener('touchstart',_onTouchStart,{passive:false}); el.addEventListener('touchmove',_onTouchMove,{passive:false}); el.addEventListener('touchend',_onTouchEnd); blocksArea.appendChild(el); }); } var targetArea=document.getElementById('sb-target'); if(targetArea){ targetArea.innerHTML='<span class="sb-placeholder" style="color:var(--text3);font-size:.85rem">Arraste os blocos aqui para montar a frase</span>'; } var verifyBtn=document.getElementById('sb-verify-btn'); if(verifyBtn) verifyBtn.disabled=true; var feedbackEl=document.getElementById('sb-feedback'); if(feedbackEl){feedbackEl.className='sb-feedback';feedbackEl.textContent='';} var explainPanel=document.getElementById('sb-explain-panel'); if(explainPanel) explainPanel.classList.remove('open'); var explainBody=document.getElementById('sb-explain-body'); if(explainBody) explainBody.innerHTML=''; var continueBtn=document.getElementById('sb-continue-btn'); if(continueBtn) continueBtn.classList.remove('visible'); _updateDirectionLabel(); _updateStatsDisplay(); return true; }
+function _shuffleArray(arr){ for(var i=arr.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var temp=arr[i]; arr[i]=arr[j]; arr[j]=temp; } }
+
+var _dragData=null;
+function _onDragStart(e){ _dragData={id:e.target.getAttribute('data-id'),text:e.target.textContent,el:e.target}; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',e.target.textContent); }
+function _onDragEnd(e){ e.target.classList.remove('dragging'); _dragData=null; }
+function _onDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect='move'; e.currentTarget.classList.add('drag-over'); }
+function _onDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+function _onDrop(e){ e.preventDefault(); e.currentTarget.classList.remove('drag-over'); var id=_dragData?_dragData.id:'-1'; _addToSlots(id,e.dataTransfer.getData('text/plain')); _dragData=null; }
+
+var _touchData=null,_touchClone=null;
+function _onTouchStart(e){ if(e.target.classList.contains('sb-block')&&!e.target.classList.contains('used')){ e.preventDefault(); var t=e.touches[0]; _touchData={id:e.target.getAttribute('data-id'),text:e.target.textContent,el:e.target,startX:t.clientX,startY:t.clientY}; } }
+function _onTouchMove(e){ if(!_touchData) return; e.preventDefault(); var t=e.touches[0]; if(!_touchClone){ _touchClone=document.createElement('div'); _touchClone.className='sb-block dragging'; _touchClone.textContent=_touchData.text; _touchClone.style.position='fixed'; _touchClone.style.zIndex='9999'; _touchClone.style.pointerEvents='none'; document.body.appendChild(_touchClone); _touchData.el.classList.add('dragging'); } _touchClone.style.left=(t.clientX-40)+'px'; _touchClone.style.top=(t.clientY-20)+'px'; var target=document.getElementById('sb-target'); if(target){ var rect=target.getBoundingClientRect(); if(t.clientX>=rect.left&&t.clientX<=rect.right&&t.clientY>=rect.top&&t.clientY<=rect.bottom){target.classList.add('drag-over')}else{target.classList.remove('drag-over')} } }
+function _onTouchEnd(e){ if(!_touchData) return; if(_touchClone){_touchClone.remove();_touchClone=null;} _touchData.el.classList.remove('dragging'); var target=document.getElementById('sb-target'); if(target) target.classList.remove('drag-over'); var t=(e.changedTouches&&e.changedTouches.length>0)?e.changedTouches[0]:null; if(t&&target){ var rect=target.getBoundingClientRect(); if(t.clientX>=rect.left&&t.clientX<=rect.right&&t.clientY>=rect.top&&t.clientY<=rect.bottom){_addToSlots(_touchData.id,_touchData.text)} } _touchData=null; }
+
+function _addToSlots(id,text){ if(_verified) return; var targetArea=document.getElementById('sb-target'); if(!targetArea) return; var placeholder=targetArea.querySelector('.sb-placeholder'); if(placeholder) placeholder.remove(); var slotEl=document.createElement('span'); slotEl.className='sb-slot'; slotEl.setAttribute('data-id',id); slotEl.innerHTML=text+'<span class="sb-remove" onclick="GermanSentenceBuilderCore._removeSlot(this.parentElement)">&times;</span>'; targetArea.appendChild(slotEl); _slots.push({id:id,text:text}); var block=document.querySelector('.sb-block[data-id="'+id+'"]'); if(block) block.classList.add('used'); _updateVerifyButton(); }
+function _removeSlot(el){ if(_verified) return; var id=el.getAttribute('data-id'); var targetArea=document.getElementById('sb-target'); if(targetArea) targetArea.removeChild(el); _slots=_slots.filter(function(s){return s.id!==id;}); var block=document.querySelector('.sb-block[data-id="'+id+'"]'); if(block) block.classList.remove('used'); if(_slots.length===0&&targetArea){ targetArea.innerHTML='<span class="sb-placeholder" style="color:var(--text3);font-size:.85rem">Arraste os blocos aqui para montar a frase</span>'; } _updateVerifyButton(); }
+function _updateVerifyButton(){ var btn=document.getElementById('sb-verify-btn'); if(btn) btn.disabled=_slots.length===0; }
+
+function _verify(){ if(_verified||_slots.length===0) return; _verified=true; _totalAttempts++; var userText=_slots.map(function(s){return s.text;}).join(' '); var correctText,lang=(typeof state!=='undefined'&&state)?state.lang:'pt'; if(_currentDirection==='pt_de'){ correctText=_tokenizeDe(_currentPhrase.de).join(' '); } else { var srcText=(lang==='en'&&_currentPhrase.en)?_currentPhrase.en:_currentPhrase.pt; correctText=_tokenizePt(srcText).join(' '); } _correct=(userText.toLowerCase().trim()===correctText.toLowerCase().trim()); var feedbackEl=document.getElementById('sb-feedback'),verifyBtn=document.getElementById('sb-verify-btn'),continueBtn=document.getElementById('sb-continue-btn'); if(_correct){ _totalCorrect++; _streak++; _consecErrors=0; if(feedbackEl){feedbackEl.className='sb-feedback correct';feedbackEl.textContent='Correct! Sehr gut!';} if(verifyBtn) verifyBtn.style.display='none'; if(!_fastMode&&continueBtn) continueBtn.classList.add('visible'); if(_streak>=_streakNeeded&&_wordCount<MAX_WORDS){_wordCount++;_streak=0;} _currentDirection=(_currentDirection==='pt_de')?'de_pt':'pt_de'; } else { _consecErrors++; _streak=0; if(feedbackEl){feedbackEl.className='sb-feedback wrong';feedbackEl.textContent='Incorrect! See explanation below.';} if(verifyBtn) verifyBtn.style.display='none'; if(continueBtn) continueBtn.classList.add('visible'); if(_consecErrors>=2&&_wordCount>MIN_WORDS){_wordCount--;_consecErrors=0;} } var uid=_currentPhrase.de+'|'+_currentPhrase.pt; _recentHistory.push(uid); if(_recentHistory.length>HISTORY_SIZE) _recentHistory.shift(); if(!_fastMode||!_correct){ _showExplanation(); } var bar=document.getElementById('sb-session-bar'); if(bar) bar.style.width=Math.round(_totalCorrect/Math.max(1,_totalAttempts)*100)+'%'; _updateStatsDisplay(); _saveState(); _updateGPSEvo(); if(_fastMode&&_correct){ setTimeout(function(){_continue();},600); } }
+function _showExplanation(){ var panel=document.getElementById('sb-explain-panel'),body=document.getElementById('sb-explain-body'); if(!panel||!body) return; if(_currentPhrase&&_currentPhrase.explanation){ body.innerHTML=_buildExplanationHTML(_currentPhrase.explanation); }else{body.innerHTML='<p>No detailed explanation for this phrase.</p>';} panel.classList.add('open'); }
+function _continue(){ var feedbackEl=document.getElementById('sb-feedback'); if(feedbackEl) feedbackEl.className='sb-feedback'; var verifyBtn=document.getElementById('sb-verify-btn'); if(verifyBtn){verifyBtn.style.display='';verifyBtn.disabled=true;} var continueBtn=document.getElementById('sb-continue-btn'); if(continueBtn) continueBtn.classList.remove('visible'); var panel=document.getElementById('sb-explain-panel'); if(panel) panel.classList.remove('open'); var sel=_selectPhrase(); if(sel) _renderPhrase(); }
+
+function _updateStatsDisplay(){ var wcEl=document.getElementById('sb-word-count'); if(wcEl) wcEl.textContent=_wordCount; var streakEl=document.getElementById('sb-streak'); if(streakEl) streakEl.textContent=_streak+'/'+_streakNeeded; var errEl=document.getElementById('sb-consec-errors'); if(errEl) errEl.textContent=_consecErrors; var snEl=document.getElementById('sb-streak-needed'); if(snEl) snEl.value=_streakNeeded; var snvEl=document.getElementById('sb-streak-needed-val'); if(snvEl) snvEl.textContent=_streakNeeded; var streakStat=document.getElementById('sb-streak-stat'); if(streakStat){ streakStat.className='sb-stat '+(_streak>=_streakNeeded?'streak-ok':(_streak>0?'streak-warn':'')); } }
+function _resetCurr(){ _slots=[]; _verified=false; _correct=false; var targetArea=document.getElementById('sb-target'); if(targetArea) targetArea.innerHTML='<span class="sb-placeholder" style="color:var(--text3);font-size:.85rem">Arraste os blocos aqui para montar a frase</span>'; var blocks=document.querySelectorAll('.sb-block'); blocks.forEach(function(b){b.classList.remove('used');}); var verifyBtn=document.getElementById('sb-verify-btn'); if(verifyBtn){verifyBtn.style.display='';verifyBtn.disabled=true;} var feedbackEl=document.getElementById('sb-feedback'); if(feedbackEl) feedbackEl.className='sb-feedback'; var panel=document.getElementById('sb-explain-panel'); if(panel) panel.classList.remove('open'); var continueBtn=document.getElementById('sb-continue-btn'); if(continueBtn) continueBtn.classList.remove('visible'); }
+function _resetGame(){ _wordCount=2; _streak=0; _consecErrors=0; _recentHistory=[]; _totalCorrect=0; _totalAttempts=0; _currentPhrase=null; _currentDirection='pt_de'; _streakNeeded=5; _fastMode=false; _saveState(); _slots=[]; _verified=false; _correct=false; var targetArea=document.getElementById('sb-target'); if(targetArea) targetArea.innerHTML='<span class="sb-placeholder" style="color:var(--text3);font-size:.85rem">Arraste os blocos aqui para montar a frase</span>'; var blocks=document.querySelectorAll('.sb-block'); blocks.forEach(function(b){b.classList.remove('used');}); var verifyBtn=document.getElementById('sb-verify-btn'); if(verifyBtn){verifyBtn.style.display='';verifyBtn.disabled=true;} var feedbackEl=document.getElementById('sb-feedback'); if(feedbackEl) feedbackEl.className='sb-feedback'; var panel=document.getElementById('sb-explain-panel'); if(panel) panel.classList.remove('open'); var continueBtn=document.getElementById('sb-continue-btn'); if(continueBtn) continueBtn.classList.remove('visible'); var snEl=document.getElementById('sb-streak-needed'); if(snEl) snEl.value=5; var snvEl=document.getElementById('sb-streak-needed-val'); if(snvEl) snvEl.textContent='5'; var ftEl=document.getElementById('sb-fastmode-toggle'); if(ftEl) ftEl.checked=false; _updateDirectionLabel(); var sel=_selectPhrase(); if(sel) _renderPhrase(); _updateStatsDisplay(); }
+
+function _updateGPSEvo(){ if(typeof GPS==='undefined') return; if(_correct){ if(!GPS.skills.grammar.sentenceStructure) GPS.skills.grammar.sentenceStructure=0; GPS.skills.grammar.sentenceStructure=Math.min(100,GPS.skills.grammar.sentenceStructure+2); if(!GPS.skills.grammar.wordOrder) GPS.skills.grammar.wordOrder=0; GPS.skills.grammar.wordOrder=Math.min(100,GPS.skills.grammar.wordOrder+2); if(!GPS.skills.grammar.cases) GPS.skills.grammar.cases={nom:0,acc:0,dat:0}; if(_currentPhrase&&_currentPhrase.de){ if(/den\b|einen\b/.test(_currentPhrase.de)){ GPS.skills.grammar.cases.acc=Math.min(100,(GPS.skills.grammar.cases.acc||0)+2); } if(/dem\b|einem\b|im\b|zum\b|mir\b/.test(_currentPhrase.de)){ GPS.skills.grammar.cases.dat=Math.min(100,(GPS.skills.grammar.cases.dat||0)+2); } } if(_currentPhrase&&_currentPhrase.de&&/muss|kann|will|darf|soll|mÃ¶chte/.test(_currentPhrase.de)){ if(!GPS.skills.verbs) GPS.skills.verbs={regular:0,irregular:0,modal:0,separable:0,auxiliary:0}; GPS.skills.verbs.modal=Math.min(100,(GPS.skills.verbs.modal||0)+2); } if(_currentPhrase&&_currentPhrase.de&&/habe|hat|gearbeitet|gegangen|gefahren/.test(_currentPhrase.de)){ if(!GPS.skills.grammar.tenses) GPS.skills.grammar.tenses=0; GPS.skills.grammar.tenses=Math.min(100,GPS.skills.grammar.tenses+2); } } var ov=GPS.skills.overall||0; var g=GPS.skills.grammar; if(g&&g.sentenceStructure&&g.wordOrder){ ov=Math.round((g.sentenceStructure+g.wordOrder+(g.tenses||0)+(g.cases?((g.cases.nom||0)+(g.cases.acc||0)+(g.cases.dat||0))/3:0))/4); } GPS.skills.overall=Math.min(100,ov); if(typeof saveGPS==='function') saveGPS(); }
+
+function init(){ if(_listenersReady) return; _loadState(); var modeView=document.getElementById('mode-sentenceBuilder'); if(!modeView) return; var verifyBtn=document.getElementById('sb-verify-btn'); if(verifyBtn) verifyBtn.addEventListener('click',_verify); var resetBtn=document.getElementById('sb-reset-btn'); if(resetBtn) resetBtn.addEventListener('click',_resetCurr); var resetGameBtn=document.getElementById('sb-resetgame-btn'); if(resetGameBtn) resetGameBtn.addEventListener('click',_resetGame); var continueBtn=document.getElementById('sb-continue-btn'); if(continueBtn) continueBtn.addEventListener('click',_continue); var targetArea=document.getElementById('sb-target'); if(targetArea){ targetArea.addEventListener('dragover',_onDragOver); targetArea.addEventListener('drop',_onDrop); targetArea.addEventListener('dragleave',_onDragLeave); } var explainHeader=document.getElementById('sb-explain-header'); if(explainHeader){ explainHeader.addEventListener('click',function(){ var panel=document.getElementById('sb-explain-panel'); if(panel) panel.classList.toggle('open'); }); } _listenersReady=true; }
+function onModeEnter(){ init(); _padDB(); _loadState(); _currentDirection='pt_de'; _updateDirectionLabel(); if(!_currentPhrase){ var sel=_selectPhrase(); if(!sel) return; } _renderPhrase(); _renderSidebarContent(); }
+function _toggleDirection(){ _currentDirection=(_currentDirection==='pt_de')?'de_pt':'pt_de'; _currentPhrase=null; _updateDirectionLabel(); var sel=_selectPhrase(); if(sel) _renderPhrase(); }
+function _updateDirectionLabel(){ var badge=document.getElementById('sb-direction-badge'); var toggle=document.getElementById('sb-direction-toggle'); var isPtDe=(_currentDirection==='pt_de'); if(badge){ badge.textContent=isPtDe?'PT â†’ DE':'DE â†’ PT'; badge.className='sb-direction-badge '+(isPtDe?'pt-de':'de-pt'); } if(toggle){ toggle.textContent=isPtDe?'PT â†’ DE':'DE â†’ PT'; if(isPtDe){toggle.classList.remove('flipped');}else{toggle.classList.add('flipped');} } }
+function _renderSidebarContent(){ var list=document.getElementById('sidebar-sentencebuilder-list'); if(!list) return; list.innerHTML='<div class="sidebar-link-item" style="cursor:default"><span class="link-icon">ðŸ“</span><span>Modo: Montar Frases</span></div><div class="sidebar-link-item" style="cursor:default"><span class="link-icon">ðŸ“Š</span><span>Palavras: '+_wordCount+' | Streak: '+_streak+'/'+_streakNeeded+'</span></div><div class="sidebar-link-item" style="cursor:default"><span class="link-icon">âœ…</span><span>Acertos: '+_totalCorrect+' | Tentativas: '+_totalAttempts+'</span></div>'; }
+
+return {init,onModeEnter,_onStreakNeededChange,_removeSlot,_verify,_resetCurr,_continue,_renderSidebarContent,_toggleDirection,_resetGame,_toggleFastMode};
+})();
+
+
 function setup(){
   loadState();
   initGPS();
@@ -7165,7 +7368,7 @@ function setup(){
     if(confirm(_t('reset.confirm'))){
       localStorage.removeItem('deutschmeister_state');
       localStorage.removeItem('deutschmeister_evo');
-      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'}};
+      state={completed:{},progress:{},favorites:[],notes:'',darkMode:false,adaptive:true,lang:state.lang||'pt',wfsExplored:{},wfsPatterns:{},evo:null,currentMode:'chapters',viewState:{},musicState:{currentSong:null,currentView:'lobby'},sentenceBuilderState:{wordCount:2,streak:0,streakNeeded:5,consecErrors:0,recentHistory:[],totalCorrect:0,totalAttempts:0,fastMode:false}};
       resetGPS();
       applyLang();
       GermanModeCore.init();
@@ -7231,6 +7434,7 @@ $('#import-file').onchange=function(e){
       if(!state.evo)state.evo=null;
       if(!state.currentMode)state.currentMode='chapters';
       if(!state.viewState)state.viewState={};if(!state.musicState)state.musicState={currentSong:null,currentView:'lobby',lobbyScrollY:0};
+      if(!state.sentenceBuilderState)state.sentenceBuilderState={wordCount:2,streak:0,streakNeeded:5,consecErrors:0,recentHistory:[],totalCorrect:0,totalAttempts:0,fastMode:false};
       syncGPSFromState();
       saveState();
       applyLang();
