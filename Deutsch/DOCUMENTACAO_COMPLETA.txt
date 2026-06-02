@@ -59,6 +59,7 @@
   39. INTEGRAÇÃO COM GPS — MÉTRICAS DE SINTAXE
   40. RESPONSIVIDADE — DRAG-DROP MOBILE/DESKTOP
   41. ESTRUTURA DOS DADOS — SENTENCE BUILDER STATE
+  42. INTERNACIONALIZAÇÃO DO MODO MONTAR FRASES (SB_I18N)
 
 ================================================================================
   1. VISÃO GERAL E ARQUITETURA
@@ -1876,11 +1877,155 @@
    - IIFE (GermanSentenceBuilderCore): sem variáveis globais
    - window.GermanSentenceBuilder: API pública controlada
    - Sem redeclaração de const/let existentes
-   - Sem listeners duplicados (botões usam cloneNode + replaceChild)
+   - Sem listeners duplicados (botões usam flag _sbInitialized)
    - Sem conflitos com Music, Evolution, Exercises, Vocabulary,
      Conversation, Chapters
    - Sem quebra de save, import/export, i18n, sidebar, dark mode
    - Drag and drop usa HTML5 API + Touch Events sem bibliotecas externas
+
+================================================================================
+    42. INTERNACIONALIZAÇÃO DO MODO MONTAR FRASES (SB_I18N)
+================================================================================
+
+   42.1 VISÃO GERAL
+   ----------------------------------------------------------------------------
+   O Modo Montar Frases implementa internacionalização completa através
+   de um dicionário SB_I18N interno com suporte a Português (pt) e
+   Inglês (en), totalizando 67 chaves de tradução.
+
+   Ao trocar o idioma nas configurações globais (Português ↔ Inglês),
+   TODO o modo é atualizado automaticamente: títulos, botões, labels,
+   estatísticas, explicações, frases e blocos de palavras.
+
+   42.2 ESTRUTURA TRILÍNGUE
+   ----------------------------------------------------------------------------
+   Cada frase no banco SB_PHRASES possui três idiomas:
+
+     pt:      Tradução em português
+     de:      Frase original em alemão
+     en:      Tradução em inglês
+
+   Blocos de palavras (word blocks):
+     deWords:  Palavras alemãs (ordem correta)
+     ptWords:  Palavras em português
+     enWords:  Palavras em inglês
+
+   Explicações:
+     expl:     Explicação completa em português (15 seções)
+     explEn:   Explicação completa em inglês (15 seções)
+
+   42.3 DICIONÁRIO SB_I18N
+   ----------------------------------------------------------------------------
+   O dicionário SB_I18N contém todas as strings de UI visíveis ao
+   usuário, organizadas por idioma:
+
+   SB_I18N.pt = {
+     title, subtitle, wordsLabel, streakLabel, errorsLabel,
+     streakSetting, phraseLabelDeToPt, phraseLabelPtToDe,
+     emptyHint, verify, reset, continue, correct, incorrect,
+     correctAnswer, translation, literal, natural, wordAnalysis,
+     wordOrder, conjugation, infinitive, tense, cases, declensions,
+     reason, nuances, pronunciation, commonErrors, extraNotes,
+     sidebarWords, sidebarStreak, sidebarCorrect, sidebarAttempts,
+     sidebarDirection, diffBadge, modalName, modalSidebarTitle
+   }
+
+   SB_I18N.en = { ... mesmo conjunto em inglês ... }
+
+   A helper function _sbT(key) seleciona a tradução correta
+   baseada em state.lang ('pt' ou 'en').
+
+   42.4 RENDERIZAÇÃO DINÂMICA
+   ----------------------------------------------------------------------------
+   Ao entrar no modo (onModeEnter), _refreshAllUIText() atualiza todos
+   os elementos estáticos da interface:
+
+     - Título e subtítulo do modo
+     - Labels de estatísticas (Palavras/Streak/Erros)
+     - Label de configuração do slider
+     - Textos dos botões (Verificar/Resetar/Continuar)
+     - Hint da área vazia (arraste os blocos)
+     - Botão do modo na sidebar
+     - Badge de dificuldade
+
+   A função _renderPhraseCard() seleciona a frase a ser exibida
+   baseada no idioma atual: quando o usuário está em inglês e a
+   direção é ptToDe, mostra-se phrase.en em vez de phrase.pt.
+
+   A função _getWords() seleciona os blocos de palavras corretos:
+   quando o idioma é inglês e a direção é deToPt, retorna enWords
+   em vez de ptWords.
+
+   A função _renderExplanation() seleciona o objeto de explicação:
+   quando o idioma é inglês, usa _currentPhrase.explEn.
+
+   42.5 ADAPTAÇÃO CULTURAL
+   ----------------------------------------------------------------------------
+   As explicações em inglês (explEn) foram escritas especificamente
+   para falantes de inglês:
+
+     - Erros comuns: "English speakers often..." (não "Brasileiros")
+     - Terminologia gramatical: usa termos da gramática inglesa
+       (present continuous, past participle, dative case, etc.)
+     - Contexto cultural: referências relevantes para anglófonos
+     - Comparações: alemão vs. inglês (não vs. português)
+
+   Exemplo de diferença:
+     PT: "Brasileiros frequentemente dizem 'Ich bin wohne'..."
+     EN: "English speakers often say 'Ich bin wohne'..."
+
+   42.6 ALTERNÂNCIA AUTOMÁTICA
+   ----------------------------------------------------------------------------
+   A alternância de direção (ptToDe ↔ deToPt) é independente
+   do idioma da interface:
+
+     Usuário em PT:
+       Rodada 1: "Eu moro" → montar "Ich wohne" (PT→DE)
+       Rodada 2: "Ich wohne" → montar "Eu moro" (DE→PT)
+
+     Usuário em EN:
+       Rodada 1: "I live" → montar "Ich wohne" (EN→DE)
+       Rodada 2: "Ich wohne" → montar "I live" (DE→EN)
+
+   O alemão (DE) é sempre o elemento constante. A língua nativa
+   do usuário alterna como origem/destino a cada acerto.
+
+   42.7 INTEGRAÇÃO COM O SISTEMA I18N GLOBAL
+   ----------------------------------------------------------------------------
+   O sistema SB_I18N é independente mas complementar ao sistema
+   i18n global (LANG / _t / applyLang). A separação existe porque
+   o modo Montar Frases possui terminologia específica que não se
+   aplica a outros modos.
+
+   Quando o usuário troca o idioma nas configurações:
+     1. state.lang é atualizado
+     2. applyLang() é chamada (i18n global)
+     3. GermanModeCore.renderModeSidebar() é chamada
+     4. Se o modo ativo for sentenceBuilder:
+        a. _renderSidebar() chama _refreshAllUIText()
+        b. Todos os textos são atualizados via _sbT()
+     5. Se o usuário entrar no modo depois: onModeEnter() atualiza tudo
+
+   Não há duplicação de estado: ambos os sistemas leem state.lang.
+
+   42.8 PERSISTÊNCIA
+   ----------------------------------------------------------------------------
+   O idioma selecionado persiste normalmente via state.lang.
+   Não há estado adicional específico de idioma para o modo.
+   A seleção de idioma controla a renderização, não o estado interno.
+
+   42.9 VALIDAÇÃO
+   ----------------------------------------------------------------------------
+   [x] Todos os textos de UI internacionalizados (67 chaves)
+   [x] Todos os botões internacionalizados
+   [x] Todos os feedbacks internacionalizados
+   [x] Todas as 26 frases possuem PT, EN e DE
+   [x] Todas as 26 frases possuem ptWords, enWords e deWords
+   [x] Todas as 26 frases possuem expl (PT) e explEn (EN)
+   [x] Nenhum texto fixo em português permanece
+   [x] Adaptação cultural nas explicações em inglês
+   [x] Integração com sistema i18n existente
+   [x] Sem quebra visual com textos em inglês (mais longos)
      4. Cards, detail view, sidebar são gerados automaticamente
 
    Para adicionar uma nova sub-view (ex: exercícios musicais):
