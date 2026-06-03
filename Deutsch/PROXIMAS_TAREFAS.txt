@@ -1,0 +1,391 @@
+================================================================================
+          PROXIMAS TAREFAS — DeutschMeister v3.3 — Handoff Document
+                   Criado em Junho 2026 para continuidade do projeto
+================================================================================
+
+Este documento é um HANDOFF. Seu objetivo é permitir que uma IA completamente
+nova assuma o desenvolvimento deste projeto sem depender do histórico completo
+da conversa anterior.
+
+Leia este documento INTEIRO antes de fazer qualquer alteração.
+
+================================================================================
+  1. RESUMO EXECUTIVO
+================================================================================
+
+Projeto:     DeutschMeister — Plataforma interativa de aprendizado de alemão
+Objetivo:    Ensinar alemão do nível A1 ao B1 (padrão CEFR)
+Arquitetura: SPA (Single Page Application) — HTML + CSS + JS vanilla
+             TUDO em um único arquivo HTML. Sem frameworks. Sem bibliotecas.
+
+Arquivos existentes (apenas 2 na pasta):
+  1. deutsch-meister.html      — aplicação completa (~2.04 MB, 406 frases SB_PHRASES)
+  2. DOCUMENTACAO_COMPLETA.txt — documentação técnica completa (~2373 linhas)
+  3. PROXIMAS_TAREFAS.txt      — este arquivo (handoff/continuidade)
+
+Modos implementados (10 no total):
+  - Capítulos (chapters)       — 20 capítulos A1→B1 com teoria, exercícios, mini testes
+  - Música (music)             — lobby musical com detail view
+  - Exercícios (exercises)     — hub (placeholder)
+  - Vocabulário (vocabulary)   — glossário com 156+ entradas em 20 categorias
+  - Evolução (evolution)       — dashboard GPS de tracking de aprendizado
+  - Revisão (review)           — hub (placeholder)
+  - Engenharia (engineering)   — análise estrutural de frases (Sentence Engineering)
+  - Listening (listening)      — hub (placeholder)
+  - Conversação (conversation) — hub (placeholder)
+  - Montar Frases (sentenceBuilder) — drag-and-drop de construção de frases ★
+
+Sistemas pedagógicos:
+  - DNA do Verbo              — perfil linguístico de cada verbo
+  - Conexões Verbais          — rede de verbos derivados por prefixos
+  - Engenharia da Palavra     — decomposição morfológica
+  - Famílias de Palavras (WFS) — árvore de raízes e derivações
+  - Engenharia da Frase       — análise estrutural de frases
+
+Persistência:  localStorage['deutschmeister_state'] (chave única)
+Idiomas:       Português (pt) / English (en)
+Navegadores:   Chrome, Firefox, Edge, Safari (modernos)
+
+================================================================================
+  2. STATUS ATUAL (O QUE JÁ ESTÁ IMPLEMENTADO)
+================================================================================
+
+[x] Sistema de capítulos (20 capítulos, teoria + exercícios + mini testes)
+[x] Sistema de exercícios (múltipla escolha, texto, ordenação)
+[x] Sistema de mini testes
+[x] Treinador de conjugação verbal
+[x] DNA do Verbo (VERB_DNA)
+[x] Conexões Verbais (GermanVerbConnectionsSystem)
+[x] Engenharia da Palavra (GermanWordEngineeringSystem)
+[x] Famílias de Palavras (DeutschMeisterWordFamilies)
+[x] Engenharia da Frase (SENTENCE_ENGINEERING_DB)
+[x] GPS / Evolução (tracking de domínio do usuário)
+[x] Glossário (156+ entradas, 20 categorias)
+[x] Sidebar dinâmica adaptativa (2 níveis)
+[x] Sistema de saves (localStorage)
+[x] Export/Import de progresso
+[x] Cheat code (campo oculto)
+[x] Anotações pessoais
+[x] Internacionalização (i18n PT/EN)
+[x] Dark mode
+[x] Base Fundamental (7 subseções teóricas)
+[x] Modo Música (lobby + detail view, 1 música)
+[x] Modo Montar Frases (drag-and-drop, explicações por frase, GPS integration)
+
+================================================================================
+  3. ÚLTIMA AUDITORIA (SB_PHRASES)
+================================================================================
+
+Data:        Junho 2026
+Motivo:      Inconsistências em contagens anteriores (13+17≠20)
+Método:      Regex extraindo TODOS os campos 'de:' dentro de blocos _add()
+             e contando como p.de.split(' ').length (igual ao código real)
+Conclusão:   Contagens anteriores baseavam-se em estimativas dos rótulos
+             dos lotes de edição, que estavam incorretos.
+             NÃO existem estruturas paralelas, frases órfãs ou duplicatas.
+
+RESULTADO DA AUDITORIA (contagem real de frases acessíveis):
+
+  Grupo       | Frases | Meta (30) | Status
+  ------------|--------|-----------|--------
+  2 palavras  |   31   |    30     |   OK
+  3 palavras  |   30   |    30     |   OK
+  4 palavras  |   30   |    30     |   OK
+  5 palavras  |   21   |    30     | FALTAM 9
+  6 palavras  |   69   |    30     |   OK
+  7 palavras  |   44   |    30     |   OK
+  8 palavras  |   42   |    30     |   OK
+  9 palavras  |   23   |    30     | FALTAM 7
+  10 palavras |   33   |    30     |   OK
+  11 palavras |   10   |    30     | FALTAM 20
+  12 palavras |    9   |    30     | FALTAM 21
+  13 palavras |    4   |    30     | FALTAM 26
+  14 palavras |   30   |    30     |   OK
+  15 palavras |   30   |    30     |   OK
+  ------------|--------|-----------|--------
+  TOTAL       |  406   |    420    | FALTAM 83
+
+  Grupos completos (≥30): 2, 3, 4, 6, 7, 8, 10, 14, 15 (9 de 14)
+  Total de frases: 406 (original: 26 → +380 adicionadas)
+
+  Tamanho do arquivo HTML: ~2.04 MB
+  Blocos _add(): ~30 blocos no total (1 original + ~29 de expansão)
+
+ESTRUTURA DO SB_PHRASES (verificada na auditoria):
+  - Variável: const SB_PHRASES = {} (linha 7294 do HTML)
+  - Função de carga: _add() (linha 7393), chave = p.de.split(' ').length
+  - Função de sorteio: _pickPhrase() (linha 7537), lê SB_PHRASES[Math.min(wordCount,15)]
+  - API externa: window.GermanSentenceBuilder.getPhrases(wc)
+  - Todas as frases estão dentro de blocos _add([...])
+  - NENHUMA estrutura alternativa existe
+  - NENHUMA frase órfã/inacessível existe
+  - NENHUMA duplicata estrutural existe
+
+================================================================================
+  4. TAREFA PRINCIPAL EM ANDAMENTO
+================================================================================
+
+TAREFA: Conclusão do banco SB_PHRASES
+META:   Todos os grupos de 2 a 15 palavras com pelo menos 30 frases acessíveis
+STATUS: EM ANDAMENTO (9 de 14 grupos concluídos)
+        83 frases restantes distribuídas em 5 grupos
+
+O QUE JÁ FOI FEITO:
+  - Grupos 2-4 expandidos com +25 frases cada (com explicações completas PT+EN)
+  - Grupos 6-8 naturalmente ultrapassaram 30 durante a expansão
+  - Grupos 14-15 concluídos com fórmula de construção precisa de 14/15 palavras
+  - Grupo 10 concluído com frases de 10 palavras verificadas
+  - Todos os grupos 5-15 receberam conteúdo inicial (mesmo os incompletos)
+
+O QUE FALTA (por prioridade de execução):
+
+  Grupo a completar  | Frases atuais | Frases a adicionar | Meta
+  -------------------|---------------|--------------------|------
+  5 palavras         |     21        |        +9          |  30
+  9 palavras         |     23        |        +7          |  30
+  11 palavras        |     10        |       +20          |  30
+  12 palavras        |      9        |       +21          |  30
+  13 palavras        |      4        |       +26          |  30
+
+  Total restante: 83 novas frases
+
+MÉTODO DE TRABALHO RECOMENDADO:
+  1. Use o PowerShell para verificar a contagem de palavras de cada frase ANTES
+     de inseri-la no HTML (split por espaço no campo 'de')
+  2. Para 5 palavras: frases curtas em Präteritum funcionam bem
+  3. Para 9 palavras: use Perfekt com complementos moderados
+  4. Para 11-13 palavras: use estruturas complexas (subordinadas, relativas, etc.)
+  5. Após cada lote, execute a verificação de contagem com PowerShell
+  6. NUNCA confie nos rótulos dos comentários // COMPLETANDO X PALAVRAS
+  7. Sempre verifique a contagem real com o script de auditoria
+
+SCRIPT DE CONTAGEM (PowerShell, executar na pasta do projeto):
+  $c=Get-Content "deutsch-meister.html" -Raw
+  $p='_add\(\[([\s\S]*?)\]\);'
+  $m=[regex]::Matches($c,$p)
+  $h=@{}
+  for($w=2;$w-le15;$w++){$h["$w"]=@{}}
+  foreach($b in $m){$t=$b.Groups[1].Value
+    $dm=[regex]::Matches($t,'de:"([^"]*)"')
+    foreach($d in $dm){$x=$d.Groups[1].Value
+      $wc=($x -split ' ').Count
+      if($wc-ge2 -and $wc-le15){$h["$wc"][$x]=1}}}
+  for($w=2;$w-le15;$w++){$n=$h["$w"].Keys.Count
+    Write-Output "$w palavras: $n"}
+
+================================================================================
+  5. PENDÊNCIAS (PRIORIDADE ALTA)
+================================================================================
+
+[EM ANDAMENTO] Completar banco SB_PHRASES (83 frases restantes)
+  Sub-itens:
+  [ ] 5 palavras: adicionar +9 frases (atual: 21, meta: 30)
+  [ ] 9 palavras: adicionar +7 frases (atual: 23, meta: 30)
+  [ ] 11 palavras: adicionar +20 frases (atual: 10, meta: 30)
+  [ ] 12 palavras: adicionar +21 frases (atual: 9, meta: 30)
+  [ ] 13 palavras: adicionar +26 frases (atual: 4, meta: 30)
+
+================================================================================
+  6. PENDÊNCIAS FUTURAS (PLANEJADAS, NÃO IMPLEMENTADAS)
+================================================================================
+
+[PLANEJADO] Grupo Avançado 16–20 palavras
+  Descrição: Após todos os grupos 2-15 atingirem 30 frases, estender o sistema
+             para suportar frases de 16 a 20 palavras.
+  Mudanças necessárias:
+    - Alterar _pickPhrase(): Math.min(_sbState.wordCount, 20) em vez de 15
+    - Adicionar frases de 16, 17, 18, 19 e 20 palavras
+    - Atualizar slider e UI para refletir novo máximo
+  Status: NÃO INICIADO
+
+[PLANEJADO] Revisão final do banco SB_PHRASES
+  Descrição: Após completar todos os grupos, revisar qualidade de todas as frases,
+             verificar duplicatas acidentais, revisar explicações.
+  Status: NÃO INICIADO
+
+[PLANEJADO] Dificuldade adaptativa (state.adaptive)
+  Descrição: O toggle já existe na UI e no state, mas a lógica adaptativa
+             nunca foi implementada.
+  Status: NÃO INICIADO
+
+[PLANEJADO] Sistema de repetição espaçada (SRS)
+  Descrição: Usar os dados de decay/strength do GPS para sugerir revisões
+  Status: NÃO INICIADO
+
+[PLANEJADO] Expansão do Modo Música
+  Descrição: Adicionar mais músicas, modo karaokê, exercícios musicais
+  Status: NÃO INICIADO (apenas 1 música implementada)
+
+[PLANEJADO] Versão EN da Base Fundamental
+  Descrição: A seção #base-fundamental está hardcoded apenas em português
+  Status: NÃO INICIADO
+
+================================================================================
+  7. REGRAS GLOBAIS DO PROJETO
+================================================================================
+
+REGRAS ABSOLUTAS — NUNCA VIOLAR:
+
+  1. NÃO criar arquivos .js separados. TUDO fica no HTML.
+  2. NÃO criar arquivos .css separados. TUDO fica no HTML.
+  3. NÃO criar arquivos .json, .py, .java, .cpp, .cs, .php, .ts.
+  4. NÃO criar arquivos .txt auxiliares (exceto os 3 já existentes).
+  5. NÃO criar scripts temporários ou geradores externos.
+  6. NÃO criar bancos de dados externos.
+
+  7. Modificar APENAS:
+     - deutsch-meister.html
+     - DOCUMENTACAO_COMPLETA.txt
+     - PROXIMAS_TAREFAS.txt (este arquivo)
+
+  8. Sempre manter compatibilidade com:
+     - localStorage['deutschmeister_state'] (saves)
+     - Export/Import de progresso
+     - Internacionalização (i18n PT/EN)
+     - Dark mode
+     - Todos os 10 modos existentes
+
+  9. NÃO alterar:
+     - Sidebar
+     - Capítulos
+     - Música
+     - Vocabulário
+     - Conversação
+     - Evolução/GPS
+     - CSS existente
+     - Lógica de save/load/import/export/reset
+
+  10. Sempre atualizar DOCUMENTACAO_COMPLETA.txt após mudanças significativas.
+  11. Sempre atualizar PROXIMAS_TAREFAS.txt após concluir pendências.
+  12. Sempre verificar contagens com o script PowerShell de auditoria.
+  13. NÃO usar estimativas ou aproximações em relatórios.
+  14. Cada frase adicionada ao SB_PHRASES DEVE ter:
+      - de, pt, en (frase nos 3 idiomas)
+      - deWords, ptWords, enWords (arrays de palavras)
+      - cat (categoria), tense (tempo verbal)
+      - expl (explicação completa em português com 14 campos)
+      - explEn (explicação completa em inglês com 14 campos)
+
+================================================================================
+  8. ERROS JÁ ENCONTRADOS E CORRIGIDOS
+================================================================================
+
+ERRO 1: Contagem de frases baseada em estimativas
+  Causa: Os rótulos dos lotes de edição (ex: "// COMPLETANDO 5 PALAVRAS (+17)")
+         continham contagens incorretas. Frases eram escritas sem verificação
+         de contagem de palavras antes da inserção.
+  Impacto: Relatórios mostravam 30 frases onde só existiam 21 (ex: grupo 5).
+  Solução: Auditoria completa com regex PowerShell. Contar frases APENAS
+           usando o script de auditoria (seção 4 deste documento).
+  Data: Junho 2026
+
+ERRO 2: Frases com contagem de palavras diferente da esperada
+  Causa: Ao construir frases de 14-15 palavras, a contagem mental de palavras
+         frequentemente diferia da contagem real (split por espaços).
+         Ex: "Er hat heute in der neuen großen Firma gearbeitet" = 10, não 14.
+  Impacto: Frases iam para grupos errados (ex: 15 em vez de 14).
+  Solução: Verificar cada frase com PowerShell ANTES de inserir:
+           ("frase aqui" -split ' ').Count deve ser exatamente o número desejado.
+  Data: Junho 2026
+
+ERRO 3: Fórmula de 15 palavras só funcionava com estrutura específica
+  Causa: A fórmula "Subj+Aux+Time+in+Art+Adj+Adj+Noun+mit+Poss+Adj+Noun+Adj+Noun+Part"
+         produzia consistentemente 15 palavras, mas variações sutis (ex: usar
+         "in dem" em vez de "im") alteravam a contagem.
+  Solução: Usar EXATAMENTE a mesma estrutura de slots para todas as frases
+           do grupo 15. Não fazer variações não testadas.
+  Data: Junho 2026
+
+================================================================================
+  9. INSTRUÇÕES PARA A PRÓXIMA IA
+================================================================================
+
+Se você é uma IA que acabou de receber este projeto, siga ESTES PASSOS:
+
+PASSO 1: Leia este arquivo INTEIRO (PROXIMAS_TAREFAS.txt)
+PASSO 2: Leia DOCUMENTACAO_COMPLETA.txt INTEIRA
+PASSO 3: Leia o HTML (deutsch-meister.html) — use Read com offset para ler
+         em partes, é um arquivo grande (~2 MB)
+PASSO 4: Execute o script de contagem PowerShell da seção 4 para verificar
+         o estado atual do banco SB_PHRASES
+PASSO 5: Vá para a seção 4 (TAREFA PRINCIPAL EM ANDAMENTO) e continue
+         a partir do primeiro grupo não concluído
+
+ORDEM DE EXECUÇÃO RECOMENDADA:
+  1. Comece pelo grupo 5 palavras (mais fácil, +9 frases)
+  2. Depois grupo 9 palavras (+7 frases)
+  3. Depois grupo 11 palavras (+20 frases)
+  4. Depois grupo 12 palavras (+21 frases)
+  5. Por último grupo 13 palavras (+26 frases)
+
+LOCALIZAÇÃO NO HTML:
+  - SB_PHRASES: declarado na linha 7294
+  - _add(): função na linha 7393
+  - Ponto de inserção para novas frases: ANTES de "// ===== STATE ====="
+    (use grep para encontrar esta linha)
+  - _pickPhrase(): linha 7537
+  - API pública: window.GermanSentenceBuilder (linha 8315+)
+
+FORMATO DE CADA FRASE (uma linha por entrada no _add):
+  {de:"frase em alemão",pt:"tradução português",en:"english translation",
+   deWords:["palavra1","palavra2",...],ptWords:[...],enWords:[...],
+   cat:"Categoria",tense:"Tempo verbal",
+   expl:{literal:"...",natural:"...",words:[{w:"...",g:"...",f:"..."},...],
+         order:"...",conj:"...",verb:"...",tenseLab:"...",cases:"...",
+         decl:"...",reason:"...",nuance:"...",pron:"...",commonErr:"...",
+         extra:"..."},
+   explEn:{...mesmo formato em inglês...}}
+
+IMPORTANTE:
+  - Cada frase deve ter CONTAGEM DE PALAVRAS VERIFICADA antes da inserção
+  - Use o PowerShell: ("frase" -split ' ').Count para verificar
+  - As frases são automaticamente classificadas no grupo correto pelo _add()
+  - NÃO confie nos comentários // COMPLETANDO X PALAVRAS
+  - Mantenha explicações em PT e EN para cada frase (14 campos cada)
+  - Use vocabulário diversificado (evite repetir sein, haben, gehen, machen)
+  - Use contextos variados (trabalho, saúde, viagem, tecnologia, etc.)
+
+================================================================================
+  10. CHECKLIST GERAL DO PROJETO
+================================================================================
+
+SISTEMAS PRINCIPAIS:
+  [x] Sistema de capítulos (20 capítulos)
+  [x] Sistema de exercícios (362 em PT, 300 em EN)
+  [x] Sistema de mini testes
+  [x] Treinador de conjugação verbal
+  [x] DNA do Verbo (VERB_DNA, 25 verbos)
+  [x] Conexões Verbais (72+ conexões)
+  [x] Engenharia da Palavra (38 verbos)
+  [x] Famílias de Palavras (WFS, 10 famílias, 106+ membros)
+  [x] Engenharia da Frase (40+ análises)
+  [x] GPS / Evolução (tracking completo)
+  [x] Glossário (156+ entradas)
+  [x] Sidebar dinâmica
+  [x] Sistema de saves
+  [x] Export/Import
+  [x] Internacionalização (i18n PT/EN)
+  [x] Dark mode
+  [x] Base Fundamental
+  [x] Modo Música (1 música implementada)
+
+MODO MONTAR FRASES:
+  [x] Sistema de drag-and-drop
+  [x] Sistema de verificação
+  [x] Sistema de explicações (15 seções por frase)
+  [x] Sistema de progressão (streak)
+  [x] Anti-repetição (histórico de 20 frases)
+  [x] Internacionalização do modo (SB_I18N, 67 chaves)
+  [x] Integração com GPS
+  [x] Persistência (state.sentenceBuilderState)
+  [ ] Banco de frases completo (83 frases restantes)
+  [ ] Grupo avançado 16-20 palavras
+  [ ] Revisão final de qualidade
+
+DOCUMENTAÇÃO:
+  [x] DOCUMENTACAO_COMPLETA.txt (documentação técnica)
+  [x] PROXIMAS_TAREFAS.txt (este arquivo — handoff)
+
+================================================================================
+                          FIM DO HANDOFF
+================================================================================
