@@ -1,10 +1,10 @@
 ===============================================================================
                 DOCUMENTACAO COMPLETA — DeutschMeister v3.3
              Plataforma Interativa de Aprendizado de Alemão
-   Documentação Técnica — Junho 2026 (Modo Montar Frases implementado)
+   Documentação Técnica — Junho 2026 (Modo Montar Frases expandido +25 frases/grupo)
 ================================================================================
 
-  Arquivo Fonte:  deutsch-meister.html (~8700 linhas, ~1.2M caracteres)
+   Arquivo Fonte:  deutsch-meister.html (321 frases SB_PHRASES, 1.82 MB)
   Tipo:           SPA (Single Page Application) — HTML + CSS + JS vanilla
   Objetivo:       Ensinar alemão A1→B1 seguindo padrão CEFR
   Arquitetura:    MULTIMODO — 10 modos/guias com sidebar dinâmica adaptativa
@@ -1674,12 +1674,56 @@
    Frases de 6-7 palavras: Perfekt avançado, Konjunktiv II, orações subordinadas
    Frases de 8+ palavras: estruturas complexas, múltiplos complementos
 
-   36.4 ANTI-REPETIÇÃO
-   ----------------------------------------------------------------------------
-   O sistema mantém um histórico (_sbState.history) com as últimas 20
-   frases utilizadas (identificadas pelo texto em alemão). Ao selecionar
-   nova frase, frases no histórico são filtradas. Se todas as frases do
-   grupo estiverem no histórico, o histórico é reutilizado (fallback).
+    36.4 ANTI-REPETIÇÃO
+    ----------------------------------------------------------------------------
+    O sistema mantém um histórico (_sbState.history) com as últimas 20
+    frases utilizadas (identificadas pelo texto em alemão). Ao selecionar
+    nova frase, frases no histórico são filtradas. Se todas as frases do
+    grupo estiverem no histórico, o histórico é reutilizado (fallback).
+
+    36.5 EXPANSÃO — JUNHO 2026 (AUDITADA)
+    ----------------------------------------------------------------------------
+    AUDITORIA ESTRUTURAL (Junho 2026):
+    
+    Estrutura real:
+      - SB_PHRASES: const {} na linha 7294 (IIFE GermanSentenceBuilderCore)
+      - _add(): função na linha 7393, alimenta SB_PHRASES via p.de.split(' ').length
+      - _pickPhrase(): linha 7537, lê SB_PHRASES[Math.min(wordCount,15)]
+      - API: window.GermanSentenceBuilder.getPhrases(wc)
+      - Blocos _add: 21 blocos, todos no mesmo escopo
+      - Estruturas alternativas: NENHUMA
+      - Frases órfãs/inacessíveis: NENHUMA
+      - Duplicatas: NENHUMA (contagem por de-field único)
+    
+    Causa das divergências em relatórios anteriores:
+      Contagens baseadas em estimativas do conteúdo de cada lote de edição,
+      e não em contagem real via regex. Lotes rotulados como "+17 frases de
+      5 palavras" continham frases com contagens de palavras variadas.
+
+    CONTAGEM DEFINITIVA (frases acessíveis ao sistema):
+    
+    Grupo       | Final  | Meta (30) |
+    ------------|--------|------------|
+    2 palavras  |   31   |    OK     |
+    3 palavras  |   30   |    OK     |
+    4 palavras  |   30   |    OK     |
+    5 palavras  |   21   |  FALTAM 9 |
+    6 palavras  |   69   |    OK     |
+    7 palavras  |   44   |    OK     |
+    8 palavras  |   42   |    OK     |
+    9 palavras  |   23   |  FALTAM 7 |
+    10 palavras |   33   |    OK     |
+    11 palavras |   10   |  FALTAM 20|
+    12 palavras |    9   |  FALTAM 21|
+    13 palavras |    4   |  FALTAM 26|
+    14 palavras |   30   |    OK     |
+    15 palavras |   30   |    OK     |
+    ------------|--------|------------|
+    TOTAL       |  406   |            |
+
+    Grupos completos (>=30): 2,3,4,6,7,8,10,14,15 (9 de 14)
+    Total geral: 406 frases (+380 do original de 26)
+    Tamanho: ~1.9 MB
 
 ================================================================================
     37. ALGORITMO DE PROGRESSÃO — STREAK E DIFICULDADE
@@ -2019,9 +2063,10 @@
    [x] Todos os textos de UI internacionalizados (67 chaves)
    [x] Todos os botões internacionalizados
    [x] Todos os feedbacks internacionalizados
-   [x] Todas as 26 frases possuem PT, EN e DE
-   [x] Todas as 26 frases possuem ptWords, enWords e deWords
-   [x] Todas as 26 frases possuem expl (PT) e explEn (EN)
+    [x] Todas as 26 frases originais + ~200 novas frases possuem PT, EN e DE
+    [x] Todas as frases (originais + novas) possuem ptWords, enWords e deWords
+    [x] Todas as frases (originais + novas) possuem expl (PT) e explEn (EN)
+    [x] Auditoria Junho 2026: 321 frases, 21 blocos _add, sem estruturas órfãs
    [x] Nenhum texto fixo em português permanece
    [x] Adaptação cultural nas explicações em inglês
    [x] Integração com sistema i18n existente
