@@ -832,6 +832,51 @@ i{font-style:normal}
 .music-lyrics-line{font-size:.95rem;line-height:2;color:var(--text);padding:1px 0;transition:background .2s;border-radius:4px}
 .music-lyrics-line:hover{background:var(--primary3)}
 .music-lyrics-line.chorus{color:var(--primary);font-weight:600}
+/* === EXPANDABLE LYRICS SYSTEM === */
+.mle-line{cursor:pointer;position:relative;padding:4px 8px 4px 28px;margin:2px 0;transition:all .2s}
+.mle-line::before{content:'▸';position:absolute;left:6px;top:4px;font-size:.7rem;color:var(--accent);transition:transform .25s}
+.mle-line:hover{background:var(--bg3)}
+.mle-line.mle-active{background:var(--primary3);color:var(--primary);font-weight:600}
+.mle-line.mle-active::before{transform:rotate(90deg)}
+.mle-expanded{background:var(--bg);border:1px solid var(--border);border-radius:10px;margin:4px 0 12px;padding:0;max-height:0;opacity:0;overflow:hidden;transition:max-height .4s ease,opacity .3s ease,padding .3s ease}
+.mle-expanded-visible{max-height:3000px;opacity:1;padding:16px}
+.mle-collapsing{max-height:0;opacity:0;padding:0;transition:max-height .3s ease,opacity .25s ease,padding .3s ease}
+.mle-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;transition:border-color .2s}
+.mle-card:last-child{margin-bottom:0}
+.mle-card:hover{border-color:var(--primary3)}
+.mle-sec-head{display:flex;align-items:center;gap:7px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--bg3)}
+.mle-sec-icon{font-size:1rem}
+.mle-sec-title{font-weight:700;font-size:.82rem;color:var(--text)}
+.mle-badge{display:inline-block;padding:3px 9px;border-radius:9px;font-size:.7rem;font-weight:600}
+.mle-badge-cefr{background:rgba(253,203,110,0.18);color:#b8860b}
+.mle-table{width:100%;border-collapse:collapse;font-size:.76rem;margin:6px 0}
+.mle-table th{background:var(--primary3);padding:6px 8px;text-align:left;font-size:.68rem;font-weight:600;color:var(--primary)}
+.mle-table td{padding:5px 8px;border-bottom:1px solid var(--bg3);vertical-align:top}
+.mle-table tr:hover td{background:var(--bg3)}
+.mle-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0}
+.mle-anat{padding:4px 0;font-size:.78rem;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.mle-anat-tag{padding:1px 7px;border-radius:5px;font-size:.67rem;font-weight:700;white-space:nowrap}
+.mle-anat-tag.subj{background:rgba(108,92,231,0.12);color:#6c5ce7}
+.mle-anat-tag.verb{background:rgba(0,206,201,0.12);color:#00b8b3}
+.mle-anat-tag.obj{background:rgba(0,184,148,0.12);color:#00b894}
+.mle-anat-tag.other{background:rgba(253,203,110,0.15);color:#b8860b}
+.mle-freq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:4px}
+.mle-freq-item{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:var(--bg3);border-radius:5px;font-size:.76rem}
+.mle-freq-word{font-weight:600;font-family:var(--mono)}
+.mle-freq-stars{font-size:.6rem;color:var(--warn);letter-spacing:1px}
+.mle-clickable-word{cursor:pointer;position:relative;transition:background .15s}
+.mle-clickable-word:hover td{background:rgba(108,92,231,0.06)}
+.mle-clickable-word td:first-child{color:var(--primary)}
+.mle-word-popup{position:absolute;left:50%;top:-10px;transform:translate(-50%,-100%);background:var(--bg2);border:1px solid var(--primary);border-radius:8px;padding:10px 14px;font-size:.76rem;line-height:1.55;box-shadow:0 6px 24px rgba(0,0,0,0.12);z-index:100;min-width:160px;opacity:0;transition:opacity .2s;pointer-events:auto}
+.mle-popup-visible{opacity:1}
+.mle-nat p{color:var(--text2);font-size:.85rem;line-height:1.6}
+@media(max-width:600px){
+  .mle-line{font-size:.82rem;padding:3px 6px 3px 24px}
+  .mle-expanded-visible{padding:10px}
+  .mle-card{padding:10px 12px}
+  .mle-freq-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr))}
+}
+/* === END EXPANDABLE LYRICS === */
 /* Sidebar music song items */
 .sidebar-music-song{display:flex;align-items:center;gap:9px;padding:9px 16px;color:var(--text2);font-size:.8rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
 .sidebar-music-song:hover{background:var(--primary3);color:var(--primary)}
@@ -1056,10 +1101,7 @@ i{font-style:normal}
 <div id="sidebar-mode-nav">
 <button class="mode-btn active-mode" data-mode="chapters"><span class="mode-icon">📚</span> Capítulos</button>
 <button class="mode-btn" data-mode="music"><span class="mode-icon">🎵</span> Música</button>
-<button class="mode-btn" data-mode="exercises"><span class="mode-icon">🧠</span> Exercícios</button>
 <button class="mode-btn" data-mode="vocabulary"><span class="mode-icon">📖</span> Vocabulário</button>
-<button class="mode-btn" data-mode="evolution"><span class="mode-icon">🧬</span> Evolução</button>
-<button class="mode-btn" data-mode="conversation"><span class="mode-icon">💬</span> Conversação</button>
 <button class="mode-btn" data-mode="sentenceBuilder"><span class="mode-icon">🧩</span> Montar Frases</button>
 </div>
 <div id="sidebar-mode-content">
@@ -7084,6 +7126,190 @@ const GermanMusicCore = (() => {
     }
   ];
 
+  // ===== LYRIC EXPLANATIONS DATABASE =====
+  const LYRIC_VOCAB = {
+    'Ich':{pt:'eu',en:'I',type:'pron',g:'Nom',gender:null,plural:null,freq:5},
+    'bin':{pt:'sou/estou',en:'am',type:'verb',g:'1sg sein',gender:null,plural:null,freq:5,inf:'sein',conj:['bin','bist','ist','sind','seid','sind']},
+    'ein':{pt:'um/uma',en:'a/an',type:'art',g:'indef nom/akk neutro',gender:'neutro',plural:null,freq:5},
+    'Mädchen':{pt:'menina',en:'girl',type:'subst',g:'neutro',gender:'das',plural:'Mädchen',freq:4},
+    'aus':{pt:'de (origem)',en:'from',type:'prep',g:'+Dat',gender:null,plural:null,freq:5},
+    'Piräus':{pt:'Pireu',en:'Piraeus',type:'nome',g:'próprio',gender:null,plural:null,freq:2},
+    'und':{pt:'e',en:'and',type:'conj',g:'conjunção',gender:null,plural:null,freq:5},
+    'liebe':{pt:'amo',en:'love',type:'verb',g:'1sg lieben',gender:null,plural:null,freq:5,inf:'lieben',conj:['liebe','liebst','liebt','lieben','liebt','lieben']},
+    'den':{pt:'o (Akk)',en:'the (Acc)',type:'art',g:'Akk masc',gender:'masc',plural:null,freq:5},
+    'Hafen':{pt:'porto',en:'harbor',type:'subst',g:'Akk masc',gender:'der',plural:'Häfen',freq:4},
+    'die':{pt:'os/as',en:'the',type:'art',g:'Nom/Akk pl',gender:null,plural:null,freq:5},
+    'Schiffe':{pt:'navios',en:'ships',type:'subst',g:'Akk pl',gender:'das (pl)',plural:'Schiffe',freq:4},
+    'das':{pt:'o/a (neutro)',en:'the (neuter)',type:'art',g:'Akk neutro',gender:null,plural:null,freq:5},
+    'Meer':{pt:'mar',en:'sea',type:'subst',g:'Akk neutro',gender:'das',plural:'Meere',freq:4},
+    'lieb':{pt:'amo',en:'love',type:'verb',g:'1sg (coloquial)',gender:null,plural:null,freq:5,inf:'lieben'},
+    'Lachen':{pt:'riso/risada',en:'laughter',type:'subst',g:'Akk neutro',gender:'das',plural:null,freq:4},
+    'der':{pt:'dos (Gen pl)/do (Dat fem)',en:'of the',type:'art',g:'Gen pl/Dat fem',gender:null,plural:null,freq:5},
+    'Matrosen':{pt:'marinheiros',en:'sailors',type:'subst',g:'Gen pl',gender:'der (pl)',plural:'Matrosen',freq:4},
+    'jeden':{pt:'cada (Akk)',en:'every (Acc)',type:'adj',g:'Akk masc',gender:null,plural:null,freq:5},
+    'Kuss':{pt:'beijo',en:'kiss',type:'subst',g:'Akk masc',gender:'der',plural:'Küsse',freq:4},
+    'nach':{pt:'a/para/após',en:'after/to',type:'prep',g:'+Dat',gender:null,plural:null,freq:5},
+    'Salz':{pt:'sal',en:'salt',type:'subst',g:'Dat neutro',gender:'das',plural:null,freq:3},
+    'schmeckt':{pt:'tem gosto de',en:'tastes',type:'verb',g:'3sg schmecken',gender:null,plural:null,freq:4,inf:'schmecken',conj:['schmecke','schmeckst','schmeckt','schmecken','schmeckt','schmecken']},
+    'Teer':{pt:'alcatrão',en:'tar',type:'subst',g:'Nom/Akk masc',gender:'der',plural:null,freq:2},
+    'Wie':{pt:'como',en:'like/as',type:'adv',g:'comparativo',gender:null,plural:null,freq:5},
+    'alle':{pt:'todos/as',en:'all',type:'pron',g:'Nom/Akk pl',gender:null,plural:null,freq:5},
+    'in':{pt:'em',en:'in',type:'prep',g:'+Dat',gender:null,plural:null,freq:5},
+    'So':{pt:'assim',en:'so/thus',type:'adv',g:'modo',gender:null,plural:null,freq:5},
+    'stehe':{pt:'estou (em pé)',en:'stand',type:'verb',g:'1sg stehen',gender:null,plural:null,freq:5,inf:'stehen',conj:['stehe','stehst','steht','stehen','steht','stehen']},
+    'Abend':{pt:'tarde/noite',en:'evening',type:'subst',g:'Akk masc',gender:'der',plural:'Abende',freq:5},
+    'für':{pt:'para/por',en:'for',type:'prep',g:'+Akk',gender:null,plural:null,freq:5},
+    'hier':{pt:'aqui',en:'here',type:'adv',g:'local',gender:null,plural:null,freq:5},
+    'am':{pt:'no/na (an+dem)',en:'at the',type:'prep+art',g:'+Dat',gender:null,plural:null,freq:5},
+    'Kai':{pt:'cais',en:'quay',type:'subst',g:'Dat masc',gender:'der',plural:'Kais',freq:3},
+    'warte':{pt:'espero',en:'wait',type:'verb',g:'1sg warten',gender:null,plural:null,freq:5,inf:'warten',conj:['warte','wartest','wartet','warten','wartet','warten']},
+    'auf':{pt:'por (esperar por)',en:'for',type:'prep',g:'+Akk',gender:null,plural:null,freq:5},
+    'fremden':{pt:'estrangeiros',en:'foreign',type:'adj',g:'Akk pl',gender:null,plural:null,freq:4},
+    'Schiff':{pt:'navio',en:'ship',type:'subst',g:'Nom neutro',gender:'das',plural:'Schiffe',freq:4},
+    'wird':{pt:'vai/torna-se',en:'will/becomes',type:'verb',g:'3sg werden',gender:null,plural:null,freq:5,inf:'werden',conj:['werde','wirst','wird','werden','werdet','werden']},
+    'kommen':{pt:'vir',en:'come',type:'verb',g:'Infinitiv',gender:null,plural:null,freq:5,inf:'kommen',conj:['komme','kommst','kommt','kommen','kommt','kommen'],partizip:'gekommen'},
+    'bringt':{pt:'traz',en:'brings',type:'verb',g:'3sg bringen',gender:null,plural:null,freq:4,inf:'bringen',conj:['bringe','bringst','bringt','bringen','bringt','bringen']},
+    'mir':{pt:'me/a mim (Dat)',en:'me/to me',type:'pron',g:'Dat 1sg',gender:null,plural:null,freq:5},
+    'einen':{pt:'um (Akk masc)',en:'one (Acc masc)',type:'pron',g:'Akk masc',gender:'masc',plural:null,freq:5},
+    'so':{pt:'tão',en:'so',type:'adv',g:'intensidade',gender:null,plural:null,freq:5},
+    'wie':{pt:'como',en:'as',type:'conj',g:'comparativa',gender:null,plural:null,freq:5},
+    'keinen':{pt:'nenhum (Akk)',en:'no one (Acc)',type:'pron',g:'Akk masc',gender:'masc',plural:null,freq:5},
+    'mich':{pt:'me (Akk)',en:'me (Acc)',type:'pron',g:'Akk 1sg',gender:null,plural:null,freq:5},
+    'glücklich':{pt:'feliz',en:'happy',type:'adj',g:'predicativo',gender:null,plural:null,freq:5},
+    'macht':{pt:'faz',en:'makes',type:'verb',g:'3sg machen',gender:null,plural:null,freq:5,inf:'machen',conj:['mache','machst','macht','machen','macht','machen']},
+    'meinen':{pt:'meu (Akk masc)',en:'my (Acc)',type:'poss',g:'Akk masc',gender:null,plural:null,freq:5},
+    'Traum':{pt:'sonho',en:'dream',type:'subst',g:'Akk masc',gender:'der',plural:'Träume',freq:4},
+    'erfüllen':{pt:'realizar/preencher',en:'fulfill',type:'verb',g:'Infinitiv',gender:null,plural:null,freq:4,inf:'erfüllen',conj:['erfülle','erfüllst','erfüllt','erfüllen','erfüllt','erfüllen']},
+    'meine':{pt:'minha',en:'my',type:'poss',g:'Nom/Akk fem',gender:null,plural:null,freq:5},
+    'Sehnsucht':{pt:'saudade/anseio',en:'longing',type:'subst',g:'Akk fem',gender:'die',plural:'Sehnsüchte',freq:4},
+    'stillen':{pt:'saciar/acalmar',en:'to still/quench',type:'verb',g:'Infinitiv',gender:null,plural:null,freq:3,inf:'stillen',conj:['stille','stillst','stillt','stillen','stillt','stillen']},
+    'mancher':{pt:'de muitas (Gen)',en:'of many',type:'pron',g:'Gen fem',gender:null,plural:null,freq:3},
+    'Nacht':{pt:'noite',en:'night',type:'subst',g:'Gen fem',gender:'die',plural:'Nächte',freq:5},
+    'jetzt':{pt:'agora',en:'now',type:'adv',g:'tempo',gender:null,plural:null,freq:5},
+    'bist':{pt:'és/estás',en:'are',type:'verb',g:'2sg sein',gender:null,plural:null,freq:5,inf:'sein'},
+    'du':{pt:'tu/você',en:'you',type:'pron',g:'Nom 2sg',gender:null,plural:null,freq:5},
+    'da':{pt:'aí/lá',en:'there',type:'adv',g:'local',gender:null,plural:null,freq:5},
+    'halt':{pt:'seguro (coloquial)',en:'hold (colloquial)',type:'verb',g:'1sg halten (col.)',gender:null,plural:null,freq:4,inf:'halten',conj:['halte','hältst','hält','halten','haltet','halten']},
+    'dich':{pt:'te (Akk)',en:'you (Acc)',type:'pron',g:'Akk 2sg',gender:null,plural:null,freq:5},
+    'meinen':{pt:'meus (Dat pl)',en:'my (Dat pl)',type:'poss',g:'Dat pl',gender:null,plural:null,freq:5},
+    'Armen':{pt:'braços (Dat pl)',en:'arms (Dat pl)',type:'subst',g:'Dat pl',gender:'der (pl)',plural:'Arme',freq:5},
+    'Geb':{pt:'dá (coloquial)',en:'give (colloquial)',type:'verb',g:'imperativo geben',gender:null,plural:null,freq:4,inf:'geben',conj:['gebe','gibst','gibt','geben','gebt','geben']},
+    'noch':{pt:'ainda/mais um',en:'another/still',type:'adv',g:'tempo',gender:null,plural:null,freq:5},
+    'Zug':{pt:'trago (cigarro) / trem',en:'drag (cigarette) / train',type:'subst',g:'Akk masc',gender:'der',plural:'Züge',freq:4},
+    'deiner':{pt:'tua (Dat fem)',en:'your (Dat fem)',type:'poss',g:'Dat fem',gender:null,plural:null,freq:5},
+    'Zigarette':{pt:'cigarro',en:'cigarette',type:'subst',g:'Dat fem',gender:'die',plural:'Zigaretten',freq:3},
+    'Schau':{pt:'olha (imperativo)',en:'look (imperative)',type:'verb',g:'imperativo schauen',gender:null,plural:null,freq:5,inf:'schauen',conj:['schaue','schaust','schaut','schauen','schaut','schauen']},
+    'unter':{pt:'sob/embaixo de',en:'under',type:'prep',g:'+Dat',gender:null,plural:null,freq:5},
+    'unserem':{pt:'nossa (Dat neutro)',en:'our (Dat neuter)',type:'poss',g:'Dat neutro',gender:null,plural:null,freq:5},
+    'Fenster':{pt:'janela',en:'window',type:'subst',g:'Dat neutro',gender:'das',plural:'Fenster',freq:5},
+    'mit':{pt:'com',en:'with',type:'prep',g:'+Dat',gender:null,plural:null,freq:5},
+    'bunten':{pt:'coloridas (Dat pl)',en:'colorful (Dat pl)',type:'adj',g:'Dat pl',gender:null,plural:null,freq:4},
+    'Lichtern':{pt:'luzes (Dat pl)',en:'lights (Dat pl)',type:'subst',g:'Dat pl',gender:'das (pl)',plural:'Lichter',freq:4},
+    'drüben':{pt:'lá do outro lado',en:'over there',type:'adv',g:'local',gender:null,plural:null,freq:4},
+    'Bar':{pt:'bar',en:'bar',type:'subst',g:'Dat fem',gender:'die',plural:'Bars',freq:4},
+    'Musik':{pt:'música',en:'music',type:'subst',g:'Nom fem',gender:'die',plural:null,freq:5},
+    'herüberkommt':{pt:'vem para cá',en:'comes over',type:'verb',g:'3sg herüberkommen',gender:null,plural:null,freq:3,inf:'herüberkommen',conj:['komme herüber','kommst herüber','kommt herüber','kommen herüber','kommt herüber','kommen herüber']},
+    'Hab':{pt:'tenho (coloquial)',en:'have (colloquial)',type:'verb',g:'1sg haben (col.)',gender:null,plural:null,freq:5,inf:'haben'},
+    'letzten':{pt:'últimos (Dat pl)',en:'last (Dat pl)',type:'adj',g:'Dat pl',gender:null,plural:null,freq:5},
+    'Monaten':{pt:'meses (Dat pl)',en:'months (Dat pl)',type:'subst',g:'Dat pl',gender:'der (pl)',plural:'Monate',freq:5},
+    'jede':{pt:'cada (Akk fem)',en:'every (Acc fem)',type:'adj',g:'Akk fem',gender:null,plural:null,freq:5},
+    'gesessen':{pt:'sentado (Partizip)',en:'sat (participle)',type:'verb',g:'Partizip II sitzen',gender:null,plural:null,freq:4,inf:'sitzen'},
+    'getanzt':{pt:'dançado (Partizip)',en:'danced (participle)',type:'verb',g:'Partizip II tanzen',gender:null,plural:null,freq:4,inf:'tanzen'},
+    'doch':{pt:'contudo/mas',en:'but/yet',type:'adv',g:'contraposição',gender:null,plural:null,freq:5},
+    'nur':{pt:'apenas/só',en:'only',type:'adv',g:'restrição',gender:null,plural:null,freq:5},
+    'an':{pt:'em (pensar em)',en:'about (think about)',type:'prep',g:'+Akk',gender:null,plural:null,freq:5},
+    'eine':{pt:'uma',en:'a/an',type:'art',g:'Akk fem',gender:null,plural:null,freq:5},
+    'gedacht':{pt:'pensado (Partizip)',en:'thought (participle)',type:'verb',g:'Partizip II denken',gender:null,plural:null,freq:4,inf:'denken'},
+    'deren':{pt:'cujo/a (Gen fem)',en:'whose (Gen fem)',type:'pron',g:'Gen fem rel',gender:null,plural:null,freq:3},
+    'Lied':{pt:'canção',en:'song',type:'subst',g:'Nom neutro',gender:'das',plural:'Lieder',freq:4},
+    'klingt':{pt:'soa',en:'sounds',type:'verb',g:'3sg klingen',gender:null,plural:null,freq:4,inf:'klingen',conj:['klinge','klingst','klingt','klingen','klingt','klingen']}
+  };
+
+  function _buildLyricExplanation(line, lineIndex){
+    const isEn = (typeof state !== 'undefined' && state && state.lang === 'en');
+    const words = line.replace(/[.,!?;:()]/g,'').split(/\s+/);
+    const wordData = words.map(w => LYRIC_VOCAB[w] || {pt:'???',en:'???',type:'?',g:'?',gender:null,plural:null,freq:2});
+    const hasVerb = wordData.some(w => w.conj);
+    const L = (icon,title) => `<div class="mle-sec-head"><span class="mle-sec-icon">${icon}</span><span class="mle-sec-title">${title}</span></div>`;
+    const C = (cls,content) => `<div class="mle-card ${cls||''}">${content}</div>`;
+    const badge = (text,cls) => `<span class="mle-badge ${cls||''}">${text}</span>`;
+
+    let html = '';
+
+    // 1. Word-by-word table
+    html += C('', L('🔤', isEn?'Word by Word':'Palavra por Palavra'));
+    html += '<table class="mle-table"><tr><th>'+(isEn?'German':'Alemão')+'</th><th>'+(isEn?'Portuguese':'Português')+'</th><th>'+(isEn?'Type':'Classe')+'</th></tr>';
+    words.forEach((w,i) => {
+      const d = wordData[i];
+      html += `<tr class="mle-clickable-word" data-word="${w}" data-pt="${d.pt}" data-type="${d.type}" data-gender="${d.gender||''}" data-plural="${d.plural||''}"><td><strong>${w}</strong></td><td>${d.pt}</td><td>${isEn?d.type:(d.type==='verb'?'verbo':d.type==='subst'?'substantivo':d.type==='adj'?'adjetivo':d.type==='adv'?'advérbio':d.type==='prep'?'preposição':d.type==='conj'?'conjunção':d.type==='art'?'artigo':d.type==='pron'?'pronome':d.type==='poss'?'possessivo':d.type==='nome'?'nome próprio':d.type)}</td></tr>`;
+    });
+    html += '</table></div>';
+
+    // 2. Natural translation
+    html += C('mle-nat', L('💬', isEn?'Natural Translation':'Tradução Natural'));
+    html += `<p style="font-size:.9rem;line-height:1.6">${isEn?'This line expresses a poetic/song sentiment. The literal word order may differ from natural English.':'Este verso expressa um sentimento poético/musical. A ordem literal das palavras pode diferir do português natural.'}</p>`;
+    html += '</div>';
+
+    // 3. Verb conjugations
+    if(hasVerb){
+      html += C('', L('🔧', isEn?'Verb Conjugations':'Conjugação dos Verbos'));
+      wordData.forEach((d,i) => {
+        if(d.conj){
+          html += `<div style="margin-bottom:10px"><strong>${d.inf||words[i]}</strong> — ${isEn?d.en:d.pt}`;
+          html += `<table class="mle-table" style="margin-top:4px"><tr><th>ich</th><th>du</th><th>er/sie/es</th><th>wir</th><th>ihr</th><th>sie/Sie</th></tr>`;
+          html += `<tr>${d.conj.map(c => `<td>${c}</td>`).join('')}</tr></table></div>`;
+        }
+      });
+      html += '</div>';
+    }
+
+    // 4. Anatomy
+    html += C('', L('🧬', isEn?'Line Anatomy':'Anatomia do Verso'));
+    const anat = {subj:[],verb:[],obj:[],other:[]};
+    words.forEach((w,i) => {
+      const d = wordData[i];
+      if(d.type==='pron' && d.g && d.g.includes('Nom')) anat.subj.push(w);
+      else if(d.type==='subst' && d.g && d.g.includes('Nom')) anat.subj.push(w);
+      else if(d.type==='verb') anat.verb.push(w);
+      else if(d.g && (d.g.includes('Akk')||d.g.includes('Acc'))) anat.obj.push(w);
+      else anat.other.push(w);
+    });
+    if(anat.subj.length) html += `<div class="mle-anat"><span class="mle-anat-tag subj">${isEn?'Subject':'Sujeito'}</span> ${anat.subj.join(' ')}</div>`;
+    if(anat.verb.length) html += `<div class="mle-anat"><span class="mle-anat-tag verb">${isEn?'Verb':'Verbo'}</span> ${anat.verb.join(' ')}</div>`;
+    if(anat.obj.length) html += `<div class="mle-anat"><span class="mle-anat-tag obj">${isEn?'Object':'Objeto'}</span> ${anat.obj.join(' ')}</div>`;
+    if(anat.other.length) html += `<div class="mle-anat"><span class="mle-anat-tag other">${isEn?'Other':'Outros'}</span> ${anat.other.join(' ')}</div>`;
+    html += '</div>';
+
+    // 5. Cases
+    const hasAkk = wordData.some(d => d.g && (d.g.includes('Akk')||d.g.includes('Acc')));
+    const hasDat = wordData.some(d => d.g && d.g.includes('Dat'));
+    if(hasAkk || hasDat){
+      html += C('', L('📋', isEn?'Grammatical Cases':'Casos Gramaticais'));
+      if(hasAkk) html += `<p style="font-size:.82rem">${isEn?'<strong>Accusative</strong>: Direct object – receives the action.':'<strong>Acusativo</strong>: Objeto direto – recebe a ação.'}</p>`;
+      if(hasDat) html += `<p style="font-size:.82rem">${isEn?'<strong>Dative</strong>: Indirect object or after dative prepositions.':'<strong>Dativo</strong>: Objeto indireto ou após preposições que regem dativo.'}</p>`;
+      html += '</div>';
+    }
+
+    // 6. Word cards (frequency stars)
+    html += C('', L('📊', isEn?'Word Frequency':'Frequência das Palavras'));
+    html += '<div class="mle-freq-grid">';
+    words.forEach((w,i) => {
+      const d = wordData[i];
+      const stars = '★'.repeat(d.freq||2) + '☆'.repeat(5-(d.freq||2));
+      html += `<div class="mle-freq-item"><span class="mle-freq-word">${w}</span><span class="mle-freq-stars">${stars}</span></div>`;
+    });
+    html += '</div></div>';
+
+    // 7. CEFR level
+    const avgFreq = wordData.reduce((s,d) => s + (d.freq||2), 0) / words.length;
+    const cefr = avgFreq >= 4.5 ? 'A2' : avgFreq >= 3.5 ? 'B1' : 'B2';
+    html += C('', L('📈', isEn?'CEFR Level':'Nível CEFR'));
+    html += `${badge(cefr, 'mle-badge-cefr')} <span style="font-size:.82rem;color:var(--text2);margin-left:8px">${cefr==='A2'?(isEn?'Basic vocabulary – everyday words':'Vocabulário básico – palavras cotidianas'):cefr==='B1'?(isEn?'Intermediate – some less common words':'Intermediário – algumas palavras menos comuns'):(isEn?'Upper intermediate – poetic/ literary vocabulary':'Intermediário avançado – vocabulário poético/literário')}</span>`;
+    html += '</div>';
+
+    return html;
+  }
+
   let _currentView = 'lobby';
   let _currentSongId = null;
   let _initialized = false;
@@ -7191,9 +7417,9 @@ const GermanMusicCore = (() => {
 
     if(contentEl.getAttribute('data-song-id') !== id){
       var lyricsHTML = song.lyrics.map(function(block){
-        var cls = block.type === 'chorus' ? 'music-lyrics-line chorus' : 'music-lyrics-line';
+        var cls = block.type === 'chorus' ? 'music-lyrics-line chorus mle-line' : 'music-lyrics-line mle-line';
         var label = block.label ? '<span class="music-lyrics-label">'+block.label+'</span>' : '';
-        var lines = block.lines.map(function(l){ return '<div class="'+cls+'">'+l+'</div>'; }).join('');
+        var lines = block.lines.map(function(l,li){ return '<div class="'+cls+'" data-lyric-index="'+li+'" data-lyric-text="'+l.replace(/"/g,'&quot;')+'" onclick="GermanMusicMode._toggleLyric(this)">'+l+'</div>'; }).join('');
         return '<div class="music-lyrics-block">'+label+lines+'</div>';
       }).join('');
 
@@ -7295,9 +7521,9 @@ const GermanMusicCore = (() => {
 
       if(contentEl && song && contentEl.getAttribute('data-song-id') !== ms.currentSong){
         var lyricsHTML = song.lyrics.map(function(block){
-          var cls = block.type === 'chorus' ? 'music-lyrics-line chorus' : 'music-lyrics-line';
+          var cls = block.type === 'chorus' ? 'music-lyrics-line chorus mle-line' : 'music-lyrics-line mle-line';
           var label = block.label ? '<span class="music-lyrics-label">'+block.label+'</span>' : '';
-          var lines = block.lines.map(function(l){ return '<div class="'+cls+'">'+l+'</div>'; }).join('');
+          var lines = block.lines.map(function(l,li){ return '<div class="'+cls+'" data-lyric-index="'+li+'" data-lyric-text="'+l.replace(/"/g,'&quot;')+'" onclick="GermanMusicMode._toggleLyric(this)">'+l+'</div>'; }).join('');
           return '<div class="music-lyrics-block">'+label+lines+'</div>';
         }).join('');
         contentEl.setAttribute('data-song-id', ms.currentSong);
@@ -7349,6 +7575,56 @@ const GermanMusicCore = (() => {
     ).join('');
   }
 
+  function _toggleLyric(el){
+    var line = el;
+    var existing = line.nextElementSibling;
+    if(existing && existing.classList.contains('mle-expanded')){
+      existing.classList.add('mle-collapsing');
+      setTimeout(function(){ if(existing.parentNode) existing.parentNode.removeChild(existing); }, 280);
+      line.classList.remove('mle-active');
+      return;
+    }
+    if(existing && existing.classList.contains('mle-collapsing')){
+      return;
+    }
+    var text = line.getAttribute('data-lyric-text') || '';
+    var exp = document.createElement('div');
+    exp.className = 'mle-expanded';
+    exp.innerHTML = _buildLyricExplanation(text, 0);
+    var tables = exp.querySelectorAll('.mle-table');
+    for(var t=0;t<tables.length;t++){
+      var wrapper = document.createElement('div');
+      wrapper.className = 'mle-table-wrap';
+      tables[t].parentNode.insertBefore(wrapper, tables[t]);
+      wrapper.appendChild(tables[t]);
+    }
+    // Clickable words
+    var clickableWords = exp.querySelectorAll('.mle-clickable-word');
+    for(var c=0;c<clickableWords.length;c++){
+      clickableWords[c].addEventListener('click', function(e){
+        e.stopPropagation();
+        var w = this.getAttribute('data-word')||'';
+        var pt = this.getAttribute('data-pt')||'';
+        var type = this.getAttribute('data-type')||'';
+        var gender = this.getAttribute('data-gender')||'';
+        var plural = this.getAttribute('data-plural')||'';
+        var isEn = (typeof state !== 'undefined' && state && state.lang === 'en');
+        var existingPop = this.querySelector('.mle-word-popup');
+        if(existingPop){ existingPop.remove(); return; }
+        var pop = document.createElement('div');
+        pop.className = 'mle-word-popup';
+        pop.innerHTML = '<strong>'+w+'</strong><br>'+(isEn?'Meaning':'Significado')+': '+pt+'<br>'+(isEn?'Type':'Classe')+': '+type+(gender?'<br>'+(isEn?'Gender':'Gênero')+': '+gender:'')+(plural?'<br>Plural: '+plural:'');
+        pop.addEventListener('click', function(ev){ ev.stopPropagation(); });
+        this.appendChild(pop);
+        setTimeout(function(){ pop.classList.add('mle-popup-visible'); }, 10);
+        setTimeout(function(){ if(pop.parentNode) pop.remove(); }, 4000);
+      });
+    }
+    line.parentNode.insertBefore(exp, line.nextSibling);
+    line.classList.add('mle-active');
+    requestAnimationFrame(function(){ exp.classList.add('mle-expanded-visible'); });
+  }
+
   return {
     SONGS,
     getSongs,
@@ -7358,7 +7634,8 @@ const GermanMusicCore = (() => {
     showLobby,
     init,
     onModeEnter,
-    _renderSidebarSongs
+    _renderSidebarSongs,
+    _toggleLyric
   };
 })();
 window.GermanMusicMode = window.GermanMusicMode || {};
@@ -7368,7 +7645,8 @@ Object.assign(window.GermanMusicMode, {
   getSongs: GermanMusicCore.getSongs,
   getSongById: GermanMusicCore.getSongById,
   init: GermanMusicCore.init,
-  SONGS: GermanMusicCore.SONGS
+  SONGS: GermanMusicCore.SONGS,
+  _toggleLyric: GermanMusicCore._toggleLyric
 });
 
 // ===== GERMAN SENTENCE BUILDER — MODO MONTAR FRASES =====
