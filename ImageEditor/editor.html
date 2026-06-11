@@ -1376,6 +1376,31 @@ class SettingsManager {
     }
   }
 
+  _checkSlotReplaceConfirmation(slot, config) {
+    if (!config.replaceExisting) return;
+    const stamps = app.imageStampManager.getStampsBySlot(slot);
+    if (stamps.length === 0) {
+      config.replaceExisting = false;
+      app.stampSettingsManager.setSlot(slot, config);
+      this.renderImageSlots();
+      return;
+    }
+    if (!config.source) {
+      app.notification('Slot ' + slot + ' nao possui uma imagem configurada.', 'warning');
+      return;
+    }
+    const msg = 'This will update all existing stamps created using Slot ' + slot + '. Continue?';
+    if (confirm(msg)) {
+      const oldSnapshots = stamps.map(s => JSON.parse(JSON.stringify(s)));
+      const cmd = new ReplaceSlotStampsCommand(app.imageStampManager, slot, oldSnapshots, config);
+      app.historyManager.pushCommand(cmd);
+      app.notification('Slot ' + slot + ' stamps updated', 'info', 2000);
+      config.replaceExisting = false;
+      app.stampSettingsManager.setSlot(slot, config);
+      this.renderImageSlots();
+    }
+  }
+
   _createSlotKeybindRow(slot, config) {
     const div = document.createElement('div'); div.className = 'slot-control';
     const label = document.createElement('label'); label.textContent = 'Tecla de atalho';
@@ -1442,6 +1467,7 @@ class SettingsManager {
       config.source = url; config.sourceType = 'url';
       app.stampSettingsManager.setSlot(slot, config);
       app.notification('Imagem carregada com sucesso', 'success');
+      this._checkSlotReplaceConfirmation(slot, config);
       this.renderImageSlots();
     };
     img.onerror = () => { app.notification('N&atilde;o foi poss&iacute;vel carregar a imagem do link', 'error'); };
@@ -1486,6 +1512,9 @@ class SettingsManager {
       config.sizePercent = v;
       app.stampSettingsManager.setSlot(slot, config);
     });
+    input.addEventListener('change', () => {
+      this._checkSlotReplaceConfirmation(slot, config);
+    });
     row.appendChild(input); row.appendChild(val);
     div.appendChild(label); div.appendChild(row);
     return div;
@@ -1512,7 +1541,10 @@ class SettingsManager {
       if (!config.effectSettings) config.effectSettings = {};
       config.effectSettings.appearDuration = parseInt(cInput.value);
     });
-    cInput.addEventListener('change', () => { app.stampSettingsManager.setSlot(slot, config); });
+    cInput.addEventListener('change', () => {
+      app.stampSettingsManager.setSlot(slot, config);
+      this._checkSlotReplaceConfirmation(slot, config);
+    });
     cRow.appendChild(cInput); cRow.appendChild(cVal);
     cond.appendChild(clabel); cond.appendChild(cRow);
     select.addEventListener('change', () => {
@@ -1545,13 +1577,17 @@ class SettingsManager {
       if (!config.effectSettings) config.effectSettings = {};
       config.effectSettings.disappearDuration = parseInt(cInput.value);
     });
-    cInput.addEventListener('change', () => { app.stampSettingsManager.setSlot(slot, config); });
+    cInput.addEventListener('change', () => {
+      app.stampSettingsManager.setSlot(slot, config);
+      this._checkSlotReplaceConfirmation(slot, config);
+    });
     cRow.appendChild(cInput); cRow.appendChild(cVal);
     cond.appendChild(clabel); cond.appendChild(cRow);
     select.addEventListener('change', () => {
       config.disappearEffect = select.value || null;
       cond.classList.toggle('show', select.value === 'fadeOut');
       app.stampSettingsManager.setSlot(slot, config);
+      this._checkSlotReplaceConfirmation(slot, config);
     });
     div.appendChild(label); div.appendChild(select); div.appendChild(cond);
     return div;
@@ -1583,7 +1619,10 @@ class SettingsManager {
         if (!config.effectSettings) config.effectSettings = {};
         config.effectSettings[key] = parseInt(i.value);
       });
-      i.addEventListener('change', () => { app.stampSettingsManager.setSlot(slot, config); });
+      i.addEventListener('change', () => {
+        app.stampSettingsManager.setSlot(slot, config);
+        this._checkSlotReplaceConfirmation(slot, config);
+      });
       r.appendChild(i); r.appendChild(v); c.appendChild(l); c.appendChild(r); return c;
     };
     blinkCond.appendChild(addBlinkControl('Velocidade do piscar', 'blinkSpeed', 500, 100, 2000));
@@ -1600,7 +1639,10 @@ class SettingsManager {
       if (!config.effectSettings) config.effectSettings = {};
       config.effectSettings.wobbleIntensity = parseInt(wInput.value);
     });
-    wInput.addEventListener('change', () => { app.stampSettingsManager.setSlot(slot, config); });
+    wInput.addEventListener('change', () => {
+      app.stampSettingsManager.setSlot(slot, config);
+      this._checkSlotReplaceConfirmation(slot, config);
+    });
     wRow.appendChild(wInput); wRow.appendChild(wVal);
     wobbleCond.appendChild(wLabel); wobbleCond.appendChild(wRow);
 
@@ -1609,6 +1651,7 @@ class SettingsManager {
       blinkCond.classList.toggle('show', select.value === 'blink');
       wobbleCond.classList.toggle('show', select.value === 'wobble');
       app.stampSettingsManager.setSlot(slot, config);
+      this._checkSlotReplaceConfirmation(slot, config);
     });
 
     div.appendChild(label); div.appendChild(select); div.appendChild(blinkCond); div.appendChild(wobbleCond);
@@ -1816,6 +1859,24 @@ class ImageStampManager {
     if (!stamp || !el) return;
     el.style.left = (stamp.worldX - stamp.width / 2) + 'px';
     el.style.top = (stamp.worldY - stamp.height / 2) + 'px';
+  }
+
+  updateStampElement(id) {
+    const stamp = this.getById(id);
+    const el = this._stampElements.get(id);
+    if (!stamp || !el) return;
+    el.src = stamp.src;
+    el.style.left = (stamp.worldX - stamp.width / 2) + 'px';
+    el.style.top = (stamp.worldY - stamp.height / 2) + 'px';
+    el.style.width = stamp.width + 'px';
+    el.style.height = stamp.height + 'px';
+    el.style.zIndex = stamp.zIndex;
+  }
+
+  syncAllElements() {
+    for (const stamp of EditorState.stamps.list) {
+      this.updateStampElement(stamp.id);
+    }
   }
 
   // ---- SERIALIZATION METHODS ----
@@ -2088,22 +2149,49 @@ class MoveStampCommand extends Command {
   }
 }
 
-class ReplaceStampCommand extends Command {
-  constructor(imageStampManager, slot, newStampData) {
+class ReplaceSlotStampsCommand extends Command {
+  constructor(imageStampManager, slot, oldStampsSnapshots, newConfig) {
     super();
     this._manager = imageStampManager;
-    this.slot = slot;
-    this.newStampData = newStampData;
-    this._oldStamps = [];
+    this._slot = slot;
+    this._oldStampsSnapshots = oldStampsSnapshots;
+    this._newConfig = JSON.parse(JSON.stringify(newConfig));
   }
   execute() {
-    this._oldStamps = this._manager.getBySlot(this.slot);
-    this._oldStamps.forEach(s => this._manager.removeStamp(s.id));
-    this._manager.addStamp({ ...this.newStampData, slot: this.slot });
+    const stamps = this._manager.getBySlot(this._slot);
+    stamps.forEach(stamp => {
+      this._applyConfig(stamp);
+    });
+    this._manager.syncAllElements();
   }
   undo() {
-    this._manager.getBySlot(this.slot).forEach(s => this._manager.removeStamp(s.id));
-    this._oldStamps.forEach(s => this._manager.addStamp(s));
+    this._oldStampsSnapshots.forEach(snapshot => {
+      const stamp = this._manager.getById(snapshot.id);
+      if (stamp) {
+        Object.assign(stamp, snapshot);
+      }
+    });
+    this._manager.syncAllElements();
+  }
+  redo() {
+    this.execute();
+  }
+  _applyConfig(stamp) {
+    const config = this._newConfig;
+    const containerHeight = DOM['canvas-area'].clientHeight;
+    const percent = clamp(config.sizePercent || 15, 10, 100) / 100;
+    const newHeight = Math.round(containerHeight * percent);
+
+    stamp.src = config.source;
+    stamp.sourceType = config.sourceType || 'url';
+    stamp.appearEffect = config.appearEffect || null;
+    stamp.appearSettings = config.effectSettings ? JSON.parse(JSON.stringify(config.effectSettings)) : null;
+    stamp.disappearEffect = config.disappearEffect || null;
+    stamp.disappearSettings = config.disappearEffect ? JSON.parse(JSON.stringify(config.effectSettings)) : null;
+    stamp.imageEffect = config.imageEffect || null;
+    stamp.imageEffectSettings = config.imageEffect ? JSON.parse(JSON.stringify(config.effectSettings)) : null;
+    stamp.height = newHeight;
+    stamp.width = newHeight;
   }
 }
 
@@ -2666,6 +2754,7 @@ class App {
         config.sourceType = 'datauri';
         this.stampSettingsManager.setSlot(activeSlot, config);
         this.notification('Imagem carregada para o Slot ' + activeSlot, 'success');
+        this.settingsManager._checkSlotReplaceConfirmation(activeSlot, config);
         this.settingsManager.renderImageSlots();
         DOM['slot-file-input'].value = '';
       };
