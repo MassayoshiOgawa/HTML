@@ -1,0 +1,627 @@
+================================================================================
+HANDOFF FINAL - STAGE 10
+AUDITORIA TECNICA, REFINAMENTOS FINAIS E PREPARACAO PARA EXPANSAO FUTURA
+================================================================================
+
+DATA: 2026-06-11
+ARQUIVO PRINCIPAL: editor.html
+ETAPA CONCLUIDA: 10 - Auditoria Tecnica, Refinamentos Finais e Preparacao
+
+================================================================================
+1. VISÃO GERAL DO PROJETO
+================================================================================
+
+Editor de imagens profissional no estilo Paint 3D, implementado em um unico
+arquivo HTML (~4046 linhas). Suporta desenho a lapis, borracha, caneta
+temporaria (que some), ferramenta mao para navegacao, zoom, e um sistema
+completo de image stamps (carimbos) com 9 slots configuraveis, efeitos
+visuais (blink, wobble, fadeIn, fadeOut), suporte a GIFs, undo/redo, 
+export/import de projetos (.json), autosave com restauracao automatica
+de sessao via localStorage.
+
+================================================================================
+2. ARQUITETURA ADOTADA
+================================================================================
+
+2.1. Orquestrador (App)
+  - Classe principal que cria e coordena todos os managers.
+  - Gerencia eventos de alto nivel (keyboard, mouse, resize).
+  - Responsavel por inicializacao e disposicao (cleanup).
+
+2.2. Managers
+  Cada manager tem uma responsabilidade unica e clara:
+
+  - EventBus: Pub/sub para comunicacao desacoplada entre modulos.
+  - NotificationManager: Exibe notificacoes padronizadas (info, success, error, warning).
+  - KeybindManager: Gerencia atalhos de teclado com persistencia em localStorage.
+  - HistoryManager: Undo/Redo com suporte a strokes de desenho e Command objects.
+  - CanvasManager: Zoom, pan, transformacao da tela.
+  - LayerManager: Gerenciamento das camadas de canvas (background, permanent, temp, fading).
+  - ToolManager: Registro e ativacao de ferramentas (Pencil, Eraser, FadingPen, Hand).
+  - UIManager: Atualizacao da interface (status bar, tool options).
+  - SettingsManager: Modal de configuracoes, renderizacao de keybinds e slots.
+  - InputManager: Captura de eventos de teclado e mouse.
+  - ImageStampManager: CRUD de stamps, renderizacao DOM, hit testing, validacao de estado.
+  - StampSettingsManager: Configuracao dos 9 slots (imagem, tamanho, efeitos, keybind).
+  - StampEffectManager: Definicao e validacao de efeitos (fadeIn, fadeOut, blink, wobble).
+  - StampPersistenceAdapter: Adaptador para serializacao de stamps + settings.
+  - ProjectPersistenceManager: Export/Import de projetos .json.
+  - SessionPersistenceManager: Autosave e restauracao automatica via localStorage.
+  - CursorManager: Cursor customizado com anel duplo e crosshair.
+  - StampPreviewManager: Preview de stamp ao segurar tecla do slot.
+
+2.3. Models (dados)
+  - EditorState: Objeto global contendo TODO o estado da aplicacao.
+    * canvas (scale, offset, image, dimensions)
+    * tools (activeTool, isDrawing, fadingStrokes)
+    * history (undoStack, redoStack, maxHistory)
+    * stamps (list, nextZIndex)
+    * stampSettings (slots, defaultSizePercent)
+    * preview (activeSlot, isActive, effectState)
+    * settings (keybinds, defaultKeybinds)
+    * ui (isOptionsOpen)
+    * input (deleteModeActive, moveModeActive, draggingStampId)
+
+2.4. Commands (padrao Command)
+  - AddStampCommand: Adiciona um novo stamp.
+  - RemoveStampCommand: Remove um stamp existente.
+  - MoveStampCommand: Move um stamp para nova posicao.
+  - ReplaceSlotStampsCommand: Substitui stamps de um slot com novas configs.
+  - Todos implementam: execute(), undo(), redo(), serialize(), deserialize().
+
+2.5. Utilities
+  - clamp(), debounce(), throttle(), lerp(), uuid()
+  - screenToWorld(), worldToScreen(), getCanvasCoords()
+  - formatKeybindDisplay()
+  - assert() para desenvolvimento
+  - debug.log/warn/error() para logging condicional
+
+2.6. UI Controllers (dentro dos managers)
+  - SettingsManager controla o modal e renderizacao dos slots.
+  - UIManager controla status bar e tool options.
+  - StampPreviewManager controla a preview layer.
+
+2.7. Persistence Systems
+  - KeybindManager: localStorage key 'image-editor-keybinds'
+  - StampSettingsManager: localStorage key 'image-editor-stamp-slots'
+  - ProjectPersistenceManager: Export/Import .json (download/upload)
+  - SessionPersistenceManager: localStorage key 'image_editor_autosave'
+
+================================================================================
+3. LISTA DE TODOS OS MANAGERS EXISTENTES
+================================================================================
+
+  - EventBus
+  - NotificationManager
+  - KeybindManager
+  - HistoryManager
+  - CanvasManager
+  - LayerManager
+  - ToolManager
+  - UIManager
+  - SettingsManager
+  - InputManager
+  - ImageStampManager
+  - StampSettingsManager
+  - StampEffectManager
+  - StampPersistenceAdapter
+  - ProjectPersistenceManager
+  - SessionPersistenceManager
+  - CursorManager
+  - StampPreviewManager
+
+================================================================================
+4. LISTA DE TODOS OS MODELS EXISTENTES
+================================================================================
+
+  - EditorState (objeto literal global, nao classe)
+  - Stamp objects (propriedades: id, slot, src, sourceType, worldX, worldY,
+    width, height, zIndex, appearEffect, disappearEffect, imageEffect,
+    effectSettings, createdAt)
+
+================================================================================
+5. LISTA DE TODOS OS COMMANDS EXISTENTES
+================================================================================
+
+  - AddStampCommand
+  - RemoveStampCommand
+  - MoveStampCommand
+  - ReplaceSlotStampsCommand
+
+================================================================================
+6. FLUXO COMPLETO DOS IMAGE STAMPS
+================================================================================
+
+6.1. Configuracao do Slot
+  1. Usuario abre Configuracoes > Image Slots.
+  2. Seleciona um slot (1-9).
+  3. Faz upload de imagem ou insere URL.
+  4. Configura tamanho, efeitos, keybind.
+  5. StampSettingsManager.setSlot() salva no localStorage e emite STAMP_SETTINGS_CHANGED.
+
+6.2. Preview
+  1. Usuario pressiona tecla do slot (ex: "1").
+  2. StampPreviewManager._onKeyDown() detecta tecla.
+  3. _activatePreview() cria elemento <img> na stamp-preview-layer.
+  4. Aplica tamanho, efeito de surgimento (fadeIn) e efeito continuo (blink/wobble).
+  5. Preview segue o mouse ate o usuario soltar a tecla.
+
+6.3. Insercao
+  1. Usuario clica com o mouse (botao esquerdo) enquanto segura a tecla do slot.
+  2. _tryInsertStamp() verifica mouse button down e ferramenta ativa = "hand".
+  3. _insertStamp() calcula posicao world e dimensoes (com aspect ratio).
+  4. Cria AddStampCommand e executa via HistoryManager.pushCommand().
+  5. ImageStampManager.add() adiciona ao EditorState.stamps.list e emite STAMP_ADDED.
+
+6.4. Remocao
+  1. Usuario pressiona X (delete-stamp-mode).
+  2. Cursor muda para crosshair, modo delete ativo.
+  3. Clica em um stamp existente.
+  4. RemoveStampCommand e executado via HistoryManager.pushCommand().
+
+6.5. Movimentacao
+  1. Usuario pressiona V (move-stamp-mode).
+  2. Cursor muda para move, modo move ativo.
+  3. Clica e arrasta um stamp existente.
+  4. Durante o arrasto: ImageStampManager.moveStamp() atualiza posicao e emite STAMP_MODIFIED.
+  5. Ao soltar: MoveStampCommand registrado no historico (se posicao mudou).
+
+6.6. Substituicao em Massa
+  1. Usuario altera configuracao de slot com "Replace Existing Stamps" ativo.
+  2. SettingsManager._checkSlotReplaceConfirmation() exibe confirmacao.
+  3. ReplaceSlotStampsCommand substitui todos os stamps do slot com novas configs.
+  4. Aspect ratio e preservado (fix aplicado na Etapa 10).
+
+================================================================================
+7. FUNCIONAMENTO DO HISTORICO
+================================================================================
+
+  - HistoryManager mantem duas pilhas: undoStack e redoStack.
+  - Maximo: 50 entradas (configuravel em EditorState.history.maxHistory).
+  - Suporta dois tipos de entrada:
+    * Strokes de desenho: objetos simples com pontos, tamanho, cor.
+    * Command objects: instancias de Command (stamp operations).
+  - Command objects sao serializaveis via serialize()/deserialize().
+  - Apos cada operacao, emite HISTORY_CHANGED e atualiza botoes Undo/Redo.
+  - clear() reinicia ambas as pilhas.
+  - restoreHistory() reconstroi o historico a partir de dados serializados.
+
+================================================================================
+8. FUNCIONAMENTO DO SISTEMA JSON (EXPORT/IMPORT)
+================================================================================
+
+8.1. Export
+  - ProjectPersistenceManager.buildProjectSnapshot() gera snapshot completo:
+    * canvasState (scale, offset, imageData como data URL, nome, dimensoes)
+    * keybindSettings
+    * stampSlotConfigurations
+    * stamps (array completo com todos os dados)
+    * historyState (undoStack + redoStack serializados)
+  - exportProject() serializa como JSON, cria blob, faz download.
+
+8.2. Import
+  - importProject() abre seletor de arquivos.
+  - _handleImportFile() le o arquivo, faz parse.
+  - _executeImport() valida, sanitiza, pergunta confirmacao, restaura.
+  - validateProject() verifica versao e sanitiza dados:
+    * Remove duplicatas de ID
+    * Preenche campos faltantes
+    * Resolve conflitos de keybind
+  - _restoreProject() limpa estado atual e recria tudo.
+  - _finishRestore() restaura keybinds, slots, stamps, historico, UI.
+
+================================================================================
+9. FUNCIONAMENTO DO AUTOSAVE
+================================================================================
+
+  - SessionPersistenceManager gerencia autosave via localStorage.
+  - Chave: 'image_editor_autosave'
+  - Versao atual: 1
+  - Debounce: 1000ms (evita escritas excessivas)
+  - Limite: 4MB (soft-fail com warning)
+  - Acionado por: STAMP_ADDED, STAMP_REMOVED, STAMP_MODIFIED (sem drag),
+    STAMP_SETTINGS_CHANGED, IMAGE_LOADED
+  - Reutiliza ProjectPersistenceManager.buildProjectSnapshot().
+  - Indicador visual na status bar: "Saving...", "Saved", "Too large", "Save error".
+  - Ao abrir o editor: verifica sessao salva, exibe dialogo de restauracao.
+  - restoreSession() valida dados, limpa sessao, chama _restoreProject().
+  - validateSessionData() verifica: objeto valido, versao, savedAt, projectData.
+
+================================================================================
+10. DESCRICAO DO ESTADO GLOBAL
+================================================================================
+
+  EditorState: objeto global (window.EditorState) contendo:
+
+  canvas: {
+    scale: number,         // Fator de zoom (0.1 a 10)
+    offsetX: number,       // Pan horizontal (px)
+    offsetY: number,       // Pan vertical (px)
+    image: Image|null,     // Objeto Image da imagem carregada
+    imageUrl: string|null, // ObjectURL da imagem
+    imageName: string,     // Nome do arquivo
+    imageWidth: number,    // Largura da imagem em px
+    imageHeight: number,   // Altura da imagem em px
+  }
+
+  tools: {
+    activeToolName: string, // 'pencil' | 'eraser' | 'fading-pen' | 'hand'
+    isDrawing: boolean,
+    currentStroke: object|null,
+    isPanning: boolean,
+    fadingStrokes: array,
+    currentFadingStroke: object|null,
+    fadingLoopId: number|null,
+  }
+
+  history: {
+    undoStack: array,   // Max 50 entries
+    redoStack: array,
+    maxHistory: number,
+  }
+
+  stamps: {
+    list: array,         // Todos os stamps
+    nextZIndex: number,  // Proximo z-index disponivel
+  }
+
+  stampSettings: {
+    slots: object,       // { 1: config, 2: config, ... }
+    defaultSizePercent: 15,
+  }
+
+  preview: {
+    activeSlot: number|null,
+    isActive: boolean,
+    effectState: object,
+    lastBind: string|null,
+  }
+
+  settings: {
+    keybinds: object,
+    defaultKeybinds: object,
+  }
+
+  ui: {
+    isOptionsOpen: boolean,
+  }
+
+  input: {
+    deleteModeActive: boolean,
+    moveModeActive: boolean,
+    draggingStampId: string|null,
+    dragOffsetWorldX: number,
+    dragOffsetWorldY: number,
+    dragStartWorldX: number,
+    dragStartWorldY: number,
+  }
+
+================================================================================
+11. CONVENCOES ADOTADAS
+================================================================================
+
+  - Nomes em ingles para codigo, portugues para UI.
+  - Managers comecam com letra maiuscula (PascalCase).
+  - Metodos privados comecam com underscore (_method).
+  - Eventos seguem o padrao EVENTS.XXX (SCREAMING_SNAKE_CASE).
+  - Constantes em SCREAMING_SNAKE_CASE.
+  - Variaveis e metodos em camelCase.
+  - Classes em PascalCase.
+  - Commands sufixo "Command".
+  - DOM = fonte de apresentacao, nao de verdade.
+  - EditorState = fonte da verdade (single source of truth).
+  - Toda comunicacao entre modulos via EventBus.
+  - Undo/Redo via Command Pattern para operacoes de stamp.
+  - Strokes de desenho sao armazenados diretamente no historico (nao Command).
+  - Debug mode controlado por DEBUG_MODE + window.__DEBUG__.
+
+================================================================================
+12. LIMITACOES ATUAIS
+================================================================================
+
+  - Imagens de fundo sao exportadas como data URL (PNG), pode exceder limites.
+  - Limite de autosave: 4MB (sessoes maiores nao sao salvas).
+  - Nao ha compressao de dados.
+  - Nao ha cloud save.
+  - Nao ha suporte a multiplos slots de autosave.
+  - Nao ha backup incremental.
+  - Nao ha sincronizacao online.
+  - Nao ha suporte a multi-select de stamps.
+  - Nao ha ferramenta de texto.
+  - Nao ha redimensionamento/rotacao manual.
+  - Nao ha grupos de stamps.
+  - Nao ha camadas editaveis.
+  - Nao ha filtros/plugins.
+  - GIFs sao armazenados como data URIs (podem ser grandes).
+  - Maximo de 50 entradas no historico (configuravel).
+  - localStorage compartilhado entre abas do mesmo dominio.
+
+================================================================================
+13. PONTOS CRITICOS QUE EXIGEM CUIDADO
+================================================================================
+
+  1. EditorState e a unica fonte da verdade. NUNCA confiar no DOM para estado.
+  2. Stamp ID deve ser unico. Usar crypto.randomUUID() ou uuid().
+  3. Nao chamar performAutosave() diretamente; usar scheduleAutosave() (debounce).
+  4. restoreSession() chama clearSession() ANTES de _restoreProject().
+  5. Nao salvar durante arrasto de stamps (verificar draggingStampId).
+  6. Apos importar projeto, sessao e limpa e novo autosave e disparado.
+  7. ImageStampManager._stampElements deve sempre refletir stamps.list.
+  8. validateState() verifica consistencia stamp<->DOM (apenas em DEBUG_MODE).
+  9. Debug mode desligado por padrao (DEBUG_MODE=false). Ativar com window.__DEBUG__=true.
+  10. custom confirm dialog (confirmAsync) substitui nativo confirm().
+  11. Canvas rect cache (_canvasRectCache) deve ser invalidado em resize/transform.
+  12. ReplaceSlotStampsCommand preserva aspect ratio dos stamps existentes.
+  13. StampPreviewManager deve ser destroy()/dispose() ao limpar.
+  14. EventBus listeners retornam funcao de unsubscribe (sempre usar se possivel).
+  15. dispose() em todos os managers para cleanup adequado.
+
+================================================================================
+14. OPORTUNIDADES FUTURAS DE EXPANSAO
+================================================================================
+
+  Arquitetura preparada para (NAO implementado, apenas hooks reservados):
+
+  14.1. Selecao Multipla
+    - Adicionar selection.selectedIds (Set<stampId>) no EditorState.
+    - Adicionar classe de selecao visual nos elementos.
+    - Adicionar comandos batch (GroupCommand).
+
+  14.2. Redimensionamento Manual
+    - Adicionar transformStamp(stampId, transform) no App.
+    - Adicionar handles de redimensionamento nos stamps selecionados.
+    - TransformCommand para undo/redo.
+
+  14.3. Rotacao
+    - Adicionar campo rotation ao model Stamp.
+    - Transformar CSS com rotate() no elemento renderizado.
+
+  14.4. Camadas Editaveis
+    - Adicionar EditorState.layers array.
+    - Cada stamp referencia layerIndex.
+    - UI para reordenar, ocultar, travar camadas.
+
+  14.5. Grupos de Stamps
+    - Adicionar groupId ao model Stamp.
+    - StampGroupManager para operacoes em grupo.
+    - groupStamps() e ungroupStamps() hooks no App.
+
+  14.6. Ferramenta Texto
+    - TextTool com input inline.
+    - TextStampCommand para undo/redo.
+    - Suporte a fontes, tamanho, cor, alinhamento.
+
+  14.7. Filtros
+    - StampEffectManager pode ser estendido com filtros CSS (grayscale, blur, etc).
+    - applyFilter() e removeFilter() hooks no App.
+
+  14.8. Plugins
+    - Adicionar sistema de plugins com ciclo de vida (init, destroy).
+    - PluginManager para registrar/carregar plugins.
+    - API exposta via App para plugins.
+
+================================================================================
+15. CHECKLIST FINAL DAS FUNCIONALIDADES CONCLUIDAS
+================================================================================
+
+  ✓ Preview do stamp ao segurar tecla do slot
+  ✓ Insercao de stamp com clique do mouse
+  ✓ Exclusao de stamp com modo delete (X)
+  ✓ Movimentacao de stamp com modo move (V)
+  ✓ GIFs funcionam como stamps (animados)
+  ✓ Undo (Ctrl+Z) para desenho e stamps
+  ✓ Redo (Ctrl+Y) para desenho e stamps
+  ✓ Substituicao em massa com Replace Existing Stamps
+  ✓ Export JSON do projeto completo
+  ✓ Import JSON com validacao e sanitizacao
+  ✓ Autosave automatico com debounce (1s)
+  ✓ Restauracao automatica de sessao ao abrir
+  ✓ Keybinds personalizaveis com deteccao de conflitos
+  ✓ 9 slots de imagem configuraveis
+  ✓ Efeitos: Fade In, Fade Out, Blink, Wobble
+  ✓ Ferramentas: Lapis, Borracha, Caneta que Some, Mao
+  ✓ Zoom com scroll, slider e botoes
+  ✓ Pan com ferramenta Mao
+  ✓ Fit to screen e Zoom 100%
+  ✓ Custom cursor com anel duplo + crosshair
+  ✓ Notificacoes padronizadas (info, success, error, warning)
+  ✓ Acessibilidade basica (aria-labels, focus-visible, roles)
+  ✓ Custom confirm dialog (substitui confirm() nativo)
+  ✓ Estado global como unica fonte da verdade
+  ✓ Managers com dispose() para cleanup
+  ✓ Sistema de validacao de estado (DEBUG_MODE)
+  ✓ Cache de rect do canvas (performance)
+  ✓ DocumentFragment para renderizacao em massa de stamps
+  ✓ Aspect ratio preservado em substituicao em massa
+  ✓ Arquitetura preparada para expansoes futuras
+  ✓ Documentacao interna nos modulos complexos
+  ✓ Nenhuma excecao no console (validado)
+
+================================================================================
+16. RECOMENDACOES TECNICAS PARA FUTURAS IMPLEMENTACOES
+================================================================================
+
+  16.1. Antes de adicionar nova funcionalidade:
+    - Sempre ler EditorState para entender estado atual.
+    - Verificar se ja existe manager responsavel pela area.
+    - Usar EventBus para comunicacao com outros modulos.
+    - Seguir Command Pattern para operacoes que precisam undo/redo.
+    - Adicionar campos no EditorState (nao criar estado global separado).
+
+  16.2. Para novas ferramentas de desenho:
+    - Estender classe Tool.
+    - Registrar em ToolManager via registerTool().
+    - Adicionar opcoes em getOptions().
+    - Usar camada apropriada (permanent, temp, fading).
+
+  16.3. Para novos efeitos de stamp:
+    - Adicionar em StampEffectManager.availableEffects.
+    - Adicionar logica de renderizacao em StampPreviewManager.
+    - Preservar serializacao em commands e persistence.
+
+  16.4. Para integracao com cloud/online:
+    - Substituir localStorage por API remota.
+    - Manter mesma interface (scheduleAutosave, restoreSession).
+    - Adicionar autenticacao e gerenciamento de projetos.
+
+  16.5. Para performance com muitos stamps (>1000):
+    - Virtualizacao: renderizar apenas stamps visiveis no viewport.
+    - Pooling de elementos DOM.
+    - Canvas rendering em vez de elementos <img> para stamps.
+    - Thumbnail/lazy loading para stamps fora da tela.
+
+  16.6. Para testes:
+    - Testar sempre com DEBUG_MODE=true.
+    - Verificar validateState() apos operacoes.
+    - Testar import/export com dados corrompidos.
+    - Testar autosave com localStorage cheio/indisponivel.
+    - Testar com 500+ stamps e 100+ GIFs simultaneos.
+
+================================================================================
+17. ALTERACOES REALIZADAS NA ETAPA 10
+================================================================================
+
+  17.1. DEBUG_MODE
+    - Default: false (producao).
+    - Ativar via window.__DEBUG__ = true antes do carregamento.
+    - debug.log/warn/error respeitam DEBUG_MODE.
+
+  17.2. Dispose/Cleanup
+    - Todos os managers ganharam metodo dispose().
+    - App.dispose() chama dispose() de todos os managers.
+    - InputManager.unbind() ja existia.
+    - StampPreviewManager.destroy() ja existia, adicionado dispose().
+    - Limpeza de timers, listeners, referencias.
+
+  17.3. Validacao de Estado
+    - ImageStampManager.validateState() verifica:
+      * StampEntity sem DOM
+      * DOM sem StampEntity
+      * IDs duplicados
+      * z-index invalidos
+      * Posicoes invalidas
+    - Ativo apenas em DEBUG_MODE.
+
+  17.4. Acessibilidade
+    - aria-label em todos os botoes interativos.
+    - role="toolbar", role="dialog", role="alertdialog", role="status".
+    - aria-modal="true" em modais.
+    - aria-live="polite" em elementos de status dinamico.
+    - :focus-visible outline global.
+    - Tabindex natural (ordem do DOM).
+
+  17.5. Custom Confirm Modal
+    - Substituido confirm() nativo por modal customizado.
+    - Elementos: #confirm-dialog, #confirm-backdrop, #confirm-content.
+    - App.confirmAsync() retorna Promise<boolean>.
+    - Usado em: Clear Saved Session, Import Project.
+
+  17.6. Aspect Ratio em Substituicao em Massa
+    - ReplaceSlotStampsCommand._applyConfig() preserva proporcao.
+    - stamp.width = stamp.width * (newHeight / stamp.height).
+
+  17.7. Performance
+    - _canvasRectCache: cache de getBoundingClientRect().
+    - _invalidateCanvasRect() chamado em resize e transform.
+    - screenToWorld() usa cache.
+    - renderAll() usa DocumentFragment para batch DOM insertion.
+    - onerror handler em _renderStampElement para imagens quebradas.
+
+  17.8. Visual Consistency
+    - .danger-btn classe para botoes destrutivos (ex: clear session).
+    - Inline styles substituidos por classes CSS.
+    - Confirm dialog estilizado consistentemente com resto da UI.
+
+  17.9. Error Protection
+    - getCanvasCoords() envolvido em try-catch.
+    - onerror em stamp image loading (esconde imagem quebrada).
+    - _handleImportFile e _executeImport sao async com await.
+    - Tratamento de erros em todas as operacoes de FileReader.
+
+  17.10. Documentacao Interna
+      - Headers expandidos em modulos complexos.
+      - Comentarios sobre uso futuro em cada manager.
+      - Future expansion hooks no App como stubs comentados.
+      - EditorState documentado com campos futuros reservados.
+
+================================================================================
+18. ESTRUTURA DE DADOS - AUTOSAVE
+================================================================================
+
+{
+    "version": 1,
+    "savedAt": "ISO date string",
+    "projectData": {
+        "version": 1,
+        "exportedAt": "ISO date string",
+        "canvasState": {
+            "scale": number,
+            "offsetX": number,
+            "offsetY": number,
+            "imageData": "data:image/png;base64,...",
+            "imageName": string,
+            "imageWidth": number,
+            "imageHeight": number
+        },
+        "keybindSettings": { ... },
+        "stampSlotConfigurations": { ... },
+        "stamps": [ ... ],
+        "historyState": {
+            "undoStack": [...],
+            "redoStack": [...]
+        }
+    }
+}
+
+================================================================================
+19. KEYBINDS PADRAO
+================================================================================
+
+  - Pencil: P
+  - Eraser: E
+  - Fading Pen: F
+  - Hand: H
+  - Undo: Ctrl+Z
+  - Redo: Ctrl+Y
+  - Zoom In: Ctrl++
+  - Zoom Out: Ctrl+-
+  - Zoom 100%: Ctrl+0
+  - Fit to Screen: Ctrl+Shift+F
+  - Settings: Ctrl+,
+  - Toggle Options: Ctrl+\
+  - Delete Stamp Mode: X
+  - Move Stamp Mode: V
+  - Slots 1-9: Respectivas teclas (configuravel)
+
+================================================================================
+20. LOCAL STORAGE KEYS
+================================================================================
+
+  - 'image-editor-keybinds': Configuracoes de atalhos (KeybindManager)
+  - 'image-editor-stamp-slots': Configuracoes dos 9 slots (StampSettingsManager)
+  - 'image_editor_autosave': Sessao de autosave (SessionPersistenceManager)
+
+================================================================================
+21. TESTES MANUAIS RECOMENDADOS PARA VALIDACAO
+================================================================================
+
+  1. Desenho: selecionar Lapis, desenhar na tela, Ctrl+Z desfaz, Ctrl+Y refaz.
+  2. Borracha: selecionar Borracha, apagar parte do desenho.
+  3. Caneta Temporaria: desenhar com FadingPen, observar desaparecimento.
+  4. Mao: selecionar Mao, arrastar para navegar, scroll para zoom.
+  5. Stamps: configurar Slot 1 com imagem, pressionar 1, clicar na tela.
+  6. Delete Mode: pressionar X, clicar em stamp para remover.
+  7. Move Mode: pressionar V, arrastar stamp para nova posicao.
+  8. Undo/Redo com stamps: inserir stamp, Ctrl+Z desfaz, Ctrl+Y refaz.
+  9. Efeitos: configurar blink/wobble/fadeIn/fadeOut nos slots.
+  10. GIFs: carregar GIF em slot, inserir como stamp (animado).
+  11. Export: Configuracoes > Project > Export, baixar .json.
+  12. Import: Configuracoes > Project > Import, selecionar .json.
+  13. Autosave: realizar acoes, verificar indicador "Saved".
+  14. Restore: recarregar pagina, clicar "Restore Session".
+  15. Custom Confirm: Clear Saved Session > verificar modal customizado.
+  16. Acessibilidade: navegar por Tab entre elementos, verificar focus visible.
+
+================================================================================
+FIM DO DOCUMENTO DE HANDOFF - STAGE 10 (FINAL)
+================================================================================

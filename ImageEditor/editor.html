@@ -22,6 +22,7 @@
 }
 html, body { height: 100%; overflow: hidden; font-family: var(--font); background: var(--bg-primary); color: var(--text-primary); }
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-sm); }
 input[type="range"] { -webkit-appearance: none; appearance: none; background: none; cursor: pointer; }
 input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: var(--text-muted); border-radius: 2px; }
 input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg-surface); margin-top: -6px; box-shadow: var(--shadow-sm); transition: background var(--t-fast); }
@@ -228,6 +229,20 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 #restore-discard-btn { background: rgba(255,255,255,0.08) !important; color: var(--text-primary) !important; }
 #restore-discard-btn:hover { background: rgba(255,255,255,0.12) !important; }
 
+/* DANGER BUTTON */
+.danger-btn { background: rgba(218,54,51,0.2) !important; color: var(--error) !important; }
+.danger-btn:hover { background: rgba(218,54,51,0.35) !important; }
+
+/* CONFIRM DIALOG */
+#confirm-dialog { position: fixed; inset: 0; z-index: 650; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity var(--t-norm); }
+#confirm-dialog.open { opacity: 1; pointer-events: auto; }
+#confirm-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+#confirm-content { position: relative; background: var(--bg-elevated); border-radius: var(--radius-lg); padding: 28px; max-width: 380px; width: 90%; text-align: center; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
+#confirm-content p { font-size: 14px; color: var(--text-primary); line-height: 1.5; margin-bottom: 20px; }
+#confirm-actions { display: flex; gap: 8px; }
+#confirm-actions .settings-btn { flex: 1; justify-content: center; }
+#confirm-no-btn:hover { background: rgba(255,255,255,0.12)!important; }
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
   #tool-options { width: 200px; }
@@ -246,20 +261,20 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
   </header>
 
   <main id="workspace">
-    <aside id="toolbar">
-      <div class="tool-group">
-        <button class="tool-btn active" data-tool="pencil" title="Lápis (P)"><i class="fas fa-pencil-alt"></i></button>
-        <button class="tool-btn" data-tool="eraser" title="Borracha (E)"><i class="fas fa-eraser"></i></button>
-        <button class="tool-btn" data-tool="fading-pen" title="Caneta que Some (F)"><i class="fas fa-pen-fancy"></i></button>
-        <button class="tool-btn" data-tool="hand" title="Mão (H)"><i class="fas fa-hand-paper"></i></button>
+    <aside id="toolbar" role="toolbar" aria-label="Ferramentas">
+      <div class="tool-group" role="group" aria-label="Ferramentas de desenho">
+        <button class="tool-btn active" data-tool="pencil" title="Lápis (P)" aria-label="Lápis"><i class="fas fa-pencil-alt"></i></button>
+        <button class="tool-btn" data-tool="eraser" title="Borracha (E)" aria-label="Borracha"><i class="fas fa-eraser"></i></button>
+        <button class="tool-btn" data-tool="fading-pen" title="Caneta que Some (F)" aria-label="Caneta que Some"><i class="fas fa-pen-fancy"></i></button>
+        <button class="tool-btn" data-tool="hand" title="Mão (H)" aria-label="Mão"><i class="fas fa-hand-paper"></i></button>
       </div>
-      <div class="tool-group">
-        <button id="undo-btn" disabled title="Desfazer (Ctrl+Z)"><i class="fas fa-undo"></i></button>
-        <button id="redo-btn" disabled title="Refazer (Ctrl+Y)"><i class="fas fa-redo"></i></button>
+      <div class="tool-group" role="group" aria-label="Histórico">
+        <button id="undo-btn" disabled title="Desfazer (Ctrl+Z)" aria-label="Desfazer"><i class="fas fa-undo"></i></button>
+        <button id="redo-btn" disabled title="Refazer (Ctrl+Y)" aria-label="Refazer"><i class="fas fa-redo"></i></button>
       </div>
-      <div class="tool-group">
-        <button id="fit-to-screen-btn" title="Ajustar à tela"><i class="fas fa-expand"></i></button>
-        <button id="zoom-100-btn" title="Zoom 100% (Ctrl+0)"><i class="fas fa-percent"></i></button>
+      <div class="tool-group" role="group" aria-label="Zoom">
+        <button id="fit-to-screen-btn" title="Ajustar à tela" aria-label="Ajustar à tela"><i class="fas fa-expand"></i></button>
+        <button id="zoom-100-btn" title="Zoom 100% (Ctrl+0)" aria-label="Zoom 100%"><i class="fas fa-percent"></i></button>
       </div>
     </aside>
 
@@ -291,51 +306,62 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
       </div>
     </section>
 
-    <aside id="tool-options">
+    <aside id="tool-options" role="complementary" aria-label="Opções da ferramenta">
       <div id="tool-options-header">
         <span id="tool-options-title">L&aacute;pis</span>
-        <button id="tool-options-close"><i class="fas fa-chevron-right"></i></button>
+        <button id="tool-options-close" aria-label="Fechar painel de opções"><i class="fas fa-chevron-right"></i></button>
       </div>
-      <div id="tool-options-content"></div>
+      <div id="tool-options-content" role="region" aria-label="Configurações da ferramenta ativa"></div>
     </aside>
   </main>
 
-  <footer id="statusbar">
-    <div id="status-left">
-      <span id="status-tool"><i class="fas fa-pencil-alt"></i> L&aacute;pis</span>
-    </div>
-    <div id="status-center">
-      <button id="zoom-out-btn" title="Reduzir zoom"><i class="fas fa-minus"></i></button>
-      <input type="range" id="zoom-slider" min="10" max="1000" value="100" step="1">
-      <button id="zoom-in-btn" title="Aumentar zoom"><i class="fas fa-plus"></i></button>
-      <span id="zoom-percent">100%</span>
-    </div>
-    <div id="status-right">
-      <span id="autosave-indicator" class="autosave-indicator"></span>
-      <span id="status-filename">Nenhuma imagem</span>
-      <span id="status-dimensions"></span>
-    </div>
-  </footer>
+    <footer id="statusbar" role="status" aria-label="Barra de status">
+      <div id="status-left">
+        <span id="status-tool"><i class="fas fa-pencil-alt"></i> L&aacute;pis</span>
+      </div>
+      <div id="status-center">
+        <button id="zoom-out-btn" title="Reduzir zoom" aria-label="Reduzir zoom"><i class="fas fa-minus"></i></button>
+        <input type="range" id="zoom-slider" min="10" max="1000" value="100" step="1" aria-label="Nível de zoom">
+        <button id="zoom-in-btn" title="Aumentar zoom" aria-label="Aumentar zoom"><i class="fas fa-plus"></i></button>
+        <span id="zoom-percent" aria-live="polite">100%</span>
+      </div>
+      <div id="status-right">
+        <span id="autosave-indicator" class="autosave-indicator" aria-live="polite"></span>
+        <span id="status-filename">Nenhuma imagem</span>
+        <span id="status-dimensions"></span>
+      </div>
+    </footer>
 </div>
 
-<div id="restore-dialog">
+<div id="restore-dialog" role="dialog" aria-modal="true" aria-label="Restaurar sessão">
   <div id="restore-backdrop"></div>
   <div id="restore-content">
     <p>A previous session was found.<br>Would you like to restore it?</p>
     <div class="restore-sub">Your last session includes all stamps, drawings, and settings.</div>
     <div id="restore-actions">
-      <button id="restore-yes-btn" class="settings-btn"><i class="fas fa-undo-alt"></i> Restore Session</button>
-      <button id="restore-discard-btn" class="settings-btn"><i class="fas fa-trash"></i> Discard Session</button>
+      <button id="restore-yes-btn" class="settings-btn" aria-label="Restaurar sessão"><i class="fas fa-undo-alt"></i> Restore Session</button>
+      <button id="restore-discard-btn" class="settings-btn" aria-label="Descartar sessão"><i class="fas fa-trash"></i> Discard Session</button>
     </div>
   </div>
 </div>
 
-<div id="settings-modal">
+<div id="confirm-dialog" role="alertdialog" aria-modal="true" aria-label="Confirmação">
+  <div id="confirm-backdrop"></div>
+  <div id="confirm-content">
+    <p id="confirm-message" role="alert"></p>
+    <div id="confirm-actions">
+      <button id="confirm-yes-btn" class="settings-btn" aria-label="Confirmar"><i class="fas fa-check"></i> <span id="confirm-yes-label">OK</span></button>
+      <button id="confirm-no-btn" class="settings-btn" aria-label="Cancelar" style="background:rgba(255,255,255,0.08)!important;color:var(--text-primary)!important;"><i class="fas fa-times"></i> Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="settings-modal" role="dialog" aria-modal="true" aria-label="Configurações">
   <div id="settings-backdrop"></div>
   <div id="settings-content">
     <div id="settings-header">
       <h2>Configura&ccedil;&otilde;es</h2>
-      <button id="settings-close"><i class="fas fa-times"></i></button>
+      <button id="settings-close" aria-label="Fechar configurações"><i class="fas fa-times"></i></button>
     </div>
     <div id="settings-body">
       <section class="settings-section">
@@ -370,7 +396,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
           </div>
           <div class="slot-info" style="margin-top:8px;padding:0 4px;">Export the complete project or restore from a previously saved .json file.</div>
           <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-            <button id="clear-session-btn" class="settings-btn" style="background:rgba(218,54,51,0.2);color:var(--error);"><i class="fas fa-trash-alt"></i> Clear Saved Session</button>
+            <button id="clear-session-btn" class="settings-btn danger-btn"><i class="fas fa-trash-alt"></i> Clear Saved Session</button>
             <div class="slot-info" style="margin-top:6px;padding:0 4px;">Permanently remove the autosaved session from this browser.</div>
           </div>
         </div>
@@ -389,9 +415,9 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 
 <script>
 // ============================================================
-// DEBUG MODE
+// DEBUG MODE - disable for production, toggle via window.__DEBUG__
 // ============================================================
-const DEBUG_MODE = true;
+const DEBUG_MODE = window.__DEBUG__ === true || false;
 const debug = {
   log: (...args) => { if (DEBUG_MODE) console.log('[Editor]', ...args); },
   warn: (...args) => { if (DEBUG_MODE) console.warn('[Editor]', ...args); },
@@ -450,10 +476,18 @@ class EventBus {
   once(event, callback) {
     const unsub = this.on(event, (data) => { unsub(); callback(data); });
   }
+  dispose() {
+    this._listeners = {};
+  }
 }
 
 // ============================================================
 // COMMAND PATTERN
+// - Each command implements execute(), undo(), redo()
+// - serialize()/deserialize() for persistence across sessions
+// - Future: Add GroupCommand for batching multiple operations
+// - Future: Add TransformCommand for resize/rotation
+// - Future: Add TextCommand for text tool operations
 // ============================================================
 class Command {
   constructor() { this._executed = false; }
@@ -486,15 +520,28 @@ const EVENTS = {
 // ============================================================
 // COORDINATE UTILITIES
 // ============================================================
+const _canvasRectCache = { left: 0, top: 0, width: 0, height: 0, _stale: true };
+function _invalidateCanvasRect() { _canvasRectCache._stale = true; }
+function _getCanvasRect() {
+  if (_canvasRectCache._stale) {
+    const r = DOM['canvas-area'].getBoundingClientRect();
+    _canvasRectCache.left = r.left;
+    _canvasRectCache.top = r.top;
+    _canvasRectCache.width = r.width;
+    _canvasRectCache.height = r.height;
+    _canvasRectCache._stale = false;
+  }
+  return _canvasRectCache;
+}
 function screenToWorld(clientX, clientY) {
-  const rect = DOM['canvas-area'].getBoundingClientRect();
+  const rect = _getCanvasRect();
   return {
     x: (clientX - rect.left - EditorState.canvas.offsetX) / EditorState.canvas.scale,
     y: (clientY - rect.top - EditorState.canvas.offsetY) / EditorState.canvas.scale,
   };
 }
 function worldToScreen(worldX, worldY) {
-  const rect = DOM['canvas-area'].getBoundingClientRect();
+  const rect = _getCanvasRect();
   return {
     x: rect.left + worldX * EditorState.canvas.scale + EditorState.canvas.offsetX,
     y: rect.top + worldY * EditorState.canvas.scale + EditorState.canvas.offsetY,
@@ -503,6 +550,13 @@ function worldToScreen(worldX, worldY) {
 
 // ============================================================
 // GLOBAL STATE (EDITOR STATE)
+// Source of truth for ALL application state.
+// DOM is NEVER the source of truth — always read from EditorState.
+// Future fields (not yet used, reserved for upcoming features):
+//   - selection: { selectedIds: Set<string>, transformHandle: null }
+//   - layers: [{ id, name, visible, locked, zIndex }]
+//   - groups: [{ id, name, stampIds: [] }]
+//   - plugins: Map<string, Plugin>
 // ============================================================
 const EditorState = {
   canvas: {
@@ -581,7 +635,8 @@ function initDOM() {
     'settings-filename','settings-dimensions','undo-btn','redo-btn',
     'image-stamp-layer','image-slots-toggle','image-slots-content','slot-file-input','stamp-preview-layer','stamp-mode-indicator',
     'json-import-input','project-toggle','project-content','export-project-btn','import-project-btn',
-    'restore-dialog','restore-backdrop','restore-yes-btn','restore-discard-btn','clear-session-btn','autosave-indicator'];
+    'restore-dialog','restore-backdrop','restore-yes-btn','restore-discard-btn','clear-session-btn','autosave-indicator',
+    'confirm-dialog','confirm-backdrop','confirm-yes-btn','confirm-no-btn','confirm-message','confirm-yes-label'];
   ids.forEach(id => { DOM[id] = document.getElementById(id); });
   DOM.canvases = [DOM['layer-background'],DOM['layer-permanent'],DOM['layer-temp'],DOM['layer-fading']];
   DOM.ctxBg = DOM['layer-background'].getContext('2d');
@@ -598,7 +653,7 @@ function initDOM() {
 // UTILITY
 // ============================================================
 function getCanvasCoords(clientX, clientY) {
-  return screenToWorld(clientX, clientY);
+  try { return screenToWorld(clientX, clientY); } catch (e) { return { x: 0, y: 0 }; }
 }
 
 function formatKeybindDisplay(combo) {
@@ -699,6 +754,12 @@ class InputManager {
 
 // ============================================================
 // NOTIFICATION MANAGER
+// Standardized notification system.
+// - All notifications use same animation (slide in from right)
+// - Standard types: info (blue), success (green), error (red), warning (yellow)
+// - Default duration: 3500ms, auto-dismiss with fade-out
+// - Future: add toast stacking with max visible limit
+// - Future: add action buttons in notifications
 // ============================================================
 class NotificationManager {
   show(message, type = 'info', duration = 3500) {
@@ -711,6 +772,10 @@ class NotificationManager {
       el.classList.remove('show'); el.classList.add('hide');
       setTimeout(() => el.remove(), 300);
     }, duration);
+  }
+  dispose() {
+    const container = DOM.notifications;
+    if (container) container.innerHTML = '';
   }
 }
 
@@ -807,10 +872,20 @@ class KeybindManager {
     const result = this.getActionForKey(e);
     if (result && app) { e.preventDefault(); app.executeAction(result.action); }
   }
+
+  dispose() {
+    this.stopCapture();
+    this.keybinds = {};
+  }
 }
 
 // ============================================================
 // HISTORY MANAGER
+// - Undo/Redo: two stacks (undoStack, redoStack) with maxHistory cap
+// - Supports both raw strokes (drawing) and Command objects (stamps)
+// - All history is serializable for autosave/export
+// - Future: add history compression for very large histories
+// - Future: add batch grouping for multi-selection operations
 // ============================================================
 class HistoryManager {
   constructor(eventBus) { this.eventBus = eventBus; }
@@ -927,6 +1002,11 @@ class HistoryManager {
   restoreFromAutosave(data, imageStampManager) {
     this.restoreHistory(data, imageStampManager);
   }
+
+  dispose() {
+    this.clear();
+    this.eventBus = null;
+  }
 }
 
 // ============================================================
@@ -950,6 +1030,8 @@ class LayerManager {
     const canvas = DOM[map[name]];
     if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
   }
+
+  dispose() {}
 }
 
 // ============================================================
@@ -983,6 +1065,7 @@ class CanvasManager {
   }
 
   _applyTransform() {
+    _invalidateCanvasRect();
     DOM['canvas-container'].style.transform = 'translate('+EditorState.canvas.offsetX+'px,'+EditorState.canvas.offsetY+'px) scale('+EditorState.canvas.scale+')';
     if (app) app.cursorManager.requestDraw();
   }
@@ -1018,6 +1101,10 @@ class CanvasManager {
     const delta = -e.deltaY;
     const factor = delta > 0 ? 1.08 : 1 / 1.08;
     this.setScale(EditorState.canvas.scale * factor, cx, cy);
+  }
+
+  dispose() {
+    this.eventBus = null;
   }
 }
 
@@ -1352,6 +1439,12 @@ class ToolManager {
   handleMouseDown(e) { if (this.activeTool) this.activeTool.onMouseDown(e); }
   handleMouseMove(e) { if (this.activeTool) this.activeTool.onMouseMove(e); }
   handleMouseUp(e) { if (this.activeTool) this.activeTool.onMouseUp(e); }
+
+  dispose() {
+    if (this.activeTool) { this.activeTool.deactivate(); this.activeTool = null; }
+    this.tools.clear();
+    this.eventBus = null;
+  }
 }
 
 // ============================================================
@@ -1415,6 +1508,8 @@ class UIManager {
     const icon = DOM['tool-options-close'].querySelector('i');
     if (icon) icon.className = EditorState.ui.isOptionsOpen ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
   }
+
+  dispose() {}
 }
 
 // ============================================================
@@ -1426,6 +1521,12 @@ class SettingsManager {
     this._open = false;
     this._activeSlot = null;
     this._slotExpanded = {};
+  }
+
+  dispose() {
+    this.close();
+    this._slotExpanded = {};
+    this._activeSlot = null;
   }
   toggle() {
     this._open ? this.close() : this.open();
@@ -1797,6 +1898,11 @@ class SettingsManager {
 
 // ============================================================
 // IMAGE STAMP MANAGER
+// - Source of truth: EditorState.stamps.list
+// - DOM elements kept in sync via _stampElements Map
+// - Future: multi-select would add a Set<stampId> here
+// - Future: groups would add groupId to stamp model
+// - Future: layers would add layerIndex to stamp model
 // ============================================================
 class ImageStampManager {
   constructor(eventBus) {
@@ -1912,13 +2018,30 @@ class ImageStampManager {
       if (el.parentNode) el.parentNode.removeChild(el);
     }
     this._stampElements.clear();
-    this.getAll().forEach(s => this._renderStampElement(s));
+    const stamps = this.getAll();
+    if (!this._layer) return;
+    const fragment = document.createDocumentFragment();
+    const elements = {};
+    for (const s of stamps) {
+      const img = document.createElement('img');
+      img.src = s.src;
+      img.draggable = false;
+      img.dataset.stampId = s.id;
+      img.style.cssText = 'position:absolute;pointer-events:none;left:' + (s.worldX - s.width / 2) + 'px;top:' + (s.worldY - s.height / 2) + 'px;width:' + s.width + 'px;height:' + s.height + 'px;z-index:' + s.zIndex;
+      fragment.appendChild(img);
+      elements[s.id] = img;
+    }
+    this._layer.appendChild(fragment);
+    for (const [id, el] of Object.entries(elements)) {
+      this._stampElements.set(id, el);
+    }
   }
 
   _renderStampElement(stamp) {
     if (!this._layer) return null;
     const img = document.createElement('img');
-    img.src = stamp.src;
+    img.src = stamp.src || '';
+    img.onerror = () => { img.style.display = 'none'; };
     img.draggable = false;
     img.dataset.stampId = stamp.id;
     img.style.position = 'absolute';
@@ -1998,6 +2121,45 @@ class ImageStampManager {
     }
   }
 
+  // ---- STATE VALIDATION ----
+  validateState() {
+    if (!DEBUG_MODE) return { valid: true, errors: [] };
+    const errors = [];
+    const seenIds = new Set();
+    const stamps = EditorState.stamps.list;
+    for (const stamp of stamps) {
+      if (!stamp.id || typeof stamp.id !== 'string') {
+        errors.push('Stamp missing valid id');
+        continue;
+      }
+      if (seenIds.has(stamp.id)) {
+        errors.push('Duplicate stamp ID: ' + stamp.id);
+      }
+      seenIds.add(stamp.id);
+      const el = this._stampElements.get(stamp.id);
+      if (!el) {
+        errors.push('StampEntity ' + stamp.id + ' without DOM element');
+      } else if (el.dataset.stampId !== stamp.id) {
+        errors.push('DOM element data-mismatch for stamp ' + stamp.id);
+      }
+      if (typeof stamp.zIndex !== 'number' || isNaN(stamp.zIndex)) {
+        errors.push('Invalid z-index for stamp ' + stamp.id);
+      }
+      if (typeof stamp.worldX !== 'number' || typeof stamp.worldY !== 'number') {
+        errors.push('Invalid position for stamp ' + stamp.id);
+      }
+    }
+    for (const [id, el] of this._stampElements) {
+      if (!stamps.some(s => s.id === id)) {
+        errors.push('DOM element without StampEntity: ' + id);
+      }
+    }
+    if (errors.length > 0) {
+      debug.warn('State validation errors:', errors);
+    }
+    return { valid: errors.length === 0, errors };
+  }
+
   // ---- SERIALIZATION METHODS ----
 
   serializeStamp(stamp) {
@@ -2018,6 +2180,13 @@ class ImageStampManager {
 
   removeStampById(id) {
     return this.removeStamp(id);
+  }
+
+  dispose() {
+    this.clear();
+    this.eventBus = null;
+    this._stampElements = null;
+    this._layer = null;
   }
 
   serializeAllStamps() {
@@ -2172,6 +2341,10 @@ class StampSettingsManager {
     this.save();
     this.eventBus.emit(EVENTS.STAMP_SETTINGS_CHANGED, { slot: null, config: null });
   }
+
+  dispose() {
+    this.eventBus = null;
+  }
 }
 
 // ============================================================
@@ -2225,6 +2398,10 @@ class StampEffectManager {
   getAllEffects() {
     return { ...this.availableEffects };
   }
+
+  dispose() {
+    this.availableEffects = null;
+  }
 }
 
 // ============================================================
@@ -2256,6 +2433,12 @@ class StampPersistenceAdapter {
 
 // ============================================================
 // PROJECT PERSISTENCE MANAGER
+// - Handles full project export/import as .json files
+// - Validates version, sanitizes imported data (duplicate IDs, missing fields)
+// - Builds complete project snapshot for export and autosave
+// - Future: add partial export (selected stamps only)
+// - Future: add project thumbnails
+// - Future: add cloud save integration
 // ============================================================
 class ProjectPersistenceManager {
   constructor(appInstance) {
@@ -2389,17 +2572,17 @@ class ProjectPersistenceManager {
     DOM['json-import-input'].click();
   }
 
-  _handleImportFile(file) {
+  async _handleImportFile(file) {
     if (!file) return;
     if (!file.name.endsWith('.json')) {
       this.app.notification('Please select a .json file', 'error');
       return;
     }
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
         const data = JSON.parse(ev.target.result);
-        this._executeImport(data);
+        await this._executeImport(data);
       } catch (e) {
         this.app.notification('Invalid JSON file: ' + e.message, 'error');
         debug.error('Import parse error:', e);
@@ -2411,14 +2594,14 @@ class ProjectPersistenceManager {
     reader.readAsText(file);
   }
 
-  _executeImport(data) {
+  async _executeImport(data) {
     const validation = this.validateProject(data);
     if (!validation.valid) {
       this.app.notification(validation.error, 'error');
       return;
     }
-    const msg = 'Importing a project will replace the current session. Continue?';
-    if (!confirm(msg)) return;
+    const confirmed = await this.app.confirmAsync('Importing a project will replace the current session. Continue?', 'Import');
+    if (!confirmed) return;
     try {
       const sanitized = validation.sanitized || this.migrateProjectVersion(data);
       if (sanitized.errors && sanitized.errors.length > 0) {
@@ -2493,10 +2676,20 @@ class ProjectPersistenceManager {
     app.cursorManager.refresh();
     app.eventBus.emit(EVENTS.IMAGE_LOADED, { name: EditorState.canvas.imageName, width: EditorState.canvas.imageWidth, height: EditorState.canvas.imageHeight });
   }
+
+  dispose() {
+    this.app = null;
+  }
 }
 
 // ============================================================
 // SESSION PERSISTENCE MANAGER (Autosave via localStorage)
+// - Uses debounced autosave (1s) to avoid excessive writes
+// - Reuses ProjectPersistenceManager.buildProjectSnapshot()
+// - Max 4MB size limit, soft-fail on overflow
+// - Future: add IndexedDB fallback for larger sessions
+// - Future: add compression before localStorage write
+// - Future: add multiple save slots
 // ============================================================
 class SessionPersistenceManager {
   constructor(appInstance) {
@@ -2624,6 +2817,13 @@ class SessionPersistenceManager {
       el.textContent = '';
       el.className = 'autosave-indicator';
     }, 2500);
+  }
+
+  dispose() {
+    clearTimeout(this._indicatorTimeout);
+    this._indicatorTimeout = null;
+    this._debouncedAutosave = null;
+    this.app = null;
   }
 }
 
@@ -2772,12 +2972,18 @@ class ReplaceSlotStampsCommand extends Command {
     stamp.imageEffect = config.imageEffect || null;
     stamp.imageEffectSettings = config.imageEffect ? JSON.parse(JSON.stringify(config.effectSettings)) : null;
     stamp.height = newHeight;
-    stamp.width = newHeight;
+    stamp.width = stamp.width > 0 && stamp.height > 0 ? Math.round(stamp.width * (newHeight / stamp.height)) : newHeight;
   }
 }
 
 // ============================================================
 // STAMP PREVIEW MANAGER
+// Shows real-time preview of stamp under cursor when slot key is held.
+// Handles keybind detection, preview rendering, stamp insertion on click.
+// Disappear effects (fadeOut) play when the key is released.
+// Continuous effects (blink, wobble) run during preview.
+// Aspect ratio is preserved from source image natural dimensions.
+// Future: add rotation preview, multi-stamp preview for multi-select
 // ============================================================
 class StampPreviewManager {
   constructor(eventBus, stampSettingsManager, canvasArea, canvasContainer) {
@@ -2913,6 +3119,14 @@ class StampPreviewManager {
     if (this._isActive && !this._fadingOut) {
       this._updatePosition();
     }
+  }
+
+  dispose() {
+    this.destroy();
+    this.stampSettingsManager = null;
+    this.canvasArea = null;
+    this.canvasContainer = null;
+    this.eventBus = null;
   }
 
   _onResize() {
@@ -3216,6 +3430,41 @@ class App {
   }
 
   notification(msg, type, duration) { this.notificationManager.show(msg, type, duration); }
+  _confirmResolve = null;
+
+  confirmAsync(message, confirmLabel) {
+    return new Promise((resolve) => {
+      DOM['confirm-message'].textContent = message;
+      const labelEl = DOM['confirm-yes-label'];
+      labelEl.textContent = confirmLabel || 'OK';
+      DOM['confirm-dialog'].classList.add('open');
+      this._confirmResolve = resolve;
+    });
+  }
+
+  _closeConfirm(result) {
+    DOM['confirm-dialog'].classList.remove('open');
+    if (this._confirmResolve) {
+      this._confirmResolve(result);
+      this._confirmResolve = null;
+    }
+  }
+
+  dispose() {
+    debug.log('App.dispose() called');
+    if (this.stampPreviewManager) this.stampPreviewManager.dispose();
+    this.inputManager.unbind();
+    this.imageStampManager.dispose();
+    this.historyManager.dispose();
+    this.canvasManager.dispose();
+    this.toolManager.dispose();
+    this.keybindManager.dispose();
+    this.sessionPersistenceManager.dispose();
+    this.projectPersistenceManager.dispose();
+    this.stampSettingsManager.dispose();
+    this.eventBus.dispose();
+    this.notificationManager.dispose();
+  }
 
   init() {
     initDOM();
@@ -3378,10 +3627,15 @@ class App {
       this.notification('Saved session discarded', 'info', 2000);
     });
 
-    // Clear Saved Session button
-    DOM['clear-session-btn'].addEventListener('click', () => {
-      const msg = 'This will permanently remove the autosaved session. Continue?';
-      if (confirm(msg)) {
+    // Confirm dialog buttons
+    DOM['confirm-yes-btn'].addEventListener('click', () => this._closeConfirm(true));
+    DOM['confirm-no-btn'].addEventListener('click', () => this._closeConfirm(false));
+    DOM['confirm-backdrop'].addEventListener('click', () => this._closeConfirm(false));
+
+    // Clear Saved Session button (now uses custom confirm)
+    DOM['clear-session-btn'].addEventListener('click', async () => {
+      const confirmed = await this.confirmAsync('This will permanently remove the autosaved session. Continue?', 'Clear');
+      if (confirmed) {
         this.sessionPersistenceManager.clearSession();
         this.notification('Saved session cleared', 'info', 2000);
       }
@@ -3499,6 +3753,7 @@ class App {
   }
 
   _handleResize() {
+    _invalidateCanvasRect();
     this.canvasManager._applyTransform();
     this.updateUI();
   }
@@ -3746,6 +4001,36 @@ class App {
       this._updateCursor();
     }
   }
+
+  // ---- FUTURE EXPANSION HOOKS (stubs for upcoming features) ----
+  // These methods are not yet implemented, but the architecture
+  // expects them to be added when the corresponding features are built.
+
+  // Future: SelectStampManager integration
+  // getSelectedStamps() { return []; }
+  // selectStamp(id) {}
+  // deselectAllStamps() {}
+
+  // Future: StampGroupManager integration
+  // groupStamps(ids) {}
+  // ungroupStamps(groupId) {}
+
+  // Future: LayerManager enhancement for editable layers
+  // createLayer(name) {}
+  // removeLayer(layerId) {}
+  // reorderLayers(ids) {}
+
+  // Future: TextTool integration
+  // addTextStamp(worldX, worldY, text, config) {}
+
+  // Future: Filter/Effect plugins
+  // applyFilter(stampId, filterName, params) {}
+  // removeFilter(stampId) {}
+
+  // Future: Manual resize/rotation
+  // transformStamp(stampId, transform) {}
+  // beginTransform(stampId) {}
+  // endTransform(stampId) {}
 }
 
 // ============================================================
