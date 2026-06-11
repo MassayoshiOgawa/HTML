@@ -1,0 +1,574 @@
+================================================================================
+HANDOFF DOCUMENT - STAGE 05
+EXCLUSAO E MOVIMENTACAO DE IMAGE STAMPS
+================================================================================
+
+DATA: 2026-06-11
+ARQUIVO PRINCIPAL: editor.html
+ETAPA CONCLUIDA: 5 - Exclusao e Movimentacao de Image Stamps
+
+================================================================================
+1. RESUMO DA ETAPA
+================================================================================
+
+Esta etapa implementou dois modos de interacao com stamps permanentes:
+
+1. DELETE MODE: ativado ao segurar a tecla X (ou keybind configurada).
+   Enquanto ativo, clicar com o botao esquerdo sobre um stamp o remove.
+
+2. MOVE MODE: ativado ao segurar a tecla V (ou keybind configurada).
+   Enquanto ativo, clicar e arrastar um stamp o reposiciona.
+
+Ambos os modos usam hit testing por coordenadas do mundo (world coordinates),
+respeitando zoom, pan, z-index, e o tamanho real de cada stamp.
+
+Todas as funcionalidades existentes (lapis, borracha, caneta que some, zoom,
+pan, historico, keybinds, slots, preview, insercao de stamps) continuam
+funcionando exatamente como antes.
+
+================================================================================
+2. FUNCIONALIDADES IMPLEMENTADAS
+================================================================================
+
+2.1. DELETE MODE
+
+  - Ativado ao pressionar e segurar a tecla X (padrao)
+  - Desativado ao soltar a tecla X
+  - Enquanto ativo, cursor do mouse muda para crosshair
+  - Enquanto ativo, indicador "Delete Mode Active" (fundo vermelho) aparece
+    no canto superior esquerdo do canvas
+  - Clicar com botao esquerdo sobre um stamp o remove instantaneamente
+
+2.2. MOVE MODE
+
+  - Ativado ao pressionar e segurar a tecla V (padrao)
+  - Desativado ao soltar a tecla V
+  - Enquanto ativo, cursor do mouse muda para move (seta de 4 direcoes)
+  - Enquanto ativo, indicador "Move Mode Active" (fundo azul) aparece
+    no canto superior esquerdo do canvas
+  - Clicar e arrastar um stamp o reposiciona
+  - Stamp selecionado recebe destaque visual (outline azul + drop-shadow)
+  - Ao soltar o botao do mouse, a movimentacao e finalizada
+  - Ao soltar a tecla V durante um arrasto, o arrasto e finalizado
+
+2.3. SISTEMA DE HIT TESTING
+
+  - Implementado no ImageStampManager
+  - Converte coordenadas de tela para coordenadas do mundo
+  - Verifica se o ponto esta dentro do bounding box de cada stamp
+  - Retorna o stamp com maior z-index entre os que contem o ponto
+  - Considera: posicao real (worldX/worldY), tamanho (width/height),
+    zoom (via conversao de coordenadas), pan (via conversao),
+    z-index (itera do maior para o menor)
+
+2.4. KEYBINDS CONFIGURAVEIS
+
+  - "Delete Stamp Mode" com valor padrao "x"
+  - "Move Stamp Mode" com valor padrao "v"
+  - Configuraveis no modal de teclas (Settings > Atalhos de Teclado)
+  - Persistidas no localStorage via chave "image-editor-keybinds"
+
+================================================================================
+3. ALTERACOES ARQUITETURAIS
+================================================================================
+
+3.1. EditorState (MODIFICADO)
+
+  - Adicionado EditorState.input com:
+    deleteModeActive: boolean
+    moveModeActive: boolean
+    draggingStampId: string | null
+    dragOffsetWorldX: number
+    dragOffsetWorldY: number
+
+3.2. EditorState.settings.defaultKeybinds (MODIFICADO)
+
+  - Adicionados:
+    'delete-stamp-mode': 'x'
+    'move-stamp-mode': 'v'
+
+3.3. KEYBIND_ACTIONS (MODIFICADO)
+
+  - Adicionados:
+    {id:'delete-stamp-mode',label:'Delete Stamp Mode'}
+    {id:'move-stamp-mode',label:'Move Stamp Mode'}
+
+3.4. ImageStampManager (EXPANDIDO)
+
+  - 4 novos metodos:
+    hitTest(worldX, worldY)
+      Retorna o stamp com maior zIndex na posicao worldX/worldY,
+      ou null se nenhum stamp for encontrado. A bounding box e
+      calculada como: left = worldX - width/2, right = worldX + width/2,
+      top = worldY - height/2, bottom = worldY + height/2.
+
+    findTopMostAtPosition(worldX, worldY)
+      Alias para hitTest().
+
+    moveStamp(id, worldX, worldY)
+      Atualiza worldX/worldY no estado (fonte da verdade),
+      chama updateStampPosition() para sincronizar o DOM,
+      emite STAMP_MODIFIED.
+
+    updateStampPosition(id)
+      Sincroniza o elemento <img> no DOM com as coordenadas
+      do estado. Usa left/top em world coordinates.
+
+3.5. App (MODIFICADO)
+
+  - 10 novos metodos privados:
+    _keyMatchesKeybind(e, keybind)
+      Verifica se o evento de teclado corresponde a uma keybind
+      (considerando modificadores ctrl/alt/shift e o local).
+      Ignora e.repeat e e.location === 3 (num pad).
+
+    _handleModeKeyDown(e)
+      Verifica se a tecla pressionada corresponde a delete-stamp-mode
+      ou move-stamp-mode. Se sim, ativa o modo correspondente,
+      desativa o outro modo, atualiza indicador e cursor.
+      Ignora INPUT/TEXTAREA. Retorna true se consumiu o evento.
+
+    _handleModeKeyUp(e)
+      Verifica se a tecla solta corresponde ao delete-stamp-mode
+      ou move-stamp-mode. Se sim, desativa o modo.
+      Se havia um arrasto em andamento (move mode), finaliza.
+      Ignora INPUT/TEXTAREA. Retorna true se consumiu o evento.
+
+    _handleStampModeMouseDown(e)
+      Se delete mode ativo: faz hit test, se achar stamp, remove.
+      Se move mode ativo: faz hit test, se achar stamp, inicia
+      arrasto (calcula offset, marca draggingStampId, aplica
+      highlight visual).
+      Apenas botao esquerdo (button 0).
+
+    _handleStampModeMouseMove(e)
+      Se draggingStampId estiver definido, calcula nova posicao
+      em world coordinates (subtraindo o offset de arrasto)
+      e chama moveStamp().
+
+    _handleStampModeMouseUp(e)
+      Se draggingStampId estiver definido, finaliza o arrasto.
+
+    _finalizeStampDrag()
+      Remove highlight visual, emite STAMP_MODIFIED, limpa estado
+      de arrasto (draggingStampId, dragOffsetWorldX/Y).
+
+    _highlightStamp(stampId, highlight)
+      Aplica outline (2px solid var(--accent)) e drop-shadow no
+      elemento <img> do stamp quando highlight=true.
+      Remove quando highlight=false.
+
+    _updateModeIndicator()
+      Mostra/esconde o elemento #stamp-mode-indicator com texto
+      e cor apropriados para cada modo.
+
+    _updateModeCursor()
+      Alterna o cursor do canvas-area entre crosshair (delete),
+      move (move mode), ou normal (nenhum modo).
+      Esconde o custom cursor do CursorManager durante os modos.
+
+3.6. _bindEvents (MODIFICADO)
+
+  - document.addEventListener('keydown', ...):
+    Antes de chamar keybindManager.handleKeyDown, chama
+    _handleModeKeyDown. Se retornar true, previne default e
+    nao chama keybindManager.
+
+  - document.addEventListener('keyup', ...):
+    Adicionado listener para _handleModeKeyUp.
+
+  - canvas-area mousedown:
+    Antes de chamar toolManager.handleMouseDown, chama
+    _handleStampModeMouseDown. Se retornar true, nao chama
+    toolManager.
+
+  - canvas-area mousemove:
+    Se delete ou move mode ativo, pula cursorManager.move().
+    Antes de chamar toolManager.handleMouseMove, chama
+    _handleStampModeMouseMove. Se retornar true (arrasto
+    ativo), nao chama toolManager.
+
+  - canvas-area mouseleave:
+    Se modo ativo, nao esconde o cursor (pois o custom
+    cursor ja esta desativado).
+
+  - canvas-area mouseenter:
+    Se modo ativo, nao reposiciona o cursor.
+
+  - document mouseup:
+    Antes de chamar toolManager.handleMouseUp, chama
+    _handleStampModeMouseUp. Se retornar true, nao chama
+    toolManager.
+
+3.7. DOM (MODIFICADO)
+
+  - Adicionado #stamp-mode-indicator ao array de ids
+
+3.8. HTML (MODIFICADO)
+
+  - Adicionado elemento <div id="stamp-mode-indicator">
+    dentro de #canvas-area, como irmao de #canvas-container
+    e #splash-screen
+
+3.9. CSS (MODIFICADO)
+
+  - Adicionados estilos para .stamp-mode-indicator:
+    .stamp-mode-indicator
+      posicao absoluta, top 12px, left 12px, padding 6px 14px,
+      border-radius 8px, cor branca, font-size 13px, font-weight 600,
+      pointer-events none, z-index 300, backdrop-filter blur,
+      transicao de opacidade
+
+    .stamp-mode-indicator.show
+      opacity: 1
+
+    .stamp-mode-indicator.delete-mode
+      background rgba(218,54,51,0.88), box-shadow vermelho
+
+    .stamp-mode-indicator.move-mode
+      background rgba(0,120,212,0.88), box-shadow azul
+
+================================================================================
+4. ESTRUTURAS DE DADOS
+================================================================================
+
+4.1. EditorState.input
+
+  deleteModeActive: boolean
+    true quando delete mode esta ativo (tecla pressionada)
+
+  moveModeActive: boolean
+    true quando move mode esta ativo (tecla pressionada)
+
+  draggingStampId: string | null
+    ID do stamp sendo arrastado, ou null
+
+  dragOffsetWorldX: number
+    Diferenca entre a posicao do clique e o centro do stamp
+    no eixo X (coordenadas do mundo)
+
+  dragOffsetWorldY: number
+    Diferenca entre a posicao do clique e o centro do stamp
+    no eixo Y (coordenadas do mundo)
+
+================================================================================
+5. INTEGRACAO COM SISTEMAS EXISTENTES
+================================================================================
+
+5.1. DEPENDENCIAS
+
+  ImageStampManager.hitTest()
+    -> this.getAll() (stamps ordenados por zIndex)
+    -> stamp.worldX, worldY, width, height
+
+  ImageStampManager.moveStamp()
+    -> this.getById(id) (buscar stamp)
+    -> this.updateStampPosition(id) (sincronizar DOM)
+
+  App._handleModeKeyDown()
+    -> EditorState.settings.keybinds['delete-stamp-mode']
+    -> EditorState.settings.keybinds['move-stamp-mode']
+    -> this._keyMatchesKeybind(e, keybind)
+
+  App._handleStampModeMouseDown()
+    -> getCanvasCoords() (converter tela para mundo)
+    -> imageStampManager.hitTest() (detectar stamp)
+    -> imageStampManager.removeStamp() (remover)
+    -> EditorState.input.draggingStampId
+
+  App._highlightStamp()
+    -> imageStampManager._stampElements.get(id)
+
+5.2. EVENTOS EMITIDOS
+
+  ImageStampManager.moveStamp() -> emite STAMP_MODIFIED
+  App._finalizeStampDrag() -> emite STAMP_MODIFIED (via moveStamp)
+
+================================================================================
+6. KEYBINDS ADICIONADAS
+================================================================================
+
+  delete-stamp-mode: 'x' (padrao)
+  move-stamp-mode: 'v' (padrao)
+
+  - Aparecem na lista de atalhos configuaveis no modal Settings
+  - Salvos no localStorage via KeybindManager
+  - Suportam combos com modificadores (ctrl+x, alt+v, etc.)
+
+================================================================================
+7. ALTERACOES NO ESTADO GLOBAL (EditorState)
+================================================================================
+
+  - NOVO: EditorState.input (ver secao 4)
+  - NOVO: EditorState.settings.defaultKeybinds['delete-stamp-mode'] = 'x'
+  - NOVO: EditorState.settings.defaultKeybinds['move-stamp-mode'] = 'v'
+  - EditorState.settings.keybinds passa a incluir 'delete-stamp-mode' e
+    'move-stamp-mode' apos load() do KeybindManager
+
+================================================================================
+8. ALTERACOES NO localStorage
+================================================================================
+
+  - NENHUMA chave nova foi adicionada.
+  - As novas keybinds sao persistidas automaticamente pela chave existente
+    'image-editor-keybinds' (KeybindManager.save()).
+
+================================================================================
+9. COMPORTAMENTO ESPECIFICO DOS MODOS
+================================================================================
+
+9.1. DELETE MODE
+
+  - Entrada: pressionar tecla configurada (padrao X)
+  - Saida: soltar tecla
+  - Enquanto ativo, cursor crosshair
+  - Click esquerdo em stamp: remove o stamp com maior zIndex
+  - Click em area sem stamp: NAO remove nada
+  - Click nao interfere com ferramentas (lapis, borracha, etc.)
+  - Click com botao direito: NAO remove nada
+
+9.2. MOVE MODE
+
+  - Entrada: pressionar tecla configurada (padrao V)
+  - Saida: soltar tecla
+  - Enquanto ativo, cursor move
+  - Click esquerdo em stamp + arrastar: move o stamp
+  - Stamp selecionado: outline azul + drop-shadow
+  - Enquanto arrastado, stamp segue o cursor perfeitamente
+  - Usa world coordinates (NUNCA coordenadas de tela)
+  - Respeita zoom e pan (via getCanvasCoords)
+  - Arrasto finalizado ao soltar o mouse OU soltar a tecla V
+
+9.3. PRIORIDADE DE Z-INDEX
+
+  - Ambos os modos selecionam o stamp com maior zIndex
+  - hitTest() itera do ultimo para o primeiro elemento da lista
+    (a lista e ordenada por zIndex ascendente via getAll())
+  - Exemplo:
+    Stamp A zIndex 1
+    Stamp B zIndex 3
+    Stamp C zIndex 5
+    Click em sobreposicao -> seleciona Stamp C
+
+9.4. MUTUAL EXCLUSION
+
+  - Delete mode e Move mode sao mutuamente exclusivos
+  - Ativar um modo desativa automaticamente o outro
+  - Nao e possivel estar em ambos os modos simultaneamente
+
+================================================================================
+10. LIMITACOES ATUAIS DO SISTEMA
+================================================================================
+
+  - Undo/Redo NAO esta integrado com Delete e Move modes
+    (RemoveStampCommand e MoveStampCommand existem mas nao sao utilizados)
+  - Nao ha selecao de stamps (clicar para selecionar sem modo)
+  - Nao ha indicacao permanente de stamp selecionado (highlight
+    aparece apenas durante arrasto)
+  - Nao ha substituicao em massa (Replace Existing Stamps)
+  - Nao ha save/load de stamps (persistencia)
+  - Nao ha lista visual de stamps na interface
+  - Nao ha exportacao/importacao de stamps
+  - Nao ha caixa de transformacao (redimensionamento, rotacao)
+  - Nao ha selecao multipla de stamps
+  - Efeitos visuais (blink, wobble, fadeIn) sao aplicados apenas
+    no preview, nao nos stamps permanentes
+  - arrasto pode "travocar" se o mouse sair do canvas-area
+    (mousemove fica vinculado ao canvas-area, nao ao document)
+
+================================================================================
+11. CUIDADOS PARA EVITAR REGRESSOES
+================================================================================
+
+  1. As novas keybinds "delete-stamp-mode" e "move-stamp-mode" sao
+     interceptadas ANTES do keybindManager.handleKeyDown(), entao
+     nao conflitam com acoes existentes.
+
+  2. O evento keyup e tratado separadamente para os modos, nao
+     interfere com o InputManager.
+
+  3. O custom cursor (CursorManager) e desabilitado durante os modos
+     e restaurado ao sair via _updateCursor().
+
+  4. O indicador de modo (#stamp-mode-indicator) tem
+     pointer-events: none, entao nao interfere com cliques no canvas.
+
+  5. O hit testing usa coordenadas do mundo, independente de zoom/pan.
+
+  6. O pointer-events das stamps continua 'none' (nao alterado).
+     Nao afeta o hit testing (que e feito por matematica).
+
+  7. O mousedown/mousemove/mouseup no canvas-area durante os modos
+     sao interceptados APENAS quando um stamp e detectado. Clicks
+     em areas sem stamp passam para a tool normalmente.
+
+  8. O arrasto em modo move verifica EditorState.input.draggingStampId,
+     nao interfere com desenho ou ferramentas.
+
+  9. GIFs continuam animados porque as stamps sao elementos <img>
+     nativos. Nada no novo codigo afeta a renderizacao de GIFs.
+
+  10. A geracao de ID (crypto.randomUUID com fallback) nao foi alterada.
+
+  11. O StampPreviewManager nao foi alterado. Preview continua funcionando.
+
+  12. A insercao de stamps (Etapa 4) nao foi alterada.
+
+================================================================================
+12. TESTES MANUAIS RECOMENDADOS
+================================================================================
+
+  1. Carregar imagem, configurar slots, inserir alguns stamps
+  2. Pressionar X -> cursor crosshair, indicador "Delete Mode Active"
+  3. Clicar em um stamp -> stamp e removido
+  4. Verificar que stamps adjacentes permanecem
+  5. Clicar em area sem stamp -> nada acontece
+  6. Soltar X -> indicador desaparece, cursor normal
+  7. Pressionar V -> cursor move, indicador "Move Mode Active"
+  8. Clicar e arrastar um stamp -> stamp segue o cursor, tem outline
+  9. Soltar o mouse -> stamp permanece na nova posicao
+  10. Soltar V -> modo desativado
+  11. Testar com multiplos zoom levels (scroll) -> hit testing funciona
+  12. Testar com pan (ferramenta Mao) + V -> hit testing funciona
+  13. Testar stamps sobrepostos -> sempre seleciona o de cima
+  14. Verificar GIFs continuam animados durante e apos arrasto
+  15. Abrir Settings, verificar "Delete Stamp Mode" e "Move Stamp Mode"
+      na lista de atalhos
+  16. Alterar keybind de delete para "Shift+X", salvar, recarregar
+      pagina, verificar que persiste
+  17. Verificar ferramentas existentes (lapis, borracha, caneta que
+      some) continuam funcionando fora dos modos
+  18. Nenhum erro no console apos todas as interacoes
+  19. Fade out de preview continua funcionando
+  20. Inserir stamps (Etapa 4) continua funcionando
+
+================================================================================
+13. FUNCIONALIDADES AINDA NAO IMPLEMENTADAS
+================================================================================
+
+  - Undo/Redo integrado para Delete e Move de stamps
+    (RemoveStampCommand e MoveStampCommand existem no codigo
+    mas nao sao acionados pelos modos. Eles precisam ser
+    instanciados e executados via HistoryManager)
+  - Selecao de stamps (clicar para selecionar sem modo)
+  - Persistencia de stamps (save/load em localStorage)
+  - Lista visual de stamps na interface
+  - Efeitos visuais em stamps fixos (blink, wobble, fadeIn
+    existem apenas no preview)
+  - Substituicao em massa (Replace Existing Stamps na configuracao
+    do slot, mas nao implementado em tempo de execucao)
+  - Exportacao/importacao de stamps
+  - Drag and drop de arquivos para criar stamps
+  - Caixa de transformacao (redimensionamento, rotacao)
+  - Selecao multipla de stamps
+
+================================================================================
+14. DESCRICAO DA ETAPA 6 (PROXIMA)
+================================================================================
+
+A Etapa 6 devera implementar a integracao completa com UNDO/REDO para
+operacoes de stamps, e refinamentos no sistema de interacao.
+
+14.1. FUNCIONALIDADES ESPERADAS
+
+  - Undo/Redo para Delete de stamps:
+    * Quando um stamp e removido (via Delete Mode), a operacao deve
+      ser registrada no HistoryManager
+    * Ctrl+Z deve restaurar o stamp removido
+    * Ctrl+Y deve refazer a remocao
+    * Utilizar RemoveStampCommand (ja existe no codigo)
+
+  - Undo/Redo para Move de stamps:
+    * Quando um stamp e movido (via Move Mode), a operacao deve
+      ser registrada no HistoryManager
+    * Ctrl+Z deve retornar o stamp a posicao original
+    * Ctrl+Y deve refazer o movimento
+    * Utilizar MoveStampCommand (ja existe no codigo)
+    * Capturar posicao original ANTES do inicio do arrasto
+
+  - Refinamentos de experiencia:
+    * Animacao suave de retorno ao desfazer movimento
+    * Feedback visual ao desfazer/refazer (piscar o stamp)
+    * Prevenir estado inconsistente (stamp removido mas DOM presente)
+
+14.2. INTEGRACAO COM SISTEMAS EXISTENTES
+
+  - App._handleStampModeMouseDown(): ao inves de chamar
+    imageStampManager.removeStamp() diretamente, criar e executar
+    um RemoveStampCommand via historyManager.
+
+  - App._handleStampModeMouseDown(): ao iniciar arrasto, salvar
+    a posicao original (stamp.worldX, stamp.worldY) para uso
+    pelo MoveStampCommand.
+
+  - App._finalizeStampDrag(): ao finalizar arrasto, criar e executar
+    um MoveStampCommand com oldX/oldY (posicoes originais) e
+    newX/newY (posicoes finais).
+
+  - HistoryManager.push(): atualmente aceita strokes do canvas.
+    Precisa ser expandido para aceitar Command objects.
+
+  - Alternativa: implementar um StampHistoryManager separado que
+    gerencia uma pilha de StampCommand.
+
+14.3. ARQUITETURA EXISTENTE QUE DEVE SER REUTILIZADA
+
+  - RemoveStampCommand (linha ~1975):
+    constructor(imageStampManager, stampId)
+    execute(): remove stamp, salva referencia em _removed
+    undo(): restaura stamp com _removed
+
+  - MoveStampCommand (linha ~2005):
+    constructor(imageStampManager, stampId, oldX, oldY, newX, newY)
+    execute(): define worldX/worldY para newX/newY
+    undo(): define worldX/worldY para oldX/oldY
+
+  - AddStampCommand (linha ~1975):
+    constructor(imageStampManager, stampData)
+    execute(): adiciona stamp, salva id
+    undo(): remove pelo id
+
+  - HistoryManager (linha ~738):
+    push(), undo(), redo()
+    Atualmente gerencia apenas strokes de desenho
+    Precisa ser expandido para Command objects
+
+14.4. OBSERVACOES IMPORTANTES PARA O PROXIMO DESENVOLVEDOR
+
+  O HistoryManager atual gerencia strokes como objetos simples
+  (arrays de pontos). Para integrar Undo/Redo com stamps, o
+  HistoryManager precisa ser expandido para aceitar Command objects.
+
+  Sugestoes de implementacao:
+
+  1. Criar um array separado EditorState.history.commandStack
+     para comandos de stamp (para nao misturar com strokes).
+
+  2. Ou modificar HistoryManager.push() para detectar se o
+     argumento e um Command ou um stroke, e tratar adequadamente.
+
+  3. Ou criar um StampCommandHistory gerenciado pelo
+     ImageStampManager.
+
+  A abordagem recomendada:
+  - Adicionar EditorState.history.commandUndoStack e
+    EditorState.history.commandRedoStack
+  - HistoryManager ganha metodos pushCommand(command),
+    undoCommand(), redoCommand()
+  - App.executeAction('undo') verifica se ha comandos para
+    desfazer, e se sim, chama undoCommand() ao inves de undo()
+  - O estado dos botoes undo/redo considera ambas as pilhas
+
+  Cuidados:
+  - Nao quebrar o undo/redo existente de strokes
+  - Nao permitir estado inconsistente (stamp removido do estado
+    mas ainda no DOM)
+  - Garantir que o DOM seja sincronizado apos cada undo/redo
+    (ImageStampManager.renderAll() pode ser usado para
+    reconstruir o DOM a partir do estado)
+  - Testar exaustivamente: inserir stamp, mover, deletar,
+    desfazer varias vezes, refazer
+
+================================================================================
+FIM DO DOCUMENTO DE HANDOFF - STAGE 05
+================================================================================

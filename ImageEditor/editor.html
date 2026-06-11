@@ -66,6 +66,10 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 
 /* CURSOR CUSTOM (rendered by JS) */
 #image-stamp-layer { position: absolute; top: 0; left: 0; width: 0; height: 0; pointer-events: none; z-index: 5; }
+.stamp-mode-indicator { position: absolute; top: 12px; left: 12px; padding: 6px 14px; border-radius: var(--radius-md); color: #fff; font-size: 13px; font-weight: 600; pointer-events: none; z-index: 300; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; transition: opacity var(--t-fast); }
+.stamp-mode-indicator.show { opacity: 1; }
+.stamp-mode-indicator.delete-mode { background: rgba(218,54,51,0.88); box-shadow: 0 0 12px rgba(218,54,51,0.3); }
+.stamp-mode-indicator.move-mode { background: rgba(0,120,212,0.88); box-shadow: 0 0 12px rgba(0,120,212,0.3); }
 #cursor-custom { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 200; display: none; }
 #stamp-preview-layer { position: absolute; top: 0; left: 0; width: 0; height: 0; pointer-events: none; z-index: 10; display: none; }
 #stamp-preview-layer img { position: absolute; pointer-events: none; will-change: transform, opacity; }
@@ -250,6 +254,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
         <div id="image-stamp-layer"></div>
         <div id="stamp-preview-layer"></div>
       </div>
+      <div id="stamp-mode-indicator" class="stamp-mode-indicator">Delete Mode Active</div>
       <div id="splash-screen">
         <div id="splash-content">
           <div id="splash-icon"><i class="fas fa-image"></i></div>
@@ -484,13 +489,20 @@ const EditorState = {
     defaultKeybinds: {
       pencil:'p',eraser:'e','fading-pen':'f',hand:'h',undo:'ctrl+z',redo:'ctrl+y',
       'zoom-in':'ctrl++','zoom-out':'ctrl+-','zoom-100':'ctrl+0',
-      'fit-to-screen':'ctrl+shift+f',settings:'ctrl+,','toggle-options':'ctrl+\\'
+      'fit-to-screen':'ctrl+shift+f',settings:'ctrl+,','toggle-options':'ctrl+\\',
+      'delete-stamp-mode':'x','move-stamp-mode':'v'
     },
   },
   ui: {
     isOptionsOpen: true,
   },
-  input: {},
+  input: {
+    deleteModeActive: false,
+    moveModeActive: false,
+    draggingStampId: null,
+    dragOffsetWorldX: 0,
+    dragOffsetWorldY: 0,
+  },
 };
 
 const KEYBIND_ACTIONS = [
@@ -499,7 +511,8 @@ const KEYBIND_ACTIONS = [
   {id:'undo',label:'Desfazer'},{id:'redo',label:'Refazer'},
   {id:'zoom-in',label:'Ampliar zoom'},{id:'zoom-out',label:'Reduzir zoom'},
   {id:'zoom-100',label:'Zoom 100%'},{id:'fit-to-screen',label:'Ajustar &agrave; tela'},
-  {id:'settings',label:'Abrir configura&ccedil;&otilde;es'},{id:'toggle-options',label:'Abrir painel de op&ccedil;&otilde;es'}
+  {id:'settings',label:'Abrir configura&ccedil;&otilde;es'},{id:'toggle-options',label:'Abrir painel de op&ccedil;&otilde;es'},
+  {id:'delete-stamp-mode',label:'Delete Stamp Mode'},{id:'move-stamp-mode',label:'Move Stamp Mode'}
 ];
 
 // ============================================================
@@ -515,7 +528,7 @@ function initDOM() {
     'settings-btn','settings-modal','settings-backdrop','settings-close','settings-new-image','splash-screen',
     'splash-dropzone','file-input','notifications','keybinds-list','keybinds-reset',
     'settings-filename','settings-dimensions','undo-btn','redo-btn',
-    'image-stamp-layer','image-slots-toggle','image-slots-content','slot-file-input','stamp-preview-layer'];
+    'image-stamp-layer','image-slots-toggle','image-slots-content','slot-file-input','stamp-preview-layer','stamp-mode-indicator'];
   ids.forEach(id => { DOM[id] = document.getElementById(id); });
   DOM.canvases = [DOM['layer-background'],DOM['layer-permanent'],DOM['layer-temp'],DOM['layer-fading']];
   DOM.ctxBg = DOM['layer-background'].getContext('2d');
@@ -1738,6 +1751,45 @@ class ImageStampManager {
     }
     this._stampElements.delete(id);
   }
+
+  // ---- HIT TESTING & MOVEMENT ----
+
+  hitTest(worldX, worldY) {
+    const stamps = this.getAll();
+    for (let i = stamps.length - 1; i >= 0; i--) {
+      const s = stamps[i];
+      const left = s.worldX - s.width / 2;
+      const right = s.worldX + s.width / 2;
+      const top = s.worldY - s.height / 2;
+      const bottom = s.worldY + s.height / 2;
+      if (worldX >= left && worldX <= right && worldY >= top && worldY <= bottom) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  findTopMostAtPosition(worldX, worldY) {
+    return this.hitTest(worldX, worldY);
+  }
+
+  moveStamp(id, worldX, worldY) {
+    const stamp = this.getById(id);
+    if (!stamp) return null;
+    stamp.worldX = worldX;
+    stamp.worldY = worldY;
+    this.updateStampPosition(id);
+    this.eventBus.emit(EVENTS.STAMP_MODIFIED, stamp);
+    return stamp;
+  }
+
+  updateStampPosition(id) {
+    const stamp = this.getById(id);
+    const el = this._stampElements.get(id);
+    if (!stamp || !el) return;
+    el.style.left = (stamp.worldX - stamp.width / 2) + 'px';
+    el.style.top = (stamp.worldY - stamp.height / 2) + 'px';
+  }
 }
 
 // ============================================================
@@ -2452,19 +2504,47 @@ class App {
   }
 
   _bindEvents() {
-    document.addEventListener('keydown', (e) => this.keybindManager.handleKeyDown(e));
+    document.addEventListener('keydown', (e) => {
+      if (this._handleModeKeyDown(e)) { e.preventDefault(); return; }
+      this.keybindManager.handleKeyDown(e);
+    });
+    document.addEventListener('keyup', (e) => this._handleModeKeyUp(e));
     window.addEventListener('resize', () => this._handleResize());
-    DOM['canvas-area'].addEventListener('mousedown', (e) => this.toolManager.handleMouseDown(e));
+    window.addEventListener('blur', () => {
+      if (EditorState.input.deleteModeActive || EditorState.input.moveModeActive || EditorState.input.draggingStampId) {
+        if (EditorState.input.draggingStampId) this._finalizeStampDrag();
+        EditorState.input.deleteModeActive = false;
+        EditorState.input.moveModeActive = false;
+        this._updateModeIndicator();
+        this._updateModeCursor();
+      }
+    });
+    DOM['canvas-area'].addEventListener('mousedown', (e) => {
+      if (this._handleStampModeMouseDown(e)) return;
+      this.toolManager.handleMouseDown(e);
+    });
     DOM['canvas-area'].addEventListener('mousemove', (e) => {
-      this.cursorManager.move(e.clientX, e.clientY);
+      if (!EditorState.input.deleteModeActive && !EditorState.input.moveModeActive) {
+        this.cursorManager.move(e.clientX, e.clientY);
+      }
+      if (this._handleStampModeMouseMove(e)) return;
       this.toolManager.handleMouseMove(e);
     });
-    DOM['canvas-area'].addEventListener('mouseleave', () => this.cursorManager.hide());
-    DOM['canvas-area'].addEventListener('mouseenter', (e) => {
-      this.cursorManager.move(e.clientX, e.clientY);
-      this._updateCursor();
+    DOM['canvas-area'].addEventListener('mouseleave', () => {
+      if (!EditorState.input.deleteModeActive && !EditorState.input.moveModeActive) {
+        this.cursorManager.hide();
+      }
     });
-    document.addEventListener('mouseup', (e) => this.toolManager.handleMouseUp(e));
+    DOM['canvas-area'].addEventListener('mouseenter', (e) => {
+      if (!EditorState.input.deleteModeActive && !EditorState.input.moveModeActive) {
+        this.cursorManager.move(e.clientX, e.clientY);
+        this._updateCursor();
+      }
+    });
+    document.addEventListener('mouseup', (e) => {
+      if (this._handleStampModeMouseUp(e)) return;
+      this.toolManager.handleMouseUp(e);
+    });
     DOM['canvas-area'].addEventListener('wheel', (e) => this.canvasManager.handleWheel(e), { passive: false });
     DOM['zoom-slider'].addEventListener('input', (e) => {
       const v = parseInt(e.target.value); this.canvasManager.setScale(v / 100);
@@ -2682,6 +2762,168 @@ class App {
     for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
     ctx.strokeStyle = color; ctx.lineWidth = size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.stroke(); ctx.restore();
+  }
+
+  // ============================================================
+  // STAMP MODE HANDLING (DELETE MODE & MOVE MODE)
+  // ============================================================
+
+  _keyMatchesKeybind(e, keybind) {
+    if (!keybind) return false;
+    const parts = keybind.split('+');
+    const key = parts[parts.length - 1];
+    const hasCtrl = parts.includes('ctrl');
+    const hasAlt = parts.includes('alt');
+    const hasShift = parts.includes('shift');
+    if (e.repeat) return false;
+    if (e.location === 3) return false;
+    if (e.key.toLowerCase() !== key) return false;
+    if (!!e.ctrlKey !== hasCtrl) return false;
+    if (!!e.altKey !== hasAlt) return false;
+    if (!!e.shiftKey !== hasShift) return false;
+    return true;
+  }
+
+  _handleModeKeyDown(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return false;
+    const deleteKeybind = EditorState.settings.keybinds['delete-stamp-mode'];
+    const moveKeybind = EditorState.settings.keybinds['move-stamp-mode'];
+    if (this._keyMatchesKeybind(e, deleteKeybind)) {
+      e.preventDefault();
+      EditorState.input.moveModeActive = false;
+      EditorState.input.deleteModeActive = true;
+      this._updateModeIndicator();
+      this._updateModeCursor();
+      return true;
+    }
+    if (this._keyMatchesKeybind(e, moveKeybind)) {
+      e.preventDefault();
+      EditorState.input.deleteModeActive = false;
+      EditorState.input.moveModeActive = true;
+      this._updateModeIndicator();
+      this._updateModeCursor();
+      return true;
+    }
+    return false;
+  }
+
+  _handleModeKeyUp(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return false;
+    const deleteKeybind = EditorState.settings.keybinds['delete-stamp-mode'];
+    const moveKeybind = EditorState.settings.keybinds['move-stamp-mode'];
+    if (deleteKeybind && e.key.toLowerCase() === deleteKeybind.split('+').pop()) {
+      EditorState.input.deleteModeActive = false;
+      this._updateModeIndicator();
+      this._updateModeCursor();
+      return true;
+    }
+    if (moveKeybind && e.key.toLowerCase() === moveKeybind.split('+').pop()) {
+      if (EditorState.input.draggingStampId) {
+        this._finalizeStampDrag();
+      }
+      EditorState.input.moveModeActive = false;
+      this._updateModeIndicator();
+      this._updateModeCursor();
+      return true;
+    }
+    return false;
+  }
+
+  _handleStampModeMouseDown(e) {
+    if (e.button !== 0) return false;
+    if (EditorState.input.deleteModeActive || EditorState.input.moveModeActive) {
+      const world = getCanvasCoords(e.clientX, e.clientY);
+      const stamp = this.imageStampManager.hitTest(world.x, world.y);
+      if (!stamp) return false;
+      if (EditorState.input.deleteModeActive) {
+        this.imageStampManager.removeStamp(stamp.id);
+        return true;
+      }
+      if (EditorState.input.moveModeActive) {
+        const offsetX = world.x - stamp.worldX;
+        const offsetY = world.y - stamp.worldY;
+        EditorState.input.draggingStampId = stamp.id;
+        EditorState.input.dragOffsetWorldX = offsetX;
+        EditorState.input.dragOffsetWorldY = offsetY;
+        this._highlightStamp(stamp.id, true);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  _handleStampModeMouseMove(e) {
+    if (EditorState.input.draggingStampId) {
+      const world = getCanvasCoords(e.clientX, e.clientY);
+      const newX = world.x - EditorState.input.dragOffsetWorldX;
+      const newY = world.y - EditorState.input.dragOffsetWorldY;
+      this.imageStampManager.moveStamp(EditorState.input.draggingStampId, newX, newY);
+      return true;
+    }
+    return false;
+  }
+
+  _handleStampModeMouseUp(e) {
+    if (e.button !== 0) return false;
+    if (EditorState.input.draggingStampId) {
+      this._finalizeStampDrag();
+      return true;
+    }
+    return false;
+  }
+
+  _finalizeStampDrag() {
+    const stampId = EditorState.input.draggingStampId;
+    if (stampId) {
+      this._highlightStamp(stampId, false);
+      this.eventBus.emit(EVENTS.STAMP_MODIFIED, this.imageStampManager.getStampById(stampId));
+    }
+    EditorState.input.draggingStampId = null;
+    EditorState.input.dragOffsetWorldX = 0;
+    EditorState.input.dragOffsetWorldY = 0;
+  }
+
+  _highlightStamp(stampId, highlight) {
+    const el = this.imageStampManager._stampElements.get(stampId);
+    if (!el) return;
+    if (highlight) {
+      el.style.outline = '2px solid var(--accent)';
+      el.style.outlineOffset = '2px';
+      el.style.filter = 'drop-shadow(0 0 6px rgba(0,120,212,0.5))';
+      el.style.transition = 'outline var(--t-fast), filter var(--t-fast)';
+    } else {
+      el.style.outline = '';
+      el.style.outlineOffset = '';
+      el.style.filter = '';
+      el.style.transition = '';
+    }
+  }
+
+  _updateModeIndicator() {
+    const el = DOM['stamp-mode-indicator'];
+    if (!el) return;
+    el.classList.remove('delete-mode', 'move-mode', 'show');
+    if (EditorState.input.deleteModeActive) {
+      el.textContent = 'Delete Mode Active';
+      el.classList.add('delete-mode', 'show');
+    } else if (EditorState.input.moveModeActive) {
+      el.textContent = 'Move Mode Active';
+      el.classList.add('move-mode', 'show');
+    }
+  }
+
+  _updateModeCursor() {
+    const ca = DOM['canvas-area'];
+    if (EditorState.input.deleteModeActive) {
+      this.cursorManager.hide();
+      ca.style.cursor = 'crosshair';
+    } else if (EditorState.input.moveModeActive) {
+      this.cursorManager.hide();
+      ca.style.cursor = 'move';
+    } else {
+      ca.style.cursor = '';
+      this._updateCursor();
+    }
   }
 }
 
