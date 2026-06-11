@@ -67,6 +67,8 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 /* CURSOR CUSTOM (rendered by JS) */
 #image-stamp-layer { position: absolute; top: 0; left: 0; width: 0; height: 0; pointer-events: none; z-index: 5; }
 #cursor-custom { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 200; display: none; }
+#stamp-preview-layer { position: absolute; top: 0; left: 0; width: 0; height: 0; pointer-events: none; z-index: 10; display: none; }
+#stamp-preview-layer img { position: absolute; pointer-events: none; will-change: transform, opacity; }
 #canvas-area.tool-active { cursor: none; }
 
 /* TOOL OPTIONS */
@@ -246,6 +248,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
         <canvas id="layer-temp"></canvas>
         <canvas id="layer-fading"></canvas>
         <div id="image-stamp-layer"></div>
+        <div id="stamp-preview-layer"></div>
       </div>
       <div id="splash-screen">
         <div id="splash-content">
@@ -470,6 +473,12 @@ const EditorState = {
     slots: {},
     defaultSizePercent: 15,
   },
+  preview: {
+    activeSlot: null,
+    isActive: false,
+    effectState: {},
+    lastBind: null,
+  },
   settings: {
     keybinds: {},
     defaultKeybinds: {
@@ -506,7 +515,7 @@ function initDOM() {
     'settings-btn','settings-modal','settings-backdrop','settings-close','settings-new-image','splash-screen',
     'splash-dropzone','file-input','notifications','keybinds-list','keybinds-reset',
     'settings-filename','settings-dimensions','undo-btn','redo-btn',
-    'image-stamp-layer','image-slots-toggle','image-slots-content','slot-file-input'];
+    'image-stamp-layer','image-slots-toggle','image-slots-content','slot-file-input','stamp-preview-layer'];
   ids.forEach(id => { DOM[id] = document.getElementById(id); });
   DOM.canvases = [DOM['layer-background'],DOM['layer-permanent'],DOM['layer-temp'],DOM['layer-fading']];
   DOM.ctxBg = DOM['layer-background'].getContext('2d');
@@ -1899,6 +1908,351 @@ class ReplaceStampCommand extends Command {
 }
 
 // ============================================================
+// STAMP PREVIEW MANAGER
+// ============================================================
+class StampPreviewManager {
+  constructor(eventBus, stampSettingsManager, canvasArea, canvasContainer) {
+    this.eventBus = eventBus;
+    this.stampSettingsManager = stampSettingsManager;
+    this.canvasArea = canvasArea;
+    this.canvasContainer = canvasContainer;
+
+    this._activeSlot = null;
+    this._isActive = false;
+    this._element = null;
+    this._clientX = 0;
+    this._clientY = 0;
+    this._heldSlots = new Set();
+    this._fadingOut = false;
+
+    this._blinkTimer = null;
+    this._wobbleTimer = null;
+
+    this._boundKeyDown = this._onKeyDown.bind(this);
+    this._boundKeyUp = this._onKeyUp.bind(this);
+    this._boundMouseMove = this._onMouseMove.bind(this);
+    this._boundResize = this._onResize.bind(this);
+    this._boundBlur = this._onWindowBlur.bind(this);
+  }
+
+  init() {
+    this._createLayer();
+    document.addEventListener('keydown', this._boundKeyDown);
+    document.addEventListener('keyup', this._boundKeyUp);
+    this.canvasArea.addEventListener('mousemove', this._boundMouseMove);
+    window.addEventListener('resize', this._boundResize);
+    window.addEventListener('blur', this._boundBlur);
+    debug.log('StampPreviewManager initialized');
+  }
+
+  destroy() {
+    this._deactivatePreview(true);
+    if (this._layer && this._layer.parentNode) {
+      this._layer.parentNode.removeChild(this._layer);
+    }
+    document.removeEventListener('keydown', this._boundKeyDown);
+    document.removeEventListener('keyup', this._boundKeyUp);
+    this.canvasArea.removeEventListener('mousemove', this._boundMouseMove);
+    window.removeEventListener('resize', this._boundResize);
+    window.removeEventListener('blur', this._boundBlur);
+  }
+
+  _createLayer() {
+    this._layer = DOM['stamp-preview-layer'];
+    if (!this._layer) {
+      this._layer = document.createElement('div');
+      this._layer.id = 'stamp-preview-layer';
+      this.canvasContainer.appendChild(this._layer);
+    }
+  }
+
+  _onWindowBlur() {
+    this._heldSlots.clear();
+    if (this._isActive) this._deactivatePreview(true);
+  }
+
+  _onKeyDown(e) {
+    if (e.repeat) return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.location === 3) return;
+
+    const key = e.key.toLowerCase();
+    if (['control', 'alt', 'shift', 'meta'].includes(key)) return;
+    if (key.length > 1 && key !== ' ') return;
+
+    const normalizedKey = key === ' ' ? 'space' : key;
+    const slot = this._getSlotForKey(normalizedKey);
+    if (!slot) return;
+
+    const config = this.stampSettingsManager.getSlot(slot);
+    if (!config.source) return;
+
+    e.preventDefault();
+    this._heldSlots.add(slot);
+
+    if (slot !== this._activeSlot) {
+      this._activatePreview(slot, config);
+    }
+  }
+
+  _onKeyUp(e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.location === 3) return;
+
+    const key = e.key.toLowerCase();
+    if (['control', 'alt', 'shift', 'meta'].includes(key)) return;
+    if (key.length > 1 && key !== ' ') return;
+
+    const normalizedKey = key === ' ' ? 'space' : key;
+    const slot = this._getSlotForKey(normalizedKey);
+    if (!slot) return;
+
+    this._heldSlots.delete(slot);
+
+    if (this._activeSlot === slot) {
+      this._deactivatePreview(false);
+    }
+  }
+
+  _getSlotForKey(key) {
+    for (let i = 1; i <= 9; i++) {
+      const config = this.stampSettingsManager.getSlot(i);
+      if (config.keybind && config.keybind === key) return i;
+    }
+    return null;
+  }
+
+  _onMouseMove(e) {
+    this._clientX = e.clientX;
+    this._clientY = e.clientY;
+    if (this._isActive && !this._fadingOut) {
+      this._updatePosition();
+    }
+  }
+
+  _onResize() {
+    if (this._isActive && this._element) {
+      this._recalculateSize();
+      this._updatePosition();
+    }
+  }
+
+  _activatePreview(slot, config) {
+    if (this._isActive) {
+      this._deactivatePreview(true);
+    }
+
+    this._activeSlot = slot;
+    this._isActive = true;
+    this._fadingOut = false;
+
+    const img = document.createElement('img');
+    img.src = config.source;
+    img.draggable = false;
+    img.style.cssText = 'position:absolute;pointer-events:none;will-change:transform,opacity;';
+
+    this._layer.appendChild(img);
+    this._element = img;
+    this._layer.style.display = 'block';
+
+    this._applySize(config);
+    this._updatePosition();
+    this._applyAppearEffect(config);
+    this._startContinuousEffect(config);
+
+    EditorState.preview.activeSlot = slot;
+    EditorState.preview.isActive = true;
+    EditorState.preview.lastBind = config.keybind;
+  }
+
+  _deactivatePreview(immediate) {
+    if (!this._isActive) return;
+
+    const config = this.stampSettingsManager.getSlot(this._activeSlot);
+    const element = this._element;
+    const hasFadeOut = !immediate && config && config.disappearEffect === 'fadeOut';
+
+    this._stopContinuousEffect();
+
+    if (hasFadeOut) {
+      this._fadingOut = true;
+      const duration = (config.effectSettings && config.effectSettings.disappearDuration) || 300;
+
+      element.style.transition = 'opacity ' + duration + 'ms ease';
+      element.style.opacity = '0';
+
+      setTimeout(() => this._cleanupPreview(), duration);
+    } else {
+      this._cleanupPreview();
+    }
+  }
+
+  _cleanupPreview() {
+    if (this._element && this._element.parentNode) {
+      this._element.parentNode.removeChild(this._element);
+    }
+    this._element = null;
+    this._isActive = false;
+    this._activeSlot = null;
+    this._fadingOut = false;
+    if (this._layer) this._layer.style.display = 'none';
+
+    EditorState.preview.activeSlot = null;
+    EditorState.preview.isActive = false;
+  }
+
+  _applySize(config) {
+    if (!this._element) return;
+    const height = this._calculateHeight(config);
+    this._element.style.height = height + 'px';
+    this._element.style.width = 'auto';
+
+    if (this._element.complete && this._element.naturalWidth > 0) {
+      const aspect = this._element.naturalWidth / this._element.naturalHeight;
+      this._element.style.width = (height * aspect) + 'px';
+    }
+
+    this._element.onload = () => {
+      if (!this._element || !this._isActive) return;
+      const h = this._calculateHeight(config);
+      const aspect = this._element.naturalWidth / this._element.naturalHeight;
+      this._element.style.width = (h * aspect) + 'px';
+      this._updatePosition();
+    };
+  }
+
+  _recalculateSize() {
+    if (!this._element || !this._isActive) return;
+    const config = this._activeSlot ? this.stampSettingsManager.getSlot(this._activeSlot) : null;
+    if (!config) return;
+
+    const height = this._calculateHeight(config);
+    this._element.style.height = height + 'px';
+
+    if (this._element.complete && this._element.naturalWidth > 0) {
+      const aspect = this._element.naturalWidth / this._element.naturalHeight;
+      this._element.style.width = (height * aspect) + 'px';
+    }
+  }
+
+  _calculateHeight(config) {
+    const percent = clamp(config.sizePercent || 15, 10, 100) / 100;
+    return Math.round(this.canvasArea.clientHeight * percent);
+  }
+
+  _updatePosition() {
+    if (!this._element || this._fadingOut) return;
+
+    const rect = this.canvasArea.getBoundingClientRect();
+    const worldX = (this._clientX - rect.left - EditorState.canvas.offsetX) / EditorState.canvas.scale;
+    const worldY = (this._clientY - rect.top - EditorState.canvas.offsetY) / EditorState.canvas.scale;
+
+    const elW = this._element.offsetWidth || parseFloat(this._element.style.width) || 100;
+    const elH = this._element.offsetHeight || parseFloat(this._element.style.height) || 100;
+
+    this._element.style.left = (worldX - elW / 2) + 'px';
+    this._element.style.top = (worldY - elH / 2) + 'px';
+  }
+
+  _applyAppearEffect(config) {
+    if (!this._element) return;
+
+    if (config.appearEffect === 'fadeIn') {
+      const duration = (config.effectSettings && config.effectSettings.appearDuration) || 300;
+      this._element.style.opacity = '0';
+      this._element.style.transition = 'opacity ' + duration + 'ms ease';
+
+      void this._element.offsetWidth;
+
+      this._element.style.opacity = '1';
+    }
+  }
+
+  _startContinuousEffect(config) {
+    if (!config.imageEffect || config.imageEffect === 'none' || !this._element) return;
+
+    if (config.imageEffect === 'blink') {
+      this._startBlink(config);
+    } else if (config.imageEffect === 'wobble') {
+      this._startWobble(config);
+    }
+  }
+
+  _stopContinuousEffect() {
+    if (this._blinkTimer) {
+      cancelAnimationFrame(this._blinkTimer);
+      this._blinkTimer = null;
+    }
+    if (this._wobbleTimer) {
+      cancelAnimationFrame(this._wobbleTimer);
+      this._wobbleTimer = null;
+    }
+    if (this._element) {
+      this._element.style.opacity = '';
+      this._element.style.transform = '';
+      this._element.style.transition = '';
+    }
+  }
+
+  _startBlink(config) {
+    const settings = config.effectSettings || {};
+    const visibleTime = settings.blinkVisibleTime || 300;
+    const invisibleTime = settings.blinkInvisibleTime || 200;
+
+    let isVisible = true;
+    let lastToggle = performance.now();
+
+    const tick = (now) => {
+      if (!this._element || !this._isActive || this._fadingOut) {
+        this._blinkTimer = null;
+        return;
+      }
+
+      const elapsed = now - lastToggle;
+      const threshold = isVisible ? visibleTime : invisibleTime;
+
+      if (elapsed >= threshold) {
+        isVisible = !isVisible;
+        lastToggle = now;
+        this._element.style.opacity = isVisible ? '1' : '0';
+      }
+
+      this._blinkTimer = requestAnimationFrame(tick);
+    };
+
+    this._blinkTimer = requestAnimationFrame(tick);
+  }
+
+  _startWobble(config) {
+    const intensity = (config.effectSettings && config.effectSettings.wobbleIntensity) || 50;
+    const factor = intensity / 50;
+
+    let startTime = performance.now();
+    const duration = 400 / factor;
+
+    const tick = (now) => {
+      if (!this._element || !this._isActive || this._fadingOut) {
+        this._wobbleTimer = null;
+        return;
+      }
+
+      const elapsed = now - startTime;
+      const progress = (elapsed % duration) / duration;
+
+      const rot = Math.sin(progress * Math.PI * 4) * 5 * factor;
+      const tx = Math.sin(progress * Math.PI * 4) * 5 * factor;
+      const ty = Math.sin(progress * Math.PI * 2) * 5 * factor;
+
+      this._element.style.transform = 'translate(' + tx + 'px,' + ty + 'px) rotate(' + rot + 'deg)';
+
+      this._wobbleTimer = requestAnimationFrame(tick);
+    };
+
+    this._wobbleTimer = requestAnimationFrame(tick);
+  }
+}
+
+// ============================================================
 // APP (ORCHESTRATOR)
 // ============================================================
 class App {
@@ -1931,6 +2285,8 @@ class App {
     this._bindEvents();
     this.toolManager.activateTool('pencil');
     this._setupDragDrop();
+    this.stampPreviewManager = new StampPreviewManager(this.eventBus, this.stampSettingsManager, DOM['canvas-area'], DOM['canvas-container']);
+    this.stampPreviewManager.init();
     this.canvasManager._applyTransform();
     this.updateUI();
   }
