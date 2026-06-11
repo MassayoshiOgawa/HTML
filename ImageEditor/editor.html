@@ -65,6 +65,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 #layer-background { position: relative !important; }
 
 /* CURSOR CUSTOM (rendered by JS) */
+#image-stamp-layer { position: absolute; top: 0; left: 0; width: 0; height: 0; pointer-events: none; z-index: 5; }
 #cursor-custom { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 200; display: none; }
 #canvas-area.tool-active { cursor: none; }
 
@@ -197,6 +198,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
         <canvas id="layer-permanent"></canvas>
         <canvas id="layer-temp"></canvas>
         <canvas id="layer-fading"></canvas>
+        <div id="image-stamp-layer"></div>
       </div>
       <div id="splash-screen">
         <div id="splash-content">
@@ -361,6 +363,10 @@ const EVENTS = {
   INPUT_MOUSEUP: 'input:mouseup',
   TOOL_ACTIVATED: 'tool:activated',
   IMAGE_LOADED: 'image:loaded',
+  STAMP_ADDED: 'stamp:added',
+  STAMP_REMOVED: 'stamp:removed',
+  STAMP_MODIFIED: 'stamp:modified',
+  STAMP_SETTINGS_CHANGED: 'stamp:settings-changed',
 };
 
 // ============================================================
@@ -399,7 +405,14 @@ const EditorState = {
   history: {
     undoStack: [], redoStack: [], maxHistory: 50,
   },
-  stamps: {},
+  stamps: {
+    list: [],
+    nextZIndex: 1,
+  },
+  stampSettings: {
+    slots: {},
+    defaultSizePercent: 15,
+  },
   settings: {
     keybinds: {},
     defaultKeybinds: {
@@ -435,7 +448,8 @@ function initDOM() {
     'zoom-slider','zoom-percent','zoom-in-btn','zoom-out-btn','fit-to-screen-btn','zoom-100-btn',
     'settings-btn','settings-modal','settings-backdrop','settings-close','settings-new-image','splash-screen',
     'splash-dropzone','file-input','notifications','keybinds-list','keybinds-reset',
-    'settings-filename','settings-dimensions','undo-btn','redo-btn'];
+    'settings-filename','settings-dimensions','undo-btn','redo-btn',
+    'image-stamp-layer'];
   ids.forEach(id => { DOM[id] = document.getElementById(id); });
   DOM.canvases = [DOM['layer-background'],DOM['layer-permanent'],DOM['layer-temp'],DOM['layer-fading']];
   DOM.ctxBg = DOM['layer-background'].getContext('2d');
@@ -1226,6 +1240,283 @@ class SettingsManager {
 }
 
 // ============================================================
+// IMAGE STAMP MANAGER
+// ============================================================
+class ImageStampManager {
+  constructor(eventBus) {
+    this.eventBus = eventBus;
+  }
+
+  add(stampData) {
+    const stamp = {
+      id: uuid(),
+      slot: stampData.slot || 0,
+      src: stampData.src || '',
+      sourceType: stampData.sourceType || 'url',
+      worldX: stampData.worldX || 0,
+      worldY: stampData.worldY || 0,
+      width: stampData.width || 0,
+      height: stampData.height || 0,
+      zIndex: EditorState.stamps.nextZIndex++,
+      appearEffect: stampData.appearEffect || null,
+      appearSettings: stampData.appearSettings || null,
+      disappearEffect: stampData.disappearEffect || null,
+      disappearSettings: stampData.disappearSettings || null,
+      imageEffect: stampData.imageEffect || null,
+      imageEffectSettings: stampData.imageEffectSettings || null,
+      createdAt: Date.now(),
+    };
+    EditorState.stamps.list.push(stamp);
+    this.eventBus.emit(EVENTS.STAMP_ADDED, stamp);
+    return stamp;
+  }
+
+  remove(id) {
+    const idx = EditorState.stamps.list.findIndex(s => s.id === id);
+    if (idx === -1) return null;
+    const removed = EditorState.stamps.list.splice(idx, 1)[0];
+    this.eventBus.emit(EVENTS.STAMP_REMOVED, removed);
+    return removed;
+  }
+
+  getById(id) {
+    return EditorState.stamps.list.find(s => s.id === id) || null;
+  }
+
+  getBySlot(slot) {
+    return EditorState.stamps.list.filter(s => s.slot === slot);
+  }
+
+  getAll() {
+    return [...EditorState.stamps.list].sort((a, b) => a.zIndex - b.zIndex);
+  }
+
+  replaceSlot(slot, newStampData) {
+    this.getBySlot(slot).forEach(s => this.remove(s.id));
+    return this.add({ ...newStampData, slot });
+  }
+
+  clear() {
+    EditorState.stamps.list = [];
+    EditorState.stamps.nextZIndex = 1;
+    this.eventBus.emit(EVENTS.STAMP_REMOVED, null);
+  }
+
+  toExportData() {
+    return this.getAll().map(s => ({ ...s }));
+  }
+}
+
+// ============================================================
+// STAMP SETTINGS MANAGER
+// ============================================================
+class StampSettingsManager {
+  constructor(eventBus) {
+    this.eventBus = eventBus;
+  }
+
+  getDefaultSlotConfig(slot) {
+    return {
+      slot: slot,
+      keybind: String(slot),
+      source: null,
+      sourceType: null,
+      sizePercent: EditorState.stampSettings.defaultSizePercent,
+      appearEffect: null,
+      disappearEffect: null,
+      imageEffect: null,
+      effectSettings: {},
+    };
+  }
+
+  getSlot(slot) {
+    if (!EditorState.stampSettings.slots[slot]) {
+      EditorState.stampSettings.slots[slot] = this.getDefaultSlotConfig(slot);
+    }
+    return EditorState.stampSettings.slots[slot];
+  }
+
+  setSlot(slot, config) {
+    EditorState.stampSettings.slots[slot] = {
+      ...this.getDefaultSlotConfig(slot),
+      ...config,
+      slot,
+    };
+    this.eventBus.emit(EVENTS.STAMP_SETTINGS_CHANGED, { slot, config: EditorState.stampSettings.slots[slot] });
+  }
+
+  getAllSlots() {
+    const result = {};
+    for (let i = 1; i <= 9; i++) {
+      result[i] = this.getSlot(i);
+    }
+    return result;
+  }
+
+  resetSlot(slot) {
+    delete EditorState.stampSettings.slots[slot];
+    this.eventBus.emit(EVENTS.STAMP_SETTINGS_CHANGED, { slot, config: this.getSlot(slot) });
+  }
+
+  toExportData() {
+    return { ...EditorState.stampSettings.slots };
+  }
+}
+
+// ============================================================
+// STAMP EFFECT MANAGER
+// ============================================================
+class StampEffectManager {
+  constructor() {
+    this.availableEffects = {
+      fadeIn: {
+        name: 'fadeIn',
+        label: 'Fade In',
+        type: 'appear',
+        defaultSettings: { duration: 300 },
+      },
+      fadeOut: {
+        name: 'fadeOut',
+        label: 'Fade Out',
+        type: 'disappear',
+        defaultSettings: { duration: 300 },
+      },
+      blink: {
+        name: 'blink',
+        label: 'Piscar',
+        type: 'image',
+        defaultSettings: { interval: 500, count: 3 },
+      },
+      wobble: {
+        name: 'wobble',
+        label: 'Balançar',
+        type: 'image',
+        defaultSettings: { amplitude: 5, duration: 400 },
+      },
+    };
+  }
+
+  getEffect(name) {
+    return this.availableEffects[name] || null;
+  }
+
+  getEffectsByType(type) {
+    return Object.values(this.availableEffects).filter(e => e.type === type);
+  }
+
+  validateSettings(effectName, settings) {
+    const effect = this.getEffect(effectName);
+    if (!effect) return { valid: false, error: 'Unknown effect' };
+    const merged = { ...effect.defaultSettings, ...settings };
+    return { valid: true, settings: merged };
+  }
+
+  getAllEffects() {
+    return { ...this.availableEffects };
+  }
+}
+
+// ============================================================
+// STAMP PERSISTENCE ADAPTER
+// ============================================================
+class StampPersistenceAdapter {
+  constructor(imageStampManager, stampSettingsManager) {
+    this.imageStampManager = imageStampManager;
+    this.stampSettingsManager = stampSettingsManager;
+  }
+
+  toJSON() {
+    return {
+      stamps: this.imageStampManager.toExportData(),
+      settings: this.stampSettingsManager.toExportData(),
+      nextZIndex: EditorState.stamps.nextZIndex,
+    };
+  }
+
+  fromJSON(data) {
+    const restored = {
+      stamps: data.stamps || [],
+      settings: data.settings || {},
+      nextZIndex: data.nextZIndex || 1,
+    };
+    return restored;
+  }
+}
+
+// ============================================================
+// STAMP COMMANDS (for future Undo/Redo integration)
+// ============================================================
+class AddStampCommand extends Command {
+  constructor(imageStampManager, stampData) {
+    super();
+    this.imageStampManager = imageStampManager;
+    this.stampData = stampData;
+    this._stampId = null;
+  }
+  execute() {
+    const stamp = this.imageStampManager.add(this.stampData);
+    this._stampId = stamp.id;
+  }
+  undo() {
+    if (this._stampId) this.imageStampManager.remove(this._stampId);
+  }
+}
+
+class RemoveStampCommand extends Command {
+  constructor(imageStampManager, stampId) {
+    super();
+    this.imageStampManager = imageStampManager;
+    this.stampId = stampId;
+    this._removed = null;
+  }
+  execute() {
+    this._removed = this.imageStampManager.remove(this.stampId);
+  }
+  undo() {
+    if (this._removed) this.imageStampManager.add(this._removed);
+  }
+}
+
+class MoveStampCommand extends Command {
+  constructor(imageStampManager, stampId, oldX, oldY, newX, newY) {
+    super();
+    this.imageStampManager = imageStampManager;
+    this.stampId = stampId;
+    this.oldX = oldX;
+    this.oldY = oldY;
+    this.newX = newX;
+    this.newY = newY;
+  }
+  execute() {
+    const stamp = this.imageStampManager.getById(this.stampId);
+    if (stamp) { stamp.worldX = this.newX; stamp.worldY = this.newY; }
+  }
+  undo() {
+    const stamp = this.imageStampManager.getById(this.stampId);
+    if (stamp) { stamp.worldX = this.oldX; stamp.worldY = this.oldY; }
+  }
+}
+
+class ReplaceStampCommand extends Command {
+  constructor(imageStampManager, slot, newStampData) {
+    super();
+    this.imageStampManager = imageStampManager;
+    this.slot = slot;
+    this.newStampData = newStampData;
+    this._oldStamps = [];
+  }
+  execute() {
+    this._oldStamps = this.imageStampManager.getBySlot(this.slot);
+    this._oldStamps.forEach(s => this.imageStampManager.remove(s.id));
+    this.imageStampManager.add({ ...this.newStampData, slot: this.slot });
+  }
+  undo() {
+    this.imageStampManager.getBySlot(this.slot).forEach(s => this.imageStampManager.remove(s.id));
+    this._oldStamps.forEach(s => this.imageStampManager.add(s));
+  }
+}
+
+// ============================================================
 // APP (ORCHESTRATOR)
 // ============================================================
 class App {
@@ -1240,6 +1531,10 @@ class App {
     this.uiManager = new UIManager();
     this.settingsManager = new SettingsManager(this.eventBus);
     this.inputManager = new InputManager(this.eventBus);
+    this.imageStampManager = new ImageStampManager(this.eventBus);
+    this.stampSettingsManager = new StampSettingsManager(this.eventBus);
+    this.stampEffectManager = new StampEffectManager();
+    this.stampPersistenceAdapter = new StampPersistenceAdapter(this.imageStampManager, this.stampSettingsManager);
   }
 
   notification(msg, type, duration) { this.notificationManager.show(msg, type, duration); }

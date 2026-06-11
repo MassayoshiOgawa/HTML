@@ -1,0 +1,404 @@
+================================================================================
+HANDOFF DOCUMENT - STAGE 01
+INFRAESTRUTURA DO SISTEMA DE IMAGE STAMPS
+================================================================================
+
+DATA: 2026-06-11
+ARQUIVO PRINCIPAL: editor.html
+ETAPA CONCLUIDA: 1 - Infraestrutura de Image Stamps
+
+================================================================================
+1. RESUMO DA ETAPA
+================================================================================
+
+Esta etapa implementou a infraestrutura arquitetural necessaria para suportar
+futuramente o sistema de Image Stamps (imagens controladas por keybinds 1-9).
+
+NENHUMA funcionalidade visivel ao usuario final foi implementada. O foco foi
+exclusivamente construir a base interna (managers, modelos de dados, estado
+global, camada DOM) para que as proximas etapas possam ser implementadas com
+seguranca.
+
+Todas as funcionalidades existentes (lapis, borracha, caneta que some, zoom,
+pan, historico, keybinds) continuam funcionando exatamente como antes.
+
+================================================================================
+2. NOVOS COMPONENTES IMPLEMENTADOS
+================================================================================
+
+2.1. IMAGE STAMP LAYER (DOM)
+
+  <div id="image-stamp-layer"></div>
+
+  - Adicionado dentro de #canvas-container, apos o ultimo canvas (#layer-fading)
+  - Referenciado via DOM['image-stamp-layer']
+  - CSS: position absolute, top/left 0, width/height 0, pointer-events none, z-index 5
+  - Acompanha automaticamente zoom e pan pois herda a transformacao do container
+  - Permanece vazia nesta etapa (sem elementos filhos)
+
+2.2. ImageStampManager (classe)
+
+  Responsavel por gerenciar todas as imagens permanentes (stamps).
+
+  Metodos:
+    add(stampData)           - Adiciona stamp com ID unico e zIndex auto-incrementado
+    remove(id)               - Remove stamp por ID
+    getById(id)              - Busca stamp por ID
+    getBySlot(slot)          - Retorna todos os stamps de um slot (1-9)
+    getAll()                 - Retorna todos os stamps ordenados por zIndex
+    replaceSlot(slot, data)  - Remove stamps de um slot e adiciona novo
+    clear()                  - Remove todos os stamps e reseta nextZIndex
+    toExportData()           - Prepara dados para exportacao futura
+
+  Eventos emitidos:
+    STAMP_ADDED   ('stamp:added')   - ao adicionar stamp
+    STAMP_REMOVED ('stamp:removed') - ao remover stamp(s)
+
+  Dependencias: EventBus
+
+2.3. StampSettingsManager (classe)
+
+  Responsavel pelas configuracoes dos slots 1-9.
+
+  Metodos:
+    getDefaultSlotConfig(slot) - Retorna configuracao padrao para um slot
+    getSlot(slot)              - Retorna configuracao de um slot (cria se nao existir)
+    setSlot(slot, config)      - Define configuracao de um slot
+    getAllSlots()              - Retorna configuracoes de todos os slots 1-9
+    resetSlot(slot)            - Reseta configuracao de um slot para o padrao
+    toExportData()             - Prepara dados para exportacao futura
+
+  Eventos emitidos:
+    STAMP_SETTINGS_CHANGED ('stamp:settings-changed') - ao alterar configuracao
+
+  Dependencias: EventBus
+
+2.4. StampEffectManager (classe)
+
+  Responsavel por definir a arquitetura de efeitos futuros.
+
+  NENHUM efeito foi implementado. Apenas a estrutura de definicao.
+
+  Efeitos definidos (estrutura apenas):
+    fadeIn  - tipo 'appear',   default: { duration: 300 }
+    fadeOut - tipo 'disappear', default: { duration: 300 }
+    blink   - tipo 'image',     default: { interval: 500, count: 3 }
+    wobble  - tipo 'image',     default: { amplitude: 5, duration: 400 }
+
+  Metodos:
+    getEffect(name)           - Retorna definicao de um efeito
+    getEffectsByType(type)    - Retorna efeitos de um tipo especifico
+    validateSettings(name, s) - Valida configuracoes de um efeito
+    getAllEffects()           - Retorna todos os efeitos disponiveis
+
+  Dependencias: nenhuma
+
+2.5. StampPersistenceAdapter (classe)
+
+  Nao implementa save/load real. Apenas prepara arquitetura.
+
+  Metodos:
+    toJSON()   - Prepara dados de stamps + settings + nextZIndex para exportacao
+    fromJSON() - Prepara estrutura para importacao de dados (nao modifica estado)
+
+  Dependencias: ImageStampManager, StampSettingsManager
+
+2.6. STAMP COMMANDS (classes)
+
+  Quatro classes de comando preparadas para futura integracao com Undo/Redo:
+
+    AddStampCommand
+      - Armazena stampData
+      - execute(): adiciona stamp, guarda ID gerado
+      - undo(): remove stamp pelo ID
+
+    RemoveStampCommand
+      - Armazena stampId
+      - execute(): remove stamp, guarda dados removidos
+      - undo(): readiciona stamp com dados salvos
+
+    MoveStampCommand
+      - Armazena stampId, oldX, oldY, newX, newY
+      - execute(): move para newX/newY
+      - undo(): move para oldX/oldY
+
+    ReplaceStampCommand
+      - Armazena slot, newStampData, oldStamps
+      - execute(): salva stamps antigos, remove todos do slot, adiciona novo
+      - undo(): remove novo, readiciona antigos
+
+  Observacao: NAO integrados ao HistoryManager nesta etapa.
+
+================================================================================
+3. ALTERACOES NO ESTADO GLOBAL (EditorState)
+================================================================================
+
+  EditorState.stamps (ALTERADO - antes era objeto vazio)
+    list: []              - Array de StampEntity
+    nextZIndex: 1         - Contador para zIndex auto-incrementado
+
+  EditorState.stampSettings (NOVO)
+    slots: {}             - Objeto slot_numero -> SlotConfiguration
+    defaultSizePercent: 15 - Tamanho percentual padrao para stamps
+
+================================================================================
+4. MODELOS DE DADOS
+================================================================================
+
+4.1. StampEntity
+
+  {
+    id:          string (UUID v4),
+    slot:        number (0-9, 0 = sem slot),
+    src:         string (URL ou data URI da imagem),
+    sourceType:  string ('url' | 'datauri' | 'clipboard'),
+    worldX:      number (coordenada X no espaco do mundo),
+    worldY:      number (coordenada Y no espaco do mundo),
+    width:       number (largura em pixels do mundo),
+    height:      number (altura em pixels do mundo),
+    zIndex:      number (ordem de sobreposicao, auto-incrementado),
+    appearEffect:       string|null,
+    appearSettings:     object|null,
+    disappearEffect:    string|null,
+    disappearSettings:  object|null,
+    imageEffect:        string|null,
+    imageEffectSettings: object|null,
+    createdAt:   number (timestamp Date.now())
+  }
+
+4.2. SlotConfiguration
+
+  {
+    slot:           number (1-9),
+    keybind:        string (tecla associada, padrao: '1'-'9'),
+    source:         string|null (fonte da imagem),
+    sourceType:     string|null ('url' | 'datauri' | 'clipboard'),
+    sizePercent:    number (tamanho percentual, padrao: 15),
+    appearEffect:   string|null,
+    disappearEffect: string|null,
+    imageEffect:    string|null,
+    effectSettings: object,
+  }
+
+================================================================================
+5. EVENTOS ADICIONADOS
+================================================================================
+
+  STAMP_ADDED:           'stamp:added'
+  STAMP_REMOVED:         'stamp:removed'
+  STAMP_MODIFIED:        'stamp:modified'
+  STAMP_SETTINGS_CHANGED: 'stamp:settings-changed'
+
+================================================================================
+6. ALTERACOES NO DOM
+================================================================================
+
+  - Adicionado <div id="image-stamp-layer"></div> dentro de #canvas-container
+    (apos #layer-fading, antes do fechamento do container)
+
+  - Adicionado 'image-stamp-layer' a lista de IDs em initDOM()
+    para referencia via DOM['image-stamp-layer']
+
+================================================================================
+7. ALTERACOES NO CSS
+================================================================================
+
+  Adicionado:
+
+  #image-stamp-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+================================================================================
+8. NOVOS MANAGERS NO APP
+================================================================================
+
+  Adicionados ao App.constructor() nesta ordem:
+
+    this.imageStampManager     = new ImageStampManager(this.eventBus);
+    this.stampSettingsManager  = new StampSettingsManager(this.eventBus);
+    this.stampEffectManager    = new StampEffectManager();
+    this.stampPersistenceAdapter = new StampPersistenceAdapter(
+      this.imageStampManager,
+      this.stampSettingsManager
+    );
+
+  Ordem de inicializacao no constructor:
+    1. eventBus
+    2. notificationManager
+    3. keybindManager
+    4. historyManager
+    5. canvasManager
+    6. layerManager
+    7. toolManager
+    8. uiManager
+    9. settingsManager
+    10. inputManager
+    11. imageStampManager (NOVO)
+    12. stampSettingsManager (NOVO)
+    13. stampEffectManager (NOVO)
+    14. stampPersistenceAdapter (NOVO)
+
+================================================================================
+9. DEPENDENCIAS INTERNAS
+================================================================================
+
+  ImageStampManager        -> EventBus
+  StampSettingsManager     -> EventBus
+  StampEffectManager       -> (nenhuma)
+  StampPersistenceAdapter  -> ImageStampManager, StampSettingsManager
+  AddStampCommand          -> ImageStampManager
+  RemoveStampCommand       -> ImageStampManager
+  MoveStampCommand         -> ImageStampManager
+  ReplaceStampCommand      -> ImageStampManager
+
+================================================================================
+10. PONTOS PREPARADOS PARA ETAPAS FUTURAS
+================================================================================
+
+  - Slot settings (1-9) prontos para configuracao via interface
+  - Stamp layer DOM pronta para receber elementos img
+  - ImageStampManager.add() ja cria entidades completas com ID e zIndex
+  - StampEffectManager com estrutura de efeitos (fadeIn, fadeOut, blink, wobble)
+  - StampPersistenceAdapter com toJSON()/fromJSON() para save/load futuro
+  - StampCommand classes prontas para integracao com HistoryManager
+  - StampEntity ja inclui campos para efeitos (appear, disappear, image)
+  - Coordenadas worldX/worldY ja no espaco do mundo (via screenToWorld)
+  - Eventos de stamp ja integrados ao EventBus para desacoplamento
+  - StampSettingsManager preparado para futura persistencia em localStorage
+
+================================================================================
+11. FUNCIONALIDADES QUE AINDA NAO FORAM IMPLEMENTADAS
+================================================================================
+
+  - Interface visual dos slots (1-9) - NÃO implementado
+  - Preview de imagem no cursor ao selecionar slot - NÃO implementado
+  - Insercao permanente de stamps no canvas - NÃO implementado
+  - GIFs animados - NÃO implementado
+  - Efeitos visuais (fadeIn, fadeOut, blink, wobble) - NÃO implementado
+  - Exclusao de stamps - NÃO implementado
+  - Arrastar/posicionar stamps - NÃO implementado
+  - Integracao com Undo/Redo (StampCommand nao esta no HistoryManager) - NÃO implementado
+  - Save/load via localStorage - NÃO implementado
+  - Exportacao JSON - NÃO implementado
+  - Drag and drop de imagens para criar stamps - NÃO implementado
+  - Teclas 1-9 nao tem acao vinculada - NÃO implementado
+  - Nenhuma alteracao na interface do usuario - NÃO implementado
+
+================================================================================
+12. TESTES MANUAIS RECOMENDADOS (VALIDACAO DE REGRESSAO)
+================================================================================
+
+  Apos concluir esta etapa, validar que:
+
+  1. Abrir editor.html no navegador, verificar splash screen
+  2. Verificar console do navegador - nenhum erro ou excecao
+  3. Carregar uma imagem (PNG/JPG/WebP)
+  4. Testar ferramenta Lapis (P) - desenhar
+  5. Testar ferramenta Borracha (E) - apagar
+  6. Testar ferramenta Caneta que Some (F) - desenhar e esperar sumir
+  7. Testar zoom (scroll do mouse)
+  8. Testar ferramenta Mao (H) para pan
+  9. Testar Ctrl+Z (desfazer) e Ctrl+Y (refazer)
+  10. Testar zoom slider e botoes +/-
+  11. Testar "Ajustar a tela" e "Zoom 100%"
+  12. Testar atalhos de teclado (P, E, F, H, etc.)
+  13. Abrir configuracoes (Ctrl+,) e verificar keybinds
+  14. Verificar no inspetor de elementos que #image-stamp-layer existe
+     em #canvas-container
+  15. Verificar no console que app.imageStampManager esta inicializado:
+     console.log(app.imageStampManager)
+  16. Verificar no console que app.stampSettingsManager esta inicializado:
+     console.log(app.stampSettingsManager)
+  17. Verificar no console que EditorState.stamps possui list e nextZIndex:
+     console.log(EditorState.stamps)
+  18. Verificar no console que EditorState.stampSettings existe:
+     console.log(EditorState.stampSettings)
+  19. Testar adicao manual de stamp via console:
+     app.imageStampManager.add({ slot: 1, src: 'https://via.placeholder.com/100', worldX: 100, worldY: 100, width: 100, height: 100 })
+     console.log(app.imageStampManager.getAll())
+     deve retornar array com 1 stamp
+
+================================================================================
+13. CUIDADOS PARA EVITAR REGRESSOES
+================================================================================
+
+  1. NENHUMA funcionalidade existente foi alterada. Todo codigo novo e
+     aditivo, nao modificando comportamento previo.
+
+  2. A ordem de inicializacao no App.constructor foi preservada, com os
+     novos managers adicionados ao final (apos inputManager).
+
+  3. Image-stamp-layer nao interfere com layers existentes pois:
+     - Tem z-index 5 (entre canvas e cursor)
+     - Tem pointer-events: none
+     - Nao possui tamanho (width/height: 0) ate que elementos sejam inseridos
+
+  4. Nenhum evento novo foi interceptado por sistemas existentes.
+
+  5. Nenhum keybind foi alterado ou adicionado.
+
+  6. Nenhuma alteracao foi feita em:
+     - Tool classes (Pencil, Eraser, FadingPen, Hand)
+     - ToolManager
+     - UIManager
+     - SettingsManager
+     - CursorManager
+     - CanvasManager
+     - LayerManager
+     - HistoryManager
+     - KeybindManager
+     - InputManager
+     - NotificationManager
+     - EventBus
+     - init()
+     - _bindEvents()
+     - _registerTools()
+     - loadImage()
+     - renderPermanentCanvas()
+     - ensureFadingLoop()
+
+  7. Nao ha codigo morto. Toda infraestrutura implementada e minima e
+     necessaria para as proximas etapas.
+
+================================================================================
+14. DESCRICAO DA PROXIMA ETAPA (ETAPA 2)
+================================================================================
+
+A Etapa 2 devera implementar:
+
+  - Interface visual de configuracao dos slots (1-9)
+  - Preview de imagem no cursor ao selecionar slot
+  - Insercao permanente de stamps ao clicar no canvas
+  - Gerenciamento basico de stamps na interface:
+    * Lista de stamps inseridos
+    * Exclusao de stamps individuais
+    * Selecao de slot ativo
+  - Teclas 1-9 para selecionar slot e inserir stamp
+  - Integracao com o sistema de coordenadas (world space)
+  - Integracao com a camada #image-stamp-layer (criar elementos img)
+  - Nao deve quebrar nenhuma funcionalidade existente
+
+IMPORTANTE para a Etapa 2:
+  - Utilizar os managers criados nesta etapa (ImageStampManager,
+    StampSettingsManager, StampEffectManager)
+  - Utilizar os modelos de dados (StampEntity, SlotConfiguration)
+  - Utilizar o EventBus para comunicacao
+  - Stamps devem ser renderizados como elementos <img> dentro de
+    #image-stamp-layer
+  - Coordenadas devem ser world space
+  - Nao implementar ainda:
+    * Efeitos visuais avancados
+    * Save/load
+    * GIFs animados
+    * Exportacao
+
+================================================================================
+FIM DO DOCUMENTO DE HANDOFF - STAGE 01
+================================================================================
