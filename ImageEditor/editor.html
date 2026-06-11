@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Editor</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-primary: #1a1a2e; --bg-surface: #2a2a3e; --bg-elevated: #353550;
+  --bg-canvas: #3a3a4a; --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.12);
+  --text-primary: #e0e0e0; --text-secondary: #9a9ab0; --text-muted: #6a6a80;
+  --accent: #0078d4; --accent-hover: #1a8ae8; --accent-glow: rgba(0,120,212,0.3);
+  --success: #2ea043; --error: #da3633; --warning: #d29922;
+  --titlebar-h: 48px; --toolbar-w: 56px; --options-w: 240px; --statusbar-h: 40px;
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --t-fast: 0.15s ease; --t-norm: 0.25s ease; --t-slow: 0.35s ease;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+html, body { height: 100%; overflow: hidden; font-family: var(--font); background: var(--bg-primary); color: var(--text-primary); }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input[type="range"] { -webkit-appearance: none; appearance: none; background: none; cursor: pointer; }
+input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: var(--text-muted); border-radius: 2px; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg-surface); margin-top: -6px; box-shadow: var(--shadow-sm); transition: background var(--t-fast); }
+input[type="range"]::-webkit-slider-thumb:hover { background: var(--accent-hover); }
+input[type="range"]::-moz-range-track { height: 4px; background: var(--text-muted); border-radius: 2px; }
+input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg-surface); cursor: pointer; }
+kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inherit; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 3px; color: var(--text-secondary); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+/* LAYOUT */
+#app { display: flex; flex-direction: column; height: 100vh; background: var(--bg-primary); }
+
+/* TITLE BAR */
+#titlebar { display: flex; align-items: center; justify-content: space-between; height: var(--titlebar-h); padding: 0 16px; background: rgba(30,30,50,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; flex-shrink: 0; }
+#app-name { font-size: 15px; font-weight: 600; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
+#app-name i { color: var(--accent); font-size: 18px; }
+#titlebar-actions { display: flex; gap: 4px; }
+#settings-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 18px; transition: all var(--t-fast); }
+#settings-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* WORKSPACE */
+#workspace { display: flex; flex: 1; min-height: 0; position: relative; }
+
+/* TOOLBAR */
+#toolbar { width: var(--toolbar-w); background: rgba(42,42,62,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 2px; flex-shrink: 0; z-index: 50; }
+.tool-group { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; width: 100%; }
+.tool-group + .tool-group { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 8px; }
+.tool-btn, #undo-btn, #redo-btn, #fit-to-screen-btn, #zoom-100-btn { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); font-size: 17px; transition: all var(--t-fast); position: relative; color: var(--text-secondary); }
+.tool-btn:hover, #undo-btn:hover, #redo-btn:hover, #fit-to-screen-btn:hover, #zoom-100-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.tool-btn.active { background: rgba(0,120,212,0.2); color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+.tool-btn.active::after { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--accent); border-radius: 0 2px 2px 0; }
+#undo-btn:disabled, #redo-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* CANVAS AREA */
+#canvas-area { flex: 1; position: relative; overflow: hidden; background-color: #3a3a4a; background-image: linear-gradient(45deg, #4a4a5a 25%, transparent 25%), linear-gradient(-45deg, #4a4a5a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #4a4a5a 75%), linear-gradient(-45deg, transparent 75%, #4a4a5a 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+#canvas-container { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
+#canvas-container canvas { position: absolute; top: 0; left: 0; display: block; pointer-events: none; }
+#layer-background { position: relative !important; }
+
+/* CURSOR CUSTOM (rendered by JS) */
+#cursor-custom { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 200; display: none; }
+#canvas-area.tool-active { cursor: none; }
+
+/* TOOL OPTIONS */
+#tool-options { width: var(--options-w); background: rgba(42,42,62,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; transition: width var(--t-norm), opacity var(--t-norm); z-index: 50; }
+#tool-options.collapsed { width: 36px; min-width: 36px; }
+#tool-options.collapsed #tool-options-header { border-bottom: none; padding: 12px 4px; justify-content: center; }
+#tool-options.collapsed #tool-options-content { display: none; }
+#tool-options-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+#tool-options-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+#tool-options-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 13px; color: var(--text-muted); transition: all var(--t-fast); }
+#tool-options-close:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+#tool-options-content { flex: 1; padding: 16px; overflow-y: auto; }
+.option-group { margin-bottom: 16px; }
+.option-group:last-child { margin-bottom: 0; }
+.option-label { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+.option-value { color: var(--text-primary); font-weight: 500; }
+.option-group input[type="range"] { width: 100%; }
+
+/* STATUS BAR */
+#statusbar { display: flex; align-items: center; justify-content: space-between; height: var(--statusbar-h); padding: 0 16px; background: rgba(26,26,46,0.92); border-top: 1px solid var(--border); flex-shrink: 0; z-index: 100; font-size: 12px; color: var(--text-secondary); }
+#status-left, #status-center, #status-right { display: flex; align-items: center; gap: 12px; }
+#status-center { gap: 8px; }
+#status-center button { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 11px; color: var(--text-secondary); transition: all var(--t-fast); }
+#status-center button:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+#zoom-slider { width: 120px; }
+#zoom-percent { min-width: 44px; font-weight: 600; color: var(--text-primary); font-size: 13px; }
+#status-right { gap: 16px; }
+#status-filename, #status-dimensions { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#status-tool { display: flex; align-items: center; gap: 6px; }
+#status-tool i { font-size: 13px; }
+
+/* SPLASH SCREEN */
+#splash-screen { position: absolute; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: radial-gradient(ellipse at center, var(--bg-surface) 0%, var(--bg-primary) 100%); transition: opacity var(--t-slow); }
+#splash-screen.hidden { opacity: 0; pointer-events: none; }
+#splash-content { text-align: center; max-width: 520px; padding: 40px; }
+#splash-icon { font-size: 64px; color: var(--accent); margin-bottom: 16px; animation: pulse-glow 3s ease-in-out infinite; }
+@keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 10px rgba(0,120,212,0.3)); } 50% { filter: drop-shadow(0 0 20px rgba(0,120,212,0.6)); } }
+#splash-content h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+#splash-content p { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
+#splash-dropzone { border: 2px dashed var(--border-strong); border-radius: var(--radius-lg); padding: 48px 32px; cursor: pointer; transition: all var(--t-norm); background: rgba(255,255,255,0.02); }
+#splash-dropzone:hover { border-color: var(--accent); background: rgba(0,120,212,0.05); }
+#splash-dropzone.dragover { border-color: var(--accent); background: rgba(0,120,212,0.1); transform: scale(1.02); }
+#splash-dropzone i { font-size: 48px; color: var(--text-muted); margin-bottom: 12px; }
+#splash-dropzone p { font-size: 15px; color: var(--text-secondary); margin-bottom: 0; }
+#splash-tips { display: flex; flex-direction: column; gap: 6px; margin-top: 24px; }
+.tip-card { font-size: 12px; color: var(--text-muted); }
+.tip-card kbd { margin: 0 2px; }
+
+/* SETTINGS MODAL */
+#settings-modal { position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity var(--t-norm); }
+#settings-modal.open { opacity: 1; pointer-events: auto; }
+#settings-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+#settings-content { position: relative; background: var(--bg-elevated); border-radius: var(--radius-lg); width: 520px; max-height: 80vh; overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid var(--border); transform: scale(0.95); transition: transform var(--t-norm); }
+#settings-modal.open #settings-content { transform: scale(1); }
+#settings-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+#settings-header h2 { font-size: 18px; font-weight: 600; }
+#settings-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 16px; color: var(--text-secondary); transition: all var(--t-fast); }
+#settings-close:hover { background: rgba(255,255,255,0.08); }
+#settings-body { padding: 24px; }
+.settings-section { margin-bottom: 28px; }
+.settings-section:last-child { margin-bottom: 0; }
+.settings-section h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 12px; }
+.settings-section p { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+.settings-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--accent); color: #fff; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; transition: all var(--t-fast); margin-top: 8px; }
+.settings-btn:hover { background: var(--accent-hover); }
+#keybinds-reset { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+#keybinds-reset:hover { background: rgba(255,255,255,0.12); }
+.settings-version { font-size: 11px !important; color: var(--text-muted) !important; text-align: center; }
+.keybind-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.03); margin-bottom: 4px; }
+.keybind-row:hover { background: rgba(255,255,255,0.06); }
+.keybind-label { font-size: 13px; flex: 1; }
+.keybind-key { font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.08); padding: 3px 10px; border-radius: var(--radius-sm); min-width: 80px; text-align: center; }
+.keybind-change-btn { font-size: 11px; padding: 4px 10px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.06); color: var(--text-secondary); margin-left: 8px; transition: all var(--t-fast); }
+.keybind-change-btn:hover { background: rgba(255,255,255,0.12); color: var(--text-primary); }
+.keybind-change-btn.capturing { background: var(--warning); color: #000; font-weight: 600; animation: pulse-bg 1s ease-in-out infinite; }
+@keyframes pulse-bg { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+/* NOTIFICATIONS */
+#notifications { position: fixed; bottom: 60px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.notification { padding: 12px 20px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-md); transform: translateX(120%); opacity: 0; transition: all var(--t-norm); pointer-events: auto; max-width: 360px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.notification.show { transform: translateX(0); opacity: 1; }
+.notification.hide { transform: translateX(120%); opacity: 0; }
+.notification.info { background: rgba(0,120,212,0.9); color: #fff; }
+.notification.success { background: rgba(46,160,67,0.9); color: #fff; }
+.notification.error { background: rgba(218,54,51,0.9); color: #fff; }
+.notification.warning { background: rgba(210,153,34,0.9); color: #000; }
+
+/* FILE INPUT */
+#file-input { display: none; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  #tool-options { width: 200px; }
+  :root { --options-w: 200px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header id="titlebar">
+    <div id="app-name"><i class="fas fa-paint-brush"></i> Image Editor</div>
+    <div id="titlebar-actions">
+      <button id="settings-btn" title="Configurações"><i class="fas fa-cog"></i></button>
+    </div>
+  </header>
+
+  <main id="workspace">
+    <aside id="toolbar">
+      <div class="tool-group">
+        <button class="tool-btn active" data-tool="pencil" title="Lápis (P)"><i class="fas fa-pencil-alt"></i></button>
+        <button class="tool-btn" data-tool="eraser" title="Borracha (E)"><i class="fas fa-eraser"></i></button>
+        <button class="tool-btn" data-tool="fading-pen" title="Caneta que Some (F)"><i class="fas fa-pen-fancy"></i></button>
+        <button class="tool-btn" data-tool="hand" title="Mão (H)"><i class="fas fa-hand-paper"></i></button>
+      </div>
+      <div class="tool-group">
+        <button id="undo-btn" disabled title="Desfazer (Ctrl+Z)"><i class="fas fa-undo"></i></button>
+        <button id="redo-btn" disabled title="Refazer (Ctrl+Y)"><i class="fas fa-redo"></i></button>
+      </div>
+      <div class="tool-group">
+        <button id="fit-to-screen-btn" title="Ajustar à tela"><i class="fas fa-expand"></i></button>
+        <button id="zoom-100-btn" title="Zoom 100% (Ctrl+0)"><i class="fas fa-percent"></i></button>
+      </div>
+    </aside>
+
+    <section id="canvas-area">
+      <div id="canvas-container">
+        <canvas id="layer-background"></canvas>
+        <canvas id="layer-permanent"></canvas>
+        <canvas id="layer-temp"></canvas>
+        <canvas id="layer-fading"></canvas>
+      </div>
+      <div id="splash-screen">
+        <div id="splash-content">
+          <div id="splash-icon"><i class="fas fa-image"></i></div>
+          <h1>Image Editor</h1>
+          <p>Editor de imagens profissional &mdash; Paint 3D Style</p>
+          <div id="splash-dropzone">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Arraste uma imagem aqui ou clique para selecionar</p>
+          </div>
+          <div id="splash-tips">
+            <div class="tip-card"><kbd>P</kbd> L&aacute;pis &nbsp; <kbd>E</kbd> Borracha &nbsp; <kbd>F</kbd> Caneta &nbsp; <kbd>H</kbd> M&atilde;o</div>
+            <div class="tip-card"><kbd>Scroll</kbd> Zoom &nbsp; <kbd>Ctrl+Z</kbd> Desfazer &nbsp; <kbd>Ctrl+Y</kbd> Refazer</div>
+            <div class="tip-card">Formatos suportados: PNG, JPG, JPEG, WebP</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside id="tool-options">
+      <div id="tool-options-header">
+        <span id="tool-options-title">L&aacute;pis</span>
+        <button id="tool-options-close"><i class="fas fa-chevron-right"></i></button>
+      </div>
+      <div id="tool-options-content"></div>
+    </aside>
+  </main>
+
+  <footer id="statusbar">
+    <div id="status-left">
+      <span id="status-tool"><i class="fas fa-pencil-alt"></i> L&aacute;pis</span>
+    </div>
+    <div id="status-center">
+      <button id="zoom-out-btn" title="Reduzir zoom"><i class="fas fa-minus"></i></button>
+      <input type="range" id="zoom-slider" min="10" max="1000" value="100" step="1">
+      <button id="zoom-in-btn" title="Aumentar zoom"><i class="fas fa-plus"></i></button>
+      <span id="zoom-percent">100%</span>
+    </div>
+    <div id="status-right">
+      <span id="status-filename">Nenhuma imagem</span>
+      <span id="status-dimensions"></span>
+    </div>
+  </footer>
+</div>
+
+<div id="settings-modal">
+  <div id="settings-backdrop"></div>
+  <div id="settings-content">
+    <div id="settings-header">
+      <h2>Configura&ccedil;&otilde;es</h2>
+      <button id="settings-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="settings-body">
+      <section class="settings-section">
+        <h3>Informa&ccedil;&otilde;es da Imagem</h3>
+        <p id="settings-filename">Arquivo: Nenhuma imagem</p>
+        <p id="settings-dimensions">Dimens&otilde;es: &mdash;</p>
+        <button id="settings-new-image" class="settings-btn"><i class="fas fa-upload"></i> Enviar Nova Imagem</button>
+      </section>
+      <section class="settings-section">
+        <h3>Atalhos de Teclado</h3>
+        <div id="keybinds-list"></div>
+        <button id="keybinds-reset" class="settings-btn"><i class="fas fa-undo-alt"></i> Restaurar Padr&otilde;es</button>
+      </section>
+      <section class="settings-section">
+        <p class="settings-version">Vers&atilde;o 1.0.0</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept="image/png,image/jpeg,image/webp">
+<div id="notifications"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  scale: 1, offsetX: 0, offsetY: 0, activeToolName: 'pencil',
+  image: null, imageUrl: null, imageName: '', imageWidth: 0, imageHeight: 0,
+  history: [], redoStack: [], maxHistory: 50,
+  isDrawing: false, currentStroke: null,
+  isPanning: false, panStart: null, panOffsetStart: null,
+  fadingStrokes: [], currentFadingStroke: null, fadingLoopId: null,
+  isOptionsOpen: true, keybinds: {},
+  defaultKeybinds: {
+    pencil:'p',eraser:'e','fading-pen':'f',hand:'h',undo:'ctrl+z',redo:'ctrl+y',
+    'zoom-in':'ctrl++','zoom-out':'ctrl+-','zoom-100':'ctrl+0',
+    'fit-to-screen':'ctrl+shift+f',settings:'ctrl+,','toggle-options':'ctrl+\\'
+  }
+};
+
+const KEYBIND_ACTIONS = [
+  {id:'pencil',label:'Selecionar l&aacute;pis'},{id:'eraser',label:'Selecionar borracha'},
+  {id:'fading-pen',label:'Selecionar caneta tempor&aacute;ria'},{id:'hand',label:'Selecionar ferramenta m&atilde;o'},
+  {id:'undo',label:'Desfazer'},{id:'redo',label:'Refazer'},
+  {id:'zoom-in',label:'Ampliar zoom'},{id:'zoom-out',label:'Reduzir zoom'},
+  {id:'zoom-100',label:'Zoom 100%'},{id:'fit-to-screen',label:'Ajustar &agrave; tela'},
+  {id:'settings',label:'Abrir configura&ccedil;&otilde;es'},{id:'toggle-options',label:'Abrir painel de op&ccedil;&otilde;es'}
+];
+
+// ============================================================
+// DOM REFERENCES
+// ============================================================
+const DOM = {};
+
+function initDOM() {
+  const ids = ['app','canvas-area','canvas-container','layer-background','layer-permanent',
+    'layer-temp','layer-fading','toolbar','tool-options','tool-options-title',
+    'tool-options-content','tool-options-close','status-tool','status-filename','status-dimensions',
+    'zoom-slider','zoom-percent','zoom-in-btn','zoom-out-btn','fit-to-screen-btn','zoom-100-btn',
+    'settings-btn','settings-modal','settings-backdrop','settings-close','settings-new-image','splash-screen',
+    'splash-dropzone','file-input','notifications','keybinds-list','keybinds-reset',
+    'settings-filename','settings-dimensions','undo-btn','redo-btn'];
+  ids.forEach(id => { DOM[id] = document.getElementById(id); });
+  DOM.canvases = [DOM['layer-background'],DOM['layer-permanent'],DOM['layer-temp'],DOM['layer-fading']];
+  DOM.ctxBg = DOM['layer-background'].getContext('2d');
+  DOM.ctxPerm = DOM['layer-permanent'].getContext('2d');
+  DOM.ctxTemp = DOM['layer-temp'].getContext('2d');
+  DOM.ctxFade = DOM['layer-fading'].getContext('2d');
+  DOM.ctxBg.imageSmoothingEnabled = true;
+  DOM.ctxBg.imageSmoothingQuality = 'high';
+  DOM.ctxPerm.imageSmoothingEnabled = true;
+  DOM.ctxFade.imageSmoothingEnabled = true;
+}
+
+// ============================================================
+// UTILITY
+// ============================================================
+function getCanvasCoords(clientX, clientY) {
+  const rect = DOM['canvas-area'].getBoundingClientRect();
+  return {
+    x: (clientX - rect.left - state.offsetX) / state.scale,
+    y: (clientY - rect.top - state.offsetY) / state.scale
+  };
+}
+
+function formatKeybindDisplay(combo) {
+  if (!combo) return '&mdash;';
+  return combo.split('+').map(p => {
+    if (p==='ctrl') return 'Ctrl'; if (p==='shift') return 'Shift';
+    if (p==='alt') return 'Alt'; if (p==='space') return 'Espa&ccedil;o';
+    if (p==='arrowup') return '&uarr;'; if (p==='arrowdown') return '&darr;';
+    if (p==='arrowleft') return '&larr;'; if (p==='arrowright') return '&rarr;';
+    return p.toUpperCase();
+  }).join(' + ');
+}
+
+// ============================================================
+// NOTIFICATION MANAGER
+// ============================================================
+class NotificationManager {
+  show(message, type = 'info', duration = 3500) {
+    const el = document.createElement('div');
+    el.className = 'notification ' + type;
+    el.innerHTML = message;
+    DOM.notifications.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => {
+      el.classList.remove('show'); el.classList.add('hide');
+      setTimeout(() => el.remove(), 300);
+    }, duration);
+  }
+}
+
+// ============================================================
+// KEYBIND MANAGER
+// ============================================================
+class KeybindManager {
+  constructor() { this.keybinds = {}; this._capturing = false; this._captureCB = null; }
+
+  load() {
+    try {
+      const saved = localStorage.getItem('image-editor-keybinds');
+      this.keybinds = saved ? JSON.parse(saved) : { ...state.defaultKeybinds };
+    } catch(e) { this.keybinds = { ...state.defaultKeybinds }; }
+    state.keybinds = this.keybinds;
+  }
+
+  save() {
+    try { localStorage.setItem('image-editor-keybinds', JSON.stringify(this.keybinds)); } catch(e) {}
+  }
+
+  reset() {
+    this.keybinds = { ...state.defaultKeybinds };
+    state.keybinds = this.keybinds;
+    this.save();
+  }
+
+  getActionForKey(e) {
+    const ctrl = e.ctrlKey || e.metaKey;
+    if (e.key === 'Control' || e.key === 'Alt' || e.key === 'Shift' || e.key === 'Meta') return null;
+    const parts = [];
+    if (ctrl) parts.push('ctrl');
+    if (e.altKey) parts.push('alt');
+    if (e.shiftKey) parts.push('shift');
+    let key = e.key;
+    if (key === ' ') key = 'Space';
+    const isModifier = ['Control','Alt','Shift','Meta'].includes(key);
+    if (!isModifier && key) parts.push(key.toLowerCase());
+    const combo = parts.join('+');
+    for (const [action, bind] of Object.entries(this.keybinds)) {
+      if (bind === combo) return { action, combo };
+    }
+    if (ctrl && (e.key === '=' || e.key === '+') && (this.keybinds['zoom-in'] === 'ctrl++' || this.keybinds['zoom-in'] === 'ctrl+=')) return { action:'zoom-in', combo:'ctrl++' };
+    if (ctrl && e.key === '-' && this.keybinds['zoom-out'] === 'ctrl+-') return { action:'zoom-out', combo:'ctrl+-' };
+    return null;
+  }
+
+  setKeybind(action, combo) {
+    for (const [a, b] of Object.entries(this.keybinds)) {
+      if (a !== action && b === combo) return { success: false, conflict: a };
+    }
+    this.keybinds[action] = combo;
+    state.keybinds = this.keybinds;
+    return { success: true };
+  }
+
+  startCapture(callback) { this._capturing = true; this._captureCB = callback; }
+  stopCapture() { this._capturing = false; this._captureCB = null; }
+
+  handleKeyDown(e) {
+    if (this._capturing) {
+      e.preventDefault(); e.stopPropagation();
+      const parts = [];
+      if (e.ctrlKey || e.metaKey) parts.push('ctrl');
+      if (e.altKey) parts.push('alt');
+      if (e.shiftKey) parts.push('shift');
+      const key = e.key.toLowerCase();
+      if (!['control','alt','shift','meta'].includes(key)) {
+        if (key === ' ') parts.push('space'); else parts.push(key);
+      }
+      const combo = parts.join('+');
+      if (combo && this._captureCB) { this._captureCB(combo); this._capturing = false; this._captureCB = null; }
+      return;
+    }
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    const result = this.getActionForKey(e);
+    if (result && app) { e.preventDefault(); app.executeAction(result.action); }
+  }
+}
+
+// ============================================================
+// HISTORY MANAGER
+// ============================================================
+class HistoryManager {
+  push(stroke) {
+    state.redoStack = [];
+    state.history.push(JSON.parse(JSON.stringify(stroke)));
+    if (state.history.length > state.maxHistory) state.history.shift();
+    this._updateUI();
+  }
+
+  undo() {
+    if (state.history.length === 0) { app.notification('Nada para desfazer', 'warning', 1500); return; }
+    state.redoStack.push(state.history.pop());
+    this._updateUI();
+    app.renderPermanentCanvas();
+  }
+
+  redo() {
+    if (state.redoStack.length === 0) { app.notification('Nada para refazer', 'warning', 1500); return; }
+    state.history.push(state.redoStack.pop());
+    this._updateUI();
+    app.renderPermanentCanvas();
+  }
+
+  clear() { state.history = []; state.redoStack = []; this._updateUI(); }
+
+  _updateUI() {
+    DOM['undo-btn'].disabled = state.history.length === 0;
+    DOM['redo-btn'].disabled = state.redoStack.length === 0;
+  }
+}
+
+// ============================================================
+// LAYER MANAGER
+// ============================================================
+class LayerManager {
+  resize(w, h) {
+    DOM.canvases.forEach(c => { c.width = w; c.height = h; });
+    DOM['canvas-container'].style.width = w + 'px';
+    DOM['canvas-container'].style.height = h + 'px';
+  }
+
+  clearAll() {
+    DOM.canvases.forEach(c => {
+      c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    });
+  }
+
+  clearLayer(name) {
+    const map = { background:'layer-background', permanent:'layer-permanent', temp:'layer-temp', fading:'layer-fading' };
+    const canvas = DOM[map[name]];
+    if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+// ============================================================
+// ZOOM MANAGER
+// ============================================================
+class ZoomManager {
+  constructor() { this.minScale = 0.1; this.maxScale = 10; }
+
+  setScale(newScale, cx, cy) {
+    newScale = Math.max(this.minScale, Math.min(this.maxScale, newScale));
+    if (cx !== undefined && cy !== undefined) {
+      const canvasX = (cx - state.offsetX) / state.scale;
+      const canvasY = (cy - state.offsetY) / state.scale;
+      state.offsetX = cx - canvasX * newScale;
+      state.offsetY = cy - canvasY * newScale;
+    } else {
+      const ca = DOM['canvas-area'];
+      const ccx = ca.clientWidth / 2, ccy = ca.clientHeight / 2;
+      const canvasX = (ccx - state.offsetX) / state.scale;
+      const canvasY = (ccy - state.offsetY) / state.scale;
+      state.offsetX = ccx - canvasX * newScale;
+      state.offsetY = ccy - canvasY * newScale;
+    }
+    state.scale = newScale;
+    app.updateTransform();
+    app.updateUI();
+  }
+
+  zoomIn() { this.setScale(state.scale * 1.2); }
+  zoomOut() { this.setScale(state.scale / 1.2); }
+  setZoom100() {
+    const ca = DOM['canvas-area'];
+    state.offsetX = Math.max(0, (ca.clientWidth - state.imageWidth) / 2);
+    state.offsetY = Math.max(0, (ca.clientHeight - state.imageHeight) / 2);
+    state.scale = 1;
+    app.updateTransform();
+    app.updateUI();
+  }
+
+  fitToScreen() {
+    const cw = DOM['canvas-area'].clientWidth, ch = DOM['canvas-area'].clientHeight;
+    if (state.imageWidth === 0 || state.imageHeight === 0) return;
+    const scaleX = cw / state.imageWidth, scaleY = ch / state.imageHeight;
+    const fitScale = Math.min(scaleX, scaleY) * 0.95;
+    state.offsetX = (cw - state.imageWidth * fitScale) / 2;
+    state.offsetY = (ch - state.imageHeight * fitScale) / 2;
+    state.scale = fitScale;
+    app.updateTransform();
+    app.updateUI();
+  }
+
+  handleWheel(e) {
+    e.preventDefault();
+    const rect = DOM['canvas-area'].getBoundingClientRect();
+    const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+    const delta = -e.deltaY;
+    const factor = delta > 0 ? 1.08 : 1 / 1.08;
+    this.setScale(state.scale * factor, cx, cy);
+  }
+}
+
+// ============================================================
+// CURSOR MANAGER - redesigned with double border + discreet crosshair
+// ============================================================
+class CursorManager {
+  constructor(container) {
+    this.container = container;
+    this.canvas = document.createElement('canvas');
+    this.canvas.id = 'cursor-custom';
+    this.ctx = this.canvas.getContext('2d');
+    this.canvas.width = 0;
+    this.canvas.height = 0;
+    container.appendChild(this.canvas);
+
+    this.x = -10000;
+    this.y = -10000;
+    this.visible = false;
+    this._pending = false;
+    this._handDragging = false;
+  }
+
+  move(clientX, clientY) {
+    const rect = this.container.getBoundingClientRect();
+    this.x = clientX - rect.left;
+    this.y = clientY - rect.top;
+    if (this.visible && !this._pending) {
+      this._pending = true;
+      requestAnimationFrame(() => this._draw());
+    }
+  }
+
+  requestDraw() {
+    if (!this.visible || this._pending) return;
+    this._pending = true;
+    requestAnimationFrame(() => this._draw());
+  }
+
+  setHandDragging(dragging) {
+    this._handDragging = dragging;
+    if (!this.visible) {
+      this.container.style.cursor = dragging ? 'grabbing' : 'grab';
+    }
+  }
+
+  hide() {
+    this.visible = false;
+    this.canvas.style.display = 'none';
+    this.container.classList.remove('tool-active');
+    this.container.style.cursor = '';
+    if (this.canvas.width > 0) {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  }
+
+  refresh() {
+    const tool = app.toolManager.getActiveTool();
+    if (!tool || !state.image || !tool.isActive) {
+      this.hide();
+      return;
+    }
+    if (tool.name === 'hand') {
+      this.visible = false;
+      this.canvas.style.display = 'none';
+      this.container.classList.remove('tool-active');
+      this.container.style.cursor = this._handDragging ? 'grabbing' : 'grab';
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    } else {
+      this.visible = true;
+      this.canvas.style.display = 'block';
+      this.container.classList.add('tool-active');
+      this.container.style.cursor = '';
+      this.requestDraw();
+    }
+  }
+
+  _draw() {
+    this._pending = false;
+    if (!this.visible) return;
+
+    const tool = app.toolManager.getActiveTool();
+    if (!tool || !state.image) {
+      this.hide();
+      return;
+    }
+
+    const r = Math.max(1, (tool.size || 0) * state.scale);
+    const padding = 14;
+    const needed = Math.max(Math.ceil(r * 2 + padding * 2), 40);
+    const curr = this.canvas.width;
+    if (needed > curr || needed < curr * 0.5) {
+      this.canvas.width = needed;
+      this.canvas.height = needed;
+    }
+
+    const cx = this.canvas.width / 2;
+    const cy = this.canvas.height / 2;
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.canvas.style.left = (this.x - cx) + 'px';
+    this.canvas.style.top = (this.y - cy) + 'px';
+
+    this._drawRing(ctx, cx, cy, r);
+    this._drawCrosshair(ctx, cx, cy, r);
+  }
+
+  _drawRing(ctx, cx, cy, r) {
+    ctx.save();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  _drawCrosshair(ctx, cx, cy, r) {
+    const half = Math.min(Math.max(r * 0.4, 4), 9);
+
+    ctx.save();
+    ctx.lineCap = 'round';
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - half, cy); ctx.lineTo(cx + half, cy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - half); ctx.lineTo(cx, cy + half);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - half, cy); ctx.lineTo(cx + half, cy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - half); ctx.lineTo(cx, cy + half);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+}
+
+// ============================================================
+// TOOL BASE CLASS
+// ============================================================
+class Tool {
+  constructor(config) {
+    this.name = config.name; this.label = config.label;
+    this.icon = config.icon; this.shortcut = config.shortcut;
+    this.isActive = false; this.size = config.size || 5; this.color = '#000000';
+  }
+
+  activate() {
+    this.isActive = true;
+  }
+
+  deactivate() {
+    this.isActive = false;
+    this.onCancel();
+  }
+
+  onMouseDown(e) {}
+  onMouseMove(e) {}
+  onMouseUp(e) {}
+  onCancel() {}
+  getOptions() { return []; }
+}
+
+// ============================================================
+// PENCIL TOOL
+// ============================================================
+class PencilTool extends Tool {
+  constructor() { super({ name:'pencil', label:'Lápis', icon:'pencil-alt', shortcut:'p', size:5 }); this.points = []; this._drawing = false; }
+  getOptions() { return [{ type:'range', id:'pencil-size', label:'Grossura', min:1, max:50, value:this.size, step:1, unit:'px' }]; }
+  onMouseDown(e) {
+    const coords = getCanvasCoords(e.clientX, e.clientY);
+    this._drawing = true; this.points = [coords];
+    state.currentStroke = { toolType:'pencil', points:this.points, size:this.size, color:this.color, layer:'permanent' };
+    state.isDrawing = true;
+    this._drawPoint(coords);
+  }
+  onMouseMove(e) {
+    if (!this._drawing) return;
+    const coords = getCanvasCoords(e.clientX, e.clientY);
+    this.points.push(coords);
+    this._drawSegment(this.points[this.points.length-2], coords);
+  }
+  onMouseUp(e) {
+    if (!this._drawing) return;
+    this._drawing = false; state.isDrawing = false;
+    if (this.points.length > 1) app.historyManager.push(state.currentStroke);
+    state.currentStroke = null; this.points = [];
+  }
+  onCancel() { this._drawing = false; state.isDrawing = false; this.points = []; state.currentStroke = null; }
+  _drawPoint(c) { const ctx = DOM.ctxPerm; ctx.beginPath(); ctx.arc(c.x, c.y, this.size/2, 0, Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); }
+  _drawSegment(f,t) { const ctx = DOM.ctxPerm; ctx.beginPath(); ctx.moveTo(f.x,f.y); ctx.lineTo(t.x,t.y); ctx.strokeStyle=this.color; ctx.lineWidth=this.size; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke(); }
+}
+
+// ============================================================
+// ERASER TOOL
+// ============================================================
+class EraserTool extends Tool {
+  constructor() { super({ name:'eraser', label:'Borracha', icon:'eraser', shortcut:'e', size:20 }); this.points = []; this._drawing = false; }
+  getOptions() { return [{ type:'range', id:'eraser-size', label:'Tamanho', min:5, max:100, value:this.size, step:1, unit:'px' }]; }
+  onMouseDown(e) {
+    const coords = getCanvasCoords(e.clientX, e.clientY);
+    this._drawing = true; this.points = [coords];
+    state.currentStroke = { toolType:'eraser', points:this.points, size:this.size, layer:'permanent' };
+    state.isDrawing = true;
+    this._erasePoint(coords);
+  }
+  onMouseMove(e) {
+    if (!this._drawing) return;
+    const coords = getCanvasCoords(e.clientX, e.clientY);
+    this.points.push(coords);
+    this._eraseSegment(this.points[this.points.length-2], coords);
+  }
+  onMouseUp(e) {
+    if (!this._drawing) return;
+    this._drawing = false; state.isDrawing = false;
+    if (this.points.length > 1) app.historyManager.push(state.currentStroke);
+    state.currentStroke = null; this.points = [];
+    DOM.ctxPerm.globalCompositeOperation = 'source-over';
+  }
+  onCancel() { this._drawing = false; state.isDrawing = false; this.points = []; state.currentStroke = null; DOM.ctxPerm.globalCompositeOperation = 'source-over'; }
+  _erasePoint(c) {
+    const ctx = DOM.ctxPerm; ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath(); ctx.arc(c.x, c.y, this.size/2, 0, Math.PI*2); ctx.fillStyle='rgba(0,0,0,1)'; ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  _eraseSegment(f,t) {
+    const ctx = DOM.ctxPerm; ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath(); ctx.moveTo(f.x,f.y); ctx.lineTo(t.x,t.y); ctx.strokeStyle='rgba(0,0,0,1)'; ctx.lineWidth=this.size; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+}
+
+// ============================================================
+// FADING PEN TOOL
+// ============================================================
+class FadingPenTool extends Tool {
+  constructor() { super({ name:'fading-pen', label:'Caneta que Some', icon:'pen-fancy', shortcut:'f', size:5 }); this.points = []; this._drawing = false; this.lifetime = 3; }
+  getOptions() { return [
+    { type:'range', id:'fading-size', label:'Grossura', min:1, max:50, value:this.size, step:1, unit:'px' },
+    { type:'range', id:'fading-time', label:'Tempo na tela', min:0.5, max:10, value:this.lifetime, step:0.5, unit:'s' }
+  ]; }
+  onMouseDown(e) {
+    const coords = getCanvasCoords(e.clientX, e.clientY);
+    this._drawing = true; this.points = [coords];
+    state.isDrawing = true;
+    state.currentFadingStroke = { points:this.points, size:this.size, color:'#000000', lifetime:this.lifetime*1000 };
+    app.ensureFadingLoop();
+  }
+  onMouseMove(e) {
+    if (!this._drawing) return;
+    const coords = getCanvasCoords(e.clientX, e.clientY);
+    this.points.push(coords);
+  }
+  onMouseUp(e) {
+    if (!this._drawing) return;
+    this._drawing = false; state.isDrawing = false;
+    if (this.points.length > 1 && state.currentFadingStroke) {
+      state.fadingStrokes.push({ ...state.currentFadingStroke, points:[...this.points], fadeStartTime:performance.now() });
+    }
+    state.currentFadingStroke = null;
+    app.ensureFadingLoop();
+  }
+  onCancel() { this._drawing = false; state.isDrawing = false; this.points = []; state.currentFadingStroke = null; }
+}
+
+// ============================================================
+// HAND TOOL
+// ============================================================
+class HandTool extends Tool {
+  constructor() { super({ name:'hand', label:'Mão', icon:'hand-paper', shortcut:'h' }); this._panning = false; this._start = null; this._offsetStart = null; }
+  getOptions() { return [{ type:'info', text:'Arraste para navegar pela imagem' }]; }
+  onMouseDown(e) {
+    this._panning = true; this._start = { x:e.clientX, y:e.clientY };
+    this._offsetStart = { x:state.offsetX, y:state.offsetY };
+    app.cursorManager.setHandDragging(true);
+  }
+  onMouseMove(e) {
+    if (!this._panning) return;
+    state.offsetX = this._offsetStart.x + (e.clientX - this._start.x);
+    state.offsetY = this._offsetStart.y + (e.clientY - this._start.y);
+    app.updateTransform();
+  }
+  onMouseUp(e) {
+    this._panning = false;
+    app.cursorManager.setHandDragging(false);
+  }
+  onCancel() { this._panning = false; app.cursorManager.setHandDragging(false); }
+}
+
+// ============================================================
+// TOOL MANAGER
+// ============================================================
+class ToolManager {
+  constructor() { this.tools = new Map(); this.activeTool = null; }
+  registerTool(tool) { this.tools.set(tool.name, tool); }
+  activateTool(name) {
+    if (this.activeTool) { this.activeTool.deactivate(); }
+    const tool = this.tools.get(name);
+    if (!tool) return;
+    this.activeTool = tool; state.activeToolName = name;
+    tool.activate();
+    document.querySelectorAll('.tool-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tool === name);
+    });
+    app._updateCursor();
+    app.updateUI();
+    app.uiManager.updateToolOptions(tool);
+  }
+  getActiveTool() { return this.activeTool; }
+  handleMouseDown(e) { if (this.activeTool) this.activeTool.onMouseDown(e); }
+  handleMouseMove(e) { if (this.activeTool) this.activeTool.onMouseMove(e); }
+  handleMouseUp(e) { if (this.activeTool) this.activeTool.onMouseUp(e); }
+}
+
+// ============================================================
+// UI MANAGER
+// ============================================================
+class UIManager {
+  updateToolOptions(tool) {
+    if (!tool) return;
+    DOM['tool-options-title'].textContent = tool.label;
+    const container = DOM['tool-options-content'];
+    container.innerHTML = '';
+    const options = tool.getOptions();
+    if (options.length === 0) { container.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px 0;">Nenhuma configura&ccedil;&atilde;o dispon&iacute;vel</div>'; return; }
+    options.forEach(opt => {
+      if (opt.type === 'info') {
+        const p = document.createElement('p'); p.style.cssText = 'color:var(--text-muted);font-size:12px;text-align:center;';
+        p.textContent = opt.text; container.appendChild(p); return;
+      }
+      const group = document.createElement('div'); group.className = 'option-group';
+      const label = document.createElement('div'); label.className = 'option-label';
+      const span = document.createElement('span'); span.textContent = opt.label;
+      const val = document.createElement('span'); val.className = 'option-value'; val.textContent = opt.value + (opt.unit||'');
+      label.appendChild(span); label.appendChild(val);
+      const input = document.createElement('input'); input.type = 'range';
+      input.min = opt.min; input.max = opt.max; input.value = opt.value; input.step = opt.step || 1;
+      input.addEventListener('input', () => {
+        const v = parseFloat(input.value);
+        val.textContent = v + (opt.unit||'');
+        const toolName = tool.name;
+        if (toolName === 'pencil' || toolName === 'eraser' || toolName === 'fading-pen') {
+          const t = app.toolManager.tools.get(toolName);
+          if (opt.id.includes('size')) { t.size = v; app.cursorManager.requestDraw(); }
+          if (opt.id.includes('time') && t.lifetime !== undefined) { t.lifetime = v; }
+        }
+      });
+      group.appendChild(label); group.appendChild(input); container.appendChild(group);
+    });
+  }
+
+  updateStatusBar() {
+    const tool = app.toolManager.getActiveTool();
+    if (tool) {
+      DOM['status-tool'].innerHTML = '<i class="fas fa-'+tool.icon+'"></i> '+tool.label;
+    }
+    DOM['status-filename'].textContent = state.imageName || 'Nenhuma imagem';
+    if (state.imageWidth && state.imageHeight) {
+      DOM['status-dimensions'].textContent = state.imageWidth + ' x ' + state.imageHeight + ' px';
+    } else {
+      DOM['status-dimensions'].textContent = '';
+    }
+    const pct = Math.round(state.scale * 100);
+    DOM['zoom-percent'].textContent = pct + '%';
+    DOM['zoom-slider'].value = pct;
+    DOM['settings-filename'].textContent = 'Arquivo: ' + (state.imageName || 'Nenhuma imagem');
+    DOM['settings-dimensions'].textContent = 'Dimens&otilde;es: ' + (state.imageWidth ? state.imageWidth+' x '+state.imageHeight+' px' : '&mdash;');
+  }
+
+  toggleOptions() {
+    state.isOptionsOpen = !state.isOptionsOpen;
+    DOM['tool-options'].classList.toggle('collapsed', !state.isOptionsOpen);
+    const icon = DOM['tool-options-close'].querySelector('i');
+    if (icon) icon.className = state.isOptionsOpen ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+  }
+}
+
+// ============================================================
+// SETTINGS MANAGER
+// ============================================================
+class SettingsManager {
+  constructor() { this._open = false; }
+  toggle() {
+    this._open ? this.close() : this.open();
+  }
+  open() {
+    this._open = true;
+    DOM['settings-modal'].classList.add('open');
+    this.renderKeybinds();
+  }
+  close() {
+    this._open = false;
+    DOM['settings-modal'].classList.remove('open');
+  }
+  renderKeybinds() {
+    const list = DOM['keybinds-list']; list.innerHTML = '';
+    KEYBIND_ACTIONS.forEach(a => {
+      const row = document.createElement('div'); row.className = 'keybind-row';
+      const label = document.createElement('span'); label.className = 'keybind-label'; label.innerHTML = a.label;
+      const key = document.createElement('span'); key.className = 'keybind-key'; key.innerHTML = formatKeybindDisplay(state.keybinds[a.id]);
+      const btn = document.createElement('button'); btn.className = 'keybind-change-btn'; btn.textContent = 'Alterar';
+      btn.addEventListener('click', () => {
+        btn.textContent = 'Pressione...'; btn.classList.add('capturing');
+        app.keybindManager.startCapture((combo) => {
+          const result = app.keybindManager.setKeybind(a.id, combo);
+          if (result.success) {
+            key.innerHTML = formatKeybindDisplay(combo);
+            app.keybindManager.save();
+          } else {
+            const conflict = KEYBIND_ACTIONS.find(x => x.id === result.conflict);
+            app.notification('Conflito: "'+formatKeybindDisplay(combo)+'" j&aacute; est&aacute; atribu&iacute;do a "'+(conflict?conflict.label:result.conflict)+'"', 'error');
+          }
+          btn.textContent = 'Alterar'; btn.classList.remove('capturing');
+        });
+      });
+      row.appendChild(label); row.appendChild(key); row.appendChild(btn);
+      list.appendChild(row);
+    });
+  }
+}
+
+// ============================================================
+// APP (ORCHESTRATOR)
+// ============================================================
+class App {
+  constructor() {
+    this.notificationManager = new NotificationManager();
+    this.keybindManager = new KeybindManager();
+    this.historyManager = new HistoryManager();
+    this.zoomManager = new ZoomManager();
+    this.layerManager = new LayerManager();
+    this.toolManager = new ToolManager();
+    this.uiManager = new UIManager();
+    this.settingsManager = new SettingsManager();
+  }
+
+  notification(msg, type, duration) { this.notificationManager.show(msg, type, duration); }
+
+  init() {
+    initDOM();
+    this.cursorManager = new CursorManager(DOM['canvas-area']);
+    this.keybindManager.load();
+    this._registerTools();
+    this._bindEvents();
+    this.toolManager.activateTool('pencil');
+    this._setupDragDrop();
+    this.updateTransform();
+    this.updateUI();
+  }
+
+  _updateCursor() {
+    this.cursorManager.refresh();
+  }
+
+  _registerTools() {
+    this.toolManager.registerTool(new PencilTool());
+    this.toolManager.registerTool(new EraserTool());
+    this.toolManager.registerTool(new FadingPenTool());
+    this.toolManager.registerTool(new HandTool());
+  }
+
+  _bindEvents() {
+    document.addEventListener('keydown', (e) => this.keybindManager.handleKeyDown(e));
+    window.addEventListener('resize', () => this._handleResize());
+    DOM['canvas-area'].addEventListener('mousedown', (e) => this.toolManager.handleMouseDown(e));
+    DOM['canvas-area'].addEventListener('mousemove', (e) => {
+      this.cursorManager.move(e.clientX, e.clientY);
+      this.toolManager.handleMouseMove(e);
+    });
+    DOM['canvas-area'].addEventListener('mouseleave', () => this.cursorManager.hide());
+    DOM['canvas-area'].addEventListener('mouseenter', (e) => {
+      this.cursorManager.move(e.clientX, e.clientY);
+      this._updateCursor();
+    });
+    document.addEventListener('mouseup', (e) => this.toolManager.handleMouseUp(e));
+    DOM['canvas-area'].addEventListener('wheel', (e) => this.zoomManager.handleWheel(e), { passive: false });
+    DOM['zoom-slider'].addEventListener('input', (e) => {
+      const v = parseInt(e.target.value); this.zoomManager.setScale(v / 100);
+    });
+    DOM['zoom-in-btn'].addEventListener('click', () => this.zoomManager.zoomIn());
+    DOM['zoom-out-btn'].addEventListener('click', () => this.zoomManager.zoomOut());
+    DOM['fit-to-screen-btn'].addEventListener('click', () => this.zoomManager.fitToScreen());
+    DOM['zoom-100-btn'].addEventListener('click', () => this.zoomManager.setZoom100());
+    DOM['settings-btn'].addEventListener('click', () => this.settingsManager.open());
+    DOM['settings-close'].addEventListener('click', () => this.settingsManager.close());
+    DOM['settings-backdrop'].addEventListener('click', () => this.settingsManager.close());
+    DOM['settings-new-image'].addEventListener('click', () => DOM['file-input'].click());
+    DOM['tool-options-close'].addEventListener('click', () => this.uiManager.toggleOptions());
+    DOM['undo-btn'].addEventListener('click', () => this.historyManager.undo());
+    DOM['redo-btn'].addEventListener('click', () => this.historyManager.redo());
+    DOM['keybinds-reset'].addEventListener('click', () => {
+      this.keybindManager.reset(); this.settingsManager.renderKeybinds();
+      this.notification('Atalhos restaurados para os padr&otilde;es', 'success');
+    });
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      btn.addEventListener('click', () => this.toolManager.activateTool(btn.dataset.tool));
+    });
+    DOM['file-input'].addEventListener('change', (e) => {
+      const file = e.target.files[0]; if (file) this.loadImage(file);
+      DOM['file-input'].value = '';
+    });
+    DOM['settings-modal'].addEventListener('click', (e) => {
+      if (e.target === DOM['settings-modal'] || e.target === DOM['settings-backdrop']) this.settingsManager.close();
+    });
+  }
+
+  _setupDragDrop() {
+    const ca = DOM['canvas-area'];
+    ca.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
+    ca.addEventListener('drop', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const file = e.dataTransfer.files[0]; if (file) this.loadImage(file);
+    });
+    DOM['splash-dropzone'].addEventListener('dragover', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      DOM['splash-dropzone'].classList.add('dragover');
+    });
+    DOM['splash-dropzone'].addEventListener('dragleave', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      DOM['splash-dropzone'].classList.remove('dragover');
+    });
+    DOM['splash-dropzone'].addEventListener('drop', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      DOM['splash-dropzone'].classList.remove('dragover');
+      const file = e.dataTransfer.files[0]; if (file) this.loadImage(file);
+    });
+    DOM['splash-dropzone'].addEventListener('click', () => DOM['file-input'].click());
+  }
+
+  loadImage(file) {
+    const validTypes = ['image/png','image/jpeg','image/webp'];
+    if (!validTypes.includes(file.type)) {
+      this.notification('Formato de arquivo n&atilde;o suportado. Use PNG, JPG, JPEG ou WebP.', 'error');
+      return;
+    }
+    if (state.imageUrl) URL.revokeObjectURL(state.imageUrl);
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      state.image = img; state.imageUrl = url; state.imageName = file.name;
+      state.imageWidth = img.naturalWidth; state.imageHeight = img.naturalHeight;
+      this.layerManager.resize(img.naturalWidth, img.naturalHeight);
+      DOM.ctxBg.drawImage(img, 0, 0);
+      [DOM.ctxPerm, DOM.ctxTemp, DOM.ctxFade].forEach(ctx => ctx.clearRect(0,0,img.naturalWidth,img.naturalHeight));
+      this.historyManager.clear();
+      state.fadingStrokes = []; state.currentFadingStroke = null;
+      state.fadingLoopId = null;
+      state.offsetX = 0; state.offsetY = 0; state.scale = 1;
+      const ca = DOM['canvas-area'];
+      state.offsetX = Math.max(0, (ca.clientWidth - state.imageWidth) / 2);
+      state.offsetY = Math.max(0, (ca.clientHeight - state.imageHeight) / 2);
+      this.updateTransform(); this.updateUI();
+      DOM['splash-screen'].classList.add('hidden');
+      this.settingsManager.close();
+      this._updateCursor();
+      this.cursorManager.requestDraw();
+      this.notification('Imagem carregada com sucesso', 'success', 2500);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      this.notification('N&atilde;o foi poss&iacute;vel carregar a imagem. O arquivo pode estar corrompido.', 'error');
+    };
+    img.src = url;
+  }
+
+  updateTransform() {
+    DOM['canvas-container'].style.transform = 'translate('+state.offsetX+'px,'+state.offsetY+'px) scale('+state.scale+')';
+    this.cursorManager.requestDraw();
+  }
+
+  updateUI() {
+    this.uiManager.updateStatusBar();
+    this.uiManager.updateToolOptions(this.toolManager.getActiveTool());
+  }
+
+  executeAction(action) {
+    switch (action) {
+      case 'pencil': case 'eraser': case 'fading-pen': case 'hand':
+        this.toolManager.activateTool(action); break;
+      case 'undo':
+        if (state.isDrawing && this.toolManager.getActiveTool()) {
+          this.toolManager.getActiveTool().onCancel();
+          state.isDrawing = false;
+          this.renderPermanentCanvas();
+        } else {
+          this.historyManager.undo();
+        }
+        break;
+      case 'redo': this.historyManager.redo(); break;
+      case 'zoom-in': this.zoomManager.zoomIn(); break;
+      case 'zoom-out': this.zoomManager.zoomOut(); break;
+      case 'zoom-100': this.zoomManager.setZoom100(); break;
+      case 'fit-to-screen': this.zoomManager.fitToScreen(); break;
+      case 'settings': this.settingsManager.open(); break;
+      case 'toggle-options': this.uiManager.toggleOptions(); break;
+    }
+  }
+
+  _handleResize() {
+    this.updateTransform();
+    this.updateUI();
+  }
+
+  // ---------- PERMANENT CANVAS REDRAW ----------
+  renderPermanentCanvas() {
+    const ctx = DOM.ctxPerm; const w = DOM['layer-permanent'].width; const h = DOM['layer-permanent'].height;
+    ctx.clearRect(0, 0, w, h);
+    for (const stroke of state.history) {
+      const points = stroke.points; if (points.length < 2) continue;
+      ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+      if (stroke.toolType === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.strokeStyle = 'rgba(0,0,0,1)';
+      } else {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = stroke.color || '#000000';
+      }
+      ctx.lineWidth = stroke.size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // ---------- FADING STROKES LOOP ----------
+  ensureFadingLoop() {
+    if (state.fadingLoopId) return;
+    const tick = () => {
+      const now = performance.now();
+      state.fadingStrokes = state.fadingStrokes.filter(s => {
+        const elapsed = now - s.fadeStartTime;
+        return elapsed < s.lifetime;
+      });
+      const hasFading = state.fadingStrokes.length > 0;
+      const hasCurrent = !!state.currentFadingStroke;
+      if (hasFading || hasCurrent) {
+        this._renderFadingCanvas(now);
+        state.fadingLoopId = requestAnimationFrame(tick);
+      } else {
+        state.fadingLoopId = null;
+        DOM.ctxFade.clearRect(0, 0, DOM['layer-fading'].width, DOM['layer-fading'].height);
+      }
+    };
+    state.fadingLoopId = requestAnimationFrame(tick);
+  }
+
+  _renderFadingCanvas(now) {
+    const ctx = DOM.ctxFade; ctx.clearRect(0, 0, DOM['layer-fading'].width, DOM['layer-fading'].height);
+    state.fadingStrokes.forEach(s => {
+      const elapsed = now - s.fadeStartTime;
+      const alpha = Math.max(0, 1 - elapsed / s.lifetime);
+      this._drawFadingStroke(ctx, s.points, s.size, s.color, alpha);
+    });
+    if (state.currentFadingStroke && state.currentFadingStroke.points.length > 1) {
+      this._drawFadingStroke(ctx, state.currentFadingStroke.points, state.currentFadingStroke.size, state.currentFadingStroke.color, 1);
+    }
+  }
+
+  _drawFadingStroke(ctx, points, size, color, alpha) {
+    if (points.length < 2) return;
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.strokeStyle = color; ctx.lineWidth = size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.stroke(); ctx.restore();
+  }
+}
+
+// ============================================================
+// INITIALIZE
+// ============================================================
+let app;
+document.addEventListener('DOMContentLoaded', () => {
+  app = new App();
+  app.init();
+});
+</script>
+</body>
+</html>

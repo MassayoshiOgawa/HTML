@@ -1,0 +1,721 @@
+# MEGA PROMPT — SITE DE EDIÇÃO DE IMAGEM (ESTILO PAINT 3D)
+
+## INSTRUÇÃO GERAL
+
+Você deve gerar um ÚNICO documento HTML contendo TODO o CSS e JavaScript embutido. Nenhum arquivo externo. O documento deve ser um site de edição de imagem profissional, inspirado visualmente no **Paint 3D da Microsoft**, com layout moderno, escuro/acizentado, toolbars flutuantes, glassmorphism sutil e animações suaves.
+
+O JavaScript deve ser estruturado de forma modular e profissional, utilizando classes ou objetos especializados para cada subsistema, preparando o código para receber dezenas de novas ferramentas e funcionalidades futuras sem necessidade de reescrita.
+
+---
+
+## FUNCIONALIDADES PRINCIPAIS
+
+### 1. UPLOAD DE IMAGEM COMO BACKGROUND
+- O usuário faz upload de uma imagem (PNG, JPG, JPEG, WebP).
+- A imagem imediatamente se torna o "background" do canvas central.
+- A imagem deve ocupar o canvas inteiro, centralizada, mantendo proporção (cover ou contain — escolha contain para não cortar).
+- Se nenhuma imagem for carregada, o canvas deve exibir um grid quadriculado (xadrez cinza claro/branco) como placeholder, com um texto central "Arraste ou clique para enviar uma imagem" e um ícone de upload estilizado.
+
+### 2. ZOOM
+- O usuário pode dar zoom em QUALQUER área da imagem.
+- Zoom deve ser controlado por:
+  - Scroll do mouse (roda) — zoom in/out suave.
+  - Botão + e - na toolbar inferior ou lateral.
+  - Slider de zoom na barra de status.
+- O zoom deve ser suave (transição CSS ou requestAnimationFrame).
+- O zoom deve focar na posição do cursor do mouse (zoom hacia o ponto onde o mouse está, não apenas no centro).
+- O canvas deve ser um container com overflow hidden, e a imagem deve ser transformada via transform: scale() e translate().
+- O fundo quadriculado (xadrez) deve ser visível nas bordas quando a imagem não preencher todo o canvas.
+- O zoom mínimo deve ser 10% e o máximo 1000%.
+- Exibir percentual do zoom em algum lugar (canto ou barra de status).
+
+### 3. FERRAMENTAS DE EDIÇÃO (4 FERRAMENTAS)
+
+#### 3.1. LÁPIS (Pencil)
+- Desenha riscos livres na imagem.
+- Cor: preto (por enquanto, futuro terá seletor de cor).
+- Input range para controlar a grossura (1px a 50px).
+- O desenho deve ser feito em uma camada (canvas) sobreposta à imagem de background.
+- O cursor do mouse deve mudar para um ícone de lápis (ou um círculo do tamanho da grossura).
+
+#### 3.2. BORRACHA (Eraser)
+- Apaga os traços feitos pelo lápis/caneta.
+- Input range para definir o tamanho da borracha (5px a 100px).
+- Deve funcionar como a borracha do Paint: clica e arrasta para apagar.
+- A borracha deve revelar a imagem original por baixo (deve apagar os desenhos da camada sobreposta, não a imagem em si).
+- O cursor deve ser um quadrado ou círculo do tamanho definido.
+
+#### 3.3. CANETA QUE SOME (Fading Pen)
+- Rabisca igual ao lápis, mas os traços desaparecem após um tempo.
+- Dois inputs range:
+  - Grossura (1px a 50px).
+  - Tempo na tela (0.5s a 10s).
+- Implementação: cada segmento de traço deve ser desenhado com opacidade e timer. Use requestAnimationFrame ou setInterval para reduzir a opacidade gradualmente até 0 e então remover.
+- Alternativa: usar trail de partículas ou stroke com fade-out animado via alpha.
+- O efeito deve ser suave, os traços devem sumir gradativamente (não sumir de uma vez).
+- Mesma cor: preta (futuro terá seletor).
+
+#### 3.4. FERRAMENTA DE NAVEGAÇÃO — HAND TOOL
+- Ferramenta específica para movimentação da área de trabalho (pan).
+- Ícone próprio (mão) na toolbar.
+- Atalho padrão: H.
+- Permitir arrastar a área visível da imagem em qualquer direção.
+- Funcionar corretamente em qualquer nível de zoom.
+- Cursor apropriado:
+  - Padrão: cursor "grab".
+  - Enquanto arrasta: cursor "grabbing".
+- Não interferir com ferramentas de desenho (ao trocar para hand tool, o desenho não deve ser afetado).
+- O pan deve ser suave e responsivo.
+
+### 4. SELEÇÃO DE FERRAMENTAS
+- Toolbar vertical ou horizontal com ícones das 4 ferramentas.
+- A ferramenta ativa deve estar destacada (cor diferente, brilho, borda).
+- Ícones: use SVG inline ou Unicode. Exemplos:
+  - Lápis: ✏️ ou ícone SVG de lápis.
+  - Borracha: 🟤 ou ícone SVG.
+  - Caneta: 🖊️ ou ícone SVG.
+  - Mão: ✋ ou ícone SVG.
+- Atalhos de teclado:
+  - P = Lápis
+  - E = Borracha
+  - F = Caneta que some
+  - H = Hand tool (mão)
+  - Ctrl+Z = Desfazer último traço
+  - Ctrl+Y = Refazer último traço desfeito
+
+### 5. BOTÃO DE CONFIGURAÇÕES
+- Ícone de engrenagem ⚙️ no canto superior direito ou na toolbar.
+- Ao clicar, abre um painel/modal/overlay com opções.
+- Dentro do painel, DEVE TER:
+  - Botão "Enviar Nova Imagem" (input file hidden + botão estilizado).
+  - Ao selecionar uma nova imagem:
+    - O sistema RESETA TUDO (limpa todos os desenhos, reseta zoom para 100%, reseta posição).
+    - Substitui a imagem de background pela nova.
+    - Fecha o painel de configurações.
+- Pode ter também informações como:
+  - Nome do arquivo atual.
+  - Dimensões da imagem.
+  - Versão do editor.
+- Dentro do painel de configurações, DEVE CONTER também a seção "Atalhos de Teclado" (descrita em seção específica abaixo).
+
+### 6. BOTÃO DE RESET/DESFAZER E REFAZER
+- Botão "Desfazer" (Ctrl+Z) que remove o último traço desenhado.
+- Botão "Refazer" (Ctrl+Y) que refaz o último traço desfeito.
+- Manter um histórico (array de objetos) de todos os strokes/paths desenhados.
+- Implementação: cada ferramenta ao terminar um traço (mouseup) salva o path inteiro (pontos, grossura, tipo, timestamp). Desfazer remove o último e redesenha tudo. Refazer restaura o último removido.
+- Máximo de 50 ações no histórico (limitar para não consumir memória).
+- O histórico deve ser baseado em ações completas, não em eventos parciais.
+
+---
+
+## LAYOUT VISUAL (ESTILO PAINT 3D)
+
+### Paleta de Cores
+- Fundo da aplicação: #1a1a2e ou #2d2d44 (azul-escuro suave).
+- Toolbars: tons de #2a2a3e a #3a3a5e com bordas sutis.
+- Canvas area: fundo cinza médio #3a3a4a.
+- Botões: tons de azul vibrante (#0078d7) para hover/active, similar ao Paint 3D.
+- Texto: branco #ffffff e cinza claro #cccccc.
+- Acento (highlights): #0099ff ou #4fc3f7.
+- O tema escuro deve ser de alta qualidade, inspirado em Paint 3D, Visual Studio Code, Photoshop e ferramentas criativas modernas.
+- Objetivos do tema escuro: reduzir fadiga visual, transmitir profissionalismo, manter excelente legibilidade.
+- Evitar contrastes agressivos.
+- Evitar cores muito saturadas.
+
+### Estrutura do Layout
+- **Barra Superior (Title Bar)**:
+  - Logotipo ou nome "Image Editor" à esquerda.
+  - No centro ou direita: botão Configurações ⚙️.
+  - Altura: ~48px.
+  - Fundo escuro com separação sutil.
+  - Glassmorphism: background: rgba(30, 30, 50, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.08);
+
+- **Toolbar Esquerda ou Superior**:
+  - Ferramentas em formato de cards/ícones quadrados (~48x48px).
+  - Cada ferramenta com tooltip.
+  - Espaçamento de 4px entre ícones.
+  - Fundo semi-transparente escuro com backdrop-filter.
+  - A ferramenta ativa ganha um glow azul e fundo levemente mais claro.
+
+- **Painel Lateral Direito**:
+  - Exibe as configurações da ferramenta ativa (inputs range, botões, opções).
+  - Deve ser recolhível (toggle) para maximizar área do canvas.
+  - Largura: ~240px.
+  - Fundo escuro semi-transparente com glassmorphism.
+  - Título dinâmico mostrando o nome da ferramenta ativa.
+  - Animação de abrir/fechar suave.
+
+- **Barra Inferior (Status Bar)**:
+  - Nível de zoom (slider + percentual).
+  - Dimensões da imagem (ex: "1920 x 1080 px").
+  - Nome da ferramenta ativa.
+  - Nome do arquivo atual.
+  - Altura: ~40px.
+  - Fundo escuro sólido ou levemente transparente.
+
+- **Canvas Central**:
+  - Ocupa TODO o espaço restante.
+  - Background checkerboard pattern (CSS com gradient ou SVG) para transparência.
+  - Overflow: hidden.
+  - A imagem + desenhos ficam dentro de um container interno que é movido/zoomado.
+
+### Ideias para Visual Profissional
+- **Glassmorphism**: Use backdrop-filter: blur() e backgrounds semi-transparentes nas toolbars e painéis.
+- **Neumorphism suave**: Sombras internas e externas nos botões.
+- **Animações**: 
+  - Transição suave de 0.2s em todos os hovers.
+  - Painel de configurações abre com animação de escala + fade.
+  - Indicador de ferramenta ativa com slide suave.
+  - Notificações toast para ações (ex: "Imagem carregada com sucesso").
+  - Destaque animado da ferramenta ativa.
+  - Estados hover sofisticados com brilho sutil.
+  - Indicadores de carregamento durante upload.
+  - Feedback visual após operações concluídas.
+  - Indicadores discretos de operação bem-sucedida.
+- **Grid overlay**: Opcionalmente, overlay de grid 3x3 (regra dos terços) que aparece ao segurar Shift ou via toggle.
+- **Sombra da imagem**: A imagem no canvas deve ter uma sombra sutil (box-shadow) para dar profundidade.
+- **Scrollbar customizada**: Estilizar scrollbars para combinar com o tema escuro.
+- **Cursors customizados**: Para cada ferramenta, um cursor diferente:
+  - Lápis: crosshair com círculo ao redor.
+  - Borracha: círculo quadriculado.
+  - Caneta: crosshair fino.
+  - Hand tool: cursor grab/grabbing.
+- **Responsividade**: O site deve se adaptar a diferentes tamanhos de tela (mas focar exclusivamente em desktop e notebook — NÃO desenvolver para mobile).
+- **Tooltips modernos**: Aparecem com delay sutil, fundo escuro, borda arredondada, seta indicadora.
+- **Efeitos sutis de profundidade**: Sombras em múltiplos níveis para criar hierarquia visual.
+- **Painéis com abertura elegante**: Transições de transform com scale e opacity.
+
+### Ícones
+- Use SVG inline ou biblioteca via CDN (FontAwesome ou Material Icons via CDN).
+- Se usar CDN, inclua <link> ou <script> no <head>.
+
+---
+
+## DETALHES TÉCNICOS DE IMPLEMENTAÇÃO
+
+### Arquitetura do JavaScript (Módulos)
+O JavaScript deve ser estruturado em classes ou objetos especializados, cada um em seu próprio escopo lógico:
+
+- **App** — Orquestrador principal, inicializa todos os subsistemas.
+- **CanvasManager** — Gerencia os canvas layers, redimensionamento, renderização.
+- **ToolManager** — Gerencia registro, ativação/desativação de ferramentas (Tool Registry).
+- **Tool (base)** — Classe base para todas as ferramentas, com métodos: activate(), deactivate(), onMouseDown(), onMouseMove(), onMouseUp(), render().
+- **PencilTool** — Implementação do lápis, estende Tool.
+- **EraserTool** — Implementação da borracha, estende Tool.
+- **FadingPenTool** — Implementação da caneta que some, estende Tool.
+- **HandTool** — Implementação da ferramenta mão para pan, estende Tool.
+- **HistoryManager** — Sistema de desfazer/refazer com limite configurável.
+- **ZoomManager** — Controle de zoom, pan, smooth animation com requestAnimationFrame.
+- **SettingsManager** — Gerenciamento do modal de configurações, keybinds, localStorage.
+- **KeybindManager** — Sistema de atalhos de teclado, detecção, conflitos, personalização.
+- **NotificationManager** — Sistema de notificações toast.
+- **ExportManager** — Futuro sistema de exportação.
+- **LayerManager** — Gerencia as camadas (layers) do editor.
+- **UIManager** — Gerencia a interface do usuário, tooltips, atualizações de painel.
+
+### Estrutura do HTML
+```html
+<div id="app">
+  <header id="titlebar">
+    <span id="app-name">Image Editor</span>
+    <div id="titlebar-actions">
+      <button id="settings-btn">⚙️</button>
+    </div>
+  </header>
+  <main id="workspace">
+    <aside id="toolbar">
+      <!-- Ferramentas -->
+    </aside>
+    <section id="canvas-area">
+      <div id="canvas-container">
+        <canvas id="layer-background"></canvas>
+        <canvas id="layer-permanent"></canvas>
+        <canvas id="layer-temp"></canvas>
+        <canvas id="layer-fading"></canvas>
+      </div>
+    </section>
+    <aside id="tool-options">
+      <!-- Painel de opções da ferramenta ativa -->
+    </aside>
+  </main>
+  <footer id="statusbar">
+    <!-- Zoom, info, status -->
+  </footer>
+</div>
+<div id="settings-modal"><!-- Configurações --></div>
+<div id="splash-screen"><!-- Tela inicial --></div>
+```
+
+### Canvas Layers
+- Use MÚLTIPLOS canvas sobrepostos, um para cada camada:
+  - **Canvas Layer 0 (background)**: exibe a imagem original. Nunca é modificada.
+  - **Canvas Layer 1 (permanent)**: onde os desenhos do lápis são feitos. Nunca é limpa automaticamente.
+  - **Canvas Layer 2 (temp)**: camada temporária para pré-visualizações (ex: forma geométrica futura).
+  - **Canvas Layer 3 (fading)**: camada utilizada pela caneta que desaparece. Limpa e redesenha constantemente.
+- Todas dentro de um container que aplica zoom e pan.
+- A borracha nunca deve apagar a imagem original (Layer 0).
+- A caneta que some desenha na Layer 3, que é continuamente limpa e redesenhada com opacidade decrescente.
+- Camadas devem permanecer separadas internamente para evitar destruição acidental da imagem original.
+- Toda futura ferramenta deverá poder interagir com o sistema de layers.
+
+### Gerenciamento de Zoom e Pan
+- Variáveis: scale, offsetX, offsetY.
+- No scroll (wheel): ajustar scale, ajustar offset para zoom em direção ao cursor.
+- No drag da hand tool: ajustar offsetX/offsetY.
+- Aplicar via: container.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`.
+- Ou usar canvas context transforms: ctx.scale(scale), ctx.translate() — mas aí precisa converter coordenadas do mouse para coordenadas do canvas.
+- Utilizar requestAnimationFrame para animações suaves de zoom.
+- Botões dedicados: "Ajustar à tela" (fit to screen), "100%" (zoom original).
+- Atalhos: Ctrl+0 = zoom 100%, Ctrl++ = ampliar, Ctrl+- = reduzir.
+- Exibir percentual contínuo do zoom atual.
+- Precisão elevada na posição do cursor durante zoom.
+
+### Drawing System
+- No mousedown: inicia um novo path (Stroke).
+- Armazena array de pontos: [{x, y}].
+- No mousemove: adiciona pontos ao path atual e desenha em tempo real.
+- No mouseup: finaliza o stroke e salva no histórico.
+- Redesenhar: a cada frame ou no mouseup, limpa o canvas e redesenha TODOS os strokes do histórico + o atual.
+- Para performance com muitos traços, usar um canvas offline (offscreen) ou redesenhar apenas o necessário.
+
+### Histórico Profissional (Undo + Redo)
+- Array de strokes: cada stroke é { tool, points: [{x,y},...], size, color, layer }
+- Ctrl+Z (Undo): remove o último stroke do array ativo e move para array de redo. Redesenha tudo.
+- Ctrl+Y (Redo): pega o último do array de redo e move de volta para o array ativo. Redesenha tudo.
+- Máximo de 50 ações no histórico (configurável).
+- Histórico baseado em ações completas (não em eventos de mouse isolados).
+- Compatível com todas as ferramentas (lápis, borracha, caneta, futuras).
+- Cada ação armazena informações suficientes para reconstrução completa do estado.
+- O histórico deve persistir entre redimensionamentos da janela.
+
+### Fading Pen (Caneta que Some)
+- Cada stroke da caneta que some tem um campo lifetime (ms).
+- Ao criar o stroke, calcular expirationTime = Date.now() + lifetime.
+- Em um loop (setInterval a cada 50ms ou requestAnimationFrame):
+  - Para cada stroke da caneta, calcular alpha = max(0, (expirationTime - now) / lifetime).
+  - Se alpha <= 0, remover do desenho.
+  - Redesenhar com alpha.
+- Alternativa mais performática: usar ctx.globalAlpha no redesenho.
+- A camada de fading (Layer 3) é limpa e redesenhada constantemente com alphas atualizados.
+
+### Checkerboard Pattern (Fundo do Canvas)
+```css
+background-image: 
+  linear-gradient(45deg, #555 25%, transparent 25%),
+  linear-gradient(-45deg, #555 25%, transparent 25%),
+  linear-gradient(45deg, transparent 75%, #555 75%),
+  linear-gradient(-45deg, transparent 75%, #555 75%);
+background-size: 20px 20px;
+background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+```
+Ou use SVG pattern inline.
+
+### Submissão de Arquivo nas Configurações
+- Input do tipo file dentro do modal de config.
+- Aceitar: image/png, image/jpeg, image/webp.
+- Ao mudar: ler File, criar URL com URL.createObjectURL, definir como src da imagem.
+- Resetar: limpar canvas, limpar histórico, resetar zoom para 1, offset para 0, fechar modal.
+- Atualizar informações (nome, dimensões) na status bar.
+- Validar o arquivo antes de carregar (tipo MIME, integridade).
+- Exibir mensagem de erro amigável se o arquivo for inválido ou corrompido.
+- Utilizar revokeObjectURL para liberar memória de URLs antigas.
+
+### Tratamento de Erros
+- Adicionar tratamento profissional para falhas:
+  - Arquivo inválido: exibir notificação toast "Formato de arquivo não suportado".
+  - Arquivo corrompido: exibir notificação toast "Não foi possível carregar a imagem. O arquivo pode estar corrompido."
+  - Falha de carregamento: exibir notificação toast com mensagem clara.
+  - Falha de exportação: exibir notificação toast informando o problema.
+  - Ações indisponíveis: exibir feedback visual se uma ação não puder ser executada.
+- Mensagens devem ser claras, amigáveis e não técnicas.
+- Jamais interromper o funcionamento completo do editor devido a um erro isolado.
+
+### Performance e Otimização
+- Utilizar requestAnimationFrame para renderização e animações.
+- Minimizar redraws desnecessários (renderizar apenas quando necessário).
+- Evitar loops excessivos (setInterval com intervalos grandes para fading).
+- Liberar recursos não utilizados (URL.createObjectURL, canvas descartados).
+- Para imagens grandes, considerar renderizar em resolução reduzida durante zoom extremo.
+- Preparar o sistema para futuras ferramentas complexas sem degradação.
+- Manter experiência fluida mesmo com grande quantidade de traços no histórico.
+
+---
+
+## ARQUITETURA PROFISSIONAL E ESCALÁVEL
+
+O JavaScript deve ser estruturado em módulos lógicos, classes ou objetos especializados, separando responsabilidades de forma clara.
+
+Módulos/classes obrigatórios:
+
+- **App (Orquestrador)** — Inicializa e conecta todos os subsistemas.
+- **CanvasManager** — Gerencia os canvas layers, redimensionamento, renderização, coordenadas.
+- **LayerManager** — Gerencia as camadas (background, permanent, temp, fading) e suas interações.
+- **ToolManager (Tool Registry)** — Registra, ativa, desativa e gerencia ferramentas. Sistema extensível.
+- **Tool (classe abstrata/base)** — Define interface para todas as ferramentas.
+- **HistoryManager** — Gerencia desfazer/refazer com limite configurável, baseado em ações completas.
+- **ZoomManager** — Controle de zoom e pan com animação suave, shortcuts, botões.
+- **SettingsManager** — Gerencia painel de configurações, preferências do usuário.
+- **KeybindManager** — Gerencia atalhos de teclado, personalização, detecção de conflitos.
+- **NotificationManager** — Sistema de notificações toast.
+- **UIManager** — Atualiza interface, tooltips, painéis, barra de status.
+
+O objetivo é permitir futuras expansões sem necessidade de reescrever grandes partes do sistema.
+
+Todas as interações entre módulos devem ser feitas através de métodos públicos bem definidos.
+
+---
+
+## SISTEMA DE CAMADAS (LAYERS)
+
+O editor deve utilizar múltiplas camadas independentes e isoladas.
+
+Estrutura mínima de camadas:
+
+- **Camada 0 — Imagem Original**: Exibe a imagem de fundo. NUNCA é modificada por ferramentas de desenho.
+- **Camada 1 — Desenhos Permanentes**: Onde lápis e outras ferramentas permanentes desenham.
+- **Camada 2 — Temporária/Pré-visualização**: Para pré-visualizações de ferramentas futuras (formas, seleções).
+- **Camada 3 — Caneta que Desaparece**: Exclusiva para a ferramenta de fading pen.
+
+Regras:
+
+- A borracha NUNCA deve apagar a imagem original (Camada 0).
+- A borracha remove apenas traços da Camada 1 e/ou Camada 3.
+- A caneta que some desenha exclusivamente na Camada 3.
+- Camadas devem permanecer separadas internamente.
+- Toda futura ferramenta deverá poder interagir com o sistema de layers.
+- Cada camada pode ter opacidade, visibilidade e ordem de renderização independentes.
+
+---
+
+## SISTEMA DE HISTÓRICO PROFISSIONAL
+
+Expandir o sistema de desfazer para um sistema completo de histórico.
+
+Requisitos:
+
+- **Desfazer (Undo)**: Ctrl+Z — remove a última ação e restaura o estado anterior.
+- **Refazer (Redo)**: Ctrl+Y — restaura a última ação desfeita.
+- **Limite configurável** de ações no histórico (padrão: 50, mínimo: 10, máximo: 200).
+- **Histórico baseado em ações completas**: cada mouseup finaliza uma ação; mousedown+mousemove são uma única ação.
+- **Compatível com todas as ferramentas**: lápis, borracha, caneta, hand tool (pan não entra no histórico), e futuras.
+- Cada ação deve armazenar:
+  - Tipo da ferramenta.
+  - Array de pontos.
+  - Grossura/configurações.
+  - Cor.
+  - Camada (layer) afetada.
+  - Timestamp.
+- O histórico deve permitir reconstrução completa do estado do editor.
+- Desfazer deve restaurar exatamente o estado anterior, incluindo traços da caneta que some.
+
+---
+
+## FERRAMENTA DE NAVEGAÇÃO (HAND TOOL)
+
+Adicionar ferramenta específica para movimentação da área de trabalho.
+
+Características:
+
+- Ícone próprio (mão) na toolbar.
+- Atalho padrão: H.
+- Permitir arrastar a área visível da imagem em qualquer direção (pan).
+- Funcionar corretamente em qualquer nível de zoom.
+- Cursor apropriado:
+  - Modo inativo: cursor "grab" (mão aberta).
+  - Durante arrasto: cursor "grabbing" (mão fechada).
+- Não interferir com ferramentas de desenho — ao ativar hand tool, desenhos não são afetados.
+- O pan deve ser suave, responsivo e utilizar requestAnimationFrame.
+- Ao trocar para hand tool, o cursor da ferramenta anterior não deve permanecer.
+
+---
+
+## SISTEMA AVANÇADO DE ZOOM
+
+Expandir o sistema de zoom com recursos profissionais.
+
+Requisitos adicionais:
+
+- **Botão "Ajustar à tela" (Fit to Screen)**: Redimensiona o zoom para que a imagem inteira fique visível no canvas.
+- **Botão "100%"**: Retorna ao zoom 1:1 (100%).
+- **Atalhos de teclado**:
+  - Ctrl+0: retornar ao zoom 100%.
+  - Ctrl++ (Ctrl+Shift+=): ampliar zoom.
+  - Ctrl+-: reduzir zoom.
+- **Exibição contínua** do percentual atual na barra de status e no slider.
+- **Zoom suave**: utilizar requestAnimationFrame para interpolar entre o zoom atual e o destino.
+- **Precisão elevada**: o zoom deve focar exatamente na posição do cursor, mantendo o ponto sob o cursor estável durante o zoom.
+- Comportamento deve lembrar softwares profissionais como Photoshop, Paint 3D e Krita.
+
+---
+
+## FOCO EXCLUSIVO EM DESKTOP E NOTEBOOK
+
+O sistema deve ser projetado especificamente para:
+
+- Computadores desktop.
+- Notebooks.
+
+NÃO é necessário desenvolver adaptações para dispositivos móveis.
+
+A interface pode assumir a presença de:
+
+- Mouse com botões esquerdo, direito e scroll wheel.
+- Scroll wheel para zoom.
+- Teclado físico completo com Ctrl, Shift, etc.
+- Monitores maiores (resolução mínima recomendada: 1280x720).
+
+A experiência desktop deve ser priorizada acima de qualquer outra.
+
+Layout deve funcionar bem em janelas redimensionáveis, mas sempre pensando em uso com mouse e teclado.
+
+---
+
+## MELHORIAS VISUAIS DE FEEDBACK
+
+Adicionar refinamentos visuais profissionais:
+
+- **Destaque animado da ferramenta ativa**: glow pulsante ou borda iluminada.
+- **Tooltips modernos**: fundo escuro semi-transparente, bordas arredondadas, seta, aparecem com delay de 300ms.
+- **Estados hover sofisticados**: mudança suave de cor, brilho, leve escala (1.05).
+- **Indicadores de carregamento**: spinner ou barra de progresso durante upload de imagens grandes.
+- **Feedback visual após upload**: toast notification "Imagem carregada com sucesso".
+- **Indicadores discretos para operações concluídas**: checkmark animado, toast sutil.
+- Todas as animações devem ser suaves (0.2s a 0.3s) e discretas, sem exageros.
+
+---
+
+## MICROINTERAÇÕES E EXPERIÊNCIA PREMIUM
+
+O editor deve transmitir sensação de software comercial.
+
+Adicionar:
+
+- **Transições consistentes**: todas as mudanças de estado (hover, active, disabled) devem ter transição CSS.
+- **Efeitos sutis de profundidade**: múltiplos níveis de sombra para criar hierarquia visual (toolbar > canvas > modais).
+- **Glassmorphism controlado**: backdrop-filter: blur() em toolbars e painéis, sem exageros.
+- **Sombras realistas**: box-shadow com múltiplas camadas de sombra (ambient + directional).
+- **Painéis com abertura elegante**: modal de configurações abre com scale(0.95 -> 1) + opacity(0 -> 1).
+- **Feedback instantâneo ao usuário**: qualquer clique ou ação deve ter resposta visual em <100ms.
+- Evitar exageros visuais.
+- A prioridade é transmitir profissionalismo e solidez.
+
+---
+
+## ESTRUTURA DE INTERFACE SEMELHANTE A SOFTWARE PROFISSIONAL
+
+A aplicação deve conter os seguintes componentes visuais obrigatórios:
+
+**BARRA SUPERIOR (Title Bar)**:
+- Nome do editor ("Image Editor") à esquerda.
+- Botão de configurações ⚙️ à direita.
+- Altura fixa ~48px.
+- Glassmorphism com backdrop-filter.
+
+**BARRA LATERAL ESQUERDA (Toolbar)**:
+- Ícones das ferramentas em formato cards 48x48px.
+- Ferramenta ativa destacada com glow azul.
+- Tooltips em cada ícone.
+- Largura: ~56px.
+
+**PAINEL LATERAL DIREITO (Tool Options)**:
+- Configurações da ferramenta ativa.
+- Recolhível (botão toggle).
+- Largura: ~240px quando aberto.
+- Título dinâmico com nome da ferramenta.
+
+**ÁREA CENTRAL (Workspace)**:
+- Canvas principal com checkerboard pattern.
+- Ocupa todo o espaço restante.
+- Overflow: hidden.
+- Múltiplos canvas layers sobrepostos.
+
+**BARRA INFERIOR (Status Bar)**:
+- Zoom (slider + percentual).
+- Informações do documento (nome, dimensões).
+- Ferramenta atual.
+- Altura: ~40px.
+
+Todos os componentes devem seguir a mesma identidade visual: tema escuro, glassmorphism sutil, bordas arredondadas, transições suaves.
+
+---
+
+## PREPARAÇÃO PARA FUTURAS FERRAMENTAS
+
+Criar um sistema extensível que permita adicionar novas ferramentas facilmente.
+
+Implementar um **Tool Registry** (gerenciador de ferramentas).
+
+Cada ferramenta registrada deve possuir:
+
+- **nome**: identificador único (ex: "pencil").
+- **label**: nome legível (ex: "Lápis").
+- **ícone**: SVG ou Unicode.
+- **atalho**: tecla de atalho (ex: "p").
+- **configurações**: array de objetos descrevendo inputs range, cores, etc.
+- **eventos próprios**: onActivate, onDeactivate, onMouseDown, onMouseMove, onMouseUp.
+- **método de ativação**: activate() — configura cursor, painel de opções, estado.
+- **método de desativação**: deactivate() — limpa estado específico.
+- **método de renderização**: render() — chamado a cada frame se necessário.
+
+O sistema deve ser extensível: adicionar uma nova ferramenta = criar classe e registrar no ToolManager.
+
+ToolManager deve ter métodos:
+- registerTool(tool)
+- activateTool(name)
+- getActiveTool()
+- getAllTools()
+
+---
+
+## SISTEMA COMPLETO DE KEYBINDS PERSONALIZÁVEIS
+
+Criar uma seção específica dentro das configurações chamada "Atalhos de Teclado" ou "Keybinds".
+
+O usuário deve poder visualizar e redefinir os atalhos das seguintes funções:
+
+- Selecionar lápis
+- Selecionar borracha
+- Selecionar caneta temporária
+- Selecionar ferramenta mão
+- Desfazer
+- Refazer
+- Ajustar à tela
+- Resetar zoom (100%)
+- Exportar imagem (futuro)
+- Abrir configurações
+- Abrir painel de opções (toggle direito)
+
+Requisitos técnicos:
+
+- **Interface visual para alteração**: tabela ou lista dentro do modal de configurações mostrando comando + atalho atual + botão "Alterar".
+- **Detecção automática da tecla pressionada**: ao clicar em "Alterar", o sistema espera o usuário pressionar uma combinação de teclas e detecta automaticamente (keydown event).
+- **Impedir conflitos entre atalhos**: se o usuário definir dois comandos com o mesmo atalho, exibir aviso e não permitir.
+- **Possibilidade de restaurar padrões**: botão "Restaurar Padrões" na seção de keybinds.
+- **Salvar preferências**: usar localStorage para persistir as configurações de atalhos.
+- **Reset completo**: opção de limpar todas as preferências salvas.
+
+---
+
+## TELA INICIAL PROFISSIONAL (SPLASH SCREEN)
+
+Antes de carregar qualquer imagem, exibir uma experiência inicial elegante.
+
+Deve conter:
+
+- **Nome do editor**: "Image Editor" ou nome criativo.
+- **Breve descrição**: "Editor de imagens profissional — Paint 3D Style".
+- **Área destacada para upload**: um retângulo com borda tracejada, grande, no centro, com background levemente diferente.
+- **Ícone ilustrativo**: ícone grande de imagem/upload no centro da área.
+- **Texto**: "Arraste uma imagem aqui ou clique para selecionar".
+- **Dicas rápidas**: pequenos cards ou lista com dicas de uso:
+  - "P: Lápis | E: Borracha | F: Caneta | H: Mão"
+  - "Scroll: Zoom | Ctrl+Z: Desfazer"
+  - "Formatos suportados: PNG, JPG, JPEG, WebP"
+- **Visual sofisticado**: glassmorphism, animação sutil de entrada (fade-in), gradiente no background.
+
+A tela deve desaparecer automaticamente após o primeiro carregamento de imagem, com animação de fade-out.
+
+---
+
+## TEMA ESCURO PREMIUM
+
+O editor deve utilizar tema escuro de alta qualidade.
+
+Inspirar-se em:
+
+- **Paint 3D**: barras escuras, azul como cor de acento.
+- **Visual Studio Code**: fundo escuro com bom contraste.
+- **Photoshop**: cinzas escuros profissionais.
+- **Ferramentas criativas modernas**: Figma, Spline, etc.
+
+Diretrizes de cores:
+
+- **Background principal**: #1a1a2e ou #1e1e2e
+- **Superfície de painéis**: #2a2a3e a #2d2d44
+- **Superfície elevada (modais)**: #353550
+- **Bordas**: rgba(255,255,255,0.06) a rgba(255,255,255,0.1)
+- **Texto primário**: #e0e0e0
+- **Texto secundário**: #9a9ab0
+- **Acento primário**: #0078d4 (azul Paint 3D)
+- **Acento hover**: #1a8ae8
+- **Acento glow**: rgba(0,120,212,0.3)
+- **Sucesso**: #2ea043
+- **Erro**: #da3633
+- **Aviso**: #d29922
+
+Objetivos:
+
+- Reduzir fadiga visual durante uso prolongado.
+- Transmitir profissionalismo e seriedade.
+- Manter excelente legibilidade em todos os elementos.
+- Evitar contrastes agressivos (nunca usar preto puro #000).
+- Evitar cores muito saturadas.
+
+---
+
+## RESTRIÇÕES TÉCNICAS OBRIGATÓRIAS
+
+- CÓDIGO DEVE SER EM UM ÚNICO ARQUIVO HTML.
+- CSS e JS devem estar embutidos (inline) no HTML.
+- Não usar frameworks (React, Vue, Angular etc). Vanilla JS only.
+- Não utilizar bibliotecas de canvas (Fabric.js, Konva, Paper.js, etc).
+- Não utilizar bibliotecas de UI (Bootstrap, Materialize, etc).
+- CDNs continuam permitidas apenas para ícones (FontAwesome 6 Free via CDN) OU se estritamente necessário para funcionalidades específicas.
+- Todo o comportamento deve ser implementado manualmente.
+- Código deve ser limpo, comentado em inglês (comentários para explicar seções).
+- O visual deve ser profissional: transições suaves, glassmorphism, sombras, animações.
+- Performance: usar requestAnimationFrame para desenhos, evitar loops desnecessários.
+- Compatibilidade: Chrome, Firefox, Edge (últimas versões).
+- Segurança: usar createObjectURL para upload, revogar URLs antigas com revokeObjectURL.
+- Mobile: NÃO é necessário adaptar para dispositivos móveis. Foco exclusivo em desktop e notebook.
+
+---
+
+## EXEMPLO DE COMPORTAMENTO ESPERADO
+
+1. Usuário abre o site. Vê a tela inicial (splash screen) com área de upload destacada, nome do editor, dicas rápidas.
+2. Usuário clica na área de upload ou arrasta uma imagem. Seleciona uma foto.
+3. A tela inicial desaparece com fade-out. A foto aparece no canvas.
+4. A barra de status mostra "Foto.jpg | 1920x1080 | Ferramenta: Lápis | Zoom: 100%".
+5. Usuário seleciona a ferramenta Lápis na toolbar. O painel direito mostra o input range de grossura. Cursor vira crosshair com círculo.
+6. Usuário desenha na imagem com o mouse.
+7. Usuário dá scroll para dar zoom em uma área específica — o zoom foca onde o mouse está.
+8. Usuário seleciona a ferramenta Mão (atalho H). Cursor vira "grab". Arrasta para navegar pela imagem com zoom.
+9. Usuário volta para o Lápis (atalho P). Desenha mais alguns traços.
+10. Usuário seleciona Borracha (atalho E), ajusta tamanho no painel direito. Apaga parte do desenho.
+11. Usuário seleciona Caneta que Some (atalho F), ajusta grossura e tempo (ex: 3s). Desenha algo — os traços somem gradualmente em 3 segundos.
+12. Usuário aperta Ctrl+Z — o último traço permanente desaparece.
+13. Usuário aperta Ctrl+Y — o traço reaparece.
+14. Usuário pressiona Ctrl+0 — zoom retorna para 100%.
+15. Usuário pressiona Ctrl++ — zoom aumenta.
+16. Usuário clica no botão "Ajustar à tela" — zoom se ajusta para mostrar a imagem inteira.
+17. Usuário clica em Configurações ⚙️ > seção Keybinds. Altera o atalho do lápis de "P" para "B". O sistema detecta conflito com borracha e avisa.
+18. Usuário restaura padrões. Fecha config.
+19. Usuário clica em Configurações > Enviar Nova Imagem — escolhe outra imagem. Tudo reseta e a nova imagem aparece com zoom 100%.
+20. Usuário tenta enviar um arquivo .gif — sistema exibe toast "Formato de arquivo não suportado. Use PNG, JPG, JPEG ou WebP."
+
+---
+
+## RESTRIÇÕES E OBSERVAÇÕES
+
+- CÓDIGO DEVE SER EM UM ÚNICO ARQUIVO HTML.
+- CSS e JS devem estar embutidos (inline) no HTML.
+- Não usar frameworks (React, Vue etc). Vanilla JS only.
+- Pode usar CDN para ícones (FontAwesome 6 Free via CDN).
+- Código deve ser limpo, comentado em inglês (comentários para explicar seções).
+- O visual deve ser profissional: transições suaves, glassmorphism, sombras, animações.
+- Performance: usar requestAnimationFrame para desenhos, evitar loops desnecessários.
+- Compatibilidade: Chrome, Firefox, Edge (últimas versões).
+- Segurança: usar createObjectURL para upload, revogar URLs antigas com revokeObjectURL.
+- Mobile: não é prioridade, deve funcionar apenas em desktop e notebook.
+- Nunca utilizar bibliotecas de canvas (Fabric.js, Konva, Paper.js, etc).
+- Nunca utilizar bibliotecas de UI (Bootstrap, Materialize, etc).
+- CDN permitido exclusivamente para ícones.
+
+---
+
+## ENTREGUE APENAS O CÓDIGO COMPLETO
+
+Após ler e entender este prompt, gere o arquivo HTML completo e funcional. Teste mentalmente cada funcionalidade antes de entregar. Não omita nenhuma das ferramentas ou requisitos. O site deve abrir no navegador e funcionar imediatamente sem nenhuma configuração adicional.
+
+O código gerado deve ser a base de um editor de imagens profissional e comercial, preparado para receber dezenas de novas ferramentas futuramente. Código limpo, expansível e de fácil manutenção.
