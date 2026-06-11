@@ -273,21 +273,145 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 
 <script>
 // ============================================================
-// STATE
+// DEBUG MODE
 // ============================================================
-const state = {
-  scale: 1, offsetX: 0, offsetY: 0, activeToolName: 'pencil',
-  image: null, imageUrl: null, imageName: '', imageWidth: 0, imageHeight: 0,
-  history: [], redoStack: [], maxHistory: 50,
-  isDrawing: false, currentStroke: null,
-  isPanning: false, panStart: null, panOffsetStart: null,
-  fadingStrokes: [], currentFadingStroke: null, fadingLoopId: null,
-  isOptionsOpen: true, keybinds: {},
-  defaultKeybinds: {
-    pencil:'p',eraser:'e','fading-pen':'f',hand:'h',undo:'ctrl+z',redo:'ctrl+y',
-    'zoom-in':'ctrl++','zoom-out':'ctrl+-','zoom-100':'ctrl+0',
-    'fit-to-screen':'ctrl+shift+f',settings:'ctrl+,','toggle-options':'ctrl+\\'
+const DEBUG_MODE = true;
+const debug = {
+  log: (...args) => { if (DEBUG_MODE) console.log('[Editor]', ...args); },
+  warn: (...args) => { if (DEBUG_MODE) console.warn('[Editor]', ...args); },
+  error: (...args) => { if (DEBUG_MODE) console.error('[Editor]', ...args); },
+};
+function assert(condition, message) {
+  if (DEBUG_MODE && !condition) throw new Error('[Assert] ' + message);
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+function debounce(fn, ms) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), ms);
+  };
+}
+function throttle(fn, ms) {
+  let last = 0;
+  return function(...args) {
+    const now = Date.now();
+    if (now - last >= ms) { last = now; fn.apply(this, args); }
+  };
+}
+function lerp(a, b, t) { return a + (b - a) * t; }
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+// ============================================================
+// EVENT BUS
+// ============================================================
+class EventBus {
+  constructor() { this._listeners = {}; debug.log('EventBus created'); }
+  on(event, callback) {
+    if (!this._listeners[event]) this._listeners[event] = new Set();
+    this._listeners[event].add(callback);
+    return () => this.off(event, callback);
   }
+  off(event, callback) {
+    if (!this._listeners[event]) return;
+    this._listeners[event].delete(callback);
+  }
+  emit(event, data) {
+    if (!this._listeners[event]) return;
+    for (const cb of this._listeners[event]) {
+      try { cb(data); } catch (e) { debug.error('EventBus error:', e); }
+    }
+  }
+  once(event, callback) {
+    const unsub = this.on(event, (data) => { unsub(); callback(data); });
+  }
+}
+
+// ============================================================
+// COMMAND PATTERN
+// ============================================================
+class Command {
+  constructor() { this._executed = false; }
+  execute() { throw new Error('Command must implement execute()'); }
+  undo() { throw new Error('Command must implement undo()'); }
+  redo() { this.execute(); }
+}
+
+// ============================================================
+// STANDARDIZED EVENTS
+// ============================================================
+const EVENTS = {
+  HISTORY_CHANGED: 'history:changed',
+  SETTINGS_UPDATED: 'settings:updated',
+  CANVAS_TRANSFORMED: 'canvas:transformed',
+  KEYBIND_CHANGED: 'keybind:changed',
+  INPUT_KEYDOWN: 'input:keydown',
+  INPUT_KEYUP: 'input:keyup',
+  INPUT_MOUSEDOWN: 'input:mousedown',
+  INPUT_MOUSEMOVE: 'input:mousemove',
+  INPUT_MOUSEUP: 'input:mouseup',
+  TOOL_ACTIVATED: 'tool:activated',
+  IMAGE_LOADED: 'image:loaded',
+};
+
+// ============================================================
+// COORDINATE UTILITIES
+// ============================================================
+function screenToWorld(clientX, clientY) {
+  const rect = DOM['canvas-area'].getBoundingClientRect();
+  return {
+    x: (clientX - rect.left - EditorState.canvas.offsetX) / EditorState.canvas.scale,
+    y: (clientY - rect.top - EditorState.canvas.offsetY) / EditorState.canvas.scale,
+  };
+}
+function worldToScreen(worldX, worldY) {
+  const rect = DOM['canvas-area'].getBoundingClientRect();
+  return {
+    x: rect.left + worldX * EditorState.canvas.scale + EditorState.canvas.offsetX,
+    y: rect.top + worldY * EditorState.canvas.scale + EditorState.canvas.offsetY,
+  };
+}
+
+// ============================================================
+// GLOBAL STATE (EDITOR STATE)
+// ============================================================
+const EditorState = {
+  canvas: {
+    scale: 1, offsetX: 0, offsetY: 0,
+    image: null, imageUrl: null, imageName: '',
+    imageWidth: 0, imageHeight: 0,
+  },
+  tools: {
+    activeToolName: 'pencil',
+    isDrawing: false, currentStroke: null,
+    isPanning: false, panStart: null, panOffsetStart: null,
+    fadingStrokes: [], currentFadingStroke: null, fadingLoopId: null,
+  },
+  history: {
+    undoStack: [], redoStack: [], maxHistory: 50,
+  },
+  stamps: {},
+  settings: {
+    keybinds: {},
+    defaultKeybinds: {
+      pencil:'p',eraser:'e','fading-pen':'f',hand:'h',undo:'ctrl+z',redo:'ctrl+y',
+      'zoom-in':'ctrl++','zoom-out':'ctrl+-','zoom-100':'ctrl+0',
+      'fit-to-screen':'ctrl+shift+f',settings:'ctrl+,','toggle-options':'ctrl+\\'
+    },
+  },
+  ui: {
+    isOptionsOpen: true,
+  },
+  input: {},
 };
 
 const KEYBIND_ACTIONS = [
@@ -328,11 +452,7 @@ function initDOM() {
 // UTILITY
 // ============================================================
 function getCanvasCoords(clientX, clientY) {
-  const rect = DOM['canvas-area'].getBoundingClientRect();
-  return {
-    x: (clientX - rect.left - state.offsetX) / state.scale,
-    y: (clientY - rect.top - state.offsetY) / state.scale
-  };
+  return screenToWorld(clientX, clientY);
 }
 
 function formatKeybindDisplay(combo) {
@@ -344,6 +464,91 @@ function formatKeybindDisplay(combo) {
     if (p==='arrowleft') return '&larr;'; if (p==='arrowright') return '&rarr;';
     return p.toUpperCase();
   }).join(' + ');
+}
+
+// ============================================================
+// INPUT MANAGER
+// ============================================================
+class InputManager {
+  constructor(eventBus) {
+    this.eventBus = eventBus;
+    this.keys = {};
+    this.buttons = {};
+    this.mouse = { x: 0, y: 0, clientX: 0, clientY: 0 };
+    this._bound = false;
+    this._handlers = [];
+  }
+
+  bind(target) {
+    if (this._bound) return;
+    this._bound = true;
+    this._target = target || document;
+
+    const kd = (e) => {
+      this.keys[e.key.toLowerCase()] = true;
+      this.eventBus.emit(EVENTS.INPUT_KEYDOWN, e);
+    };
+    const ku = (e) => {
+      this.keys[e.key.toLowerCase()] = false;
+      this.eventBus.emit(EVENTS.INPUT_KEYUP, e);
+    };
+    const md = (e) => {
+      this.buttons[e.button] = true;
+      this.mouse.clientX = e.clientX;
+      this.mouse.clientY = e.clientY;
+      if (this._target) {
+        const rect = this._target.getBoundingClientRect();
+        this.mouse.x = e.clientX - rect.left;
+        this.mouse.y = e.clientY - rect.top;
+      }
+      this.eventBus.emit(EVENTS.INPUT_MOUSEDOWN, e);
+    };
+    const mm = (e) => {
+      this.mouse.clientX = e.clientX;
+      this.mouse.clientY = e.clientY;
+      if (this._target) {
+        const rect = this._target.getBoundingClientRect();
+        this.mouse.x = e.clientX - rect.left;
+        this.mouse.y = e.clientY - rect.top;
+      }
+      this.eventBus.emit(EVENTS.INPUT_MOUSEMOVE, e);
+    };
+    const mu = (e) => {
+      this.buttons[e.button] = false;
+      this.eventBus.emit(EVENTS.INPUT_MOUSEUP, e);
+    };
+    const blur = () => {
+      for (const k in this.keys) this.keys[k] = false;
+      for (const b in this.buttons) this.buttons[b] = false;
+    };
+
+    this._handlers = [
+      { el: document, type: 'keydown', fn: kd },
+      { el: document, type: 'keyup', fn: ku },
+      { el: document, type: 'mousedown', fn: md },
+      { el: document, type: 'mousemove', fn: mm },
+      { el: document, type: 'mouseup', fn: mu },
+      { el: window, type: 'blur', fn: blur },
+    ];
+
+    this._handlers.forEach(h => h.el.addEventListener(h.type, h.fn));
+    debug.log('InputManager bound');
+  }
+
+  unbind() {
+    if (!this._bound) return;
+    this._handlers.forEach(h => h.el.removeEventListener(h.type, h.fn));
+    this._handlers = [];
+    this._bound = false;
+    this.keys = {};
+    this.buttons = {};
+    debug.log('InputManager unbound');
+  }
+
+  isKeyDown(key) { return !!this.keys[key.toLowerCase()]; }
+  isMouseDown(button) { return !!this.buttons[button]; }
+  getMousePosition() { return { x: this.mouse.x, y: this.mouse.y }; }
+  getMouseClient() { return { x: this.mouse.clientX, y: this.mouse.clientY }; }
 }
 
 // ============================================================
@@ -367,14 +572,19 @@ class NotificationManager {
 // KEYBIND MANAGER
 // ============================================================
 class KeybindManager {
-  constructor() { this.keybinds = {}; this._capturing = false; this._captureCB = null; }
+  constructor(eventBus) {
+    this.eventBus = eventBus;
+    this.keybinds = {};
+    this._capturing = false;
+    this._captureCB = null;
+  }
 
   load() {
     try {
       const saved = localStorage.getItem('image-editor-keybinds');
-      this.keybinds = saved ? JSON.parse(saved) : { ...state.defaultKeybinds };
-    } catch(e) { this.keybinds = { ...state.defaultKeybinds }; }
-    state.keybinds = this.keybinds;
+      this.keybinds = saved ? JSON.parse(saved) : { ...EditorState.settings.defaultKeybinds };
+    } catch(e) { this.keybinds = { ...EditorState.settings.defaultKeybinds }; }
+    EditorState.settings.keybinds = this.keybinds;
   }
 
   save() {
@@ -382,9 +592,10 @@ class KeybindManager {
   }
 
   reset() {
-    this.keybinds = { ...state.defaultKeybinds };
-    state.keybinds = this.keybinds;
+    this.keybinds = { ...EditorState.settings.defaultKeybinds };
+    EditorState.settings.keybinds = this.keybinds;
     this.save();
+    this.eventBus.emit(EVENTS.KEYBIND_CHANGED, this.keybinds);
   }
 
   getActionForKey(e) {
@@ -412,7 +623,8 @@ class KeybindManager {
       if (a !== action && b === combo) return { success: false, conflict: a };
     }
     this.keybinds[action] = combo;
-    state.keybinds = this.keybinds;
+    EditorState.settings.keybinds = this.keybinds;
+    this.eventBus.emit(EVENTS.KEYBIND_CHANGED, this.keybinds);
     return { success: true };
   }
 
@@ -444,32 +656,37 @@ class KeybindManager {
 // HISTORY MANAGER
 // ============================================================
 class HistoryManager {
+  constructor(eventBus) { this.eventBus = eventBus; }
+
   push(stroke) {
-    state.redoStack = [];
-    state.history.push(JSON.parse(JSON.stringify(stroke)));
-    if (state.history.length > state.maxHistory) state.history.shift();
+    EditorState.history.redoStack = [];
+    EditorState.history.undoStack.push(JSON.parse(JSON.stringify(stroke)));
+    if (EditorState.history.undoStack.length > EditorState.history.maxHistory) EditorState.history.undoStack.shift();
     this._updateUI();
+    this.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: EditorState.history.undoStack, redoStack: EditorState.history.redoStack });
   }
 
   undo() {
-    if (state.history.length === 0) { app.notification('Nada para desfazer', 'warning', 1500); return; }
-    state.redoStack.push(state.history.pop());
+    if (EditorState.history.undoStack.length === 0) { if (app) app.notification('Nada para desfazer', 'warning', 1500); return; }
+    EditorState.history.redoStack.push(EditorState.history.undoStack.pop());
     this._updateUI();
-    app.renderPermanentCanvas();
+    if (app) app.renderPermanentCanvas();
+    this.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: EditorState.history.undoStack, redoStack: EditorState.history.redoStack });
   }
 
   redo() {
-    if (state.redoStack.length === 0) { app.notification('Nada para refazer', 'warning', 1500); return; }
-    state.history.push(state.redoStack.pop());
+    if (EditorState.history.redoStack.length === 0) { if (app) app.notification('Nada para refazer', 'warning', 1500); return; }
+    EditorState.history.undoStack.push(EditorState.history.redoStack.pop());
     this._updateUI();
-    app.renderPermanentCanvas();
+    if (app) app.renderPermanentCanvas();
+    this.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: EditorState.history.undoStack, redoStack: EditorState.history.redoStack });
   }
 
-  clear() { state.history = []; state.redoStack = []; this._updateUI(); }
+  clear() { EditorState.history.undoStack = []; EditorState.history.redoStack = []; this._updateUI(); this.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: [], redoStack: [] }); }
 
   _updateUI() {
-    DOM['undo-btn'].disabled = state.history.length === 0;
-    DOM['redo-btn'].disabled = state.redoStack.length === 0;
+    DOM['undo-btn'].disabled = EditorState.history.undoStack.length === 0;
+    DOM['redo-btn'].disabled = EditorState.history.redoStack.length === 0;
   }
 }
 
@@ -497,52 +714,62 @@ class LayerManager {
 }
 
 // ============================================================
-// ZOOM MANAGER
+// CANVAS MANAGER
 // ============================================================
-class ZoomManager {
-  constructor() { this.minScale = 0.1; this.maxScale = 10; }
+class CanvasManager {
+  constructor(eventBus) {
+    this.eventBus = eventBus;
+    this.minScale = 0.1;
+    this.maxScale = 10;
+  }
 
   setScale(newScale, cx, cy) {
-    newScale = Math.max(this.minScale, Math.min(this.maxScale, newScale));
+    newScale = clamp(newScale, this.minScale, this.maxScale);
     if (cx !== undefined && cy !== undefined) {
-      const canvasX = (cx - state.offsetX) / state.scale;
-      const canvasY = (cy - state.offsetY) / state.scale;
-      state.offsetX = cx - canvasX * newScale;
-      state.offsetY = cy - canvasY * newScale;
+      const canvasX = (cx - EditorState.canvas.offsetX) / EditorState.canvas.scale;
+      const canvasY = (cy - EditorState.canvas.offsetY) / EditorState.canvas.scale;
+      EditorState.canvas.offsetX = cx - canvasX * newScale;
+      EditorState.canvas.offsetY = cy - canvasY * newScale;
     } else {
       const ca = DOM['canvas-area'];
       const ccx = ca.clientWidth / 2, ccy = ca.clientHeight / 2;
-      const canvasX = (ccx - state.offsetX) / state.scale;
-      const canvasY = (ccy - state.offsetY) / state.scale;
-      state.offsetX = ccx - canvasX * newScale;
-      state.offsetY = ccy - canvasY * newScale;
+      const canvasX = (ccx - EditorState.canvas.offsetX) / EditorState.canvas.scale;
+      const canvasY = (ccy - EditorState.canvas.offsetY) / EditorState.canvas.scale;
+      EditorState.canvas.offsetX = ccx - canvasX * newScale;
+      EditorState.canvas.offsetY = ccy - canvasY * newScale;
     }
-    state.scale = newScale;
-    app.updateTransform();
-    app.updateUI();
+    EditorState.canvas.scale = newScale;
+    this._applyTransform();
+    this.eventBus.emit(EVENTS.CANVAS_TRANSFORMED, { scale: EditorState.canvas.scale });
   }
 
-  zoomIn() { this.setScale(state.scale * 1.2); }
-  zoomOut() { this.setScale(state.scale / 1.2); }
+  _applyTransform() {
+    DOM['canvas-container'].style.transform = 'translate('+EditorState.canvas.offsetX+'px,'+EditorState.canvas.offsetY+'px) scale('+EditorState.canvas.scale+')';
+    if (app) app.cursorManager.requestDraw();
+  }
+
+  zoomIn() { this.setScale(EditorState.canvas.scale * 1.2); }
+  zoomOut() { this.setScale(EditorState.canvas.scale / 1.2); }
+
   setZoom100() {
     const ca = DOM['canvas-area'];
-    state.offsetX = Math.max(0, (ca.clientWidth - state.imageWidth) / 2);
-    state.offsetY = Math.max(0, (ca.clientHeight - state.imageHeight) / 2);
-    state.scale = 1;
-    app.updateTransform();
-    app.updateUI();
+    EditorState.canvas.offsetX = Math.max(0, (ca.clientWidth - EditorState.canvas.imageWidth) / 2);
+    EditorState.canvas.offsetY = Math.max(0, (ca.clientHeight - EditorState.canvas.imageHeight) / 2);
+    EditorState.canvas.scale = 1;
+    this._applyTransform();
+    if (app) app.updateUI();
   }
 
   fitToScreen() {
     const cw = DOM['canvas-area'].clientWidth, ch = DOM['canvas-area'].clientHeight;
-    if (state.imageWidth === 0 || state.imageHeight === 0) return;
-    const scaleX = cw / state.imageWidth, scaleY = ch / state.imageHeight;
+    if (EditorState.canvas.imageWidth === 0 || EditorState.canvas.imageHeight === 0) return;
+    const scaleX = cw / EditorState.canvas.imageWidth, scaleY = ch / EditorState.canvas.imageHeight;
     const fitScale = Math.min(scaleX, scaleY) * 0.95;
-    state.offsetX = (cw - state.imageWidth * fitScale) / 2;
-    state.offsetY = (ch - state.imageHeight * fitScale) / 2;
-    state.scale = fitScale;
-    app.updateTransform();
-    app.updateUI();
+    EditorState.canvas.offsetX = (cw - EditorState.canvas.imageWidth * fitScale) / 2;
+    EditorState.canvas.offsetY = (ch - EditorState.canvas.imageHeight * fitScale) / 2;
+    EditorState.canvas.scale = fitScale;
+    this._applyTransform();
+    if (app) app.updateUI();
   }
 
   handleWheel(e) {
@@ -551,7 +778,7 @@ class ZoomManager {
     const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
     const delta = -e.deltaY;
     const factor = delta > 0 ? 1.08 : 1 / 1.08;
-    this.setScale(state.scale * factor, cx, cy);
+    this.setScale(EditorState.canvas.scale * factor, cx, cy);
   }
 }
 
@@ -610,7 +837,7 @@ class CursorManager {
 
   refresh() {
     const tool = app.toolManager.getActiveTool();
-    if (!tool || !state.image || !tool.isActive) {
+    if (!tool || !EditorState.canvas.image || !tool.isActive) {
       this.hide();
       return;
     }
@@ -634,12 +861,12 @@ class CursorManager {
     if (!this.visible) return;
 
     const tool = app.toolManager.getActiveTool();
-    if (!tool || !state.image) {
+    if (!tool || !EditorState.canvas.image) {
       this.hide();
       return;
     }
 
-    const r = Math.max(1, (tool.size || 0) * state.scale);
+    const r = Math.max(1, (tool.size || 0) * EditorState.canvas.scale);
     const padding = 14;
     const needed = Math.max(Math.ceil(r * 2 + padding * 2), 40);
     const curr = this.canvas.width;
@@ -741,8 +968,8 @@ class PencilTool extends Tool {
   onMouseDown(e) {
     const coords = getCanvasCoords(e.clientX, e.clientY);
     this._drawing = true; this.points = [coords];
-    state.currentStroke = { toolType:'pencil', points:this.points, size:this.size, color:this.color, layer:'permanent' };
-    state.isDrawing = true;
+    EditorState.tools.currentStroke = { toolType:'pencil', points:this.points, size:this.size, color:this.color, layer:'permanent' };
+    EditorState.tools.isDrawing = true;
     this._drawPoint(coords);
   }
   onMouseMove(e) {
@@ -753,11 +980,11 @@ class PencilTool extends Tool {
   }
   onMouseUp(e) {
     if (!this._drawing) return;
-    this._drawing = false; state.isDrawing = false;
-    if (this.points.length > 1) app.historyManager.push(state.currentStroke);
-    state.currentStroke = null; this.points = [];
+    this._drawing = false; EditorState.tools.isDrawing = false;
+    if (this.points.length > 1) app.historyManager.push(EditorState.tools.currentStroke);
+    EditorState.tools.currentStroke = null; this.points = [];
   }
-  onCancel() { this._drawing = false; state.isDrawing = false; this.points = []; state.currentStroke = null; }
+  onCancel() { this._drawing = false; EditorState.tools.isDrawing = false; this.points = []; EditorState.tools.currentStroke = null; }
   _drawPoint(c) { const ctx = DOM.ctxPerm; ctx.beginPath(); ctx.arc(c.x, c.y, this.size/2, 0, Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); }
   _drawSegment(f,t) { const ctx = DOM.ctxPerm; ctx.beginPath(); ctx.moveTo(f.x,f.y); ctx.lineTo(t.x,t.y); ctx.strokeStyle=this.color; ctx.lineWidth=this.size; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke(); }
 }
@@ -771,8 +998,8 @@ class EraserTool extends Tool {
   onMouseDown(e) {
     const coords = getCanvasCoords(e.clientX, e.clientY);
     this._drawing = true; this.points = [coords];
-    state.currentStroke = { toolType:'eraser', points:this.points, size:this.size, layer:'permanent' };
-    state.isDrawing = true;
+    EditorState.tools.currentStroke = { toolType:'eraser', points:this.points, size:this.size, layer:'permanent' };
+    EditorState.tools.isDrawing = true;
     this._erasePoint(coords);
   }
   onMouseMove(e) {
@@ -783,12 +1010,12 @@ class EraserTool extends Tool {
   }
   onMouseUp(e) {
     if (!this._drawing) return;
-    this._drawing = false; state.isDrawing = false;
-    if (this.points.length > 1) app.historyManager.push(state.currentStroke);
-    state.currentStroke = null; this.points = [];
+    this._drawing = false; EditorState.tools.isDrawing = false;
+    if (this.points.length > 1) app.historyManager.push(EditorState.tools.currentStroke);
+    EditorState.tools.currentStroke = null; this.points = [];
     DOM.ctxPerm.globalCompositeOperation = 'source-over';
   }
-  onCancel() { this._drawing = false; state.isDrawing = false; this.points = []; state.currentStroke = null; DOM.ctxPerm.globalCompositeOperation = 'source-over'; }
+  onCancel() { this._drawing = false; EditorState.tools.isDrawing = false; this.points = []; EditorState.tools.currentStroke = null; DOM.ctxPerm.globalCompositeOperation = 'source-over'; }
   _erasePoint(c) {
     const ctx = DOM.ctxPerm; ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath(); ctx.arc(c.x, c.y, this.size/2, 0, Math.PI*2); ctx.fillStyle='rgba(0,0,0,1)'; ctx.fill();
@@ -813,8 +1040,8 @@ class FadingPenTool extends Tool {
   onMouseDown(e) {
     const coords = getCanvasCoords(e.clientX, e.clientY);
     this._drawing = true; this.points = [coords];
-    state.isDrawing = true;
-    state.currentFadingStroke = { points:this.points, size:this.size, color:'#000000', lifetime:this.lifetime*1000 };
+    EditorState.tools.isDrawing = true;
+    EditorState.tools.currentFadingStroke = { points:this.points, size:this.size, color:'#000000', lifetime:this.lifetime*1000 };
     app.ensureFadingLoop();
   }
   onMouseMove(e) {
@@ -824,14 +1051,14 @@ class FadingPenTool extends Tool {
   }
   onMouseUp(e) {
     if (!this._drawing) return;
-    this._drawing = false; state.isDrawing = false;
-    if (this.points.length > 1 && state.currentFadingStroke) {
-      state.fadingStrokes.push({ ...state.currentFadingStroke, points:[...this.points], fadeStartTime:performance.now() });
+    this._drawing = false; EditorState.tools.isDrawing = false;
+    if (this.points.length > 1 && EditorState.tools.currentFadingStroke) {
+      EditorState.tools.fadingStrokes.push({ ...EditorState.tools.currentFadingStroke, points:[...this.points], fadeStartTime:performance.now() });
     }
-    state.currentFadingStroke = null;
+    EditorState.tools.currentFadingStroke = null;
     app.ensureFadingLoop();
   }
-  onCancel() { this._drawing = false; state.isDrawing = false; this.points = []; state.currentFadingStroke = null; }
+  onCancel() { this._drawing = false; EditorState.tools.isDrawing = false; this.points = []; EditorState.tools.currentFadingStroke = null; }
 }
 
 // ============================================================
@@ -842,13 +1069,13 @@ class HandTool extends Tool {
   getOptions() { return [{ type:'info', text:'Arraste para navegar pela imagem' }]; }
   onMouseDown(e) {
     this._panning = true; this._start = { x:e.clientX, y:e.clientY };
-    this._offsetStart = { x:state.offsetX, y:state.offsetY };
+    this._offsetStart = { x:EditorState.canvas.offsetX, y:EditorState.canvas.offsetY };
     app.cursorManager.setHandDragging(true);
   }
   onMouseMove(e) {
     if (!this._panning) return;
-    state.offsetX = this._offsetStart.x + (e.clientX - this._start.x);
-    state.offsetY = this._offsetStart.y + (e.clientY - this._start.y);
+    EditorState.canvas.offsetX = this._offsetStart.x + (e.clientX - this._start.x);
+    EditorState.canvas.offsetY = this._offsetStart.y + (e.clientY - this._start.y);
     app.updateTransform();
   }
   onMouseUp(e) {
@@ -862,14 +1089,19 @@ class HandTool extends Tool {
 // TOOL MANAGER
 // ============================================================
 class ToolManager {
-  constructor() { this.tools = new Map(); this.activeTool = null; }
+  constructor(eventBus) {
+    this.eventBus = eventBus;
+    this.tools = new Map();
+    this.activeTool = null;
+  }
   registerTool(tool) { this.tools.set(tool.name, tool); }
   activateTool(name) {
     if (this.activeTool) { this.activeTool.deactivate(); }
     const tool = this.tools.get(name);
     if (!tool) return;
-    this.activeTool = tool; state.activeToolName = name;
+    this.activeTool = tool; EditorState.tools.activeToolName = name;
     tool.activate();
+    this.eventBus.emit(EVENTS.TOOL_ACTIVATED, { tool: name });
     document.querySelectorAll('.tool-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.tool === name);
     });
@@ -925,24 +1157,24 @@ class UIManager {
     if (tool) {
       DOM['status-tool'].innerHTML = '<i class="fas fa-'+tool.icon+'"></i> '+tool.label;
     }
-    DOM['status-filename'].textContent = state.imageName || 'Nenhuma imagem';
-    if (state.imageWidth && state.imageHeight) {
-      DOM['status-dimensions'].textContent = state.imageWidth + ' x ' + state.imageHeight + ' px';
+    DOM['status-filename'].textContent = EditorState.canvas.imageName || 'Nenhuma imagem';
+    if (EditorState.canvas.imageWidth && EditorState.canvas.imageHeight) {
+      DOM['status-dimensions'].textContent = EditorState.canvas.imageWidth + ' x ' + EditorState.canvas.imageHeight + ' px';
     } else {
       DOM['status-dimensions'].textContent = '';
     }
-    const pct = Math.round(state.scale * 100);
+    const pct = Math.round(EditorState.canvas.scale * 100);
     DOM['zoom-percent'].textContent = pct + '%';
     DOM['zoom-slider'].value = pct;
-    DOM['settings-filename'].textContent = 'Arquivo: ' + (state.imageName || 'Nenhuma imagem');
-    DOM['settings-dimensions'].textContent = 'Dimens&otilde;es: ' + (state.imageWidth ? state.imageWidth+' x '+state.imageHeight+' px' : '&mdash;');
+    DOM['settings-filename'].textContent = 'Arquivo: ' + (EditorState.canvas.imageName || 'Nenhuma imagem');
+    DOM['settings-dimensions'].textContent = 'Dimens&otilde;es: ' + (EditorState.canvas.imageWidth ? EditorState.canvas.imageWidth+' x '+EditorState.canvas.imageHeight+' px' : '&mdash;');
   }
 
   toggleOptions() {
-    state.isOptionsOpen = !state.isOptionsOpen;
-    DOM['tool-options'].classList.toggle('collapsed', !state.isOptionsOpen);
+    EditorState.ui.isOptionsOpen = !EditorState.ui.isOptionsOpen;
+    DOM['tool-options'].classList.toggle('collapsed', !EditorState.ui.isOptionsOpen);
     const icon = DOM['tool-options-close'].querySelector('i');
-    if (icon) icon.className = state.isOptionsOpen ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+    if (icon) icon.className = EditorState.ui.isOptionsOpen ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
   }
 }
 
@@ -950,7 +1182,10 @@ class UIManager {
 // SETTINGS MANAGER
 // ============================================================
 class SettingsManager {
-  constructor() { this._open = false; }
+  constructor(eventBus) {
+    this.eventBus = eventBus;
+    this._open = false;
+  }
   toggle() {
     this._open ? this.close() : this.open();
   }
@@ -968,7 +1203,7 @@ class SettingsManager {
     KEYBIND_ACTIONS.forEach(a => {
       const row = document.createElement('div'); row.className = 'keybind-row';
       const label = document.createElement('span'); label.className = 'keybind-label'; label.innerHTML = a.label;
-      const key = document.createElement('span'); key.className = 'keybind-key'; key.innerHTML = formatKeybindDisplay(state.keybinds[a.id]);
+      const key = document.createElement('span'); key.className = 'keybind-key'; key.innerHTML = formatKeybindDisplay(EditorState.settings.keybinds[a.id]);
       const btn = document.createElement('button'); btn.className = 'keybind-change-btn'; btn.textContent = 'Alterar';
       btn.addEventListener('click', () => {
         btn.textContent = 'Pressione...'; btn.classList.add('capturing');
@@ -995,14 +1230,16 @@ class SettingsManager {
 // ============================================================
 class App {
   constructor() {
+    this.eventBus = new EventBus();
     this.notificationManager = new NotificationManager();
-    this.keybindManager = new KeybindManager();
-    this.historyManager = new HistoryManager();
-    this.zoomManager = new ZoomManager();
+    this.keybindManager = new KeybindManager(this.eventBus);
+    this.historyManager = new HistoryManager(this.eventBus);
+    this.canvasManager = new CanvasManager(this.eventBus);
     this.layerManager = new LayerManager();
-    this.toolManager = new ToolManager();
+    this.toolManager = new ToolManager(this.eventBus);
     this.uiManager = new UIManager();
-    this.settingsManager = new SettingsManager();
+    this.settingsManager = new SettingsManager(this.eventBus);
+    this.inputManager = new InputManager(this.eventBus);
   }
 
   notification(msg, type, duration) { this.notificationManager.show(msg, type, duration); }
@@ -1011,11 +1248,12 @@ class App {
     initDOM();
     this.cursorManager = new CursorManager(DOM['canvas-area']);
     this.keybindManager.load();
+    this.inputManager.bind(DOM['canvas-area']);
     this._registerTools();
     this._bindEvents();
     this.toolManager.activateTool('pencil');
     this._setupDragDrop();
-    this.updateTransform();
+    this.canvasManager._applyTransform();
     this.updateUI();
   }
 
@@ -1044,14 +1282,14 @@ class App {
       this._updateCursor();
     });
     document.addEventListener('mouseup', (e) => this.toolManager.handleMouseUp(e));
-    DOM['canvas-area'].addEventListener('wheel', (e) => this.zoomManager.handleWheel(e), { passive: false });
+    DOM['canvas-area'].addEventListener('wheel', (e) => this.canvasManager.handleWheel(e), { passive: false });
     DOM['zoom-slider'].addEventListener('input', (e) => {
-      const v = parseInt(e.target.value); this.zoomManager.setScale(v / 100);
+      const v = parseInt(e.target.value); this.canvasManager.setScale(v / 100);
     });
-    DOM['zoom-in-btn'].addEventListener('click', () => this.zoomManager.zoomIn());
-    DOM['zoom-out-btn'].addEventListener('click', () => this.zoomManager.zoomOut());
-    DOM['fit-to-screen-btn'].addEventListener('click', () => this.zoomManager.fitToScreen());
-    DOM['zoom-100-btn'].addEventListener('click', () => this.zoomManager.setZoom100());
+    DOM['zoom-in-btn'].addEventListener('click', () => this.canvasManager.zoomIn());
+    DOM['zoom-out-btn'].addEventListener('click', () => this.canvasManager.zoomOut());
+    DOM['fit-to-screen-btn'].addEventListener('click', () => this.canvasManager.fitToScreen());
+    DOM['zoom-100-btn'].addEventListener('click', () => this.canvasManager.setZoom100());
     DOM['settings-btn'].addEventListener('click', () => this.settingsManager.open());
     DOM['settings-close'].addEventListener('click', () => this.settingsManager.close());
     DOM['settings-backdrop'].addEventListener('click', () => this.settingsManager.close());
@@ -1104,27 +1342,28 @@ class App {
       this.notification('Formato de arquivo n&atilde;o suportado. Use PNG, JPG, JPEG ou WebP.', 'error');
       return;
     }
-    if (state.imageUrl) URL.revokeObjectURL(state.imageUrl);
+    if (EditorState.canvas.imageUrl) URL.revokeObjectURL(EditorState.canvas.imageUrl);
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
-      state.image = img; state.imageUrl = url; state.imageName = file.name;
-      state.imageWidth = img.naturalWidth; state.imageHeight = img.naturalHeight;
+      EditorState.canvas.image = img; EditorState.canvas.imageUrl = url; EditorState.canvas.imageName = file.name;
+      EditorState.canvas.imageWidth = img.naturalWidth; EditorState.canvas.imageHeight = img.naturalHeight;
       this.layerManager.resize(img.naturalWidth, img.naturalHeight);
       DOM.ctxBg.drawImage(img, 0, 0);
       [DOM.ctxPerm, DOM.ctxTemp, DOM.ctxFade].forEach(ctx => ctx.clearRect(0,0,img.naturalWidth,img.naturalHeight));
       this.historyManager.clear();
-      state.fadingStrokes = []; state.currentFadingStroke = null;
-      state.fadingLoopId = null;
-      state.offsetX = 0; state.offsetY = 0; state.scale = 1;
+      EditorState.tools.fadingStrokes = []; EditorState.tools.currentFadingStroke = null;
+      EditorState.tools.fadingLoopId = null;
+      EditorState.canvas.offsetX = 0; EditorState.canvas.offsetY = 0; EditorState.canvas.scale = 1;
       const ca = DOM['canvas-area'];
-      state.offsetX = Math.max(0, (ca.clientWidth - state.imageWidth) / 2);
-      state.offsetY = Math.max(0, (ca.clientHeight - state.imageHeight) / 2);
-      this.updateTransform(); this.updateUI();
+      EditorState.canvas.offsetX = Math.max(0, (ca.clientWidth - EditorState.canvas.imageWidth) / 2);
+      EditorState.canvas.offsetY = Math.max(0, (ca.clientHeight - EditorState.canvas.imageHeight) / 2);
+      this.canvasManager._applyTransform(); this.updateUI();
       DOM['splash-screen'].classList.add('hidden');
       this.settingsManager.close();
       this._updateCursor();
       this.cursorManager.requestDraw();
+      this.eventBus.emit(EVENTS.IMAGE_LOADED, { name: file.name, width: EditorState.canvas.imageWidth, height: EditorState.canvas.imageHeight });
       this.notification('Imagem carregada com sucesso', 'success', 2500);
     };
     img.onerror = () => {
@@ -1135,8 +1374,7 @@ class App {
   }
 
   updateTransform() {
-    DOM['canvas-container'].style.transform = 'translate('+state.offsetX+'px,'+state.offsetY+'px) scale('+state.scale+')';
-    this.cursorManager.requestDraw();
+    this.canvasManager._applyTransform();
   }
 
   updateUI() {
@@ -1149,26 +1387,26 @@ class App {
       case 'pencil': case 'eraser': case 'fading-pen': case 'hand':
         this.toolManager.activateTool(action); break;
       case 'undo':
-        if (state.isDrawing && this.toolManager.getActiveTool()) {
+        if (EditorState.tools.isDrawing && this.toolManager.getActiveTool()) {
           this.toolManager.getActiveTool().onCancel();
-          state.isDrawing = false;
+          EditorState.tools.isDrawing = false;
           this.renderPermanentCanvas();
         } else {
           this.historyManager.undo();
         }
         break;
       case 'redo': this.historyManager.redo(); break;
-      case 'zoom-in': this.zoomManager.zoomIn(); break;
-      case 'zoom-out': this.zoomManager.zoomOut(); break;
-      case 'zoom-100': this.zoomManager.setZoom100(); break;
-      case 'fit-to-screen': this.zoomManager.fitToScreen(); break;
+      case 'zoom-in': this.canvasManager.zoomIn(); break;
+      case 'zoom-out': this.canvasManager.zoomOut(); break;
+      case 'zoom-100': this.canvasManager.setZoom100(); break;
+      case 'fit-to-screen': this.canvasManager.fitToScreen(); break;
       case 'settings': this.settingsManager.open(); break;
       case 'toggle-options': this.uiManager.toggleOptions(); break;
     }
   }
 
   _handleResize() {
-    this.updateTransform();
+    this.canvasManager._applyTransform();
     this.updateUI();
   }
 
@@ -1176,7 +1414,7 @@ class App {
   renderPermanentCanvas() {
     const ctx = DOM.ctxPerm; const w = DOM['layer-permanent'].width; const h = DOM['layer-permanent'].height;
     ctx.clearRect(0, 0, w, h);
-    for (const stroke of state.history) {
+    for (const stroke of EditorState.history.undoStack) {
       const points = stroke.points; if (points.length < 2) continue;
       ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
       for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
@@ -1195,35 +1433,35 @@ class App {
 
   // ---------- FADING STROKES LOOP ----------
   ensureFadingLoop() {
-    if (state.fadingLoopId) return;
+    if (EditorState.tools.fadingLoopId) return;
     const tick = () => {
       const now = performance.now();
-      state.fadingStrokes = state.fadingStrokes.filter(s => {
+      EditorState.tools.fadingStrokes = EditorState.tools.fadingStrokes.filter(s => {
         const elapsed = now - s.fadeStartTime;
         return elapsed < s.lifetime;
       });
-      const hasFading = state.fadingStrokes.length > 0;
-      const hasCurrent = !!state.currentFadingStroke;
+      const hasFading = EditorState.tools.fadingStrokes.length > 0;
+      const hasCurrent = !!EditorState.tools.currentFadingStroke;
       if (hasFading || hasCurrent) {
         this._renderFadingCanvas(now);
-        state.fadingLoopId = requestAnimationFrame(tick);
+        EditorState.tools.fadingLoopId = requestAnimationFrame(tick);
       } else {
-        state.fadingLoopId = null;
+        EditorState.tools.fadingLoopId = null;
         DOM.ctxFade.clearRect(0, 0, DOM['layer-fading'].width, DOM['layer-fading'].height);
       }
     };
-    state.fadingLoopId = requestAnimationFrame(tick);
+    EditorState.tools.fadingLoopId = requestAnimationFrame(tick);
   }
 
   _renderFadingCanvas(now) {
     const ctx = DOM.ctxFade; ctx.clearRect(0, 0, DOM['layer-fading'].width, DOM['layer-fading'].height);
-    state.fadingStrokes.forEach(s => {
+    EditorState.tools.fadingStrokes.forEach(s => {
       const elapsed = now - s.fadeStartTime;
       const alpha = Math.max(0, 1 - elapsed / s.lifetime);
       this._drawFadingStroke(ctx, s.points, s.size, s.color, alpha);
     });
-    if (state.currentFadingStroke && state.currentFadingStroke.points.length > 1) {
-      this._drawFadingStroke(ctx, state.currentFadingStroke.points, state.currentFadingStroke.size, state.currentFadingStroke.color, 1);
+    if (EditorState.tools.currentFadingStroke && EditorState.tools.currentFadingStroke.points.length > 1) {
+      this._drawFadingStroke(ctx, EditorState.tools.currentFadingStroke.points, EditorState.tools.currentFadingStroke.size, EditorState.tools.currentFadingStroke.color, 1);
     }
   }
 
