@@ -157,6 +157,53 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 /* FILE INPUT */
 #file-input { display: none; }
 
+/* SLOT SETTINGS */
+.slot-main-toggle { cursor: pointer; user-select: none; padding: 8px 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); margin-bottom: 4px; transition: background var(--t-fast); }
+.slot-main-toggle:hover { background: rgba(255,255,255,0.06); }
+.slot-main-toggle .arrow { transition: transform var(--t-fast); font-size: 13px; }
+.slot-main-toggle.open .arrow { transform: rotate(90deg); }
+.slot-main-content { overflow: hidden; max-height: 0; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0; }
+.slot-main-content.open { max-height: 6000px; opacity: 1; }
+.slot-group { margin: 4px 0; border-radius: var(--radius-sm); overflow: hidden; background: rgba(255,255,255,0.02); }
+.slot-header { cursor: pointer; user-select: none; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-secondary); transition: background var(--t-fast); }
+.slot-header:hover { background: rgba(255,255,255,0.04); }
+.slot-header .arrow { transition: transform var(--t-fast); font-size: 11px; }
+.slot-header.open .arrow { transform: rotate(90deg); }
+.slot-content { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+.slot-content.open { max-height: 4000px; }
+.slot-control { padding: 6px 12px; }
+.slot-control + .slot-control { border-top: 1px solid rgba(255,255,255,0.04); }
+.slot-control label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500; }
+.slot-preview-wrap { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.slot-preview { width: 64px; height: 64px; border-radius: var(--radius-sm); border: 1px solid var(--border); object-fit: cover; background: rgba(255,255,255,0.05); flex-shrink: 0; }
+.slot-preview-empty { width: 64px; height: 64px; border-radius: var(--radius-sm); border: 1px dashed var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+.slot-preview-label { font-size: 11px; color: var(--text-muted); }
+.slot-link-row { display: flex; gap: 4px; margin: 4px 0; }
+.slot-link-input { flex: 1; padding: 5px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text-primary); font-size: 12px; outline: none; }
+.slot-link-input:focus { border-color: var(--accent); }
+.slot-link-input::placeholder { color: var(--text-muted); }
+.slot-btn { padding: 4px 10px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.08); color: var(--text-secondary); font-size: 11px; transition: all var(--t-fast); border: none; cursor: pointer; }
+.slot-btn:hover { background: rgba(255,255,255,0.12); color: var(--text-primary); }
+.slot-btn.primary { background: var(--accent); color: #fff; }
+.slot-btn.primary:hover { background: var(--accent-hover); }
+.slot-info { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.slot-size-value { color: var(--text-primary); font-weight: 500; min-width: 36px; text-align: right; font-size: 12px; }
+.slot-select { width: 100%; padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text-primary); font-size: 12px; outline: none; cursor: pointer; }
+.slot-select:focus { border-color: var(--accent); }
+.slot-cond { padding: 6px 0 0 0; display: none; }
+.slot-cond.show { display: block; }
+.slot-cond label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.slot-range-row { display: flex; align-items: center; gap: 6px; }
+.slot-range-row input[type="range"] { flex: 1; }
+.slot-range-row .slot-range-value { min-width: 36px; text-align: right; font-size: 12px; color: var(--text-primary); font-weight: 500; }
+.slot-toggle-wrap { display: flex; align-items: center; justify-content: space-between; }
+.slot-toggle-switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+.slot-toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slot-toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--text-muted); border-radius: 20px; transition: var(--t-fast); }
+.slot-toggle-slider::before { content: ''; position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: var(--t-fast); }
+.slot-toggle-switch input:checked + .slot-toggle-slider { background: var(--accent); }
+.slot-toggle-switch input:checked + .slot-toggle-slider::before { transform: translateX(16px); }
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
   #tool-options { width: 200px; }
@@ -264,6 +311,15 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
         <button id="keybinds-reset" class="settings-btn"><i class="fas fa-undo-alt"></i> Restaurar Padr&otilde;es</button>
       </section>
       <section class="settings-section">
+        <div id="image-slots-toggle" class="slot-main-toggle">
+          <span>Image Slots (1&ndash;9)</span>
+          <i class="fas fa-chevron-right arrow"></i>
+        </div>
+        <div id="image-slots-content" class="slot-main-content">
+
+        </div>
+      </section>
+      <section class="settings-section">
         <p class="settings-version">Vers&atilde;o 1.0.0</p>
       </section>
     </div>
@@ -271,6 +327,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 </div>
 
 <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp">
+<input type="file" id="slot-file-input" accept="image/png,image/jpeg,image/webp,image/gif">
 <div id="notifications"></div>
 
 <script>
@@ -449,7 +506,7 @@ function initDOM() {
     'settings-btn','settings-modal','settings-backdrop','settings-close','settings-new-image','splash-screen',
     'splash-dropzone','file-input','notifications','keybinds-list','keybinds-reset',
     'settings-filename','settings-dimensions','undo-btn','redo-btn',
-    'image-stamp-layer'];
+    'image-stamp-layer','image-slots-toggle','image-slots-content','slot-file-input'];
   ids.forEach(id => { DOM[id] = document.getElementById(id); });
   DOM.canvases = [DOM['layer-background'],DOM['layer-permanent'],DOM['layer-temp'],DOM['layer-fading']];
   DOM.ctxBg = DOM['layer-background'].getContext('2d');
@@ -1199,6 +1256,8 @@ class SettingsManager {
   constructor(eventBus) {
     this.eventBus = eventBus;
     this._open = false;
+    this._activeSlot = null;
+    this._slotExpanded = {};
   }
   toggle() {
     this._open ? this.close() : this.open();
@@ -1207,6 +1266,7 @@ class SettingsManager {
     this._open = true;
     DOM['settings-modal'].classList.add('open');
     this.renderKeybinds();
+    this.renderImageSlots();
   }
   close() {
     this._open = false;
@@ -1236,6 +1296,291 @@ class SettingsManager {
       row.appendChild(label); row.appendChild(key); row.appendChild(btn);
       list.appendChild(row);
     });
+  }
+
+  // ---------- IMAGE SLOTS ----------
+  renderImageSlots() {
+    const container = DOM['image-slots-content'];
+    container.innerHTML = '';
+    for (let i = 1; i <= 9; i++) {
+      const config = app.stampSettingsManager.getSlot(i);
+      const group = document.createElement('div'); group.className = 'slot-group';
+      const header = document.createElement('div'); header.className = 'slot-header';
+      header.innerHTML = 'Slot ' + i + ' <span class="arrow"><i class="fas fa-chevron-right"></i></span>';
+      const content = document.createElement('div'); content.className = 'slot-content';
+
+      content.appendChild(this._createSlotKeybindRow(i, config));
+      content.appendChild(this._createSlotSourceRow(i, config));
+      content.appendChild(this._createSlotPreviewRow(i, config));
+      content.appendChild(this._createSlotSizeRow(i, config));
+      content.appendChild(this._createSlotAppearRow(i, config));
+      content.appendChild(this._createSlotDisappearRow(i, config));
+      content.appendChild(this._createSlotImageEffectRow(i, config));
+      content.appendChild(this._createSlotReplaceRow(i, config));
+
+      if (this._slotExpanded[i]) { header.classList.add('open'); content.classList.add('open'); }
+      header.addEventListener('click', () => {
+        header.classList.toggle('open'); content.classList.toggle('open');
+        this._slotExpanded[i] = content.classList.contains('open');
+      });
+      group.appendChild(header); group.appendChild(content); container.appendChild(group);
+    }
+  }
+
+  _createSlotKeybindRow(slot, config) {
+    const div = document.createElement('div'); div.className = 'slot-control';
+    const label = document.createElement('label'); label.textContent = 'Tecla de atalho';
+    const row = document.createElement('div'); row.className = 'keybind-row'; row.style.margin = '0'; row.style.background = 'none'; row.style.padding = '4px 0';
+    const key = document.createElement('span'); key.className = 'keybind-key'; key.innerHTML = formatKeybindDisplay(config.keybind);
+    const btn = document.createElement('button'); btn.className = 'keybind-change-btn'; btn.textContent = 'Alterar';
+    btn.addEventListener('click', () => {
+      btn.textContent = 'Pressione...'; btn.classList.add('capturing');
+      app.keybindManager.startCapture((combo) => {
+        let conflict = null;
+        for (let j = 1; j <= 9; j++) {
+          if (j === slot) continue;
+          const oc = app.stampSettingsManager.getSlot(j);
+          if (oc.keybind === combo) { conflict = 'Slot ' + j; break; }
+        }
+        if (!conflict) {
+          for (const [action, bind] of Object.entries(EditorState.settings.keybinds)) {
+            if (bind === combo) { conflict = KEYBIND_ACTIONS.find(x => x.id === action); break; }
+          }
+        }
+        if (conflict) {
+          const conflictLabel = typeof conflict === 'string' ? conflict : conflict.label;
+          app.notification('Conflito: "' + formatKeybindDisplay(combo) + '" j&aacute; est&aacute; atribu&iacute;do a "' + conflictLabel + '"', 'error');
+        } else {
+          config.keybind = combo;
+          app.stampSettingsManager.setSlot(slot, config);
+          key.innerHTML = formatKeybindDisplay(combo);
+        }
+        btn.textContent = 'Alterar'; btn.classList.remove('capturing');
+      });
+    });
+    row.appendChild(key); row.appendChild(btn);
+    div.appendChild(label); div.appendChild(row);
+    return div;
+  }
+
+  _createSlotSourceRow(slot, config) {
+    const div = document.createElement('div'); div.className = 'slot-control';
+    const label = document.createElement('label'); label.textContent = 'Fonte da imagem';
+    const uploadBtn = document.createElement('button'); uploadBtn.className = 'slot-btn'; uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+    uploadBtn.addEventListener('click', () => {
+      this._activeSlot = slot;
+      DOM['slot-file-input'].click();
+    });
+    const linkRow = document.createElement('div'); linkRow.className = 'slot-link-row';
+    const linkInput = document.createElement('input'); linkInput.type = 'text'; linkInput.className = 'slot-link-input'; linkInput.placeholder = 'https://site.com/imagem.png';
+    if (config.source && config.sourceType === 'url') linkInput.value = config.source;
+    const applyBtn = document.createElement('button'); applyBtn.className = 'slot-btn primary'; applyBtn.textContent = 'Aplicar';
+    applyBtn.addEventListener('click', () => this._slotApplyLink(slot, config, linkInput.value));
+    linkInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') this._slotApplyLink(slot, config, linkInput.value); });
+    linkRow.appendChild(linkInput); linkRow.appendChild(applyBtn);
+    div.appendChild(label); div.appendChild(uploadBtn);
+    const info = document.createElement('div'); info.className = 'slot-info'; info.textContent = 'ou insira um link direto:';
+    div.appendChild(info); div.appendChild(linkRow);
+    return div;
+  }
+
+  _slotApplyLink(slot, config, url) {
+    url = url.trim();
+    if (!url) { app.notification('Insira um link v&aacute;lido', 'warning'); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      config.source = url; config.sourceType = 'url';
+      app.stampSettingsManager.setSlot(slot, config);
+      app.notification('Imagem carregada com sucesso', 'success');
+      this.renderImageSlots();
+    };
+    img.onerror = () => { app.notification('N&atilde;o foi poss&iacute;vel carregar a imagem do link', 'error'); };
+    img.src = url;
+  }
+
+  _createSlotPreviewRow(slot, config) {
+    const div = document.createElement('div'); div.className = 'slot-control';
+    const label = document.createElement('label'); label.textContent = 'Preview';
+    const wrap = document.createElement('div'); wrap.className = 'slot-preview-wrap';
+    if (config.source) {
+      const img = document.createElement('img'); img.className = 'slot-preview';
+      img.src = config.source; img.alt = 'Slot ' + slot;
+      img.onerror = () => { img.style.display = 'none'; ep.style.display = 'flex'; };
+      const ep = document.createElement('div'); ep.className = 'slot-preview-empty'; ep.style.display = 'none'; ep.textContent = 'Erro';
+      wrap.appendChild(img); wrap.appendChild(ep);
+    } else {
+      const ep = document.createElement('div'); ep.className = 'slot-preview-empty'; ep.textContent = 'Nenhuma imagem';
+      wrap.appendChild(ep);
+    }
+    const resetBtn = document.createElement('button'); resetBtn.className = 'slot-btn'; resetBtn.textContent = 'Remover imagem';
+    resetBtn.style.marginLeft = 'auto';
+    resetBtn.addEventListener('click', () => {
+      config.source = null; config.sourceType = null;
+      app.stampSettingsManager.setSlot(slot, config);
+      this.renderImageSlots();
+    });
+    wrap.appendChild(resetBtn);
+    div.appendChild(label); div.appendChild(wrap);
+    return div;
+  }
+
+  _createSlotSizeRow(slot, config) {
+    const div = document.createElement('div'); div.className = 'slot-control';
+    const label = document.createElement('label'); label.textContent = 'Tamanho da imagem';
+    const row = document.createElement('div'); row.className = 'slot-range-row';
+    const input = document.createElement('input'); input.type = 'range'; input.min = 10; input.max = 100; input.step = 2.5; input.value = config.sizePercent;
+    const val = document.createElement('span'); val.className = 'slot-size-value'; val.textContent = Math.round(config.sizePercent) + '%';
+    input.addEventListener('input', () => {
+      const v = parseFloat(input.value);
+      val.textContent = v + '%';
+      config.sizePercent = v;
+      app.stampSettingsManager.setSlot(slot, config);
+    });
+    row.appendChild(input); row.appendChild(val);
+    div.appendChild(label); div.appendChild(row);
+    return div;
+  }
+
+  _createSlotAppearRow(slot, config) {
+    const div = document.createElement('div'); div.className = 'slot-control';
+    const label = document.createElement('label'); label.textContent = 'Efeito de surgimento';
+    const select = document.createElement('select'); select.className = 'slot-select';
+    ['Padr&atilde;o', 'Fade In'].forEach((opt, idx) => {
+      const o = document.createElement('option');
+      o.value = idx === 0 ? '' : 'fadeIn';
+      o.innerHTML = opt;
+      if ((idx === 0 && !config.appearEffect) || (idx === 1 && config.appearEffect === 'fadeIn')) o.selected = true;
+      select.appendChild(o);
+    });
+    const cond = document.createElement('div'); cond.className = 'slot-cond' + (config.appearEffect === 'fadeIn' ? ' show' : '');
+    const clabel = document.createElement('label'); clabel.textContent = 'Dura&ccedil;&atilde;o (ms)';
+    const cRow = document.createElement('div'); cRow.className = 'slot-range-row';
+    const cInput = document.createElement('input'); cInput.type = 'range'; cInput.min = 100; cInput.max = 2000; cInput.step = 50; cInput.value = (config.effectSettings && config.effectSettings.appearDuration) || 300;
+    const cVal = document.createElement('span'); cVal.className = 'slot-range-value'; cVal.textContent = cInput.value + 'ms';
+    cInput.addEventListener('input', () => {
+      cVal.textContent = cInput.value + 'ms';
+      if (!config.effectSettings) config.effectSettings = {};
+      config.effectSettings.appearDuration = parseInt(cInput.value);
+    });
+    cInput.addEventListener('change', () => { app.stampSettingsManager.setSlot(slot, config); });
+    cRow.appendChild(cInput); cRow.appendChild(cVal);
+    cond.appendChild(clabel); cond.appendChild(cRow);
+    select.addEventListener('change', () => {
+      config.appearEffect = select.value || null;
+      cond.classList.toggle('show', select.value === 'fadeIn');
+      app.stampSettingsManager.setSlot(slot, config);
+    });
+    div.appendChild(label); div.appendChild(select); div.appendChild(cond);
+    return div;
+  }
+
+  _createSlotDisappearRow(slot, config) {
+    const div = document.createElement('div'); div.className = 'slot-control';
+    const label = document.createElement('label'); label.textContent = 'Efeito de desaparecimento';
+    const select = document.createElement('select'); select.className = 'slot-select';
+    ['Padr&atilde;o', 'Fade Out'].forEach((opt, idx) => {
+      const o = document.createElement('option');
+      o.value = idx === 0 ? '' : 'fadeOut';
+      o.innerHTML = opt;
+      if ((idx === 0 && !config.disappearEffect) || (idx === 1 && config.disappearEffect === 'fadeOut')) o.selected = true;
+      select.appendChild(o);
+    });
+    const cond = document.createElement('div'); cond.className = 'slot-cond' + (config.disappearEffect === 'fadeOut' ? ' show' : '');
+    const clabel = document.createElement('label'); clabel.textContent = 'Dura&ccedil;&atilde;o (ms)';
+    const cRow = document.createElement('div'); cRow.className = 'slot-range-row';
+    const cInput = document.createElement('input'); cInput.type = 'range'; cInput.min = 100; cInput.max = 2000; cInput.step = 50; cInput.value = (config.effectSettings && config.effectSettings.disappearDuration) || 300;
+    const cVal = document.createElement('span'); cVal.className = 'slot-range-value'; cVal.textContent = cInput.value + 'ms';
+    cInput.addEventListener('input', () => {
+      cVal.textContent = cInput.value + 'ms';
+      if (!config.effectSettings) config.effectSettings = {};
+      config.effectSettings.disappearDuration = parseInt(cInput.value);
+    });
+    cInput.addEventListener('change', () => { app.stampSettingsManager.setSlot(slot, config); });
+    cRow.appendChild(cInput); cRow.appendChild(cVal);
+    cond.appendChild(clabel); cond.appendChild(cRow);
+    select.addEventListener('change', () => {
+      config.disappearEffect = select.value || null;
+      cond.classList.toggle('show', select.value === 'fadeOut');
+      app.stampSettingsManager.setSlot(slot, config);
+    });
+    div.appendChild(label); div.appendChild(select); div.appendChild(cond);
+    return div;
+  }
+
+  _createSlotImageEffectRow(slot, config) {
+    const div = document.createElement('div'); div.className = 'slot-control';
+    const label = document.createElement('label'); label.textContent = 'Efeito cont&iacute;nuo';
+    const select = document.createElement('select'); select.className = 'slot-select';
+    ['Padr&atilde;o', 'Piscar', 'Balan&ccedil;ar'].forEach((opt, idx) => {
+      const o = document.createElement('option');
+      o.value = idx === 0 ? '' : (idx === 1 ? 'blink' : 'wobble');
+      o.innerHTML = opt;
+      if ((idx === 0 && !config.imageEffect) || (idx === 1 && config.imageEffect === 'blink') || (idx === 2 && config.imageEffect === 'wobble')) o.selected = true;
+      select.appendChild(o);
+    });
+    const blinkCond = document.createElement('div'); blinkCond.className = 'slot-cond' + (config.imageEffect === 'blink' ? ' show' : '');
+    const wobbleCond = document.createElement('div'); wobbleCond.className = 'slot-cond' + (config.imageEffect === 'wobble' ? ' show' : '');
+
+    // Blink controls
+    const addBlinkControl = (labelText, key, defVal, min, max) => {
+      const c = document.createElement('div'); c.style.marginBottom = '4px';
+      const l = document.createElement('label'); l.textContent = labelText;
+      const r = document.createElement('div'); r.className = 'slot-range-row';
+      const i = document.createElement('input'); i.type = 'range'; i.min = min; i.max = max; i.step = 50; i.value = (config.effectSettings && config.effectSettings[key]) || defVal;
+      const v = document.createElement('span'); v.className = 'slot-range-value'; v.textContent = i.value + 'ms';
+      i.addEventListener('input', () => {
+        v.textContent = i.value + 'ms';
+        if (!config.effectSettings) config.effectSettings = {};
+        config.effectSettings[key] = parseInt(i.value);
+      });
+      i.addEventListener('change', () => { app.stampSettingsManager.setSlot(slot, config); });
+      r.appendChild(i); r.appendChild(v); c.appendChild(l); c.appendChild(r); return c;
+    };
+    blinkCond.appendChild(addBlinkControl('Velocidade do piscar', 'blinkSpeed', 500, 100, 2000));
+    blinkCond.appendChild(addBlinkControl('Tempo vis&iacute;vel', 'blinkVisibleTime', 300, 50, 2000));
+    blinkCond.appendChild(addBlinkControl('Tempo invis&iacute;vel', 'blinkInvisibleTime', 200, 50, 2000));
+
+    // Wobble control
+    const wLabel = document.createElement('label'); wLabel.textContent = 'Intensidade do balan&ccedil;o';
+    const wRow = document.createElement('div'); wRow.className = 'slot-range-row';
+    const wInput = document.createElement('input'); wInput.type = 'range'; wInput.min = 1; wInput.max = 100; wInput.step = 1; wInput.value = (config.effectSettings && config.effectSettings.wobbleIntensity) || 50;
+    const wVal = document.createElement('span'); wVal.className = 'slot-range-value'; wVal.textContent = wInput.value + '%';
+    wInput.addEventListener('input', () => {
+      wVal.textContent = wInput.value + '%';
+      if (!config.effectSettings) config.effectSettings = {};
+      config.effectSettings.wobbleIntensity = parseInt(wInput.value);
+    });
+    wInput.addEventListener('change', () => { app.stampSettingsManager.setSlot(slot, config); });
+    wRow.appendChild(wInput); wRow.appendChild(wVal);
+    wobbleCond.appendChild(wLabel); wobbleCond.appendChild(wRow);
+
+    select.addEventListener('change', () => {
+      config.imageEffect = select.value || null;
+      blinkCond.classList.toggle('show', select.value === 'blink');
+      wobbleCond.classList.toggle('show', select.value === 'wobble');
+      app.stampSettingsManager.setSlot(slot, config);
+    });
+
+    div.appendChild(label); div.appendChild(select); div.appendChild(blinkCond); div.appendChild(wobbleCond);
+    return div;
+  }
+
+  _createSlotReplaceRow(slot, config) {
+    const div = document.createElement('div'); div.className = 'slot-control';
+    const wrap = document.createElement('div'); wrap.className = 'slot-toggle-wrap';
+    const label = document.createElement('label'); label.textContent = 'Replace Existing Stamps'; label.style.margin = '0';
+    const sw = document.createElement('label'); sw.className = 'slot-toggle-switch';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!config.replaceExisting;
+    const slider = document.createElement('span'); slider.className = 'slot-toggle-slider';
+    cb.addEventListener('change', () => {
+      config.replaceExisting = cb.checked;
+      app.stampSettingsManager.setSlot(slot, config);
+    });
+    sw.appendChild(cb); sw.appendChild(slider);
+    wrap.appendChild(label); wrap.appendChild(sw);
+    div.appendChild(wrap);
+    return div;
   }
 }
 
@@ -1326,6 +1671,7 @@ class StampSettingsManager {
       disappearEffect: null,
       imageEffect: null,
       effectSettings: {},
+      replaceExisting: false,
     };
   }
 
@@ -1342,6 +1688,7 @@ class StampSettingsManager {
       ...config,
       slot,
     };
+    this.save();
     this.eventBus.emit(EVENTS.STAMP_SETTINGS_CHANGED, { slot, config: EditorState.stampSettings.slots[slot] });
   }
 
@@ -1355,7 +1702,42 @@ class StampSettingsManager {
 
   resetSlot(slot) {
     delete EditorState.stampSettings.slots[slot];
+    this.save();
     this.eventBus.emit(EVENTS.STAMP_SETTINGS_CHANGED, { slot, config: this.getSlot(slot) });
+  }
+
+  save() {
+    try {
+      const data = {};
+      for (let i = 1; i <= 9; i++) {
+        if (EditorState.stampSettings.slots[i]) {
+          data[i] = EditorState.stampSettings.slots[i];
+        }
+      }
+      localStorage.setItem('image-editor-stamp-slots', JSON.stringify(data));
+    } catch (e) {
+      debug.error('Failed to save stamp slots:', e);
+    }
+  }
+
+  load() {
+    try {
+      const saved = localStorage.getItem('image-editor-stamp-slots');
+      if (saved) {
+        const data = JSON.parse(saved);
+        for (let i = 1; i <= 9; i++) {
+          if (data[i]) {
+            EditorState.stampSettings.slots[i] = {
+              ...this.getDefaultSlotConfig(i),
+              ...data[i],
+              slot: i,
+            };
+          }
+        }
+      }
+    } catch (e) {
+      debug.error('Failed to load stamp slots:', e);
+    }
   }
 
   toExportData() {
@@ -1543,6 +1925,7 @@ class App {
     initDOM();
     this.cursorManager = new CursorManager(DOM['canvas-area']);
     this.keybindManager.load();
+    this.stampSettingsManager.load();
     this.inputManager.bind(DOM['canvas-area']);
     this._registerTools();
     this._bindEvents();
@@ -1605,6 +1988,33 @@ class App {
     });
     DOM['settings-modal'].addEventListener('click', (e) => {
       if (e.target === DOM['settings-modal'] || e.target === DOM['settings-backdrop']) this.settingsManager.close();
+    });
+    DOM['image-slots-toggle'].addEventListener('click', () => {
+      DOM['image-slots-toggle'].classList.toggle('open');
+      DOM['image-slots-content'].classList.toggle('open');
+    });
+    DOM['slot-file-input'].addEventListener('change', (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const validTypes = ['image/png','image/jpeg','image/webp','image/gif'];
+      if (!validTypes.includes(file.type)) {
+        this.notification('Formato n&atilde;o suportado. Use PNG, JPG, JPEG, WebP ou GIF.', 'error');
+        DOM['slot-file-input'].value = '';
+        return;
+      }
+      const activeSlot = this.settingsManager._activeSlot;
+      if (!activeSlot) { DOM['slot-file-input'].value = ''; return; }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const config = this.stampSettingsManager.getSlot(activeSlot);
+        config.source = ev.target.result;
+        config.sourceType = 'datauri';
+        this.stampSettingsManager.setSlot(activeSlot, config);
+        this.notification('Imagem carregada para o Slot ' + activeSlot, 'success');
+        this.settingsManager.renderImageSlots();
+        DOM['slot-file-input'].value = '';
+      };
+      reader.onerror = () => { this.notification('Erro ao ler o arquivo', 'error'); DOM['slot-file-input'].value = ''; };
+      reader.readAsDataURL(file);
     });
   }
 

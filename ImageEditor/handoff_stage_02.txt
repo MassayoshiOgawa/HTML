@@ -1,0 +1,444 @@
+================================================================================
+HANDOFF DOCUMENT - STAGE 02
+INTERFACE E CONFIGURACAO DOS SLOTS 1-9
+================================================================================
+
+DATA: 2026-06-11
+ARQUIVO PRINCIPAL: editor.html
+ETAPA CONCLUIDA: 2 - Interface e Configuracao dos Slots 1-9
+
+================================================================================
+1. RESUMO DA ETAPA
+================================================================================
+
+Esta etapa implementou toda a infraestrutura visual e logica das configuracoes
+dos slots de imagens (1 a 9). O usuario agora pode configurar completamente
+cada slot no painel de configuracoes, porem essas configuracoes ainda nao
+possuem efeitos visiveis no canvas (sem preview no cursor, sem insercao).
+
+Todas as funcionalidades existentes (lapis, borracha, caneta que some, zoom,
+pan, historico, keybinds) continuam funcionando exatamente como antes.
+
+================================================================================
+2. FUNCIONALIDADES IMPLEMENTADAS
+================================================================================
+
+2.1. NOVO TOGGLE "IMAGE SLOTS (1-9)" NAS CONFIGURACOES
+
+  - Adicionado abaixo do toggle de Keybinds
+  - Toggle recolhivel com animacao suave (max-height transition)
+  - Inicia fechado ao abrir as configuracoes
+  - Ao expandir, mostra 9 subtoggles "Slot 1" a "Slot 9"
+
+2.2. NOVE SUBTOGGLES DE SLOT
+
+  - Slot 1 a Slot 9, cada um com seu proprio toggle recolhivel
+  - Todos iniciam fechados
+  - Estado de expansao e preservado durante a sessao (via _slotExpanded)
+  - Ao re-renderizar (apos upload/link), o estado expandido e restaurado
+
+2.3. CONFIGURACAO DE KEYBIND POR SLOT
+
+  - Sistema identico ao de keybinds existentes
+  - Cada slot possui boto "Alterar" que entra em modo de captura
+  - Detecta automaticamente a tecla pressionada
+  - Salva automaticamente apos confirmacao
+  - Detecta conflitos com outros slots E com keybinds principais
+  - Exibe notificacao amigavel em caso de conflito
+  - Permite restauracao para o padrao (botoes de reset por slot NAO
+    implementados - usar o "Remover imagem" para limpar)
+
+  KEYBINDS PADRAO:
+    Slot 1 -> 1    Slot 2 -> 2    Slot 3 -> 3
+    Slot 4 -> 4    Slot 5 -> 5    Slot 6 -> 6
+    Slot 7 -> 7    Slot 8 -> 8    Slot 9 -> 9
+
+  Restricoes: apenas fileira superior do teclado (sem numpad).
+
+2.4. FONTE DA IMAGEM (UPLOAD E LINK)
+
+  Upload:
+    - Botao "Upload" em cada slot
+    - Aceita: PNG, JPG, JPEG, WebP, GIF
+    - Le o arquivo como data URI via FileReader
+    - Exibe notificacao em caso de formato invalido
+    - Nao apaga configuracao anterior em caso de erro
+
+  Link direto:
+    - Input de texto para URL
+    - Botao "Aplicar" ou tecla Enter para confirmar
+    - Valida o link tentando carregar a imagem via new Image()
+    - Em caso de sucesso: salva a URL como source
+    - Em caso de erro: exibe notificacao, nao altera configuracao anterior
+    - Suporta URLs de GIFs animados
+
+2.5. PREVIEW NAS CONFIGURACOES
+
+  - Exibe miniatura de 64x64px apos configurar uma imagem
+  - GIFs permanecem animados na miniatura
+  - Quando nenhuma imagem configurada: mostra "Nenhuma imagem" com borda
+    tracejada
+  - Botao "Remover imagem" para limpar a configuracao
+
+2.6. TAMANHO DA IMAGEM (SLIDER)
+
+  - Input range com: minimo 10%, maximo 100%, step 2.5%
+  - Exibe o valor atual continuamente (ex: 10%, 12.5%, ... 100%)
+  - Salva automaticamente a cada alteracao
+
+2.7. EFEITO DE SURGIMENTO (APPEAR)
+
+  - Select com duas opcoes: "Padrao" e "Fade In"
+  - Quando "Fade In" selecionado: mostra controle de duracao (slider)
+  - Duracao: 100ms a 2000ms, step 50ms, padrao 300ms
+
+2.8. EFEITO DE DESAPARECIMENTO (DISAPPEAR)
+
+  - Select com duas opcoes: "Padrao" e "Fade Out"
+  - Quando "Fade Out" selecionado: mostra controle de duracao (slider)
+  - Duracao: 100ms a 2000ms, step 50ms, padrao 300ms
+
+2.9. EFEITO CONTINUO (IMAGE EFFECT)
+
+  - Select com tres opcoes: "Padrao", "Piscar", "Balancar"
+  - Quando "Piscar" selecionado: mostra tres sliders:
+    * Velocidade do piscar (100-2000ms, padrao 500ms)
+    * Tempo visivel (50-2000ms, padrao 300ms)
+    * Tempo invisivel (50-2000ms, padrao 200ms)
+  - Quando "Balancar" selecionado: mostra um slider:
+    * Intensidade do balanco (1-100%, padrao 50%)
+
+2.10. SUBSTITUICAO EM MASSA (REPLACE EXISTING STAMPS)
+
+  - Toggle switch "Replace Existing Stamps"
+  - Quando ativado: armazena a intencao no estado/configuracao
+  - NENHUMA substituicao real ocorre nesta etapa
+  - Apenas armazena o flag replaceExisting no SlotConfiguration
+
+================================================================================
+3. ALTERACOES NO DOM
+================================================================================
+
+  Adicionado dentro de #settings-body (entre keybinds e versao):
+
+    <section class="settings-section">
+      <div id="image-slots-toggle" class="slot-main-toggle">
+        <span>Image Slots (1-9)</span>
+        <i class="fas fa-chevron-right arrow"></i>
+      </div>
+      <div id="image-slots-content" class="slot-main-content"></div>
+    </section>
+
+  Adicionado apos #file-input:
+
+    <input type="file" id="slot-file-input"
+           accept="image/png,image/jpeg,image/webp,image/gif">
+
+  Novos IDs registrados em initDOM():
+    image-slots-toggle
+    image-slots-content
+    slot-file-input
+
+================================================================================
+4. ESTRUTURA COMPLETA DO SlotConfiguration (ATUALIZADA)
+
+  {
+    slot:              number (1-9),
+    keybind:           string (tecla associada, padrao: '1'-'9'),
+    source:            string|null (data URI ou URL da imagem),
+    sourceType:        string|null ('url' | 'datauri'),
+    sizePercent:       number (tamanho percentual, padrao: 15, min:10, max:100),
+    appearEffect:      string|null (null | 'fadeIn'),
+    disappearEffect:   string|null (null | 'fadeOut'),
+    imageEffect:       string|null (null | 'blink' | 'wobble'),
+    effectSettings:    object {
+      appearDuration:      number (ms, para fadeIn, padrao 300),
+      disappearDuration:   number (ms, para fadeOut, padrao 300),
+      blinkSpeed:          number (ms, padrao 500),
+      blinkVisibleTime:    number (ms, padrao 300),
+      blinkInvisibleTime:  number (ms, padrao 200),
+      wobbleIntensity:     number (porcentagem, padrao 50),
+    },
+    replaceExisting:   boolean (padrao false, apenas intencao)
+  }
+
+================================================================================
+5. CHAVES DO localStorage
+
+  image-editor-stamp-slots:
+    - Contem objeto com chaves '1' a '9' mapeando para SlotConfiguration
+    - Salvo automaticamente via StampSettingsManager.save()
+    - Carregado automaticamente via StampSettingsManager.load()
+    - Chamado durante App.init() (apos keybindManager.load())
+
+================================================================================
+6. COMPORTAMENTO DOS TOGGLES
+
+  Toggle principal "Image Slots (1-9)":
+    - Clique no header expande/recolhe com transicao suave (max-height)
+    - Inicia fechado toda vez que as configuracoes sao abertas
+    - CSS: classe .open em #image-slots-toggle e #image-slots-content
+
+  Subtoggles "Slot 1-9":
+    - Clique no header expande/recolhe
+    - Estado de expansao preservado via SettingsManager._slotExpanded
+    - Iniciam fechados
+    - Ao re-renderizar (apos upload/link), estado restaurado
+
+================================================================================
+7. FUNCIONAMENTO DO SISTEMA DE UPLOAD
+
+  1. Usuario clica "Upload" em um slot
+  2. SettingsManager._activeSlot e definido como o numero do slot
+  3. O input #slot-file-input e acionado via .click()
+  4. Usuario seleciona um arquivo
+  5. Evento change valida o tipo (image/png, image/jpeg, image/webp, image/gif)
+  6. Se invalido: notificacao de erro, input resetado
+  7. Se valido: FileReader le como data URI
+  8. Configuracao do slot atualizada (source, sourceType) e salva
+  9. renderImageSlots() e chamado para atualizar a UI
+
+================================================================================
+8. FUNCIONAMENTO DO SISTEMA DE LINKS
+
+  1. Usuario digita URL no input de link do slot
+  2. Clica "Aplicar" ou pressiona Enter
+  3. URL e validada (new Image() com crossOrigin 'anonymous')
+  4. Se onload: URL salva como source, notificacao de sucesso, UI atualizada
+  5. Se onerror: notificacao de erro, configuracao anterior preservada
+  6. URL vazia: notificacao de aviso
+
+================================================================================
+9. FUNCIONAMENTO DAS MINIATURAS
+
+  - Exibidas em .slot-preview (img de 64x64px, object-fit cover)
+  - Se config.source existe: <img src="config.source">
+  - Senao: <div class="slot-preview-empty">Nenhuma imagem</div>
+  - Tratamento de erro: se imagem nao carrega, mostra "Erro"
+  - Botao "Remover imagem" ao lado da miniatura para limpar
+
+================================================================================
+10. FUNCIONAMENTO DOS CONTROLES CONDICIONAIS
+
+  Cada controle condicional usa classe .slot-cond com display: none por padrao
+  e .slot-cond.show com display: block.
+
+  Logica:
+    - appearEffect == 'fadeIn' -> mostra controle de duracao
+    - disappearEffect == 'fadeOut' -> mostra controle de duracao
+    - imageEffect == 'blink' -> mostra tres sliders (velocidade, visivel, invisivel)
+    - imageEffect == 'wobble' -> mostra slider de intensidade
+
+  Ao mudar o select:
+    - Atualiza config.effectSettings
+    - Salva configuracao via setSlot()
+    - Atualiza classe .show nos controles condicionais
+
+================================================================================
+11. ALTERACOES ARQUITETURAIS
+
+11.1. StampSettingsManager (MODIFICADO)
+
+  Novos metodos:
+    save()  - Salva todas as configs de slot (1-9) em localStorage
+    load()  - Carrega configs de slot do localStorage
+
+  Metodos modificados:
+    getDefaultSlotConfig(slot) - agora inclui replaceExisting: false
+    setSlot(slot, config) - agora chama save() apos alterar
+    resetSlot(slot) - agora chama save() apos resetar
+
+11.2. SettingsManager (MODIFICADO)
+
+  Novos metodos:
+    renderImageSlots()           - Renderiza todos os 9 slots
+    _createSlotKeybindRow()      - Cria linha de keybind do slot
+    _createSlotSourceRow()       - Cria controles de fonte (upload + link)
+    _createSlotPreviewRow()      - Cria preview da imagem
+    _createSlotSizeRow()         - Cria slider de tamanho
+    _createSlotAppearRow()       - Cria select de efeito de surgimento
+    _createSlotDisappearRow()    - Cria select de efeito de desaparecimento
+    _createSlotImageEffectRow()  - Cria select de efeito continuo
+    _createSlotReplaceRow()      - Cria toggle de substituicao
+    _slotApplyLink()             - Valida e aplica link de imagem
+
+  Novas propriedades:
+    _activeSlot    - Slot alvo para upload (numero)
+    _slotExpanded  - Mapa de estados de expansao { slot: true/false }
+
+11.3. App (MODIFICADO)
+
+  init():
+    - Agora chama stampSettingsManager.load() apos keybindManager.load()
+
+  _bindEvents():
+    - Adicionado handler para click em #image-slots-toggle
+    - Adicionado handler para change em #slot-file-input
+
+================================================================================
+12. CSS ADICIONADO
+
+  Toda a estilizacao dos componentes de slot usa as variaveis CSS existentes:
+
+    .slot-main-toggle      - Toggle principal "Image Slots (1-9)"
+    .slot-main-content     - Container do conteudo do toggle principal
+    .slot-group            - Grupo de cada slot
+    .slot-header           - Header de cada slot (toggle)
+    .slot-content          - Conteudo de cada slot
+    .slot-control          - Cada controle individual dentro de um slot
+    .slot-preview          - Imagem de preview (64x64)
+    .slot-preview-empty    - Placeholder quando sem imagem
+    .slot-link-input       - Input de URL
+    .slot-btn              - Botoes padrao de slot
+    .slot-select           - Select padrao de slot
+    .slot-cond             - Controles condicionais (show/hide)
+    .slot-range-row        - Linha de slider com valor
+    .slot-toggle-switch    - Toggle switch (Replace Existing Stamps)
+
+================================================================================
+13. DEPENDENCIAS INTERNAS
+
+  SettingsManager.renderImageSlots()
+    -> stampSettingsManager.getSlot(slot)
+    -> stampSettingsManager.setSlot(slot, config)
+    -> stampSettingsManager.save()
+    -> keybindManager.startCapture(callback)
+    -> keybindManager.keybinds (para deteccao de conflitos)
+    -> DOM['image-slots-content']
+    -> DOM['slot-file-input']
+    -> app.notification()
+
+  App._bindEvents() - slot file input handler
+    -> settingsManager._activeSlot
+    -> stampSettingsManager.getSlot()
+    -> stampSettingsManager.setSlot()
+    -> settingsManager.renderImageSlots()
+    -> app.notification()
+
+================================================================================
+14. LIMITACOES ATUAIS DO SISTEMA
+
+  - Nao ha preview de imagem no cursor ao selecionar slot
+  - Nao ha insercao permanente de stamps no canvas
+  - Nao ha gerenciamento de stamps na interface (lista, exclusao)
+  - Nao ha integracao com teclas 1-9 para acao real
+  - Nao ha suporte a drag and drop para criar stamps
+  - Efeitos configurados nao sao aplicados (apenas armazenados)
+  - Substituicao em massa (Replace Existing Stamps) e apenas intencao
+  - Tamanho percentual nao tem efeito pratico no canvas
+  - Nao ha validacao de que os links sao realmente de imagens (apenas
+    tentativa de carregamento)
+  - Estado de expansao dos slots e perdido ao recarregar a pagina
+  - Toggle principal sempre inicia fechado ao abrir configuracoes
+
+================================================================================
+15. CUIDADOS PARA EVITAR REGRESSOES
+
+  1. NENHUMA funcionalidade existente foi alterada. Todo codigo novo e
+     aditivo.
+
+  2. A ordem de inicializacao no App.constructor foi preservada.
+
+  3. Nenhum keybind existente foi alterado ou removido.
+
+  4. Nenhuma alteracao foi feita nas tool classes ou no fluxo de
+     desenho/edicao do canvas.
+
+  5. Todas as novas funcionalidades sao confinadas ao painel de
+     configuracoes (settings modal), sem impacto no canvas ou nas
+     ferramentas.
+
+  6. O sistema de upload de slot usa FileReader.readAsDataURL, que
+     e assincrono e nao bloqueia a interface.
+
+  7. A validacao de links usa new Image(), que e assincrona e nao
+     bloqueia.
+
+  8. localStorage e acessado apenas em save() e load(), com
+     tratamento de erros (try/catch).
+
+  9. Nao ha codigo morto. Toda implementacao e necessaria para a
+     configuracao dos slots.
+
+  10. Cuidado: SettingsManager._activeSlot nao e resetado apos
+      upload cancelado. Nao causa problemas, mas e bom estar ciente.
+
+================================================================================
+16. TESTES MANUAIS RECOMENDADOS
+
+  1. Abrir editor.html e verificar splash screen
+  2. Verificar console - nenhum erro ou excecao
+  3. Abrir configuracoes (Ctrl+, ou botaoda engrenagem)
+  4. Verificar que "Image Slots (1-9)" aparece abaixo dos keybinds
+  5. Clicar em "Image Slots (1-9)" - expande suavemente
+  6. Verificar que 9 slots aparecem (Slot 1 a Slot 9)
+  7. Verificar que todos os slots iniciam recolhidos
+  8. Expandir Slot 1 - verificar todos os controles
+  9. Testar alteracao de keybind no Slot 1 (clicar "Alterar", pressionar tecla)
+  10. Verificar que conflito e detectado se mesma tecla usada em outro slot
+  11. Verificar que conflito e detectado com keybinds principais
+  12. Fazer upload de uma imagem para o Slot 1
+  13. Colar um link de imagem valido no Slot 2 e clicar "Aplicar"
+  14. Verificar que as miniaturas aparecem corretamente
+  15. Testar link invalido - notificacao de erro, configuracao anterior preservada
+  16. Testar upload de GIF - verificar animacao na miniatura
+  17. Ajustar slider de tamanho - verificar valor % mudando
+  18. Selecionar "Fade In" - verificar controle de duracao aparecendo
+  19. Selecionar "Fade Out" - verificar controle de duracao aparecendo
+  20. Selecionar "Piscar" - verificar tres sliders aparecendo
+  21. Selecionar "Balancar" - verificar slider de intensidade aparecendo
+  22. Alternar "Replace Existing Stamps" - verificar toggle liga/desliga
+  23. Fechar e reabrir configuracoes - verificar que slots abertos continuam
+      expandidos (durante mesma sessao)
+  24. Recarregar a pagina - verificar que configuracoes persistem
+  25. Verificar console novamente - nenhum erro apos interacao
+  26. Fechar configuracoes - verificar que editor continua funcionando
+  27. Testar todas as ferramentas (P, E, F, H) - funcionando
+  28. Testar zoom, pan, desfazer/refazer - funcionando
+  29. Testar carregamento de nova imagem - funcionando
+  30. Verificar no localStorage: console.log(localStorage.getItem('image-editor-stamp-slots'))
+
+================================================================================
+17. DESCRICAO DA PROXIMA ETAPA (ETAPA 3)
+
+A Etapa 3 devera implementar:
+
+  - Preview de imagem no cursor ao selecionar um slot
+    * Ao pressionar tecla 1-9, mostrar a imagem configurada seguindo o cursor
+    * Tamanho deve respeitar o sizePercent configurado
+    * Deve desaparecer ao trocar de ferramenta ou pressionar Esc
+
+  - Insercao permanente de stamps ao clicar no canvas
+    * Clicar no canvas com slot ativo insere o stamp
+    * Utilizar ImageStampManager.add() para criar a entidade
+    * Renderizar como <img> dentro de #image-stamp-layer
+    * Coordenadas devem ser world space (usar screenToWorld)
+
+  - Gerenciamento basico de stamps na interface
+    * Lista de stamps inseridos (tooltip ou painel)
+    * Exclusao de stamps individuais
+    * Selecao de slot ativo (visualmente indicado)
+
+  - Teclas 1-9 para ativar slot e inserir stamp
+    * Keybinds dos slots devem ser vinculados a acoes reais
+    * Usar getActionForKey ou similar para detectar teclas de slot
+
+  - Rendering dos elementos <img> em #image-stamp-layer
+    * Aplicar worldX, worldY como posicao
+    * Aplicar width, height calculados
+    * Nao implementar ainda efeitos visuais avancados
+
+IMPORTANTE para a Etapa 3:
+  - Utilizar os managers ja criados (ImageStampManager)
+  - Utilizar SlotConfiguration para ler settings do slot ativo
+  - Integrar com o sistema de cursor existente (CursorManager)
+  - Nao quebrar a configuracao dos slots (Etapa 2)
+  - Nao implementar ainda:
+    * Efeitos visuais avancados (fadeIn, fadeOut, blink, wobble)
+    * Exportacao
+    * Drag and drop de stamps
+    * Movimentacao de stamps pos-insercao
+
+================================================================================
+FIM DO DOCUMENTO DE HANDOFF - STAGE 02
+================================================================================
