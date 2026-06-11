@@ -502,6 +502,8 @@ const EditorState = {
     draggingStampId: null,
     dragOffsetWorldX: 0,
     dragOffsetWorldY: 0,
+    dragStartWorldX: 0,
+    dragStartWorldY: 0,
   },
 };
 
@@ -759,19 +761,44 @@ class HistoryManager {
     this.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: EditorState.history.undoStack, redoStack: EditorState.history.redoStack });
   }
 
+  pushCommand(command) {
+    command.execute();
+    EditorState.history.redoStack = [];
+    EditorState.history.undoStack.push({ _type: 'command', command });
+    if (EditorState.history.undoStack.length > EditorState.history.maxHistory) EditorState.history.undoStack.shift();
+    this._updateUI();
+    this.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: EditorState.history.undoStack, redoStack: EditorState.history.redoStack });
+  }
+
   undo() {
     if (EditorState.history.undoStack.length === 0) { if (app) app.notification('Nada para desfazer', 'warning', 1500); return; }
-    EditorState.history.redoStack.push(EditorState.history.undoStack.pop());
+    const entry = EditorState.history.undoStack.pop();
+    if (entry._type === 'command') {
+      entry.command.undo();
+      EditorState.history.redoStack.push(entry);
+      if (app) app.notification('Undo', 'info', 1000);
+    } else {
+      EditorState.history.redoStack.push(entry);
+      if (app) app.renderPermanentCanvas();
+      if (app) app.notification('Undo', 'info', 1000);
+    }
     this._updateUI();
-    if (app) app.renderPermanentCanvas();
     this.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: EditorState.history.undoStack, redoStack: EditorState.history.redoStack });
   }
 
   redo() {
     if (EditorState.history.redoStack.length === 0) { if (app) app.notification('Nada para refazer', 'warning', 1500); return; }
-    EditorState.history.undoStack.push(EditorState.history.redoStack.pop());
+    const entry = EditorState.history.redoStack.pop();
+    if (entry._type === 'command') {
+      entry.command.redo();
+      EditorState.history.undoStack.push(entry);
+      if (app) app.notification('Redo', 'info', 1000);
+    } else {
+      EditorState.history.undoStack.push(entry);
+      if (app) app.renderPermanentCanvas();
+      if (app) app.notification('Redo', 'info', 1000);
+    }
     this._updateUI();
-    if (app) app.renderPermanentCanvas();
     this.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: EditorState.history.undoStack, redoStack: EditorState.history.redoStack });
   }
 
@@ -1622,7 +1649,7 @@ class ImageStampManager {
 
   add(stampData) {
     const stamp = {
-      id: crypto.randomUUID ? crypto.randomUUID() : uuid(),
+      id: stampData.id || (crypto.randomUUID ? crypto.randomUUID() : uuid()),
       slot: stampData.slot || 0,
       src: stampData.src || '',
       sourceType: stampData.sourceType || 'url',
@@ -1630,14 +1657,14 @@ class ImageStampManager {
       worldY: stampData.worldY || 0,
       width: stampData.width || 0,
       height: stampData.height || 0,
-      zIndex: EditorState.stamps.nextZIndex++,
+      zIndex: stampData.zIndex !== undefined ? stampData.zIndex : EditorState.stamps.nextZIndex++,
       appearEffect: stampData.appearEffect || null,
       appearSettings: stampData.appearSettings || null,
       disappearEffect: stampData.disappearEffect || null,
       disappearSettings: stampData.disappearSettings || null,
       imageEffect: stampData.imageEffect || null,
       imageEffectSettings: stampData.imageEffectSettings || null,
-      createdAt: Date.now(),
+      createdAt: stampData.createdAt || Date.now(),
     };
     EditorState.stamps.list.push(stamp);
     this.eventBus.emit(EVENTS.STAMP_ADDED, stamp);
@@ -1789,6 +1816,28 @@ class ImageStampManager {
     if (!stamp || !el) return;
     el.style.left = (stamp.worldX - stamp.width / 2) + 'px';
     el.style.top = (stamp.worldY - stamp.height / 2) + 'px';
+  }
+
+  // ---- SERIALIZATION METHODS ----
+
+  serializeStamp(stamp) {
+    return JSON.parse(JSON.stringify(stamp));
+  }
+
+  deserializeStamp(data) {
+    return { ...data };
+  }
+
+  restoreStamp(stampData) {
+    return this.addStamp(stampData);
+  }
+
+  cloneStampData(stamp) {
+    return JSON.parse(JSON.stringify(stamp));
+  }
+
+  removeStampById(id) {
+    return this.removeStamp(id);
   }
 }
 
@@ -1966,75 +2015,95 @@ class StampPersistenceAdapter {
 }
 
 // ============================================================
-// STAMP COMMANDS (for future Undo/Redo integration)
+// STAMP COMMANDS (Undo/Redo integration)
 // ============================================================
 class AddStampCommand extends Command {
   constructor(imageStampManager, stampData) {
     super();
-    this.imageStampManager = imageStampManager;
-    this.stampData = stampData;
+    this._manager = imageStampManager;
+    this._stampData = stampData;
     this._stampId = null;
+    this._stampSnapshot = null;
   }
   execute() {
-    const stamp = this.imageStampManager.add(this.stampData);
+    const stamp = this._manager.addStamp(this._stampData);
     this._stampId = stamp.id;
+    this._stampSnapshot = JSON.parse(JSON.stringify(stamp));
   }
   undo() {
-    if (this._stampId) this.imageStampManager.remove(this._stampId);
+    if (this._stampId) this._manager.removeStamp(this._stampId);
+  }
+  redo() {
+    if (this._stampSnapshot) this._manager.addStamp(this._stampSnapshot);
   }
 }
 
 class RemoveStampCommand extends Command {
   constructor(imageStampManager, stampId) {
     super();
-    this.imageStampManager = imageStampManager;
-    this.stampId = stampId;
-    this._removed = null;
+    this._manager = imageStampManager;
+    this._stampId = stampId;
+    this._removedSnapshot = null;
   }
   execute() {
-    this._removed = this.imageStampManager.remove(this.stampId);
+    const stamp = this._manager.getStampById(this._stampId);
+    if (stamp) {
+      this._removedSnapshot = JSON.parse(JSON.stringify(stamp));
+      this._manager.removeStamp(this._stampId);
+    }
   }
   undo() {
-    if (this._removed) this.imageStampManager.add(this._removed);
+    if (this._removedSnapshot) this._manager.addStamp(this._removedSnapshot);
+  }
+  redo() {
+    this.execute();
   }
 }
 
 class MoveStampCommand extends Command {
   constructor(imageStampManager, stampId, oldX, oldY, newX, newY) {
     super();
-    this.imageStampManager = imageStampManager;
-    this.stampId = stampId;
+    this._manager = imageStampManager;
+    this._stampId = stampId;
     this.oldX = oldX;
     this.oldY = oldY;
     this.newX = newX;
     this.newY = newY;
   }
   execute() {
-    const stamp = this.imageStampManager.getById(this.stampId);
-    if (stamp) { stamp.worldX = this.newX; stamp.worldY = this.newY; }
+    const stamp = this._manager.getById(this._stampId);
+    if (stamp) {
+      stamp.worldX = this.newX;
+      stamp.worldY = this.newY;
+      this._manager.updateStampPosition(this._stampId);
+    }
   }
   undo() {
-    const stamp = this.imageStampManager.getById(this.stampId);
-    if (stamp) { stamp.worldX = this.oldX; stamp.worldY = this.oldY; }
+    const stamp = this._manager.getById(this._stampId);
+    if (stamp) {
+      stamp.worldX = this.oldX;
+      stamp.worldY = this.oldY;
+      this._manager.updateStampPosition(this._stampId);
+    }
   }
 }
 
 class ReplaceStampCommand extends Command {
   constructor(imageStampManager, slot, newStampData) {
     super();
-    this.imageStampManager = imageStampManager;
+    this._manager = imageStampManager;
     this.slot = slot;
     this.newStampData = newStampData;
     this._oldStamps = [];
   }
   execute() {
-    this._oldStamps = this.imageStampManager.getBySlot(this.slot);
-    this._oldStamps.forEach(s => this.imageStampManager.remove(s.id));
-    this.imageStampManager.add({ ...this.newStampData, slot: this.slot });
+    this._oldStamps = this._manager.getBySlot(this.slot);
+    this._oldStamps.forEach(s => this._manager.removeStamp(s.id));
+    this._manager.addStamp({ ...this.newStampData, slot: this.slot });
   }
   undo() {
-    this.imageStampManager.getBySlot(this.slot).forEach(s => this.imageStampManager.remove(s.id));
-    this._oldStamps.forEach(s => this.imageStampManager.add(s));
+    this._manager.getBySlot(this.slot).forEach(s => this._manager.removeStamp(s.id));
+    this._oldStamps.forEach(s => this._manager.addStamp(s));
   }
 }
 
@@ -2298,7 +2367,9 @@ class StampPreviewManager {
       imageEffectSettings: config.imageEffect ? { ...config.effectSettings } : null,
     };
 
-    app.imageStampManager.addStamp(stampData);
+    const cmd = new AddStampCommand(app.imageStampManager, stampData);
+    app.historyManager.pushCommand(cmd);
+    app.notification('Stamp added', 'info', 1500);
   }
 
   _applySize(config) {
@@ -2704,7 +2775,9 @@ class App {
   renderPermanentCanvas() {
     const ctx = DOM.ctxPerm; const w = DOM['layer-permanent'].width; const h = DOM['layer-permanent'].height;
     ctx.clearRect(0, 0, w, h);
-    for (const stroke of EditorState.history.undoStack) {
+    for (const entry of EditorState.history.undoStack) {
+      if (entry._type === 'command') continue;
+      const stroke = entry;
       const points = stroke.points; if (points.length < 2) continue;
       ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
       for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
@@ -2836,7 +2909,9 @@ class App {
       const stamp = this.imageStampManager.hitTest(world.x, world.y);
       if (!stamp) return false;
       if (EditorState.input.deleteModeActive) {
-        this.imageStampManager.removeStamp(stamp.id);
+        const cmd = new RemoveStampCommand(this.imageStampManager, stamp.id);
+        this.historyManager.pushCommand(cmd);
+        this.notification('Stamp removed', 'info', 1500);
         return true;
       }
       if (EditorState.input.moveModeActive) {
@@ -2845,6 +2920,8 @@ class App {
         EditorState.input.draggingStampId = stamp.id;
         EditorState.input.dragOffsetWorldX = offsetX;
         EditorState.input.dragOffsetWorldY = offsetY;
+        EditorState.input.dragStartWorldX = stamp.worldX;
+        EditorState.input.dragStartWorldY = stamp.worldY;
         this._highlightStamp(stamp.id, true);
         return true;
       }
@@ -2876,11 +2953,23 @@ class App {
     const stampId = EditorState.input.draggingStampId;
     if (stampId) {
       this._highlightStamp(stampId, false);
-      this.eventBus.emit(EVENTS.STAMP_MODIFIED, this.imageStampManager.getStampById(stampId));
+      const stamp = this.imageStampManager.getStampById(stampId);
+      if (stamp) {
+        const oldX = EditorState.input.dragStartWorldX;
+        const oldY = EditorState.input.dragStartWorldY;
+        if (stamp.worldX !== oldX || stamp.worldY !== oldY) {
+          const cmd = new MoveStampCommand(this.imageStampManager, stampId, oldX, oldY, stamp.worldX, stamp.worldY);
+          this.historyManager.pushCommand(cmd);
+          this.notification('Stamp moved', 'info', 1500);
+        }
+      }
+      this.eventBus.emit(EVENTS.STAMP_MODIFIED, stamp ? this.imageStampManager.getStampById(stampId) : null);
     }
     EditorState.input.draggingStampId = null;
     EditorState.input.dragOffsetWorldX = 0;
     EditorState.input.dragOffsetWorldY = 0;
+    EditorState.input.dragStartWorldX = 0;
+    EditorState.input.dragStartWorldY = 0;
   }
 
   _highlightStamp(stampId, highlight) {
