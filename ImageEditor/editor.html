@@ -1599,11 +1599,17 @@ class SettingsManager {
 class ImageStampManager {
   constructor(eventBus) {
     this.eventBus = eventBus;
+    this._stampElements = new Map();
+    this._layer = null;
+  }
+
+  setLayer(layerEl) {
+    this._layer = layerEl;
   }
 
   add(stampData) {
     const stamp = {
-      id: uuid(),
+      id: crypto.randomUUID ? crypto.randomUUID() : uuid(),
       slot: stampData.slot || 0,
       src: stampData.src || '',
       sourceType: stampData.sourceType || 'url',
@@ -1651,6 +1657,10 @@ class ImageStampManager {
   }
 
   clear() {
+    for (const [id, el] of this._stampElements) {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }
+    this._stampElements.clear();
     EditorState.stamps.list = [];
     EditorState.stamps.nextZIndex = 1;
     this.eventBus.emit(EVENTS.STAMP_REMOVED, null);
@@ -1658,6 +1668,75 @@ class ImageStampManager {
 
   toExportData() {
     return this.getAll().map(s => ({ ...s }));
+  }
+
+  // ---- DOM RENDERING METHODS ----
+
+  addStamp(stampData) {
+    const stamp = this.add(stampData);
+    this._renderStampElement(stamp);
+    return stamp;
+  }
+
+  removeStamp(id) {
+    const stamp = this.remove(id);
+    if (stamp) this._destroyStampElement(id);
+    return stamp;
+  }
+
+  getStampById(id) { return this.getById(id); }
+  getStampsBySlot(slot) { return this.getBySlot(slot); }
+  getAllStamps() { return this.getAll(); }
+
+  getTopMostStamp() {
+    const stamps = this.getAll();
+    return stamps.length > 0 ? stamps[stamps.length - 1] : null;
+  }
+
+  calculateNextZIndex() {
+    return EditorState.stamps.nextZIndex;
+  }
+
+  renderStamp(stamp) {
+    return this._renderStampElement(stamp);
+  }
+
+  destroyStamp(id) {
+    this._destroyStampElement(id);
+  }
+
+  renderAll() {
+    for (const [id, el] of this._stampElements) {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }
+    this._stampElements.clear();
+    this.getAll().forEach(s => this._renderStampElement(s));
+  }
+
+  _renderStampElement(stamp) {
+    if (!this._layer) return null;
+    const img = document.createElement('img');
+    img.src = stamp.src;
+    img.draggable = false;
+    img.dataset.stampId = stamp.id;
+    img.style.position = 'absolute';
+    img.style.left = (stamp.worldX - stamp.width / 2) + 'px';
+    img.style.top = (stamp.worldY - stamp.height / 2) + 'px';
+    img.style.width = stamp.width + 'px';
+    img.style.height = stamp.height + 'px';
+    img.style.zIndex = stamp.zIndex;
+    img.style.pointerEvents = 'none';
+    this._layer.appendChild(img);
+    this._stampElements.set(stamp.id, img);
+    return img;
+  }
+
+  _destroyStampElement(id) {
+    const el = this._stampElements.get(id);
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+    this._stampElements.delete(id);
   }
 }
 
@@ -1924,12 +2003,15 @@ class StampPreviewManager {
     this._clientY = 0;
     this._heldSlots = new Set();
     this._fadingOut = false;
+    this._mouseButtonDown = false;
 
     this._blinkTimer = null;
     this._wobbleTimer = null;
 
     this._boundKeyDown = this._onKeyDown.bind(this);
     this._boundKeyUp = this._onKeyUp.bind(this);
+    this._boundMouseDown = this._onMouseDown.bind(this);
+    this._boundMouseUp = this._onMouseUp.bind(this);
     this._boundMouseMove = this._onMouseMove.bind(this);
     this._boundResize = this._onResize.bind(this);
     this._boundBlur = this._onWindowBlur.bind(this);
@@ -1939,6 +2021,8 @@ class StampPreviewManager {
     this._createLayer();
     document.addEventListener('keydown', this._boundKeyDown);
     document.addEventListener('keyup', this._boundKeyUp);
+    this.canvasArea.addEventListener('mousedown', this._boundMouseDown);
+    document.addEventListener('mouseup', this._boundMouseUp);
     this.canvasArea.addEventListener('mousemove', this._boundMouseMove);
     window.addEventListener('resize', this._boundResize);
     window.addEventListener('blur', this._boundBlur);
@@ -1952,9 +2036,19 @@ class StampPreviewManager {
     }
     document.removeEventListener('keydown', this._boundKeyDown);
     document.removeEventListener('keyup', this._boundKeyUp);
+    this.canvasArea.removeEventListener('mousedown', this._boundMouseDown);
+    document.removeEventListener('mouseup', this._boundMouseUp);
     this.canvasArea.removeEventListener('mousemove', this._boundMouseMove);
     window.removeEventListener('resize', this._boundResize);
     window.removeEventListener('blur', this._boundBlur);
+  }
+
+  _onMouseDown(e) {
+    if (e.button === 0) this._mouseButtonDown = true;
+  }
+
+  _onMouseUp(e) {
+    if (e.button === 0) this._mouseButtonDown = false;
   }
 
   _createLayer() {
@@ -2010,6 +2104,7 @@ class StampPreviewManager {
     this._heldSlots.delete(slot);
 
     if (this._activeSlot === slot) {
+      this._tryInsertStamp(slot);
       this._deactivatePreview(false);
     }
   }
@@ -2099,6 +2194,59 @@ class StampPreviewManager {
 
     EditorState.preview.activeSlot = null;
     EditorState.preview.isActive = false;
+  }
+
+  _tryInsertStamp(slot) {
+    if (!this._isActive || !this._element) return;
+    if (!this._mouseButtonDown) return;
+    if (!app || !app.toolManager) return;
+    const tool = app.toolManager.getActiveTool();
+    if (!tool || tool.name !== 'hand') return;
+
+    this._insertStamp(slot);
+  }
+
+  _insertStamp(slot) {
+    const config = this.stampSettingsManager.getSlot(slot);
+    if (!config || !config.source) return;
+
+    const rect = this.canvasArea.getBoundingClientRect();
+    const worldX = (this._clientX - rect.left - EditorState.canvas.offsetX) / EditorState.canvas.scale;
+    const worldY = (this._clientY - rect.top - EditorState.canvas.offsetY) / EditorState.canvas.scale;
+
+    const ccRect = this.canvasContainer.getBoundingClientRect();
+    if (this._clientX < ccRect.left || this._clientX > ccRect.right ||
+        this._clientY < ccRect.top || this._clientY > ccRect.bottom) {
+      return;
+    }
+
+    const stampHeight = this._calculateHeight(config);
+    let stampWidth = stampHeight;
+    if (this._element.complete && this._element.naturalWidth > 0) {
+      const aspect = this._element.naturalWidth / this._element.naturalHeight;
+      stampWidth = stampHeight * aspect;
+    } else {
+      const parsed = parseFloat(this._element.style.width);
+      if (parsed > 0) stampWidth = parsed;
+    }
+
+    const stampData = {
+      slot: slot,
+      src: config.source,
+      sourceType: config.sourceType || 'url',
+      worldX: worldX,
+      worldY: worldY,
+      width: stampWidth,
+      height: stampHeight,
+      appearEffect: config.appearEffect || null,
+      appearSettings: config.effectSettings ? { ...config.effectSettings } : null,
+      disappearEffect: config.disappearEffect || null,
+      disappearSettings: config.disappearEffect ? { ...config.effectSettings } : null,
+      imageEffect: config.imageEffect || null,
+      imageEffectSettings: config.imageEffect ? { ...config.effectSettings } : null,
+    };
+
+    app.imageStampManager.addStamp(stampData);
   }
 
   _applySize(config) {
@@ -2283,6 +2431,7 @@ class App {
     this.inputManager.bind(DOM['canvas-area']);
     this._registerTools();
     this._bindEvents();
+    this.imageStampManager.setLayer(DOM['image-stamp-layer']);
     this.toolManager.activateTool('pencil');
     this._setupDragDrop();
     this.stampPreviewManager = new StampPreviewManager(this.eventBus, this.stampSettingsManager, DOM['canvas-area'], DOM['canvas-container']);

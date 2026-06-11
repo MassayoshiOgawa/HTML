@@ -1,0 +1,590 @@
+================================================================================
+HANDOFF DOCUMENT - STAGE 04
+SISTEMA DE INSERCAO PERMANENTE DE IMAGE STAMPS
+================================================================================
+
+DATA: 2026-06-11
+ARQUIVO PRINCIPAL: editor.html
+ETAPA CONCLUIDA: 4 - Insercao Permanente de Image Stamps
+
+================================================================================
+1. RESUMO DA ETAPA
+================================================================================
+
+Esta etapa implementou a insercao permanente das imagens configuradas nos
+slots 1 a 9 dentro do canvas do editor.
+
+Ao pressionar e segurar a keybind de um slot com a ferramenta Mao ativa
+e o botao esquerdo do mouse pressionado, o preview da imagem aparece
+seguindo o cursor (funcionalidade herdada da Etapa 3). Ao soltar a tecla,
+o preview desaparece e uma copia permanente da imagem e inserida no
+editor como um StampEntity independente.
+
+Todas as funcionalidades existentes (lapis, borracha, caneta que some,
+zoom, pan, historico, keybinds, configuracao dos slots, preview dos
+slots) continuam funcionando exatamente como antes.
+
+================================================================================
+2. FUNCIONALIDADES IMPLEMENTADAS
+================================================================================
+
+2.1. INSERCAO PERMANENTE DE STAMPS
+
+  - A insercao permanente ocorre quando TODAS as condicoes abaixo sao
+    satisfeitas:
+    * Ferramenta Mao (hand) esta ativa
+    * Botao esquerdo do mouse esta pressionado
+    * Uma keybind de slot (1-9) esta pressionada
+    * Um preview valido esta sendo exibido (imagem configurada no slot)
+
+  - Fluxo completo:
+    1. Usuario ativa a ferramenta Mao (tecla H ou clique na toolbar)
+    2. Usuario pressiona o botao esquerdo do mouse
+    3. Usuario pressiona e segura a keybind de um slot (1-9)
+    4. O preview da imagem aparece seguindo o cursor
+    5. Usuario posiciona a imagem na posicao desejada
+    6. Usuario solta a keybind
+    7. O preview desaparece (com ou sem fade out, conforme configurado)
+    8. Uma copia permanente do stamp e criada no canvas
+
+  - A insercao acontece no momento em que a tecla e solta (keyup),
+    antes do preview ser desativado.
+
+2.2. IMAGE STAMP MANAGER EXPANDIDO
+
+  - O ImageStampManager existente foi expandido com metodos de renderizacao
+    DOM e gerenciamento de elementos HTML.
+
+  - Novos metodos adicionados:
+
+    addStamp(stampData)
+      - Chama add() internamente (cria entidade no estado)
+      - Renderiza o elemento <img> correspondente no DOM
+      - Retorna o StampEntity criado
+
+    removeStamp(id)
+      - Chama remove() internamente (remove do estado)
+      - Remove o elemento <img> do DOM
+      - Retorna o StampEntity removido (ou null)
+
+    getStampById(id)
+      - Alias para getById(id)
+
+    getStampsBySlot(slot)
+      - Alias para getBySlot(slot)
+
+    getAllStamps()
+      - Alias para getAll()
+
+    getTopMostStamp()
+      - Retorna o stamp com maior zIndex (ultimo inserido)
+      - Retorna null se nao houver stamps
+
+    calculateNextZIndex()
+      - Retorna o proximo zIndex a ser usado
+      - Nao incrementa o contador
+
+    renderStamp(stamp)
+      - Renderiza um StampEntity especifico no DOM
+      - Utilizado para renderizacao individual
+
+    destroyStamp(id)
+      - Remove o elemento <img> do DOM sem remover do estado
+      - Utilizado para gerenciamento fino de DOM
+
+    renderAll()
+      - Remove todos os elementos <img> do DOM
+      - Re-renderiza todos os stamps a partir do estado
+      - Utilizado para reconstrucao completa do DOM
+
+    setLayer(layerEl)
+      - Define o elemento DOM que servira como container
+      - Deve ser chamado durante a inicializacao (App.init())
+
+    _renderStampElement(stamp)
+      - Metodo privado que cria o elemento <img>
+      - Configura src, posicao (left/top em world coords),
+        dimensoes (width/height), zIndex, pointer-events
+      - Adiciona ao _layer e registra no Map _stampElements
+
+    _destroyStampElement(id)
+      - Metodo privado que remove o elemento <img> do DOM
+      - Remove do Map _stampElements
+
+  - O metodo clear() foi modificado para tambem destruir todos os
+    elementos DOM antes de limpar o estado.
+
+  - A geracao de ID foi alterada de uuid() para crypto.randomUUID()
+    com fallback para uuid().
+
+2.3. STAMPENTITY - ESTRUTURA FINAL
+
+  Cada StampEntity e um objeto JavaScript com a seguinte estrutura:
+
+    {
+      id: string (UUID via crypto.randomUUID),
+      slot: number (1-9, slot de origem),
+      src: string (URL ou data URI da imagem),
+      sourceType: string ('url' | 'datauri'),
+      worldX: number (coordenada X no espaco do mundo),
+      worldY: number (coordenada Y no espaco do mundo),
+      width: number (largura em pixels no espaco do mundo),
+      height: number (altura em pixels no espaco do mundo),
+      zIndex: number (ordem de sobreposicao, auto-incrementado),
+      appearEffect: string | null ('fadeIn' ou null),
+      appearSettings: object | null,
+      disappearEffect: string | null ('fadeOut' ou null),
+      disappearSettings: object | null,
+      imageEffect: string | null ('blink' | 'wobble' | null),
+      imageEffectSettings: object | null,
+      createdAt: number (timestamp de criacao),
+    }
+
+  A fonte da verdade e o estado JavaScript (EditorState.stamps.list).
+  O elemento <img> no DOM e uma representacao derivada.
+
+  Cada StampEntity tem um elemento <img> correspondente no DOM,
+  registrado no Map _stampElements (id -> HTMLImageElement).
+
+2.4. SISTEMA DE Z-INDEX
+
+  - Cada novo stamp recebe um zIndex igual ao valor atual de
+    EditorState.stamps.nextZIndex, que e entao incrementado.
+
+  - O stamp inserido mais recentemente tem o maior zIndex.
+
+  - Exemplo:
+    Stamp A -> zIndex 1
+    Stamp B -> zIndex 2
+    Stamp C -> zIndex 3
+
+  - zIndex e aplicado via CSS (style.zIndex) no elemento <img>.
+
+2.5. SISTEMA DE COORDENADAS DO MUNDO (WORLD COORDINATES)
+
+  - A posicao de cada stamp e armazenada em coordenadas do mundo
+    (worldX, worldY), que representam o centro da imagem.
+
+  - A conversao de coordenadas de tela para mundo:
+
+    worldX = (clientX - rect.left - offsetX) / scale
+    worldY = (clientY - rect.top - offsetY) / scale
+
+    Onde:
+      clientX, clientY = posicao do cursor na tela
+      rect = getBoundingClientRect() do canvas-area
+      offsetX, offsetY = pan offset do canvas
+      scale = zoom scale do canvas
+
+  - A renderizacao no DOM aplica:
+    left = worldX - width/2
+    top = worldY - height/2
+
+  - Como os elementos <img> estao dentro de #canvas-container (que
+    possui transform: translate + scale), as coordenadas do mundo
+    sao automaticamente mapeadas para a tela pelo navegador.
+
+2.6. COMPORTAMENTO DOS GIFS PERMANENTES
+
+  - GIFs animados permanecem animados apos insercao permanente.
+  - Como os stamps sao elementos <img> nativos (nao canvas),
+    a animacao nativa do GIF e preservada pelo navegador.
+  - Continuam animados durante zoom e pan (pois o elemento <img>
+    nunca e interrompido).
+  - Funciona tanto para uploads (data URI) quanto para links (URL).
+
+2.7. VALIDACAO DE LIMITE ESPACIAL
+
+  - O centro do stamp deve estar dentro do canvas-container.
+  - A verificacao e feita comparando as coordenadas de tela do
+    cursor contra o bounding client rect do canvas-container.
+  - Se o cursor estiver fora, a insercao e cancelada (nenhum
+    erro, apenas nao insere).
+  - Stamps podem ultrapassar os limites da imagem principal,
+    desde que o centro esteja dentro do canvas-container.
+
+2.8. REACAO AO ZOOM E PAN
+
+  - Todos os stamps reagem ao zoom e pan automaticamente:
+    * Ampliam junto com a imagem principal (devido ao scale do
+      canvas-container)
+    * Reduzem junto com a imagem principal
+    * Acompanham deslocamentos do pan (devido ao translate do
+      canvas-container)
+    * Mantem proporcoes corretas
+    * Mantem alinhamento perfeito com a imagem principal
+
+  - Nenhum codigo adicional e necessario para zoom/pan porque os
+    elementos <img> estao dentro de #canvas-container, que tem
+    a transformacao CSS aplicada.
+
+2.9. TRACKING DO MOUSE
+
+  - O StampPreviewManager agora monitora o estado do botao
+    esquerdo do mouse:
+    * _mouseButtonDown: boolean (true quando botao esquerdo
+      esta pressionado)
+    * _onMouseDown(e): define _mouseButtonDown = true (apenas
+      botao 0)
+    * _onMouseUp(e): define _mouseButtonDown = false (apenas
+      botao 0)
+
+  - Eventos mousedown sao escutados no canvas-area
+  - Eventos mouseup sao escutados no document (para capturar
+    soltura fora do canvas)
+
+================================================================================
+3. ALTERACOES ARQUITETURAIS
+================================================================================
+
+3.1. ImageStampManager (EXPANDIDO)
+
+  - Novo Map: _stampElements (id -> HTMLImageElement)
+  - Nova ref: _layer (elemento DOM #image-stamp-layer)
+  - 10 novos metodos publicos (listados na secao 2.2)
+  - 2 novos metodos privados (_renderStampElement, _destroyStampElement)
+  - clear() modificado para destruir DOM elements
+  - ID alterado para crypto.randomUUID() com fallback
+
+3.2. StampPreviewManager (MODIFICADO)
+
+  - Nova prop: _mouseButtonDown (boolean)
+  - Novos handlers: _boundMouseDown, _boundMouseUp
+  - init(): registra mousedown no canvas-area, mouseup no document
+  - destroy(): remove mousedown e mouseup listeners
+  - _onKeyUp(): agora chama _tryInsertStamp(slot) antes de
+    _deactivatePreview
+  - Novos metodos: _onMouseDown(e), _onMouseUp(e),
+    _tryInsertStamp(slot), _insertStamp(slot)
+
+3.3. App (MODIFICADO)
+
+  - init(): adicionado this.imageStampManager.setLayer(DOM['image-stamp-layer'])
+    antes de toolManager.activateTool()
+
+3.4. DOM (NAO ALTERADO)
+
+  - Nenhum novo elemento DOM foi adicionado
+  - #image-stamp-layer ja existia (criado na Etapa 1)
+  - #stamp-preview-layer ja existia (criado na Etapa 3)
+
+3.5. CSS (NAO ALTERADO)
+
+  - Nenhum novo CSS foi adicionado
+  - #image-stamp-layer: position absolute, top/left 0, width 0, height 0,
+    pointer-events none, z-index 5
+
+================================================================================
+4. ESTRUTURAS DE DADOS
+================================================================================
+
+4.1. ImageStampManager._stampElements
+
+  Map<string, HTMLImageElement>
+    key: stamp.id (UUID string)
+    value: elemento <img> no DOM
+
+4.2. StampPreviewManager._mouseButtonDown
+
+  boolean
+    true: botao esquerdo do mouse esta pressionado
+    false: botao esquerdo do mouse NAO esta pressionado
+
+================================================================================
+5. INTEGRACAO COM SISTEMAS EXISTENTES
+================================================================================
+
+5.1. DEPENDENCIAS
+
+  StampPreviewManager._tryInsertStamp()
+    -> app.toolManager.getActiveTool() (para verificar ferramenta Mao)
+    -> this._mouseButtonDown (para verificar mouse pressionado)
+    -> this._isActive / this._element (para verificar preview valido)
+    -> this._insertStamp(slot) (para criar o stamp)
+
+  StampPreviewManager._insertStamp()
+    -> stampSettingsManager.getSlot(slot) (para ler config)
+    -> this.canvasArea.getBoundingClientRect() (calcular world coords)
+    -> this.canvasContainer.getBoundingClientRect() (validar bounds)
+    -> EditorState.canvas.offsetX, offsetY, scale (coordenadas)
+    -> this._calculateHeight(config) (calcular altura)
+    -> this._element.complete, naturalWidth, naturalHeight (aspect ratio)
+    -> app.imageStampManager.addStamp(stampData) (criar stamp)
+
+  ImageStampManager.addStamp()
+    -> this.add(stampData) (criar entidade no estado)
+    -> this._renderStampElement(stamp) (criar elemento <img>)
+
+  ImageStampManager._renderStampElement()
+    -> this._layer (container DOM)
+    -> stamp.worldX, worldY, width, height, zIndex, src, id
+
+5.2. EVENTOS EMITIDOS
+
+  ImageStampManager.add() -> emite EVENTS.STAMP_ADDED
+  ImageStampManager.remove() -> emite EVENTS.STAMP_REMOVED
+  ImageStampManager.clear() -> emite EVENTS.STAMP_REMOVED
+
+================================================================================
+6. KEYBINDS
+================================================================================
+
+  - NENHUMA keybind nova foi adicionada ou alterada.
+  - As teclas 1-9 continuam sendo as keybinds padrao dos slots.
+  - O fluxo de insercao usa as mesmas keybinds do preview (Etapa 3):
+    keydown ativa preview, keyup insere stamp + desativa preview.
+
+================================================================================
+7. ALTERACOES NO ESTADO GLOBAL (EditorState)
+================================================================================
+
+  - NENHUMA alteracao foi feita no EditorState.
+  - As estruturas existentes continuam sendo utilizadas:
+    EditorState.stamps.list (array de StampEntity)
+    EditorState.stamps.nextZIndex (contador de z-index)
+    EditorState.preview (estado do preview, usado pelo StampPreviewManager)
+
+================================================================================
+8. ALTERACOES NO localStorage
+================================================================================
+
+  - NENHUMA alteracao foi feita no localStorage.
+  - Stamps inseridos NAO sao persistidos.
+  - Chaves existentes permanecem:
+    image-editor-keybinds     (KeybindManager)
+    image-editor-stamp-slots  (StampSettingsManager)
+
+================================================================================
+9. COMPORTAMENTO ESPECIFICO DA INSERCAO
+================================================================================
+
+9.1. ORDEM DE EXECUCAO EM KEYUP
+
+  Quando a tecla do slot e solta:
+    1. _heldSlots.delete(slot)
+    2. if (_activeSlot === slot):
+       a. _tryInsertStamp(slot) -> verifica condicoes -> _insertStamp(slot)
+       b. _deactivatePreview(false) -> inicia fade out (se configurado)
+          ou remove preview imediatamente
+
+  A insercao acontece ANTES do preview ser removido. Isso significa
+  que o stamp permanente aparece no DOM enquanto o preview ainda esta
+  visivel (durante o fade out, se configurado).
+
+9.2. PREVIEW DURANTE FADE OUT
+
+  - Se o slot possui efeito de desaparecimento "Fade Out", o preview
+    permanece visivel durante o fade out (opacity: 1 -> 0).
+  - O stamp permanente e criado na mesma posicao.
+  - O stamp fica atras do preview (z-index 5 vs z-index 10).
+  - Quando o fade out termina e o preview e removido, o stamp
+    permanece visivel.
+
+9.3. CANCELAMENTO DE INSERCAO
+
+  A insercao e cancelada silenciosamente (sem notificacao) quando:
+  - Nenhum preview ativo
+  - Mouse nao esta pressionado
+  - Ferramenta ativa nao e a Mao
+  - Cursor esta fora do canvas-container
+
+================================================================================
+10. LIMITACOES ATUAIS DO SISTEMA
+================================================================================
+
+  - Nao ha remocao/delecao de stamps individuais
+  - Nao ha movimentacao de stamps pos-insercao
+  - Nao ha selecao de stamps (clicar para selecionar)
+  - Nao ha integracao com Undo/Redo para stamps (AddStampCommand existe
+    mas nao e utilizado no fluxo de insercao)
+  - Nao ha persistencia de stamps (localStorage)
+  - Nao ha lista visual de stamps na interface
+  - Nao ha ferramenta de mover stamps
+  - Efeitos visuais (blink, wobble, fadeIn) sao aplicados apenas no
+    preview, nao nos stamps permanentes
+  - Substituicao em massa (Replace Existing Stamps) e apenas configuracao
+    de slot, nao implementada
+  - Nao ha exportacao/importacao de stamps
+
+================================================================================
+11. CUIDADOS PARA EVITAR REGRESSOES
+================================================================================
+
+  1. NENHUMA funcionalidade existente foi alterada. Todo codigo novo
+     e aditivo (expansao de classes existentes).
+
+  2. O metodo ImageStampManager.add() NAO foi modificado (mantem
+     comportamento original de criar estado + emitir evento).
+
+  3. O metodo ImageStampManager.clear() foi modificado para tambem
+     limpar elementos DOM. Isso e seguro pois clear() e chamado
+     apenas quando uma nova imagem e carregada (App.loadImage).
+
+  4. O StampPreviewManager._onKeyUp() foi modificado para adicionar
+     _tryInsertStamp() antes de _deactivatePreview(). O comportamento
+     de desativacao do preview permanece identico.
+
+  5. Os eventos mousedown/mouseup foram adicionados ao
+     StampPreviewManager, mas NAO interferem com o fluxo do
+     ToolManager (que continua responsavel pelas ferramentas).
+
+  6. O preview continua funcionando exatamente como antes (Etapa 3)
+     quando as condicoes de insercao nao sao satisfeitas.
+
+  7. A configuracao dos slots (Etapa 2) nao foi alterada.
+
+  8. A insercao de stamps usa o mesmo calculo de altura que o preview
+     (_calculateHeight), garantindo consistencia de tamanho.
+
+  9. O layer #image-stamp-layer ja existia e continua com as mesmas
+     propriedades CSS.
+
+  10. A criacao do StampPreviewManager continua na mesma ordem
+      (apos _setupDragDrop()).
+
+  11. A geracao de ID foi alterada de uuid() para crypto.randomUUID()
+      com fallback, mantendo compatibilidade.
+
+================================================================================
+12. TESTES MANUAIS RECOMENDADOS
+================================================================================
+
+  1. Abrir editor.html, carregar uma imagem, verificar console sem erros
+  2. Configurar Slot 1 com uma imagem (upload) e Slot 2 com outra (link)
+  3. Configurar Slot 3 com um GIF animado
+  4. Ativar ferramenta Mao (H)
+  5. Pressionar botao esquerdo do mouse
+  6. Pressionar e segurar '1' -> preview aparece
+  7. Posicionar o cursor, soltar '1' -> preview desaparece, stamp inserido
+  8. Repetir processo no mesmo slot -> stamp #2 inserido
+  9. Verificar que ambos os stamps existem simultaneamente
+  10. Inserir stamps do Slot 2 e Slot 3
+  11. Verificar que GIF do Slot 3 permanece animado
+  12. Usar zoom (scroll) -> stamps ampliam/reduzem com a imagem
+  13. Usar pan (arrastar com Mao) -> stamps acompanham
+  14. Inserir stamp com cursor fora do canvas-container -> nao insere
+  15. Tentar inserir com ferramenta Lapis ativa -> nao insere
+  16. Tentar inserir sem mouse pressionado -> nao insere (preview normal)
+  17. Verificar z-index: ultimo stamp inserido fica acima dos anteriores
+  18. Verificar que funcionalidades existentes continuam:
+      - Lapis, borracha, caneta que some
+      - Zoom e pan
+      - Desfazer/refazer (Ctrl+Z, Ctrl+Y)
+      - Configuracao dos slots
+      - Preview dos slots (Etapa 3)
+  19. Verificar nenhum erro no console apos todas as interacoes
+  20. Clicar no canvas com Mao + mouse + keybind -> insercao no clique
+  21. Verificar que a imagem inserida tem o mesmo tamanho do preview
+  22. Verificar que a imagem inserida tem a mesma proporcao do preview
+  23. Verificar coordenadas corretas apos multiplos zooms e pans
+
+================================================================================
+13. FUNCIONALIDADES AINDA NAO IMPLEMENTADAS
+================================================================================
+
+  - Remocao/delecao de stamps individuais
+  - Movimentacao de stamps pos-insercao (arrastar)
+  - Selecao de stamps (clicar para selecionar, highlight visual)
+  - Integracao completa com Undo/Redo (AddStampCommand existe mas
+    nao e integrado ao fluxo de insercao)
+  - Persistencia de stamps (localStorage, save/load)
+  - Lista visual de stamps na interface (painel, tooltip, ou modal)
+  - Ferramenta de mover stamps (Mover)
+  - Efeitos visuais em stamps fixos (blink, wobble, fadeIn existem
+    apenas no preview)
+  - Substituicao em massa (Replace Existing Stamps config)
+  - Exportacao/importacao de stamps
+  - Drag and drop de arquivos para criar stamps
+
+================================================================================
+14. DESCRICAO DA ETAPA 5 (PROXIMA)
+================================================================================
+
+A Etapa 5 devera implementar a MOVIMENTACAO E EXCLUSAO DE STAMPS.
+
+14.1. FUNCIONALIDADES ESPERADAS
+
+  - Selecao de stamps:
+    * Clicar em um stamp existente deve seleciona-lo
+    * Stamp selecionado deve ter indicacao visual (borda, destaque)
+    * Apenas um stamp pode estar selecionado por vez
+    * Clicar fora deve desselecionar
+
+  - Movimentacao de stamps:
+    * Stamp selecionado pode ser arrastado com o mouse
+    * Deve funcionar com a ferramenta Mao (ou ferramenta especifica)
+    * Deve atualizar worldX/worldY da entidade
+    * Deve atualizar a posicao do elemento <img> no DOM
+    * Deve funcionar corretamente com zoom e pan
+
+  - Exclusao de stamps:
+    * Tecla Delete ou Backspace remove o stamp selecionado
+    * Botao de exclusao na toolbar ou contexto
+    * Deve remover do estado (EditorState.stamps.list)
+    * Deve remover do DOM (ImageStampManager._stampElements)
+    * Deve decrementar/ajustar z-index se necessario
+    * Nao deve quebrar outros stamps
+
+  - Indicacao visual de selecao:
+    * Borda ou outline no stamp selecionado
+    * Destaque sem interferir na imagem
+    * Suporte a eventos de clique no elemento <img>
+
+14.2. INTEGRACAO COM SISTEMAS EXISTENTES
+
+  - ImageStampManager:
+    * Utilizar getStampById() para buscar stamps
+    * Utilizar removeStamp() para remover stamps (ja remove DOM)
+    * Utilizar getAllStamps() para listar
+
+  - pointer-events:
+    * Atualmente #image-stamp-layer tem pointer-events: none
+    * Para suportar clique/arrasto, sera necessario alterar para
+      pointer-events: auto (ou remover a propriedade)
+    * Alternativamente, cada stamp pode ter pointer-events: auto
+      individualmente
+
+  - EventBus:
+    * STAMP_SELECTED, STAMP_DESELECTED (novos eventos)
+    * STAMP_MOVED (para notificar movimento)
+
+  - StampPreviewManager:
+    * Nao deve ser afetado pelas novas funcionalidades
+    * O preview continua sobrepondo stamps (z-index 10)
+
+14.3. ARQUITETURA EXISTENTE QUE DEVE SER REUTILIZADA
+
+  - ImageStampManager._stampElements: Map para acesso rapido ao
+    elemento DOM de cada stamp
+  - ImageStampManager.getAllStamps(): lista ordenada por zIndex
+  - ImageStampManager.getStampById(): busca por ID
+  - ImageStampManager.removeStamp(): remove estado + DOM
+  - EditorState.stamps.list: fonte da verdade
+  - EVENTS.STAMP_ADDED, STAMP_REMOVED, STAMP_MODIFIED: eventos
+    existentes para notificacao
+  - MoveStampCommand: comando existente para Undo/Redo (nao integrado)
+  - RemoveStampCommand: comando existente para Undo/Redo (nao integrado)
+
+14.4. OBSERVACOES IMPORTANTES PARA O PROXIMO DESENVOLVEDOR
+
+  Para permitir clique nos stamps, a propriedade pointer-events do
+  #image-stamp-layer ou dos elementos <img> individuais precisa ser
+  alterada de 'none' para 'auto' (ou ser removida).
+
+  Ao alterar pointer-events, e necessario garantir que:
+  - O preview (stamp-preview-layer) continua com pointer-events: none
+  - A ferramenta Mao continua funcionando para pan
+  - O clique em stamps nao interfere com desenho (lapis, borracha)
+  - O clique em stamps funciona mesmo durante zoom
+
+  Sugestao de implementacao:
+  - Manter #image-stamp-layer com pointer-events: none
+  - Definir pointer-events: auto apenas nos elementos <img> dos stamps
+    (style.pointerEvents = 'auto' em _renderStampElement)
+  - Adicionar listeners de mousedown/mousemove/mouseup nos elementos
+    <img> para deteccao de clique e arrasto
+  - Ou usar delegacao de eventos no #image-stamp-layer
+
+================================================================================
+FIM DO DOCUMENTO DE HANDOFF - STAGE 04
+================================================================================
