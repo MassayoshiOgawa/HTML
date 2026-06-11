@@ -210,6 +210,24 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 .slot-toggle-switch input:checked + .slot-toggle-slider { background: var(--accent); }
 .slot-toggle-switch input:checked + .slot-toggle-slider::before { transform: translateX(16px); }
 
+/* AUTOSAVE INDICATOR */
+#autosave-indicator { font-size: 11px; min-width: 60px; text-align: right; transition: color var(--t-fast); }
+#autosave-indicator.autosave-saving { color: var(--text-muted); }
+#autosave-indicator.autosave-saved { color: var(--success); }
+#autosave-indicator.autosave-warning { color: var(--warning); }
+
+/* RESTORE DIALOG */
+#restore-dialog { position: fixed; inset: 0; z-index: 600; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity var(--t-norm); }
+#restore-dialog.open { opacity: 1; pointer-events: auto; }
+#restore-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+#restore-content { position: relative; background: var(--bg-elevated); border-radius: var(--radius-lg); padding: 32px; max-width: 420px; width: 90%; text-align: center; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
+#restore-content p { font-size: 15px; color: var(--text-primary); line-height: 1.5; margin-bottom: 8px; }
+#restore-content .restore-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+#restore-actions { display: flex; gap: 8px; }
+#restore-actions .settings-btn { flex: 1; justify-content: center; }
+#restore-discard-btn { background: rgba(255,255,255,0.08) !important; color: var(--text-primary) !important; }
+#restore-discard-btn:hover { background: rgba(255,255,255,0.12) !important; }
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
   #tool-options { width: 200px; }
@@ -293,10 +311,23 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
       <span id="zoom-percent">100%</span>
     </div>
     <div id="status-right">
+      <span id="autosave-indicator" class="autosave-indicator"></span>
       <span id="status-filename">Nenhuma imagem</span>
       <span id="status-dimensions"></span>
     </div>
   </footer>
+</div>
+
+<div id="restore-dialog">
+  <div id="restore-backdrop"></div>
+  <div id="restore-content">
+    <p>A previous session was found.<br>Would you like to restore it?</p>
+    <div class="restore-sub">Your last session includes all stamps, drawings, and settings.</div>
+    <div id="restore-actions">
+      <button id="restore-yes-btn" class="settings-btn"><i class="fas fa-undo-alt"></i> Restore Session</button>
+      <button id="restore-discard-btn" class="settings-btn"><i class="fas fa-trash"></i> Discard Session</button>
+    </div>
+  </div>
 </div>
 
 <div id="settings-modal">
@@ -338,6 +369,10 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
             <button id="import-project-btn" class="settings-btn" style="flex:1;"><i class="fas fa-upload"></i> Import (.json)</button>
           </div>
           <div class="slot-info" style="margin-top:8px;padding:0 4px;">Export the complete project or restore from a previously saved .json file.</div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+            <button id="clear-session-btn" class="settings-btn" style="background:rgba(218,54,51,0.2);color:var(--error);"><i class="fas fa-trash-alt"></i> Clear Saved Session</button>
+            <div class="slot-info" style="margin-top:6px;padding:0 4px;">Permanently remove the autosaved session from this browser.</div>
+          </div>
         </div>
       </section>
       <section class="settings-section">
@@ -545,7 +580,8 @@ function initDOM() {
     'splash-dropzone','file-input','notifications','keybinds-list','keybinds-reset',
     'settings-filename','settings-dimensions','undo-btn','redo-btn',
     'image-stamp-layer','image-slots-toggle','image-slots-content','slot-file-input','stamp-preview-layer','stamp-mode-indicator',
-    'json-import-input','project-toggle','project-content','export-project-btn','import-project-btn'];
+    'json-import-input','project-toggle','project-content','export-project-btn','import-project-btn',
+    'restore-dialog','restore-backdrop','restore-yes-btn','restore-discard-btn','clear-session-btn','autosave-indicator'];
   ids.forEach(id => { DOM[id] = document.getElementById(id); });
   DOM.canvases = [DOM['layer-background'],DOM['layer-permanent'],DOM['layer-temp'],DOM['layer-fading']];
   DOM.ctxBg = DOM['layer-background'].getContext('2d');
@@ -882,6 +918,14 @@ class HistoryManager {
     }
     this._updateUI();
     this.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: EditorState.history.undoStack, redoStack: EditorState.history.redoStack });
+  }
+
+  serializeForAutosave() {
+    return this.serializeHistory();
+  }
+
+  restoreFromAutosave(data, imageStampManager) {
+    this.restoreHistory(data, imageStampManager);
   }
 }
 
@@ -1980,6 +2024,14 @@ class ImageStampManager {
     return this.getAll().map(s => JSON.parse(JSON.stringify(s)));
   }
 
+  serializeForAutosave() {
+    return this.serializeAllStamps();
+  }
+
+  restoreFromAutosave(data) {
+    this.restoreAllStamps(data);
+  }
+
   deserializeAllStamps(data) {
     if (!Array.isArray(data)) return [];
     return data.filter(s => s && typeof s.id === 'string' && typeof s.worldX === 'number' && typeof s.worldY === 'number');
@@ -2096,6 +2148,14 @@ class StampSettingsManager {
 
   serializeSettings() {
     return JSON.parse(JSON.stringify(EditorState.stampSettings.slots));
+  }
+
+  serializeForAutosave() {
+    return this.serializeSettings();
+  }
+
+  restoreFromAutosave(data) {
+    this.restoreSettings(data);
   }
 
   restoreSettings(settings) {
@@ -2365,6 +2425,7 @@ class ProjectPersistenceManager {
         debug.warn('Import sanitization warnings:', sanitized.errors);
       }
       const importData = sanitized;
+      this.app.sessionPersistenceManager.clearSession();
       this._restoreProject(importData);
       this.app.notification('Project imported successfully', 'success', 3000);
     } catch (e) {
@@ -2431,6 +2492,138 @@ class ProjectPersistenceManager {
     app.updateUI();
     app.cursorManager.refresh();
     app.eventBus.emit(EVENTS.IMAGE_LOADED, { name: EditorState.canvas.imageName, width: EditorState.canvas.imageWidth, height: EditorState.canvas.imageHeight });
+  }
+}
+
+// ============================================================
+// SESSION PERSISTENCE MANAGER (Autosave via localStorage)
+// ============================================================
+class SessionPersistenceManager {
+  constructor(appInstance) {
+    this.app = appInstance;
+    this.STORAGE_KEY = 'image_editor_autosave';
+    this.CURRENT_VERSION = 1;
+    this.AUTOSAVE_DEBOUNCE = 1000;
+    this.MAX_AUTOSAVE_BYTES = 4 * 1024 * 1024;
+    this._debouncedAutosave = debounce(() => this.performAutosave(), this.AUTOSAVE_DEBOUNCE);
+    this._indicatorTimeout = null;
+  }
+
+  hasSavedSession() {
+    try {
+      const data = localStorage.getItem(this.STORAGE_KEY);
+      return data !== null && data.length > 0;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  clearSession() {
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+    } catch (e) {
+      debug.error('clearSession failed:', e);
+    }
+  }
+
+  validateSessionData(data) {
+    if (!data || typeof data !== 'object') return { valid: false, error: 'Invalid session data' };
+    if (typeof data.version !== 'number') return { valid: false, error: 'Missing version field' };
+    if (data.version > this.CURRENT_VERSION) return { valid: false, error: 'Session version is newer than editor supports' };
+    if (typeof data.savedAt !== 'string') return { valid: false, error: 'Missing savedAt field' };
+    if (!data.projectData || typeof data.projectData !== 'object') return { valid: false, error: 'Missing projectData' };
+    return { valid: true };
+  }
+
+  scheduleAutosave() {
+    this._showIndicator('saving');
+    this._debouncedAutosave();
+  }
+
+  performAutosave() {
+    try {
+      const snapshot = this.app.projectPersistenceManager.buildProjectSnapshot();
+      const sessionData = {
+        version: this.CURRENT_VERSION,
+        savedAt: new Date().toISOString(),
+        projectData: snapshot,
+      };
+      const json = JSON.stringify(sessionData);
+      const sizeBytes = new Blob([json]).size;
+      if (sizeBytes > this.MAX_AUTOSAVE_BYTES) {
+        this._showIndicator('warning');
+        this.app.notification('Session became too large to autosave automatically.', 'warning', 3000);
+        return;
+      }
+      localStorage.setItem(this.STORAGE_KEY, json);
+      this._showIndicator('saved');
+    } catch (e) {
+      debug.error('performAutosave failed:', e);
+      this._showIndicator('error');
+    }
+  }
+
+  saveSession() {
+    try {
+      const snapshot = this.app.projectPersistenceManager.buildProjectSnapshot();
+      const sessionData = {
+        version: this.CURRENT_VERSION,
+        savedAt: new Date().toISOString(),
+        projectData: snapshot,
+      };
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(sessionData));
+      return true;
+    } catch (e) {
+      debug.error('saveSession failed:', e);
+      return false;
+    }
+  }
+
+  restoreSession() {
+    try {
+      const json = localStorage.getItem(this.STORAGE_KEY);
+      if (!json) return false;
+      const data = JSON.parse(json);
+      const validation = this.validateSessionData(data);
+      if (!validation.valid) {
+        this.clearSession();
+        this.app.notification('Saved session was corrupted and has been discarded.', 'warning', 4000);
+        return false;
+      }
+      this.clearSession();
+      this.app.projectPersistenceManager._restoreProject(data.projectData);
+      this.app.notification('Session restored', 'success', 2500);
+      return true;
+    } catch (e) {
+      this.clearSession();
+      this.app.notification('Saved session was corrupted and has been discarded.', 'warning', 4000);
+      debug.error('restoreSession failed:', e);
+      return false;
+    }
+  }
+
+  _showIndicator(state) {
+    const el = DOM['autosave-indicator'];
+    if (!el) return;
+    el.className = 'autosave-indicator';
+    if (state === 'saving') {
+      el.textContent = 'Saving...';
+      el.classList.add('autosave-saving');
+    } else if (state === 'saved') {
+      el.textContent = 'Saved';
+      el.classList.add('autosave-saved');
+    } else if (state === 'warning') {
+      el.textContent = 'Too large';
+      el.classList.add('autosave-warning');
+    } else if (state === 'error') {
+      el.textContent = 'Save error';
+      el.classList.add('autosave-warning');
+    }
+    clearTimeout(this._indicatorTimeout);
+    this._indicatorTimeout = setTimeout(() => {
+      el.textContent = '';
+      el.className = 'autosave-indicator';
+    }, 2500);
   }
 }
 
@@ -3019,6 +3212,7 @@ class App {
     this.stampEffectManager = new StampEffectManager();
     this.stampPersistenceAdapter = new StampPersistenceAdapter(this.imageStampManager, this.stampSettingsManager);
     this.projectPersistenceManager = new ProjectPersistenceManager(this);
+    this.sessionPersistenceManager = new SessionPersistenceManager(this);
   }
 
   notification(msg, type, duration) { this.notificationManager.show(msg, type, duration); }
@@ -3038,6 +3232,8 @@ class App {
     this.stampPreviewManager.init();
     this.canvasManager._applyTransform();
     this.updateUI();
+    this._setupAutosave();
+    this._checkSavedSession();
   }
 
   _updateCursor() {
@@ -3165,6 +3361,31 @@ class App {
       reader.onerror = () => { this.notification('Erro ao ler o arquivo', 'error'); DOM['slot-file-input'].value = ''; };
       reader.readAsDataURL(file);
     });
+
+    // Restore dialog
+    DOM['restore-yes-btn'].addEventListener('click', () => {
+      DOM['restore-dialog'].classList.remove('open');
+      this.sessionPersistenceManager.restoreSession();
+    });
+    DOM['restore-discard-btn'].addEventListener('click', () => {
+      DOM['restore-dialog'].classList.remove('open');
+      this.sessionPersistenceManager.clearSession();
+      this.notification('Saved session discarded', 'info', 2000);
+    });
+    DOM['restore-backdrop'].addEventListener('click', () => {
+      DOM['restore-dialog'].classList.remove('open');
+      this.sessionPersistenceManager.clearSession();
+      this.notification('Saved session discarded', 'info', 2000);
+    });
+
+    // Clear Saved Session button
+    DOM['clear-session-btn'].addEventListener('click', () => {
+      const msg = 'This will permanently remove the autosaved session. Continue?';
+      if (confirm(msg)) {
+        this.sessionPersistenceManager.clearSession();
+        this.notification('Saved session cleared', 'info', 2000);
+      }
+    });
   }
 
   _setupDragDrop() {
@@ -3188,6 +3409,24 @@ class App {
       const file = e.dataTransfer.files[0]; if (file) this.loadImage(file);
     });
     DOM['splash-dropzone'].addEventListener('click', () => DOM['file-input'].click());
+  }
+
+  _setupAutosave() {
+    const spm = this.sessionPersistenceManager;
+    this.eventBus.on(EVENTS.STAMP_ADDED, () => spm.scheduleAutosave());
+    this.eventBus.on(EVENTS.STAMP_REMOVED, () => spm.scheduleAutosave());
+    this.eventBus.on(EVENTS.STAMP_MODIFIED, () => {
+      if (!EditorState.input.draggingStampId) spm.scheduleAutosave();
+    });
+    this.eventBus.on(EVENTS.STAMP_SETTINGS_CHANGED, () => spm.scheduleAutosave());
+    this.eventBus.on(EVENTS.IMAGE_LOADED, () => spm.scheduleAutosave());
+    debug.log('Autosave triggers registered');
+  }
+
+  _checkSavedSession() {
+    if (this.sessionPersistenceManager.hasSavedSession()) {
+      DOM['restore-dialog'].classList.add('open');
+    }
   }
 
   loadImage(file) {
