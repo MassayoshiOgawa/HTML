@@ -161,7 +161,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 .notification.warning { background: rgba(210,153,34,0.9); color: #000; }
 
 /* FILE INPUT */
-#file-input { display: none; }
+#file-input, #json-import-input { display: none; }
 
 /* SLOT SETTINGS */
 .slot-main-toggle { cursor: pointer; user-select: none; padding: 8px 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); margin-bottom: 4px; transition: background var(--t-fast); }
@@ -328,6 +328,19 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
         </div>
       </section>
       <section class="settings-section">
+        <div id="project-toggle" class="slot-main-toggle">
+          <span>Project</span>
+          <i class="fas fa-chevron-right arrow"></i>
+        </div>
+        <div id="project-content" class="slot-main-content" style="padding: 8px 0;">
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button id="export-project-btn" class="settings-btn" style="flex:1;"><i class="fas fa-download"></i> Export (.json)</button>
+            <button id="import-project-btn" class="settings-btn" style="flex:1;"><i class="fas fa-upload"></i> Import (.json)</button>
+          </div>
+          <div class="slot-info" style="margin-top:8px;padding:0 4px;">Export the complete project or restore from a previously saved .json file.</div>
+        </div>
+      </section>
+      <section class="settings-section">
         <p class="settings-version">Vers&atilde;o 1.0.0</p>
       </section>
     </div>
@@ -336,6 +349,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
 
 <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp">
 <input type="file" id="slot-file-input" accept="image/png,image/jpeg,image/webp,image/gif">
+<input type="file" id="json-import-input" accept=".json">
 <div id="notifications"></div>
 
 <script>
@@ -530,7 +544,8 @@ function initDOM() {
     'settings-btn','settings-modal','settings-backdrop','settings-close','settings-new-image','splash-screen',
     'splash-dropzone','file-input','notifications','keybinds-list','keybinds-reset',
     'settings-filename','settings-dimensions','undo-btn','redo-btn',
-    'image-stamp-layer','image-slots-toggle','image-slots-content','slot-file-input','stamp-preview-layer','stamp-mode-indicator'];
+    'image-stamp-layer','image-slots-toggle','image-slots-content','slot-file-input','stamp-preview-layer','stamp-mode-indicator',
+    'json-import-input','project-toggle','project-content','export-project-btn','import-project-btn'];
   ids.forEach(id => { DOM[id] = document.getElementById(id); });
   DOM.canvases = [DOM['layer-background'],DOM['layer-permanent'],DOM['layer-temp'],DOM['layer-fading']];
   DOM.ctxBg = DOM['layer-background'].getContext('2d');
@@ -693,6 +708,17 @@ class KeybindManager {
     this.eventBus.emit(EVENTS.KEYBIND_CHANGED, this.keybinds);
   }
 
+  serializeKeybinds() {
+    return JSON.parse(JSON.stringify(this.keybinds));
+  }
+
+  restoreKeybinds(data) {
+    this.keybinds = { ...EditorState.settings.defaultKeybinds, ...data };
+    EditorState.settings.keybinds = this.keybinds;
+    this.save();
+    this.eventBus.emit(EVENTS.KEYBIND_CHANGED, this.keybinds);
+  }
+
   getActionForKey(e) {
     const ctrl = e.ctrlKey || e.metaKey;
     if (e.key === 'Control' || e.key === 'Alt' || e.key === 'Shift' || e.key === 'Meta') return null;
@@ -807,6 +833,55 @@ class HistoryManager {
   _updateUI() {
     DOM['undo-btn'].disabled = EditorState.history.undoStack.length === 0;
     DOM['redo-btn'].disabled = EditorState.history.redoStack.length === 0;
+  }
+
+  serializeHistory() {
+    const COMMANDS_SERIALIZABLE = { 'command': true };
+    return {
+      undoStack: EditorState.history.undoStack.map(entry => {
+        if (entry._type === 'command') {
+          return { _type: 'command', command: entry.command.serialize() };
+        }
+        return entry;
+      }),
+      redoStack: EditorState.history.redoStack.map(entry => {
+        if (entry._type === 'command') {
+          return { _type: 'command', command: entry.command.serialize() };
+        }
+        return entry;
+      }),
+    };
+  }
+
+  restoreHistory(data, imageStampManager) {
+    this.clear();
+    const CMD_MAP = {
+      AddStampCommand, RemoveStampCommand, MoveStampCommand, ReplaceSlotStampsCommand,
+    };
+    for (const entry of (data.undoStack || [])) {
+      if (entry._type === 'command') {
+        const CmdClass = CMD_MAP[entry.command.__cmdType];
+        if (CmdClass) {
+          const cmd = CmdClass.deserialize(entry.command, imageStampManager);
+          EditorState.history.undoStack.push({ _type: 'command', command: cmd });
+        }
+      } else {
+        EditorState.history.undoStack.push(entry);
+      }
+    }
+    for (const entry of (data.redoStack || [])) {
+      if (entry._type === 'command') {
+        const CmdClass = CMD_MAP[entry.command.__cmdType];
+        if (CmdClass) {
+          const cmd = CmdClass.deserialize(entry.command, imageStampManager);
+          EditorState.history.redoStack.push({ _type: 'command', command: cmd });
+        }
+      } else {
+        EditorState.history.redoStack.push(entry);
+      }
+    }
+    this._updateUI();
+    this.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: EditorState.history.undoStack, redoStack: EditorState.history.redoStack });
   }
 }
 
@@ -1900,6 +1975,31 @@ class ImageStampManager {
   removeStampById(id) {
     return this.removeStamp(id);
   }
+
+  serializeAllStamps() {
+    return this.getAll().map(s => JSON.parse(JSON.stringify(s)));
+  }
+
+  deserializeAllStamps(data) {
+    if (!Array.isArray(data)) return [];
+    return data.filter(s => s && typeof s.id === 'string' && typeof s.worldX === 'number' && typeof s.worldY === 'number');
+  }
+
+  restoreAllStamps(stampsData) {
+    for (const [id, el] of this._stampElements) {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }
+    this._stampElements.clear();
+    EditorState.stamps.list = [];
+    let maxZ = 0;
+    for (const s of stampsData) {
+      if (s.zIndex > maxZ) maxZ = s.zIndex;
+    }
+    EditorState.stamps.nextZIndex = maxZ + 1;
+    for (const s of stampsData) {
+      this.addStamp(s);
+    }
+  }
 }
 
 // ============================================================
@@ -1993,6 +2093,25 @@ class StampSettingsManager {
   toExportData() {
     return { ...EditorState.stampSettings.slots };
   }
+
+  serializeSettings() {
+    return JSON.parse(JSON.stringify(EditorState.stampSettings.slots));
+  }
+
+  restoreSettings(settings) {
+    EditorState.stampSettings.slots = {};
+    for (let i = 1; i <= 9; i++) {
+      if (settings[i]) {
+        EditorState.stampSettings.slots[i] = {
+          ...this.getDefaultSlotConfig(i),
+          ...JSON.parse(JSON.stringify(settings[i])),
+          slot: i,
+        };
+      }
+    }
+    this.save();
+    this.eventBus.emit(EVENTS.STAMP_SETTINGS_CHANGED, { slot: null, config: null });
+  }
 }
 
 // ============================================================
@@ -2076,6 +2195,246 @@ class StampPersistenceAdapter {
 }
 
 // ============================================================
+// PROJECT PERSISTENCE MANAGER
+// ============================================================
+class ProjectPersistenceManager {
+  constructor(appInstance) {
+    this.app = appInstance;
+    this.CURRENT_VERSION = 1;
+  }
+
+  validateVersion(data) {
+    if (!data || typeof data.version !== 'number') {
+      return { valid: false, error: 'Invalid or missing version field' };
+    }
+    if (data.version > this.CURRENT_VERSION) {
+      return { valid: false, error: 'Project version (' + data.version + ') is newer than this editor supports (' + this.CURRENT_VERSION + ')' };
+    }
+    return { valid: true };
+  }
+
+  migrateProjectVersion(data) {
+    if (data.version === 1) return data;
+    return data;
+  }
+
+  sanitizeImportedData(data) {
+    const errors = [];
+    if (!data.canvasState || typeof data.canvasState !== 'object') {
+      errors.push('Missing canvasState');
+      data.canvasState = { scale: 1, offsetX: 0, offsetY: 0, imageData: null, imageName: '', imageWidth: 0, imageHeight: 0 };
+    }
+    if (!data.stampSlotConfigurations || typeof data.stampSlotConfigurations !== 'object') {
+      errors.push('Missing stampSlotConfigurations');
+      data.stampSlotConfigurations = {};
+    }
+    if (!Array.isArray(data.stamps)) {
+      errors.push('Missing stamps array');
+      data.stamps = [];
+    }
+    if (!data.keybindSettings || typeof data.keybindSettings !== 'object') {
+      errors.push('Missing keybindSettings');
+      data.keybindSettings = {};
+    }
+    if (!data.historyState || typeof data.historyState !== 'object') {
+      errors.push('Missing historyState');
+      data.historyState = { undoStack: [], redoStack: [] };
+    }
+    const seenIds = new Set();
+    for (const stamp of data.stamps) {
+      if (!stamp.id || typeof stamp.id !== 'string') {
+        stamp.id = crypto.randomUUID ? crypto.randomUUID() : uuid();
+      }
+      if (seenIds.has(stamp.id)) {
+        stamp.id = crypto.randomUUID ? crypto.randomUUID() : uuid();
+      }
+      seenIds.add(stamp.id);
+      if (typeof stamp.worldX !== 'number' || isNaN(stamp.worldX)) stamp.worldX = 0;
+      if (typeof stamp.worldY !== 'number' || isNaN(stamp.worldY)) stamp.worldY = 0;
+      if (typeof stamp.width !== 'number' || isNaN(stamp.width) || stamp.width <= 0) stamp.width = 100;
+      if (typeof stamp.height !== 'number' || isNaN(stamp.height) || stamp.height <= 0) stamp.height = 100;
+      if (typeof stamp.zIndex !== 'number' || isNaN(stamp.zIndex)) stamp.zIndex = 1;
+      if (!stamp.src) stamp.src = '';
+      if (stamp.slot === undefined || typeof stamp.slot !== 'number') stamp.slot = 1;
+    }
+    const usedKeybinds = new Set();
+    for (const [slotKey, config] of Object.entries(data.stampSlotConfigurations)) {
+      if (!config.keybind) config.keybind = String(slotKey);
+      if (usedKeybinds.has(config.keybind)) {
+        config.keybind = String(slotKey);
+      }
+      usedKeybinds.add(config.keybind);
+    }
+    return { sanitized: data, errors };
+  }
+
+  buildProjectSnapshot() {
+    const app = this.app;
+    let imageData = null;
+    try {
+      imageData = DOM['layer-background'].toDataURL('image/png');
+    } catch (e) {
+      debug.warn('Could not export canvas image data:', e);
+    }
+    return {
+      version: this.CURRENT_VERSION,
+      exportedAt: new Date().toISOString(),
+      canvasState: {
+        scale: EditorState.canvas.scale,
+        offsetX: EditorState.canvas.offsetX,
+        offsetY: EditorState.canvas.offsetY,
+        imageData: imageData,
+        imageName: EditorState.canvas.imageName,
+        imageWidth: EditorState.canvas.imageWidth,
+        imageHeight: EditorState.canvas.imageHeight,
+      },
+      keybindSettings: app.keybindManager.serializeKeybinds(),
+      stampSlotConfigurations: app.stampSettingsManager.serializeSettings(),
+      stamps: app.imageStampManager.serializeAllStamps(),
+      historyState: app.historyManager.serializeHistory(),
+    };
+  }
+
+  validateProject(data) {
+    const versionCheck = this.validateVersion(data);
+    if (!versionCheck.valid) return { valid: false, error: versionCheck.error };
+    const { sanitized, errors } = this.sanitizeImportedData(data);
+    if (errors.length > 0) {
+      return { valid: true, warnings: errors, sanitized };
+    }
+    return { valid: true, sanitized };
+  }
+
+  exportProject() {
+    const snapshot = this.buildProjectSnapshot();
+    const json = JSON.stringify(snapshot, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const dateStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+    const timeStr = pad(now.getHours()) + '-' + pad(now.getMinutes()) + '-' + pad(now.getSeconds());
+    const filename = 'project_' + dateStr + '_' + timeStr + '.json';
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    this.app.notification('Project exported: ' + filename, 'success', 2500);
+  }
+
+  importProject() {
+    DOM['json-import-input'].click();
+  }
+
+  _handleImportFile(file) {
+    if (!file) return;
+    if (!file.name.endsWith('.json')) {
+      this.app.notification('Please select a .json file', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        this._executeImport(data);
+      } catch (e) {
+        this.app.notification('Invalid JSON file: ' + e.message, 'error');
+        debug.error('Import parse error:', e);
+      }
+    };
+    reader.onerror = () => {
+      this.app.notification('Error reading file', 'error');
+    };
+    reader.readAsText(file);
+  }
+
+  _executeImport(data) {
+    const validation = this.validateProject(data);
+    if (!validation.valid) {
+      this.app.notification(validation.error, 'error');
+      return;
+    }
+    const msg = 'Importing a project will replace the current session. Continue?';
+    if (!confirm(msg)) return;
+    try {
+      const sanitized = validation.sanitized || this.migrateProjectVersion(data);
+      if (sanitized.errors && sanitized.errors.length > 0) {
+        debug.warn('Import sanitization warnings:', sanitized.errors);
+      }
+      const importData = sanitized;
+      this._restoreProject(importData);
+      this.app.notification('Project imported successfully', 'success', 3000);
+    } catch (e) {
+      this.app.notification('Error importing project: ' + e.message, 'error');
+      debug.error('Import error:', e);
+    }
+  }
+
+  _restoreProject(data) {
+    const app = this.app;
+    app.historyManager.clear();
+    app.imageStampManager.clear();
+    if (EditorState.canvas.imageUrl) {
+      URL.revokeObjectURL(EditorState.canvas.imageUrl);
+    }
+    EditorState.canvas.image = null;
+    EditorState.canvas.imageUrl = null;
+    EditorState.canvas.imageName = '';
+    EditorState.canvas.imageWidth = 0;
+    EditorState.canvas.imageHeight = 0;
+    app.layerManager.clearAll();
+    app.layerManager.resize(1, 1);
+    EditorState.stamps.nextZIndex = 1;
+
+    const cs = data.canvasState;
+    EditorState.canvas.scale = cs.scale || 1;
+    EditorState.canvas.offsetX = cs.offsetX || 0;
+    EditorState.canvas.offsetY = cs.offsetY || 0;
+
+    if (cs.imageData) {
+      const img = new Image();
+      img.onload = () => {
+        EditorState.canvas.image = img;
+        EditorState.canvas.imageName = cs.imageName || '';
+        EditorState.canvas.imageWidth = cs.imageWidth || img.naturalWidth;
+        EditorState.canvas.imageHeight = cs.imageHeight || img.naturalHeight;
+        app.layerManager.resize(EditorState.canvas.imageWidth, EditorState.canvas.imageHeight);
+        DOM.ctxBg.drawImage(img, 0, 0);
+        [DOM.ctxPerm, DOM.ctxTemp, DOM.ctxFade].forEach(ctx => ctx.clearRect(0, 0, EditorState.canvas.imageWidth, EditorState.canvas.imageHeight));
+        app.canvasManager._applyTransform();
+        DOM['splash-screen'].classList.add('hidden');
+        app._updateCursor();
+        this._finishRestore(data, app);
+      };
+      img.onerror = () => {
+        debug.warn('Could not load image data from project, proceeding without background');
+        DOM['splash-screen'].classList.add('hidden');
+        this._finishRestore(data, app);
+      };
+      img.src = cs.imageData;
+    } else {
+      DOM['splash-screen'].classList.add('hidden');
+      this._finishRestore(data, app);
+    }
+  }
+
+  _finishRestore(data, app) {
+    app.keybindManager.restoreKeybinds(data.keybindSettings || {});
+    app.stampSettingsManager.restoreSettings(data.stampSlotConfigurations || {});
+    app.imageStampManager.restoreAllStamps(data.stamps || []);
+    app.historyManager.restoreHistory(data.historyState || { undoStack: [], redoStack: [] }, app.imageStampManager);
+    app.settingsManager.renderImageSlots();
+    app.settingsManager.renderKeybinds();
+    app.updateUI();
+    app.cursorManager.refresh();
+    app.eventBus.emit(EVENTS.IMAGE_LOADED, { name: EditorState.canvas.imageName, width: EditorState.canvas.imageWidth, height: EditorState.canvas.imageHeight });
+  }
+}
+
+// ============================================================
 // STAMP COMMANDS (Undo/Redo integration)
 // ============================================================
 class AddStampCommand extends Command {
@@ -2096,6 +2455,15 @@ class AddStampCommand extends Command {
   }
   redo() {
     if (this._stampSnapshot) this._manager.addStamp(this._stampSnapshot);
+  }
+  serialize() {
+    return { __cmdType: 'AddStampCommand', stampData: this._stampData, stampId: this._stampId, stampSnapshot: this._stampSnapshot };
+  }
+  static deserialize(data, manager) {
+    const cmd = new AddStampCommand(manager, data.stampData);
+    cmd._stampId = data.stampId;
+    cmd._stampSnapshot = data.stampSnapshot;
+    return cmd;
   }
 }
 
@@ -2118,6 +2486,14 @@ class RemoveStampCommand extends Command {
   }
   redo() {
     this.execute();
+  }
+  serialize() {
+    return { __cmdType: 'RemoveStampCommand', stampId: this._stampId, removedSnapshot: this._removedSnapshot };
+  }
+  static deserialize(data, manager) {
+    const cmd = new RemoveStampCommand(manager, data.stampId);
+    cmd._removedSnapshot = data.removedSnapshot;
+    return cmd;
   }
 }
 
@@ -2147,6 +2523,12 @@ class MoveStampCommand extends Command {
       this._manager.updateStampPosition(this._stampId);
     }
   }
+  serialize() {
+    return { __cmdType: 'MoveStampCommand', stampId: this._stampId, oldX: this.oldX, oldY: this.oldY, newX: this.newX, newY: this.newY };
+  }
+  static deserialize(data, manager) {
+    return new MoveStampCommand(manager, data.stampId, data.oldX, data.oldY, data.newX, data.newY);
+  }
 }
 
 class ReplaceSlotStampsCommand extends Command {
@@ -2175,6 +2557,12 @@ class ReplaceSlotStampsCommand extends Command {
   }
   redo() {
     this.execute();
+  }
+  serialize() {
+    return { __cmdType: 'ReplaceSlotStampsCommand', slot: this._slot, oldStampsSnapshots: this._oldStampsSnapshots, newConfig: this._newConfig };
+  }
+  static deserialize(data, manager) {
+    return new ReplaceSlotStampsCommand(manager, data.slot, data.oldStampsSnapshots, data.newConfig);
   }
   _applyConfig(stamp) {
     const config = this._newConfig;
@@ -2630,6 +3018,7 @@ class App {
     this.stampSettingsManager = new StampSettingsManager(this.eventBus);
     this.stampEffectManager = new StampEffectManager();
     this.stampPersistenceAdapter = new StampPersistenceAdapter(this.imageStampManager, this.stampSettingsManager);
+    this.projectPersistenceManager = new ProjectPersistenceManager(this);
   }
 
   notification(msg, type, duration) { this.notificationManager.show(msg, type, duration); }
@@ -2736,6 +3125,21 @@ class App {
     DOM['image-slots-toggle'].addEventListener('click', () => {
       DOM['image-slots-toggle'].classList.toggle('open');
       DOM['image-slots-content'].classList.toggle('open');
+    });
+    DOM['project-toggle'].addEventListener('click', () => {
+      DOM['project-toggle'].classList.toggle('open');
+      DOM['project-content'].classList.toggle('open');
+    });
+    DOM['export-project-btn'].addEventListener('click', () => {
+      this.projectPersistenceManager.exportProject();
+    });
+    DOM['import-project-btn'].addEventListener('click', () => {
+      this.projectPersistenceManager.importProject();
+    });
+    DOM['json-import-input'].addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) this.projectPersistenceManager._handleImportFile(file);
+      DOM['json-import-input'].value = '';
     });
     DOM['slot-file-input'].addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
