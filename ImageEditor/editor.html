@@ -568,7 +568,7 @@ const EditorState = {
     activeToolName: 'pencil',
     isDrawing: false, currentStroke: null,
     isPanning: false, panStart: null, panOffsetStart: null,
-    fadingStrokes: [], currentFadingStroke: null, fadingLoopId: null,
+    fadingStrokes: [], currentFadingStroke: null, fadingLoopId: null, _fsIdCounter: 0, _hiddenFsIds: [],
   },
   history: {
     undoStack: [], redoStack: [], maxHistory: 50,
@@ -910,7 +910,13 @@ class HistoryManager {
   undo() {
     if (EditorState.history.undoStack.length === 0) { if (app) app.notification('Nada para desfazer', 'warning', 1500); return; }
     const entry = EditorState.history.undoStack.pop();
-    if (entry._type === 'command') {
+    if (entry._type === 'fading-stroke') {
+      if (EditorState.tools._hiddenFsIds.indexOf(entry._fsId) === -1) {
+        EditorState.tools._hiddenFsIds.push(entry._fsId);
+      }
+      EditorState.history.redoStack.push(entry);
+      if (app) app.notification('Undo', 'info', 1000);
+    } else if (entry._type === 'command') {
       entry.command.undo();
       EditorState.history.redoStack.push(entry);
       if (app) app.notification('Undo', 'info', 1000);
@@ -926,7 +932,12 @@ class HistoryManager {
   redo() {
     if (EditorState.history.redoStack.length === 0) { if (app) app.notification('Nada para refazer', 'warning', 1500); return; }
     const entry = EditorState.history.redoStack.pop();
-    if (entry._type === 'command') {
+    if (entry._type === 'fading-stroke') {
+      const idx = EditorState.tools._hiddenFsIds.indexOf(entry._fsId);
+      if (idx !== -1) EditorState.tools._hiddenFsIds.splice(idx, 1);
+      EditorState.history.undoStack.push(entry);
+      if (app) app.notification('Redo', 'info', 1000);
+    } else if (entry._type === 'command') {
       entry.command.redo();
       EditorState.history.undoStack.push(entry);
       if (app) app.notification('Redo', 'info', 1000);
@@ -1379,7 +1390,16 @@ class FadingPenTool extends Tool {
     if (!this._drawing) return;
     this._drawing = false; EditorState.tools.isDrawing = false;
     if (this.points.length > 1 && EditorState.tools.currentFadingStroke) {
-      EditorState.tools.fadingStrokes.push({ ...EditorState.tools.currentFadingStroke, points:[...this.points], fadeStartTime:performance.now() });
+      const fsId = EditorState.tools._fsIdCounter++;
+      EditorState.tools.fadingStrokes.push({ ...EditorState.tools.currentFadingStroke, points:[...this.points], fadeStartTime:performance.now(), _fsId: fsId });
+      if (app && app.historyManager) {
+        EditorState.history.undoStack.push({ _type: 'fading-stroke', _fsId: fsId, _hidden: false });
+        EditorState.history.redoStack = [];
+        if (EditorState.history.undoStack.length > EditorState.history.maxHistory) EditorState.history.undoStack.shift();
+        app.historyManager._updateUI();
+        app.eventBus.emit(EVENTS.HISTORY_CHANGED, { undoStack: EditorState.history.undoStack, redoStack: EditorState.history.redoStack });
+        app.notification('Stroke added', 'info', 1000);
+      }
     }
     EditorState.tools.currentFadingStroke = null;
     app.ensureFadingLoop();
@@ -1596,7 +1616,7 @@ class SettingsManager {
     }
   }
 
-  _checkSlotReplaceConfirmation(slot, config) {
+  async _checkSlotReplaceConfirmation(slot, config) {
     if (!config.replaceExisting) return;
     const stamps = app.imageStampManager.getStampsBySlot(slot);
     if (stamps.length === 0) {
@@ -1610,7 +1630,8 @@ class SettingsManager {
       return;
     }
     const msg = 'This will update all existing stamps created using Slot ' + slot + '. Continue?';
-    if (confirm(msg)) {
+    const confirmed = await app.confirmAsync(msg, 'Update');
+    if (confirmed) {
       const oldSnapshots = stamps.map(s => JSON.parse(JSON.stringify(s)));
       const cmd = new ReplaceSlotStampsCommand(app.imageStampManager, slot, oldSnapshots, config);
       app.historyManager.pushCommand(cmd);
@@ -1683,11 +1704,11 @@ class SettingsManager {
     if (!url) { app.notification('Insira um link v&aacute;lido', 'warning'); return; }
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onload = () => {
+    img.onload = async () => {
       config.source = url; config.sourceType = 'url';
       app.stampSettingsManager.setSlot(slot, config);
       app.notification('Imagem carregada com sucesso', 'success');
-      this._checkSlotReplaceConfirmation(slot, config);
+      await this._checkSlotReplaceConfirmation(slot, config);
       this.renderImageSlots();
     };
     img.onerror = () => { app.notification('N&atilde;o foi poss&iacute;vel carregar a imagem do link', 'error'); };
@@ -1732,8 +1753,8 @@ class SettingsManager {
       config.sizePercent = v;
       app.stampSettingsManager.setSlot(slot, config);
     });
-    input.addEventListener('change', () => {
-      this._checkSlotReplaceConfirmation(slot, config);
+    input.addEventListener('change', async () => {
+      await this._checkSlotReplaceConfirmation(slot, config);
     });
     row.appendChild(input); row.appendChild(val);
     div.appendChild(label); div.appendChild(row);
@@ -1761,9 +1782,9 @@ class SettingsManager {
       if (!config.effectSettings) config.effectSettings = {};
       config.effectSettings.appearDuration = parseInt(cInput.value);
     });
-    cInput.addEventListener('change', () => {
+    cInput.addEventListener('change', async () => {
       app.stampSettingsManager.setSlot(slot, config);
-      this._checkSlotReplaceConfirmation(slot, config);
+      await this._checkSlotReplaceConfirmation(slot, config);
     });
     cRow.appendChild(cInput); cRow.appendChild(cVal);
     cond.appendChild(clabel); cond.appendChild(cRow);
@@ -1797,17 +1818,17 @@ class SettingsManager {
       if (!config.effectSettings) config.effectSettings = {};
       config.effectSettings.disappearDuration = parseInt(cInput.value);
     });
-    cInput.addEventListener('change', () => {
+    cInput.addEventListener('change', async () => {
       app.stampSettingsManager.setSlot(slot, config);
-      this._checkSlotReplaceConfirmation(slot, config);
+      await this._checkSlotReplaceConfirmation(slot, config);
     });
     cRow.appendChild(cInput); cRow.appendChild(cVal);
     cond.appendChild(clabel); cond.appendChild(cRow);
-    select.addEventListener('change', () => {
+    select.addEventListener('change', async () => {
       config.disappearEffect = select.value || null;
       cond.classList.toggle('show', select.value === 'fadeOut');
       app.stampSettingsManager.setSlot(slot, config);
-      this._checkSlotReplaceConfirmation(slot, config);
+      await this._checkSlotReplaceConfirmation(slot, config);
     });
     div.appendChild(label); div.appendChild(select); div.appendChild(cond);
     return div;
@@ -1859,9 +1880,9 @@ class SettingsManager {
       if (!config.effectSettings) config.effectSettings = {};
       config.effectSettings.wobbleIntensity = parseInt(wInput.value);
     });
-    wInput.addEventListener('change', () => {
+    wInput.addEventListener('change', async () => {
       app.stampSettingsManager.setSlot(slot, config);
-      this._checkSlotReplaceConfirmation(slot, config);
+      await this._checkSlotReplaceConfirmation(slot, config);
     });
     wRow.appendChild(wInput); wRow.appendChild(wVal);
     wobbleCond.appendChild(wLabel); wobbleCond.appendChild(wRow);
@@ -2971,8 +2992,9 @@ class ReplaceSlotStampsCommand extends Command {
     stamp.disappearSettings = config.disappearEffect ? JSON.parse(JSON.stringify(config.effectSettings)) : null;
     stamp.imageEffect = config.imageEffect || null;
     stamp.imageEffectSettings = config.imageEffect ? JSON.parse(JSON.stringify(config.effectSettings)) : null;
+    const oldHeight = stamp.height;
     stamp.height = newHeight;
-    stamp.width = stamp.width > 0 && stamp.height > 0 ? Math.round(stamp.width * (newHeight / stamp.height)) : newHeight;
+    stamp.width = oldHeight > 0 ? Math.round(stamp.width * (newHeight / oldHeight)) : newHeight;
   }
 }
 
@@ -3504,6 +3526,7 @@ class App {
     document.addEventListener('keyup', (e) => this._handleModeKeyUp(e));
     window.addEventListener('resize', () => this._handleResize());
     window.addEventListener('blur', () => {
+      if (this.keybindManager._capturing) this.keybindManager.stopCapture();
       if (EditorState.input.deleteModeActive || EditorState.input.moveModeActive || EditorState.input.draggingStampId) {
         if (EditorState.input.draggingStampId) this._finalizeStampDrag();
         EditorState.input.deleteModeActive = false;
@@ -3699,7 +3722,7 @@ class App {
       DOM.ctxBg.drawImage(img, 0, 0);
       [DOM.ctxPerm, DOM.ctxTemp, DOM.ctxFade].forEach(ctx => ctx.clearRect(0,0,img.naturalWidth,img.naturalHeight));
       this.historyManager.clear();
-      EditorState.tools.fadingStrokes = []; EditorState.tools.currentFadingStroke = null;
+      EditorState.tools.fadingStrokes = []; EditorState.tools.currentFadingStroke = null; EditorState.tools._hiddenFsIds = [];
       EditorState.tools.fadingLoopId = null;
       EditorState.canvas.offsetX = 0; EditorState.canvas.offsetY = 0; EditorState.canvas.scale = 1;
       const ca = DOM['canvas-area'];
@@ -3806,6 +3829,7 @@ class App {
   _renderFadingCanvas(now) {
     const ctx = DOM.ctxFade; ctx.clearRect(0, 0, DOM['layer-fading'].width, DOM['layer-fading'].height);
     EditorState.tools.fadingStrokes.forEach(s => {
+      if (s._fsId !== undefined && EditorState.tools._hiddenFsIds.indexOf(s._fsId) !== -1) return;
       const elapsed = now - s.fadeStartTime;
       const alpha = Math.max(0, 1 - elapsed / s.lifetime);
       this._drawFadingStroke(ctx, s.points, s.size, s.color, alpha);
@@ -3869,6 +3893,7 @@ class App {
 
   _handleModeKeyUp(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return false;
+    if (e.location === 3) return false;
     const deleteKeybind = EditorState.settings.keybinds['delete-stamp-mode'];
     const moveKeybind = EditorState.settings.keybinds['move-stamp-mode'];
     if (deleteKeybind && e.key.toLowerCase() === deleteKeybind.split('+').pop()) {
