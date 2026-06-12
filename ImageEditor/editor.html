@@ -1712,7 +1712,6 @@ class SettingsManager {
     url = url.trim();
     if (!url) { app.notification('Insira um link v&aacute;lido', 'warning'); return; }
     const img = new Image();
-    img.crossOrigin = 'anonymous';
     img.onload = async () => {
       config.source = url; config.sourceType = 'url';
       app.stampSettingsManager.setSlot(slot, config);
@@ -3079,6 +3078,8 @@ class StampPreviewManager {
     this._blinkTimer = null;
     this._wobbleTimer = null;
 
+    this._gifBlobCache = new Map();
+
     this._boundKeyDown = this._onKeyDown.bind(this);
     this._boundKeyUp = this._onKeyUp.bind(this);
     this._boundMouseDown = this._onMouseDown.bind(this);
@@ -3158,7 +3159,7 @@ class StampPreviewManager {
     e.preventDefault();
     this._heldSlots.add(slot);
 
-    if (slot !== this._activeSlot) {
+    if (slot !== this._activeSlot || this._fadingOut) {
       this._activatePreview(slot, config);
     }
   }
@@ -3223,7 +3224,16 @@ class StampPreviewManager {
 
   _activatePreview(slot, config) {
     if (this._isActive) {
-      this._deactivatePreview(true);
+      const currentConfig = this.stampSettingsManager.getSlot(this._activeSlot);
+      if (currentConfig && currentConfig.disappearEffect === 'fadeOut') {
+        this._deactivateWithFadeOut();
+      } else {
+        this._deactivatePreview(true);
+      }
+    }
+
+    if (this._element && this._element.parentNode) {
+      this._element.parentNode.removeChild(this._element);
     }
 
     this._activeSlot = slot;
@@ -3236,11 +3246,25 @@ class StampPreviewManager {
     }
 
     const img = document.createElement('img');
-    img.src = config.source;
     img.draggable = false;
     img.style.cssText = 'position:absolute;pointer-events:none;will-change:transform,opacity;';
 
     this._layer.appendChild(img);
+
+    const isGif = config.source && config.source.match(/\.gif/i);
+    if (isGif && config.sourceType === 'url') {
+      const blob = this._gifBlobCache && this._gifBlobCache.get(config.source);
+      if (blob) {
+        img.src = URL.createObjectURL(blob);
+      } else {
+        if (!this._gifCounter) this._gifCounter = {};
+        this._gifCounter[config.source] = ((this._gifCounter[config.source] || 0) + 1) % 16;
+        img.src = config.source + (config.source.includes('?') ? '&' : '?') + '_cb=' + this._gifCounter[config.source];
+        this._prefetchGifBlob(config.source);
+      }
+    } else {
+      img.src = config.source;
+    }
     this._element = img;
     this._layer.style.display = 'block';
 
@@ -3270,9 +3294,36 @@ class StampPreviewManager {
       element.style.transition = 'opacity ' + duration + 'ms ease';
       element.style.opacity = '0';
 
-      setTimeout(() => this._cleanupPreview(), duration);
+      setTimeout(() => {
+        if (this._element === element) {
+          this._cleanupPreview();
+        }
+      }, duration);
     } else {
       this._cleanupPreview();
+    }
+  }
+
+  _deactivateWithFadeOut() {
+    const element = this._element;
+    if (!element) return;
+    const config = this.stampSettingsManager.getSlot(this._activeSlot);
+    const duration = (config && config.effectSettings && config.effectSettings.disappearDuration) || 300;
+
+    this._element = null;
+    this._isActive = false;
+    this._activeSlot = null;
+    this._fadingOut = false;
+    this._stopContinuousEffect();
+
+    if (config && config.disappearEffect === 'fadeOut') {
+      element.style.transition = 'opacity ' + duration + 'ms ease';
+      element.style.opacity = '0';
+      setTimeout(() => {
+        if (element.parentNode) element.parentNode.removeChild(element);
+      }, duration);
+    } else {
+      if (element.parentNode) element.parentNode.removeChild(element);
     }
   }
 
@@ -3281,6 +3332,9 @@ class StampPreviewManager {
       app.stampSettingsManager.getSlot(this._activeSlot).hideCursorOnPreview;
 
     if (this._element && this._element.parentNode) {
+      if (this._element.src && this._element.src.startsWith('blob:')) {
+        URL.revokeObjectURL(this._element.src);
+      }
       this._element.parentNode.removeChild(this._element);
     }
     this._element = null;
@@ -3295,6 +3349,18 @@ class StampPreviewManager {
     if (hadCursorHidden && app) {
       app.cursorManager.container.style.cursor = '';
       app._updateCursor();
+    }
+  }
+
+  async _prefetchGifBlob(source) {
+    if (!this._gifBlobCache) this._gifBlobCache = new Map();
+    if (this._gifBlobCache.has(source)) return;
+    this._gifBlobCache.set(source, undefined);
+    try {
+      const response = await fetch(source, { cache: 'force-cache' });
+      this._gifBlobCache.set(source, response.ok ? await response.blob() : null);
+    } catch (_) {
+      this._gifBlobCache.set(source, null);
     }
   }
 
@@ -3357,7 +3423,7 @@ class StampPreviewManager {
     if (!this._element) return;
     const height = this._calculateHeight(config);
     this._element.style.height = height + 'px';
-    this._element.style.width = 'auto';
+    this._element.style.width = height + 'px';
 
     if (this._element.complete && this._element.naturalWidth > 0) {
       const aspect = this._element.naturalWidth / this._element.naturalHeight;
@@ -3414,13 +3480,18 @@ class StampPreviewManager {
     if (!this._element) return;
 
     if (config.appearEffect === 'fadeIn') {
+      const element = this._element;
       const duration = (config.effectSettings && config.effectSettings.appearDuration) || 300;
-      this._element.style.opacity = '0';
-      this._element.style.transition = 'opacity ' + duration + 'ms ease';
+      element.style.opacity = '0';
+      element.style.transition = 'opacity ' + duration + 'ms ease';
 
-      void this._element.offsetWidth;
-
-      this._element.style.opacity = '1';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (element === this._element) {
+            element.style.opacity = '1';
+          }
+        });
+      });
     }
   }
 
