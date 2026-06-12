@@ -371,9 +371,14 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 11px; font-family: inh
         <button id="settings-new-image" class="settings-btn"><i class="fas fa-upload"></i> Enviar Nova Imagem</button>
       </section>
       <section class="settings-section">
-        <h3>Atalhos de Teclado</h3>
-        <div id="keybinds-list"></div>
-        <button id="keybinds-reset" class="settings-btn"><i class="fas fa-undo-alt"></i> Restaurar Padr&otilde;es</button>
+        <div id="keybinds-toggle" class="slot-main-toggle">
+          <span>Atalhos de Teclado</span>
+          <i class="fas fa-chevron-right arrow"></i>
+        </div>
+        <div id="keybinds-content" class="slot-main-content">
+          <div id="keybinds-list"></div>
+          <button id="keybinds-reset" class="settings-btn"><i class="fas fa-undo-alt"></i> Restaurar Padr&otilde;es</button>
+        </div>
       </section>
       <section class="settings-section">
         <div id="image-slots-toggle" class="slot-main-toggle">
@@ -632,7 +637,8 @@ function initDOM() {
     'zoom-slider','zoom-percent','zoom-in-btn','zoom-out-btn','fit-to-screen-btn','zoom-100-btn',
     'settings-btn','settings-modal','settings-backdrop','settings-close','settings-new-image','splash-screen',
     'splash-dropzone','file-input','notifications','keybinds-list','keybinds-reset',
-    'settings-filename','settings-dimensions','undo-btn','redo-btn',
+    'settings-filename','settings-dimensions',    'undo-btn','redo-btn',
+    'keybinds-toggle','keybinds-content',
     'image-stamp-layer','image-slots-toggle','image-slots-content','slot-file-input','stamp-preview-layer','stamp-mode-indicator',
     'json-import-input','project-toggle','project-content','export-project-btn','import-project-btn',
     'restore-dialog','restore-backdrop','restore-yes-btn','restore-discard-btn','clear-session-btn','autosave-indicator',
@@ -2071,7 +2077,16 @@ class ImageStampManager {
     img.style.width = stamp.width + 'px';
     img.style.height = stamp.height + 'px';
     img.style.pointerEvents = 'none';
-    this._layer.appendChild(img);
+    if (stamp.appearEffect === 'fadeIn') {
+      const duration = (stamp.appearSettings && stamp.appearSettings.appearDuration) || 300;
+      img.style.opacity = '0';
+      img.style.transition = 'opacity ' + duration + 'ms ease';
+      this._layer.appendChild(img);
+      void img.offsetWidth;
+      img.style.opacity = '1';
+    } else {
+      this._layer.appendChild(img);
+    }
     this._stampElements.set(stamp.id, img);
     return img;
   }
@@ -3587,6 +3602,10 @@ class App {
     });
     DOM['settings-modal'].addEventListener('click', (e) => {
       if (e.target === DOM['settings-modal'] || e.target === DOM['settings-backdrop']) this.settingsManager.close();
+    });
+    DOM['keybinds-toggle'].addEventListener('click', () => {
+      DOM['keybinds-toggle'].classList.toggle('open');
+      DOM['keybinds-content'].classList.toggle('open');
     });
     DOM['image-slots-toggle'].addEventListener('click', () => {
       DOM['image-slots-toggle'].classList.toggle('open');
