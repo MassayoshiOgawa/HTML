@@ -1612,6 +1612,7 @@ class SettingsManager {
       content.appendChild(this._createSlotDisappearRow(i, config));
       content.appendChild(this._createSlotImageEffectRow(i, config));
       content.appendChild(this._createSlotHideCursorRow(i, config));
+      content.appendChild(this._createSlotUseViewportSizeRow(i, config));
       content.appendChild(this._createSlotReplaceRow(i, config));
 
       if (this._slotExpanded[i]) { header.classList.add('open'); content.classList.add('open'); }
@@ -1920,6 +1921,24 @@ class SettingsManager {
     sw.appendChild(cb); sw.appendChild(slider);
     wrap.appendChild(label); wrap.appendChild(sw);
     div.appendChild(wrap);
+    return div;
+  }
+
+  _createSlotUseViewportSizeRow(slot, config) {
+    const div = document.createElement('div'); div.className = 'slot-control';
+    const wrap = document.createElement('div'); wrap.className = 'slot-toggle-wrap';
+    const label = document.createElement('label'); label.textContent = 'Proporcional à tela'; label.style.margin = '0';
+    const subtitle = document.createElement('div'); subtitle.className = 'slot-info'; subtitle.textContent = 'Desligado: proporcional à imagem';
+    const sw = document.createElement('label'); sw.className = 'slot-toggle-switch';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!config.useViewportSize;
+    const slider = document.createElement('span'); slider.className = 'slot-toggle-slider';
+    cb.addEventListener('change', () => {
+      config.useViewportSize = cb.checked;
+      app.stampSettingsManager.setSlot(slot, config);
+    });
+    sw.appendChild(cb); sw.appendChild(slider);
+    wrap.appendChild(label); wrap.appendChild(sw);
+    div.appendChild(wrap); div.appendChild(subtitle);
     return div;
   }
 
@@ -2296,6 +2315,7 @@ class StampSettingsManager {
       effectSettings: {},
       replaceExisting: false,
       hideCursorOnPreview: false,
+      useViewportSize: true,
     };
   }
 
@@ -3358,7 +3378,11 @@ class StampPreviewManager {
 
   _calculateHeight(config) {
     const percent = clamp(config.sizePercent || 15, 10, 100) / 100;
-    return Math.round(this.canvasArea.clientHeight * percent);
+    if (config.useViewportSize) {
+      return Math.round((this.canvasArea.clientHeight * percent) / EditorState.canvas.scale);
+    }
+    const imageHeight = EditorState.canvas.imageHeight || this.canvasArea.clientHeight;
+    return Math.round(imageHeight * percent);
   }
 
   _updatePosition() {
