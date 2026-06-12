@@ -1079,6 +1079,7 @@ class CanvasManager {
     EditorState.canvas.scale = newScale;
     this._applyTransform();
     this.eventBus.emit(EVENTS.CANVAS_TRANSFORMED, { scale: EditorState.canvas.scale });
+    if (app) app.updateUI();
   }
 
   _applyTransform() {
@@ -3085,6 +3086,7 @@ class StampPreviewManager {
     this._boundMouseMove = this._onMouseMove.bind(this);
     this._boundResize = this._onResize.bind(this);
     this._boundBlur = this._onWindowBlur.bind(this);
+    this._boundZoom = this._onZoom.bind(this);
   }
 
   init() {
@@ -3096,6 +3098,7 @@ class StampPreviewManager {
     this.canvasArea.addEventListener('mousemove', this._boundMouseMove);
     window.addEventListener('resize', this._boundResize);
     window.addEventListener('blur', this._boundBlur);
+    this.eventBus.on(EVENTS.CANVAS_TRANSFORMED, this._boundZoom);
     debug.log('StampPreviewManager initialized');
   }
 
@@ -3111,6 +3114,7 @@ class StampPreviewManager {
     this.canvasArea.removeEventListener('mousemove', this._boundMouseMove);
     window.removeEventListener('resize', this._boundResize);
     window.removeEventListener('blur', this._boundBlur);
+    this.eventBus.off(EVENTS.CANVAS_TRANSFORMED, this._boundZoom);
   }
 
   _onMouseDown(e) {
@@ -3204,6 +3208,13 @@ class StampPreviewManager {
   }
 
   _onResize() {
+    if (this._isActive && this._element) {
+      this._recalculateSize();
+      this._updatePosition();
+    }
+  }
+
+  _onZoom() {
     if (this._isActive && this._element) {
       this._recalculateSize();
       this._updatePosition();
