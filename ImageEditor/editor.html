@@ -1611,6 +1611,7 @@ class SettingsManager {
       content.appendChild(this._createSlotAppearRow(i, config));
       content.appendChild(this._createSlotDisappearRow(i, config));
       content.appendChild(this._createSlotImageEffectRow(i, config));
+      content.appendChild(this._createSlotHideCursorRow(i, config));
       content.appendChild(this._createSlotReplaceRow(i, config));
 
       if (this._slotExpanded[i]) { header.classList.add('open'); content.classList.add('open'); }
@@ -1902,6 +1903,23 @@ class SettingsManager {
     });
 
     div.appendChild(label); div.appendChild(select); div.appendChild(blinkCond); div.appendChild(wobbleCond);
+    return div;
+  }
+
+  _createSlotHideCursorRow(slot, config) {
+    const div = document.createElement('div'); div.className = 'slot-control';
+    const wrap = document.createElement('div'); wrap.className = 'slot-toggle-wrap';
+    const label = document.createElement('label'); label.textContent = 'Ocultar cursor ao exibir'; label.style.margin = '0';
+    const sw = document.createElement('label'); sw.className = 'slot-toggle-switch';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!config.hideCursorOnPreview;
+    const slider = document.createElement('span'); slider.className = 'slot-toggle-slider';
+    cb.addEventListener('change', () => {
+      config.hideCursorOnPreview = cb.checked;
+      app.stampSettingsManager.setSlot(slot, config);
+    });
+    sw.appendChild(cb); sw.appendChild(slider);
+    wrap.appendChild(label); wrap.appendChild(sw);
+    div.appendChild(wrap);
     return div;
   }
 
@@ -2277,6 +2295,7 @@ class StampSettingsManager {
       imageEffect: null,
       effectSettings: {},
       replaceExisting: false,
+      hideCursorOnPreview: false,
     };
   }
 
@@ -3180,6 +3199,11 @@ class StampPreviewManager {
     this._isActive = true;
     this._fadingOut = false;
 
+    if (config.hideCursorOnPreview && app) {
+      app.cursorManager.hide();
+      app.cursorManager.container.style.cursor = 'none';
+    }
+
     const img = document.createElement('img');
     img.src = config.source;
     img.draggable = false;
@@ -3222,6 +3246,9 @@ class StampPreviewManager {
   }
 
   _cleanupPreview() {
+    const hadCursorHidden = this._isActive && this._activeSlot && app &&
+      app.stampSettingsManager.getSlot(this._activeSlot).hideCursorOnPreview;
+
     if (this._element && this._element.parentNode) {
       this._element.parentNode.removeChild(this._element);
     }
@@ -3233,6 +3260,11 @@ class StampPreviewManager {
 
     EditorState.preview.activeSlot = null;
     EditorState.preview.isActive = false;
+
+    if (hadCursorHidden && app) {
+      app.cursorManager.container.style.cursor = '';
+      app._updateCursor();
+    }
   }
 
   _tryInsertStamp(slot) {
