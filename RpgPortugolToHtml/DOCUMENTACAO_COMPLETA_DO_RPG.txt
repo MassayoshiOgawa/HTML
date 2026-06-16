@@ -1,0 +1,2306 @@
+================================================================================
+DOCUMENTACAO COMPLETA DO RPG - SOMBRAS DE VALDORIA
+================================================================================
+Versao do Codigo Analisado: v1.0
+Linguagem Original: Portugol Studio
+Total de Linhas: 3696
+Data da Analise: 16/06/2026
+
+ATENCAO: Este documento foi gerado por engenharia reversa para permitir que
+UMA OUTRA IA recrie integralmente este jogo em HTML/CSS/JS em um unico arquivo,
+sem acesso ao codigo original em Portugol.
+
+================================================================================
+1. VISAO GERAL DO PROJETO
+================================================================================
+
+Genero: RPG de texto (roguelike) em console, com exploracao em grid 2D ASCII,
+combate por turnos, gerenciamento de recursos e progressao de personagem.
+
+Proposta: "Sombras de Valdoria" e um RPG de fantasia medieval onde o jogador
+controla um heroi que explora masmorras/florestas geradas proceduralmente,
+enfrenta inimigos, completa missoes, gerencia recursos (fome, stamina, peso),
+evolui de nivel, melhora equipamentos e interage com uma loja com economia
+dinamica (inflacao noturna, sistema de reputacao/desconto).
+
+Objetivos do Jogo:
+- Sobreviver explorando mapas aleatorios cheios de perigos
+- Evoluir do nivel 1 ao 50 enfrentando inimigos cada vez mais dificeis
+- Gerenciar recursos: HP, Mana, Fome, Stamina, Peso do inventario, Ouro
+- Completar quests para ganhar XP e ouro extras
+- Refinar arma ate +5 para maximizar dano
+- Derrotar bosses para progredir
+- Acumular riqueza e reputacao na loja
+
+Fluxo Principal de Gameplay:
+1. Jogador inicia digitando nome e selecionando uma das 8 classes
+2. Recebe itens iniciais (3 pocoes de vida, 2 de mana, 5 paes)
+3. Passa por um combate tutorial (nivel 1)
+4. Entra no loop principal: explora mapa -> encontra inimigos/eventos/lojas/saida
+5. Em cada passo no mapa, pode consumir fome, mudar o ciclo dia/noite, ativar eventos
+6. Ao encontrar saida, novo mapa e gerado
+7. Morrer faz perder 20% do ouro e voltar com 50% HP/Mana
+8. Jogo continua ate o jogador desistir (nao ha "final" implementado)
+
+Experiencia Esperada: Jogador deve sentir que esta em uma jornada de
+sobrevivencia onde cada decisao importa - gastar ouro com comida vs equipamento,
+arriscar explorar mais ou voltar, usar habilidades no momento certo, gerenciar
+cooldowns e recursos em combates prolongados.
+
+================================================================================
+2. RESUMO EXECUTIVO DO FUNCIONAMENTO
+================================================================================
+
+O jogador inicia no menu principal onde pode comecar um novo jogo ou carregar
+um save. Ao criar personagem, digita seu nome e escolhe entre 8 classes, cada
+uma com atributos iniciais diferentes e 5 habilidades unicas desbloqueadas
+progressivamente do nivel 1 ao 5.
+
+Apos a selecao, o jogo gera o primeiro mapa procedural (grid 15x30) usando um
+algoritmo de caminhada aleatoria que cria corredores. O jogador comeca na
+coluna 0, linha aleatoria. O mapa contem: espacos vazios (caminho), areas
+intransponiveis (Nada/paredes), inimigos (E), baus (B), lojas (L), arvores (T),
+e uma saida (S) no extremo oposto.
+
+O combate e por turnos com as opcoes: Atacar (auto), Habilidades, Itens, Fugir.
+Cada classe tem 5 habilidades com cooldowns e custo de mana. O sistema
+elemental (Fogo > Gelo > Terra > Fogo, Luz <> Trevas) dobra dano em fraquezas.
+Ha stagger (barra de atordoamento) que ao zerar faz o inimigo perder o turno.
+
+A economia funciona com ouro obtido de inimigos e baus. A loja vende
+consumiveis (pocoes, comida) e itens especiais. O ferreiro repara e refina
+armas (+1 a +5). Ha inflacao noturna (+25% precos de consumo) e desconto por
+reputacao (a cada 500g gastos, +5% desconto, max 20%).
+
+O jogador gerencia fome (0-100) que diminui com acoes. Se chegar a 0, fica
+exausto (-50% atributos). O ciclo dia/noite alterna a cada 5 acoes. A noite,
+inimigos sao +30% fortes mas dao +50% XP e ouro.
+
+Ao derrotar inimigos, ganha XP e ouro, possivelmente loot (armas, armaduras,
+acessorios) com raridade determinada por rolagem. Ao acumular XP suficiente,
+sobe de nivel (max 50), ganhando +2 em todos atributos base e recuperando HP/Mana.
+
+O save e feito via codigo textual que o jogador anota e pode digitar ao iniciar
+o jogo para restaurar progresso (implementacao basica - o parser nao e completo).
+
+================================================================================
+3. ESTRUTURA DO CODIGO
+================================================================================
+
+3.1 BIBLIOTECAS UTILIZADAS
+- Util: aguarde(), sorteia()
+- Matematica: arredondar()
+- Tipos: (nao utilizada explicitamente, apenas incluida)
+
+3.2 CONSTANTES
+====================
+
+NOME_JOGO = "=== SOMBRAS DE VALDORIA ==="
+  Finalidade: titulo exibido nas telas
+
+VERSAO = "v1.0"
+  Finalidade: versao do jogo
+
+LEVEL_MAX = 50
+  Finalidade: nivel maximo que o jogador pode atingir
+
+LEVEL_CAP_INICIAL = 5
+  Finalidade: cap inicial de nivel (embora nao usado ativamente no codigo,
+  serve para referenciar que ate nivel 5 se desbloqueiam habilidades)
+
+MAX_BUFFS = 10
+  Finalidade: numero maximo de buffs simultaneos
+
+MAX_DEBUFFS = 3
+  Finalidade: numero base de debuffs (usado como MAX_DEBUFFS * 3 = 9 slots)
+
+MAX_SLOTS = 30
+  Finalidade: slots maximos no inventario
+
+PESO_BASE = 30.0
+  Finalidade: peso base que o jogador pode carregar (sem contar bonus de forca)
+
+MAX_EVENTOS = 50
+MAX_ITENS_LOJA = 40
+MAX_QUESTS = 20
+MAX_INIMIGOS = 30
+MAX_HABILIDADES = 50
+MAX_EQUIPAMENTOS = 20
+  Finalidade: limites para os vetores de cada sistema
+
+dano (variavel global inteira)
+  Finalidade: usada como variavel temporaria global para calculo de dano
+  NOTA: Isso e uma variavel solta (nao constante) que deveria ser local
+  POSSIVEL BUG: Como e global, pode ser sobrescrita em chamadas aninhadas
+
+3.3 LIMITES GLOBAIS (NAO CONSTANTES)
+=====================================
+LIMITE_REDUCAO_DANO = 80.0  (% maximo de reducao de dano via defesa)
+LIMITE_CRITICO = 80.0       (% maximo de chance critica)
+LIMITE_ESQUIVA = 75.0       (% maximo de chance de esquiva)
+LIMITE_ROUBO_VIDA = 50.0    (% maximo de roubo de vida - nao usado no codigo)
+LIMITE_REGENERACAO = 15.0   (% maximo de regeneracao - nao usado no codigo)
+LIMITE_STUN = 2.0           (% limite de stun - nao usado no codigo)
+LIMITE_DEBUFF_DANO = 50.0   (% limite de debuff de dano - nao usado no codigo)
+  NOTA: Varios limites sao definidos mas nunca referenciados no codigo
+
+3.4 ELEMENTOS
+==============
+ELEM_FOGO = 1
+ELEM_GELO = 2
+ELEM_TERRA = 3
+ELEM_LUZ = 4
+ELEM_TREVAS = 5
+ELEM_RAIO = 6
+ELEM_NEUTRO = 0
+
+3.5 CATEGORIAS DE ITENS
+========================
+CAT_CONSUMIVEL = 1
+CAT_EQUIPAMENTO = 2
+CAT_MATERIAL = 3
+CAT_QUEST = 4
+CAT_ESPECIAL = 5
+
+3.6 RARIDADES
+==============
+RAR_COMUM = 1
+RAR_INCOMUM = 2
+RAR_RARO = 3
+RAR_EPICO = 4
+RAR_LENDARIO = 5
+RAR_MITICO = 6
+
+3.7 CLASSES
+============
+CLS_GUERREIRO = 1
+CLS_MAGO = 2
+CLS_LADINO = 3
+CLS_PALADINO = 4
+CLS_ARQUEIRO = 5
+CLS_DRUIDA = 6
+CLS_NECROMANTE = 7
+CLS_MONGE = 8
+
+3.8 VARIAVEIS GLOBAIS - JOGADOR
+=================================
+g_nome_jogador (cadeia): nome do personagem
+g_classe_jogador (inteiro): classe selecionada (1-8)
+g_nivel (inteiro): nivel atual (inicia 1)
+g_xp (inteiro): experiencia acumulada (inicia 0)
+g_xp_proximo (inteiro): XP necessario para proximo nivel (inicia 100)
+g_ouro (inteiro): dinheiro (inicia 50)
+g_reputacao (inteiro): acumulo de gastos para desconto (inicia 0)
+g_desconto (inteiro): % de desconto na loja (inicia 0)
+
+Atributos Base:
+g_forca = 5, g_defesa = 5, g_inteligencia = 5, g_agilidade = 5,
+g_vitalidade = 5, g_precisao = 90 (%), g_critico = 5 (%),
+g_esquiva = 3 (%), g_resistencia_elem = 0, g_velocidade = 10
+
+Status Derivados:
+g_hp_max = 175, g_hp_atual = 175
+g_mana_max = 90, g_mana_atual = 90
+g_stamina = 100
+
+Equipamento Equipado:
+g_equip_forca, g_equip_defesa, g_equip_inteligencia, g_equip_agilidade,
+g_equip_vitalidade, g_equip_critico, g_equip_esquiva: bonus de equipamentos
+g_arma_dano = 10 (dano base da arma)
+g_arma_durabilidade = 100, g_arma_durabilidade_max = 100
+g_arma_elemento = ELEM_NEUTRO (0)
+g_arma_nivel_refino = 0 (0 a +5)
+g_arma_nome = "Espada Basica"
+g_armadura_nome = "Roupa Basica"
+g_armadura_defesa = 5
+
+3.9 SISTEMA DE SOBREVIVENCIA
+==============================
+g_fome = 100 (0-100)
+g_ciclo_dia_noite = "Dia"
+g_acoes_totais = 0
+g_acoes_para_mudar_tempo = 5
+g_exausto = falso
+
+3.10 SISTEMA DE BUFFS/DEBUFFS
+===============================
+g_buff_nome[MAX_BUFFS], g_buff_duracao[], g_buff_intensidade[],
+g_buff_tipo[], g_buff_ativo[], g_buff_count
+g_debuff_nome[MAX_DEBUFFS*3], g_debuff_duracao[], g_debuff_intensidade[],
+g_debuff_tipo[], g_debuff_ativo[], g_debuff_count
+g_inv_valor_efeito (inteiro): usado como fallback no uso de itens
+
+3.11 SISTEMA DE HABILIDADES
+=============================
+g_skill_nome[MAX_HABILIDADES], g_skill_custo[], g_skill_cooldown[],
+g_skill_cooldown_atual[], g_skill_dano_mult[], g_skill_tipo[],
+g_skill_duracao[], g_skill_elemento[], g_skill_disponivel[],
+g_skill_count (inicializado com 40)
+
+3.12 SISTEMA DE INVENTARIO
+============================
+30 campos por slot: nome, desc, categoria, raridade, tipo, elemento,
+quantidade, qtd_max (fixo 10), peso, valor, nivel_req, empilhavel,
+utilizavel, equipavel, descartavel, quest, bonus_forca, bonus_defesa,
+bonus_critico, bonus_agi, bonus_mana, bonus_hp, efeito_principal,
+durabilidade, durabilidade_max, slots_usados, peso_atual
+
+3.13 SISTEMA DE INIMIGOS
+==========================
+g_inim_nome, g_inim_hp_max, g_inim_hp_atual, g_inim_ataque, g_inim_defesa,
+g_inim_inteligencia, g_inim_agilidade, g_inim_vitalidade, g_inim_critico,
+g_inim_esquiva, g_inim_resistencia, g_inim_elemento, g_inim_xp, g_inim_ouro,
+g_inim_tipo (1=comum, 2=elite, 3=boss), g_inim_stagger_max, g_inim_stagger_atual,
+g_inim_stunned, g_inim_char (char exibido no mapa), g_inim_count
+
+3.14 SISTEMA DE LOJA
+======================
+g_loja_nome[40], g_loja_desc[], g_loja_preco[], g_loja_categoria[],
+g_loja_raridade[], g_loja_nivel_req[], g_loja_estoque[],
+g_loja_efeito[], g_loja_valor_efeito[], g_loja_count (inicializado com 14)
+
+3.15 SISTEMA DE QUESTS
+=======================
+g_quest_nome[20], g_quest_desc[], g_quest_tipo[], g_quest_alvo[],
+g_quest_progresso[], g_quest_objetivo[], g_quest_xp_recompensa[],
+g_quest_ouro_recompensa[], g_quest_ativa[], g_quest_completa[],
+g_quest_count (inicializado com 2)
+
+3.16 SISTEMA DE MAPA
+======================
+g_mapa_matriz[25][50]: matriz bidimensional que armazena o estado de cada celula
+g_mapa_tamanho_x = 15, g_mapa_tamanho_y = 30: dimensoes do mapa
+g_mapa_player_x, g_mapa_player_y: posicao do jogador
+g_mapa_gerado: flag se mapa ja foi gerado
+g_mapa_parar_geracao: flag para interromper geracao
+g_mapa_char_inimigo = "E", g_mapa_char_player = "@",
+g_mapa_char_bau = "B", g_mapa_char_loja = "L",
+g_mapa_char_saida = "S", g_mapa_char_arvore = "T",
+g_mapa_char_agua = "~" (nao usado na geracao)
+g_mapa_regiao_atual = "Floresta Sombria"
+
+3.17 SISTEMA DE EVENTOS
+=========================
+g_evento_nome[50], g_evento_desc[], g_evento_tipo[],
+g_evento_chance[], g_evento_ativo[], g_evento_count (inicializado com 6)
+
+3.18 VARIAVEIS DE COMBATE
+===========================
+g_combate_inimigo_idx = -1
+g_em_combate = falso
+g_combate_turno = 0
+g_combate_acoes_jogador = 0
+g_turno_extra_rodada = falso (controla se ja teve turno extra no round)
+g_ambiente_atual = "Normal"
+g_dano_total_causado = 0
+g_inimigos_mortos = 0
+
+3.19 VARIAVEIS AUXILIARES
+===========================
+g_jogo_ativo = verdadeiro
+g_dificuldade = 1 (nao usado)
+g_primeira_vez = verdadeiro (nao usado apos inicio)
+g_save_code = ""
+g_total_acoes = 0 (nao usado ativamente)
+g_combates_vencidos = 0
+g_bosses_derrotados = 0
+
+================================================================================
+4. DOCUMENTACAO DE TODAS AS FUNCOES
+================================================================================
+
+----------------------------------------------------------------------
+FUNCAO: inicializar_jogo()
+----------------------------------------------------------------------
+FINALIDADE: Inicializa todos os sistemas antes do jogo comecar
+PARAMETROS: Nenhum
+VALORES RETORNADOS: Nenhum (procedimento)
+VARIÁVEIS UTILIZADAS: Nenhuma (apenas chama outras funcoes)
+PASSO A PASSO:
+  1. Limpa a tela
+  2. Exibe nome do jogo e versao
+  3. Aguarda 1 segundo
+  4. Chama inicializar_habilidades() para popular o vetor de skills
+  5. Chama inicializar_loja() para popular o vetor da loja
+  6. Chama inicializar_eventos() para popular os eventos
+  7. Chama inicializar_quests() para popular as missoes
+INTERACOES: Depende de todas as funcoes de inicializacao chamadas
+IMPORTANCIA: Funcao de setup essencial, sem ela nenhum sistema funciona
+RISCOS: Se falhar, nenhum sistema tera dados para operar
+
+----------------------------------------------------------------------
+FUNCAO: inicializar_habilidades()
+----------------------------------------------------------------------
+FINALIDADE: Preenche o vetor global de habilidades com 40 skills (8 classes x 5)
+PARAMETROS: Nenhum
+VALORES RETORNADOS: Nenhum
+VARIÁVEIS UTILIZADAS: g_skill_* (todos os vetores), g_skill_count
+PASSO A PASSO:
+  Define indices 0-4 para Guerreiro, 5-9 para Mago, 10-14 para Ladino,
+  15-19 para Paladino, 20-24 para Arqueiro, 25-29 para Druida,
+  30-34 para Necromante, 35-39 para Monge.
+  Para cada skill define: nome, custo (MP), cooldown (turnos),
+  cooldown_atual (0), dano_mult (percentual), tipo (categoria de efeito),
+  duracao (turnos de efeito), elemento, disponivel (verdadeiro)
+  Finaliza setando g_skill_count = 40
+INTERACOES: Usada por menu_habilidades(), usar_habilidade()
+IMPORTANCIA: Nuclear - define todas as capacidades das classes
+RISCOS: Alterar indices quebra o mapeamento classe -> skills
+
+----------------------------------------------------------------------
+FUNCAO: inicializar_loja()
+----------------------------------------------------------------------
+FINALIDADE: Preenche o vetor da loja com 14 itens disponiveis para compra
+PARAMETROS: Nenhum
+VALORES RETORNADOS: Nenhum
+VARIÁVEIS UTILIZADAS: g_loja_* (todos os vetores), g_loja_count
+PASSO A PASSO:
+  indices 0-6: Consumiveis (Pao Velho, Racao, Pocao Vida P/M, Pocao Mana P/M,
+  Elixir Adrenalina)
+  indices 7-10: Especiais (Pedra Amolar, Bomba Luz, Amuleto Sorte,
+  Coracao Fenix)
+  indices 11-13: Mercador Negro (noturno): Sangue Demonio, Capa Invisibilidade,
+  Peraminho Proibido
+  g_loja_count = 14
+  Efeitos: 1=Fome, 2=HP, 3=Mana, 4=Stamina, 5=Reparo, 6=Stun, 7=Ouro+,
+  8=Reviver, 9=ATK+, 10=Fuga, 11=Reset CD
+INTERACOES: Usada por loja_consumiveis()
+IMPORTANCIA: Base da economia do jogo
+RISCOS: Alterar indices quebra a logica de efeito dos itens
+
+----------------------------------------------------------------------
+FUNCAO: inicializar_eventos()
+----------------------------------------------------------------------
+FINALIDADE: Preenche o vetor de eventos aleatorios com 6 eventos
+PARAMETROS: Nenhum
+VALORES RETORNADOS: Nenhum
+VARIÁVEIS UTILIZADAS: g_evento_*
+PASSO A PASSO:
+  Evento 0: Emboscada de Goblins (tipo=1, chance=45) - combate
+  Evento 1: Bau Encontrado (tipo=2, chance=20) - loot
+  Evento 2: Mercador Ambulante (tipo=3, chance=10) - loja
+  Evento 3: Armadilha! (tipo=4, chance=10) - dano
+  Evento 4: Missao Encontrada (tipo=5, chance=10) - quest
+  Evento 5: Fonte Misteriosa (tipo=6, chance=5) - cura total
+  g_evento_count = 6
+INTERACOES: Usada por evento_aleatorio()
+IMPORTANCIA: Adiciona variedade a exploracao
+RISCOS: Nenhum
+
+----------------------------------------------------------------------
+FUNCAO: inicializar_quests()
+----------------------------------------------------------------------
+FINALIDADE: Preenche o vetor de quests com 2 missoes
+PARAMETROS: Nenhum
+VALORES RETORNADOS: Nenhum
+VARIÁVEIS UTILIZADAS: g_quest_*
+PASSO A PASSO:
+  Quest 0: "Primeiros Passos" - derrote 3 inimigos, recompensa 50XP + 30g
+  Quest 1: "Cacador de Goblins" - derrote 5 inimigos, recompensa 100XP + 60g
+  g_quest_count = 2
+  NOTA: Quest 1 comeca inativa (g_quest_ativa[1] = falso), ativada por evento
+INTERACOES: Usada por atualizar_quests_combate(), ativar_quest_aleatoria()
+IMPORTANCIA: Sistema de progressao secundario
+RISCOS: Nenhum
+
+----------------------------------------------------------------------
+FUNCAO: inteiro calcular_hp_max()
+----------------------------------------------------------------------
+FINALIDADE: Calcula o HP maximo do jogador
+PARAMETROS: Nenhum
+VALORES RETORNADOS: inteiro - HP maximo calculado
+VARIÁVEIS UTILIZADAS: g_vitalidade, g_equip_vitalidade, g_nivel
+FORMULA: base = 100 + (vitalidade * 15) + (equip_vitalidade * 15)
+         bonus_nivel = nivel * 12
+         retorna base + bonus_nivel
+EXEMPLO: Nivel 1, Vitalidade 5, equip 0: 100 + 75 + 12 = 187 (mas inicia como 175)
+IMPORTANCIA: Usada sempre que HP precisa ser recalculado (level up, equipamento)
+RISCOS: Nenhum
+
+----------------------------------------------------------------------
+FUNCAO: inteiro calcular_mana_max()
+----------------------------------------------------------------------
+FINALIDADE: Calcula a mana maxima do jogador
+PARAMETROS: Nenhum
+VALORES RETORNADOS: inteiro - mana maxima
+FORMULA: base = 50 + (inteligencia * 8) + (equip_inteligencia * 8)
+         bonus_nivel = nivel * 10
+EXEMPLO: Nivel 1, Inteligencia 5, equip 0: 50 + 40 + 10 = 100 (mas inicia como 90)
+
+----------------------------------------------------------------------
+FUNCAO: inteiro calcular_ataque_total()
+----------------------------------------------------------------------
+FINALIDADE: Calcula o ataque total do jogador para uso em combate
+PARAMETROS: Nenhum
+VALORES RETORNADOS: inteiro - dano de ataque total
+FORMULA: base = g_arma_dano + (g_forca * 1.8) + (g_equip_forca * 1.8)
+         bonus_nivel = g_nivel * 8
+         refino_bonus: +1=10%, +2=25%, +3=40%, +4=60%, +5=100%
+         total = base + bonus_nivel + (base * refino_bonus / 100)
+IMPORTANCIA: Usada em todo ataque fisico basico e habilidades fisicas
+RISCOS: Nenhum
+
+----------------------------------------------------------------------
+FUNCAO: inteiro calcular_defesa_total()
+----------------------------------------------------------------------
+FINALIDADE: Calcula a defesa total do jogador
+PARAMETROS: Nenhum
+FORMULA: base = g_defesa + g_armadura_defesa + g_equip_defesa
+         bonus_nivel = g_nivel * 7
+         retorna base + bonus_nivel
+
+----------------------------------------------------------------------
+FUNCAO: inteiro calcular_reducao_dano(inteiro defesa)
+----------------------------------------------------------------------
+FINALIDADE: Converte defesa em % de reducao de dano
+PARAMETROS: defesa - valor de defesa
+FORMULA: reducao = defesa * 0.35
+         se reducao > LIMITE_REDUCAO_DANO (80), cap em 80
+         retorna Matematica.arredondar(reducao, 0)
+IMPORTANCIA: Toda defesa passa por esta funcao
+NOTA: O limite de 80% significa que mesmo com defesa infinita, sempre
+leva pelo menos 20% do dano
+
+----------------------------------------------------------------------
+FUNCAO: inteiro calcular_critico_total()
+----------------------------------------------------------------------
+FINALIDADE: Chance critica total do jogador
+FORMULA: total = g_critico + g_equip_critico
+         se total > LIMITE_CRITICO (80), cap em 80
+
+----------------------------------------------------------------------
+FUNCAO: inteiro calcular_esquiva_total()
+----------------------------------------------------------------------
+FINALIDADE: Chance de esquiva total do jogador
+FORMULA: total = g_esquiva + g_equip_esquiva
+         se total > LIMITE_ESQUIVA (75), cap em 75
+
+----------------------------------------------------------------------
+FUNCAO: real calcular_peso_max()
+----------------------------------------------------------------------
+FINALIDADE: Peso maximo que o inventario pode carregar
+FORMULA: retorna PESO_BASE (30) + (g_forca * 1.5)
+EXEMPLO: Forca 8: 30 + 12 = 42
+
+----------------------------------------------------------------------
+FUNCAO: inteiro calcular_xp_proximo()
+----------------------------------------------------------------------
+FINALIDADE: Calcula XP necessario para o proximo nivel
+FORMULA: xp = 100.0
+         loop i = 0 ate nivel: xp = xp * 1.45
+         retorna Matematica.arredondar(xp, 0)
+EXEMPLO: Nivel 1: 100 * 1.45 = 145
+         Nivel 2: 145 * 1.45 = 210
+         Nivel 3: 210 * 1.45 = 304
+         Nivel 10: ~2870
+         Nivel 50: ~8.5 bilhoes (crescimento exponencial extremo)
+NOTA: O loop vai de 0 ate g_nivel, entao quando g_nivel=1, multiplica 1 vez
+      Isso significa que g_xp_proximo ja e o valor para o proximo nivel
+
+----------------------------------------------------------------------
+FUNCAO: real verificar_fracao_elemental(inteiro atacante_elem, inteiro defensor_elem)
+----------------------------------------------------------------------
+FINALIDADE: Retorna multiplicador elemental entre atacante e defensor
+PARAMETROS: atacante_elem, defensor_elem (inteiros 0-6)
+VALORES RETORNADOS: real (0.5, 1.0, ou 2.0)
+TABELA DE FRAQUEZAS:
+  Fogo (1) -> Gelo (2): 2.0
+  Gelo (2) -> Terra (3): 2.0
+  Terra (3) -> Fogo (1): 2.0
+  Luz (4) -> Trevas (5): 2.0
+  Trevas (5) -> Luz (4): 2.0
+
+TABELA DE RESISTENCIAS (inverso):
+  Gelo (2) atacando Fogo (1): 0.5
+  Terra (3) atacando Gelo (2): 0.5
+  Fogo (1) atacando Terra (3): 0.5
+  Trevas (5) atacando Luz (4): 0.5
+  Luz (4) atacando Trevas (5): 0.5
+
+Raio (6) e Neutro (0): Sempre 1.0 com todos
+
+----------------------------------------------------------------------
+FUNCAO: cadeia nome_elemento(inteiro elem)
+----------------------------------------------------------------------
+FINALIDADE: Retorna string do nome do elemento
+Mapeamento: 0=Neutro, 1=Fogo, 2=Gelo, 3=Terra, 4=Luz, 5=Trevas, 6=Raio
+
+----------------------------------------------------------------------
+FUNCAO: cadeia nome_classe(inteiro cls)
+----------------------------------------------------------------------
+FINALIDADE: Retorna string do nome da classe
+Mapeamento: 1=Guerreiro, 2=Mago, 3=Ladino, 4=Paladino, 5=Arqueiro,
+6=Druida, 7=Necromante, 8=Monge
+
+----------------------------------------------------------------------
+FUNCAO: cadeia nome_raridade(inteiro rar)
+----------------------------------------------------------------------
+FINALIDADE: Retorna string do nome da raridade
+Mapeamento: 1=Comum, 2=Incomum, 3=Raro, 4=Epico, 5=Lendario, 6=Mitico
+
+----------------------------------------------------------------------
+FUNCAO: aplicar_buff(cadeia nome, inteiro duracao, inteiro intensidade, inteiro tipo)
+----------------------------------------------------------------------
+FINALIDADE: Aplica um buff ao jogador (ou renova se ja existir)
+PARAMETROS: nome, duracao (turnos), intensidade, tipo (categoria do buff)
+PASSO A PASSO:
+  1. Procura buff existente com mesmo nome
+     - Se achar: renova duracao e intensidade, retorna
+  2. Se nao achou e tem espaco (g_buff_count < MAX_BUFFS):
+     - Adiciona novo buff no proximo slot
+     - Incrementa g_buff_count
+IMPORTANCIA: Essencial para sistema de efeitos temporarios
+RISCOS: MAX_BUFFS=10 limita buffs simultaneos
+
+----------------------------------------------------------------------
+FUNCAO: aplicar_debuff(cadeia nome, inteiro duracao, inteiro intensidade, inteiro tipo)
+----------------------------------------------------------------------
+FINALIDADE: similar a aplicar_buff() mas para debuffs
+DIFERENCA: MAX_DEBUFFS*3 = 9 slots
+RISCOS: Na renovacao, apenas duracao e atualizada (intensidade nao)
+
+----------------------------------------------------------------------
+FUNCAO: atualizar_efeitos_jogador()
+----------------------------------------------------------------------
+FINALIDADE: Reduz duracao de buffs/debuffs no fim do turno
+PASSO A PASSO:
+  1. Para cada buff ativo: reduz duracao em 1. Se <=0, marca como inativo
+  2. Para cada debuff ativo: reduz duracao em 1. Se <=0, marca como inativo
+IMPORTANCIA: Gerencia a expiracao de efeitos temporarios
+
+----------------------------------------------------------------------
+FUNCAO: processar_efeitos_turno_jogador()
+----------------------------------------------------------------------
+FINALIDADE: Processa efeitos de buffs/debuffs no inicio do turno do jogador
+PASSO A PASSO:
+  Buffs: tipo 1 = regeneracao HP, tipo 2 = regeneracao Mana
+  Debuffs: tipo 1 = Veneno, tipo 2 = Queimadura, tipo 3 = Sangramento
+  Aplica cura ou dano conforme intensidade
+IMPORTANCIA: Essencial para efeitos continuos (damage over time / heal over time)
+NOTA: Variavel global "dano" e usada aqui, o que pode causar bugs
+
+----------------------------------------------------------------------
+FUNCAO: logico possui_buff(inteiro tipo)
+----------------------------------------------------------------------
+FINALIDADE: Verifica se jogador tem buff de determinado tipo ativo
+RETORNA: verdadeiro se algum buff ativo tem o tipo especificado
+
+----------------------------------------------------------------------
+FUNCAO: logico possui_debuff(inteiro tipo)
+----------------------------------------------------------------------
+FINALIDADE: similar para debuffs
+
+----------------------------------------------------------------------
+FUNCAO: logico adicionar_item(cadeia nome, ... 21 parametros)
+----------------------------------------------------------------------
+FINALIDADE: Adiciona item ao inventario do jogador
+PARAMETROS: 22 parametros cobrindo todas as propriedades do item
+PASSO A PASSO:
+  1. Se item e empilhavel e qtd>1: procura stack existente no inventario
+     - Se achar espaco na pilha, adiciona la e retorna verdadeiro
+     - Se pilha encher,剩余 continua para criar nova pilha
+  2. Se slots >= MAX_SLOTS: retorna falso (inventario cheio)
+  3. Se peso_atual + item.peso > peso_max: retorna falso (peso excessivo)
+  4. Adiciona item no proximo slot livre
+  5. Atualiza peso_atual e slots_usados
+IMPORTANCIA: Funcao central do inventario - chamada por loot, loja, baus, etc.
+RISCOS: Muitos parametros, facil errar ordem na chamada
+
+----------------------------------------------------------------------
+FUNCAO: remover_item(inteiro idx)
+----------------------------------------------------------------------
+FINALIDADE: Remove item do inventario pelo indice
+PASSO A PASSO:
+  1. Atualiza peso_atual subtraindo peso do item
+  2. Desloca todos os itens seguintes uma posicao para tras
+  3. Decrementa g_inv_slots_usados
+
+----------------------------------------------------------------------
+FUNCAO: usar_item(inteiro idx)
+----------------------------------------------------------------------
+FINALIDADE: Usa/consome um item do inventario
+PASSO A PASSO:
+  1. Verifica se idx valido, se item e utilizavel, se qtd>0
+  2. Obtem efeito do item e valor do efeito (de g_loja_valor_efeito)
+  3. Processa efeito: 1=Fome, 2=HP, 3=Mana, 4=Stamina, 5=Reparo,
+     6=Bomba Luz (stun), 8=Coracao Fenix (passivo)
+  4. Reduz quantidade do item; se <=0, remove slot
+BUG POTENCIAL: g_loja_valor_efeito[efeito - 1] usa o indice -1. Se efeito=1,
+usa indice 0. Mas se um item tem efeito que nao esta mapeado em g_loja_valor_efeito,
+o valor pode vir de outra posicao. O mapeamento depende dos efeitos da loja.
+
+----------------------------------------------------------------------
+FUNCAO: mostrar_inventario()
+----------------------------------------------------------------------
+FINALIDADE: Exibe inventario e permite interagir (usar/equipar/descartar/ver detalhes)
+PASSO A PASSO:
+  1. Limpa tela, mostra header com peso, slots, ouro
+  2. Lista itens com indices, marcando [E] se equipavel, [U] se utilizavel
+  3. Aguarda escolha do jogador
+  4. Oferece opcoes: [1] Usar/Equipar, [2] Descartar, [3] Detalhes
+  5. Encaminha para funcao apropriada
+
+----------------------------------------------------------------------
+FUNCAO: mostrar_detalhes_item(inteiro idx)
+----------------------------------------------------------------------
+FINALIDADE: Mostra detalhes de um item especifico
+EXIBE: nome, descricao, raridade, peso, valor, bonus
+
+----------------------------------------------------------------------
+FUNCAO: equipar_item(inteiro idx)
+----------------------------------------------------------------------
+FINALIDADE: Equipa item como arma (tipo=1) ou armadura (tipo=2)
+PASSO A PASSO:
+  1. Se tipo==1 (arma): atualiza g_arma_dano (soma bonus_forca), g_arma_nome
+  2. Se tipo==2 (armadura): atualiza g_armadura_defesa, g_armadura_nome
+BUG: Equipar acumula bonus sem remover bonus anterior! Se equipar 2 armas,
+o bonus da primeira permanece. Nao ha sistema de desequipar.
+BUG: g_arma_dano = g_arma_dano + bonus_forca - o dano base da arma
+original nao e armazenado separadamente, entao trocar de arma nao funciona
+corretamente (o bonus antigo fica permanente)
+
+----------------------------------------------------------------------
+FUNCAO: vender_item(inteiro idx)
+----------------------------------------------------------------------
+FINALIDADE: Vende item do inventario por ouro
+PRECOS: Comum = 30%, Raro+ = 50%, Lendario+ = 70%
+REGRA: Item de quest nao pode ser vendido
+
+----------------------------------------------------------------------
+FUNCAO: verificar_peso()
+----------------------------------------------------------------------
+FINALIDADE: Exibe mensagem de alerta se inventario esta pesado
+REGRA: >100% = excessivo, >80% = pesado
+
+----------------------------------------------------------------------
+FUNCAO: inteiro gerar_inimigo(inteiro nivel, logico elite, logico boss)
+----------------------------------------------------------------------
+FINALIDADE: Gera um inimigo com stats calculados pelo nivel
+PARAMETROS: nivel (1-50), elite (boolean), boss (boolean)
+RETORNA: indice do inimigo no vetor, ou -1 se cheio
+PASSO A PASSO:
+  1. Calcula hp_base = 50 + (nivel * 22) + (nivel * nivel * 2)
+     atk_base = 8 + (nivel * 3.5)
+     def_base = 5 + (nivel * 2.2)
+  2. Se boss: hp*=5, atk*=2.2, def*=1.8
+     Se elite: hp*=2.2, atk*=1.5, def*=1.4
+  3. Gera nome combinando prefixo + tipo
+     Prefixos: 8 opcoes (Selvagem, Sombrio, Antigo, Corrompido, etc)
+     Tipos: 10 opcoes (Goblin, Orc, Esqueleto, Lobo, Aranha, etc)
+  4. Atribui stats: inteligencia=nivel*3, agilidade=nivel*2,
+     vitalidade=nivel*4, critico=5+nivel, esquiva=3+nivel
+     resistencia=nivel*2, elemento=aleatorio 1-6
+  5. xp = nivel * 15 (elite*2.5, boss*5)
+     ouro = (nivel*4) + aleatorio(0, nivel*3) (elite*2, boss*5)
+  6. stagger_max = hp_base / 4
+  7. stagger_atual = stagger_max
+  8. stunned = falso
+
+IMPORTANCIA: Toda criacao de inimigo passa por aqui
+DETALHE IMPORTANTE: O inimigo e adicionado ao vetor global, nao e temporario.
+Isso significa que inimigos derrotados acumulam no vetor (g_inim_count nunca
+diminui). Eventualmente MAX_INIMIGOS=30 sera atingido e novos inimigos nao
+poderao ser gerados.
+
+----------------------------------------------------------------------
+FUNCAO: inteiro aplicar_dano(inteiro atacante_forca, inteiro atacante_precisao,
+        inteiro atacante_critico, inteiro atacante_elemento,
+        inteiro defensor_defesa, inteiro defensor_resistencia,
+        inteiro defensor_elemento, inteiro skill_mult,
+        logico forcar_critico)
+----------------------------------------------------------------------
+FINALIDADE: Funcao universal de calculo de dano
+PARAMETROS: 9 parametros cobrindo atacante e defensor
+RETORNA: inteiro - dano final causado (0 se errou)
+PASSO A PASSO:
+  1. Roll de precisao: se aleatorio(1,100) > atacante_precisao, retorna 0 (erro)
+  2. dano_base = atacante_forca * (skill_mult / 100.0)
+  3. Roll de critico: se forcar_critico OU aleatorio <= atacante_critico:
+     dano *= 2.0
+  4. Multiplicador elemental: chama verificar_fracao_elemental()
+     dano *= elem_mult (0.5, 1.0, ou 2.0)
+  5. Aplicar defesa: reducao = calcular_reducao_dano(defensor_defesa)
+     dano -= dano * (reducao / 100.0)
+  6. Se skill_mult > 150 (habilidade forte): resistencia aplica 25%
+     dano -= dano * (defensor_resistencia * 0.25 / 100.0)
+  7. Dano minimo = 1
+  8. Retorna dano_final arredondado
+IMPORTANCIA: Funcao mais critica do combate - todo dano passa por aqui
+
+----------------------------------------------------------------------
+FUNCAO: gerar_combate(inteiro nivel_inimigo, logico elite, logico boss)
+----------------------------------------------------------------------
+FINALIDADE: Inicia e gerencia o loop principal de combate
+PASSO A PASSO:
+  1. Seta g_em_combate = verdadeiro, turno = 0
+  2. Gera inimigo chamando gerar_inimigo()
+  3. Exibe tela de inicio de combate
+  4. Loop enquanto g_em_combate:
+     a. Incrementa turno
+     b. Chama turno_jogador()
+     c. Verifica se inimigo morreu -> combate_vitoria()
+     d. Verifica se jogador morreu -> combate_derrota()
+     e. Chama turno_inimigo()
+     f. Verifica se jogador morreu -> combate_derrota()
+     g. Chama atualizar_efeitos_jogador()
+     h. Chama processar_efeitos_turno_jogador()
+     i. Chama reduzir_cooldowns()
+     j. Reseta g_turno_extra_rodada = falso
+     k. Exibe HUD de combate
+
+----------------------------------------------------------------------
+FUNCAO: turno_jogador()
+----------------------------------------------------------------------
+FINALIDADE: Exibe menu de acoes do jogador e processa escolha
+OPCOES: [1] Atacar, [2] Habilidades, [3] Itens, [4] Fugir
+
+----------------------------------------------------------------------
+FUNCAO: atacar_basico(inteiro idx)
+----------------------------------------------------------------------
+FINALIDADE: Executa ataque basico do jogador
+PASSO A PASSO:
+  1. Se durabilidade <= 0, mult_dano = 10 (90% de reducao)
+  2. Calcula ataque_total
+  3. Chama aplicar_dano com mult=100 (ou 10 se quebrada)
+  4. Aplica dano ao inimigo
+  5. Reduz durabilidade em 1
+  6. Aplica stagger de 15
+  7. Incrementa acoes_totais, verifica ciclo tempo
+
+----------------------------------------------------------------------
+FUNCAO: menu_habilidades(inteiro idx)
+----------------------------------------------------------------------
+FINALIDADE: Exibe skills disponiveis da classe do jogador e pergunta escolha
+PASSO A PASSO:
+  1. Calcula skill_base = (classe - 1) * 5
+  2. skills_desbloqueadas = g_nivel (max 5)
+  3. Lista skills com status (OK, CD:N, SEM MANA)
+  4. Aguarda escolha; verifica cooldown e mana
+  5. Chama usar_habilidade()
+
+----------------------------------------------------------------------
+FUNCAO: usar_habilidade(inteiro skill_idx, inteiro inimigo_idx)
+----------------------------------------------------------------------
+FINALIDADE: Executa a habilidade escolhida (MAIOR funcao do jogo)
+PARAMETROS: skill_idx (indice global), inimigo_idx
+PASSO A PASSO GERAL:
+  1. Consome mana (g_mana_atual -= custo)
+  2. Aplica cooldown (g_skill_cooldown_atual = cooldown)
+  3. Obtem tipo, mult, nome
+  4. Roteia para logica especifica baseada no tipo (1-29)
+
+TIPOS DE HABILIDADE:
+  Tipo 1: Dano fisico (usa ataque_total, skill_mult, durabilidade-2)
+    - Execucao (idx 4): se inimigo < 30% HP, dano extra de 30% do HP max
+  Tipo 2: Buff defensivo
+    - Postura Defensiva: buff tipo 3 (-40% dano recebido, 3 turnos)
+    - Escudo Arcano: buff tipo 4 (absorcao, 4 turnos)
+    - Esquiva: buff tipo 5 (+40% evasao, 2 turnos)
+    - Aura de Protecao: buff tipo 6 (+20 defesa, duracao 999)
+  Tipo 3: Grito de Guerra (buff tipo 7, +25% dano, 4 turnos)
+  Tipo 4: Dano magico (usa inteligencia*2 como forca)
+    - Tempestade (idx 8): 20% chance de aplicar debuff Choque
+  Tipo 5: Nevasca (muda ambiente, aplica debuff -30% precisao inimigo, 5 turnos)
+  Tipo 6: Dreno de Mana (dano + recupera 50% do custo em MP)
+  Tipo 7: Punhalada (usa 50% critico fixo)
+  Tipo 8: Bomba de Fumaca (invisibilidade, buff tipo 8)
+  Tipo 9: Veneno (aplica debuff veneno, 5 turnos, dano varia por tipo inimigo)
+  Tipo 10: Assalto (dano + cura 15% do dano causado)
+  Tipo 11: Cura Sagrada (30% HP max)
+  Tipo 12: Julgamento (dano luz + debuff -50% ataque inimigo, 1 turno)
+  Tipo 13: Ressurreicao (passiva - mensagem apenas)
+  Tipo 14: Olho de Aguia (buff, proximo ataque critico garantido)
+  Tipo 15: Armadilha (stun 1 turno, 50% em boss)
+  Tipo 16: Flecha Vampirica (dano + cura = dano, 50% em boss)
+  Tipo 17: Pele de Arvore (buff reflexao 20%, 4 turnos)
+  Tipo 18: Crescimento Exuberante (regeneracao HP, 6/9 na floresta, 5 turnos)
+  Tipo 19: Forma de Urso (buff +35% HP max e atual, 4 turnos)
+  Tipo 20: Toque Sombrio (dano trevas + debuff -15% def, 3 turnos)
+  Tipo 21: Erguer Esqueleto (buff invocacao, dano = inteligencia*35%, 4 turnos)
+  Tipo 22: Maldicao (debuff +50% dano recebido, 25% em boss, 3 turnos)
+  Tipo 23: Sacrificio (consome 20% HP atual, causa 3x como dano)
+  Tipo 24: Colheita de Almas (se mata, restaura mana e 50% HP; senao causa dano 200%)
+  Tipo 25: Palma de Ferro (dano fisico que ignora armadura)
+  Tipo 26: Meditacao (recupera 20% HP e 20% MP)
+  Tipo 27: Chute Relampago (dano + turno extra, 1x por rodada)
+  Tipo 28: Desviar Projeteis (buff bloqueio total 1 ataque)
+  Tipo 29: Golpe Ponto Vital (dano + stagger 70)
+
+IMPORTANCIA: Nucleo da identidade de cada classe
+COMPLEXIDADE: 29 tipos diferentes de efeitos, 40+ linhas de logica cada
+
+----------------------------------------------------------------------
+FUNCAO: menu_itens_combate()
+----------------------------------------------------------------------
+FINALIDADE: Permite usar itens durante combate
+PASSO A PASSO:
+  1. Lista apenas itens utilizaveis e com quantidade > 0
+  2. Aguarda escolha
+  3. Chama usar_item() com o indice real do item
+
+----------------------------------------------------------------------
+FUNCAO: tentar_fugir()
+----------------------------------------------------------------------
+FINALIDADE: Tenta fugir do combate
+FORMULA: chance = 50 + g_agilidade
+         se boss: chance = 20
+SEGURANCA: Se fugir, g_em_combate = falso
+
+----------------------------------------------------------------------
+FUNCAO: turno_inimigo(inteiro idx)
+----------------------------------------------------------------------
+FINALIDADE: Executa o turno do inimigo
+PASSO A PASSO:
+  1. Se inimigo atordoado (stunned): perde turno, retorna
+  2. Se stagger <= 0: perde turno (recupera 50% stagger), retorna
+  3. Chama ia_inimigo()
+
+----------------------------------------------------------------------
+FUNCAO: ia_inimigo(inteiro idx)
+----------------------------------------------------------------------
+FINALIDADE: Inteligencia artificial basica do inimigo
+PASSO A PASSO:
+  1. Se HP < 30% e chance 30%: cura 10% HP max
+  2. Se turno > 5 e chance 20%: ganha +5 ataque
+  3. Ataque normal:
+     a. Verifica esquiva do jogador (esquiva_total + 40 se buff 5)
+     b. Se esquivou, retorna
+     c. Verifica buff Desviar Projeteis (tipo 13): bloqueia, retorna
+     d. Calcula dano: ataque - reducao_defesa
+     e. Se noite: dano *= 1.3
+     f. Se possui buff tipo 3 (ex: Postura Defensiva): dano *= 0.6
+     g. Aplica dano ao jogador
+     h. Se possui buff tipo 10 (Pele de Arvore): reflete 20% dano
+
+----------------------------------------------------------------------
+FUNCAO: aplicar_stagger(inteiro idx, inteiro valor)
+----------------------------------------------------------------------
+FINALIDADE: Reduz barra de stagger do inimigo
+REGRA: Se boss (tipo 3), valor /= 4
+
+----------------------------------------------------------------------
+FUNCAO: reduzir_cooldowns()
+----------------------------------------------------------------------
+FINALIDADE: Reduz cooldown de todas as habilidades em 1 turno
+
+----------------------------------------------------------------------
+FUNCAO: combate_vitoria(inteiro idx)
+----------------------------------------------------------------------
+FINALIDADE: Processa recompensas da vitoria
+PASSO A PASSO:
+  1. Seta g_em_combate = falso
+  2. Incrementa contadores (combates_vencidos, inimigos_mortos)
+  3. Calcula XP: xp_base + 50% a noite
+  4. Calcula ouro: ouro_base + 50% a noite
+  5. Chama gerar_loot()
+  6. Chama atualizar_quests_combate()
+  7. Chama check_lvl()
+
+----------------------------------------------------------------------
+FUNCAO: combate_derrota()
+----------------------------------------------------------------------
+FINALIDADE: Processa derrota do jogador
+PASSO A PASSO:
+  1. Verifica se possui Coracao de Fenix (efeito 8): revive com 20% HP
+  2. Se Paladino e Ressurreicao disponivel: revive com 100% HP
+  3. Senao: perde 20% ouro, recupera 50% HP/Mana
+
+----------------------------------------------------------------------
+FUNCAO: gerar_loot(inteiro inimigo_idx)
+----------------------------------------------------------------------
+FINALIDADE: Gera loot aleatorio ao derrotar inimigo
+PASSO A PASSO:
+  1. Roll de raridade: 1% Mitico, 2% Lendario, 4% Epico, 10% Raro,
+     25% Incomum, 58% Comum (rolagem cumulativa: 1,2,6,16,41,100)
+  2. Gera nome: prefixo + tipo (Espada, Arco, Cajado, Armadura, Amuleto, Anel)
+  3. valor = nivel * 20 * raridade
+  4. bonus = raridade * 3
+  5. Se arma (tipo 0-2): adiciona como tipo 1, bonus_forca = bonus
+     Se armadura (tipo 3): adiciona como tipo 2, bonus_defesa = bonus
+     Se acessorio (tipo 4-5): adiciona como tipo 3, bonus variados
+
+----------------------------------------------------------------------
+FUNCAO: check_lvl()
+----------------------------------------------------------------------
+FINALIDADE: Verifica e processa level up
+PASSO A PASSO:
+  1. Enquanto XP >= XP_proximo e nivel < LEVEL_MAX:
+     a. Incrementa nivel, subtrai XP gasto, recalcula XP_proximo
+     b. +2 em todos atributos base (forca, defesa, inteligencia, agilidade, vitalidade)
+     c. Recalcula HP_max e Mana_max
+     d. Restaura HP e Mana ao maximo
+     e. Exibe tela de level up
+     f. Se nivel <= 5: mensagem de nova habilidade
+     g. Chama salvar_jogo()
+
+----------------------------------------------------------------------
+FUNCAO: loja()
+----------------------------------------------------------------------
+FINALIDADE: Menu principal da loja
+OPCOES: [1] Consumiveis, [2] Equipamentos/Upgrades, [3] Vender Itens
+
+----------------------------------------------------------------------
+FUNCAO: loja_consumiveis()
+----------------------------------------------------------------------
+FINALIDADE: Exibe e processa compra de itens consumiveis e especiais
+PASSO A PASSO:
+  1. Lista itens da loja (categoria CONSUMIVEL ou ESPECIAL)
+  2. Filtra itens do Mercador Negro (indices 11-13) para aparecer so a noite
+  3. Calcula preco com:
+     - Inflacao noturna: +25% para consumiveis
+     - Desconto noturno: -20% para itens do Mercador Negro
+     - Desconto por reputacao: -g_desconto%
+  4. Se comprar: deduz ouro, adiciona reputacao
+     - A cada 500g acumulados em reputacao: +5% desconto (max 20%)
+  5. Adiciona item ao inventario via adicionar_item()
+BUG: g_loja_count = 14, mas indices > 13 sao acessiveis (checagem limitada)
+
+----------------------------------------------------------------------
+FUNCAO: loja_upgrades()
+----------------------------------------------------------------------
+FINALIDADE: Ferreiro - repara e refina arma
+PASSO A PASSO:
+  1. Mostra status da arma (nome, durabilidade, refino)
+  2. Opcao 1: Reparo - custo = durabilidade_perdida / 2
+     Restaura durabilidade ao maximo
+  3. Opcao 2: Refino
+     Custos: +1=100g(Lv1), +2=250g(Lv2), +3=500g(Lv3),
+     +4=1000g(Lv4), +5=2500g(Lv5)
+     Requer nivel >= refino_atual + 1
+     Bonus: +1=10%, +2=25%, +3=40%, +4=60%, +5=100%
+     (calculado em calcular_ataque_total())
+
+----------------------------------------------------------------------
+FUNCAO: menu_venda()
+----------------------------------------------------------------------
+FINALIDADE: Exibe itens do inventario (exceto quest) para vender
+
+----------------------------------------------------------------------
+FUNCAO: atualizar_quests_combate()
+----------------------------------------------------------------------
+FINALIDADE: Atualiza progresso de quests apos cada combate
+
+----------------------------------------------------------------------
+FUNCAO: menu_quests()
+----------------------------------------------------------------------
+FINALIDADE: Exibe status das quests ativas/completas
+
+----------------------------------------------------------------------
+FUNCAO: gerar_mapa()
+----------------------------------------------------------------------
+FINALIDADE: Gera novo mapa procedural (VER SECAO 5 PARA DETALHES)
+PASSO A PASSO:
+  1. Limpa matriz (tudo "Nada")
+  2. Posiciona marcador "O" em posicao inicial (x aleatorio, y=0)
+  3. Loop: chama calcular_mapa() enquanto g_mapa_parar_geracao == falso
+  4. Chama colocar_elementos_mapa()
+  5. Seta g_mapa_gerado = verdadeiro
+
+----------------------------------------------------------------------
+FUNCAO: calcular_mapa()
+----------------------------------------------------------------------
+FINALIDADE: Algoritmo de caminhada aleatoria para gerar corredores
+(VER SECAO 5)
+
+----------------------------------------------------------------------
+FUNCAO: colocar_elementos_mapa()
+----------------------------------------------------------------------
+FINALIDADE: Distribui elementos especiais no mapa apos geracao dos caminhos
+(VER SECAO 5)
+
+----------------------------------------------------------------------
+FUNCAO: desenhar_mapa()
+----------------------------------------------------------------------
+FINALIDADE: Renderiza o mapa na tela
+PASSO A PASSO:
+  1. Desenha borda superior com "="
+  2. Para cada linha: "|" + celulas + "|"
+     - "@" para posicao do jogador
+     - " " para caminho
+     - "." para nada
+     - char do elemento (E, B, L, S, T, etc.)
+  3. Borda inferior com "="
+
+----------------------------------------------------------------------
+FUNCAO: mover_jogador(cadeia direcao)
+----------------------------------------------------------------------
+FINALIDADE: Move jogador no mapa e processa interacoes
+(VER SECAO 6)
+
+----------------------------------------------------------------------
+FUNCAO: abrir_bau()
+----------------------------------------------------------------------
+FINALIDADE: Processa abertura de bau
+ROLAGEM: 10% item raro (ouro + loot), 40% ouro (20-80g), 50% pocao vida
+CHAMADA: gerar_loot_bau() para item raro
+
+----------------------------------------------------------------------
+FUNCAO: gerar_loot_bau()
+----------------------------------------------------------------------
+FINALIDADE: Gera loot de bau (arma/armadura/acessorio raro)
+DIFERENCA de gerar_loot(): prefixos diferentes, tipos limitados,
+raridade 2-4 (Incomum a Epico)
+
+----------------------------------------------------------------------
+FUNCAO: evento_aleatorio()
+----------------------------------------------------------------------
+FINALIDADE: Dispara evento aleatorio durante exploracao
+ROLAGEM: 45% combate, 20% loot, 10% mercador, 10% armadilha,
+10% quest, 5% fonte misteriosa (cura total)
+
+----------------------------------------------------------------------
+FUNCAO: ativar_quest_aleatoria()
+----------------------------------------------------------------------
+FINALIDADE: Ativa primeira quest inativa encontrada
+
+----------------------------------------------------------------------
+FUNCAO: verificar_ciclo_tempo()
+----------------------------------------------------------------------
+FINALIDADE: Alterna dia/noite a cada 5 acoes
+REGRA: g_acoes_totais % 5 == 0 alterna
+
+----------------------------------------------------------------------
+FUNCAO: atualizar_fome()
+----------------------------------------------------------------------
+FINALIDADE: Reduz fome baseado em acao
+REGRA: -4 em combate, -2 em exploracao
+Se fome <= 0: exausto = verdadeiro, fome = 0
+Se fome < 10: exausto = verdadeiro
+Se fome < 25: exausto = falso
+Se fome >= 25: exausto = falso
+
+----------------------------------------------------------------------
+FUNCAO: salvar_jogo()
+----------------------------------------------------------------------
+FINALIDADE: Gera codigo de save textual
+FORMATO: nome|classe|nivel|xp|ouro|forca|defesa|int|agi|vit|refino|durabilidade|fome
+
+----------------------------------------------------------------------
+FUNCAO: logico carregar_jogo()
+----------------------------------------------------------------------
+FINALIDADE: Carrega jogo a partir de codigo
+NOTA: Implementacao INCOMPLETA - apenas verifica se codigo nao e vazio
+e retorna verdadeiro. O parse real nao foi implementado.
+
+----------------------------------------------------------------------
+FUNCAO: mostrar_hud_combate(inteiro inimigo_idx)
+----------------------------------------------------------------------
+FINALIDADE: Exibe HUD completa durante combate
+EXIBE: turno, ciclo, nome inimigo, HP, stagger%, atordoado?,
+nome jogador, classe, HP, MP, stamina, fome, ouro, arma,
+buffs ativos, debuffs ativos, exausto?
+
+----------------------------------------------------------------------
+FUNCAO: mostrar_hud_exploracao()
+----------------------------------------------------------------------
+FINALIDADE: Exibe HUD durante exploracao
+
+----------------------------------------------------------------------
+FUNCAO: menu_principal()
+----------------------------------------------------------------------
+FINALIDADE: Loop principal do jogo apos tutorial
+OPCOES: [1] Explorar, [2] Inventario, [3] Status, [4] Quests,
+[5] Loja, [6] Salvar, [7] Sair
+
+----------------------------------------------------------------------
+FUNCAO: menu_exploracao()
+----------------------------------------------------------------------
+FINALIDADE: Exibe mapa e permite movimento (WASD)
+
+----------------------------------------------------------------------
+FUNCAO: mostrar_status()
+----------------------------------------------------------------------
+FINALIDADE: Exibe todas as stats do jogador
+
+----------------------------------------------------------------------
+FUNCAO: selecionar_classe()
+----------------------------------------------------------------------
+FINALIDADE: Menu de selecao de classe com atributos iniciais
+(VER SECAO 10)
+
+----------------------------------------------------------------------
+FUNCAO: inicio()
+----------------------------------------------------------------------
+FINALIDADE: Ponto de entrada do jogo
+PASSO A PASSO COMPLETO:
+  1. Chama inicializar_jogo()
+  2. Tela inicial: [1] Novo Jogo, [2] Carregar
+  3. Se carregar: chama carregar_jogo() (mas ainda prossegue para novo personagem)
+  4. Pergunta nome do jogador
+  5. Chama selecionar_classe()
+  6. Adiciona itens iniciais (3 pocoes vida, 2 mana, 5 paes)
+  7. Gera primeiro mapa (aguarda 1.5s)
+  8. Exibe tutorial (3s)
+  9. Gera combate tutorial (inimigo nivel 1)
+  10. Chama menu_principal()
+BUG: Se carregar jogo (opcao 2), ainda pede nome e classe, sobrescrevendo save
+
+================================================================================
+5. SISTEMA DE GERACAO DE MAPA ALEATORIO
+================================================================================
+
+5.1 ESTRUTURA DE ARMAZENAMENTO
+O mapa e armazenado em uma matriz bidimensional de strings:
+  g_mapa_matriz[25][50] (cadeia)
+  Dimensoes efetivamente usadas: g_mapa_tamanho_x = 15, g_mapa_tamanho_y = 30
+
+Cada celula contem uma string representando seu conteudo:
+  "Nada" - area intransponivel (parede/fora do caminho)
+  "Caminho" - area transitavel vazia
+  "O" - marcador temporario de posicao durante geracao
+  "E" - inimigo
+  "B" - bau
+  "L" - loja
+  "S" - saida
+  "T" - arvore
+  "@" - jogador (nao armazenado, renderizado dinamicamente)
+
+5.2 ALGORITMO DE GERACAO (CALCULAR_MAPA)
+O algoritmo e um gerador de labirinto por caminhada aleatoria (random walk):
+
+PSEUDOCODIGO:
+  Funcao gerar_mapa():
+    1. Preencher toda matriz com "Nada"
+    2. Escolher startX aleatorio entre 1 e tamanho_x-2
+    3. Posicionar jogador em (startX, 0)
+    4. Marcar (startX, 0) como "O"
+    5. Enquanto nao parar:
+         chamar calcular_mapa()
+    6. Chamar colocar_elementos_mapa()
+
+  Funcao calcular_mapa():
+    1. Encontrar celula com "O" na matriz (busca completa!)
+    2. Verificar vizinhos (cima, baixo, esquerda, direita) que sao "Nada"
+       e estao dentro dos limites
+    3. Se nenhum vizinho disponivel: g_mapa_parar_geracao = true, retorna
+    4. Escolher direcao aleatoria entre as disponiveis
+    5. Marcar celula atual como "Caminho"
+    6. Marcar celula vizinha escolhida como "O"
+    7. Retorna (continua loop em gerar_mapa)
+
+5.3 ALOCACAO DE ELEMENTOS (COLOCAR_ELEMENTOS_MAPA)
+Apos gerar caminhos, percorre toda matriz:
+  Para cada celula "Caminho":
+    15% chance -> inimigo "E"
+    5% chance -> bau "B"
+    3% chance -> loja "L"
+    10% chance -> arvore "T"
+
+  Apos percorrer, coloca saida "S" na ultima celula "Caminho"
+  encontrada (percorrendo de tras para frente).
+
+5.4 LIMITACOES E BUGS CONHECIDOS
+- O algoritmo de busca do "O" e ineficiente: percorre a matriz INTEIRA
+  a cada passo para encontrar a posicao atual
+- Nao ha garantia de que todos os caminhos sejam conectados
+- Nao ha garantia de que a saida seja alcancavel
+- MAX_INIMIGOS=30 pode encher, impedindo geracao de novos inimigos no mapa
+  (mas o mapa apenas referencia chars, nao indices de inimigos)
+- O mapa nao regenera elementos ao visitar - uma vez que o jogador passa
+  por uma celula, ela vira "Caminho" permanentemente
+- Nao ha variedade de biomas/regioes - tudo e "Floresta Sombria"
+
+5.5 SIMBOLOGIA DO MAPA
+  "@" = jogador
+  " " = caminho livre
+  "." = area inacessivel (Nada)
+  "E" = inimigo
+  "B" = bau
+  "L" = loja
+  "S" = saida
+  "T" = arvore
+  "=" = borda horizontal
+  "|" = borda vertical
+
+5.6 RECRIACAO EM JS
+Para recriar em JavaScript, usar uma matriz 2D (array de arrays). O algoritmo
+de random walk pode ser implementado com loop while e Math.random(). Para
+melhorar a qualidade, considerar geracao de cavernas (cellular automata) ou
+BSP (Binary Space Partition) para salas conectadas por corredores.
+
+================================================================================
+6. SISTEMA DE MOVIMENTACAO
+================================================================================
+
+6.1 COMANDOS
+  W - mover para cima (x-1, y)
+  S - mover para baixo (x+1, y)
+  A - mover para esquerda (x, y-1)
+  D - mover para direita (x, y+1)
+
+6.2 LOGICA DE MOVIMENTO (mover_jogador)
+  1. Calcula nova posicao baseada na direcao
+  2. Verifica limites (0 <= x < tamanho_x, 0 <= y < tamanho_y)
+  3. Le o conteudo da celula destino
+  4. Se for "Nada": movimento negado (retorna)
+  5. Se for "E": inicia combate, inimigo nivel entre nivel-1 e nivel+2,
+     20% chance de elite. Apos combate (vitoria ou fuga), celula vira "Caminho"
+  6. Se for "B": abre bau, celula vira "Caminho"
+  7. Se for "L": entra na loja, celula vira "Caminho"
+  8. Se for "S": saida! Gera novo mapa, posiciona jogador no inicio
+  9. Se for "T": 30% chance de encontrar ouro (5-15g), celula vira "Caminho"
+  10. Se for "Caminho": 25% chance de evento aleatorio
+  11. Atualiza posicao do jogador
+  12. Incrementa acoes_totais, verifica ciclo tempo, atualiza fome
+
+6.3 EVENTOS DISPARADOS PELO MOVIMENTO
+- Encontro com inimigo -> combate
+- Bau -> loot
+- Loja -> compra/venda
+- Saida -> novo mapa
+- Arvore -> chance de ouro
+- Caminho vazio -> chance de evento aleatorio
+
+================================================================================
+7. SISTEMA DE COMBATE
+================================================================================
+
+7.1 INICIO
+Chamado por gerar_combate(nivel_inimigo, elite, boss)
+- Gera inimigo via gerar_inimigo()
+- Inicia loop enquanto g_em_combate
+
+7.2 TURNO DO JOGADOR
+Opcoes:
+  [1] Atacar: ataque_basico() - calcula dano, reduz durabilidade, aplica stagger
+  [2] Habilidades: menu_habilidades() - lista skills da classe, verifica CD/mana
+  [3] Itens: menu_itens_combate() - usa itens do inventario
+  [4] Fugir: tentar_fugir() - chance = 50 + agilidade (20 vs boss)
+
+7.3 TURNO DO INIMIGO
+  - Se atordoado (stunned): perde turno
+  - Se stagger <= 0: perde turno, recupera 50% stagger
+  - IA: cura se HP<30% (30% chance), buff se turno>5 (20% chance), ou ataque
+
+7.4 CALCULO DE DANO (aplicar_dano)
+  dano_base = forca_atacante * (skill_mult / 100)
+  critico: se rolagem <= critico_atacante, dano *= 2
+  elemental: multiplicador 0.5, 1.0, ou 2.0
+  defesa: reducao = defesa * 0.35 (cap 80%)
+  resistencia: se skill_mult > 150, reduz adicionalmente
+  dano_minimo = 1
+
+7.5 DEFESA DO JOGADOR (ia_inimigo)
+  ataque_inimigo - reducao(defesa_jogador) = dano
+  Noite: dano *= 1.3
+  Postura Defensiva (buff tipo 3): dano *= 0.6
+  Esquiva: chance de evitar ataque completamente
+  Desviar Projeteis (buff tipo 13): bloqueio total
+  Pele de Arvore (buff tipo 10): reflete 20% dano
+
+7.6 SISTEMA DE STAGGER
+  A cada ataque, reduz stagger (15 para ataque basico, variaveis para skills)
+  Bosses sofrem apenas 25% do stagger (valor/4)
+  Quando stagger = 0: inimigo perde 1 turno, recupera 50% stagger
+  Exibido na HUD como % da barra
+
+7.7 SISTEMA DE STUN
+  Habilidades como Bomba de Luz, Armadilha podem atordoar
+  Bosses tem 50% de resistencia a stun (Armadilha)
+
+7.8 CONDICOES DE VITORIA
+  Inimigo HP <= 0: chama combate_vitoria()
+  Recompensas: XP + Ouro + Loot + Progresso Quest
+
+7.9 CONDICOES DE DERROTA
+  Jogador HP <= 0: chama combate_derrota()
+  Consequencias:
+    - Se tiver Coracao de Fenix: revive com 20% HP, consome item
+    - Se for Paladino com Ressurreicao: revive com 100% HP, CD = 999
+    - Senao: perde 20% ouro, recupera 50% HP/Mana
+
+7.10 DURABILIDADE
+  Ataque basico: -1 durabilidade
+  Habilidade fisica: -2 durabilidade
+  Se durabilidade = 0: dano reduzido a 10% (mult = 10)
+  Reparo no Ferreiro: custa durabilidade_perdida / 2
+
+================================================================================
+8. SISTEMA DE ECONOMIA
+================================================================================
+
+8.1 OBTENCAO DE DINHEIRO
+- Inimigos: ouro_base = nivel*4 + aleatorio(0, nivel*3)
+  Elite: *2, Boss: *5, Noite: *1.5
+- Baus: 20-80g (40% chance), 50-150g (10% chance)
+- Arvores: 5-15g (30% chance)
+- Evento aleatorio (loot): 10-30g
+- Venda de itens: 30-70% do valor base
+
+8.2 GASTOS
+- Loja consumiveis: 10g (pao) a 750g (coracao fenix)
+- Ferreiro reparo: durabilidade_perdida/2
+- Ferreiro refino: +1=100g, +2=250g, +3=500g, +4=1000g, +5=2500g
+- Mercador Negro (noturno): 150g a 1000g
+
+8.3 VALORES DOS ITENS DA LOJA (completos)
+  [0] Pao Velho: 10g (efeito 1, valor 15) - fome +15
+  [1] Racao Viagem: 35g (efeito 1, valor 60) - fome +60
+  [2] Pocao Vida P: 25g (efeito 2, valor 30) - HP +30
+  [3] Pocao Mana P: 25g (efeito 3, valor 30) - MP +30
+  [4] Elixir Adrenalina: 50g (efeito 4, valor 20) - stamina +20
+  [5] Pocao Vida M: 60g (efeito 2, valor 80) - HP +80 (nivel 3+)
+  [6] Pocao Mana M: 60g (efeito 3, valor 80) - MP +80 (nivel 3+)
+  [7] Pedra Amolar: 80g (efeito 5, valor 100) - reparo 100% (nivel 2+)
+  [8] Bomba Luz: 120g (efeito 6, valor 1) - stun 1 turno (nivel 3+)
+  [9] Amuleto Sorte: 300g (efeito 7, valor 30) - +30% ouro drop (nivel 4+)
+  [10] Coracao Fenix: 750g (efeito 8, valor 20) - revive 20% (nivel 5+)
+  [11] Sangue Demonio: 150g (efeito 9, valor 50) - +50% ATK, -5HP/turno (noturno)
+  [12] Capa Invisibilidade: 400g (efeito 10, valor 100) - fuga 100% (noturno)
+  [13] Peraminho Proibido: 1000g (efeito 11, valor 1) - reset CDs (noturno, nivel 5+)
+
+8.4 INFLACAO E DESCONTO
+  Inflacao noturna: consumiveis +25% (multiplica preco por 1.25)
+  Desconto noturno (Mercador Negro): -20% (multiplica preco por 0.80)
+  Reputacao: a cada 500g gastos, +5% desconto (max 20%)
+    g_reputacao acumula o valor gasto; quando >=500, g_desconto+=5, reputacao=0
+
+8.5 BALANCEAMENTO FINANCEIRO
+  Ouro inicial: 50g
+  Item mais barato: 10g (pao)
+  Refino +5: 2500g
+  Coracao Fenix: 750g
+  Peraminho Proibido: 1000g
+
+  Considerando que inimigo nivel 1 da ~4-7g, o jogador precisa matar
+  varios inimigos para comprar itens basicos. A progressao economica e
+  lenta no inicio, acelerando com o nivel.
+
+  NOTA: O Amuleto da Sorte (efeito 7) nunca e implementado! Ele deveria
+  aumentar drop de ouro em 30%, mas nao ha logica em gerar_combate ou
+  gerar_inimigo que verifique este item.
+
+================================================================================
+9. SISTEMA DE BALANCEAMENTO
+================================================================================
+
+9.1 CURVA DE DIFICULDADE
+  Inimigos: HP cresce quadraticamente (nivel^2 * 2), ataque e defesa linearmente
+  Jogador: atributos crescem +2 por nivel, linearmente
+  XP necessario: cresce exponencialmente (1.45^nivel)
+
+  Isso significa que nos niveis altos, o XP necessario cresce muito mais
+  rapido que o XP obtido (nivel*15), criando uma "parede" de progressao.
+
+9.2 FORMULAS COMPLETAS DE CRESCIMENTO
+
+Jogador (por level up):
+  HP_max = 100 + vitalidade*15 + nivel*12
+  Mana_max = 50 + inteligencia*8 + nivel*10
+  Ataque_total = arma_dano + forca*1.8 + equip_forca*1.8 + nivel*8 + refino%
+  Defesa_total = defesa + armadura_defesa + equip_defesa + nivel*7
+
+Inimigo (por nivel):
+  HP = 50 + nivel*22 + nivel^2 * 2
+  ATK = 8 + nivel*3.5
+  DEF = 5 + nivel*2.2
+
+  Elite: HP*2.2, ATK*1.5, DEF*1.4, XP*2.5, Ouro*2
+  Boss: HP*5, ATK*2.2, DEF*1.8, XP*5, Ouro*5
+
+9.3 DISTRIBUICAO DE RECOMPENSAS
+  XP inimigo = nivel * 15 (elite * 2.5, boss * 5)
+  Ouro inimigo = nivel*4 + aleatorio(0, nivel*3)
+
+9.4 PONTOS DE ATENCAO
+  - O multiplicador de XP exponencial faz com que nivel 50 exija
+    aproximadamente 8.5 bilhoes de XP, praticamente inalcancavel
+  - Jogador ganha +2 em TODOS atributos por nivel, sem escolha do jogador
+  - Level cap de 50 com atributos iniciais ~8 significa nivel 50 tera ~106 em cada stat
+  - Stagger de boss e reduzido a 25%, mas stun (Armadilha) tem 50% chance
+  - O sistema de equipamento (equipar_item) ACUMULA bonus em vez de substituir
+
+================================================================================
+10. CLASSES DO JOGO
+================================================================================
+
+CLASSE: GUERREIRO (ID: 1)
+ATRIBUTOS INICIAIS: FOR 8, DEF 7, INT 3, AGI 4, VIT 6
+ARMA INICIAL: Espada Longa (dano 15)
+SKILLS: Golpe Pesado, Postura Defensiva, Grito de Guerra,
+        Redemoinho, Execucao
+PONTOS FORTES: Dano fisico alto, resistencia, buffs defensivos
+PONTOS FRACOS: Baixa inteligencia, poucas opcoes magicas
+ESTILO DE JOGO: Tanque/DPS corpo-a-corpo
+
+CLASSE: MAGO (ID: 2)
+ATRIBUTOS INICIAIS: FOR 3, DEF 4, INT 9, AGI 4, VIT 5
+ARMA INICIAL: Cajado Arcano (dano 10)
+SKILLS: Dardo Mistico, Escudo Arcano, Nevasca, Tempestade, Dreno de Mana
+PONTOS FORTES: Dano magico massivo, controle elemental
+PONTOS FRACOS: Baixa defesa, dependente de mana
+ESTILO DE JOGO: Caster/Controle
+
+CLASSE: LADINO (ID: 3)
+ATRIBUTOS INICIAIS: FOR 5, DEF 4, INT 4, AGI 9, VIT 4
+ARMA INICIAL: Adaga Dupla (dano 12)
+BONUS: Critico +10%, Esquiva +8%
+SKILLS: Punhalada, Esquiva, Bomba de Fumaca, Veneno, Assalto
+PONTOS FORTES: Chance critica, esquiva, efeitos de debuff
+PONTOS FRACOS: Baixa vitalidade e defesa
+ESTILO DE JOGO: DPS burst/Debuffer
+
+CLASSE: PALADINO (ID: 4)
+ATRIBUTOS INICIAIS: FOR 6, DEF 7, INT 5, AGI 3, VIT 7
+ARMA INICIAL: Martelo Sagrado (dano 12)
+SKILLS: Golpe de Luz, Cura Sagrada, Aura de Protecao, Julgamento, Ressurreicao
+PONTOS FORTES: Sustain, protecao, dano elemental Luz
+PONTOS FRACOS: Baixa agilidade
+ESTILO DE JOGO: Suporte/Sustainer
+NOTA: Ressurreicao tem CD 999, ou seja, uso unico por partida (a menos que
+haja reset de CDs)
+
+CLASSE: ARQUEIRO (ID: 5)
+ATRIBUTOS INICIAIS: FOR 5, DEF 4, INT 4, AGI 8, VIT 4
+ARMA INICIAL: Arco Curto (dano 13)
+BONUS: Precisao +95%, Critico +8%
+SKILLS: Tiro Rapido, Olho de Aguia, Armadilha, Chuva de Flechas,
+        Flecha Vampirica
+PONTOS FORTES: Alta precisao, critico, versatilidade
+PONTOS FRACOS: Baixa defesa e vitalidade
+ESTILO DE JOGO: Ranger/Precisao
+
+CLASSE: DRUIDA (ID: 6)
+ATRIBUTOS INICIAIS: FOR 5, DEF 6, INT 6, AGI 4, VIT 7
+ARMA INICIAL: Cajado Natural (dano 10)
+SKILLS: Chicote de Cipo, Pele de Arvore, Crescimento Exuberante,
+        Forma de Urso, Forca da Natureza
+PONTOS FORTES: Regeneracao, versatilidade, elemental Terra
+PONTOS FRACOS: Dano moderado
+ESTILO DE JOGO: Sustainer/Transformacao
+
+CLASSE: NECROMANTE (ID: 7)
+ATRIBUTOS INICIAIS: FOR 4, DEF 4, INT 8, AGI 4, VIT 5
+ARMA INICIAL: Cajado Sombrio (dano 10)
+SKILLS: Toque Sombrio, Erguer Esqueleto, Maldicao, Sacrificio,
+        Colheita de Almas
+PONTOS FORTES: Debuffs poderosos, dano elemental Trevas, burst (Sacrificio)
+PONTOS FRACOS: Baixa defesa, habilidades de alto risco/recompensa
+ESTILO DE JOGO: Debuffer/Burst
+
+CLASSE: MONGE (ID: 8)
+ATRIBUTOS INICIAIS: FOR 7, DEF 5, INT 4, AGI 7, VIT 5
+ARMA INICIAL: Luvas de Combate (dano 11)
+SKILLS: Palma de Ferro, Meditacao, Chute Relampago, Desviar Projeteis,
+        Golpe do Ponto Vital
+PONTOS FORTES: Dano que ignora defesa, turnos extras, bloqueio
+PONTOS FRACOS: Depende de ritmo (turnos extras)
+ESTILO DE JOGO: Brawler/Ritmo
+
+================================================================================
+11. HABILIDADES (COMPLETO)
+================================================================================
+
+NOTA: Tipo refere-se a categoria de efeito, nao ao elemento.
+Cada classe tem 5 habilidades, indices fixos:
+  Classe 1 (Guerreiro): indices 0-4
+  Classe 2 (Mago): indices 5-9
+  Classe 3 (Ladino): indices 10-14
+  Classe 4 (Paladino): indices 15-19
+  Classe 5 (Arqueiro): indices 20-24
+  Classe 6 (Druida): indices 25-29
+  Classe 7 (Necromante): indices 30-34
+  Classe 8 (Monge): indices 35-39
+
+SKILL 0 - Golpe Pesado (Guerreiro Nv1)
+  Tipo: 1 (dano fisico), Custo: 10 MP, CD: 1, Mult: 150%, Elemento: Neutro
+
+SKILL 1 - Postura Defensiva (Guerreiro Nv2)
+  Tipo: 2 (buff defensivo), Custo: 18 MP, CD: 5, Duracao: 3 turnos
+  Efeito: buff tipo 3, intensidade 40 (-40% dano recebido)
+
+SKILL 2 - Grito de Guerra (Guerreiro Nv3)
+  Tipo: 3 (buff ataque), Custo: 20 MP, CD: 5, Duracao: 4 turnos
+  Efeito: buff tipo 7, intensidade 25 (+25% dano)
+
+SKILL 3 - Redemoinho (Guerreiro Nv4)
+  Tipo: 1 (dano fisico), Custo: 28 MP, CD: 4, Mult: 180%, Elemento: Neutro
+
+SKILL 4 - Execucao (Guerreiro Nv5)
+  Tipo: 1 (dano fisico), Custo: 40 MP, CD: 7, Mult: 110%, Elemento: Neutro
+  Bonus: Se inimigo <30% HP, dano extra de 30% HP max (cap 2x dano do hit)
+
+SKILL 5 - Dardo Mistico (Mago Nv1)
+  Tipo: 4 (dano magico), Custo: 12 MP, CD: 1, Mult: 130%, Elemento: Neutro
+
+SKILL 6 - Escudo Arcano (Mago Nv2)
+  Tipo: 2 (buff defensivo), Custo: 20 MP, CD: 5, Duracao: 4 turnos
+  Efeito: buff tipo 4, intensidade = 50 + inteligencia*2
+
+SKILL 7 - Nevasca (Mago Nv3)
+  Tipo: 5 (debuff ambiente), Custo: 30 MP, CD: 6, Duracao: 5 turnos
+  Efeito: muda g_ambiente_atual, debuff tipo 5, intensidade 30
+
+SKILL 8 - Tempestade (Mago Nv4)
+  Tipo: 4 (dano magico), Custo: 40 MP, CD: 5, Mult: 200%, Elemento: Raio
+  Bonus: 20% chance de aplicar debuff Choque (tipo 4, 2 turnos, 10 dano)
+
+SKILL 9 - Dreno de Mana (Mago Nv5)
+  Tipo: 6 (dreno), Custo: 25 MP, CD: 3, Mult: 140%, Elemento: Neutro
+  Efeito: recupera 50% do custo em MP (12.5, arredondado)
+
+SKILL 10 - Punhalada (Ladino Nv1)
+  Tipo: 7 (critico fixo), Custo: 8 MP, CD: 1, Mult: 80%, Elemento: Neutro
+  Nota: Usa 50% critico fixo em vez do critico do jogador
+
+SKILL 11 - Esquiva (Ladino Nv2)
+  Tipo: 2 (buff defensivo), Custo: 16 MP, CD: 5, Duracao: 2 turnos
+  Efeito: buff tipo 5, intensidade 40 (+40% evasao)
+
+SKILL 12 - Bomba de Fumaca (Ladino Nv3)
+  Tipo: 8 (invisibilidade), Custo: 24 MP, CD: 6, Duracao: 1 turno
+  Efeito: buff tipo 8, intensidade 100
+
+SKILL 13 - Veneno (Ladino Nv4)
+  Tipo: 9 (veneno), Custo: 22 MP, CD: 4, Duracao: 5 turnos
+  Efeito: debuff veneno, dano por turno = 4 (2 elite, 1 boss)
+
+SKILL 14 - Assalto (Ladino Nv5)
+  Tipo: 10 (roubo vida), Custo: 35 MP, CD: 6, Mult: 140%
+  Efeito: dano + cura 15% do dano causado
+
+SKILL 15 - Golpe de Luz (Paladino Nv1)
+  Tipo: 1 (dano fisico), Custo: 12 MP, CD: 1, Mult: 120%, Elemento: Luz
+  Nota: Usa g_arma_elemento (que e sempre Neutro para armas basicas),
+  mas o dano elemental aplica verificar_fracao_elemental com elemento Luz
+
+SKILL 16 - Cura Sagrada (Paladino Nv2)
+  Tipo: 11 (cura), Custo: 30 MP, CD: 5
+  Efeito: cura 30% HP max
+
+SKILL 17 - Aura de Protecao (Paladino Nv3)
+  Tipo: 2 (buff defensivo), Custo: 25 MP, CD: 999, Duracao: 999
+  Efeito: buff tipo 6, intensidade 20 (+20 defesa permanente)
+
+SKILL 18 - Julgamento (Paladino Nv4)
+  Tipo: 12 (julgamento), Custo: 28 MP, CD: 4, Mult: 130%, Elemento: Luz
+  Efeito: dano + debuff tipo 6 (-50% ataque inimigo, 1 turno)
+
+SKILL 19 - Ressurreicao (Paladino Nv5)
+  Tipo: 13 (ressurreicao), Custo: 100 MP, CD: 999
+  Efeito: passiva, ativa ao morrer (em combate_derrota)
+
+SKILL 20 - Tiro Rapido (Arqueiro Nv1)
+  Tipo: 1 (dano fisico), Custo: 10 MP, CD: 1, Mult: 120%, Elemento: Neutro
+
+SKILL 21 - Olho de Aguia (Arqueiro Nv2)
+  Tipo: 14 (critico garantido), Custo: 20 MP, CD: 4, Duracao: 1
+  Efeito: buff tipo 9, +100% critico no proximo ataque
+
+SKILL 22 - Armadilha (Arqueiro Nv3)
+  Tipo: 15 (stun), Custo: 24 MP, CD: 5, Duracao: 1
+  Efeito: stun inimigo (50% chance em boss)
+
+SKILL 23 - Chuva de Flechas (Arqueiro Nv4)
+  Tipo: 1 (dano fisico), Custo: 35 MP, CD: 5, Mult: 190%, Elemento: Neutro
+
+SKILL 24 - Flecha Vampirica (Arqueiro Nv5)
+  Tipo: 16 (vampirismo), Custo: 40 MP, CD: 6, Mult: 150%, Elemento: Neutro
+  Efeito: cura = dano total (50% em boss)
+
+SKILL 25 - Chicote de Cipo (Druida Nv1)
+  Tipo: 1 (dano fisico), Custo: 12 MP, CD: 2, Mult: 110%, Elemento: Terra
+
+SKILL 26 - Pele de Arvore (Druida Nv2)
+  Tipo: 17 (reflexao), Custo: 22 MP, CD: 5, Duracao: 4 turnos
+  Efeito: buff tipo 10, intensidade 20 (reflete 20% dano)
+
+SKILL 27 - Crescimento Exuberante (Druida Nv3)
+  Tipo: 18 (regeneracao), Custo: 30 MP, CD: 6, Duracao: 5 turnos
+  Efeito: buff tipo 1, regenera 6 HP/turno (9 na floresta)
+
+SKILL 28 - Forma de Urso (Druida Nv4)
+  Tipo: 19 (transformacao), Custo: 35 MP, CD: 7, Duracao: 4 turnos
+  Efeito: buff tipo 11, +35% HP max e atual
+
+SKILL 29 - Forca da Natureza (Druida Nv5)
+  Tipo: 1 (dano fisico), Custo: 45 MP, CD: 7, Mult: 250%, Elemento: Terra
+
+SKILL 30 - Toque Sombrio (Necromante Nv1)
+  Tipo: 20 (debuff ataque), Custo: 10 MP, CD: 2, Mult: 90%, Elemento: Trevas
+  Efeito: debuff tipo 7 (-15% defesa, 3 turnos)
+
+SKILL 31 - Erguer Esqueleto (Necromante Nv2)
+  Tipo: 21 (invocacao), Custo: 25 MP, CD: 6, Duracao: 4 turnos
+  Efeito: buff tipo 12, dano = inteligencia*35% por turno
+
+SKILL 32 - Maldicao (Necromante Nv3)
+  Tipo: 22 (amplificador dano), Custo: 30 MP, CD: 7, Duracao: 3 turnos
+  Efeito: debuff tipo 8, +50% dano recebido (+25% em boss)
+
+SKILL 33 - Sacrificio (Necromante Nv4)
+  Tipo: 23 (sacrificio), Custo: 15 MP, CD: 4
+  Efeito: consome 20% HP atual (min 1 HP), causa 3x como dano
+
+SKILL 34 - Colheita de Almas (Necromante Nv5)
+  Tipo: 24 (colheita), Custo: 45 MP, CD: 8
+  Efeito: se dano mata inimigo: mana total, 50% HP; senao: dano 200%
+
+SKILL 35 - Palma de Ferro (Monge Nv1)
+  Tipo: 25 (ignora armadura), Custo: 10 MP, CD: 1, Mult: 120%
+  Efeito: dano = ataque_total * mult/100 (ignora defesa inimiga)
+
+SKILL 36 - Meditacao (Monge Nv2)
+  Tipo: 26 (recuperacao), Custo: 0 MP, CD: 4
+  Efeito: recupera 20% HP e 20% MP
+
+SKILL 37 - Chute Relampago (Monge Nv3)
+  Tipo: 27 (turno extra), Custo: 30 MP, CD: 6, Mult: 90%
+  Efeito: dano + turno extra (1x por rodada)
+
+SKILL 38 - Desviar Projeteis (Monge Nv4)
+  Tipo: 28 (bloqueio), Custo: 20 MP, CD: 5, Duracao: 1
+  Efeito: buff tipo 13, bloqueia 1 ataque
+
+SKILL 39 - Golpe do Ponto Vital (Monge Nv5)
+  Tipo: 29 (stagger alto), Custo: 45 MP, CD: 8, Mult: 180%
+  Efeito: dano (ignora armadura) + stagger 70
+
+================================================================================
+12. INIMIGOS
+================================================================================
+
+12.1 GERACAO
+Inimigos sao gerados por gerar_inimigo(nivel, elite, boss). Cada inimigo
+e armazenado permanentemente no vetor global g_inim_nome[] (max 30).
+
+12.2 TIPOS (NOME)
+Prefixos (8): Selvagem, Sombrio, Antigo, Corrompido, Feroz, Mistico,
+              Venenoso, Glacial
+Tipos (10): Goblin, Orc, Esqueleto, Lobo, Aranha, Morcego, Slime,
+            Morto-vivo, Demonio, Elemental
+
+Chars no mapa: G, O, S, W, A, B, L, Z, D, E
+
+12.3 CLASSIFICACAO
+g_inim_tipo: 1 = Comum, 2 = Elite, 3 = Boss
+Elite: 20% chance ao encontrar inimigo no mapa
+Boss: apenas quando chamado explicitamente (nunca no mapa normal)
+
+12.4 COMPORTAMENTO (IA)
+  - Se HP < 30% e 30% chance: cura 10% HP max
+  - Se turno > 5 e 20% chance: fortalece (+5 ataque)
+  - Senao: ataque normal com calculo de defesa/esquiva do jogador
+
+12.5 RECOMPENSAS
+  XP = nivel * 15
+  Ouro = nivel * 4 + aleatorio(0, nivel*3)
+  Elite: XP * 2.5, Ouro * 2
+  Boss: XP * 5, Ouro * 5
+  Noite: XP * 1.5, Ouro * 1.5
+
+================================================================================
+13. ITENS
+================================================================================
+
+13.1 CATEGORIAS
+  1 = Consumivel (pocoes, comida, elixires)
+  2 = Equipamento (armas, armaduras, acessorios)
+  3 = Material (nao usado)
+  4 = Quest (nao usado - itens de quest)
+  5 = Especial (pedra amolar, bombas, amuletos, etc.)
+
+13.2 RARIDADES
+  1 = Comum (58% loot)
+  2 = Incomum (25% loot)
+  3 = Raro (10% loot)
+  4 = Epico (4% loot)
+  5 = Lendario (2% loot)
+  6 = Mitico (1% loot)
+
+13.3 ITENS INICIAIS
+  - 3x Pocao de Vida P (cura 30 HP)
+  - 2x Pocao de Mana P (cura 30 MP)
+  - 5x Pao Velho (cura 15 Fome)
+
+13.4 SISTEMA DE PESO
+  Peso maximo = 30 + forca * 1.5
+  Item: peso varia (0.3 pao, 0.5 pocoes, 5.0 armas, 8.0 armaduras)
+  >100% = excessivo (sobrecarregado)
+  >80% = pesado (penalidades)
+
+13.5 SISTEMA DE EMPILHAMENTO
+  qtd_max = 10 por pilha
+  Ao adicionar item empilhavel, busca stack existente primeiro
+
+================================================================================
+14. FLUXO COMPLETO DO JOGO
+================================================================================
+
+1. INICIO
+   a. Inicializacao dos sistemas (habilidades, loja, eventos, quests)
+   b. Tela de titulo
+   c. Opcao: Novo Jogo ou Carregar
+   d. Entrada do nome do jogador
+   e. Selecao de classe (1-8)
+   f. Atribuicao de atributos iniciais conforme classe
+   g. Calculo de HP/Mana maximo
+   h. Itens iniciais no inventario
+   i. Geracao do primeiro mapa
+   j. Tutorial e combate tutorial (inimigo nivel 1)
+   k. Entrada no menu principal
+
+2. LOOP PRINCIPAL (menu_principal)
+   Enquanto jogando:
+     a. Exibe HUD de exploracao (stats resumidas)
+     b. Exibe mapa (grid 15x30 com @, espacos, inimigos, etc.)
+     c. Opcoes:
+        [1] Explorar: entra no menu de movimento (WASD)
+        [2] Inventario: ver/ usar/ equipar/ descartar itens
+        [3] Status: ver todas as stats detalhadas
+        [4] Quests: ver progresso das missoes
+        [5] Loja: comprar/vender itens
+        [6] Salvar: gerar codigo de save
+        [7] Sair: pergunta se quer salvar, depois encerra loop
+
+3. EXPLORACAO (movimento)
+   a. Move jogador (WASD) no grid
+   b. Ao mover:
+      - Se inimigo: combate por turnos
+      - Se bau: loot aleatorio
+      - Se loja: abre loja
+      - Se saida: gera novo mapa
+      - Se arvore: chance de ouro
+      - Se caminho vazio: chance de evento aleatorio
+   c. A cada movimento: reduz fome, conta acao, alterna dia/noite a cada 5
+
+4. COMBATE
+   Loop ate vitoria ou derrota:
+     a. Turno jogador: atacar / habilidade / item / fugir
+     b. Verifica se inimigo morreu
+     c. Turno inimigo (IA)
+     d. Verifica se jogador morreu
+     e. Processa efeitos (buffs/debuffs)
+     f. Reduz cooldowns
+
+5. PROGRESSAO
+   a. Acumular XP derrotando inimigos
+   b. Check_lvl(): quando XP suficiente, sobe nivel
+   c. A cada nivel: +2 todos atributos, recalcula HP/Mana, restaura ao max
+   d. Niveis 1-5: desbloqueia nova habilidade
+   e. Level maximo: 50 (praticamente inalcancavel)
+
+6. MORTE
+   a. Se Coracao de Fenix: revive com 20% HP
+   b. Se Paladino com Ressurreicao: revive 100% HP
+   c. Senao: perde 20% ouro, retorna com 50% HP/Mana
+
+================================================================================
+15. REGRAS DO MUNDO
+================================================================================
+
+15.1 CICLO DIA/NOITE
+- Alterna a cada 5 acoes totais
+- Noite: inimigos +30% ataque, +50% XP, +50% ouro
+- Noite: consumiveis +25% preco (inflacao)
+- Noite: Mercador Negro aparece com descontos de 20%
+
+15.2 FOME
+- Varia de 0 a 100
+- Reduz -4 por acao em combate, -2 por acao em exploracao
+- Se <= 0: HP comeca a cair (efeito de exaustao -50% atributos)
+- Se < 10: exausto
+- Se < 25: nao exausto mas alerta
+- Restaurada por itens (pao, racao)
+
+15.3 ESTADO DE EXAUSTAO
+- g_exausto = verdadeiro quando fome <= 10
+- Exibe "[EXAUSTO] Atributos reduzidos!" na HUD
+- NOTA: O jogo nao implementa a reducao de atributos! O prompt original
+  menciona -50% atributos, mas o codigo nao aplica essa reducao em lugar algum.
+  Apenas exibe a mensagem. ISTO E UM BUG/OMISSAO.
+
+15.4 LIMITES GLOBAIS
+- Level max: 50
+- MAX_SLOTS: 30 slots no inventario
+- Peso maximo: 30 + forca*1.5
+- MAX_BUFFS: 10 buffs simultaneos
+- MAX_DEBUFFS: 9 debuffs (3*3) simultaneos
+- MAX_INIMIGOS: 30 inimigos no vetor (nunca e limpo)
+- MAX_HABILIDADES: 50 (40 usadas)
+- MAX_ITENS_LOJA: 40 (14 usados)
+- MAX_EVENTOS: 50 (6 usados)
+- MAX_QUESTS: 20 (2 usados)
+
+15.5 LIMITES DE COMBATE
+- Limite de reducao de dano: 80%
+- Limite de critico: 80%
+- Limite de esquiva: 75%
+- Stagger max = HP/4
+- Turno extra: max 1 por rodada
+
+================================================================================
+16. CONCEITOS IMPORTANTES
+================================================================================
+
+16.1 ARQUITETURA OBSERVADA
+O codigo usa uma abordagem "estruturada global" tipica do Portugol Studio:
+- Todas as variaveis sao globais (singleton pattern implicito)
+- Nao ha uso de registros (structs) - o prompt original pedia, mas o
+  codigo final nao implementou
+- Dados sao armazenados em vetores paralelos (arrays de mesmo indice)
+- Funcoes sao procedurais, sem encapsulamento
+- A variavel global "dano" e usada como temporary, o que e propenso a bugs
+
+16.2 PADROES DE DESIGN
+- Sistema de eventos: tabela de eventos com rolagem de chance
+- Sistema de skills: maquina de estados (tipo 1-29) com dispatch central
+- Loop de jogo: menu_principal -> menu_exploracao -> eventos/combate
+
+16.3 INTENCOES DO DESENVOLVEDOR (DO PROMPT ORIGINAL)
+O prompt pedia:
+- Registros para Jogador, Inimigo, Item, Skill, Quest -> NAO implementado
+- Sistema de crafting -> NAO implementado
+- Loot procedural com prefixo + tipo + elemento + raridade -> PARCIAL
+- Sistema completo de buff/debuff com prioridades -> PARCIAL
+- IA de inimigos avancada -> BASICA
+- Sistema de troca com precos variaveis -> SIM
+- Save/Load completo com parse -> INCOMPLETO
+- Slots de equipamento (arma, armadura, capacete, bota, luva, anel, amuleto)
+  -> APENAS arma e armadura
+- Sistema de peso com estados (leve, medio, pesado, sobrecarregado)
+  -> PARCIAL (so mensagem)
+- Morte com perda de itens -> NAO (so perde ouro)
+
+16.4 DIFERENCAS ENTRE PROMPT E CODIGO
+- Prompt: Tiro Rapido = 2 ataques de 60%. Codigo: 1 ataque de 120%.
+- Prompt: Postura Defensiva reduz dano em 40%. Codigo: buff tipo 3
+  com intensidade 40, mas o efeito real e *0.6 na ia_inimigo (correto).
+- Prompt: Cura Sagrada = 40% HP. Codigo: 30% HP.
+- Prompt: Forca da Natureza invoca raizes. Codigo: apenas dano.
+- Prompt: Registros. Codigo: sem registros.
+- Save system: prompt pedia vetor de inteiros. Codigo: string concatenada.
+
+================================================================================
+17. GUIA DE MIGRACAO PARA HTML/CSS/JS
+================================================================================
+
+17.1 ESTRUTURA GERAL RECOMENDADA
+Arquivo unico HTML com:
+- HTML: estrutura da pagina (divs para cada tela)
+- CSS: estilizacao com tema medieval/escuro
+- JS: toda a logica do jogo
+
+17.2 SISTEMA DE VARIAVEIS GLOBAIS
+Original (Portugol): variaveis globais soltas
+Recomendado (JS): Um objeto ou classe GameState:
+  const game = {
+    player: { nome, classe, nivel, xp, ouro, forca, ... },
+    inventory: [],
+    map: { grid: [], x: 0, y: 0 },
+    combat: { active: false, enemy: null },
+    buffs: [],
+    debuffs: [],
+    skills: [],
+    ...
+  };
+
+17.3 SISTEMA DE MAPA
+Original: g_mapa_matriz[15][30] de strings
+Recomendado: Array 2D de objetos/enums
+  const TILE = { WALL: 0, PATH: 1, ENEMY: 2, CHEST: 3, ... };
+  let map = Array(15).fill().map(() => Array(30).fill(TILE.WALL));
+- Algoritmo de random walk funciona identico
+- Renderizacao: canvas 2D ou tabela/divs CSS grid
+- Movimento: event listeners para teclas WASD
+
+17.4 SISTEMA DE COMBATE
+Original: loop procedural com funcoes
+Recomendado: maquina de estados (state machine) com renderizacao condicional
+  const states = { EXPLORE: 0, COMBAT: 1, SHOP: 2, INVENTORY: 3, ... };
+  let state = states.EXPLORE;
+  No render loop: switch(state) { case COMBAT: mostra HUD combate; ... }
+
+17.5 SISTEMA DE CALCULOS
+As formulas de dano, HP, XP, etc. sao identicas. JS nao requer mudancas.
+Cuidado com arredondamento: usar Math.round().
+
+17.6 SISTEMA DE TEMPO
+Original: contagem de acoes (g_acoes_totais % 5)
+Recomendado: mesma logica, mas pode adicionar timer real opcional
+
+17.7 SISTEMA DE SALVAMENTO
+Original: codigo textual com parse incompleto
+Recomendado: localStorage (JSON.stringify(gameState))
+
+17.8 DIFICULDADES DA CONVERSAO
+- Portugol usa indices 1-based para arrays? Nao, e 0-based.
+  Cuidado: menus exibem indices como i+1, mas internamente e 0-based.
+- Portugol usa "e" e "ou" em vez de "&&" e "||"
+- Portugol "enquanto" = while, "para" = for, "se" = if
+- Portugol "senao" = else, "verdadeiro"/"falso" = true/false
+- loop "para (i = 0; i < x; i = i + 1)" se traduz para "for (let i = 0; i < x; i++)"
+- leia() = prompt() ou input.
+- escreva() = console.log() OU innerHTML acumulado
+- limpa() = limpar div
+- Util.aguarde(ms) = setTimeout() ou await sleep()
+- Util.sorteia(min, max) = Math.floor(Math.random() * (max - min + 1)) + min
+- Matematica.arredondar(valor, 0) = Math.round(valor)
+
+17.9 SUGESTOES DE MELHORIAS PARA A VERSAO HTML
+- Adicionar interface grafica (botoes, paineis) em vez de apenas texto
+- Implementar save completo com localStorage
+- Corrigir bug do equipar_item (remover bonus antigo)
+- Implementar o parser de save code
+- Adicionar som/musica com Web Audio API
+- Implementar o sistema de peso completo com penalidades
+- Implementar o Amuleto da Sorte (drop de ouro +30%)
+
+================================================================================
+18. DEPENDENCIAS ENTRE SISTEMAS
+================================================================================
+
+SISTEMA          DEPENDE DE                 E USADO POR
+---------        -----------                ----------
+Constantes       Nada                        Todos os sistemas
+Variaveis Globais Nada                        Todos os sistemas
+Inicializacao    Constantes                  Funcao inicio()
+Habilidades      Vetores globais             Menu/menu_combate, usar_habilidade
+Loja             Constantes, Inventario,     Menu_principal, evento_aleatorio,
+                 Economia                    exploracao (loja no mapa)
+Eventos          Constantes, Combate,        Movimentacao (evento_aleatorio)
+                 Economia, Quests
+Quests           Constantes, Combate         Eventos, combate_vitoria
+Inventario       Constantes, Calculos        Loja, Combate, Baus, Loot
+Mapa             Constantes, Combate,        Menu_principal, menu_exploracao
+                 Loja, Eventos
+Combate          Habilidades, Inimigos,      Mapa, Eventos, Tutorial
+                 Inventario, Calculos,
+                 Buffs/Debuffs
+Calculos         Constantes, Variaveis       Combate, Level Up, Buffs
+Buffs/Debuffs    Constantes                  Combate (turnos), Efeitos
+Inimigos         Constantes, Calculos        Combate (gerar_inimigo)
+Economia         Loja, Inimigos, Inventario  Loja, Combate, Venda
+Level Up         Calculos, Variaveis         Check_lvl (apos combate)
+Save/Load        Variaveis                   Menu_principal, inicio()
+
+SISTEMAS QUE NAO CONVERSAM DIRETAMENTE:
+- Quests nao interagem com inventario
+- Mapa nao interage com buffs/debuffs (exceto ambiente)
+- Eventos nao interagem com habilidades
+
+================================================================================
+19. PSEUDOCODIGO DOS PRINCIPAIS SISTEMAS
+================================================================================
+
+19.1 GERACAO DE MAPA (PSEUDOCODIGO)
+
+funcao gerar_mapa():
+    para i = 0 ate tamanho_x:
+        para j = 0 ate tamanho_y:
+            matriz[i][j] = "Nada"
+
+    startX = aleatorio(1, tamanho_x - 2)
+    posX = startX
+    posY = 0
+    matriz[posX][posY] = "O"
+
+    parar = falso
+    enquanto nao parar:
+        // encontrar "O"
+        pos = encontrar_matriz("O")
+        
+        // verificar vizinhos validos
+        vizinhos = []
+        se pos.y-1 >= 0 E matriz[pos.x][pos.y-1] == "Nada":
+            vizinhos.adicionar("cima")
+        se pos.y+1 < tamanho_y E matriz[pos.x][pos.y+1] == "Nada":
+            vizinhos.adicionar("baixo")
+        se pos.x+1 < tamanho_x E matriz[pos.x+1][pos.y] == "Nada":
+            vizinhos.adicionar("direita")
+        se pos.x-1 >= 0 E matriz[pos.x-1][pos.y] == "Nada":
+            vizinhos.adicionar("esquerda")
+        
+        se vizinhos.vazio():
+            parar = verdadeiro
+            senao:
+                direcao = vizinhos[aleatorio(0, vizinhos.tamanho-1)]
+                matriz[pos.x][pos.y] = "Caminho"
+                mover pos na direcao
+                matriz[pos.x][pos.y] = "O"
+
+    // Colocar elementos especiais
+    para cada celula "Caminho" na matriz:
+        roll = aleatorio(1, 100)
+        se roll <= 15: celula = "E"   // inimigo
+        senao se roll <= 20: celula = "B"  // bau
+        senao se roll <= 23: celula = "L"  // loja
+        senao se roll <= 33: celula = "T"  // arvore
+
+    // Colocar saida no ultimo caminho
+    percorrer matriz de tras para frente:
+        se celula == "Caminho":
+            celula = "S"
+            retorna
+
+19.2 MOVIMENTACAO (PSEUDOCODIGO)
+
+funcao mover_jogador(direcao):
+    novoX = posX
+    novoY = posY
+    
+    se direcao == "cima": novoX--
+    senao se direcao == "baixo": novoX++
+    senao se direcao == "esquerda": novoY--
+    senao se direcao == "direita": novoY++
+
+    se novoX fora dos limites: retorna
+    se novoY fora dos limites: retorna
+
+    celula = matriz[novoX][novoY]
+
+    se celula == "Nada": retorna
+
+    escolha celula:
+        caso "E":
+            nivel_inimigo = nivel_jogador + aleatorio(-1, 2)
+            elite = aleatorio(1, 100) <= 20
+            iniciar_combate(nivel_inimigo, elite, falso)
+            matriz[novoX][novoY] = "Caminho"
+        
+        caso "B":
+            abrir_bau()
+            matriz[novoX][novoY] = "Caminho"
+        
+        caso "L":
+            abrir_loja()
+            matriz[novoX][novoY] = "Caminho"
+        
+        caso "S":
+            escrever("Gerando novo mapa...")
+            gerar_mapa()
+            posX = aleatorio(1, tamanho_x-2)
+            posY = 0
+        
+        caso "T":
+            se aleatorio(1, 100) <= 30:
+                ouro += aleatorio(5, 15)
+            matriz[novoX][novoY] = "Caminho"
+        
+        caso "Caminho":
+            se aleatorio(1, 100) <= 25:
+                evento_aleatorio()
+
+    posX = novoX
+    posY = novoY
+    total_acoes++
+    verificar_ciclo_tempo()
+    atualizar_fome()
+
+19.3 COMBATE (PSEUDOCODIGO)
+
+funcao gerar_combate(nivel, elite, boss):
+    em_combate = verdadeiro
+    turno = 0
+    idx = gerar_inimigo(nivel, elite, boss)
+    
+    enquanto em_combate:
+        turno++
+        
+        // Turno jogador
+        exibir_hud()
+        escrever("[1] Atacar, [2] Habilidades, [3] Itens, [4] Fugir")
+        ler escolha
+        
+        se escolha == 1:
+            dano = atacar_basico(idx)
+        senao se escolha == 2:
+            menu_habilidades(idx)
+        senao se escolha == 3:
+            usar_item_combate()
+        senao se escolha == 4:
+            tentar_fugir()
+        
+        se inimigo_morto(): vitoria(idx); retorna
+        se jogador_morto(): derrota(); retorna
+        
+        // Turno inimigo
+        se nao atordoado E stagger > 0:
+            ia_inimigo(idx)
+        
+        se jogador_morto(): derrota(); retorna
+        
+        // Fim do turno
+        atualizar_efeitos()
+        processar_efeitos_continuos()
+        reduzir_cooldowns()
+        turno_extra_rodada = falso
+
+19.4 CALCULO DE DANO (PSEUDOCODIGO)
+
+funcao aplicar_dano(forca_atk, precisao, critico, elem_atk,
+                     defesa_def, resistencia_def, elem_def, mult, forcar_crit):
+    
+    // Precisao
+    se aleatorio(1, 100) > precisao:
+        escrever("Errou!")
+        retorna 0
+    
+    // Dano base
+    dano = forca_atk * (mult / 100.0)
+    
+    // Critico
+    se forcar_crit OU aleatorio(1, 100) <= critico:
+        dano *= 2.0
+        critico_ativado = verdadeiro
+    
+    // Elemental
+    mult_elem = verificar_fraqueza(elem_atk, elem_def)
+    dano *= mult_elem
+    
+    // Defesa
+    reducao = min(defesa_def * 0.35, 80)
+    dano -= dano * (reducao / 100.0)
+    
+    // Resistencia (skills > 150% mult)
+    se mult > 150:
+        dano -= dano * (resistencia_def * 0.25 / 100.0)
+    
+    dano = max(dano, 1)
+    dano_final = arredondar(dano)
+    
+    escrever("Dano: ", dano_final)
+    se critico_ativado: escrever(" CRITICO!")
+    se mult_elem > 1: escrever(" Super eficaz!")
+    se mult_elem < 1: escrever(" Resistente!")
+    
+    retorna dano_final
+
+19.5 ECONOMIA (PSEUDOCODIGO)
+
+funcao loja_consumiveis():
+    para cada item na loja:
+        se item.categoria == CONSUMIVEL OU ESPECIAL:
+            preco = item.preco_base
+            
+            // Inflacao noturna
+            se ciclo == "Noite" E item.categoria == CONSUMIVEL:
+                preco *= 1.25
+            se ciclo == "Noite" E item.eh_mercador_negro:
+                preco *= 0.80
+            
+            // Desconto reputacao
+            preco -= preco * (g_desconto / 100)
+            
+            exibir item.nome + " - " + preco + "g"
+    
+    ler escolha
+    se escolha valida:
+        verificar nivel >= item.nivel_requerido
+        verificar se item noturno so aparece a noite
+        verificar ouro >= preco
+        
+        se tudo ok:
+            ouro -= preco
+            reputacao += preco
+            se reputacao >= 500:
+                desconto += 5
+                reputacao = 0
+                se desconto > 20: desconto = 20
+            adicionar_ao_inventario(item)
+
+19.6 LEVEL UP (PSEUDOCODIGO)
+
+funcao check_lvl():
+    enquanto xp >= xp_proximo E nivel < LEVEL_MAX:
+        nivel++
+        xp -= xp_proximo
+        xp_proximo = recalcular_xp_proximo()
+        
+        forca += 2
+        defesa += 2
+        inteligencia += 2
+        agilidade += 2
+        vitalidade += 2
+        
+        hp_max = recalcular_hp_max()
+        mana_max = recalcular_mana_max()
+        hp_atual = hp_max
+        mana_atual = mana_max
+        
+        exibir_tela_level_up()
+        
+        se nivel <= 5: // desbloqueou habilidade
+            exibir("Nova habilidade!")
+
+================================================================================
+20. CHECKLIST FINAL PARA A IA RESPONSAVEL PELA RECRIACAO
+================================================================================
+
+[ ] Tela de titulo com nome do jogo e versao
+[ ] Menu inicial: Novo Jogo / Carregar Jogo
+[ ] Entrada de nome do jogador
+[ ] Selecao de 8 classes com descricao e atributos unicos
+[ ] Atribuicao de atributos iniciais por classe
+[ ] Calculo de HP/Mana maximo
+[ ] Itens iniciais no inventario (3 pocoes vida, 2 mana, 5 paes)
+[ ] Sistema de inicializacao (habilidades, loja, eventos, quests)
+[ ] Mapa procedural 15x30 com algoritmo de random walk
+[ ] Simbolos no mapa: @, espacos, ., E, B, L, S, T
+[ ] Renderizacao do mapa com bordas
+[ ] Movimento WASD com colisao (Nada = parede)
+[ ] Combate ao encontrar "E" (inimigo no mapa)
+[ ] Bau "B" com loot (ouro, pocoes, equipamentos)
+[ ] Loja "L" no mapa
+[ ] Saida "S" gera novo mapa
+[ ] Arvore "T" com chance de ouro
+[ ] Eventos aleatorios ao mover em caminho vazio (25% chance)
+[ ] 6 tipos de eventos: combate, loot, mercador, armadilha, quest, fonte
+[ ] Ciclo dia/noite a cada 5 acoes
+[ ] Sistema de fome (0-100, reduz com acoes)
+[ ] Estado de exaustao quando fome baixa (com penalidades reais)
+[ ] 8 classes com 5 habilidades cada (total 40 habilidades)
+[ ] Desbloqueio de habilidades por nivel (1-5)
+[ ] Sistema de cooldown por turnos
+[ ] Sistema de mana com custo por habilidade
+[ ] 29 tipos diferentes de efeitos de habilidades
+[ ] Combate por turnos com opcoes: Atacar, Habilidades, Itens, Fugir
+[ ] Calculo de dano com: precisao, critico, elemental, defesa, resistencia
+[ ] Sistema elemental: Fogo > Gelo > Terra > Fogo, Luz <> Trevas
+[ ] Sistema de Stagger (barra que ao zerar atordoa)
+[ ] Sistema de Stun
+[ ] IA de inimigo com cura, buff e ataque
+[ ] 3 tipos de inimigo: Comum, Elite, Boss
+[ ] Loot procedural com raridade (Comum a Mitico)
+[ ] 8 prefixos + 10 tipos de inimigo
+[ ] Sistema de buffs/debuffs por turnos (ate 10 buffs, 9 debuffs)
+[ ] 3 tipos de dano continuo: Veneno, Queimadura, Sangramento
+[ ] Regeneracao de HP e Mana por turno
+[ ] Baus com loot (ouro, pocoes, equipamentos raros)
+[ ] Inventario com 30 slots
+[ ] Sistema de peso (max = 30 + forca*1.5)
+[ ] Itens empilhaveis (max 10 por pilha)
+[ ] 5 categorias de item: Consumivel, Equipamento, Material, Quest, Especial
+[ ] 6 raridades: Comum, Incomum, Raro, Epico, Lendario, Mitico
+[ ] Uso de itens em combate (pocoes, bombas, etc.)
+[ ] Equipamento de arma e armadura
+[ ] Sistema de durabilidade de arma (100-0, -1 por ataque, -2 por skill)
+[ ] Dano reduzido a 10% se arma quebrada
+[ ] Venda de itens (30% comum, 50% raro+, 70% lendario+)
+[ ] Loja com 14 itens (consumiveis, especiais, mercador negro)
+[ ] Ferreiro: reparo (custo = durab_perdida/2)
+[ ] Ferreiro: refino (+1 a +5 com custos: 100, 250, 500, 1000, 2500g)
+[ ] Bonus de refino: +10%, +25%, +40%, +60%, +100%
+[ ] Inflacao noturna (+25% consumiveis)
+[ ] Mercador Negro noturno (-20% preco, 3 itens especiais)
+[ ] Sistema de reputacao/desconto (a cada 500g gastos, +5% ate 20%)
+[ ] 2 quests (derrotar inimigos)
+[ ] Ativacao de quests por evento
+[ ] Level up: +2 todos atributos, HP/Mana cheios
+[ ] Formula de XP exponencial (1.45^nivel)
+[ ] Level max: 50
+[ ] Tela de status detalhado
+[ ] HUD de combate completa (HP, MP, stamina, fome, buffs, debuffs, stagger)
+[ ] Sistema de save com codigo textual
+[ ] 3 itens de revive: Coracao de Fenix, Ressurreicao (Paladino)
+[ ] Morte: perde 20% ouro, volta com 50% HP/Mana
+[ ] Variavel global "dano" evitada (usar variavel local)
+[ ] Bug do equipar_item corrigido (nao acumular bonus)
+[ ] Implementacao real do parser de save
+[ ] Amuleto da Sorte implementado (+30% ouro drop)
+[ ] Penalidades de exaustao realmente aplicadas (-50% atributos)
+[ ] Estados de peso implementados (leve/medio/pesado/sobrecarregado)
+
+================================================================================
+FIM DA DOCUMENTACAO
+================================================================================
