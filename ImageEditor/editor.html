@@ -573,6 +573,7 @@ const EditorState = {
     activeToolName: 'pencil',
     isDrawing: false, currentStroke: null,
     isPanning: false, panStart: null, panOffsetStart: null,
+    middleButtonPanning: false, mbPanStart: null, mbPanOffsetStart: null,
     fadingStrokes: [], currentFadingStroke: null, fadingLoopId: null, _fsIdCounter: 0, _hiddenFsIds: [],
   },
   history: {
@@ -3692,19 +3693,20 @@ class App {
     DOM['canvas-area'].addEventListener('mousedown', (e) => {
       if (e.button === 1) {
         e.preventDefault();
-        this._mbPanning = true;
-        this._mbStart = { x: e.clientX, y: e.clientY };
-        this._mbOffsetStart = { x: EditorState.canvas.offsetX, y: EditorState.canvas.offsetY };
-        this.cursorManager.setHandDragging(true);
+        const s = EditorState.tools;
+        s.middleButtonPanning = true;
+        s.mbPanStart = { x: e.clientX, y: e.clientY };
+        s.mbPanOffsetStart = { x: EditorState.canvas.offsetX, y: EditorState.canvas.offsetY };
         return;
       }
       if (this._handleStampModeMouseDown(e)) return;
       this.toolManager.handleMouseDown(e);
     });
     DOM['canvas-area'].addEventListener('mousemove', (e) => {
-      if (this._mbPanning) {
-        EditorState.canvas.offsetX = this._mbOffsetStart.x + (e.clientX - this._mbStart.x);
-        EditorState.canvas.offsetY = this._mbOffsetStart.y + (e.clientY - this._mbStart.y);
+      const s = EditorState.tools;
+      if (s.middleButtonPanning) {
+        EditorState.canvas.offsetX = s.mbPanOffsetStart.x + (e.clientX - s.mbPanStart.x);
+        EditorState.canvas.offsetY = s.mbPanOffsetStart.y + (e.clientY - s.mbPanStart.y);
         this.updateTransform();
         return;
       }
@@ -3726,9 +3728,8 @@ class App {
       }
     });
     document.addEventListener('mouseup', (e) => {
-      if (e.button === 1 && this._mbPanning) {
-        this._mbPanning = false;
-        this.cursorManager.setHandDragging(false);
+      if (e.button === 1 && EditorState.tools.middleButtonPanning) {
+        EditorState.tools.middleButtonPanning = false;
         return;
       }
       if (this._handleStampModeMouseUp(e)) return;
