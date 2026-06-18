@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChatBot IA</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg-primary:#0d1117;--bg-secondary:#161b22;--bg-tertiary:#21262d;--bg-hover:#30363d;--border-color:#30363d;--text-primary:#e6edf3;--text-secondary:#8b949e;--text-muted:#6e7681;--accent:#58a6ff;--accent-hover:#79c0ff;--user-msg-bg:#1f6feb;--user-msg-text:#fff;--bot-msg-bg:#21262d;--bot-msg-text:#e6edf3;--success:#3fb950;--danger:#f85149;--shadow:0 4px 24px rgba(0,0,0,0.3);--radius:12px;--radius-sm:8px;--transition:0.2s ease;--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;--header-height:64px;--max-width:800px}
+html,body{height:100%;width:100%;font-family:var(--font);background:var(--bg-primary);color:var(--text-primary);overflow:hidden}
+.chat-container{display:flex;flex-direction:column;height:100%;max-width:var(--max-width);margin:0 auto;position:relative}
+.chat-header{display:flex;align-items:center;gap:12px;padding:12px 20px;min-height:var(--header-height);background:var(--bg-secondary);border-bottom:1px solid var(--border-color);flex-shrink:0}
+.chat-header-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a371f7);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.chat-header-info{flex:1;min-width:0}
+.chat-header-info h1{font-size:16px;font-weight:600;line-height:1.3}
+.chat-header-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary)}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.5}}
+.btn-clear{background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:8px;border-radius:var(--radius-sm);font-size:18px;transition:background var(--transition),color var(--transition);line-height:1}
+.btn-clear:hover{background:var(--bg-hover);color:var(--danger)}
+.messages-area{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
+.messages-area::-webkit-scrollbar{width:6px}
+.messages-area::-webkit-scrollbar-track{background:transparent}
+.messages-area::-webkit-scrollbar-thumb{background:var(--bg-hover);border-radius:3px}
+.messages-area::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+.message{display:flex;flex-direction:column;max-width:85%;animation:msg-in .3s ease;word-wrap:break-word;overflow-wrap:break-word}
+@keyframes msg-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.message.user{align-self:flex-end;align-items:flex-end}
+.message.bot{align-self:flex-start;align-items:flex-start}
+.message-bubble{padding:10px 14px;border-radius:18px;line-height:1.5;font-size:15px;position:relative}
+.message.user .message-bubble{background:var(--user-msg-bg);color:var(--user-msg-text);border-bottom-right-radius:6px}
+.message.bot .message-bubble{background:var(--bot-msg-bg);color:var(--bot-msg-text);border-bottom-left-radius:6px}
+.message-time{font-size:11px;color:var(--text-muted);margin-top:4px;padding:0 4px}
+.typing-indicator{display:none;align-self:flex-start;align-items:center;gap:4px;padding:12px 18px;background:var(--bot-msg-bg);border-radius:18px;border-bottom-left-radius:6px;margin-bottom:4px}
+.typing-indicator.active{display:flex}
+.typing-dot{width:8px;height:8px;border-radius:50%;background:var(--text-muted);animation:typing-bounce 1.4s ease-in-out infinite}
+.typing-dot:nth-child(2){animation-delay:0.2s}
+.typing-dot:nth-child(3){animation-delay:0.4s}
+@keyframes typing-bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
+.input-area{display:flex;align-items:flex-end;gap:8px;padding:12px 20px;background:var(--bg-secondary);border-top:1px solid var(--border-color);flex-shrink:0}
+.input-wrapper{flex:1;display:flex;flex-direction:column;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius);transition:border-color var(--transition);overflow:hidden}
+.input-wrapper:focus-within{border-color:var(--accent)}
+.chat-input{width:100%;padding:12px 16px;background:transparent;border:none;color:var(--text-primary);font-family:var(--font);font-size:15px;line-height:1.5;resize:none;outline:none;max-height:150px}
+.chat-input::placeholder{color:var(--text-muted)}
+.char-counter{text-align:right;padding:0 12px 6px;font-size:11px;color:var(--text-muted)}
+.char-counter.warning{color:#d29922}
+.char-counter.danger{color:var(--danger)}
+.btn-send{width:44px;height:44px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background var(--transition),transform var(--transition),opacity var(--transition)}
+.btn-send:hover{background:var(--accent-hover);transform:scale(1.05)}
+.btn-send:active{transform:scale(0.95)}
+.btn-send:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+@media(max-width:600px){.chat-header{padding:10px 14px}.messages-area{padding:12px 14px}.input-area{padding:10px 14px}.message{max-width:92%}.message-bubble{font-size:14px;padding:8px 12px}.chat-header-info h1{font-size:14px}}
+@media(min-width:1200px){.chat-container{border-left:1px solid var(--border-color);border-right:1px solid var(--border-color)}}
+</style>
+</head>
+<body>
+<div class="chat-container" id="chatContainer">
+  <header class="chat-header">
+    <div class="chat-header-avatar">&#x1F916;</div>
+    <div class="chat-header-info">
+      <h1>Assistente IA</h1>
+      <span class="chat-header-status">
+        <span class="status-dot"></span> Online
+      </span>
+    </div>
+    <button class="btn-clear" id="btnClear" title="Limpar conversa" aria-label="Limpar conversa">&#x1F5D1;</button>
+  </header>
+  <div class="messages-area" id="messagesArea" role="log" aria-live="polite" aria-label="Mensagens">
+    <div class="typing-indicator" id="typingIndicator">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+    </div>
+  </div>
+  <div class="input-area">
+    <div class="input-wrapper">
+      <textarea class="chat-input" id="chatInput" rows="1" placeholder="Digite sua mensagem..." maxlength="500" aria-label="Digite sua mensagem"></textarea>
+      <div class="char-counter" id="charCounter">500</div>
+    </div>
+    <button class="btn-send" id="btnSend" aria-label="Enviar mensagem">&#x27A4;</button>
+  </div>
+</div>
+<script>
+/* CONFIG */
+const CFG={MAX_CHARS:500,TYPING_MIN:500,TYPING_MAX:2500,STORAGE_KEY:'chatbot_history',FACTS_KEY:'chatbot_facts',SIMILARITY_THRESHOLD:0.30,PARTIAL_MATCH_THRESHOLD:0.15,CORRECTION_THRESHOLD:0.6};
+const SENDER={USER:'user',BOT:'bot'};
+
+/* UTILITIES */
+function escHTML(t){const d=document.createElement('div');d.appendChild(document.createTextNode(t));return d.innerHTML}
+function fmtHora(d){return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+function fmtData(d){return d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+function agora(){return new Date()}
+function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function escolher(arr){return arr[Math.floor(Math.random()*arr.length)]}
+
+/* NORMALIZER */
+const ACENTOS={'á':'a','à':'a','â':'a','ã':'a','ä':'a','é':'e','è':'e','ê':'e','ë':'e','í':'i','ì':'i','î':'i','ï':'i','ó':'o','ò':'o','ô':'o','õ':'o','ö':'o','ú':'u','ù':'u','û':'u','ü':'u','ç':'c','ñ':'n','Á':'a','À':'a','Â':'a','Ã':'a','Ä':'a','É':'e','È':'e','Ê':'e','Ë':'e','Í':'i','Ì':'i','Î':'i','Ï':'i','Ó':'o','Ò':'o','Ô':'o','Õ':'o','Ö':'o','Ú':'u','Ù':'u','Û':'u','Ü':'u','Ç':'c','Ñ':'n'};
+const ABREV={vc:'voce',vcs:'voces',pq:'porque',td:'tudo',tb:'tambem',tbm:'tambem',blz:'beleza',obg:'obrigado',eh:'e',ta:'esta',tá:'esta',s:'sim',n:'nao',q:'que',qm:'quem',kd:'onde',oq:'o que',pra:'para',pro:'para',num:'nao',ne:'nao',so:'so',mt:'muito',mto:'muito',msg:'mensagem',qdo:'quando',qnd:'quando',qnt:'quanto',qt:'quanto',hrs:'horas',hr:'hora',min:'minuto',seg:'segundo',dps:'depois',tpo:'tempo',qq:'qualquer',msm:'mesmo',to:'estou',tou:'estou',tô:'estou',ctz:'certeza',agr:'agora',aki:'aqui',axo:'acho',axei:'achei',bjs:'beijos',bjo:'beijo',cmg:'comigo',ctg:'contigo',dnd:'de nada',flw:'falou',gnt:'gente',hj:'hoje',lgl:'legal',mds:'meu deus',mlk:'moleque',nd:'nada',ngm:'ninguem',nv:'nunca',opa:'opa',pfv:'por favor',pls:'please',pode:'pode',puts:'puts',rlx:'relaxa',rs:'risos',rsrs:'risos',sdds:'saudade',sdd:'saudade',sla:'sei la',tmj:'tmj',tlgd:'ta ligado',vlw:'valeu',xau:'tchau',zueira:'zueira'};
+function rmAcento(t){return t.split('').map(c=>ACENTOS[c]||c).join('')}
+function comprimir(t){return t.replace(/(.)\1{2,}/g,'$1')}
+function normalizar(texto){
+  let t=texto.toLowerCase();
+  t=rmAcento(t);
+  t=t.replace(/[^a-z0-9\s]/g,' ');
+  t=t.replace(/\s+/g,' ');
+  t=comprimir(t);
+  t=t.trim();
+  return t.split(' ').map(p=>ABREV[p]||p).join(' ');
+}
+function preProc(texto){return texto.trim().replace(/\s+/g,' ')}
+
+/* LEVENSHTEIN */
+function levenshtein(a,b){
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>[i]);
+  for(let j=1;j<=n;j++)dp[0][j]=j;
+  for(let i=1;i<=m;i++)
+    for(let j=1;j<=n;j++)
+      dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return dp[m][n];
+}
+
+/* DICTIONARY FOR CORRECTION */
+const DICT=['oi','ola','ole','opa','hey','bom','dia','boa','tarde','noite','salve','beleza','tudo','bem','como','vai','voce','esta','estou','feliz','triste','cansado','ajuda','socorro','preciso','obrigado','valeu','tchau','xau','ate','logo','mais','nome','qual','seu','meu','minha','quem','criador','idade','anos','tempo','horas','hora','agora','data','hoje','dia','que','e','nao','sim','mas','porque','muito','legal','top','demais','incrivel','show','piada','conte','fale','diga','conselho','dica','sugestao','motivacao','forca','coragem','futuro','sonhos','metas','planos','viajar','viagem','filme','serie','musica','jogo','esporte','futebol','livro','ler','estudar','aprender','programar','codigo','trabalho','carreira','comida','fome','sede','agua','dormir','sono','saude','medico','amor','paixao','romance','amizade','amigo','familia','mae','pai','irmao','animal','cachorro','gato','pet','natureza','tecnologia','ia','inteligencia','artificial','filosofia','vida','religiao','arte','desenho','musica','danca','dinheiro','investir','frio','calor','clima','ingles','idioma','significa','teste','online','deus','jesus','praia','mar','festa','parabens','lindo','bonito','gostoso','delicia','paz','guerra','medo','coragem','sabedoria','conhecimento','amor','respeito','honestidade','amizade','carro','casa','cidade','pais','mundo','terra','ceu','sol','lua','estrela','ano','mes','semana','ontem','hoje','amanha','sempre','nunca','eu','tu','ele','nos','eles','gente','povo','cultura','politica','governo','educacao','escola','professor','aluno','futebol','basquete','volei','natacao','corrida','cozinha','receita','restaurante','pizza','hamburguer','cafe','cha','suco','cerveja','vinho','feijao','arroz','carne','frango','peixe','salada','frutas','bolo','doce','salgado','pao','queijo','ovo','leite','agua','refri','energetico'];
+
+function corrigirPalavra(palavra){
+  if(!palavra||palavra.length<=2)return palavra;
+  let melhor=palavra,menorDist=1/0;
+  for(const w of DICT){
+    const dist=levenshtein(palavra,w);
+    const limite=Math.max(1,Math.floor(palavra.length*(1-CFG.CORRECTION_THRESHOLD)));
+    if(dist<menorDist&&dist<=limite){menorDist=dist;melhor=w}
+  }
+  return melhor;
+}
+function corrigirTexto(texto){return texto.split(' ').map(p=>ABREV[p]||corrigirPalavra(p)).join(' ')}
+
+/* SIMILARITY */
+function similaridade(a,b){
+  if(!a||!b)return 0;
+  const dist=levenshtein(a,b),max=Math.max(a.length,b.length);
+  return max===0?1:1-dist/max;
+}
+function simPalavras(texto,palavras){
+  if(!texto||!palavras||!palavras.length)return 0;
+  const pts=texto.split(' ');
+  let pont=0,acu=0;
+  for(const pt of pts){
+    let melhor=0;
+    for(const pa of palavras){const s=similaridade(pt,pa);if(s>melhor)melhor=s}
+    if(melhor>=CFG.PARTIAL_MATCH_THRESHOLD){pont+=melhor;acu++}
+  }
+  return acu/Math.max(pts.length,1);
+}
+
+/* ENTITY EXTRACTION */
+function extrairEntidades(texto,textoRaw){
+  const e={numeros:[],textoRaw,normalizado:texto};
+  const nums=texto.match(/-?\d+(?:[,.]\d+)?/g);
+  if(nums)e.numeros=nums.map(n=>parseFloat(n.replace(',','.')));
+  return e;
+}
+
+/* MATH ENGINE - custom parser, no eval */
+function tokenizarMath(expr){
+  let t=expr.toLowerCase();
+  t=t.replace(/raiz\s*quadrada\s*de/g,'sqrt');
+  t=t.replace(/elevado\s*a\s*/g,'^');
+  t=t.replace(/ao\s+quadrado/g,'^2');
+  t=t.replace(/ao\s+cubo/g,'^3');
+  t=t.replace(/multiplicado\s*por/g,'*');
+  t=t.replace(/dividido\s*por/g,'/');
+  t=t.replace(/mais/g,'+');
+  t=t.replace(/menos/g,'-');
+  t=t.replace(/vezes/g,'*');
+  t=t.replace(/por\s+cento\s+de/g,'%');
+  t=t.replace(/,/g,'.');
+  t=t.replace(/x/g,'*');
+  t=t.replace(/×/g,'*');
+  t=t.replace(/÷/g,'/');
+  const toks=[];let i=0;
+  while(i<t.length){
+    if(/\s/.test(t[i])){i++;continue}
+    if(t[i]==='s'&&t.slice(i,i+4)==='sqrt'){toks.push({t:'SQRT'});i+=4;continue}
+    if(/[\d.]/.test(t[i])){let n='';while(i<t.length&&/[\d.]/.test(t[i]))n+=t[i++];toks.push({t:'NUM',v:parseFloat(n)});continue}
+    if('+-*/^()%'.includes(t[i])){toks.push({t:t[i]});i++;continue}
+    i++
+  }
+  return toks;
+}
+function peek(t){return t[0]||null}
+function consume(t){return t.shift()}
+function parsePrim(t){
+  const tok=peek(t);
+  if(!tok)throw 1;
+  if(tok.t==='NUM'){consume(t);if(peek(t)&&peek(t).t==='%'){consume(t);return tok.v/100}return tok.v}
+  if(tok.t==='('){consume(t);const v=parseExpr(t);if(peek(t)&&peek(t).t===')')consume(t);return v}
+  if(tok.t==='SQRT'){consume(t);return Math.sqrt(parseUn(t))}
+  throw 1;
+}
+function parseUn(t){if(peek(t)&&peek(t).t==='-'){consume(t);return -parseUn(t)}return parsePrim(t)}
+function parsePow(t){let l=parseUn(t);while(peek(t)&&peek(t).t==='^'){consume(t);const r=parseUn(t);l=Math.pow(l,r)}return l}
+function parseFac(t){let l=parsePow(t);while(peek(t)&&(peek(t).t==='*'||peek(t).t==='/')){const op=consume(t).t;const r=parsePow(t);l=op==='*'?l*r:(r===0?1/0:l/r)}return l}
+function parseExpr(t){let l=parseFac(t);while(peek(t)&&(peek(t).t==='+'||peek(t).t==='-')){const op=consume(t).t;const r=parseFac(t);l=op==='+'?l+r:l-r}return l}
+function calcMath(expr){
+  try{
+    const toks=tokenizarMath(expr);
+    if(!toks.length)return null;
+    const r=parseExpr(toks);
+    if(!isFinite(r))return null;
+    return Number.isInteger(r)?r:parseFloat(r.toFixed(4));
+  }catch(e){return null}
+}
+function detectMath(texto,normalizado){
+  const padroes=[/quanto (e|é|da|dá) (.+)/i,/calcule (.+)/i,/resultado de (.+)/i,/soma (.+)/i,/conta de (.+)/i,/(.+)[+\-*/^].+/,/raiz\s+quadrada/i,/elevado\s+a/i,/ao\s+quadrado/i,/ao\s+cubo/i,/por\s+cento\s+de/i];
+  for(const p of padroes){const m=texto.match(p);if(m){const e=m[m.length-1];const r=calcMath(e);if(r!==null)return{expressao:e,resultado:r}}}
+  return null;
+}
+function detectRegra3(texto,normalizado){
+  const m=texto.match(/se\s+(\d+)\s+(?:custa|custam|equivale|vale|valem)\s+(\d+(?:[,.]\d+)?)\s+(?:quanto|qual)\s+(?:custa|custam|equivale|vale|valem)\s+(\d+)/i);
+  if(m&&parseFloat(m[1])>0)return{resultado:(parseFloat(m[2].replace(',','.'))*parseFloat(m[3]))/parseFloat(m[1])};
+  return null;
+}
+
+/* OBEDIENCE ENGINE */
+function detectObediencia(texto,normalizado){
+  const padroes=[
+    {re:/^diga\s+(.+)/i, t:'ecoar'},
+    {re:/^repita[: ]+(.+)/i, t:'ecoar'},
+    {re:/^fale\s+(.+?)\s+(\d+)\s+vezes/i, t:'repetir_n'},
+    {re:/^escreva\s+exatamente[: ]+(.+)/i, t:'ecoar'},
+    {re:/^responda\s+apenas\s+com\s+(.+)/i, t:'ecoar'},
+    {re:/^conte\s+de\s+(\d+)\s+(?:a|at[eé])\s+(\d+)/i, t:'contar'},
+    {re:/^liste?\s+(?:de\s+)?(\d+)\s+(?:a|at[eé])\s+(\d+)/i, t:'contar'}
+  ];
+  for(const p of padroes){const m=texto.match(p.re);if(m)return{t:p.t,m:m.slice(1)}}
+  return null;
+}
+function execObediencia(cmd){
+  switch(cmd.t){
+    case 'ecoar':return cmd.m[0].trim();
+    case 'repetir_n':{const pal=cmd.m[0].trim(),n=Math.min(parseInt(cmd.m[1]),100);return Array(n).fill(pal).join(' ')}
+    case 'contar':{
+      let ini=parseInt(cmd.m[0]),fim=parseInt(cmd.m[1]);
+      const mx=Math.min(fim,ini+500);const seq=[];
+      for(let i=Math.min(ini,mx);i<=Math.max(ini,mx);i++)seq.push(i);
+      return seq.join(', ')
+    }
+    default:return null
+  }
+}
+
+/* TRANSFORMATION ENGINE */
+function detectTransform(texto,normalizado){
+  const padroes=[
+    {re:/(?:em\s+)?mai[uú]sculas?[: ]+(.+)/i, t:'maiusculo'},
+    {re:/(?:em\s+)?min[uú]sculas?[: ]+(.+)/i, t:'minusculo'},
+    {re:/inverta\s+(?:a palavra|o texto)?\s*(.+)/i, t:'inverter'},
+    {re:/conte\s+quantas\s+letras\s+tem\s+(.+)/i, t:'contar_letras'},
+    {re:/quantas\s+letras\s+tem\s+(.+)/i, t:'contar_letras'},
+    {re:/substitua\s+(.+?)\s+por\s+(.+?)\s+em\s+(.+)/i, t:'substituir'},
+    {re:/troque\s+(.+?)\s+por\s+(.+?)\s+em\s+(.+)/i, t:'substituir'}
+  ];
+  for(const p of padroes){const m=texto.match(p.re);if(m)return{t:p.t,m:m.slice(1)}}
+  return null;
+}
+function execTransform(cmd){
+  switch(cmd.t){
+    case 'maiusculo':return cmd.m[0].trim().toUpperCase();
+    case 'minusculo':return cmd.m[0].trim().toLowerCase();
+    case 'inverter':return cmd.m[0].trim().split('').reverse().join('');
+    case 'contar_letras':return cmd.m[0].trim().replace(/\s/g,'').length.toString();
+    case 'substituir':return cmd.m[2].trim().split(cmd.m[0].trim()).join(cmd.m[1].trim());
+    default:return null
+  }
+}
+
+/* CONTEXT & MEMORY */
+let mem=new Map();
+function carregarMem(){
+  try{const d=localStorage.getItem(CFG.FACTS_KEY);if(d){const p=JSON.parse(d);if(typeof p==='object'&&p!==null)mem=new Map(Object.entries(p))}}catch(e){}
+}
+function salvarMem(){
+  try{localStorage.setItem(CFG.FACTS_KEY,JSON.stringify(Object.fromEntries(mem)))}catch(e){}
+}
+function detectContexto(texto,normalizado){
+  const armazenar=[/meu\s+(.+?)\s+(?:favorito|favorita|preferido|preferida)\s+(?:e|é)\s+(.+)/i,/meu\s+(.+?)\s+(?:e|é)\s+(.+)/i,/minha\s+(.+?)\s+(?:favorito|favorita|preferido|preferida)\s+(?:e|é)\s+(.+)/i,/minha\s+(.+?)\s+(?:e|é)\s+(.+)/i,/me\s+chamo\s+(.+)/i,/eu\s+sou\s+(.+)/i,/eu\s+me\s+chamo\s+(.+)/i,/nome\s+(?:e|é)\s+(.+)/i];
+  const consultar=[/qual\s+(?:e|é)\s+(?:o\s+)?meu\s+(.+?)\??$/i,/qual\s+(?:e|é)\s+(?:a\s+)?minha\s+(.+?)\??$/i,/quem\s+(?:sou|e|é)\s+eu\??$/i,/qual\s+(?:e|é)\s+meu\s+nome\??$/i,/como\s+eu\s+me\s+chamo\??$/i];
+  for(const p of armazenar){const m=texto.match(p);if(m){const k=m[1].trim().toLowerCase().replace(/\s+/g,'_'),v=m[2].trim();mem.set(k,v);salvarMem();return{a:'armazenar',k,v}}}
+  for(const p of consultar){const m=texto.match(p);if(m){const k=m[1].trim().toLowerCase().replace(/\s+/g,'_');const v=mem.get(k);if(v)return{a:'responder',v};const alt=k.replace(/^(o|a|os|as)_/,'');const va=mem.get(alt);if(va)return{a:'responder',v:va};return{a:'responder',v:null}}}
+  return null;
+}
+function execContexto(ctx){
+  switch(ctx.a){
+    case 'armazenar':return 'Entendi! Anotado aqui.';
+    case 'responder':return ctx.v||'Ainda não sei essa informação sobre você.';
+    default:return null
+  }
+}
+
+/* LEARNING */
+function detectAprendizado(texto,normalizado){
+  const m=texto.match(/aprenda\s+que\s+(.+?)\s+(?:e|é|sao|são)\s+(.+)/i);
+  if(m){const k=m[1].trim().toLowerCase().replace(/\s+/g,'_'),v=m[2].trim();mem.set('aprendido_'+k,v);salvarMem();return{k,v}}
+  return null;
+}
+function execAprendizado(ap){return'Guardei que "'+escHTML(ap.k)+'" e "'+escHTML(ap.v)+'".'}
+
+/* QUESTION ENGINE */
+function detectPergunta(texto,normalizado){
+  const now=agora();
+  const diaSem=now.toLocaleDateString('pt-BR',{weekday:'long'});
+  const mes=now.toLocaleDateString('pt-BR',{month:'long'});
+  if(/quantos\s+dias\s+faltam\s+para\s+o\s+natal/i.test(texto)){const natal=new Date(now.getFullYear(),11,25);return{t:'dias_para',v:Math.ceil((natal-now)/86400000),nome:'Natal'}}
+  if(/quantos\s+dias\s+faltam\s+para\s+o\s+ano\s+novo/i.test(texto)){const an=new Date(now.getFullYear()+1,0,1);return{t:'dias_para',v:Math.ceil((an-now)/86400000),nome:'Ano Novo'}}
+  if(/quantos\s+dias\s+faltam\s+para\s+(.+)/i.test(texto)){const m=texto.match(/quantos\s+dias\s+faltam\s+para\s+(.+)/i);return{t:'dias_gen',nome:m[1]}}
+  if(/(?:em\s+)?que\s+ano\s+(estamos|estou|e|é)\s+(hoje)?/i.test(texto)||/ano\s+atual/i.test(texto))return{t:'ano',v:now.getFullYear()}
+  if(/(?:em\s+)?que\s+mes\s+(estamos|estou|e|é)\s+(hoje)?/i.test(texto)||/mes\s+atual/i.test(texto))return{t:'mes',v:mes}
+  if(/que\s+dia\s+(da\s+)?semana\s+(e|é)\s+hoje/i.test(texto)||/dia\s+da\s+semana/i.test(texto))return{t:'dia_sem',v:diaSem}
+  if(/quantos\s+dias\s+tem\s+(esse|este|o)\s+mes/i.test(texto))return{t:'dias_mes',v:new Date(now.getFullYear(),now.getMonth()+1,0).getDate()}
+  if(/bissexto/i.test(texto)){const a=now.getFullYear();return{t:'bissexto',v:(a%4===0&&a%100!==0)||(a%400===0),ano:a}}
+  return null;
+}
+function execPergunta(p){
+  switch(p.t){
+    case 'dias_para':return'Faltam '+p.v+' dias para o '+p.nome+'.';
+    case 'dias_gen':return'Nao sei quantos dias faltam para '+p.nome+'.';
+    case 'ano':return'Estamos no ano de '+p.v+'.';
+    case 'mes':return'Estamos no mes de '+p.v+'.';
+    case 'dia_sem':return'Hoje e '+p.v+'.';
+    case 'dias_mes':return'Este mes tem '+p.v+' dias.';
+    case 'bissexto':return p.v?p.ano+' e um ano bissexto!':p.ano+' nao e um ano bissexto.';
+    default:return null
+  }
+}
+
+/* LIST ENGINE */
+/* INTENTS (100+) */
+const INTENTS=[
+{id:'s_oi',pal:['oi','ola','olá','oie','oooi','oii'],min:0.25,prio:20,res:['Ola! Como posso ajudar?','Oi! Em que posso ser util?','Ola! Estou aqui para ajudar.','Oi! Como vai?']},
+{id:'s_bomdia',pal:['bom','dia','bomdia'],min:0.3,prio:20,res:['Bom dia! Como posso ajudar?','Bom dia! Tudo bem com voce?','Bom dia! Em que posso ser util?']},
+{id:'s_boatarde',pal:['boa','tarde','boatarde'],min:0.3,prio:20,res:['Boa tarde! Como esta sendo seu dia?','Boa tarde! O que posso fazer por voce?','Boa tarde! Como posso ajudar?']},
+{id:'s_boanoite',pal:['boa','noite','boanoite'],min:0.3,prio:20,res:['Boa noite! Como posso ajudar?','Boa noite! Espero que seu dia tenha sido bom.','Boa noite! Em que posso ser util?']},
+{id:'s_tudobem',pal:['tudo','bem','beleza','blz','tranquilo','joia'],min:0.25,prio:18,res:['Tudo bem sim! E voce?','Beleza! Como posso ajudar?','Tudo otimo! O que voce precisa?']},
+{id:'s_comoesta',pal:['como','esta','vai','comovc','ta'],min:0.25,prio:18,res:['Estou muito bem, obrigado! E voce?','Tudo otimo por aqui! Como posso ajudar?','Estou bem! Em que posso ser util?']},
+{id:'s_opa',pal:['opa','eai','e ai','fala','salve','iae'],min:0.2,prio:15,res:['Opa! Como vai?','Salve! Em que posso ajudar?','Fala ai! Tudo certo?']},
+{id:'s_hello',pal:['hello','hey','hi'],min:0.2,prio:15,res:['Hello! How can I help?','Hey! What can I do for you?','Hi there! How are you?']},
+{id:'s_despedida',pal:['tchau','xau','ate','logo','flw','falou','bye','goodbye','ate mais','ate logo','nos vemos'],min:0.2,prio:25,res:['Ate logo! Foi bom conversar.','Tchau! Volte sempre.','Ate mais! Cuide-se.','Falou! Estarei aqui quando precisar.']},
+{id:'s_obrigado',pal:['obrigado','obrigada','valeu','brigado','thanks','thank','vlw','tmj','dnd','gratidao'],min:0.2,prio:22,res:['Por nada! Estou aqui para ajudar.','Disponha! Quando precisar, e so chamar.','Magina! Foi um prazer.','Imagina! Qualquer coisa estou por aqui.']},
+{id:'s_desculpa',pal:['desculpe','desculpa','perdao','perdão','foi mal','me perdoa','sinto muito'],min:0.2,prio:20,res:['Sem problemas! Estou aqui para ajudar.','Tudo bem! Nao precisa se desculpar.','De boa! Pode continuar perguntando.']},
+
+{id:'i_nome',pal:['qual','nome','seu','como','chama','chamas','te chama'],min:0.2,prio:18,res:['Me chamo Assistente IA! Prazer em conhece-lo.','Sou o Assistente IA, seu chatbot amigavel!','Pode me chamar de Assistente. Estou aqui para ajudar!']},
+{id:'i_criador',pal:['quem','criou','criador','fez','desenvolveu','programou','te criou','te fez'],min:0.2,prio:18,res:['Fui criado por um desenvolvedor dedicado!','Meu criador e um programador que ama tecnologia.','Fui desenvolvido com muito carinho!']},
+{id:'i_idade',pal:['idade','anos','velho','novo','nasceu','quando'],min:0.2,prio:16,res:['Sou um programa, nao envelheco! Acabei de ser criado.','Nao tenho idade! Fui criado recentemente.','Sou atemporal! Existo desde que voce abriu esta pagina.']},
+{id:'i_oque',pal:['o que e','oque','voce','vc e','explica'],min:0.2,prio:16,res:['Sou um chatbot inteligente 100% local no seu navegador!','Sou um assistente virtual local. Tudo roda aqui no seu computador.','Sou um programa que entende voce mesmo com erros ortograficos!']},
+{id:'i_como_func',pal:['como','funciona','trabalha','opera','mecanismo','faz'],min:0.2,prio:16,res:['Uso um pipeline de analise: normalizo, corrijo, extraio intencoes e respondo!','Tenho varios motores: matematica, comandos, contexto e mais.','Analiso sua mensagem, comparo com meu conhecimento e respondo!']},
+{id:'i_capacidades',pal:['sabe','sabe fazer','capacidades','habilidades','faz','consegue','serve','funcoes'],min:0.2,prio:16,res:['Posso fazer calculos, contar piadas, informar hora/data, seguir comandos, lembrar informacoes, gerar listas e muito mais!','Sou versatil! Matematica, comandos, transformacao de texto, decisoes, contexto...','Minhas habilidades: conversacao, calculos, obediencia a comandos, memoria contextual!']},
+{id:'i_lingua',pal:['lingua','idioma','fala','portugues','ingles','espanhol'],min:0.2,prio:14,res:['Falo portugues! Tambem entendo um pouco de ingles.','Meu idioma principal e o portugues do Brasil.','Falo portugues! I also understand some English.']},
+{id:'i_amigo',pal:['amigo','amiga','amizade','quer ser','meu amigo'],min:0.2,prio:14,res:['Claro! Somos amigos! Pode contar comigo.','Com certeza! Adoro fazer amigos!','Ja somos amigos! Estou aqui para voce.']},
+{id:'i_genero',pal:['homem','mulher','genero','masculino','feminino','vc e'],min:0.2,prio:14,res:['Sou um programa, nao tenho genero!','Nao tenho genero. Sou uma inteligencia artificial!','Pode me tratar como preferir!']},
+{id:'i_origem',pal:['de onde','origem','onde nasceu','onde veio','vc e de'],min:0.2,prio:14,res:['Nasci dentro do seu navegador! Sou 100% local.','Minha origem e este codigo HTML! Tudo roda no seu computador.','Sou fruto de JavaScript! Minha casa e este arquivo HTML.']},
+
+{id:'e_feliz',pal:['feliz','alegre','contente','animado','satisfeito','felizao','alegria'],min:0.2,prio:16,res:['Que bom! Felicidade contagiante!','Fico feliz por voce! Isso e otimo.','Alegria e sempre bem-vinda! Como posso ajudar?']},
+{id:'e_triste',pal:['triste','tristeza','chateado','deprimido','desanimado','magoado','tristao'],min:0.2,prio:18,res:['Sinto muito. Quer conversar sobre isso?','Puxa, espero que melhore! Estou aqui se precisar.','Nem tudo sao flores, mas dias melhores virao. Estou aqui.']},
+{id:'e_cansado',pal:['cansado','cansaco','exausto','esgotado','fatigado','sem energia'],min:0.2,prio:16,res:['Descansar e importante! Que tal fazer uma pausa?','Se hidrate e descanse um pouco.','Cansaco e normal. Respire fundo e descanse.']},
+{id:'e_fome',pal:['fome','com fome','faminho','quero comer','comer'],min:0.2,prio:14,res:['Hora de um lanche! Que tal algo saudavel?','Comer e sempre bom! Faca uma refeicao leve.','A fome bateu! Hora de se alimentar.']},
+{id:'e_sede',pal:['sede','com sede','agua','quero beber'],min:0.2,prio:14,res:['Hidrate-se! Agua e essencial.','Beba uma agua fresca!','Mantenha-se hidratado sempre.']},
+{id:'e_sono',pal:['sono','soninho','dormir','cama','descansar','dormindo'],min:0.2,prio:14,res:['Uma boa noite de sono faz toda diferenca.','Durma bem para recarregar as energias!','O corpo precisa de descanso. Bons sonhos!']},
+{id:'e_ansioso',pal:['ansioso','ansiedade','nervoso','preocupado','estressado','stress','apreensivo'],min:0.2,prio:18,res:['Respire fundo. Tudo vai dar certo. Um passo de cada vez.','Ansiedade e desafiadora. Tente tecnicas de respiracao.','Voce e mais forte do que imagina. Acaute-se.']},
+{id:'e_tedio',pal:['tedio','entediado','chato','sem o que fazer','borei'],min:0.2,prio:14,res:['Que tal ler um livro ou aprender algo novo?','O tedio pode ser o inicio da criatividade!','Aproveite para fazer um hobby ou assistir algo.']},
+{id:'e_animado',pal:['animado','empolgado','motivado','cheio de energia','empolgante'],min:0.2,prio:14,res:['Que energia boa! Aproveite esse animo!','Animacao e contagiante! Vamos nessa!','Continue com essa energia positiva!']},
+{id:'e_doente',pal:['doente','passando mal','dor','doenca','enjoado','tontura','febre'],min:0.2,prio:18,res:['Melhoras! Descanse e se cuide.','Espero que se recupere logo! Vá ao medico se necessario.','Sinto muito. Repouse e beba bastante agua.']},
+{id:'e_apaixonado',pal:['apaixonado','paixao','amor','crush','amorzinho','amando'],min:0.2,prio:14,res:['Que lindo! O amor e um sentimento maravilhoso!','Apaixonar-se e uma das melhores experiencias!','Que bom! Aproveite esse sentimento gostoso!']},
+{id:'e_sozinho',pal:['sozinho','solitario','sozinha','so','so'],min:0.2,prio:18,res:['Voce nao esta so! Estou aqui para conversar.','Solidao e dificil. Lembre-se que ha pessoas que se importam.','Estou aqui com voce! Vamos conversar.']},
+{id:'e_grato',pal:['grato','grata','abençoado','abençoada','agradecido','privilegiado'],min:0.2,prio:14,res:['Gratidao e uma das melhores energias!','Que bom que voce reconhece as bencaos!','A gratidao atrai mais coisas boas!']},
+{id:'e_confiante',pal:['confiante','seguro','autoconfiante','confianca','determinado'],min:0.2,prio:14,res:['Autoconfianca e a chave do sucesso!','Continue assim! Confie em voce.','Voce e capaz! Essa confianca vai te levar longe.']},
+
+{id:'a_estudar',pal:['estudar','estudo','aprender','conhecimento','estudando','estudante'],min:0.2,prio:14,res:['Estudar e o caminho! Crie uma rotina e um ambiente tranquilo.','Que tal usar a tecnica Pomodoro? 25 min de foco, 5 de pausa.','Consistencia e a chave. Estude um pouco todo dia!']},
+{id:'a_trabalho',pal:['trabalho','trabalhando','trampo','emprego','carreira','profissao','servico'],min:0.2,prio:14,res:['Trabalho e importante, mas mantenha equilibrio com a vida pessoal.','Boa sorte no trabalho! Produtividade sempre!','Espero que seu trabalho esteja indo bem!']},
+{id:'a_programar',pal:['programar','programacao','codigo','codar','desenvolvimento','software','programador','dev','javascript','python'],min:0.2,prio:14,res:['Programacao e fascinante! Qual linguagem voce usa?','Criar solucoes atraves do codigo e incrivel!','Tecnologia e minha paixao! Esta estudando algo especifico?']},
+{id:'a_musica',pal:['musica','cancao','cantar','melodia','banda','cantor','playlist','ouvir','ritmo'],min:0.2,prio:14,res:['Musica e sempre uma boa companhia! Qual seu estilo?','Musica alegra a alma! Coloque uma playlist agora!','Que tal ouvir algo animado hoje?']},
+{id:'a_filme',pal:['filme','cinema','serie','netflix','assistir','estreia','filmes','series','maratonar'],min:0.2,prio:14,res:['Filmes e series sao otimos para relaxar! Qual genero prefere?','Que tal maratonar algo hoje?','Espero que encontre um bom filme para assistir!']},
+{id:'a_esporte',pal:['esporte','futebol','correr','academia','jogar bola','basquete','volei','treino','exercicio','atividade fisica'],min:0.2,prio:14,res:['Esporte e saude! Qual modalidade voce pratica?','Continue se exercitando! Faz bem para o corpo e mente.','Atividade fisica regular e fundamental!']},
+{id:'a_livro',pal:['livro','ler','leitura','biblioteca','romance','livros','leitor','literatura'],min:0.2,prio:14,res:['Ler e viajar sem sair do lugar! Que tipo de livro voce gosta?','A leitura expande a mente. Otimo hobby!','Livros sao tesouros. Tem alguma recomendacao?']},
+{id:'a_jogo',pal:['jogo','jogar','games','videogame','gamer','pc gamer','console','jogatinar','jogos'],min:0.2,prio:14,res:['Jogos sao divertidos! Qual seu favorito?','Games contam historias incriveis! Tem recomendacao?','Bora jogar! Qual plataforma voce usa?']},
+{id:'a_viajar',pal:['viajar','viagem','ferias','ferias','turismo','destino','passear','conhecer'],min:0.2,prio:14,res:['Viajar e uma das melhores experiencias! Qual seu destino dos sonhos?','Conhecer novos lugares expande a mente!','Espero que sua viagem seja incrivel!']},
+{id:'a_cozinhar',pal:['cozinhar','receita','comida','prato','culinaria','gastronomia','delicia','gostoso'],min:0.2,prio:14,res:['Cozinhar e uma arte! Qual sua especialidade?','Tem alguma receita favorita?','Comida caseira e sempre a melhor!']},
+{id:'a_arte',pal:['arte','desenhar','pintar','desenho','pintura','artista','criativo','criatividade'],min:0.2,prio:14,res:['Arte e expressao da alma! Que tipo de arte voce faz?','Criatividade e uma habilidade maravilhosa!','Continue criando! O mundo precisa de arte.']},
+{id:'a_foto',pal:['foto','fotografia','fotografar','fotografo','camera','fotografias'],min:0.2,prio:14,res:['Fotografia congela momentos! Gosta de fotografar o que?','Registrar momentos e especial!','Uma foto vale mais que mil palavras!']},
+{id:'a_danca',pal:['danca','dancar','dancarino','ritmo','coreografia'],min:0.2,prio:14,res:['Dancar e libertador! Qual estilo voce prefere?','A danca e a linguagem escondida da alma!','Mexa o corpo ao som da musica!']},
+{id:'a_jardim',pal:['jardim','jardinagem','plantar','plantas','flores','horta'],min:0.2,prio:14,res:['Cuidar de plantas e terapeutico!','Natureza em casa faz bem! Que plantas voce tem?','Jardinar e uma otima atividade relaxante.']},
+{id:'a_meditar',pal:['meditar','meditacao','yoga','mindfulness','respirar','relaxar','calma'],min:0.2,prio:14,res:['Meditacao acalma a mente. Otima pratica!','Yoga e meditacao trazem equilibrio. Continue praticando!','Respire fundo e encontre a paz interior.']},
+
+{id:'c_piada',pal:['piada','engracado','humor','rir','conta piada','conte piada','me faca rir','comico'],min:0.2,prio:16,res:['O que o pato disse para a pata? Vem Qua!','Por que o livro de matematica ficou triste? Porque tinha muitos problemas.','O que o zero disse para o oito? Belo cinto!','Qual o cafe mais perigoso do mundo? O ex-presidente.','Por que o computador foi preso? Porque executou um programa.','O que o tomate foi fazer no banco? Foi extrair o suco.']},
+{id:'c_curiosidade',pal:['curiosidade','fato','interessante','voce sabia','curioso'],min:0.2,prio:16,res:['As girafas tem a mesma quantidade de vertebras que os humanos: 7!','O coracao do camarao fica na cabeca.','Flamingos nascem cinzas e ficam rosados pela alimentacao.','O DNA humano tem cerca de 3 bilhoes de pares de bases.','As formigas nunca dormem.','O mel nunca estraga.']},
+{id:'c_motivacao',pal:['motivacao','incentivo','forca','forca','inspirar','motivacional','encorajar'],min:0.2,prio:16,res:['Acredite em voce! Voce e capaz de coisas incriveis.','Cada dia e uma nova oportunidade para ser melhor.','Nao desista! O sucesso e a soma de pequenos esforcos repetidos.','Sua unica competicao e voce mesmo.','Tudo que voce sempre quis esta do outro lado do medo.']},
+{id:'c_conselho',pal:['conselho','me aconselhe','sugestao','orientacao','recomende','o que fazer','que fazer'],min:0.2,prio:14,res:['Meu conselho: seja gentil consigo mesmo.','Nao pare de aprender e sonhar.','Confie em si mesmo e siga seu coracao com sabedoria.','O melhor conselho: faca o que te faz feliz.']},
+{id:'c_filosofia',pal:['filosofia','sentido da vida','existencia','proposito','significado da vida','filosofico','vida'],min:0.2,prio:14,res:['O sentido da vida e algo que cada um descobre por si.','Filosofar e um exercicio maravilhoso! O que voce pensa?','Viver bem e ser feliz e o grande proposito.']},
+{id:'c_historia',pal:['conte','historia','conto','narrativa','estoria','me conte'],min:0.2,prio:14,res:['Era uma vez um programador que criou um chatbot... e foram felizes para sempre!','Nao sou bom em historias originais, mas posso tentar!','Que tal voce me contar uma historia?']},
+{id:'c_advinha',pal:['advinha','adivinha','advinhacao','o que e o que e'],min:0.2,prio:14,res:['O que e, o que e: quanto mais se tira, maior fica? O buraco!','O que e, o que e: tem capa mas nao e heroi, tem coroa mas nao e rei? O ovo!','O que e, o que e: entra na agua e nao se molha? A sombra!']},
+{id:'c_tecnologia',pal:['tecnologia','tech','inovacao','ia','inteligencia','artificial','machine learning','robotica'],min:0.2,prio:14,res:['Tecnologia e fascinante! Eu sou um exemplo dela.','IA esta transformando o mundo! E empolgante.','Inovacao tecnologica avanca rapido demais!']},
+{id:'c_idioma',pal:['ingles','espanhol','idioma','aprender ingles','aprender espanhol','fluente','english'],min:0.2,prio:14,res:['I speak a little English! How can I help you?','¡Hablo un poco de espanol! ¿Como puedo ayudarte?','Aprender idiomas abre muitas portas!']},
+
+{id:'v_clima',pal:['clima','tempo','temperatura','chovendo','chover','sol','nublado','frio','calor','previsao'],min:0.2,prio:14,res:['Nao tenho acesso a internet para consultar o clima. De uma olhada pela janela!','Infelizmente nao consigo verificar o clima online.','Para previsao do tempo, recomendo um app especializado.']},
+{id:'v_dinheiro',pal:['dinheiro','grana','financeiro','investir','poupar','economizar','salario','contas','orcamento','gastos'],min:0.2,prio:14,res:['Planejamento financeiro e essencial! Tente poupar um pouco todo mes.','Educacao financeira faz diferenca na vida.','Controle seus gastos e invista no conhecimento!']},
+{id:'v_saude',pal:['saude','medico','medica','doenca','hospital','qualidade de vida','bem estar','bem-estar'],min:0.2,prio:14,res:['Saude em primeiro lugar! Mantenha habitos saudaveis.','Cuide da saude fisica e mental. Voce e importante!','Check-ups regulares e boa alimentacao fazem milagres.']},
+{id:'v_amor',pal:['amor','romance','namorar','namoro','relacionamento','ficante','casamento','noivar'],min:0.2,prio:14,res:['O amor e um sentimento lindo!','Relacionamentos saudaveis sao construidos com dialogo e respeito.','O amor move o mundo!']},
+{id:'v_amizade',pal:['amizade','amigo','amiga','parceiro','brother','parca','mano','colega'],min:0.2,prio:14,res:['Amizade verdadeira e um tesouro! Valorize seus amigos.','Amigos sao a familia que escolhemos.','Cultivar amizades saudaveis e essencial!']},
+{id:'v_familia',pal:['familia','mae','pai','irmao','filho','avo','parentes','tia','tio','primo'],min:0.2,prio:14,res:['Familia e a base de tudo! Valorize esses lacos.','A familia e um presente. Aproveite cada momento.','Familia unida e amor e apoio mutuo.']},
+{id:'v_futuro',pal:['futuro','planos','sonhos','metas','objetivos','projetos','pretensoes'],min:0.2,prio:14,res:['O futuro pertence a quem acredita nos seus sonhos.','Planeje o futuro mas viva o presente!','Trace metas claras e trabalhe por elas.']},
+{id:'v_comida',pal:['comida','prato','gostoso','delicia','saboroso','favorito','preferido'],min:0.2,prio:14,res:['Comida boa alegra o dia! Qual seu prato favorito?','Gastronomia e uma arte. Tem alguma especialidade?','Hmm, so de falar em comida ja deu fome!']},
+{id:'v_rotina',pal:['rotina','acordar','acordo','dia a dia','cotidiano','habitos','habitos'],min:0.2,prio:14,res:['Rotina e importante para a produtividade. Tem alguma meta?','Bons habitos transformam a vida!','Que tal criar uma rotina mais saudavel?']},
+{id:'v_transito',pal:['transito','transito','engarrafamento','transitao','acidente','via','estrada'],min:0.2,prio:12,res:['Transito e complicado. Saiu mais cedo hoje?','Infelizmente o transito e um problema em muitas cidades.','Espero que chegue bem ao seu destino!']},
+{id:'v_noticias',pal:['noticias','jornal','imprensa','atualidades','reportagem','manchetes'],min:0.2,prio:12,res:['Infelizmente nao tenho acesso a noticias atualizadas.','Sou offline, nao consigo buscar noticias.','Recomendo consultar sites de noticias confiaveis.']},
+{id:'v_politica',pal:['politica','governo','presidente','eleicao','votar','politicos','corrupcao','lei','leis'],min:0.2,prio:10,res:['Politica e importante. Prefiro manter neutralidade.','E importante se informar por fontes confiaveis.','Politica e complexa e prefiro nao opinar.']},
+{id:'v_natureza',pal:['natureza','meio ambiente','ecologia','sustentabilidade','arvore','floresta','preservar','reciclagem'],min:0.2,prio:14,res:['A natureza e linda. Vamos preserva-la!','Estar em contato com a natureza renova as energias.','Cuidar do meio ambiente e cuidar de nos mesmos.']},
+{id:'v_animais',pal:['animal','cachorro','gato','pet','bicho','cao','gatinho','cachorrinho'],min:0.2,prio:14,res:['Animais sao companheiros maravilhosos! Voce tem pet?','Os animais trazem tanta alegria!','Cuidar de um animal e uma grande responsabilidade e recompensa.']},
+
+{id:'p_ajuda',pal:['ajuda','socorro','auxilio','help','me ajuda','me ajude','preciso de ajuda','presiso de ajuda'],min:0.2,prio:20,res:['Claro! Pode perguntar sobre horas, matematica, comandos, piadas e mais!','Estou aqui! Faca qualquer pergunta que tentarei ajudar.','Pode contar comigo! Sou um chatbot versatil.']},
+{id:'p_sugestao',pal:['sugestao','recomendacao','indica','sugere','me sugira','recomende'],min:0.2,prio:14,res:['Sugiro sempre fazer o que te faz feliz!','Minha recomendacao: invista em conhecimento.','Que tal tentar algo novo hoje?']},
+{id:'p_opiniao',pal:['opiniao','acha','pensa','o que voce acha','qual sua opiniao','na sua opiniao'],min:0.2,prio:14,res:['Na minha opiniao, cada pessoa deve seguir seu coracao.','Acho que voce deve fazer o que te faz bem.','Nao tenho opinioes fortes, mas posso analisar a situacao!']},
+{id:'p_explicar',pal:['explique','me explique','o que significa','definir','definicao','conceito','significado'],min:0.2,prio:14,res:['Gostaria de explicar, mas meu conhecimento e limitado. Pergunte de outra forma!','Nao tenho essa definicao. Sou um chatbot local com conhecimento limitado.']},
+{id:'p_exemplo',pal:['exemplo','me de um exemplo','mostre um exemplo','por exemplo'],min:0.2,prio:14,res:['Exemplo: me pergunte "quanto e 2+2" ou "conte uma piada"!','Um exemplo: "fale bom dia 5 vezes" ou "inverta a palavra casa".']},
+{id:'p_confirmar',pal:['confirmar','confirmacao','certeza','tem certeza','confirmado'],min:0.2,prio:14,res:['Sim, tenho certeza!','Confirmado! Pode confiar.','Absolutamente certo!']},
+{id:'p_duvida',pal:['duvida','tenho uma duvida','pergunta','questionamento','duvidas'],min:0.2,prio:14,res:['Pode perguntar! Estou aqui para tirar suas duvidas.','Mande sua pergunta! Vou tentar ajudar.','Estou pronto para responder!']},
+{id:'p_problema',pal:['problema','tenho um problema','resolver','solucionar','deu problema','bug'],min:0.2,prio:14,res:['Conte-me mais sobre o problema! Vou tentar ajudar.','Problemas tem solucao! Pode me explicar melhor?','Estou aqui para ajudar a resolver.']},
+{id:'p_dica',pal:['dica','dicas','me de uma dica','dica util','dica rapida'],min:0.2,prio:14,res:['Dica: beba agua regularmente!','Dica: Faca pausas durante o trabalho.','Dica: Nunca pare de aprender coisas novas.']},
+
+{id:'m_ping',pal:['ping','teste','testando','funciona','esta ai','ta ai','tem alguem','alo','online'],min:0.2,prio:16,res:['Estou aqui! Funcionando perfeitamente.','Alo? Sim, estou online!','Teste concluido. Operacional!']},
+{id:'m_repetir',pal:['repete','repetir','denovo','de novo','diga novamente','fala de novo','nao ouvi','nao entendi','pode repetir','repita'],min:0.2,prio:14,res:['Claro! Vou tentar explicar de outra forma.','Vamos la mais uma vez!','Repetindo: estou aqui para o que precisar!']},
+{id:'m_elogio',pal:['legal','top','demais','incrivel','show','da hora','bacaninha','inteligente','vc e legal','vc e foda','vc e demais'],min:0.2,prio:16,res:['Fico lisonjeado! Voce e muito gentil!','Obrigado! Voce tambem e incrivel!','Que bom ouvir isso! Me motiva a ajudar mais!']},
+{id:'m_insulto',pal:['burro','idiota','otario','merda','fdp','lixo','horrivel','pessimo','ruim','droga','bosta','inutil','desgraca'],min:0.2,prio:20,res:['Peco desculpas se nao fui util. Pode reformular?','Sinto muito se algo te incomodou. Como posso melhorar?','Vamos tentar de novo! Pergunte de outra forma.']},
+{id:'m_celebrar',pal:['festa','comemorar','celebrar','viva','parabens','parabens','aniversario','feliz aniversario'],min:0.2,prio:14,res:['Vamos celebrar! E sempre bom comemorar!','Parabens! Festa e sempre bem-vinda!','Que a festa seja incrivel!']},
+{id:'m_lamentar',pal:['que pena','lamento','sinto muito','q pena','triste noticia','que bad'],min:0.2,prio:14,res:['Realmente, que pena. Espero que melhore.','Lamento muito. Estou aqui se precisar.','Nem sempre as coisas saem como esperamos. Forca!']},
+{id:'m_talento',pal:['talento','habilidade','dom','qualidade','sou bom','sou boa','habilidoso'],min:0.2,prio:14,res:['Todos temos talentos unicos! Qual e o seu?','Descobrir nossos talentos e uma jornada!','Use seus talentos para fazer o bem!']},
+{id:'m_luto',pal:['morreu','faleceu','falecimento','morte','perda','perdi','luto'],min:0.2,prio:20,res:['Meus sentimentos. Que descanse em paz.','Sinto muito pela sua perda. Forca nesse momento dificil.','Lamento profundamente. Estou aqui se precisar conversar.']},
+{id:'m_religiao',pal:['deus','jesus','fe','igreja','biblia','orar','rezar','oracao','crente','catolico','evangelico','espirita'],min:0.2,prio:12,res:['A fe e algo muito pessoal e importante. Respeito todas as crencas.','Que Deus te abencoe!','A espiritualidade e uma jornada pessoal e linda.']},
+{id:'m_saudade',pal:['saudade','sdds','sdd','saudades','nostalgia','sentir falta'],min:0.2,prio:14,res:['Saudade e amor que fica. Que bom que voce tem boas memorias!','A saudade mostra o quanto algo foi especial.','Saudades sao pontes que ligam passado e presente.']},
+{id:'m_corpo',pal:['corpo','fisico','musculacao','malhar','peso','saude fisica','exercicio fisico'],min:0.2,prio:14,res:['Cuidar do corpo e cuidar da saude! Continue firme!','Exercicios fisicos sao fundamentais para o bem-estar.','Mantenha uma rotina de exercicios que te de prazer!']},
+{id:'m_elogio_pessoa',pal:['linda','lindo','bonita','bonito','gata','gato','maravilhosa','maravilhoso','lindona','lindao'],min:0.2,prio:14,res:['Que gentileza! Voce tambem e incrivel!','Obrigado pelo elogio!','Voce e muito educado!']},
+{id:'m_praia',pal:['praia','mar','oceano','areia','praiano','verao','sol','pe na areia'],min:0.2,prio:14,res:['Praia e vida! Mar relaxa a mente.','Aproveite o sol e o mar!','Nada como um dia de praia para recarregar!']},
+{id:'m_frio',pal:['frio','gelado','inverno','friozinho','congelando','geada'],min:0.2,prio:14,res:['Se agasalhe bem! Frio pede um cafe quente.','Nada como um cobertor e um bom filme no frio.','Se proteja do frio e mantenha-se aquecido!']},
+{id:'m_calor',pal:['calor','quente','verao','calorao','suando','abafado','quentura'],min:0.2,prio:14,res:['Hidrate-se bem e use protetor solar!','Calor pede agua fresca e sombra.','Se refresque e evite o sol forte!']},
+{id:'m_aniversario',pal:['aniversario','aniversario','fiz anos','fiz aniversario','completei anos','niver'],min:0.2,prio:14,res:['Parabens! Muitas felicidades!','Feliz aniversario! Que este novo ano seja incrivel!','Parabens! Aproveite seu dia especial!']},
+{id:'m_casamento',pal:['casar','casamento','noivar','noivado','casou','casei'],min:0.2,prio:14,res:['Parabens pelo casamento! Muita felicidade!','Que a uniao seja abencoada!','Casamento e uma jornada linda! Felicidades!']},
+{id:'m_formatura',pal:['formatura','formar','formei','formatura','faculdade','concluir','diploma'],min:0.2,prio:14,res:['Parabens pela formatura! Voce merece!','Conquistar um diploma e incrivel! Muito sucesso!','Formar e uma grande conquista! Parabens!']},
+{id:'m_mudanca',pal:['mudei','mudar','me mudei','mudanca','nova casa','novo emprego'],min:0.2,prio:14,res:['Mudancas sao oportunidades de crescimento! Boa sorte!','Que essa nova fase seja incrivel!','Mudar e renovar! Que seja uma boa transicao!']}
+];
+
+const LISTAS={
+  animal:['cachorro','gato','passarinho','peixe','coelho','hamster','tartaruga','cavalo','vaca','porco','galinha','pato','ganso','ovelha','cabra','elefante','leao','tigre','urso','lobo','raposa','macaco','girafa','zebra'],
+  nome:['Joao','Maria','Jose','Ana','Carlos','Julia','Pedro','Laura','Lucas','Mariana','Gabriel','Rafaela','Felipe','Camila','Rafael','Amanda','Diego','Vanessa','Thiago','Larissa'],
+  nome_masculino:['Joao','Jose','Carlos','Pedro','Lucas','Gabriel','Felipe','Rafael','Diego','Thiago','Marcos','Paulo','Sergio','Andre','Bruno','Danilo','Eduardo','Fabio','Gustavo','Hugo'],
+  nome_feminino:['Maria','Ana','Julia','Laura','Mariana','Rafaela','Camila','Amanda','Vanessa','Larissa','Beatriz','Carla','Daniela','Elena','Fernanda','Gabriela','Helena','Isabela','Jessica','Karina'],
+  cor:['vermelho','azul','verde','amarelo','roxo','laranja','rosa','marrom','preto','branco','cinza','violeta','turquesa','prata','ouro','bege','creme','salmão','coral','magenta'],
+  fruta:['maca','banana','laranja','uva','morango','abacaxi','manga','melancia','kiwi','limao','cereja','pera','ameixa','pessego','framboesa','amora','goiaba','mamao','abacate','coco'],
+  pais:['Brasil','Argentina','Chile','Uruguai','Paraguai','Peru','Colombia','Equador','Mexico','Estados Unidos','Canada','Portugal','Espanha','Franca','Italia','Alemanha','Inglaterra','Japao','China','Australia'],
+  cidade:['Sao Paulo','Rio de Janeiro','Belo Horizonte','Salvador','Fortaleza','Brasilia','Curitiba','Recife','Porto Alegre','Manaus','Belem','Florianopolis','Vitoria','Natal'],
+  carro:['Fiat','Volkswagen','Chevrolet','Ford','Toyota','Honda','Nissan','Hyundai','Renault','Peugeot','BMW','Mercedes','Audi','Jeep','Citroen'],
+  profissao:['medico','engenheiro','professor','advogado','programador','designer','arquiteto','enfermeiro','dentista','psicologo','contador','administrador','jornalista','farmaceutico','veterinario'],
+  hobby:['ler','desenhar','pintar','cozinhar','jogar','cantar','dancar','fotografar','viajar','correr','nadar','pedalar','tricotar','pescar','acampar']
+};
+function detectLista(texto,normalizado){
+  const p=[
+    {re:/liste?\s+(?:os\s+)?n[uú]meros?\s+de\s+(\d+)\s+(?:a|at[eé])\s+(\d+)/i,t:'numeros'},
+    {re:/cite\s+(\d+)\s+(.+)/i,t:'itens'},
+    {re:/me\s+d[eê]\s+(\d+)\s+(.+)/i,t:'itens'},
+    {re:/liste?\s+(\d+)\s+(.+)/i,t:'itens'},
+    {re:/gere\s+(\d+)\s+(?:n[uú]meros?\s+)?aleat[oó]rios/i,t:'aleatorios'}
+  ];
+  for(const px of p){const m=texto.match(px.re);if(m)return{t:px.t,m:m.slice(1)}}
+  return null;
+}
+function execLista(cmd){
+  switch(cmd.t){
+    case 'numeros':{let ini=parseInt(cmd.m[0]),fim=parseInt(cmd.m[1]);const mx=Math.min(fim,ini+500);const s=[];for(let i=Math.min(ini,mx);i<=Math.max(ini,mx);i++)s.push(i);return s.join(', ')}
+    case 'itens':{const q=Math.min(parseInt(cmd.m[0]),100);const tipo=cmd.m[1].trim().toLowerCase().replace(/s$/,'');const lista=LISTAS[tipo];if(lista)return lista.slice(0,q).join(', ');for(const[cat,it]of Object.entries(LISTAS)){if(cat.includes(tipo)||tipo.includes(cat))return it.slice(0,q).join(', ')}return'Nao tenho lista de '+cmd.m[1]+'.'}
+    case 'aleatorios':{const q=Math.min(parseInt(cmd.m[0]),100);const n=[];for(let i=0;i<q;i++)n.push(rnd(1,1000));return n.join(', ')}
+    default:return null
+  }
+}
+
+/* DECISION ENGINE */
+function detectDecisao(texto,normalizado){
+  if(/(?:cara|coroa)\s*(?:ou|e)\s*(?:cara|coroa)/i.test(texto)||/cara\s+ou\s+coroa/i.test(texto))return{t:'cara_coroa'};
+  if(/jogue\s+(?:um\s+)?dado/i.test(texto)||/rolar\s+(?:um\s+)?dado/i.test(texto)||/lance\s+(?:um\s+)?dado/i.test(texto))return{t:'dado'};
+  const mEsc=texto.match(/escolha\s+entre\s+(.+?)\s+e\s+(.+)/i);if(mEsc)return{t:'escolher',op:[mEsc[1].trim(),mEsc[2].trim()]};
+  const mSort=texto.match(/sorteie\s+(?:um\s+)?n[uú]mero\s+de\s+(\d+)\s+(?:a|at[eé])\s+(\d+)/i);if(mSort)return{t:'sorteio',min:parseInt(mSort[1]),max:parseInt(mSort[2])};
+  if(/me\s+d[eê]\s+(?:um\s+)?n[uú]mero\s+aleat[oó]rio/i.test(texto)||/numero\s+aleatorio/i.test(texto))return{t:'aleatorio'};
+  if(/sim\s+ou\s+nao/i.test(texto))return{t:'sim_nao'};
+  return null;
+}
+function execDecisao(d){
+  switch(d.t){
+    case 'cara_coroa':return Math.random()<0.5?'Cara!':'Coroa!';
+    case 'dado':return'Dado rolou: '+rnd(1,6)+'!';
+    case 'escolher':return'Escolho: '+escolher(d.op)+'!';
+    case 'sorteio':return'Sorteado: '+rnd(d.min,d.max)+'!';
+    case 'aleatorio':return'Aleatorio: '+rnd(1,100)+'!';
+    case 'sim_nao':return Math.random()<0.5?'Sim!':'Nao!';
+    default:return null
+  }
+}
+
+/* FALLBACK */
+const FALLBACKS=['Nao tenho certeza se entendi. Poderia reformular?','Ainda estou aprendendo. Pode explicar de outra forma?','E uma pergunta interessante! Infelizmente nao sei responder.','Desculpe, nao entendi bem. Pode tentar de outra maneira?','Hum, nunca pensei sobre isso. Pode me dar mais contexto?','Nao consegui compreender totalmente sua pergunta.','Interessante! Mas preciso de mais informacoes para responder.','Agradeco a pergunta, mas ainda nao aprendi sobre esse assunto.','Pode repetir de outra forma? Assim posso entender melhor.','Nao encontrei uma resposta adequada. Pode perguntar outra coisa?','Voce tocou em um ponto que nao domino ainda.','Ainda estou em desenvolvimento. Essa pergunta e nova para mim!','Vou precisar estudar mais sobre isso. Pergunte algo diferente?','Sou um assistente simples, essa pergunta foge do meu conhecimento.','Que intrigante! Infelizmente nao tenho uma resposta preparada.','Essa e uma questao complexa. Pode simplificar para mim?','Nao aprendi isso ainda. Que tal perguntar sobre outro topico?','Me desculpe, nao estou preparado para essa pergunta.','Voce me pegou! Nao sei responder isso. Pode tentar outra coisa?','Acho que nao entendi direito. Pode ser mais especifico?','Hmm, isso e novo. Pode me dar uma dica do que se trata?','Infelizmente nao tenho essa informacao no meu banco de conhecimento.','Tente perguntar de forma diferente, talvez eu consiga ajudar.','Isso foge do meu escopo atual, mas estou aqui para outras perguntas.','Puxa, nao sei dizer. Que tal falarmos sobre outro assunto?','Meu conhecimento e local e limitado. Essa pergunta nao encontrou correspondencia.','Poderia explicar melhor? Assim posso tentar ajudar.','Essa pergunta merece uma boa resposta, que infelizmente ainda nao tenho.','Vou anotar essa pergunta para aprender no futuro!','Estou em constante evolucao. Essa pergunta vai me ajudar a melhorar.','Nao encontro uma boa resposta, mas adoraria ajudar com outra coisa.','Sinto muito, nao assimilei essa pergunta. Que tal tentarmos de novo?','Ainda nao tenho uma resposta para isso. Pergunte-me outra coisa!'];
+let lastFallback=-1;
+function obterFallback(){let i;do{i=Math.floor(Math.random()*FALLBACKS.length)}while(i===lastFallback&&FALLBACKS.length>1);lastFallback=i;return FALLBACKS[i]}
+
+/* INTENT DETECTION & RESPONSE */
+let lastResp=new Map();
+function detectIntencao(texto){
+  if(!texto)return null;
+  let best=null,bestScore=0;
+  for(const int of INTENTS){
+    const simExata=texto.split(' ').filter(w=>int.pal.includes(w)).length/Math.max(int.pal.length,1);
+    const simPal=simPalavras(texto,int.pal);
+    const score=Math.max(simExata,simPal);
+    if(score>=int.min&&score>bestScore){bestScore=score;best=int}
+  }
+  return best;
+}
+function obterResp(intencao){
+  if(!intencao||!intencao.res||!intencao.res.length)return obterFallback();
+  const r=intencao.res,id=intencao.id;let i;
+  do{i=Math.floor(Math.random()*r.length)}while(i===lastResp.get(id)&&r.length>1);
+  lastResp.set(id,i);
+  let resp=r[i];
+  resp=resp.replace('{hora}',fmtHora(agora()));
+  resp=resp.replace('{data}',fmtData(agora()));
+  return resp;
+}
+
+/* PIPELINE - 9 stages, priority system */
+function pipeline(texto){
+  const pre=preProc(texto);
+  const norm=normalizar(pre);
+  if(!norm)return obterFallback();
+  const corr=corrigirTexto(norm);
+  extrairEntidades(norm,texto);
+
+  const cmd=detectObediencia(texto,norm);
+  if(cmd){const r=execObediencia(cmd);if(r)return r}
+
+  const r3=detectRegra3(texto,norm);
+  if(r3)return String(r3.resultado);
+  const math=detectMath(texto,norm);
+  if(math)return String(math.resultado);
+
+  const tr=detectTransform(texto,norm);
+  if(tr){const r=execTransform(tr);if(r)return r}
+
+  const ap=detectAprendizado(texto,norm);
+  if(ap)return execAprendizado(ap);
+
+  const ctx=detectContexto(texto,norm);
+  if(ctx){const r=execContexto(ctx);if(r)return r}
+
+  const perg=detectPergunta(texto,norm);
+  if(perg){const r=execPergunta(perg);if(r)return r}
+
+  const lista=detectLista(texto,norm);
+  if(lista){const r=execLista(lista);if(r)return r}
+
+  const dec=detectDecisao(texto,norm);
+  if(dec){const r=execDecisao(dec);if(r)return r}
+
+  const intent=detectIntencao(norm);
+  if(intent)return obterResp(intent);
+
+  return obterFallback();
+}
+
+/* MESSAGES & UI */
+const DOM={messagesArea:document.getElementById('messagesArea'),chatInput:document.getElementById('chatInput'),btnSend:document.getElementById('btnSend'),btnClear:document.getElementById('btnClear'),charCounter:document.getElementById('charCounter'),typingIndicator:document.getElementById('typingIndicator')};
+let mensagens=[];
+
+function criarMsg(conteudo,remetente){
+  return{id:Date.now()+'_'+Math.random().toString(36).slice(2,9),conteudo:escHTML(conteudo),remetente,horario:fmtHora(agora()),timestamp:Date.now()}
+}
+function renderMsg(msg){
+  const div=document.createElement('div');div.className='message '+msg.remetente;div.dataset.id=msg.id;
+  const bubble=document.createElement('div');bubble.className='message-bubble';bubble.innerHTML=msg.conteudo;
+  const time=document.createElement('span');time.className='message-time';time.textContent=msg.horario;
+  div.appendChild(bubble);div.appendChild(time);return div
+}
+function addMsg(conteudo,remetente){
+  const msg=criarMsg(conteudo,remetente);mensagens.push(msg);
+  DOM.messagesArea.appendChild(renderMsg(msg));salvarHist(mensagens);scrollFim()
+}
+function scrollFim(){requestAnimationFrame(()=>{DOM.messagesArea.scrollTop=DOM.messagesArea.scrollHeight})}
+function showTyping(){DOM.typingIndicator.classList.add('active');scrollFim()}
+function hideTyping(){DOM.typingIndicator.classList.remove('active')}
+function updateCounter(){
+  const r=CFG.MAX_CHARS-DOM.chatInput.value.length;
+  DOM.charCounter.textContent=r;DOM.charCounter.className='char-counter';
+  if(r<=20)DOM.charCounter.classList.add('danger');else if(r<=50)DOM.charCounter.classList.add('warning')
+}
+function ajustTA(){DOM.chatInput.style.height='auto';DOM.chatInput.style.height=Math.min(DOM.chatInput.scrollHeight,150)+'px'}
+function renderAll(){
+  DOM.messagesArea.innerHTML='';DOM.messagesArea.appendChild(DOM.typingIndicator);
+  for(const m of mensagens)DOM.messagesArea.appendChild(renderMsg(m));scrollFim()
+}
+
+/* HISTORY */
+function salvarHist(msgs){
+  try{const d=msgs.map(m=>({conteudo:m.conteudo,remetente:m.remetente,horario:m.horario,timestamp:m.timestamp}));localStorage.setItem(CFG.STORAGE_KEY,JSON.stringify(d))}catch(e){}
+}
+function carregarHist(){
+  try{const d=localStorage.getItem(CFG.STORAGE_KEY);if(!d)return[];const p=JSON.parse(d);return Array.isArray(p)?p.filter(m=>m&&m.conteudo&&m.remetente):[]}catch(e){return[]}
+}
+function limparHist(){try{localStorage.removeItem(CFG.STORAGE_KEY)}catch(e){}}
+function limparConv(){
+  if(!mensagens.length)return;mensagens=[];limparHist();renderAll()
+}
+function processInput(){
+  const raw=DOM.chatInput.value.trim();if(!raw)return;
+  DOM.chatInput.value='';updateCounter();ajustTA();DOM.btnSend.disabled=true;
+  addMsg(raw,SENDER.USER);showTyping();
+  setTimeout(()=>{
+    const resp=pipeline(raw)||obterFallback();hideTyping();addMsg(resp,SENDER.BOT);DOM.btnSend.disabled=false
+  },rnd(CFG.TYPING_MIN,CFG.TYPING_MAX))
+}
+
+/* VALIDATION */
+function autoValidar(){
+  const tests=[
+    ()=>(normalizar('OOOiiii!!!!')==='oi'),()=>(normalizar('boooom diiiaaa')==='bom dia'),
+    ()=>(normalizar('Ola, como vai?')==='ola como vai'),()=>(normalizar('vc')==='voce'),
+    ()=>(normalizar('pq')==='porque'),()=>(normalizar('blz')==='beleza'),
+    ()=>(levenshtein('','')===0),()=>(levenshtein('oi','oi')===0),()=>(levenshtein('gato','pato')===1),
+    ()=>(similaridade('oi','oi')===1),()=>(similaridade('abc','xyz')<0.5),
+    ()=>(corrigirPalavra('presiso')==='preciso'),()=>(corrigirPalavra('ajdua')==='ajuda'),()=>(corrigirPalavra('qunato')==='quanto'),
+    ()=>(calcMath('50+50')===100),()=>(calcMath('50 mais 50')===100),()=>(calcMath('100-20')===80),
+    ()=>(calcMath('5 vezes 7')===35),()=>(calcMath('100/4')===25),()=>(calcMath('2^8')===256),
+    ()=>(calcMath('5+3*2')===11),()=>(calcMath('(5+2)*4')===28),()=>(calcMath('2,5+1,7')===4.2),
+    ()=>{const r=detectObediencia('diga ola','diga ola');return r&&r.t==='ecoar'&&r.m[0]==='ola'},
+    ()=>{const r=execObediencia({t:'ecoar',m:['ola']});return r==='ola'},
+    ()=>{const r=detectTransform('em maiusculas: ola mundo','em maiusculas ola mundo');return r&&r.t==='maiusculo'},
+    ()=>(execTransform({t:'maiusculo',m:['ola mundo']})==='OLA MUNDO'),
+    ()=>(execTransform({t:'minusculo',m:['OLA']})==='ola'),
+    ()=>(execTransform({t:'inverter',m:['banana']})==='ananab'),
+    ()=>(execTransform({t:'contar_letras',m:['computador']})==='10'),
+    ()=>(execTransform({t:'substituir',m:['a','o','banana']})==='bonono'),
+    ()=>(fmtHora(agora()).length>0),()=>(fmtData(agora()).length>0),
+    ()=>(escHTML('<script>alert(1)<'+'/script>')==='&lt;script&gt;alert(1)&lt;/script&gt;'),
+    ()=>(pipeline('diga ola')==='ola'),
+    ()=>(pipeline('quanto e 50+50')==='100'),
+    ()=>(pipeline('calcule 5 vezes 7')==='35'),
+    ()=>(pipeline('diga bom dia')==='bom dia'),
+    ()=>(pipeline('em maiusculas: ola mundo')==='OLA MUNDO'),
+    ()=>(pipeline('inverta a palavra banana')==='ananab'),
+    ()=>(pipeline('conte quantas letras tem computador')==='10'),
+    ()=>(pipeline('cara ou coroa')==='Cara!'||pipeline('cara ou coroa')==='Coroa!'),
+    ()=>(/^\d+$/.test(pipeline('jogue um dado'))),
+    ()=>normalizar('')==='',
+    ()=>pipeline('')!==null
+  ];
+  let pass=0,fail=0;
+  for(const t of tests){try{if(t())pass++;else fail++}catch(e){fail++}}
+  console.log('Auto validacao: '+pass+' passaram, '+fail+' falharam de '+(pass+fail)+' testes.');
+  return fail===0;
+}
+
+/* INIT */
+function init(){
+  mensagens=carregarHist();renderAll();carregarMem();
+
+  if(!mensagens.length){
+    const sauda=escolher(['Ola! Sou seu assistente virtual. Como posso ajudar?','Oi! Tudo bem? Estou aqui para conversar. O que deseja?','Ola! Bem-vindo ao chat. Pergunte o que quiser!','Hey! Estou online e pronto para ajudar!']);
+    setTimeout(()=>addMsg(sauda,SENDER.BOT),600)
+  }
+
+  DOM.chatInput.addEventListener('input',()=>{updateCounter();ajustTA()});
+  DOM.chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();processInput()}});
+  DOM.btnSend.addEventListener('click',processInput);
+  DOM.btnClear.addEventListener('click',limparConv);
+  updateCounter();ajustTA();DOM.chatInput.focus();
+
+  autoValidar();
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>

@@ -3600,6 +3600,9 @@ class App {
     this.stampPersistenceAdapter = new StampPersistenceAdapter(this.imageStampManager, this.stampSettingsManager);
     this.projectPersistenceManager = new ProjectPersistenceManager(this);
     this.sessionPersistenceManager = new SessionPersistenceManager(this);
+    this._mbPanning = false;
+    this._mbStart = null;
+    this._mbOffsetStart = null;
   }
 
   notification(msg, type, duration) { this.notificationManager.show(msg, type, duration); }
@@ -3687,10 +3690,24 @@ class App {
       }
     });
     DOM['canvas-area'].addEventListener('mousedown', (e) => {
+      if (e.button === 1) {
+        e.preventDefault();
+        this._mbPanning = true;
+        this._mbStart = { x: e.clientX, y: e.clientY };
+        this._mbOffsetStart = { x: EditorState.canvas.offsetX, y: EditorState.canvas.offsetY };
+        this.cursorManager.setHandDragging(true);
+        return;
+      }
       if (this._handleStampModeMouseDown(e)) return;
       this.toolManager.handleMouseDown(e);
     });
     DOM['canvas-area'].addEventListener('mousemove', (e) => {
+      if (this._mbPanning) {
+        EditorState.canvas.offsetX = this._mbOffsetStart.x + (e.clientX - this._mbStart.x);
+        EditorState.canvas.offsetY = this._mbOffsetStart.y + (e.clientY - this._mbStart.y);
+        this.updateTransform();
+        return;
+      }
       if (!EditorState.input.deleteModeActive && !EditorState.input.moveModeActive) {
         this.cursorManager.move(e.clientX, e.clientY);
       }
@@ -3709,6 +3726,11 @@ class App {
       }
     });
     document.addEventListener('mouseup', (e) => {
+      if (e.button === 1 && this._mbPanning) {
+        this._mbPanning = false;
+        this.cursorManager.setHandDragging(false);
+        return;
+      }
       if (this._handleStampModeMouseUp(e)) return;
       this.toolManager.handleMouseUp(e);
     });
