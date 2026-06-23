@@ -1,0 +1,253 @@
+================================================================================
+HANDOFF PROJETO - Don't Starve (Web Implementation)
+================================================================================
+
+DATA: 23/06/2026
+ESTADO: Etapa 01 - Auditoria de Arquitetura e Preparacao do Codigo-fonte
+PROGRESSO GERAL: ~20% (~224 pendencias em 25 capitulos)
+
+================================================================================
+1. INVENTARIO DE ARQUIVOS
+================================================================================
+
+C:\Users\leandro.ogawa\Desktop\GitCloned\HTML\Hobby\DontStarve\
+  dontstarve.html          [1667 linhas]  - Implementacao completa do jogo (single-file)
+  GIANT_PROMPT_CORRECTED.txt [1521 linhas] - Especificacao primaria (autoritativa)
+  GIANT_PROMPT_DONT_STARVE.txt [4411 linhas] - Especificacao secundaria (verbosa, contem contradicoes)
+  PENDENCIAS_DO_PROJETO.txt  [1335 linhas] - Auditoria completa de ~224 pendencias
+  HANDOFF_PROJETO.txt      [NOVO]         - Este documento
+
+================================================================================
+2. ARQUITETURA DO CODIGO (dontstarve.html)
+================================================================================
+
+2.1 HTML + CSS (linhas 1-108)
+  - Canvas duplo: gameCanvas (renderizacao) + lightCanvas (iluminacao)
+  - HUD: statsBar, dayCounter, quickSlots (8 slots), equipSlots
+  - Telas: invScreen, craftScreen, pauseScreen, deathScreen, mainMenu
+  - CSS inline no <style> (~87 linhas)
+  - Favicon: data:, (sem 404)
+  - Loading screen removida (decisao anterior)
+
+2.2 JavaScript (linhas 109-1667) - secoes:
+
+  a) Game Constants & Config (linha 113)
+     - TILE=16, WORLD_W=200, WORLD_H=150, FDT=0.033
+     - BIOC: mapa de cores por bioma
+     - GS (GameState): objeto central de estado global
+
+  b) Utility Functions (linha 120)
+     - lerp, cl, ds, rb, ri, dc (wrappers)
+
+  c) EventBus (linha 125)
+     - Sistema pub/sub: EB.on(), EB.off(), EB.em()
+
+  d) Seeded RNG (linha 129)
+     - SR: gerador deterministico baseado em semente inteira
+
+  e) Simplex Noise (linha 132)
+     - SN: gerador de ruido 2D com fbm()
+
+  f) Audio Manager (linha 135)
+     - AM: geracao procedural de sons (pick, hit, hurt, die, craft, eat, step, fire, charlie)
+     - Reproducao via Web Audio API
+
+  g) Asset Generator (linha 139)
+     - AS: geracao procedural de sprites em canvas 2D
+     - ~60 items: player, mobs, recursos, ferramentas, estruturas
+
+  h) World Generator (linha 228)
+     - world.gen(): ruido simplex para biomas + estradas
+     - world.placeRes(): distribuicao procedural de recursos
+     - 6 biomas: grassland, forest, savanna, marsh, rocky, mixed
+     - Spawn encontra grassland perto do centro
+
+  i) Entity System (linha 331)
+     - ENT: registro central de entidades
+     - ENT.add() com default props (hp, dmg, atkCd, facing, state, team, etc.)
+     - ENT.update(): cleanup de entidades removidas
+
+  j) Item Definitions (linha 354)
+     - ITEMS: dicionario ~75 items
+     - ITEMS[] via funcao I() com: hunger, health, sanity, spoil, fuel, dura, dmg, armor, equip
+
+  k) Inventory System (linha 451)
+     - INV: create, add, remove, count, has, equip, unequip, destroy
+     - Slots + equip slots (hand, head, body)
+
+  l) Crafting Recipes (linha 517)
+     - RECIPES: ~45 receitas com materiais + tier + estrutura requerida
+
+  m) Crafting System (linha 570)
+     - CRAFT: canCraft, canBuild, do (consome materiais, adiciona resultado)
+
+  n) Player System (linha 598)
+     - PL: create, move, update (movimento WASD + setas)
+     - Stats: hunger, sanity, health
+     - Beard growth, wetness, temperatura
+     - PL.getLight(), PL.eat()
+
+  o) Combat System (linha 667)
+     - COMBAT.attack(): dano calculado com weapon + armor reduction
+
+  p) Mob AI System (linha 693)
+     - MOB.spawnMob(): ~30 tipos de entidades
+     - MOB.update(): loop de IA + push-apart
+     - AIs individuais: spider, hound, pig, beefalo, rabbit, bird, butterfly, bee, tentacle, clockwork, treeguard, shadowcreature
+     - AIs de estrutura: spiderden, pighouse
+
+  q) Survival Mechanics (linha 941)
+     - SURV.update(): ciclo dia/noite, season, temperatura, freezing, sanity aura
+     - SURV.getAmbientTemp(), SURV.getDayLight()
+
+  r) Structure/Interaction System (linha 1009)
+     - SYS.placeStructure(): cria entidades estrutura (campfire, sciencemachine, chest, etc.)
+     - SYS.interact(): acoes ao clicar em estruturas
+     - Loot drops via EventBus (entityKilled)
+
+  s) Save/Load System (linha 1136)
+     - SV: save, load, reset via localStorage
+
+  t) Input Handling (linha 1160)
+     - Eventos: keydown, keyup, mousemove, mousedown, mouseup, contextmenu
+     - Estado global: keys{}, mouse{}, GS.attacking, GS.pickup, GS.toggleMap
+
+  u) Rendering System (linha 1171)
+     - REND: initCanvas, updateCam, worldToScreen, renderWorld, renderEntities, renderLighting
+     - HUD: statsBar, dayCounter, quickSlots, equipSlots
+     - Telas: Inventory Screen, Crafting Screen (com abas)
+     - Minimap, Debug overlay
+
+  v) Game Loop (linha 1367)
+     - GAME.init(): inicializacao assincrona com timeouts aninhados
+     - GAME.update(): PL.update -> SURV.update -> MOB.update -> ENT.update -> cook -> houndAttack -> campfire -> pickup -> attack -> death check
+     - GAME.render(): cam -> world -> entities -> lighting -> HUD -> minimap -> debug
+     - GAME.loop(): requestAnimationFrame
+
+  w) Crockpot Cooking (linha 1408)
+
+  x) Hound Attack Timer (linha 1422)
+
+  y) Auto-Save (linha 1516)
+
+  z) Menu System & Event Binding (linha 1519)
+     - bindUI(): botoes START, SEED, CONTINUE, CRAFT, INV, MAP, PAUSE, DEATH
+     - Event delegation para close buttons, qslots, inslots, citem, ctab
+     - Canvas clicks: left=attack hostil, right=interact
+
+  aa) Initialization (linha 1632)
+     - window.onload: initCanvas, AM, AS, wheel event, bindUI, check save, GAME.loop
+     - window.onresize: redimensiona canvases
+     - Debug keys: F3 (debug), F4 (grid), F5 (hitbox)
+
+================================================================================
+3. LINGUAGENS E TECNOLOGIAS
+================================================================================
+
+  - HTML5 + CSS3 (inline)
+  - JavaScript ES5 (use strict, funcoes construtoras, sem modules/classes)
+  - Canvas 2D API (renderizacao pixelart)
+  - Web Audio API (sons procedurais)
+  - localStorage (save/load)
+  - requestAnimationFrame (game loop)
+  - Single-file architecture (tudo em dontstarve.html)
+
+================================================================================
+4. MUDANCAS REALIZADAS (Etapa 01)
+================================================================================
+
+  4.1 Remocao de codigo morto:
+    - dm[] (variavel nao utilizada)
+    - var IT (objeto dicionario nunca usado)
+    - function defItem (nunca chamada)
+    - var B_TYPE (nunca usado, substituido por indices literais)
+    - Duplicata de REND.renderInv (linhas 1282-1295, sobrescrita pela versao posterior)
+
+  4.2 Padronizacao de secoes:
+    - Todos os comentarios de secao convertidos para // === ... ===
+    - Secoes que eram /* comentario */ padronizadas
+    - Novos divisores adicionados: Game Constants, Utility Functions, Crockpot Cooking,
+      Hound Attack Timer, Auto-Save Interval, Debug Toggle Keys
+
+  4.3 Correcoes:
+    - Adicionado onclick para btnMap (conecta toggleMap ao botao de mapa)
+    - Favicon data:, (feito anteriormente)
+    - Loading screen removida (feito anteriormente)
+
+  4.4 TOTAL: ~15 linhas removidas, ~22 linhas adicionadas (saldo ~+7 linhas)
+
+================================================================================
+5. PONTOS DE ATENCAO
+================================================================================
+
+  5.1 Problemas conhecidos:
+    - GAME.init() usa setTimeout aninhados (300ms + 300ms + 300ms) = inicializacao lenta
+    - GS.openContainer definido mas nunca lido (container UI nao implementada)
+    - defItem e IT foram criados para um sistema de items diferente que foi substituido
+      por ITEMS + funcao I()
+    - Sistema de estações incompleto (apenas autumn/winter implementados)
+    - Verificador de colisoes basico (sem bounding boxes, apenas distancia)
+    - Mobs compartilham IA via assignacao de funcao (MOB.spiderwarrior = MOB.spider)
+    - Dungeon/chest/craft UI usando innerHTML (recria DOM inteiro a cada frame da HUD)
+
+  5.2 Risco de contradicao entre especificacoes:
+    - GIANT_PROMPT_CORRECTED.txt é o documento autoritativo
+    - GIANT_PROMPT_DONT_STARVE.txt contem especificacoes mais detalhadas mas
+      pode conflitar com o CORRECTED
+
+  5.3 Convencoes de codigo:
+    - Nomes em ingles (variaveis, funcoes, comentarios)
+    - Comentarios de codigo em ingles, documentacao de projeto em portugues
+    - Sem ponto e virgula em algumas linhas (mas 'use strict' exige)
+    - Variaveis globais minimizadas via IIFE
+
+================================================================================
+6. PROXIMOS PASSOS (para Etapa 02+)
+================================================================================
+
+  Baseado em PENDENCIAS_DO_PROJETO.txt (~224 itens, 25 capitulos):
+
+  6.1 Sistemas criticos faltantes:
+    - Sistema de estações completo (primavera, verao)
+    - Cozimento no Crock Pot (logica de combinacao de ingredientes)
+    - Agricultura (plantio, crescimento, colheita)
+    - Secagem (drying rack)
+    - Colmeias (beebox)
+    - Pescaria (fishing rod)
+
+  6.2 Mobs faltantes:
+    - Goblin (chef)
+    - Vaga-lume (firefly)
+    - Abelha rainha (bee queen)
+    - Aranha rainha (spider queen) - esqueleto existe mas nao spawna
+    - Macaco (splumonkey)
+    - Cervo (deer)
+    - Koalafant
+    - Vara (tentacle) - existe mas sem variantes
+    - Merm
+    - Mosquito
+
+  6.3 Estruturas faltantes:
+    - Ciencia (alchemy engine)
+    - Magia (divining rod functional)
+    - Armazenamento (chest funcional com UI)
+    - Culinaria (crock pot com receitas corretas)
+    - Conforto (tent funcional, siesta lean-to)
+    - Luz (lantern, miner hat functional)
+
+  6.4 Itens faltantes:
+    - Varias gemas e seus usos
+    - Poções e magias
+    - Vestimentas faltantes
+    - Armas faltantes (boomerang funcional, hambat)
+
+  6.5 Melhorias de qualidade:
+    - Colisao com o mundo (arvores, rochas, agua)
+    - Pathfinding para mobs (substituir chase linear)
+    - Animacoes de ataque/dano
+    - Particulas (fogo, fumaça, faiscas)
+    - Sons mais variados
+
+================================================================================
+FIM DO HANDOFF
+================================================================================
