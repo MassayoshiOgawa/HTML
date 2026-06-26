@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nullscape Clone</title>
+<link rel="icon" href="data:,">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<script>
+'use strict';
+
+/* =========================
+CONFIGURAÇÕES
+========================= */
+
+const CONFIG = {
+  PLAYER_RADIUS: 10,
+  PLAYER_DIAMETER: 20,
+  PLAYER_SPEED: 250,
+  TILE_WIDTH: 120,
+  TILE_LENGTH_MIN: 240,
+  TILE_LENGTH_MAX: 300,
+  SPAWN_SIZE: 180,
+  BASE_TILE_COUNT: 10,
+  PRESENT_SIZE: 12,
+  GOLDEN_PRESENT_SIZE: 12,
+  BEACON_RADIUS: 60,
+  PRESENT_MARGIN: 30,
+  TRANSITION_DURATION: 1000,
+  PRESENTS_PER_TILE_MIN: 10,
+  PRESENTS_PER_TILE_MAX: 15,
+  COLORS: {
+    BACKGROUND: '#0d0d1a',
+    TILE: '#1e1e36',
+    TILE_BORDER: '#2e2e4a',
+    SPAWN: '#252545',
+    SPAWN_BORDER: '#353565',
+    PLAYER: '#4fc3f7',
+    PRESENT: '#66bb6a',
+    GOLDEN_PRESENT: '#ffd54f',
+    BEACON: '#ffd700',
+    HUD_TEXT: '#ffffff',
+    FADE: '#000000'
+  },
+  HUD: {
+    FONT: '18px monospace',
+    PADDING: 16,
+    LINE_HEIGHT: 24
+  }
+};
+
+const STATE = {
+  PLAYING: 'playing',
+  GOLDEN: 'golden',
+  TRANSITION: 'transition'
+};
+
+const DIR = {
+  NORTH: 'north',
+  SOUTH: 'south',
+  EAST: 'east',
+  WEST: 'west'
+};
+
+/* =========================
+UTILIDADES
+========================= */
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function randomFloat(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function circleRectCollision(cx, cy, cr, rx, ry, rw, rh) {
+  const closestX = clamp(cx, rx, rx + rw);
+  const closestY = clamp(cy, ry, ry + rh);
+  const dx = cx - closestX;
+  const dy = cy - closestY;
+  return dx * dx + dy * dy < cr * cr;
+}
+
+/* =========================
+INPUT
+========================= */
+
+class InputManager {
+  constructor() {
+    this.keys = {};
+    this.handleKeyDown = (e) => {
+      this.keys[e.key.toLowerCase()] = true;
+    };
+    this.handleKeyUp = (e) => {
+      this.keys[e.key.toLowerCase()] = false;
+    };
+    window.addEventListener('keydown', this.handleKeyDown);
+    window.addEventListener('keyup', this.handleKeyUp);
+  }
+
+  isDown(key) {
+    return !!this.keys[key];
+  }
+
+  destroy() {
+    window.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('keyup', this.handleKeyUp);
+  }
+}
+
+/* =========================
+MAPA
+========================= */
+
+class SpawnTile {
+  constructor() {
+    this.centerX = 0;
+    this.centerY = 0;
+    this.size = CONFIG.SPAWN_SIZE;
+    this.halfSize = this.size / 2;
+  }
+
+  getRect() {
+    return {
+      x: -this.halfSize,
+      y: -this.halfSize,
+      w: this.size,
+      h: this.size
+    };
+  }
+
+  getCenterX() { return 0; }
+
+  getCenterY() { return 0; }
+
+  getConnectionX(dir) {
+    switch (dir) {
+      case DIR.NORTH: return 0;
+      case DIR.SOUTH: return 0;
+      case DIR.EAST: return this.halfSize;
+      case DIR.WEST: return -this.halfSize;
+    }
+  }
+
+  getConnectionY(dir) {
+    switch (dir) {
+      case DIR.NORTH: return -this.halfSize;
+      case DIR.SOUTH: return this.halfSize;
+      case DIR.EAST: return 0;
+      case DIR.WEST: return 0;
+    }
+  }
+}
+
+class Tile {
+  constructor(entryX, entryY, direction, length) {
+    this.entryX = entryX;
+    this.entryY = entryY;
+    this.direction = direction;
+    this.length = length;
+    this.width = CONFIG.TILE_WIDTH;
+    this.halfWidth = this.width / 2;
+    this.presents = [];
+  }
+
+  getExitX() {
+    switch (this.direction) {
+      case DIR.NORTH: return this.entryX;
+      case DIR.SOUTH: return this.entryX;
+      case DIR.EAST: return this.entryX + this.length;
+      case DIR.WEST: return this.entryX - this.length;
+    }
+  }
+
+  getExitY() {
+    switch (this.direction) {
+      case DIR.NORTH: return this.entryY - this.length;
+      case DIR.SOUTH: return this.entryY + this.length;
+      case DIR.EAST: return this.entryY;
+      case DIR.WEST: return this.entryY;
+    }
+  }
+
+  getRect() {
+    const HW = this.halfWidth;
+    const L = this.length;
+    switch (this.direction) {
+      case DIR.NORTH:
+        return { x: this.entryX - HW, y: this.entryY - L - HW, w: this.width, h: L + this.width };
+      case DIR.SOUTH:
+        return { x: this.entryX - HW, y: this.entryY - HW, w: this.width, h: L + this.width };
+      case DIR.EAST:
+        return { x: this.entryX - HW, y: this.entryY - HW, w: L + this.width, h: this.width };
+      case DIR.WEST:
+        return { x: this.entryX - L - HW, y: this.entryY - HW, w: L + this.width, h: this.width };
+    }
+  }
+
+  getCoreRect() {
+    const HW = this.halfWidth;
+    const L = this.length;
+    switch (this.direction) {
+      case DIR.NORTH:
+        return { x: this.entryX - HW, y: this.entryY - L, w: this.width, h: L };
+      case DIR.SOUTH:
+        return { x: this.entryX - HW, y: this.entryY, w: this.width, h: L };
+      case DIR.EAST:
+        return { x: this.entryX, y: this.entryY - HW, w: L, h: this.width };
+      case DIR.WEST:
+        return { x: this.entryX - L, y: this.entryY - HW, w: L, h: this.width };
+    }
+  }
+}
+
+/* =========================
+GERAÇÃO PROCEDURAL
+========================= */
+
+function rectsOverlap(a, b) {
+  return !(a.x + a.w <= b.x || b.x + b.w <= a.x ||
+           a.y + a.h <= b.y || b.y + b.h <= a.y);
+}
+
+function getTurnDirections(dir) {
+  switch (dir) {
+    case DIR.NORTH: return [DIR.NORTH, DIR.WEST, DIR.EAST];
+    case DIR.SOUTH: return [DIR.SOUTH, DIR.WEST, DIR.EAST];
+    case DIR.EAST:  return [DIR.EAST, DIR.NORTH, DIR.SOUTH];
+    case DIR.WEST:  return [DIR.WEST, DIR.NORTH, DIR.SOUTH];
+  }
+}
+
+function randomTileLength() {
+  return randomInt(CONFIG.TILE_LENGTH_MIN, CONFIG.TILE_LENGTH_MAX);
+}
+
+class MapGenerator {
+  generate(tileCount) {
+    const spawn = new SpawnTile();
+    const tiles = [];
+    const endpoints = [];
+
+    const initialDirs = [DIR.NORTH, DIR.SOUTH, DIR.EAST, DIR.WEST];
+
+    for (const dir of initialDirs) {
+      const entryX = spawn.getConnectionX(dir);
+      const entryY = spawn.getConnectionY(dir);
+      const length = randomTileLength();
+      const tile = new Tile(entryX, entryY, dir, length);
+      tiles.push(tile);
+      endpoints.push({ x: tile.getExitX(), y: tile.getExitY(), dir, source: tile });
+    }
+
+    let remaining = tileCount - 4;
+    let safety = 0;
+
+    while (remaining > 0 && endpoints.length > 0 && safety < 2000) {
+      safety++;
+      const ei = Math.floor(Math.random() * endpoints.length);
+      const ep = endpoints[ei];
+      const turnDirs = getTurnDirections(ep.dir);
+      const shuffled = [...turnDirs].sort(() => Math.random() - 0.5);
+      let placed = false;
+
+      for (const dir of shuffled) {
+        const length = randomTileLength();
+        const testTile = new Tile(ep.x, ep.y, dir, length);
+        const testCore = testTile.getCoreRect();
+
+        let collides = false;
+        for (const existing of tiles) {
+          if (existing === ep.source) continue;
+          if (rectsOverlap(existing.getCoreRect(), testCore)) {
+            collides = true;
+            break;
+          }
+        }
+
+        if (!collides && rectsOverlap(spawn.getRect(), testCore)) {
+          collides = true;
+        }
+
+        if (!collides) {
+          tiles.push(testTile);
+          endpoints.splice(ei, 1);
+          endpoints.push({ x: testTile.getExitX(), y: testTile.getExitY(), dir, source: testTile });
+          placed = true;
+          remaining--;
+          break;
+        }
+      }
+
+      if (!placed) {
+        endpoints.splice(ei, 1);
+      }
+    }
+
+    this.assignPresents(tiles);
+    return { spawn, tiles };
+  }
+
+  assignPresents(tiles) {
+    for (const tile of tiles) {
+      const count = randomInt(CONFIG.PRESENTS_PER_TILE_MIN, CONFIG.PRESENTS_PER_TILE_MAX);
+      const margin = CONFIG.PRESENT_MARGIN;
+      const L = tile.length;
+      tile.presents = [];
+
+      if (tile.direction === DIR.NORTH) {
+        const startY = tile.entryY - L + margin;
+        const endY = tile.entryY - margin;
+        const step = (endY - startY) / count;
+        for (let i = 0; i < count; i++) {
+          tile.presents.push({
+            x: tile.entryX,
+            y: startY + step * (i + 0.5),
+            collected: false
+          });
+        }
+      } else if (tile.direction === DIR.SOUTH) {
+        const startY = tile.entryY + margin;
+        const endY = tile.entryY + L - margin;
+        const step = (endY - startY) / count;
+        for (let i = 0; i < count; i++) {
+          tile.presents.push({
+            x: tile.entryX,
+            y: startY + step * (i + 0.5),
+            collected: false
+          });
+        }
+      } else if (tile.direction === DIR.EAST) {
+        const startX = tile.entryX + margin;
+        const endX = tile.entryX + L - margin;
+        const step = (endX - startX) / count;
+        for (let i = 0; i < count; i++) {
+          tile.presents.push({
+            x: startX + step * (i + 0.5),
+            y: tile.entryY,
+            collected: false
+          });
+        }
+      } else if (tile.direction === DIR.WEST) {
+        const startX = tile.entryX - L + margin;
+        const endX = tile.entryX - margin;
+        const step = (endX - startX) / count;
+        for (let i = 0; i < count; i++) {
+          tile.presents.push({
+            x: startX + step * (i + 0.5),
+            y: tile.entryY,
+            collected: false
+          });
+        }
+      }
+    }
+  }
+}
+
+/* =========================
+PLAYER
+========================= */
+
+class Player {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+  }
+
+  spawnAt(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  update(input, dt, rects) {
+    let dx = 0;
+    let dy = 0;
+    if (input.isDown('w')) dy = -1;
+    if (input.isDown('s')) dy = 1;
+    if (input.isDown('a')) dx = -1;
+    if (input.isDown('d')) dx = 1;
+
+    if (dx !== 0 && dy !== 0) {
+      const len = Math.sqrt(2);
+      dx /= len;
+      dy /= len;
+    }
+
+    this.x += dx * CONFIG.PLAYER_SPEED * dt;
+    this.y += dy * CONFIG.PLAYER_SPEED * dt;
+
+    const onGround = rects.some(r =>
+      this.x >= r.x && this.x < r.x + r.w &&
+      this.y >= r.y && this.y < r.y + r.h
+    );
+
+    return onGround;
+  }
+}
+
+/* =========================
+CÂMERA
+========================= */
+
+class Camera {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+  }
+
+  follow(target) {
+    this.x = target.x;
+    this.y = target.y;
+  }
+
+  getScreenX(worldX, canvasWidth) {
+    return worldX - this.x + canvasWidth / 2;
+  }
+
+  getScreenY(worldY, canvasHeight) {
+    return worldY - this.y + canvasHeight / 2;
+  }
+}
+
+/* =========================
+PRESENTES NORMAIS
+========================= */
+
+class Present {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.collected = false;
+  }
+
+  checkCollision(px, py, pr) {
+    const hw = CONFIG.PRESENT_SIZE / 2;
+    return circleRectCollision(px, py, pr,
+      this.x - hw, this.y - hw,
+      CONFIG.PRESENT_SIZE, CONFIG.PRESENT_SIZE);
+  }
+}
+
+/* =========================
+PRESENTES DOURADOS
+========================= */
+
+class GoldenPresent {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.collected = false;
+  }
+
+  checkCollision(px, py, pr) {
+    const hw = CONFIG.GOLDEN_PRESENT_SIZE / 2;
+    return circleRectCollision(px, py, pr,
+      this.x - hw, this.y - hw,
+      CONFIG.GOLDEN_PRESENT_SIZE, CONFIG.GOLDEN_PRESENT_SIZE);
+  }
+}
+
+/* =========================
+BEACON
+========================= */
+
+class Beacon {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.active = true;
+  }
+
+  checkCollision(px, py) {
+    const dx = px - this.x;
+    const dy = py - this.y;
+    return dx * dx + dy * dy < CONFIG.BEACON_RADIUS * CONFIG.BEACON_RADIUS;
+  }
+}
+
+/* =========================
+ROUND
+========================= */
+
+class RoundManager {
+  constructor() {
+    this.round = 0;
+    this.state = STATE.PLAYING;
+    this.normalPresents = [];
+    this.goldenPresents = [];
+    this.beacon = null;
+    this.goldenCollected = 0;
+    this.transitionStart = 0;
+    this.spawn = null;
+    this.tiles = [];
+    this.groundRects = [];
+    this.presentPositions = [];
+  }
+
+  getTileCount() {
+    return CONFIG.BASE_TILE_COUNT + 2 * Math.max(0, this.round - 1);
+  }
+
+  startNewRound(mapGen) {
+    this.round++;
+    this.goldenCollected = 0;
+    this.state = STATE.PLAYING;
+    this.normalPresents = [];
+    this.goldenPresents = [];
+    this.beacon = null;
+    this.transitionStart = 0;
+
+    const result = mapGen.generate(this.getTileCount());
+    this.spawn = result.spawn;
+    this.tiles = result.tiles;
+
+    this.groundRects = [this.spawn.getRect()];
+    for (const tile of this.tiles) {
+      this.groundRects.push(tile.getRect());
+    }
+
+    this.presentPositions = [];
+    this.normalPresents = [];
+    for (const tile of this.tiles) {
+      for (const p of tile.presents) {
+        this.presentPositions.push({ x: p.x, y: p.y });
+        this.normalPresents.push(new Present(p.x, p.y));
+      }
+    }
+  }
+
+  restartRound(mapGen) {
+    this.goldenCollected = 0;
+    this.state = STATE.PLAYING;
+    this.normalPresents = [];
+    this.goldenPresents = [];
+    this.beacon = null;
+    this.transitionStart = 0;
+
+    const result = mapGen.generate(this.getTileCount());
+    this.spawn = result.spawn;
+    this.tiles = result.tiles;
+
+    this.groundRects = [this.spawn.getRect()];
+    for (const tile of this.tiles) {
+      this.groundRects.push(tile.getRect());
+    }
+
+    this.presentPositions = [];
+    this.normalPresents = [];
+    for (const tile of this.tiles) {
+      for (const p of tile.presents) {
+        this.presentPositions.push({ x: p.x, y: p.y });
+        this.normalPresents.push(new Present(p.x, p.y));
+      }
+    }
+  }
+
+  activateGoldenPhase() {
+    this.state = STATE.GOLDEN;
+
+    for (const pos of this.presentPositions) {
+      this.goldenPresents.push(new GoldenPresent(pos.x, pos.y));
+    }
+
+    this.beacon = new Beacon(this.spawn.getCenterX(), this.spawn.getCenterY());
+  }
+
+  update(player, dt) {
+    if (this.state === STATE.TRANSITION) {
+      if (Date.now() - this.transitionStart >= CONFIG.TRANSITION_DURATION) {
+        return 'next_round';
+      }
+      return 'transitioning';
+    }
+
+    if (this.state === STATE.PLAYING || this.state === STATE.GOLDEN) {
+      for (const p of this.normalPresents) {
+        if (!p.collected && p.checkCollision(player.x, player.y, CONFIG.PLAYER_RADIUS)) {
+          p.collected = true;
+        }
+      }
+
+      if (this.state === STATE.PLAYING && this.normalPresents.every(p => p.collected)) {
+        this.activateGoldenPhase();
+      }
+
+      if (this.state === STATE.GOLDEN) {
+        for (const gp of this.goldenPresents) {
+          if (!gp.collected && gp.checkCollision(player.x, player.y, CONFIG.PLAYER_RADIUS)) {
+            gp.collected = true;
+            this.goldenCollected++;
+          }
+        }
+
+        if (this.beacon && this.beacon.checkCollision(player.x, player.y)) {
+          this.state = STATE.TRANSITION;
+          this.transitionStart = Date.now();
+          return 'beacon_touched';
+        }
+      }
+    }
+
+    return 'playing';
+  }
+
+  getRemainingPresents() {
+    return this.normalPresents.filter(p => !p.collected).length;
+  }
+}
+
+/* =========================
+RENDERIZAÇÃO
+========================= */
+
+class Renderer {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+  }
+
+  resize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  }
+
+  clear() {
+    this.ctx.fillStyle = CONFIG.COLORS.BACKGROUND;
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  renderGame(roundManager, player, camera) {
+    const ctx = this.ctx;
+    const cw = this.canvas.width;
+    const ch = this.canvas.height;
+
+    /* Corredores */
+    for (const tile of roundManager.tiles) {
+      const r = tile.getRect();
+      const sx = camera.getScreenX(r.x, cw);
+      const sy = camera.getScreenY(r.y, ch);
+
+      ctx.fillStyle = CONFIG.COLORS.TILE;
+      ctx.fillRect(sx, sy, r.w, r.h);
+      ctx.strokeStyle = CONFIG.COLORS.TILE_BORDER;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(sx, sy, r.w, r.h);
+    }
+
+    /* Spawn */
+    const sr = roundManager.spawn.getRect();
+    const ssx = camera.getScreenX(sr.x, cw);
+    const ssy = camera.getScreenY(sr.y, ch);
+    ctx.fillStyle = CONFIG.COLORS.SPAWN;
+    ctx.fillRect(ssx, ssy, sr.w, sr.h);
+    ctx.strokeStyle = CONFIG.COLORS.SPAWN_BORDER;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(ssx, ssy, sr.w, sr.h);
+
+    /* Presentes Normais */
+    for (const p of roundManager.normalPresents) {
+      if (p.collected) continue;
+      const sx = camera.getScreenX(p.x, cw);
+      const sy = camera.getScreenY(p.y, ch);
+      const hw = CONFIG.PRESENT_SIZE / 2;
+      ctx.fillStyle = CONFIG.COLORS.PRESENT;
+      ctx.fillRect(sx - hw, sy - hw, CONFIG.PRESENT_SIZE, CONFIG.PRESENT_SIZE);
+    }
+
+    /* Presentes Dourados */
+    for (const gp of roundManager.goldenPresents) {
+      if (gp.collected) continue;
+      const sx = camera.getScreenX(gp.x, cw);
+      const sy = camera.getScreenY(gp.y, ch);
+      const hw = CONFIG.GOLDEN_PRESENT_SIZE / 2;
+      ctx.fillStyle = CONFIG.COLORS.GOLDEN_PRESENT;
+      ctx.fillRect(sx - hw, sy - hw, CONFIG.GOLDEN_PRESENT_SIZE, CONFIG.GOLDEN_PRESENT_SIZE);
+    }
+
+    /* Beacon */
+    if (roundManager.beacon) {
+      const bx = camera.getScreenX(roundManager.beacon.x, cw);
+      const by = camera.getScreenY(roundManager.beacon.y, ch);
+      const pulse = Math.sin(Date.now() * 0.004) * 0.15 + 0.85;
+      const radius = CONFIG.BEACON_RADIUS * pulse;
+
+      ctx.beginPath();
+      ctx.arc(bx, by, radius, 0, Math.PI * 2);
+      ctx.fillStyle = CONFIG.COLORS.BEACON;
+      ctx.globalAlpha = 0.4;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      ctx.beginPath();
+      ctx.arc(bx, by, radius * 0.7, 0, Math.PI * 2);
+      ctx.fillStyle = CONFIG.COLORS.BEACON;
+      ctx.globalAlpha = 0.7;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      ctx.beginPath();
+      ctx.arc(bx, by, radius * 0.4, 0, Math.PI * 2);
+      ctx.fillStyle = CONFIG.COLORS.BEACON;
+      ctx.fill();
+    }
+
+    /* Player */
+    const px = camera.getScreenX(player.x, cw);
+    const py = camera.getScreenY(player.y, ch);
+    ctx.beginPath();
+    ctx.arc(px, py, CONFIG.PLAYER_RADIUS, 0, Math.PI * 2);
+    ctx.fillStyle = CONFIG.COLORS.PLAYER;
+    ctx.fill();
+  }
+
+  renderHUD(roundManager) {
+    const ctx = this.ctx;
+    const { FONT, PADDING, LINE_HEIGHT } = CONFIG.HUD;
+
+    ctx.font = FONT;
+    ctx.fillStyle = CONFIG.COLORS.HUD_TEXT;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+
+    ctx.fillText(`Round: ${roundManager.round}`, PADDING, PADDING);
+    ctx.fillText(`Presentes Restantes: ${roundManager.getRemainingPresents()}`, PADDING, PADDING + LINE_HEIGHT);
+    ctx.fillText(`Presentes Dourados Coletados: ${roundManager.goldenCollected}`, PADDING, PADDING + LINE_HEIGHT * 2);
+  }
+
+  renderTransition(progress) {
+    const ctx = this.ctx;
+    ctx.fillStyle = CONFIG.COLORS.FADE;
+    ctx.globalAlpha = progress;
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.globalAlpha = 1;
+  }
+}
+
+/* =========================
+HUD
+========================= */
+
+class HUD {
+  render(renderer, roundManager) {
+    renderer.renderHUD(roundManager);
+  }
+}
+
+/* =========================
+GAME
+========================= */
+
+class Game {
+  constructor() {
+    this.canvas = document.getElementById('gameCanvas');
+    this.input = new InputManager();
+    this.renderer = new Renderer(this.canvas);
+    this.mapGen = new MapGenerator();
+    this.player = new Player();
+    this.camera = new Camera();
+    this.roundManager = new RoundManager();
+    this.hud = new HUD();
+    this.lastTime = 0;
+
+    this.roundManager.startNewRound(this.mapGen);
+    this.player.spawnAt(this.roundManager.spawn.getCenterX(), this.roundManager.spawn.getCenterY());
+    this.camera.follow(this.player);
+
+    this.loop = (time) => this.gameLoop(time);
+    requestAnimationFrame(this.loop);
+  }
+
+  gameLoop(time) {
+    const dt = Math.min((time - this.lastTime) / 1000, 0.05);
+    this.lastTime = time;
+
+    if (this.roundManager.state !== STATE.TRANSITION) {
+      const alive = this.player.update(this.input, dt, this.roundManager.groundRects);
+
+      if (!alive) {
+        this.roundManager.restartRound(this.mapGen);
+        this.player.spawnAt(this.roundManager.spawn.getCenterX(), this.roundManager.spawn.getCenterY());
+      }
+
+      this.camera.follow(this.player);
+
+      const status = this.roundManager.update(this.player, dt);
+
+      if (status === 'next_round') {
+        this.roundManager.startNewRound(this.mapGen);
+        this.player.spawnAt(this.roundManager.spawn.getCenterX(), this.roundManager.spawn.getCenterY());
+      }
+    } else {
+      const elapsed = Date.now() - this.roundManager.transitionStart;
+      const progress = Math.min(elapsed / CONFIG.TRANSITION_DURATION, 1);
+
+      if (progress >= 1) {
+        this.roundManager.startNewRound(this.mapGen);
+        this.player.spawnAt(this.roundManager.spawn.getCenterX(), this.roundManager.spawn.getCenterY());
+        this.camera.follow(this.player);
+      }
+    }
+
+    this.renderer.clear();
+    this.renderer.renderGame(this.roundManager, this.player, this.camera);
+    this.hud.render(this.renderer, this.roundManager);
+
+    if (this.roundManager.state === STATE.TRANSITION) {
+      const elapsed = Date.now() - this.roundManager.transitionStart;
+      const progress = Math.min(elapsed / CONFIG.TRANSITION_DURATION, 1);
+      this.renderer.renderTransition(progress);
+    }
+
+    requestAnimationFrame(this.loop);
+  }
+}
+
+/* =========================
+INICIALIZAÇÃO
+========================= */
+
+const game = new Game();
+</script>
+</body>
+</html>
