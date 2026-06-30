@@ -489,9 +489,54 @@ Gerar apenas um único documento TXT.
 
 Especificar que no documento HTML deve estar sem caracteres corrompidos, use UTF-8 e sem tela de Loading.
 
+Na capa do slide(Vulgo primeiro slide, introdução), colocar o titulo em forma de texto 3D com text-shadow, que é basicamente isso aqui:
+O que é o efeito de texto 3D com text-shadow?
+O efeito de texto 3D com text-shadow é uma técnica visual feita apenas com HTML, CSS e, opcionalmente, JavaScript, que cria a ilusão de profundidade sem utilizar modelos 3D reais.
+A ideia consiste em desenhar várias sombras do texto, cada uma deslocada alguns pixels em relação à anterior. Quando essas sombras são empilhadas, elas formam uma "espessura" atrás das letras, fazendo com que o texto pareça extrudado (como se tivesse sido esticado para trás no eixo de profundidade).
+Quanto maior o número de camadas de sombra, mais profundo será o efeito. Além disso, é comum adicionar uma sombra desfocada atrás do texto para aumentar a sensação de volume e destacar ainda mais o efeito tridimensional.
+Essa técnica é bastante utilizada em páginas web por ser simples, leve e compatível com praticamente todos os navegadores modernos.
+Aqui está um exemplo de código:
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Texto 3D</title>
+<style>
+body{
+    margin:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    background:#222;
+}
+h1{
+    color:white;
+    font-size:80px;
+    font-family:Arial, sans-serif;
+}
+</style>
+</head>
+<body>
+<h1 id="texto">Texto 3D</h1>
+<script>
+const texto = document.getElementById("texto");
+let sombra = "";
+for(let i = 0; i < 30; i++){
+    sombra += (sombra ? "," : "") +
+              (-i) + "px " +
+              i + "px 0 #bfbfbf";
+}
+texto.style.textShadow = sombra;
+</script>
+</body>
+</html>
+
 Esse documento será utilizado por outra IA para desenvolver toda a apresentação HTML em um único arquivo HTML contendo HTML, CSS e JavaScript.
 
 O documento deve ser extremamente detalhado.
+
+No final, não colocar um texto que tem o intuito de perguntar se há alguma dúvida.
 
 Lembre-se que a IA que vai fazer o que este prompt pede, não terá nenhum tipo de acesso as informações contidas dentro desta pasta, então seja bem detalhista, pois essa IA não terá nenhum tipo de contexto prévio
 

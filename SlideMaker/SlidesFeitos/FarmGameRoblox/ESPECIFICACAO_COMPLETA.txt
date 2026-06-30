@@ -1,0 +1,1548 @@
+﻿================================================================================
+  ESPECIFICAÇÃO COMPLETA DE DIREÇÃO CRIATIVA
+  "PROJETO DE JOGO DE FAZENDINHA NO ROBLOX"
+  APRESENTAÇÃO HTML — 20 SLIDES
+================================================================================
+
+INSTRUÇÕES PARA A IA EXECUTORA:
+- Crie um ÚNICO arquivo HTML contendo todo HTML, CSS e JavaScript inline.
+- O arquivo deve usar codificação UTF-8 (<meta charset="UTF-8">).
+- NÃO adicione tela de loading.
+- NÃO acesse nenhum outro arquivo na pasta de trabalho.
+- NÃO consulte nenhum documento externo.
+- Gere o HTML completo de uma só vez, sem depender de assets externos.
+- Use fontes do Google Fonts via @import no CSS (Poppins, Inter, JetBrains Mono).
+- Use Lucide Icons via CDN (https://unpkg.com/lucide@latest) para ícones.
+- Todo o conteúdo deve estar em português (PT-BR).
+- O documento deve ser um único arquivo HTML funcional, sem dependências locais.
+
+================================================================================
+1. IDENTIDADE VISUAL — VISÃO GERAL
+================================================================================
+
+A apresentação mescla o universo lúdico/natureza de um jogo de fazenda com a
+estética tecnológica do desenvolvimento Roblox. É uma fusão "Nature-Tech":
+orgânico encontra digital. O visual é limpo, moderno, com cores vibrantes da
+natureza (verdes, terra, dourado) sobre fundos escuros que remetem a uma
+interface de game HUD. A sensação é de estar dentro de um jogo: imersivo,
+colorido, mas profissional.
+================================================================================
+2. PALETA DE CORES
+================================================================================
+
+Tons de Natureza + Game UI.
+
+CORES PRINCIPAIS:
+  Verde Floresta   #2D6A4F  (elementos principais, botões, headers)
+  Verde Escuro     #1B4332  (fundos, containers, bordas)
+
+CORES SECUNDÁRIAS:
+  Verde Claro      #95D5B2  (títulos, destaques, ícones)
+  Marrom Terra     #D4A373  (subtítulos, cards, elementos orgânicos)
+  Dourado Mel      #F6BD60  (destaques especiais, moedas, conquistas)
+
+CORES DE FUNDO (escuro — padrão):
+  Fundo Escuro      #0D1B12  (fundo principal da apresentação)
+  Fundo Card        #132B1E  (cards, containers)
+  Fundo Overlay     rgba(13,27,18,0.85)
+
+CORES DE TEXTO:
+  Texto Principal   #E8F0EC  (sobre fundo escuro)
+  Texto Secundário  #A0C4B3  (sobre fundo escuro)
+  Título Principal  #FFFFFF  (sobre fundo escuro)
+  Título Destaque   #95D5B2  (títulos com glow verde)
+  Links             #95D5B2
+
+CORES DE BOTÃO:
+  Botão Primário    bg: #2D6A4F  hover: #3D8B64  text: #FFFFFF
+  Botão Secundário  bg: transparent  border: #95D5B2  hover: bg #95D5B2  text: #FFFFFF
+  Botão Destaque    bg: #F6BD60  hover: #E8A84A  text: #1B4332
+
+CORES DE HOVER:
+  Glow verde suave  rgba(149,213,178,0.3)
+  Glow dourado      rgba(246,189,96,0.3)
+
+CORES DE GAMIFICAÇÃO:
+  Moeda             #F6BD60
+  XP / Progresso    #52B788
+  Planta Crescendo  #74C69D
+
+GRADIENTES PRINCIPAIS:
+  Hero Gradient:    linear-gradient(135deg, #0D1B12 0%, #1B4332 50%, #2D6A4F 100%)
+  Card Gradient:    linear-gradient(145deg, #132B1E, #1B4332)
+  Accent Gradient:  linear-gradient(90deg, #2D6A4F, #52B788)
+  Gold Gradient:    linear-gradient(135deg, #F6BD60, #E8A84A)
+  Nature Gradient:  linear-gradient(180deg, #0D1B12, #1B4332, #2D6A4F)
+
+================================================================================
+3. TIPOGRAFIA
+================================================================================
+
+FONTES (Google Fonts via @import):
+  Títulos:    'Poppins', sans-serif  (700 Bold, 900 Black)
+  Subtítulos: 'Poppins', sans-serif  (600 SemiBold)
+  Conteúdo:   'Inter', sans-serif    (300 Light, 400 Regular, 500 Medium)
+  Código:     'JetBrains Mono', monospace (só nos slides técnicos: 14, 15)
+
+HIERARQUIA (tamanhos em rem — padrão 16px):
+  Slide Título (h1):      3.5rem  weight 900  letter-spacing: -0.02em
+  Slide Subtítulo (h2):   2.2rem  weight 700  letter-spacing: -0.01em
+  Slide Seção (h3):       1.6rem  weight 600
+  Conteúdo Principal:     1.1rem  weight 400  line-height: 1.7
+  Conteúdo Secundário:    0.95rem weight 300  line-height: 1.6
+  Destaque Numérico:      3rem    weight 700
+  Código:                 0.85rem weight 400
+
+ESPAÇAMENTOS:
+  Margin entre títulos e conteúdo:  1.5rem
+  Padding de cards:                 2rem
+  Gap entre elementos de grid:      1.5rem
+  Gap entre parágrafos:            0.75rem
+
+================================================================================
+4. ESTILO VISUAL GERAL
+================================================================================
+
+NATURE-TECH FUSION:
+- Minimalismo com toques orgânicos.
+- Cards com glassmorphism leve: bg rgba(19,43,30,0.6), backdrop-filter blur(12px),
+  border 1px solid rgba(149,213,178,0.15), border-radius: 16px.
+- Cantos arredondados em geral (border-radius: 16px containers, 8px botões).
+- Sombras suaves com múltiplas camadas (box-shadow com 2-3 layers).
+- Elementos decorativos geométricos combinando curvas orgânicas e linhas retas.
+- Glow sutil em elementos importantes (text-shadow com cor verde claro).
+- Partículas: fireflies (vaga-lumes) verdes/douradas nos slides orgânicos;
+  partículas tecnológicas (pixels, linhas) nos slides técnicos.
+- Ícones: estilo Lucide outline, 24-32px, cor #95D5B2 ou branco.
+- Cursor personalizado: bolinha 12px com glow verde seguindo o mouse (opcional).
+- Padrão de grid discreto (linhas rgba(255,255,255,0.03)) sobre o fundo escuro.
+
+================================================================================
+5. CONCEITO ARTÍSTICO
+================================================================================
+
+"Sua fazenda, seu código, seu mundo."
+
+A apresentação transmite a sensação de explorar tanto uma fazenda virtual quanto
+o código que a constrói. Atmosfera acolhedora, produtiva, com energia criativa.
+O espectador deve sentir que está vendo algo ao mesmo tempo divertido (jogar) e
+inteligente (programar). A natureza encontra o digital — verde orgânico encontra
+linhas de código.
+
+================================================================================
+6. BACKGROUND GLOBAL
+================================================================================
+
+Canvas animado presente em TODOS os slides:
+
+- Grid sutil de linhas (rgba(255,255,255,0.03)) horizontais e verticais.
+- Blobs orgânicos se movendo lentamente: cores #1B4332 e #2D6A4F com alpha 0.1,
+  tamanhos 50-300px de diâmetro, velocidade muito lenta.
+- Fireflies: 20-30 pontos de luz verde-claro (#95D5B2) com glow, movimento
+  aleatório suave como insetos voando (Math.sin + Math.cos com fases distintas).
+- Poeira dourada sutil (#F6BD60, 10% opacity, 5-10 partículas).
+
+O fundo NÃO deve distrair. Perceptível apenas com atenção.
+
+PARALLAX GLOBAL:
+- Fundo se move 5% mais devagar que o slide durante transições.
+
+================================================================================
+7. NAVEGAÇÃO — ESPECIFICAÇÃO COMPLETA
+================================================================================
+
+ESTRUTURA:
+- Apresentação em slides (não scroll), 100vw x 100vh cada.
+- Cada slide é uma <section class="slide">, posicionada absolutamente.
+- Apenas um slide visível por vez (opacity + transform).
+
+TROCAR DE SLIDES:
+- Botão Próximo (seta direita): canto inferior direito, flutuando, 48x48px.
+- Botão Anterior (seta esquerda): canto inferior direito, ao lado do Próximo.
+- Ambos com glassmorphism (bg rgba(19,43,30,0.7), backdrop-filter blur(8px),
+  border 1px rgba(149,213,178,0.2), border-radius 50%).
+- FadeIn dos botões apenas a partir do slide 2 (slide 1 não tem botões).
+
+NAVEGAÇÃO POR TECLADO:
+  Seta Direita / Page Down / L / Espaço: próximo slide
+  Seta Esquerda / Page Up / H: slide anterior
+  Home: primeiro slide
+  End: último slide
+  ESC: sai de fullscreen
+  F: alterna fullscreen
+  Números 1-9: vai para slide 1-9
+  Número 0: vai para slide 10
+
+BARRA DE PROGRESSO:
+- Barra horizontal fina (4px) no topo da tela, z-index 100.
+- Cor: linear-gradient(90deg, #2D6A4F, #52B788).
+- Fundo: rgba(255,255,255,0.1).
+- Largura animada (CSS transition width 0.5s ease).
+- Abaixo, à direita: contador "01 / 20" em Inter 0.8rem, cor #95D5B2, opacidade 0.7.
+
+BOTÃO FULLSCREEN:
+- Canto superior direito, ícone de maximizar (16x16px).
+- Glassmorphism, visível em todos os slides exceto o 1.
+
+MOUSE WHEEL:
+- Roda do mouse avança/volta 1 slide por click.
+- Debounce de 800ms para evitar troca múltipla.
+
+TOUCH (SWIPE):
+- Swipe esquerda: próximo slide. Swipe direita: anterior.
+- Detectado com touchstart/touchend, mínimo 50px de deslocamento horizontal.
+
+NAVEGAÇÃO POR ÍNDICE (atalho "I"):
+- Overlay com grid de 20 miniaturas numeradas (80x60px cada).
+- Clicar leva ao slide correspondente. Fechar com ESC ou clique fora.
+- Miniaturas: fundo #132B1E, número branco grande, borda sutil.
+
+================================================================================
+8. ANIMAÇÕES GLOBAIS
+================================================================================
+
+TRANSIÇÕES ENTRE SLIDES (600-800ms cada, overlap de 200ms):
+
+  Slide 1 -> 2:  Fade Out + Fade In
+  Slide 2 -> 3:  Slide Out (cima) + Slide In (baixo)
+  Slide 3 -> 4:  Scale Out (encolhe) + Scale In (cresce)
+  Slide 4 -> 5:  Blur Out (desfoca) + Blur In (foca)
+  Slide 5 -> 6:  Slide Out (esquerda) + Slide In (direita)
+  Slide 6 -> 7:  Fade Out + Fade In
+  Slide 7 -> 8:  Zoom Out + Zoom In
+  Slide 8 -> 9:  Slide Out (baixo) + Slide In (cima)
+  Slide 9 -> 10: Glitch Out + Glitch In
+  Slide 10 ->11: Cube (rotação 3D eixo Y)
+  Slide 11 ->12: Fade Out + Fade In
+  Slide 12 ->13: Slide Out (direita) + Slide In (esquerda)
+  Slide 13 ->14: Zoom Out + Zoom In
+  Slide 14 ->15: Blur Out + Blur In
+  Slide 15 ->16: Slide Out (cima) + Slide In (baixo)
+  Slide 16 ->17: Fade Out + Fade In
+  Slide 17 ->18: Scale Out + Scale In
+  Slide 18 ->19: Cube (rotação 3D eixo Y)
+  Slide 19 ->20: Fade Out + Fade In
+
+IMPLEMENTAÇÃO:
+- CSS transitions + JavaScript toggle de classes (.slide-enter, .slide-exit).
+- Usar transform, opacity, filter.
+- Cube: perspective 1000px no container, rotateY no slide.
+- Glitch: clip-path + translate + skew aleatório.
+
+EASING PADRÃO: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+STAGGER (entrada de elementos DENTRO do slide):
+- Cada elemento relevante recebe atraso progressivo de 150ms.
+- Animação: fadeIn + slideUp (translateY(30px) -> 0, opacity 0 -> 1).
+- Duração: 400ms cada. Easing ease-out.
+- Implementar com animation-delay via JS.
+
+DURAÇÕES:
+  Transição slides:        600ms (padrão), 800ms (Cube/Glitch)
+  Fade entrada elemento:   500ms
+  Slide up elemento:       400ms
+  Hover:                   200ms
+  Barra progresso:         500ms
+  Botões hover/active:     150ms
+
+================================================================================
+9. ELEMENTOS INTERATIVOS GLOBAIS
+================================================================================
+
+CURSOR PERSONALIZADO (desktop):
+- Círculo 12px diâmetro, cor #95D5B2 com glow (box-shadow 0 0 10px #95D5B2).
+- Segue o mouse suavemente (CSS transition 100ms no transform).
+- Hover em botões: aumenta para 20px, glow mais forte.
+- Hover em cards: muda glow para dourado (#F6BD60).
+
+HOVER EM BOTÕES:
+- Primário: scale(1.05), box-shadow glow verde aumenta.
+- Secundário: bg preenche com #95D5B2, texto fica #1B4332.
+- Destaque: scale(1.05), box-shadow glow dourado.
+
+HOVER EM CARDS:
+- translateY(-4px), box-shadow com mais blur/opacidade.
+- Border-color mais claro. Transition 200ms ease.
+
+TOOLTIPS:
+- Botões Navegação: "Avançar (->)" e "Voltar (<-)".
+- Slides técnicos 14-15: tooltip em termos DataStore, RemoteEvents, etc.
+- Estilo: glassmorphism bg rgba(19,43,30,0.9), padding 8px 12px,
+  border-radius 6px, Inter 0.8rem, branco, seta CSS apontando para baixo.
+
+MAGNETIC BUTTONS:
+- Botões Próximo/Anterior: deslocam até 8px na direção do cursor
+  quando mouse está a até 50px. Implementar com JS calculando posição relativa.
+
+POPUPS (MODAIS):
+- Slide 4: clicar em card de jogo abre popup com descrição.
+- Slide 19: hotspots clicáveis abrem popup com explicação.
+- Fundo overlay rgba(0,0,0,0.7), modal centralizado glassmorphism,
+  border-radius 16px, padding 2rem, max-width 600px.
+- Fechar com X ou clique fora.
+
+HOTSPOTS:
+- Slide 19 apenas. Círculos pulsantes 24px com glow verde sobre imagens.
+- Ao clicar: abrem popup com descrição da funcionalidade.
+
+================================================================================
+10. EFEITO DE TEXTO 3D NA CAPA (SLIDE 1)
+================================================================================
+
+Título: "Projeto de Jogo de Fazendinha no Roblox"
+
+IMPLEMENTAÇÃO:
+- <h1 id="titulo3d"> com o texto.
+- JavaScript gera 30 camadas de text-shadow:
+  for(i=0;i<30;i++) sombra += (-i)+"px "+i+"px 0 COR_DA_CAMADA
+- Cores das sombras: gradiente do #1B4332 (mais escuro, i=0) até #95D5B2 (mais claro, i=29).
+- Última camada extra: "0 0 20px rgba(149,213,178,0.5)" para glow.
+- Texto centralizado horizontal e verticalmente.
+- Animação extra: rotação Y lenta entre -5deg e 5deg via requestAnimationFrame
+  (usando CSS perspective no container pai).
+
+================================================================================
+11. ÍCONES
+================================================================================
+
+Usar Lucide Icons via CDN: https://unpkg.com/lucide@latest
+
+ÍCONES POR SLIDE (32x32px, canto superior esquerdo, stroke #95D5B2, glow):
+
+  Slide 1:  Sprout (broto)
+  Slide 2:  Target (alvo)
+  Slide 3:  Users (público)
+  Slide 4:  BookOpen (inspiração)
+  Slide 5:  ScrollText (história)
+  Slide 6:  RefreshCw (ciclo)
+  Slide 7:  Seedling (plantio)
+  Slide 8:  TrendingUp (crescimento)
+  Slide 9:  Wrench (ferramentas)
+  Slide 10: Coins (economia)
+  Slide 11: Package (inventário)
+  Slide 12: Save (salvamento)
+  Slide 13: Monitor (interface)
+  Slide 14: Cpu (tecnologias)
+  Slide 15: FolderTree (estrutura)
+  Slide 16: AlertTriangle (desafios)
+  Slide 17: Rocket (futuro)
+  Slide 18: Trophy (resultados)
+  Slide 19: Play (demonstração)
+  Slide 20: Heart (conclusão)
+
+================================================================================
+12. PARTÍCULAS GLOBAIS (CANVAS)
+================================================================================
+
+Fireflies: 20-30 pontos, raio 2-4px, cor #95D5B2 com glow.
+  - Movimento: noise senoidal (Math.sin(time + index) * amplitude).
+  - Velocidade: 1-2px/s. Opacidade oscila entre 0.3 e 0.8.
+Poeira dourada: 5-10 pontos, raio 1-2px, cor #F6BD60, alpha 0.1-0.3.
+
+================================================================================
+===============================================================================
+  ESPECIFICAÇÃO DETALHADA DE CADA SLIDE
+===============================================================================
+================================================================================
+
+===============================================================================
+SLIDE 1 — CAPA
+===============================================================================
+
+NOME: Capa / Introdução
+
+OBJETIVO: Apresentar o projeto de forma impactante. Causar a primeira impressão.
+
+EMOÇÃO: Admiração, curiosidade, profissionalismo.
+
+LAYOUT: Centralizado vertical e horizontalmente. Fundo ocupando 100% da tela.
+
+ORGANIZAÇÃO DOS ELEMENTOS (de cima para baixo):
+  1. Ícone Sprout (Lucide) — canto superior esquerdo, 32px, glow verde.
+  2. Título principal (h1) — centro, com efeito 3D text-shadow.
+  3. Subtítulo (h2) — abaixo do título: "Desenvolvimento de Simulação Agrícola no Roblox"
+  4. Nome do apresentador — "Apresentador: [Nome]" em Inter light 1rem
+  5. Data — "Junho 2026" em Inter light 0.9rem
+  6. Badge decorativo: "Roblox Studio • LuaU" em glass card pequeno
+
+BACKGROUND:
+- Fundo escuro #0D1B12 com Canvas animado (blobs + fireflies).
+- Grid hexagonal sutil (#95D5B2 com alpha 0.06) adicionado especificamente neste slide.
+- Partículas extras de poeira dourada.
+
+ELEMENTOS VISUAIS (de Visual.txt):
+- Texto 3D (item 138)
+- Glow (item 131)
+- Hero Layout (item 27)
+- Fundo com Canvas (item 45)
+
+ELEMENTOS INTERATIVOS (de Interativos.txt):
+- Nenhum neste slide (sem botões de navegação).
+
+PARTÍCULAS:
+- Fireflies: 30 pontos verdes, glow, movimento suave.
+- Dust dourada: 10 pontos.
+
+ILUMINAÇÃO:
+- Glow no título (text-shadow extra).
+- God Rays sutis vindo do topo (opcional, pseudo-elemento com gradiente).
+
+EFEITOS:
+- Texto 3D com 30 camadas de text-shadow.
+- Rotação Y lenta do título.
+- Gradiente animado no fundo (blobs se movem lentamente).
+
+TIPOGRAFIA:
+- Título: Poppins 900, 3.5rem, branco, com text-shadow 3D.
+- Subtítulo: Poppins 600, 1.5rem, #95D5B2.
+- Nome/Data: Inter 400, 1rem, #A0C4B3.
+
+ORDEM DE ENTRADA (com stagger, cada um 150ms após o anterior):
+  1. Ícone Sprout (fadeIn + slideDown)
+  2. Título 3D (fadeIn + scale)
+  3. Subtítulo (fadeIn + slideUp)
+  4. Nome do apresentador (fadeIn)
+  5. Data (fadeIn)
+  6. Badge (fadeIn + slideUp)
+
+INTERAÇÕES:
+- Nenhuma neste slide. Apenas assistir.
+
+TRANSIÇÃO PARA SLIDE 2:
+- Fade Out (slide 1 desvanece) + Fade In (slide 2 aparece).
+- Duração: 600ms.
+
+OBSERVAÇÕES:
+- O título 3D é o elemento central. Deve ocupar pelo menos 40% da altura da tela.
+- O efeito 3D deve ser gerado por JavaScript (30 iterações de text-shadow).
+- Fonte de inspiração: o código de text-shadow 3D demonstrado no prompt do usuário.
+
+===============================================================================
+SLIDE 2 — OBJETIVO DO PROJETO
+===============================================================================
+
+NOME: Objetivo do Projeto
+
+OBJETIVO: Explicar a motivação do projeto de forma clara e direta.
+
+EMOÇÃO: Clareza, propósito, determinação.
+
+LAYOUT: Split assimétrico — ícone grande à esquerda, texto à direita.
+
+ORGANIZAÇÃO:
+  1. Ícone Target (Lucide) — canto superior esquerdo, 32px.
+  2. Título "Objetivo do Projeto" (h2).
+  3. Lista de 4 objetivos com bullet points estilizados (círculos verdes).
+  4. Cada item: ícone pequeno + texto.
+
+BACKGROUND:
+- Fundo escuro #0D1B12 + Canvas com fireflies.
+- Blob decorativo grande no canto inferior direito (#1B4332).
+
+ELEMENTOS VISUAIS:
+- Layout split (item 26)
+- Blobs decorativos (item 192)
+- Ícones SVG (item 161)
+
+ELEMENTOS INTERATIVOS:
+- Nenhum neste slide.
+
+CONTEÚDO:
+  - Criar uma experiência divertida.
+  - Incentivar progressão do jogador.
+  - Desenvolver sistemas completos no Roblox.
+  - Aplicar conceitos de programação.
+
+TIPOGRAFIA:
+- Título: Poppins 700, 2.2rem, branco.
+- Itens: Inter 400, 1.1rem, #E8F0EC.
+- Bullets: círculo #52B788 de 8px, glow.
+
+ORDEM DE ENTRADA:
+  1. Ícone Target (fadeIn + slideDown)
+  2. Título (fadeIn + slideUp)
+  3. Item 1 (150ms delay)
+  4. Item 2 (300ms delay)
+  5. Item 3 (450ms delay)
+  6. Item 4 (600ms delay)
+
+INTERAÇÕES: Navegação padrão (teclado, botões, swipe).
+
+TRANSIÇÃO PARA SLIDE 3:
+- Slide Out para cima (slide 2 sobe) + Slide In de baixo (slide 3).
+- Duração: 600ms.
+
+===============================================================================
+SLIDE 3 — PÚBLICO-ALVO
+===============================================================================
+
+NOME: Público-Alvo
+
+OBJETIVO: Mostrar para quem o jogo foi pensado.
+
+EMOÇÃO: Inclusão, foco, estratégia.
+
+LAYOUT: Grid de cards (2x2 ou 4 cards em linha).
+
+ORGANIZAÇÃO:
+  1. Ícone Users — canto superior esquerdo.
+  2. Título "Público-Alvo".
+  3. 4 cards de público, cada um com ícone + label + breve descrição.
+  4. Cards em glassmorphism, hover levita.
+
+BACKGROUND:
+- Fundo escuro + fireflies.
+
+ELEMENTOS VISUAIS:
+- Cards com glassmorphism (item 171)
+- Grid layout (item 22)
+
+ELEMENTOS INTERATIVOS:
+- Cards com hover (levitação + glow).
+
+CONTEÚDO DOS CARDS:
+  1. 🧒 Crianças — "Jogadores jovens que amam exploração"
+  2. 👦 Adolescentes — "Buscam progressão e personalização"
+  3. 🎮 Jogadores Casuais — "Experiência relaxante e divertida"
+  4. 🌾 Fãs de Fazenda — "Apaixonados por simulação agrícola"
+
+CARDS: glass bg rgba(19,43,30,0.6), blur 12px, border-radius 16px,
+        border 1px rgba(149,213,178,0.15), padding 1.5rem.
+        Hover: translateY(-6px), box-shadow glow verde.
+
+ORDEM DE ENTRADA:
+  1. Ícone Users
+  2. Título
+  3. Card 1 (150ms)
+  4. Card 2 (300ms)
+  5. Card 3 (450ms)
+  6. Card 4 (600ms)
+
+INTERAÇÕES: Hover nos cards.
+
+TRANSIÇÃO: Scale Out + Scale In. 600ms.
+
+===============================================================================
+SLIDE 4 — INSPIRAÇÕES
+===============================================================================
+
+NOME: Inspirações
+
+OBJETIVO: Mostrar referências visuais e conceituais do projeto.
+
+EMOÇÃO: Nostalgia, reconhecimento, criatividade.
+
+LAYOUT: Grid 2x2 de cards com imagens (ícone grande) + interação de clique.
+
+ORGANIZAÇÃO:
+  1. Ícone BookOpen — canto superior esquerdo.
+  2. Título "Inspirações".
+  3. Subtítulo "Jogos que influenciaram o projeto".
+  4. 4 cards em grid 2x2, cada um com:
+     - Ícone representativo grande (emoji ou SVG)
+     - Nome do jogo (h3)
+     - Breve descrição (1 linha)
+     - Efeito hover + clique abre popup.
+
+BACKGROUND: Fundo escuro + fireflies + blobs verdes suaves.
+
+ELEMENTOS VISUAIS:
+- Cards expansíveis (Visual.txt item 177)
+- Popup (item 77)
+- Grid layout (item 22)
+
+ELEMENTOS INTERATIVOS:
+- Cards clicáveis (Interativos.txt item 141)
+- Popup com descrição (item 77-87)
+
+CONTEÚDO DOS CARDS:
+  1. 🌾 Farm Together — "Multiplayer relaxante"
+  2. 🌻 Stardew Valley — "RPG agrícola profundo"
+  3. 🍎 Hay Day — "Mobile farming clássico"
+  4. 🌱 Grow a Garden (Roblox) — "Referência direta no Roblox"
+
+POPUPS (ao clicar):
+  Cada popup contém:
+  - Nome do jogo (h3)
+  - Descrição mais detalhada (3-4 linhas)
+  - O que foi inspirado (em itálico, #F6BD60)
+  - Botão "Fechar" (X)
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Subtítulo
+  3. Card 1 (150ms)
+  4. Card 2 (300ms)
+  5. Card 3 (450ms)
+  6. Card 4 (600ms)
+
+INTERAÇÕES:
+- Hover: card levita, glow.
+- Clique: abre popup com detalhes.
+
+TRANSIÇÃO: Blur Out + Blur In. 600ms.
+
+===============================================================================
+SLIDE 5 — HISTÓRIA DO JOGO
+===============================================================================
+
+NOME: História do Jogo
+
+OBJETIVO: Contar a narrativa/proposta do jogo de forma visual.
+
+EMOÇÃO: Jornada, progressão, evolução.
+
+LAYOUT: Timeline vertical / fluxo de etapas.
+
+ORGANIZAÇÃO:
+  1. Ícone ScrollText — canto superior esquerdo.
+  2. Título "História do Jogo".
+  3. Subtítulo "A jornada do jogador".
+  4. Fluxo horizontal de 6 etapas conectadas por linhas SVG animadas.
+  5. Setas conectando cada etapa.
+
+BACKGROUND: Fundo escuro + fireflies.
+
+ELEMENTOS VISUAIS:
+- Timeline com SVG animado (Visual.txt item 314)
+- Draw SVG (item 108)
+- Cards (item 171)
+
+ETAPAS DO FLUXO (6 cards em linha horizontal):
+  🌱 Plantar → 🌾 Colher → 💰 Vender → ⬆️ Evoluir → 🏠 Expandir
+
+Cada etapa: card glassmorphism, 150x120px, com ícone + label.
+Setas: SVG path animado (stroke-dasharray + stroke-dashoffset).
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Subtítulo
+  3. Card 1 + Seta 1 (desenha SVG)
+  4. Card 2 + Seta 2 (150ms)
+  5. Card 3 + Seta 3 (300ms)
+  6. Card 4 + Seta 4 (450ms)
+  7. Card 5 + Seta 5 (600ms)
+  8. Card 6 (750ms)
+
+INTERAÇÕES: Hover em cada card (glow + detalhe extra).
+
+TRANSIÇÃO: Slide Out (esquerda) + Slide In (direita). 600ms.
+
+===============================================================================
+SLIDE 6 — GAMEPLAY (FLUXOGRAMA)
+===============================================================================
+
+NOME: Gameplay
+
+OBJETIVO: Explicar o ciclo principal de jogabilidade com um fluxograma visual.
+
+EMOÇÃO: Clareza, lógica, processo.
+
+LAYOUT: Fluxograma vertical centralizado, estilo diagrama.
+
+ORGANIZAÇÃO:
+  1. Ícone RefreshCw — canto superior esquerdo.
+  2. Título "Gameplay".
+  3. Fluxograma vertical com 6 etapas conectadas por setas animadas.
+  4. Cada etapa: container retangular com borda arredondada, ícone + texto.
+  5. Setas SVG descendo entre as etapas.
+
+BACKGROUND: Fundo escuro + fireflies + grid sutil.
+
+ELEMENTOS VISUAIS:
+- SVG animado (item 314)
+- Cards com glassmorphism (item 171)
+- Layout centralizado (item 21)
+
+FLUXOGRAMA:
+  🌱 Plantar
+     ↓
+  💧 Regar
+     ↓
+  ⏳ Esperar crescer
+     ↓
+  ✂️ Colher
+     ↓
+  💰 Vender
+     ↓
+  🪙 Ganhar moedas → Comprar melhorias (seta curva de volta para Plantar)
+
+A seta final faz loop (ciclo fechado). O último card "Comprar melhorias" tem
+uma seta curva que retorna para "Plantar", formando um ciclo visual.
+
+SETAS: SVG animado (stroke-dasharray + stroke-dashoffset).
+
+CORES:
+- Cards: bg rgba(19,43,30,0.6), border-radius 12px.
+- Setas: stroke #52B788, stroke-width 2.
+- Texto: Inter 1rem, #E8F0EC.
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Card Plantar (com seta descendo)
+  3. Card Regar (150ms)
+  4. Card Esperar (300ms)
+  5. Card Colher (450ms)
+  6. Card Vender (600ms)
+  7. Card Ganhar + seta curva (750ms)
+
+INTERAÇÕES:
+- Hover em cada card (glow).
+- Ao passar o mouse sobre um card, um tooltip aparece com breve explicação.
+
+TRANSIÇÃO: Fade Out + Fade In. 600ms.
+
+===============================================================================
+SLIDE 7 — SISTEMA DE PLANTIO
+===============================================================================
+
+NOME: Sistema de Plantio
+
+OBJETIVO: Explicar como o jogador planta as culturas.
+
+EMOÇÃO: Ensino, clareza, simplicidade.
+
+LAYOUT: Split horizontal — ícone grande + texto à esquerda, diagrama à direita.
+
+ORGANIZAÇÃO:
+  1. Ícone Seedling — canto superior esquerdo.
+  2. Título "Sistema de Plantio".
+  3. Lista de 4 passos com numeração grande (#F6BD60).
+  4. À direita: ilustração conceitual de uma plantinha crescendo (CSS puro).
+
+BACKGROUND: Fundo escuro + fireflies + blobs naturais.
+
+ELEMENTOS VISUAIS:
+- Layout split (item 26)
+- Elementos decorativos orgânicos (item 189)
+
+PASSOS:
+  1. Escolha da semente — "Selecione entre diferentes tipos de sementes"
+  2. Preparação do solo — "Use a enxada para preparar a terra"
+  3. Plantio — "Plante a semente no solo preparado"
+  4. Tempo de crescimento — "Aguarde o crescimento da planta"
+
+ILUSTRAÇÃO (CSS puro, à direita):
+- Pequena plantinha feita com divs: caule verde (div fina) + folhas (divs verdes
+  rotacionadas com border-radius).
+- Solo marrom (#D4A373) na base.
+- Animação: a planta balança suavemente (CSS animation rotate -2deg a 2deg).
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Ilustração da planta (fadeIn)
+  3. Passo 1 (150ms)
+  4. Passo 2 (300ms)
+  5. Passo 3 (450ms)
+  6. Passo 4 (600ms)
+
+INTERAÇÕES: Navegação padrão.
+
+TRANSIÇÃO: Zoom Out + Zoom In. 600ms.
+
+===============================================================================
+SLIDE 8 — SISTEMA DE CRESCIMENTO
+===============================================================================
+
+NOME: Sistema de Crescimento
+
+OBJETIVO: Mostrar a evolução visual das plantas ao longo do tempo.
+
+EMOÇÃO: Progresso, vida, expectativa.
+
+LAYOUT: 4 cards em linha horizontal, cada um representando um estágio.
+
+ORGANIZAÇÃO:
+  1. Ícone TrendingUp — canto superior esquerdo.
+  2. Título "Sistema de Crescimento".
+  3. 4 cards de estágios, lado a lado, com setas entre eles.
+  4. Cada card: nome do estágio + ilustração CSS da planta naquele estágio.
+
+ESTÁGIOS (cards de 200x250px):
+  1. 🌱 Semente — círculo marrom pequeno
+  2. 🌿 Broto — haste fina com 2 folhas pequenas
+  3. 🌳 Crescendo — haste grossa com 4 folhas médias
+  4. 🌾 Pronto para Colher — planta completa com flor/fruto dourado (#F6BD60)
+
+Cada card tem:
+- bg glassmorphism, border-radius 16px.
+- Ilustração CSS da planta no centro.
+- Label abaixo (Inter 0.9rem, #A0C4B3).
+- Barra de progresso na parte inferior do card (width diferente para cada:
+  25%, 50%, 75%, 100%), cor #52B788.
+
+ANIMAÇÃO:
+- Ao entrar, cada planta "cresce" visualmente (scaleY de 0 a 1).
+- A barra de progresso preenche da esquerda para a direita.
+
+BACKGROUND: Fundo escuro + fireflies.
+
+ELEMENTOS VISUAIS:
+- Barra de progresso (item 270)
+- Cards glassmorphism (item 171)
+- Elementos decorativos (item 189)
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Card 1 + Seta (150ms)
+  3. Card 2 + Seta (350ms)
+  4. Card 3 + Seta (550ms)
+  5. Card 4 (750ms)
+
+INTERAÇÕES: Hover no card: planta anima (balança, glow).
+
+TRANSIÇÃO: Slide Out (baixo) + Slide In (cima). 600ms.
+
+===============================================================================
+SLIDE 9 — SISTEMA DE FERRAMENTAS
+===============================================================================
+
+NOME: Sistema de Ferramentas
+
+OBJETIVO: Listar e explicar as ferramentas disponíveis no jogo.
+
+EMOÇÃO: Utilidade, organização, poder.
+
+LAYOUT: Grid 2x3 ou 3x2 de cards com ícones grandes.
+
+ORGANIZAÇÃO:
+  1. Ícone Wrench — canto superior esquerdo.
+  2. Título "Sistema de Ferramentas".
+  3. 5 cards de ferramentas em grid, cada um com:
+     - Ícone grande (emoji)
+     - Nome da ferramenta (h3)
+     - Descrição curta (1 linha)
+     - Tecla de atalho (caso exista no jogo)
+
+FERRAMENTAS:
+  1. ⛏️ Enxada — "Prepara o solo para plantio"
+  2. 💧 Regador — "Mantém as plantas hidratadas"
+  3. 🌱 Sementes — "Diferentes tipos de culturas"
+  4. 🪓 Machado — "Corta árvores e galhos"
+  5. ⚒️ Picareta — "Quebra pedras e minérios"
+
+BACKGROUND: Fundo escuro + fireflies + grid techno sutil.
+
+CARDS: glassmorphism, 180x200px. Hover: glow dourado nas ferramentas mais
+poderosas (Machado, Picareta).
+
+ELEMENTOS VISUAIS:
+- Cards grid (item 22)
+- Ícones emoji/SVG (item 161)
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Enxada (150ms)
+  3. Regador (300ms)
+  4. Sementes (450ms)
+  5. Machado (600ms)
+  6. Picareta (750ms)
+
+INTERAÇÕES: Hover nos cards (levitação + tooltip com detalhes).
+
+TRANSIÇÃO: Glitch Out + Glitch In. 800ms. (Efeito glitch sutil para
+  combinar com o tema tecnológico).
+
+===============================================================================
+SLIDE 10 — SISTEMA DE ECONOMIA
+===============================================================================
+
+NOME: Sistema de Economia
+
+OBJETIVO: Mostrar como o jogador progride financeiramente.
+
+EMOÇÃO: Prosperidade, recompensa, crescimento.
+
+LAYOUT: Dashboard econômico com indicadores visuais.
+
+ORGANIZAÇÃO:
+  1. Ícone Coins — canto superior esquerdo.
+  2. Título "Sistema de Economia".
+  3. 5 indicadores econômicos em grid/flow, cada um com:
+     - Ícone
+     - Título
+     - Valor ou descrição
+     - Barra de progresso (quando aplicável)
+
+INDICADORES:
+  1. 💰 Venda de Produtos — "Colheitas geram moedas"
+  2. 🪙 Ganho de Moedas — "Moedas por ciclo: +50 a +200"
+  3. 🌱 Compra de Sementes — "Investimento: -10 a -50 moedas"
+  4. ⛏️ Compra de Ferramentas — "Desbloqueio: -100 a -500 moedas"
+  5. 🏠 Melhorias da Fazenda — "Expansão: -1000 moedas"
+
+ELEMENTOS VISUAIS:
+- Dashboard layout (item 32)
+- Cards (item 171)
+- Barra de progresso (item 270)
+- Contador numérico (item 142)
+
+ANIMAÇÃO:
+- Os valores monetários usam contador crescente (count up) ao entrar no slide.
+- As barras de progresso preenchem da esquerda para a direita.
+
+BACKGROUND: Fundo escuro + fireflies + partículas douradas extras.
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Venda (150ms)
+  3. Ganho (300ms)
+  4. Sementes (450ms)
+  5. Ferramentas (600ms)
+  6. Melhorias (750ms)
+
+INTERAÇÕES: Hover nos cards com destaque nos valores.
+
+TRANSIÇÃO: Cube (rotação 3D eixo Y). 800ms.
+
+===============================================================================
+SLIDE 11 — SISTEMA DE INVENTÁRIO
+===============================================================================
+
+NOME: Sistema de Inventário
+
+OBJETIVO: Explicar como os itens são organizados e utilizados.
+
+EMOÇÃO: Organização, controle, capacidade.
+
+LAYOUT: Grid de categorias tipo "inventário de jogo".
+
+ORGANIZAÇÃO:
+  1. Ícone Package — canto superior esquerdo.
+  2. Título "Sistema de Inventário".
+  3. 4 categorias em grid 2x2 (ou 4 em linha), cada uma com:
+     - Ícone grande
+     - Nome da categoria
+     - Itens exemplo (tags)
+     - Quantidade (número)
+
+CATEGORIAS:
+  1. 🌱 Plantas — "Trigo, Cenoura, Tomate" — Qtd: 12
+  2. 🌰 Sementes — "Trigo, Cenoura, Tomate" — Qtd: 24
+  3. ⛏️ Ferramentas — "Enxada, Regador" — Qtd: 2
+  4. 📦 Recursos — "Madeira, Pedra" — Qtd: 50
+
+TAGS: cada item exemplo é uma tag estilo chip (bg #2D6A4F, border-radius 12px,
+        padding 4px 10px, Inter 0.75rem, #95D5B2).
+
+BACKGROUND: Fundo escuro + fireflies.
+
+ELEMENTOS VISUAIS:
+- Grid (item 22)
+- Cards (item 171)
+- Tags/chips decorativos
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Categoria 1 (150ms)
+  3. Categoria 2 (300ms)
+  4. Categoria 3 (450ms)
+  5. Categoria 4 (600ms)
+
+INTERAÇÕES: Hover na categoria: tags destacam com glow, números aumentam.
+
+TRANSIÇÃO: Fade Out + Fade In. 600ms.
+
+===============================================================================
+SLIDE 12 — SISTEMA DE SALVAMENTO
+===============================================================================
+
+NOME: Sistema de Salvamento
+
+OBJETIVO: Tranquilizar o público sobre a persistência dos dados.
+
+EMOÇÃO: Confiança, segurança, continuidade.
+
+LAYOUT: Centralizado com ícone grande e 3 pontos em destaque.
+
+ORGANIZAÇÃO:
+  1. Ícone Save — canto superior esquerdo.
+  2. Título "Sistema de Salvamento".
+  3. Ícone grande de disco/cloud (CSS) no centro.
+  4. 3 cards pequenos abaixo com os pilares do salvamento.
+
+PILARES:
+  1. 💾 Salvamento Automático — "A cada ação importante, o progresso é salvo"
+  2. 📊 Dados Armazenados — "Inventário, dinheiro, plantações e melhorias"
+  3. 🔄 Continuação do Progresso — "Ao retornar, o jogador continua de onde parou"
+
+BACKGROUND: Fundo escuro + fireflies + grid sutil.
+
+ELEMENTOS VISUAIS:
+- Hero layout (item 27)
+- Cards (item 171)
+- Ícone decorativo grande
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Ícone grande central (fadeIn + scale)
+  3. Card 1 (150ms)
+  4. Card 2 (300ms)
+  5. Card 3 (450ms)
+
+INTERAÇÕES: Navegação padrão.
+
+TRANSIÇÃO: Slide Out (direita) + Slide In (esquerda). 600ms.
+
+===============================================================================
+SLIDE 13 — INTERFACE (UI)
+===============================================================================
+
+NOME: Interface (UI)
+
+OBJETIVO: Mostrar os elementos da interface do jogo.
+
+EMOÇÃO: Usabilidade, clareza, design.
+
+LAYOUT: Mockup de tela de jogo com elementos de UI posicionados.
+
+ORGANIZAÇÃO:
+  1. Ícone Monitor — canto superior esquerdo.
+  2. Título "Interface (UI)".
+  3. Mockup central (retângulo simulando tela de jogo, 700x400px) com:
+     - Barra superior: moedas (💰 150), nível (⭐ 5)
+     - Lateral esquerda: inventário (ícones pequenos)
+     - Lateral direita: missões (2 itens)
+     - Inferior: barra de ferramentas (5 slots)
+     - Elementos de interface desenhados com CSS.
+  4. Labels ao redor com setas apontando para cada elemento da UI.
+
+BACKGROUND: Fundo escuro + fireflies.
+
+ELEMENTOS VISUAIS:
+- Mockup CSS (item 27)
+- Tooltips (item 88-95)
+- Setas SVG (item 182)
+
+ELEMENTOS DA UI DESTACADOS:
+  - 💰 Barra de Moedas (topo)
+  - 📦 Inventário (esquerda)
+  - 🏪 Loja (ícone no canto)
+  - 📋 Missões (direita)
+  - ⏱️ Tempo de Crescimento (sobre as plantas)
+  - 🛠️ Barra de Ferramentas (inferior)
+
+Cada elemento tem uma label com seta apontando para sua posição no mockup.
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Mockup (fadeIn)
+  3. Label 1 (150ms)
+  4. Label 2 (300ms)
+  5. Label 3 (450ms)
+  6. Label 4 (600ms)
+  7. Label 5 (750ms)
+  8. Label 6 (900ms)
+
+INTERAÇÕES: Hover nas labels: o elemento correspondente no mockup glow.
+
+TRANSIÇÃO: Zoom Out + Zoom In. 600ms.
+
+===============================================================================
+SLIDE 14 — TECNOLOGIAS UTILIZADAS
+===============================================================================
+
+NOME: Tecnologias Utilizadas
+
+OBJETIVO: Apresentar as ferramentas e tecnologias usadas no desenvolvimento.
+
+EMOÇÃO: Tecnologia, poder, conhecimento.
+
+LAYOUT: Grid de cards tecnológicos com ícones grandes.
+
+ORGANIZAÇÃO:
+  1. Ícone Cpu — canto superior esquerdo.
+  2. Título "Tecnologias Utilizadas".
+  3. 6 cards em grid 3x2 (ou 2x3), cada um com:
+     - Nome da tecnologia (h3, bold)
+     - Descrição breve (2 linhas)
+     - Badge de categoria (ex: "Engine", "Linguagem", "Serviço")
+
+TECNOLOGIAS:
+  1. 🏗️ Roblox Studio — "Engine de desenvolvimento" — Badge: #F6BD60
+  2. 📜 LuaU — "Linguagem de programação" — Badge: #52B788
+  3. 💾 DataStore — "Armazenamento de dados" — Badge: #95D5B2
+  4. 🏷️ Attributes — "Propriedades customizadas" — Badge: #95D5B2
+  5. 🔌 RemoteEvents — "Comunicação cliente-servidor" — Badge: #D4A373
+  6. 📁 CollectionService — "Gerenciamento de objetos" — Badge: #D4A373
+
+CARDS: glassmorphism. Destaque visual na primeira tecnologia (Roblox Studio)
+  com glow dourado.
+
+BACKGROUND: Fundo escuro + fireflies + grid hexagonal techno (#95D5B2 alpha 0.05).
+  Partículas tecnológicas (pixels flutuando).
+
+ELEMENTOS VISUAIS:
+- Grid layout (item 22)
+- Cards tecnológicos (item 181)
+- Partículas de pixels (item 211)
+- Tooltips nos badges (explicação extra)
+
+ELEMENTOS INTERATIVOS:
+- Tooltips: ao passar o mouse sobre cada tecnologia, tooltip com descrição mais
+  detalhada aparece. Ex: DataStore → "Serviço da Roblox para armazenar dados
+  persistentes dos jogadores."
+
+TIPOGRAFIA:
+- Nomes: Poppins 600, 1.2rem.
+- Descrição: Inter 400, 0.9rem.
+- Badge: JetBrains Mono 0.7rem (estilo código).
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Roblox Studio (150ms)
+  3. LuaU (300ms)
+  4. DataStore (450ms)
+  5. Attributes (600ms)
+  6. RemoteEvents (750ms)
+  7. CollectionService (900ms)
+
+INTERAÇÕES:
+- Hover: card levita + glow.
+- Tooltip com detalhes técnicos.
+- Ao clicar em um card, o fundo muda sutilmente para a cor do badge.
+
+TRANSIÇÃO: Blur Out + Blur In. 600ms.
+
+===============================================================================
+SLIDE 15 — ESTRUTURA DO PROJETO
+===============================================================================
+
+NOME: Estrutura do Projeto
+
+OBJETIVO: Mostrar a organização dos scripts no Roblox Studio.
+
+EMOÇÃO: Organização, arquitetura, profissionalismo.
+
+LAYOUT: Diagrama de árvore (tree view) estilizado.
+
+ORGANIZAÇÃO:
+  1. Ícone FolderTree — canto superior esquerdo.
+  2. Título "Estrutura do Projeto".
+  3. Tree view visual com pastas/containers do Roblox.
+  4. Cada nó: ícone de pasta + nome + ícone de arquivo (quando aplicável).
+
+ESTRUTURA EM ÁRVORE:
+  📁 Projeto (raiz)
+  ├── 📁 ServerScriptService (scripts do servidor)
+  │   ├── 📄 GameManager.lua
+  │   └── 📄 EconomySystem.lua
+  ├── 📁 ReplicatedStorage (recursos compartilhados)
+  │   ├── 📄 PlantData.lua
+  │   └── 📄 ToolConfig.lua
+  ├── 📁 StarterGui (interface)
+  │   └── 📄 HUD
+  ├── 📁 Workspace (mundo do jogo)
+  │   ├── 🌾 Plants
+  │   └── 🛠️ Tools
+  └── 📁 StarterPlayer (scripts do cliente)
+      └── 📄 PlayerController.lua
+
+Tree view: indentação visual com linhas SVG conectando os nós.
+Cada nó: bg glassmorphism sutil no hover.
+Ícones: emoji de pasta (📁) e código (📄).
+
+BACKGROUND: Fundo escuro + grid techno + fireflies.
+
+ELEMENTOS VISUAIS:
+- Tree/timeline layout (item 30)
+- SVG animado (item 314)
+- Código tipográfico (JetBrains Mono)
+
+TIPOGRAFIA: JetBrains Mono 0.85rem para nomes de arquivo, Inter para descrições.
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Raiz (150ms)
+  3. ServerScriptService + filhos (300ms)
+  4. ReplicatedStorage + filhos (500ms)
+  5. StarterGui (700ms)
+  6. Workspace + filhos (900ms)
+  7. StarterPlayer + filhos (1100ms)
+
+INTERAÇÕES:
+- Hover em cada nó: glow + tooltip explicando o que cada container faz.
+- Clique em um nó: expande detalhes (opcional).
+
+TRANSIÇÃO: Slide Out (cima) + Slide In (baixo). 600ms.
+
+===============================================================================
+SLIDE 16 — DESAFIOS ENCONTRADOS
+===============================================================================
+
+NOME: Desafios Encontrados
+
+OBJETIVO: Humanizar o projeto mostrando dificuldades reais.
+
+EMOÇÃO: Superação, aprendizado, honestidade.
+
+LAYOUT: Grid de 5 cards com ícone de alerta + solução.
+
+ORGANIZAÇÃO:
+  1. Ícone AlertTriangle — canto superior esquerdo.
+  2. Título "Desafios Encontrados".
+  3. 5 cards em grid (2+2+1 ou 3+2), cada um com:
+     - Ícone de desafio (⚠️)
+     - Descrição do problema
+     - Solução encontrada (em verde, com ✅)
+
+DESAFIOS:
+  1. ⚠️ Sistema de Crescimento → ✅ "Implementado com estágios visuais e timers"
+  2. ⚠️ Salvamento de Dados → ✅ "DataStore com salvamento automático"
+  3. ⚠️ Sincronização entre Jogadores → ✅ "RemoteEvents para comunicação"
+  4. ⚠️ Organização do Código → ✅ "Estrutura modular com Services"
+  5. ⚠️ Otimização → ✅ "Redução de loops e pooling de objetos"
+
+CARDS: glassmorphism. Solução em verde claro (#52B788).
+  Card com hover que revela um "ícone de sucesso" extra.
+
+BACKGROUND: Fundo escuro + fireflies (menos partículas, tom mais sério).
+
+ELEMENTOS VISUAIS:
+- Cards (item 171)
+- Ícones de status (item 161)
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Card 1 (150ms)
+  3. Card 2 (300ms)
+  4. Card 3 (450ms)
+  5. Card 4 (600ms)
+  6. Card 5 (750ms)
+
+INTERAÇÕES: Hover no card: a solução glow mais forte.
+
+TRANSIÇÃO: Fade Out + Fade In. 600ms.
+
+===============================================================================
+SLIDE 17 — MELHORIAS FUTURAS
+===============================================================================
+
+NOME: Melhorias Futuras
+
+OBJETIVO: Mostrar que o projeto pode continuar evoluindo.
+
+EMOÇÃO: Expectativa, entusiasmo, visão de futuro.
+
+LAYOUT: Grid de cards com ícones, estilo "roadmap".
+
+ORGANIZAÇÃO:
+  1. Ícone Rocket — canto superior esquerdo.
+  2. Título "Melhorias Futuras".
+  3. 7 cards de melhorias em grid (3+3+1 ou 4+3), cada um com:
+     - Ícone
+     - Nome da feature
+     - Tag de status: "Em breve" (dourado) ou "Planejado" (verde claro)
+     - Descrição curta
+
+MELHORIAS:
+  1. 🐄 Animais — "Galinhas, vacas e ovelhas" — 🟡 Em breve
+  2. 🚜 Tratores — "Mecanização da fazenda" — 🟢 Planejado
+  3. 👥 Multiplayer Cooperativo — "Jogue com amigos" — 🟢 Planejado
+  4. 🌤️ Clima — "Chuva, sol e estações" — 🟢 Planejado
+  5. 🌸 Estações do Ano — "Primavera, Verão, Outono, Inverno" — 🟢 Planejado
+  6. 🎉 Eventos Especiais — "Festival da colheita" — 🟢 Planejado
+  7. 📋 Sistema de Missões — "Objetivos diários e conquistas" — 🟢 Planejado
+
+CARDS: glassmorphism.
+Status tags: bg com cor correspondente, border-radius 12px, padding 2px 8px.
+
+BACKGROUND: Fundo escuro + fireflies + partículas de estrelas (futuro).
+
+ELEMENTOS VISUAIS:
+- Cards grid (item 22)
+- Tags de status (item 223)
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Card 1 (150ms)
+  3. Card 2 (300ms)
+  4. Card 3 (450ms)
+  5. Card 4 (600ms)
+  6. Card 5 (750ms)
+  7. Card 6 (900ms)
+  8. Card 7 (1050ms)
+
+INTERAÇÕES:
+- Hover: card levita + glow.
+- Tooltip com descrição mais detalhada de cada melhoria.
+
+TRANSIÇÃO: Scale Out + Scale In. 600ms.
+
+===============================================================================
+SLIDE 18 — RESULTADOS OBTIDOS
+===============================================================================
+
+NOME: Resultados Obtidos
+
+OBJETIVO: Resumir o que já foi implementado com sucesso.
+
+EMOÇÃO: Orgulho, conquista, celebração.
+
+LAYOUT: Dashboard com 5 indicadores de sucesso.
+
+ORGANIZAÇÃO:
+  1. Ícone Trophy — canto superior esquerdo.
+  2. Título "Resultados Obtidos".
+  3. 5 cards de resultado, cada um com:
+     - Ícone grande
+     - Nome do sistema
+     - Badge "✅ Funcional"
+     - Breve descrição do que foi implementado
+
+RESULTADOS:
+  1. 🌱 Sistema de Plantio — "Plantio, rega e tempo de crescimento funcionais"
+  2. 📈 Crescimento das Plantas — "4 estágios visuais com progressão automática"
+  3. 💰 Economia — "Venda, compra de sementes e melhorias operacionais"
+  4. 📦 Inventário — "Armazenamento e gerenciamento de itens funcionando"
+  5. 💾 Salvamento — "Progresso persistente com DataStore"
+
+CARDS: glassmorphism com borda verde (#52B788) para reforçar "sucesso".
+  Badge "✅ Funcional": bg rgba(82,183,136,0.2), border 1px #52B788,
+  border-radius 12px, padding 4px 12px, Inter 0.75rem, #52B788.
+
+BACKGROUND: Fundo escuro + fireflies + partículas douradas (celebração).
+
+ELEMENTOS VISUAIS:
+- Dashboard layout (item 32)
+- Cards com badge (item 171)
+- Partículas de confete sutil (item 201)
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Card 1 (150ms)
+  3. Card 2 (300ms)
+  4. Card 3 (450ms)
+  5. Card 4 (600ms)
+  6. Card 5 (750ms)
+
+CONTADOR ANIMADO:
+- Ao entrar, cada card exibe um contador crescente:
+  "Sistemas funcionais: 5/5" que conta de 0 a 5.
+
+INTERAÇÕES: Hover no card: glow dourado (celebração).
+
+TRANSIÇÃO: Cube (rotação 3D eixo Y). 800ms.
+
+===============================================================================
+SLIDE 19 — DEMONSTRAÇÃO
+===============================================================================
+
+NOME: Demonstração
+
+OBJETIVO: Mostrar capturas de tela ou elementos visuais do jogo funcionando.
+
+EMOÇÃO: Prova, evidência, entusiasmo.
+
+LAYOUT: Grid de cards com imagens e hotspots interativos.
+
+ORGANIZAÇÃO:
+  1. Ícone Play — canto superior esquerdo.
+  2. Título "Demonstração".
+  3. Grid de 3 colunas com cards representando funcionalidades:
+     - Plantio
+     - Colheita
+     - Venda
+     - Interface
+     - Evolução da Fazenda
+  4. Cada card: ícone grande + título + "Clique para detalhes"
+
+NOTA: Como não há imagens reais, cada card deve usar um ícone grande (Lucide ou
+  emoji) + uma ilustração CSS simulando a funcionalidade.
+
+CARDS DE DEMONSTRAÇÃO (5 cards):
+  1. 🌱 Plantio — Ilustração CSS: fileira de plantinhas verdes
+  2. ✂️ Colheita — Ilustração CSS: planta com glow dourado
+  3. 💰 Venda — Ilustração CSS: moedas caindo (animação CSS)
+  4. 🖥️ Interface — Mockup simplificado da UI
+  5. 🏠 Evolução — Ilustração de fazenda evoluindo (antes/depois)
+
+HOTSPOTS (sobre cada card):
+- Círculo pulsante de 24px no canto do card.
+- Ao clicar, abre popup com:
+  - Título do sistema
+  - Descrição detalhada (3-4 linhas)
+  - "Status: ✅ Funcional"
+  - "Tecnologias usadas: ..."
+
+BACKGROUND: Fundo escuro + fireflies + grid hexagonal + blobs verdes.
+  Fundo mais festivo que os outros slides.
+
+ELEMENTOS VISUAIS:
+- Cards interativos (item 177)
+- Hotspots (item 283)
+- Popups (item 77-87)
+- Ilustrações CSS
+
+ELEMENTOS INTERATIVOS (de Interativos.txt):
+- Hotspots clicáveis (item 283)
+- Popup informativo (item 84)
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Card 1 (150ms)
+  3. Card 2 (300ms)
+  4. Card 3 (450ms)
+  5. Card 4 (600ms)
+  6. Card 5 (750ms)
+  7. Hotspots aparecem pulsando (após todos os cards)
+
+INTERAÇÕES:
+- Hover no card: levitação + glow.
+- Clique no hotspot: popup com detalhes.
+
+TRANSIÇÃO: Fade Out + Fade In. 600ms.
+
+===============================================================================
+SLIDE 20 — CONCLUSÃO
+===============================================================================
+
+NOME: Conclusão
+
+OBJETIVO: Finalizar a apresentação de forma marcante e inspiradora.
+
+EMOÇÃO: Inspiração, gratidão, realização.
+
+LAYOUT: Centralizado, elegante, com assinatura visual.
+
+ORGANIZAÇÃO:
+  1. Ícone Heart — canto superior esquerdo.
+  2. Título "Conclusão".
+  3. Lista de 6 aprendizados com ícones de check.
+  4. Citação final em destaque (glass card).
+  5. Agradecimento.
+  6. "Perguntas?" — aberto para Q&A.
+
+APRENDIZADOS:
+  ✅ Programação em LuaU
+  ✅ Desenvolvimento de jogos
+  ✅ Organização de projetos
+  ✅ Criação de interfaces
+  ✅ Persistência de dados
+  ✅ Resolução de problemas
+
+CITAÇÃO FINAL (glass card central):
+"Este projeto demonstra como diferentes sistemas podem ser integrados para
+criar uma experiência completa de simulação de fazenda no Roblox."
+— em Inter 1.2rem, itálico, #95D5B2.
+
+AGRADECIMENTO:
+"Obrigado pela atenção!" — Poppins 700, 2rem, #F6BD60 (dourado).
+
+PERGUNTAS:
+"❓ Perguntas?" — Poppins 400, 1.2rem, #A0C4B3.
+
+BACKGROUND: Fundo escuro + fireflies lentas + partículas douradas suaves.
+  Blobs verdes grandes nas bordas.
+
+ELEMENTOS VISUAIS:
+- Hero layout (item 27)
+- Citação em destaque (item 16)
+- Glassmorphism card (item 171)
+
+ORDEM DE ENTRADA:
+  1. Ícone + Título
+  2. Aprendizado 1 (150ms)
+  3. Aprendizado 2 (300ms)
+  4. Aprendizado 3 (450ms)
+  5. Aprendizado 4 (600ms)
+  6. Aprendizado 5 (750ms)
+  7. Aprendizado 6 (900ms)
+  8. Citação final (1100ms, fadeIn + scale)
+  9. Agradecimento (1300ms, fadeIn + glow dourado)
+  10. Perguntas (1500ms)
+
+INTERAÇÕES:
+- Navegação padrão.
+- Botões de navegação ficam visíveis.
+
+TRANSIÇÃO PARA ENCERRAMENTO:
+- Slide 20 é o último. Se o usuário tentar avançar, não faz nada (ou volta ao slide 1).
+
+OBSERVAÇÕES:
+- Este slide deve ter um ar mais emocional e acolhedor.
+- O fundo deve ficar ligeiramente mais claro (ou com mais glow verde) para
+  transmitir a sensação de conclusão positiva.
+
+================================================================================
+INSTRUÇÕES FINAIS PARA A IA EXECUTORA
+================================================================================
+
+1. O arquivo HTML deve ser 100% autocontido. Nenhum arquivo externo além das
+   CDNs (Google Fonts, Lucide Icons) deve ser carregado.
+
+2. Use @import no CSS para Google Fonts:
+   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+3. Use Lucide Icons: <script src="https://unpkg.com/lucide@latest"></script>
+   e depois lucide.createIcons() no JS.
+
+4. CSS Reset básico no início: *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+5. Estrutura HTML:
+   <body>
+     <div id="progress-bar"><div id="progress-fill"></div><span id="slide-counter">01 / 20</span></div>
+     <button id="btn-fullscreen">⛶</button>
+     <div id="slides-container">
+       <section class="slide active" data-slide="1">...</section>
+       <section class="slide" data-slide="2">...</section>
+       ... até 20
+     </div>
+     <div id="navigation">
+       <button id="prev-btn">←</button>
+       <button id="next-btn">→</button>
+     </div>
+     <canvas id="bg-canvas"></canvas>
+     <!-- cursor personalizado -->
+     <div id="custom-cursor"></div>
+   </body>
+
+6. JavaScript deve conter:
+   - Navegação (teclado, clique, wheel, swipe)
+   - Transições entre slides (classe toggle com CSS)
+   - Canvas background (blobs, fireflies, grid)
+   - Texto 3D no slide 1 (30 camadas text-shadow)
+   - Stagger de entrada de elementos
+   - Barra de progresso
+   - Contador de slides
+   - Fullscreen toggle
+   - Popups (slide 4 e 19)
+   - Hotspots (slide 19)
+   - Tooltips
+   - Magnetic buttons
+   - Cursor personalizado
+   - Contadores animados (slide 10 e 18)
+
+7. Responsividade:
+   - Desktop: layout completo como especificado.
+   - Tablet: fontes reduzem 20%, cards adaptam para 2 colunas.
+   - Mobile: fontes reduzem 35%, cards em 1 coluna, botões maiores.
+   - Usar media queries (max-width: 1024px, max-width: 768px, max-width: 480px).
+
+8. Performance:
+   - requestAnimationFrame para Canvas e animações.
+   - Debounce em wheel event (800ms).
+   - will-change: transform em elementos animados.
+   - Evitar layout thrashing.
+
+9. Transições CSS:
+   - Cada slide precisa de classes:
+     .slide { position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; pointer-events:none; transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+     .slide.active { opacity:1; pointer-events:auto; }
+   - As transições específicas (fade, slide, scale, blur, glitch, cube) devem
+     ser implementadas com classes CSS adicionais e/ou JS para manipular estilos.
+
+10. Cores finais (confirmadas):
+    - #0D1B12 (fundo escuro)
+    - #1B4332 (verde escuro)
+    - #2D6A4F (verde floresta)
+    - #95D5B2 (verde claro)
+    - #52B788 (verde vibrante)
+    - #D4A373 (marrom terra)
+    - #F6BD60 (dourado)
+    - #E8F0EC (texto claro)
+    - #A0C4B3 (texto secundário)
+
+================================================================================
+FIM DA ESPECIFICAÇÃO
+================================================================================

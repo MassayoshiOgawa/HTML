@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto de Jogo de Fazendinha no Roblox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green-dark:#0D1B12;--green-deep:#1B4332;--green-forest:#2D6A4F;
+  --green-light:#95D5B2;--green-vibrant:#52B788;--green-medium:#74C69D;
+  --brown-earth:#D4A373;--gold-honey:#F6BD60;--gold-dark:#E8A84A;
+  --text-primary:#E8F0EC;--text-secondary:#A0C4B3;--text-white:#FFFFFF;
+  --card-bg:rgba(19,43,30,0.6);--card-border:rgba(149,213,178,0.15);
+  --glass-blur:blur(12px);--radius-card:16px;--radius-btn:8px;
+  --transition-ease:cubic-bezier(0.25,0.46,0.45,0.94);
+  --shadow-glow:0 0 20px rgba(149,213,178,0.3);
+  --shadow-gold:0 0 20px rgba(246,189,96,0.3);
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--green-dark);font-family:'Inter',sans-serif;color:var(--text-primary);-webkit-font-smoothing:antialiased}
+#slides-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;pointer-events:none;overflow-y:auto;overflow-x:hidden;padding:3rem 4rem;display:flex;flex-direction:column;justify-content:center;will-change:transform,opacity,filter}
+.slide.active{opacity:1;pointer-events:auto;z-index:2}
+.slide::-webkit-scrollbar{width:4px}
+.slide::-webkit-scrollbar-track{background:transparent}
+.slide::-webkit-scrollbar-thumb{background:var(--green-forest);border-radius:4px}
+
+/* Transition animations */
+@keyframes fadeOut{0%{opacity:1}100%{opacity:0}}
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes slideUpOut{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-100vh);opacity:1}}
+@keyframes slideUpIn{0%{transform:translateY(100vh);opacity:1}100%{transform:translateY(0);opacity:1}}
+@keyframes slideDownOut{0%{transform:translateY(0);opacity:1}100%{transform:translateY(100vh);opacity:1}}
+@keyframes slideDownIn{0%{transform:translateY(-100vh);opacity:1}100%{transform:translateY(0);opacity:1}}
+@keyframes slideLeftOut{0%{transform:translateX(0);opacity:1}100%{transform:translateX(-100vw);opacity:1}}
+@keyframes slideLeftIn{0%{transform:translateX(100vw);opacity:1}100%{transform:translateX(0);opacity:1}}
+@keyframes slideRightOut{0%{transform:translateX(0);opacity:1}100%{transform:translateX(100vw);opacity:1}}
+@keyframes slideRightIn{0%{transform:translateX(-100vw);opacity:1}100%{transform:translateX(0);opacity:1}}
+@keyframes scaleOut{0%{transform:scale(1);opacity:1}100%{transform:scale(0.5);opacity:0}}
+@keyframes scaleIn{0%{transform:scale(1.5);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes zoomOut{0%{transform:scale(1);opacity:1}100%{transform:scale(1.3);opacity:0}}
+@keyframes zoomIn{0%{transform:scale(0.7);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes blurOut{0%{filter:blur(0);opacity:1}100%{filter:blur(10px);opacity:0}}
+@keyframes blurIn{0%{filter:blur(10px);opacity:0}100%{filter:blur(0);opacity:1}}
+@keyframes glitchOut{
+  0%{clip-path:inset(0);transform:translate(0);opacity:1}
+  20%{clip-path:inset(20% 0 60% 0);transform:translate(-8px,4px)}
+  40%{clip-path:inset(40% 0 40% 0);transform:translate(8px,-3px)}
+  60%{clip-path:inset(60% 0 20% 0);transform:translate(-5px,6px)}
+  80%{clip-path:inset(10% 0 70% 0);transform:translate(6px,-5px)}
+  100%{clip-path:inset(0);transform:translate(0);opacity:0}
+}
+@keyframes glitchIn{
+  0%{clip-path:inset(0);transform:translate(0);opacity:0}
+  20%{clip-path:inset(60% 0 20% 0);transform:translate(6px,-4px);opacity:0.3}
+  40%{clip-path:inset(20% 0 60% 0);transform:translate(-6px,3px);opacity:0.6}
+  60%{clip-path:inset(40% 0 40% 0);transform:translate(4px,-2px);opacity:0.8}
+  80%{clip-path:inset(70% 0 10% 0);transform:translate(-3px,5px);opacity:0.9}
+  100%{clip-path:inset(0);transform:translate(0);opacity:1}
+}
+@keyframes cubeOut{
+  0%{transform:perspective(1200px) rotateY(0);opacity:1}
+  100%{transform:perspective(1200px) rotateY(-90deg);opacity:0.5}
+}
+@keyframes cubeIn{
+  0%{transform:perspective(1200px) rotateY(90deg);opacity:0.5}
+  100%{transform:perspective(1200px) rotateY(0);opacity:1}
+}
+.exit-fade{animation:fadeOut 0.6s var(--transition-ease) forwards}
+.enter-fade{animation:fadeIn 0.6s var(--transition-ease) forwards}
+.exit-slide-up{animation:slideUpOut 0.6s var(--transition-ease) forwards}
+.enter-slide-up{animation:slideUpIn 0.6s var(--transition-ease) forwards}
+.exit-slide-down{animation:slideDownOut 0.6s var(--transition-ease) forwards}
+.enter-slide-down{animation:slideDownIn 0.6s var(--transition-ease) forwards}
+.exit-slide-left{animation:slideLeftOut 0.6s var(--transition-ease) forwards}
+.enter-slide-left{animation:slideLeftIn 0.6s var(--transition-ease) forwards}
+.exit-slide-right{animation:slideRightOut 0.6s var(--transition-ease) forwards}
+.enter-slide-right{animation:slideRightIn 0.6s var(--transition-ease) forwards}
+.exit-scale{animation:scaleOut 0.6s var(--transition-ease) forwards}
+.enter-scale{animation:scaleIn 0.6s var(--transition-ease) forwards}
+.exit-zoom{animation:zoomOut 0.6s var(--transition-ease) forwards}
+.enter-zoom{animation:zoomIn 0.6s var(--transition-ease) forwards}
+.exit-blur{animation:blurOut 0.6s var(--transition-ease) forwards}
+.enter-blur{animation:blurIn 0.6s var(--transition-ease) forwards}
+.exit-glitch{animation:glitchOut 0.8s var(--transition-ease) forwards}
+.enter-glitch{animation:glitchIn 0.8s var(--transition-ease) forwards}
+.exit-cube{animation:cubeOut 0.8s var(--transition-ease) forwards;transform-origin:left center}
+.enter-cube{animation:cubeIn 0.8s var(--transition-ease) forwards;transform-origin:right center}
+
+/* Stagger animations */
+@keyframes fadeSlideUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes fadeSlideDown{0%{opacity:0;transform:translateY(-30px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes fadeScale{0%{opacity:0;transform:scale(0.8)}100%{opacity:1;transform:scale(1)}}
+.stagger-item{opacity:0}
+.stagger-item.visible{animation:fadeSlideUp 0.5s ease-out forwards}
+
+/* Progress bar */
+#progress-bar{position:fixed;top:0;left:0;width:100%;height:4px;z-index:100;background:rgba(255,255,255,0.1)}
+#progress-fill{height:100%;background:linear-gradient(90deg,var(--green-forest),var(--green-vibrant));transition:width 0.5s ease;width:5%}
+#slide-counter{position:fixed;top:10px;right:60px;font-family:'Inter',sans-serif;font-size:0.8rem;color:var(--green-light);opacity:0.7;z-index:100}
+
+/* Fullscreen button */
+#btn-fullscreen{position:fixed;top:12px;right:16px;z-index:100;width:32px;height:32px;border-radius:50%;border:1px solid var(--card-border);background:rgba(19,43,30,0.7);backdrop-filter:blur(8px);color:var(--green-light);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;transition:all 0.2s;opacity:0;pointer-events:none}
+#btn-fullscreen.visible{opacity:1;pointer-events:auto}
+#btn-fullscreen:hover{background:var(--green-forest);color:var(--text-white);box-shadow:var(--shadow-glow)}
+
+/* Navigation */
+#navigation{position:fixed;bottom:32px;right:32px;z-index:50;display:flex;gap:12px;opacity:0;transition:opacity 0.4s;pointer-events:none}
+#navigation.visible{opacity:1;pointer-events:auto}
+#prev-btn,#next-btn{width:48px;height:48px;border-radius:50%;border:1px solid var(--card-border);background:rgba(19,43,30,0.7);backdrop-filter:blur(8px);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text-white);transition:all 0.2s ease;position:relative}
+#prev-btn:hover,#next-btn:hover{background:var(--green-forest);box-shadow:var(--shadow-glow);transform:scale(1.05)}
+#prev-btn:active,#next-btn:active{transform:scale(0.95)}
+
+/* Custom cursor */
+#custom-cursor{position:fixed;width:12px;height:12px;border-radius:50%;background:var(--green-light);pointer-events:none;z-index:9999;mix-blend-mode:screen;transition:transform 0.1s ease,width 0.2s,height 0.2s,box-shadow 0.2s;box-shadow:0 0 10px var(--green-light),0 0 20px rgba(149,213,178,0.3);transform:translate(-50%,-50%)}
+#custom-cursor.hover-btn{width:20px;height:20px;box-shadow:0 0 20px var(--green-light),0 0 40px rgba(149,213,178,0.5)}
+#custom-cursor.hover-gold{box-shadow:0 0 20px var(--gold-honey),0 0 40px rgba(246,189,96,0.5)}
+
+/* Canvas background */
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* Icon style */
+.slide-icon{position:absolute;top:2rem;left:3rem;width:32px;height:32px;stroke:var(--green-light);filter:drop-shadow(0 0 6px rgba(149,213,178,0.5));z-index:5}
+
+/* Typography */
+h1{font-family:'Poppins',sans-serif;font-weight:900;font-size:3.5rem;letter-spacing:-0.02em;color:var(--text-white)}
+h2{font-family:'Poppins',sans-serif;font-weight:700;font-size:2.2rem;letter-spacing:-0.01em;color:var(--text-white);margin-bottom:1.5rem}
+h3{font-family:'Poppins',sans-serif;font-weight:600;font-size:1.6rem;color:var(--text-white);margin-bottom:0.75rem}
+h4{font-family:'Poppins',sans-serif;font-weight:600;font-size:1.2rem;color:var(--green-light)}
+p{font-size:1.1rem;font-weight:400;line-height:1.7;margin-bottom:0.75rem}
+.subtitle{font-family:'Poppins',sans-serif;font-weight:600;font-size:1.5rem;color:var(--green-light);margin-bottom:1.5rem}
+.text-secondary{font-size:0.95rem;font-weight:300;line-height:1.6;color:var(--text-secondary)}
+
+/* Glass card */
+.glass-card{background:rgba(19,43,30,0.6);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--card-border);border-radius:var(--radius-card);padding:2rem;transition:all 0.2s ease}
+.glass-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-glow);border-color:rgba(149,213,178,0.3)}
+
+/* Buttons */
+.btn-primary{background:var(--green-forest);color:var(--text-white);border:none;padding:12px 24px;border-radius:var(--radius-btn);font-family:'Inter',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;transition:all 0.2s ease}
+.btn-primary:hover{background:#3D8B64;transform:scale(1.05);box-shadow:var(--shadow-glow)}
+.btn-secondary{background:transparent;color:var(--text-white);border:1px solid var(--green-light);padding:12px 24px;border-radius:var(--radius-btn);font-family:'Inter',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;transition:all 0.2s ease}
+.btn-secondary:hover{background:var(--green-light);color:var(--green-deep)}
+.btn-gold{background:var(--gold-honey);color:var(--green-deep);border:none;padding:12px 24px;border-radius:var(--radius-btn);font-family:'Inter',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s ease}
+.btn-gold:hover{background:var(--gold-dark);transform:scale(1.05);box-shadow:var(--shadow-gold)}
+
+/* Slide 1 - Capa */
+#slide1{justify-content:center;align-items:center;text-align:center}
+#slide1 .slide-icon{position:absolute;top:2rem;left:3rem}
+#slide1 h1{font-size:3.5rem;margin-bottom:0}
+#slide1 .subtitle{font-size:1.5rem;color:var(--green-light);margin:1.5rem 0}
+.slide1-meta{display:flex;flex-direction:column;gap:0.25rem;margin-top:1rem;font-size:1rem;color:var(--text-secondary);font-weight:300}
+.slide1-badge{display:inline-flex;margin-top:1.5rem;padding:8px 16px;background:rgba(19,43,30,0.6);backdrop-filter:var(--glass-blur);border:1px solid var(--card-border);border-radius:var(--radius-btn);font-size:0.85rem;color:var(--green-light);font-family:'JetBrains Mono',monospace}
+
+/* Slide 2 - Objetivo */
+#slide2 .content-wrapper{display:flex;gap:3rem;align-items:center}
+#slide2 .icon-large{width:120px;height:120px;stroke:var(--green-light);filter:drop-shadow(0 0 15px rgba(149,213,178,0.4))}
+.objetivo-list{list-style:none;display:flex;flex-direction:column;gap:1rem}
+.objetivo-list li{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:rgba(19,43,30,0.4);border-radius:12px;border:1px solid var(--card-border);transition:all 0.2s;font-size:1.1rem}
+.objetivo-list li:hover{background:rgba(45,106,79,0.3);border-color:rgba(149,213,178,0.3);transform:translateX(4px)}
+.objetivo-list .bullet{width:8px;height:8px;border-radius:50%;background:var(--green-vibrant);box-shadow:0 0 8px rgba(82,183,136,0.5);flex-shrink:0}
+
+/* Slide 3 - Publico */
+.card-grid{display:grid;gap:1.5rem}
+.card-grid-4{grid-template-columns:repeat(4,1fr)}
+.card-grid-2{grid-template-columns:repeat(2,1fr)}
+.card-grid-3{grid-template-columns:repeat(3,1fr)}
+.card-grid-5{grid-template-columns:repeat(3,1fr)}
+.publico-card{text-align:center;padding:1.5rem}
+.publico-card .card-icon{font-size:2.5rem;margin-bottom:0.75rem}
+.publico-card h4{margin-bottom:0.5rem}
+.publico-card p{font-size:0.9rem;color:var(--text-secondary);line-height:1.5;margin:0}
+
+/* Slide 4 - Inspiracoes */
+.inspiracao-card,.ferramenta-card,.resultado-card,.melhoria-card,.desafio-card{cursor:pointer}
+.inspiracao-card .card-icon{font-size:3rem;margin-bottom:0.75rem;display:block}
+
+/* Slide 5 - Timeline */
+.timeline-flow{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:nowrap;overflow-x:auto;padding:1rem 0}
+.timeline-step{min-width:140px;padding:1rem;text-align:center;background:rgba(19,43,30,0.6);backdrop-filter:var(--glass-blur);border:1px solid var(--card-border);border-radius:12px;transition:all 0.2s}
+.timeline-step:hover{transform:translateY(-4px);box-shadow:var(--shadow-glow)}
+.timeline-step .step-icon{font-size:1.8rem;margin-bottom:0.5rem;display:block}
+.timeline-step .step-label{font-size:0.85rem;color:var(--text-secondary)}
+.timeline-arrow{font-size:1.5rem;color:var(--green-light);margin:0 0.5rem;flex-shrink:0}
+
+/* Slide 6 - Gameplay */
+.flowchart{display:flex;flex-direction:column;align-items:center;gap:0;padding:1rem 0}
+.flowchart-step{padding:0.8rem 1.5rem;background:rgba(19,43,30,0.6);backdrop-filter:var(--glass-blur);border:1px solid var(--card-border);border-radius:12px;display:flex;align-items:center;gap:0.75rem;transition:all 0.2s;min-width:220px;justify-content:center}
+.flowchart-step:hover{transform:translateX(4px);box-shadow:var(--shadow-glow)}
+.flowchart-step .step-icon{font-size:1.3rem}
+.flowchart-step .step-text{font-size:0.95rem;color:var(--text-primary);font-weight:500}
+.flowchart-arrow{color:var(--green-vibrant);font-size:1.2rem;margin:0.25rem 0}
+.flowchart-loop{margin-top:0.5rem;color:var(--gold-honey);font-size:0.85rem;display:flex;align-items:center;gap:0.5rem}
+
+/* Slide 7 - Plantio */
+.split-layout{display:flex;gap:3rem;align-items:center}
+.split-left{flex:1}
+.split-right{flex:1;display:flex;justify-content:center;align-items:center}
+.plant-step{display:flex;align-items:center;gap:1rem;padding:0.75rem 1rem;margin-bottom:0.75rem;background:rgba(19,43,30,0.4);border-radius:12px;border:1px solid var(--card-border);transition:all 0.2s}
+.plant-step:hover{background:rgba(45,106,79,0.2);transform:translateX(4px)}
+.plant-step-num{font-size:1.5rem;font-weight:700;color:var(--gold-honey);min-width:40px;font-family:'Poppins',sans-serif}
+.plant-step-content{flex:1}
+.plant-step-content h4{font-size:1rem;margin-bottom:0.15rem}
+.plant-step-content p{font-size:0.85rem;color:var(--text-secondary);margin:0}
+.plant-illustration{position:relative;width:200px;height:250px}
+.plant-stem{width:6px;height:100px;background:var(--green-vibrant);border-radius:3px;margin:0 auto;position:relative;animation:plantSway 3s ease-in-out infinite}
+.plant-leaf{position:absolute;width:30px;height:16px;background:var(--green-light);border-radius:50%;top:0}
+.plant-leaf.left{left:-15px;transform:rotate(-30deg);animation:plantSway 3s ease-in-out infinite 0.5s}
+.plant-leaf.right{right:-15px;transform:rotate(30deg);animation:plantSway 3s ease-in-out infinite 1s}
+.plant-soil{width:100px;height:20px;background:var(--brown-earth);border-radius:10px;margin:0 auto;margin-top:80px;position:absolute;bottom:0;left:50%;transform:translateX(-50%)}
+@keyframes plantSway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+.plant-pot{width:80px;height:60px;background:var(--brown-earth);border-radius:0 0 20px 20px;margin:0 auto;position:relative;margin-top:70px}
+.plant-pot::before{content:'';position:absolute;top:-10px;left:-10px;width:100px;height:12px;background:var(--gold-dark);border-radius:6px}
+
+/* Slide 8 - Crescimento */
+.crescimento-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem}
+.crescimento-card{text-align:center;padding:1.5rem;min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.crescimento-card .plant-drawing{height:100px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:0.5rem}
+.crescimento-card .plant-stage{font-size:0.9rem;color:var(--text-secondary);font-weight:500;margin-bottom:0.5rem}
+.crescimento-card .progress-mini{width:100%;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:0.5rem}
+.crescimento-card .progress-mini-fill{height:100%;background:var(--green-vibrant);border-radius:2px;transition:width 0.8s ease}
+
+/* Slide 9 - Ferramentas */
+.ferramenta-card{text-align:center;padding:1.5rem;display:flex;flex-direction:column;align-items:center;gap:0.5rem}
+.ferramenta-card .card-icon{font-size:2.5rem}
+.ferramenta-card h4{font-size:1.1rem}
+.ferramenta-card p{font-size:0.85rem;color:var(--text-secondary);margin:0}
+.ferramenta-card .shortcut{font-size:0.75rem;color:var(--gold-honey);font-family:'JetBrains Mono',monospace;margin-top:0.25rem;padding:2px 8px;border:1px solid var(--gold-honey);border-radius:4px}
+
+/* Slide 10 - Economia */
+.economia-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}
+.economia-card{padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem}
+.economia-card .card-header{display:flex;align-items:center;gap:0.75rem}
+.economia-card .card-header .econ-icon{font-size:1.8rem}
+.economia-card .card-header h4{font-size:1rem;margin:0}
+.economia-card .econ-value{font-family:'Poppins',sans-serif;font-weight:700;font-size:2rem;color:var(--gold-honey)}
+.economia-card .econ-desc{font-size:0.85rem;color:var(--text-secondary)}
+.economia-card .progress-bar{width:100%;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;margin-top:0.25rem}
+.economia-card .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--green-forest),var(--green-vibrant));border-radius:3px;transition:width 1s ease}
+
+/* Slide 11 - Inventario */
+.inventario-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem}
+.inventario-card{padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem}
+.inventario-card .inv-icon{font-size:2.5rem;text-align:center}
+.inventario-card h4{text-align:center;font-size:1.1rem;margin:0}
+.inventario-card .inv-count{text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:2rem;color:var(--green-vibrant)}
+.inventario-card .inv-tags{display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center}
+.inv-tag{padding:4px 10px;background:var(--green-forest);border-radius:12px;font-size:0.75rem;color:var(--green-light);font-family:'Inter',sans-serif}
+
+/* Slide 12 - Salvamento */
+.salvamento-center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem}
+.salvamento-icon-big{font-size:4rem;color:var(--green-light);filter:drop-shadow(0 0 20px rgba(149,213,178,0.4))}
+.salvamento-cards{display:flex;gap:1.5rem;width:100%;max-width:900px}
+.salvamento-card{flex:1;padding:1.5rem;text-align:center}
+.salvamento-card .sv-icon{font-size:2rem;margin-bottom:0.75rem;display:block}
+.salvamento-card h4{font-size:1rem;margin-bottom:0.5rem}
+.salvamento-card p{font-size:0.85rem;color:var(--text-secondary);margin:0}
+
+/* Slide 13 - Interface */
+.mockup-container{display:flex;gap:2rem;align-items:center;justify-content:center;margin-top:1rem}
+.mockup{width:650px;height:380px;background:rgba(19,43,30,0.8);border:2px solid var(--card-border);border-radius:12px;position:relative;overflow:hidden}
+.mockup-top{position:absolute;top:0;left:0;width:100%;height:40px;background:rgba(45,106,79,0.5);display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--card-border)}
+.mockup-top .coins{display:flex;align-items:center;gap:4px;font-size:0.8rem;color:var(--gold-honey)}
+.mockup-top .level{display:flex;align-items:center;gap:4px;font-size:0.8rem;color:var(--green-light)}
+.mockup-left{position:absolute;top:40px;left:0;width:60px;height:calc(100% - 80px);background:rgba(19,43,30,0.6);border-right:1px solid var(--card-border);display:flex;flex-direction:column;align-items:center;padding:8px;gap:6px}
+.mockup-left .inv-slot{width:36px;height:36px;background:var(--green-forest);border-radius:6px;border:1px solid var(--card-border)}
+.mockup-right{position:absolute;top:40px;right:0;width:120px;height:calc(100% - 80px);background:rgba(19,43,30,0.6);border-left:1px solid var(--card-border);padding:8px}
+.mockup-right .mission{background:rgba(45,106,79,0.3);border-radius:6px;padding:6px;margin-bottom:6px;font-size:0.65rem;color:var(--text-secondary)}
+.mockup-bottom{position:absolute;bottom:0;left:0;width:100%;height:40px;background:rgba(19,43,30,0.8);border-top:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px}
+.mockup-bottom .tool-slot{width:28px;height:28px;background:var(--green-forest);border-radius:4px;border:1px solid var(--card-border)}
+.mockup-plants{position:absolute;top:60px;left:80px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:20px}
+.mockup-plants .mplant{width:30px;height:40px;background:var(--green-vibrant);border-radius:4px;opacity:0.6}
+.mockup-labels{display:flex;flex-direction:column;gap:0.75rem}
+.mockup-label{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.8rem;background:rgba(19,43,30,0.4);border-radius:8px;font-size:0.8rem;color:var(--text-secondary);border:1px solid var(--card-border);transition:all 0.2s;cursor:default}
+.mockup-label .label-dot{width:6px;height:6px;border-radius:50%;background:var(--green-light);flex-shrink:0}
+
+/* Slide 14 - Tecnologias */
+.tecnologia-card{padding:1.5rem;display:flex;flex-direction:column;gap:0.5rem;position:relative}
+.tecnologia-card h4{font-size:1.1rem;margin:0}
+.tecnologia-card p{font-size:0.85rem;color:var(--text-secondary);margin:0}
+.tecnologia-card .badge{display:inline-block;padding:2px 10px;border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:700;width:fit-content}
+.badge-engine{background:rgba(246,189,96,0.2);color:var(--gold-honey);border:1px solid var(--gold-honey)}
+.badge-lang{background:rgba(82,183,136,0.2);color:var(--green-vibrant);border:1px solid var(--green-vibrant)}
+.badge-data{background:rgba(149,213,178,0.2);color:var(--green-light);border:1px solid var(--green-light)}
+.badge-comm{background:rgba(212,163,115,0.2);color:var(--brown-earth);border:1px solid var(--brown-earth)}
+
+/* Slide 15 - Estrutura */
+.tree-view{font-family:'JetBrains Mono',monospace;font-size:0.85rem;padding:1rem 0}
+.tree-node{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.6rem;border-radius:6px;transition:all 0.2s;cursor:default;color:var(--text-primary)}
+.tree-node:hover{background:rgba(45,106,79,0.2)}
+.tree-node .tree-icon{flex-shrink:0}
+.tree-node .tree-name{color:var(--green-light)}
+.tree-children{padding-left:1.5rem}
+.tree-leaf{display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0.6rem;border-radius:4px;transition:all 0.2s;cursor:default;color:var(--text-secondary);font-size:0.8rem}
+.tree-leaf:hover{background:rgba(45,106,79,0.15);color:var(--text-primary)}
+
+/* Slide 16 - Desafios */
+.desafio-card{padding:1.5rem;display:flex;flex-direction:column;gap:0.5rem}
+.desafio-card .desafio-title{display:flex;align-items:center;gap:0.5rem;font-weight:600;font-size:1rem}
+.desafio-card .desafio-solution{display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--green-vibrant);padding:0.5rem 0.75rem;background:rgba(82,183,136,0.1);border-radius:8px;border:1px solid rgba(82,183,136,0.2)}
+
+/* Slide 17 - Futuras */
+.melhoria-card{padding:1.5rem;display:flex;flex-direction:column;gap:0.5rem}
+.melhoria-card .melhoria-header{display:flex;align-items:center;gap:0.75rem}
+.melhoria-card .melhoria-header .m-icon{font-size:1.5rem}
+.melhoria-card .melhoria-header h4{font-size:1rem;margin:0}
+.melhoria-card p{font-size:0.85rem;color:var(--text-secondary);margin:0}
+.status-tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:600;font-family:'Inter',sans-serif}
+.status-soon{background:rgba(246,189,96,0.2);color:var(--gold-honey);border:1px solid var(--gold-honey)}
+.status-planned{background:rgba(149,213,178,0.2);color:var(--green-light);border:1px solid var(--green-light)}
+
+/* Slide 18 - Resultados */
+.resultado-card{padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem}
+.resultado-card .res-icon{font-size:2.5rem;text-align:center}
+.resultado-card h4{text-align:center;font-size:1.1rem;margin:0}
+.resultado-card p{font-size:0.85rem;color:var(--text-secondary);text-align:center;margin:0}
+.resultado-card .res-badge{display:inline-flex;align-items:center;gap:0.3rem;padding:4px 12px;background:rgba(82,183,136,0.2);border:1px solid var(--green-vibrant);border-radius:12px;font-size:0.75rem;color:var(--green-vibrant);width:fit-content;margin:0 auto}
+
+/* Slide 19 - Demonstracao */
+.demo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}
+.demo-card{padding:1.5rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:0.75rem;position:relative;cursor:pointer;min-height:180px}
+.demo-card .demo-icon{font-size:2.5rem}
+.demo-card h4{font-size:1rem;margin:0}
+.demo-card p{font-size:0.8rem;color:var(--text-secondary);margin:0}
+.hotspot{position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:var(--green-light);box-shadow:0 0 10px var(--green-light);animation:hotspotPulse 2s ease-in-out infinite;cursor:pointer;z-index:5}
+@keyframes hotspotPulse{0%,100%{transform:scale(1);box-shadow:0 0 10px var(--green-light)}50%{transform:scale(1.3);box-shadow:0 0 20px var(--green-light),0 0 30px rgba(149,213,178,0.3)}}
+
+/* Slide 20 - Conclusao */
+#slide20{justify-content:center}
+#slide20 .slide-content{max-width:700px;margin:0 auto;text-align:center}
+.aprendizado-list{list-style:none;margin:1.5rem 0}
+.aprendizado-list li{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;font-size:1rem;color:var(--text-primary)}
+.aprendizado-list li .check{color:var(--green-vibrant);font-weight:700}
+.quote-card{max-width:600px;margin:1.5rem auto;padding:1.5rem 2rem;text-align:center}
+.quote-card p{font-size:1.1rem;font-style:italic;color:var(--green-light);line-height:1.6;margin:0}
+.thanks-text{font-family:'Poppins',sans-serif;font-weight:700;font-size:2rem;color:var(--gold-honey);margin:1.5rem 0;text-shadow:0 0 20px rgba(246,189,96,0.3)}
+.qa-text{font-size:1.2rem;color:var(--text-secondary)}
+
+/* Popup / Modal */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:200;display:none;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+.modal-overlay.active{display:flex}
+.modal-content{background:rgba(19,43,30,0.95);backdrop-filter:var(--glass-blur);border:1px solid var(--card-border);border-radius:var(--radius-card);padding:2rem;max-width:600px;width:90%;position:relative;max-height:80vh;overflow-y:auto}
+.modal-close{position:absolute;top:1rem;right:1rem;width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,0.1);color:var(--text-white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s}
+.modal-close:hover{background:rgba(246,189,96,0.3);color:var(--gold-honey)}
+.modal-content h3{font-size:1.4rem;margin-bottom:1rem}
+.modal-content p{font-size:0.95rem;color:var(--text-secondary);line-height:1.6}
+.modal-content .modal-highlight{color:var(--gold-honey);font-style:italic;margin-top:0.5rem}
+
+/* Tooltip */
+.tooltip{position:fixed;padding:8px 12px;background:rgba(19,43,30,0.95);backdrop-filter:var(--glass-blur);border:1px solid var(--card-border);border-radius:6px;font-family:'Inter',sans-serif;font-size:0.8rem;color:var(--text-white);pointer-events:none;z-index:300;opacity:0;transition:opacity 0.15s;white-space:nowrap}
+.tooltip.visible{opacity:1}
+.tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:rgba(19,43,30,0.95)}
+
+/* Index overlay */
+#index-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(13,27,18,0.95);z-index:500;display:none;flex-direction:column;justify-content:center;align-items:center;backdrop-filter:blur(8px)}
+#index-overlay.active{display:flex}
+#index-overlay h3{font-size:1.5rem;margin-bottom:1.5rem;color:var(--green-light)}
+.index-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;max-width:600px;width:90%}
+.index-item{aspect-ratio:4/3;background:rgba(19,43,30,0.6);border:1px solid var(--card-border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;font-size:1.1rem;font-weight:700;color:var(--text-white);font-family:'Poppins',sans-serif}
+.index-item:hover{background:var(--green-forest);border-color:var(--green-light);box-shadow:var(--shadow-glow);transform:scale(1.05)}
+.index-item .index-sub{font-size:0.6rem;font-weight:400;color:var(--text-secondary);font-family:'Inter',sans-serif;margin-top:2px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--green-forest);border-radius:4px}
+
+/* Responsive */
+@media(max-width:1024px){
+  h1{font-size:2.8rem}h2{font-size:1.8rem}h3{font-size:1.3rem}.subtitle{font-size:1.2rem}
+  .slide{padding:2rem 3rem}
+  .card-grid-4,.card-grid-5{grid-template-columns:repeat(2,1fr)}
+  .crescimento-grid{grid-template-columns:repeat(2,1fr)}
+  .inventario-grid{grid-template-columns:repeat(2,1fr)}
+  .economia-grid{grid-template-columns:repeat(2,1fr)}
+  .split-layout{flex-direction:column}
+  .mockup{width:500px;height:300px}
+  .salvamento-cards{flex-direction:column}
+  .timeline-flow{flex-wrap:wrap;gap:0.5rem}
+}
+@media(max-width:768px){
+  h1{font-size:2.2rem}h2{font-size:1.5rem}h3{font-size:1.1rem}.subtitle{font-size:1rem}
+  .slide{padding:1.5rem 2rem}
+  .slide-icon{top:1rem;left:1.5rem;width:24px;height:24px}
+  .card-grid-4,.card-grid-3,.card-grid-5{grid-template-columns:repeat(2,1fr)}
+  .crescimento-grid{grid-template-columns:repeat(2,1fr)}
+  .economia-grid{grid-template-columns:1fr}
+  .inventario-grid{grid-template-columns:repeat(2,1fr)}
+  .demo-grid{grid-template-columns:repeat(2,1fr)}
+  .split-layout{flex-direction:column}
+  .mockup{width:100%;height:220px}
+  .mockup-labels{flex-direction:row;flex-wrap:wrap}
+  .mockup-container{flex-direction:column}
+  .salvamento-cards{flex-direction:column}
+  #slide1 h1{font-size:2.5rem}
+  .index-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:480px){
+  h1{font-size:1.8rem}h2{font-size:1.3rem}h3{font-size:1rem}.subtitle{font-size:0.9rem}
+  p{font-size:0.95rem}
+  .slide{padding:1rem 1.25rem}
+  .card-grid-4,.card-grid-3,.card-grid-2,.card-grid-5{grid-template-columns:1fr}
+  .crescimento-grid{grid-template-columns:1fr}
+  .economia-grid{grid-template-columns:1fr}
+  .inventario-grid{grid-template-columns:1fr}
+  .demo-grid{grid-template-columns:1fr}
+  .index-grid{grid-template-columns:repeat(3,1fr)}
+  .timeline-step{min-width:100px}
+  #navigation{bottom:16px;right:16px}
+  #prev-btn,#next-btn{width:40px;height:40px;font-size:1rem}
+  #slide1 h1{font-size:2rem}
+  #slide-counter{font-size:0.7rem;right:50px}
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"><div id="progress-fill"></div></div>
+<span id="slide-counter">01 / 20</span>
+<button id="btn-fullscreen" aria-label="Fullscreen">⛶</button>
+
+<div id="slides-container">
+<section class="slide active" data-slide="1" id="slide1">
+  <i data-lucide="sprout" class="slide-icon"></i>
+  <h1 id="titulo3d">Projeto de Jogo de Fazendinha no Roblox</h1>
+  <p class="subtitle">Desenvolvimento de Simulação Agrícola no Roblox</p>
+  <div class="slide1-meta">
+    <span>Apresentador: Equipe de Desenvolvimento</span>
+    <span>Junho 2026</span>
+  </div>
+  <div class="slide1-badge">Roblox Studio • LuaU</div>
+</section>
+
+<section class="slide" data-slide="2" id="slide2">
+  <i data-lucide="target" class="slide-icon"></i>
+  <h2>Objetivo do Projeto</h2>
+  <div class="content-wrapper">
+    <ul class="objetivo-list">
+      <li><span class="bullet"></span>Criar uma experiência divertida e envolvente no Roblox</li>
+      <li><span class="bullet"></span>Incentivar a progressão contínua do jogador</li>
+      <li><span class="bullet"></span>Desenvolver sistemas completos e funcionais no Roblox Studio</li>
+      <li><span class="bullet"></span>Aplicar conceitos de programação em LuaU</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide" data-slide="3" id="slide3">
+  <i data-lucide="users" class="slide-icon"></i>
+  <h2>Público-Alvo</h2>
+  <div class="card-grid card-grid-4">
+    <div class="glass-card publico-card stagger-item">
+      <div class="card-icon">🧒</div>
+      <h4>Crianças</h4>
+      <p>Jogadores jovens que amam exploração e criatividade</p>
+    </div>
+    <div class="glass-card publico-card stagger-item">
+      <div class="card-icon">👦</div>
+      <h4>Adolescentes</h4>
+      <p>Buscam progressão, personalização e desafios</p>
+    </div>
+    <div class="glass-card publico-card stagger-item">
+      <div class="card-icon">🎮</div>
+      <h4>Jogadores Casuais</h4>
+      <p>Experiência relaxante e divertida no dia a dia</p>
+    </div>
+    <div class="glass-card publico-card stagger-item">
+      <div class="card-icon">🌾</div>
+      <h4>Fãs de Fazenda</h4>
+      <p>Apaixonados por simulação agrícola e gestão</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="4" id="slide4">
+  <i data-lucide="book-open" class="slide-icon"></i>
+  <h2>Inspirações</h2>
+  <p class="subtitle" style="font-size:1.1rem;color:var(--text-secondary);margin-top:-0.5rem">Jogos que influenciaram o projeto</p>
+  <div class="card-grid card-grid-4">
+    <div class="glass-card inspiracao-card stagger-item" data-popup="popup-farm">
+      <span class="card-icon">🌾</span>
+      <h4>Farm Together</h4>
+      <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Multiplayer relaxante</p>
+    </div>
+    <div class="glass-card inspiracao-card stagger-item" data-popup="popup-stardew">
+      <span class="card-icon">🌻</span>
+      <h4>Stardew Valley</h4>
+      <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">RPG agrícola profundo</p>
+    </div>
+    <div class="glass-card inspiracao-card stagger-item" data-popup="popup-hayday">
+      <span class="card-icon">🍎</span>
+      <h4>Hay Day</h4>
+      <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Mobile farming clássico</p>
+    </div>
+    <div class="glass-card inspiracao-card stagger-item" data-popup="popup-grow">
+      <span class="card-icon">🌱</span>
+      <h4>Grow a Garden</h4>
+      <p style="font-size:0.85rem;color:var(--text-secondary);margin:0">Referência direta no Roblox</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="5" id="slide5">
+  <i data-lucide="scroll-text" class="slide-icon"></i>
+  <h2>História do Jogo</h2>
+  <p class="subtitle" style="font-size:1.1rem;color:var(--text-secondary);margin-top:-0.5rem">A jornada do jogador</p>
+  <div class="timeline-flow">
+    <div class="timeline-step stagger-item"><span class="step-icon">🌱</span><span class="step-label">Plantar</span></div>
+    <span class="timeline-arrow">→</span>
+    <div class="timeline-step stagger-item"><span class="step-icon">🌾</span><span class="step-label">Colher</span></div>
+    <span class="timeline-arrow">→</span>
+    <div class="timeline-step stagger-item"><span class="step-icon">💰</span><span class="step-label">Vender</span></div>
+    <span class="timeline-arrow">→</span>
+    <div class="timeline-step stagger-item"><span class="step-icon">⬆️</span><span class="step-label">Evoluir</span></div>
+    <span class="timeline-arrow">→</span>
+    <div class="timeline-step stagger-item"><span class="step-icon">🏠</span><span class="step-label">Expandir</span></div>
+  </div>
+</section>
+
+<section class="slide" data-slide="6" id="slide6">
+  <i data-lucide="refresh-cw" class="slide-icon"></i>
+  <h2>Gameplay</h2>
+  <div style="display:flex;justify-content:center">
+  <div class="flowchart">
+    <div class="flowchart-step stagger-item"><span class="step-icon">🌱</span><span class="step-text">Plantar</span></div>
+    <div class="flowchart-arrow">↓</div>
+    <div class="flowchart-step stagger-item"><span class="step-icon">💧</span><span class="step-text">Regar</span></div>
+    <div class="flowchart-arrow">↓</div>
+    <div class="flowchart-step stagger-item"><span class="step-icon">⏳</span><span class="step-text">Esperar crescer</span></div>
+    <div class="flowchart-arrow">↓</div>
+    <div class="flowchart-step stagger-item"><span class="step-icon">✂️</span><span class="step-text">Colher</span></div>
+    <div class="flowchart-arrow">↓</div>
+    <div class="flowchart-step stagger-item"><span class="step-icon">💰</span><span class="step-text">Vender</span></div>
+    <div class="flowchart-arrow">↓</div>
+    <div class="flowchart-step stagger-item"><span class="step-icon">🪙</span><span class="step-text">Ganhar moedas</span></div>
+    <div class="flowchart-loop">↩️ Comprar melhorias — volta ao Plantio</div>
+  </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="7" id="slide7">
+  <i data-lucide="seedling" class="slide-icon"></i>
+  <h2>Sistema de Plantio</h2>
+  <div class="split-layout">
+    <div class="split-left">
+      <div class="plant-step stagger-item"><span class="plant-step-num">01</span><div class="plant-step-content"><h4>Escolha da semente</h4><p>Selecione entre diferentes tipos de sementes</p></div></div>
+      <div class="plant-step stagger-item"><span class="plant-step-num">02</span><div class="plant-step-content"><h4>Preparação do solo</h4><p>Use a enxada para preparar a terra</p></div></div>
+      <div class="plant-step stagger-item"><span class="plant-step-num">03</span><div class="plant-step-content"><h4>Plantio</h4><p>Plante a semente no solo preparado</p></div></div>
+      <div class="plant-step stagger-item"><span class="plant-step-num">04</span><div class="plant-step-content"><h4>Tempo de crescimento</h4><p>Aguarde o crescimento da planta</p></div></div>
+    </div>
+    <div class="split-right">
+      <div class="plant-illustration">
+        <div class="plant-pot">
+          <div class="plant-stem">
+            <div class="plant-leaf left"></div>
+            <div class="plant-leaf right"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="8" id="slide8">
+  <i data-lucide="trending-up" class="slide-icon"></i>
+  <h2>Sistema de Crescimento</h2>
+  <div class="crescimento-grid">
+    <div class="glass-card crescimento-card stagger-item">
+      <div class="plant-drawing"><span style="font-size:2.5rem">🌱</span></div>
+      <span class="plant-stage">Semente</span>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:25%"></div></div>
+    </div>
+    <div class="glass-card crescimento-card stagger-item">
+      <div class="plant-drawing"><span style="font-size:2.5rem">🌿</span></div>
+      <span class="plant-stage">Broto</span>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:50%"></div></div>
+    </div>
+    <div class="glass-card crescimento-card stagger-item">
+      <div class="plant-drawing"><span style="font-size:2.5rem">🌳</span></div>
+      <span class="plant-stage">Crescendo</span>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:75%"></div></div>
+    </div>
+    <div class="glass-card crescimento-card stagger-item">
+      <div class="plant-drawing"><span style="font-size:2.5rem">🌾</span></div>
+      <span class="plant-stage">Pronto para Colher</span>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:100%;background:var(--gold-honey)"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="9" id="slide9">
+  <i data-lucide="wrench" class="slide-icon"></i>
+  <h2>Sistema de Ferramentas</h2>
+  <div class="card-grid card-grid-5">
+    <div class="glass-card ferramenta-card stagger-item"><span class="card-icon">⛏️</span><h4>Enxada</h4><p>Prepara o solo para plantio</p><span class="shortcut">[E]</span></div>
+    <div class="glass-card ferramenta-card stagger-item"><span class="card-icon">💧</span><h4>Regador</h4><p>Mantém as plantas hidratadas</p><span class="shortcut">[R]</span></div>
+    <div class="glass-card ferramenta-card stagger-item"><span class="card-icon">🌱</span><h4>Sementes</h4><p>Diferentes tipos de culturas</p><span class="shortcut">[Q]</span></div>
+    <div class="glass-card ferramenta-card stagger-item"><span class="card-icon">🪓</span><h4>Machado</h4><p>Corta árvores e galhos</p><span class="shortcut">[F]</span></div>
+    <div class="glass-card ferramenta-card stagger-item"><span class="card-icon">⚒️</span><h4>Picareta</h4><p>Quebra pedras e minérios</p><span class="shortcut">[G]</span></div>
+  </div>
+</section>
+
+<section class="slide" data-slide="10" id="slide10">
+  <i data-lucide="coins" class="slide-icon"></i>
+  <h2>Sistema de Economia</h2>
+  <div class="economia-grid">
+    <div class="glass-card economia-card stagger-item">
+      <div class="card-header"><span class="econ-icon">💰</span><h4>Venda de Produtos</h4></div>
+      <div class="econ-value" data-count="150">0</div>
+      <div class="econ-desc">Colheitas geram moedas</div>
+      <div class="progress-bar"><div class="progress-bar-fill" style="width:75%"></div></div>
+    </div>
+    <div class="glass-card economia-card stagger-item">
+      <div class="card-header"><span class="econ-icon">🪙</span><h4>Ganho de Moedas</h4></div>
+      <div class="econ-value" data-count="200">0</div>
+      <div class="econ-desc">Moedas por ciclo: +50 a +200</div>
+      <div class="progress-bar"><div class="progress-bar-fill" style="width:100%"></div></div>
+    </div>
+    <div class="glass-card economia-card stagger-item">
+      <div class="card-header"><span class="econ-icon">🌱</span><h4>Compra de Sementes</h4></div>
+      <div class="econ-value" data-count="50" style="color:var(--green-vibrant)">0</div>
+      <div class="econ-desc">Investimento: -10 a -50 moedas</div>
+      <div class="progress-bar"><div class="progress-bar-fill" style="width:25%"></div></div>
+    </div>
+    <div class="glass-card economia-card stagger-item">
+      <div class="card-header"><span class="econ-icon">⛏️</span><h4>Compra de Ferramentas</h4></div>
+      <div class="econ-value" data-count="500" style="color:var(--green-vibrant)">0</div>
+      <div class="econ-desc">Desbloqueio: -100 a -500 moedas</div>
+      <div class="progress-bar"><div class="progress-bar-fill" style="width:50%"></div></div>
+    </div>
+    <div class="glass-card economia-card stagger-item">
+      <div class="card-header"><span class="econ-icon">🏠</span><h4>Melhorias da Fazenda</h4></div>
+      <div class="econ-value" data-count="1000" style="color:var(--gold-honey)">0</div>
+      <div class="econ-desc">Expansão: -1000 moedas</div>
+      <div class="progress-bar"><div class="progress-bar-fill" style="width:40%"></div></div>
+    </div>
+    <div class="glass-card economia-card stagger-item">
+      <div class="card-header"><span class="econ-icon">📊</span><h4>Lucro Total</h4></div>
+      <div class="econ-value" data-count="5000" style="color:var(--gold-honey)">0</div>
+      <div class="econ-desc">Potencial de lucro por sessão</div>
+      <div class="progress-bar"><div class="progress-bar-fill" style="width:60%;background:linear-gradient(90deg,var(--gold-honey),var(--gold-dark))"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="11" id="slide11">
+  <i data-lucide="package" class="slide-icon"></i>
+  <h2>Sistema de Inventário</h2>
+  <div class="inventario-grid">
+    <div class="glass-card inventario-card stagger-item">
+      <div class="inv-icon">🌱</div><h4>Plantas</h4>
+      <div class="inv-count" data-count="12">0</div>
+      <div class="inv-tags"><span class="inv-tag">Trigo</span><span class="inv-tag">Cenoura</span><span class="inv-tag">Tomate</span></div>
+    </div>
+    <div class="glass-card inventario-card stagger-item">
+      <div class="inv-icon">🌰</div><h4>Sementes</h4>
+      <div class="inv-count" data-count="24">0</div>
+      <div class="inv-tags"><span class="inv-tag">Trigo</span><span class="inv-tag">Cenoura</span><span class="inv-tag">Tomate</span></div>
+    </div>
+    <div class="glass-card inventario-card stagger-item">
+      <div class="inv-icon">⛏️</div><h4>Ferramentas</h4>
+      <div class="inv-count" data-count="2">0</div>
+      <div class="inv-tags"><span class="inv-tag">Enxada</span><span class="inv-tag">Regador</span></div>
+    </div>
+    <div class="glass-card inventario-card stagger-item">
+      <div class="inv-icon">📦</div><h4>Recursos</h4>
+      <div class="inv-count" data-count="50">0</div>
+      <div class="inv-tags"><span class="inv-tag">Madeira</span><span class="inv-tag">Pedra</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="12" id="slide12">
+  <i data-lucide="save" class="slide-icon"></i>
+  <h2>Sistema de Salvamento</h2>
+  <div class="salvamento-center">
+    <div class="salvamento-icon-big">💾</div>
+    <div class="salvamento-cards">
+      <div class="glass-card salvamento-card stagger-item">
+        <span class="sv-icon">💾</span><h4>Salvamento Automático</h4>
+        <p>A cada ação importante, o progresso é salvo</p>
+      </div>
+      <div class="glass-card salvamento-card stagger-item">
+        <span class="sv-icon">📊</span><h4>Dados Armazenados</h4>
+        <p>Inventário, dinheiro, plantações e melhorias</p>
+      </div>
+      <div class="glass-card salvamento-card stagger-item">
+        <span class="sv-icon">🔄</span><h4>Continuação do Progresso</h4>
+        <p>Ao retornar, o jogador continua de onde parou</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="13" id="slide13">
+  <i data-lucide="monitor" class="slide-icon"></i>
+  <h2>Interface (UI)</h2>
+  <div class="mockup-container">
+    <div class="mockup">
+      <div class="mockup-top">
+        <span class="coins">💰 150</span>
+        <span class="level">⭐ 5</span>
+      </div>
+      <div class="mockup-left">
+        <div class="inv-slot"></div><div class="inv-slot"></div><div class="inv-slot"></div><div class="inv-slot"></div>
+      </div>
+      <div class="mockup-right">
+        <div class="mission">📋 Colher trigo (0/5)</div>
+        <div class="mission">💰 Vender 10 itens</div>
+      </div>
+      <div class="mockup-plants">
+        <div class="mplant"></div><div class="mplant"></div><div class="mplant"></div>
+        <div class="mplant"></div><div class="mplant"></div><div class="mplant"></div>
+      </div>
+      <div class="mockup-bottom">
+        <div class="tool-slot"></div><div class="tool-slot"></div><div class="tool-slot"></div>
+        <div class="tool-slot"></div><div class="tool-slot"></div>
+      </div>
+    </div>
+    <div class="mockup-labels">
+      <div class="mockup-label"><span class="label-dot"></span>💰 Barra de Moedas</div>
+      <div class="mockup-label"><span class="label-dot"></span>📦 Inventário</div>
+      <div class="mockup-label"><span class="label-dot"></span>📋 Missões</div>
+      <div class="mockup-label"><span class="label-dot"></span>🌱 Plantações</div>
+      <div class="mockup-label"><span class="label-dot"></span>🛠️ Ferramentas</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="14" id="slide14">
+  <i data-lucide="cpu" class="slide-icon"></i>
+  <h2>Tecnologias Utilizadas</h2>
+  <div class="card-grid card-grid-3">
+    <div class="glass-card tecnologia-card stagger-item" data-tooltip="Engine oficial da Roblox para criação de jogos, com editor visual e suporte a física e rede.">
+      <h4>🏗️ Roblox Studio</h4>
+      <p>Engine de desenvolvimento completa</p>
+      <span class="badge badge-engine">Engine</span>
+    </div>
+    <div class="glass-card tecnologia-card stagger-item" data-tooltip="Linguagem de script derivada do Lua 5.1, otimizada para a plataforma Roblox com tipagem opcional.">
+      <h4>📜 LuaU</h4>
+      <p>Linguagem de programação oficial</p>
+      <span class="badge badge-lang">Linguagem</span>
+    </div>
+    <div class="glass-card tecnologia-card stagger-item" data-tooltip="Serviço da Roblox para armazenamento persistente de dados dos jogadores entre sessões.">
+      <h4>💾 DataStore</h4>
+      <p>Armazenamento de dados persistente</p>
+      <span class="badge badge-data">Serviço</span>
+    </div>
+    <div class="glass-card tecnologia-card stagger-item" data-tooltip="Sistema de propriedades customizadas que podem ser anexadas a qualquer instância no Roblox.">
+      <h4>🏷️ Attributes</h4>
+      <p>Propriedades customizadas</p>
+      <span class="badge badge-data">Serviço</span>
+    </div>
+    <div class="glass-card tecnologia-card stagger-item" data-tooltip="Objetos para comunicação remota entre cliente e servidor, essenciais para jogos multiplayer.">
+      <h4>🔌 RemoteEvents</h4>
+      <p>Comunicação cliente-servidor</p>
+      <span class="badge badge-comm">Rede</span>
+    </div>
+    <div class="glass-card tecnologia-card stagger-item" data-tooltip="Serviço para organizar e gerenciar grupos de objetos no Workspace através de tags.">
+      <h4>📁 CollectionService</h4>
+      <p>Gerenciamento de objetos</p>
+      <span class="badge badge-comm">Serviço</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="15" id="slide15">
+  <i data-lucide="folder-tree" class="slide-icon"></i>
+  <h2>Estrutura do Projeto</h2>
+  <div class="tree-view">
+    <div class="tree-node stagger-item"><span class="tree-icon">📁</span><span class="tree-name">Projeto (raiz)</span></div>
+    <div class="tree-children">
+      <div class="tree-node stagger-item"><span class="tree-icon">📁</span><span class="tree-name">ServerScriptService</span></div>
+      <div class="tree-children">
+        <div class="tree-leaf stagger-item"><span class="tree-icon">📄</span>GameManager.lua</div>
+        <div class="tree-leaf stagger-item"><span class="tree-icon">📄</span>EconomySystem.lua</div>
+      </div>
+      <div class="tree-node stagger-item"><span class="tree-icon">📁</span><span class="tree-name">ReplicatedStorage</span></div>
+      <div class="tree-children">
+        <div class="tree-leaf stagger-item"><span class="tree-icon">📄</span>PlantData.lua</div>
+        <div class="tree-leaf stagger-item"><span class="tree-icon">📄</span>ToolConfig.lua</div>
+      </div>
+      <div class="tree-node stagger-item"><span class="tree-icon">📁</span><span class="tree-name">StarterGui</span></div>
+      <div class="tree-children"><div class="tree-leaf stagger-item"><span class="tree-icon">📄</span>HUD</div></div>
+      <div class="tree-node stagger-item"><span class="tree-icon">📁</span><span class="tree-name">Workspace</span></div>
+      <div class="tree-children">
+        <div class="tree-leaf stagger-item"><span class="tree-icon">🌾</span>Plants</div>
+        <div class="tree-leaf stagger-item"><span class="tree-icon">🛠️</span>Tools</div>
+      </div>
+      <div class="tree-node stagger-item"><span class="tree-icon">📁</span><span class="tree-name">StarterPlayer</span></div>
+      <div class="tree-children"><div class="tree-leaf stagger-item"><span class="tree-icon">📄</span>PlayerController.lua</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="16" id="slide16">
+  <i data-lucide="alert-triangle" class="slide-icon"></i>
+  <h2>Desafios Encontrados</h2>
+  <div class="card-grid card-grid-3" style="grid-template-columns:repeat(3,1fr)">
+    <div class="glass-card desafio-card stagger-item">
+      <div class="desafio-title">⚠️ Sistema de Crescimento</div>
+      <div class="desafio-solution">✅ Implementado com estágios visuais e timers</div>
+    </div>
+    <div class="glass-card desafio-card stagger-item">
+      <div class="desafio-title">⚠️ Salvamento de Dados</div>
+      <div class="desafio-solution">✅ DataStore com salvamento automático</div>
+    </div>
+    <div class="glass-card desafio-card stagger-item">
+      <div class="desafio-title">⚠️ Sincronização entre Jogadores</div>
+      <div class="desafio-solution">✅ RemoteEvents para comunicação</div>
+    </div>
+    <div class="glass-card desafio-card stagger-item">
+      <div class="desafio-title">⚠️ Organização do Código</div>
+      <div class="desafio-solution">✅ Estrutura modular com Services</div>
+    </div>
+    <div class="glass-card desafio-card stagger-item">
+      <div class="desafio-title">⚠️ Otimização</div>
+      <div class="desafio-solution">✅ Redução de loops e pooling de objetos</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="17" id="slide17">
+  <i data-lucide="rocket" class="slide-icon"></i>
+  <h2>Melhorias Futuras</h2>
+  <div class="card-grid card-grid-3">
+    <div class="glass-card melhoria-card stagger-item">
+      <div class="melhoria-header"><span class="m-icon">🐄</span><h4>Animais</h4></div>
+      <span class="status-tag status-soon">Em breve</span>
+      <p>Galinhas, vacas e ovelhas</p>
+    </div>
+    <div class="glass-card melhoria-card stagger-item">
+      <div class="melhoria-header"><span class="m-icon">🚜</span><h4>Tratores</h4></div>
+      <span class="status-tag status-planned">Planejado</span>
+      <p>Mecanização da fazenda</p>
+    </div>
+    <div class="glass-card melhoria-card stagger-item">
+      <div class="melhoria-header"><span class="m-icon">👥</span><h4>Multiplayer Cooperativo</h4></div>
+      <span class="status-tag status-planned">Planejado</span>
+      <p>Jogue com amigos</p>
+    </div>
+    <div class="glass-card melhoria-card stagger-item">
+      <div class="melhoria-header"><span class="m-icon">🌤️</span><h4>Clima</h4></div>
+      <span class="status-tag status-planned">Planejado</span>
+      <p>Chuva, sol e estações</p>
+    </div>
+    <div class="glass-card melhoria-card stagger-item">
+      <div class="melhoria-header"><span class="m-icon">🌸</span><h4>Estações do Ano</h4></div>
+      <span class="status-tag status-planned">Planejado</span>
+      <p>Primavera, Verão, Outono, Inverno</p>
+    </div>
+    <div class="glass-card melhoria-card stagger-item">
+      <div class="melhoria-header"><span class="m-icon">🎉</span><h4>Eventos Especiais</h4></div>
+      <span class="status-tag status-planned">Planejado</span>
+      <p>Festival da colheita</p>
+    </div>
+    <div class="glass-card melhoria-card stagger-item">
+      <div class="melhoria-header"><span class="m-icon">📋</span><h4>Sistema de Missões</h4></div>
+      <span class="status-tag status-planned">Planejado</span>
+      <p>Objetivos diários e conquistas</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="18" id="slide18">
+  <i data-lucide="trophy" class="slide-icon"></i>
+  <h2>Resultados Obtidos</h2>
+  <div class="card-grid card-grid-3">
+    <div class="glass-card resultado-card stagger-item">
+      <div class="res-icon">🌱</div><h4>Plantio</h4>
+      <p>Plantio, rega e tempo de crescimento funcionais</p>
+      <span class="res-badge">✅ Funcional</span>
+    </div>
+    <div class="glass-card resultado-card stagger-item">
+      <div class="res-icon">📈</div><h4>Crescimento</h4>
+      <p>4 estágios visuais com progressão automática</p>
+      <span class="res-badge">✅ Funcional</span>
+    </div>
+    <div class="glass-card resultado-card stagger-item">
+      <div class="res-icon">💰</div><h4>Economia</h4>
+      <p>Venda, compra de sementes e melhorias operacionais</p>
+      <span class="res-badge">✅ Funcional</span>
+    </div>
+    <div class="glass-card resultado-card stagger-item">
+      <div class="res-icon">📦</div><h4>Inventário</h4>
+      <p>Armazenamento e gerenciamento de itens funcionando</p>
+      <span class="res-badge">✅ Funcional</span>
+    </div>
+    <div class="glass-card resultado-card stagger-item">
+      <div class="res-icon">💾</div><h4>Salvamento</h4>
+      <p>Progresso persistente com DataStore</p>
+      <span class="res-badge">✅ Funcional</span>
+    </div>
+    <div class="glass-card resultado-card stagger-item" style="grid-column:span 1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-color:var(--green-vibrant)">
+      <div class="econ-value" style="font-size:3rem;color:var(--green-vibrant)" data-count="6">0</div>
+      <span style="font-size:0.85rem;color:var(--text-secondary)">Sistemas Funcionais</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="19" id="slide19">
+  <i data-lucide="play" class="slide-icon"></i>
+  <h2>Demonstração</h2>
+  <div class="demo-grid">
+    <div class="glass-card demo-card stagger-item" data-popup="demo-plantio">
+      <span class="demo-icon">🌱</span><h4>Plantio</h4>
+      <p>Fileira de plantinhas verdes</p>
+      <div class="hotspot"></div>
+    </div>
+    <div class="glass-card demo-card stagger-item" data-popup="demo-colheita">
+      <span class="demo-icon">✂️</span><h4>Colheita</h4>
+      <p>Planta com glow dourado</p>
+      <div class="hotspot"></div>
+    </div>
+    <div class="glass-card demo-card stagger-item" data-popup="demo-venda">
+      <span class="demo-icon">💰</span><h4>Venda</h4>
+      <p>Moedas caindo (animação)</p>
+      <div class="hotspot"></div>
+    </div>
+    <div class="glass-card demo-card stagger-item" data-popup="demo-interface">
+      <span class="demo-icon">🖥️</span><h4>Interface</h4>
+      <p>Mockup simplificado da UI</p>
+      <div class="hotspot"></div>
+    </div>
+    <div class="glass-card demo-card stagger-item" data-popup="demo-evolucao">
+      <span class="demo-icon">🏠</span><h4>Evolução</h4>
+      <p>Fazenda evoluindo (antes/depois)</p>
+      <div class="hotspot"></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-slide="20" id="slide20">
+  <i data-lucide="heart" class="slide-icon"></i>
+  <div class="slide-content">
+    <h2>Conclusão</h2>
+    <ul class="aprendizado-list">
+      <li class="stagger-item"><span class="check">✅</span> Programação em LuaU</li>
+      <li class="stagger-item"><span class="check">✅</span> Desenvolvimento de jogos</li>
+      <li class="stagger-item"><span class="check">✅</span> Organização de projetos</li>
+      <li class="stagger-item"><span class="check">✅</span> Criação de interfaces</li>
+      <li class="stagger-item"><span class="check">✅</span> Persistência de dados</li>
+      <li class="stagger-item"><span class="check">✅</span> Resolução de problemas</li>
+    </ul>
+    <div class="glass-card quote-card stagger-item">
+      <p>"Este projeto demonstra como diferentes sistemas podem ser integrados para criar uma experiência completa de simulação de fazenda no Roblox."</p>
+    </div>
+    <div class="thanks-text stagger-item">Obrigado pela atenção!</div>
+    <div class="qa-text stagger-item">❓ Perguntas?</div>
+  </div>
+</section>
+</div>
+
+<div id="navigation">
+  <button id="prev-btn" aria-label="Anterior">←</button>
+  <button id="next-btn" aria-label="Próximo">→</button>
+</div>
+
+<canvas id="bg-canvas"></canvas>
+<div id="custom-cursor"></div>
+<div id="tooltip-el" class="tooltip"></div>
+<div id="modal-overlay" class="modal-overlay"><div class="modal-content"><button class="modal-close" id="modal-close-btn">✕</button><div id="modal-body"></div></div></div>
+<div id="index-overlay"><h3>Navegação Rápida</h3><div class="index-grid" id="index-grid"></div></div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+(function(){
+'use strict';
+
+// ========== CONFIG ==========
+const TOTAL_SLIDES = 20;
+let currentSlide = 1;
+let isTransitioning = false;
+let navVisible = false;
+let isFullscreen = false;
+let wheelTimeout = 0;
+let touchStartX = 0;
+
+const transitionMap = {
+  1:'fade',2:'slide-up',3:'scale',4:'blur',5:'slide-left',
+  6:'fade',7:'zoom',8:'slide-down',9:'glitch',10:'cube',
+  11:'fade',12:'slide-right',13:'zoom',14:'blur',15:'slide-up',
+  16:'fade',17:'scale',18:'cube',19:'fade'
+};
+
+// ========== DOM REFS ==========
+const slides = document.querySelectorAll('.slide');
+const progressFill = document.getElementById('progress-fill');
+const slideCounter = document.getElementById('slide-counter');
+const nav = document.getElementById('navigation');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const fullscreenBtn = document.getElementById('btn-fullscreen');
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+const cursor = document.getElementById('custom-cursor');
+const tooltipEl = document.getElementById('tooltip-el');
+const modalOverlay = document.getElementById('modal-overlay');
+const modalBody = document.getElementById('modal-body');
+const modalClose = document.getElementById('modal-close-btn');
+const indexOverlay = document.getElementById('index-overlay');
+const indexGrid = document.getElementById('index-grid');
+
+// ========== CANVAS RESIZE ==========
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// ========== CANVAS BACKGROUND ==========
+class Particle {
+  constructor(type){
+    this.type = type || 'firefly';
+    this.reset();
+  }
+  reset(){
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = this.type === 'firefly' ? 2 + Math.random() * 2 : 1 + Math.random() * 1.5;
+    this.speedX = (Math.random() - 0.5) * 0.8;
+    this.speedY = (Math.random() - 0.5) * 0.8;
+    this.phase = Math.random() * Math.PI * 2;
+    this.amplitude = 0.5 + Math.random() * 1.5;
+    this.opacity = this.type === 'firefly' ? 0.3 + Math.random() * 0.5 : 0.05 + Math.random() * 0.15;
+    this.opacitySpeed = 0.005 + Math.random() * 0.01;
+    this.opacityPhase = Math.random() * Math.PI * 2;
+    this.color = this.type === 'firefly' ? '149,213,178' : '246,189,96';
+  }
+  update(time){
+    this.x += this.speedX + Math.sin(time * 0.001 + this.phase) * 0.3;
+    this.y += this.speedY + Math.cos(time * 0.001 + this.phase * 0.7) * 0.3;
+    this.opacity += Math.sin(time * 0.002 + this.opacityPhase) * this.opacitySpeed;
+    this.opacity = Math.max(0.05, Math.min(0.8, this.opacity));
+    if(this.x < -10) this.x = canvas.width + 10;
+    if(this.x > canvas.width + 10) this.x = -10;
+    if(this.y < -10) this.y = canvas.height + 10;
+    if(this.y > canvas.height + 10) this.y = -10;
+  }
+  draw(){
+    ctx.save();
+    ctx.globalAlpha = this.opacity;
+    if(this.type === 'firefly'){
+      const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 4);
+      grad.addColorStop(0, `rgba(${this.color},0.8)`);
+      grad.addColorStop(0.3, `rgba(${this.color},0.3)`);
+      grad.addColorStop(1, `rgba(${this.color},0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = `rgba(${this.color},0.9)`;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = `rgba(${this.color},${this.opacity})`;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+let particles = [];
+function initParticles(){
+  particles = [];
+  for(let i=0;i<28;i++) particles.push(new Particle('firefly'));
+  for(let i=0;i<8;i++) particles.push(new Particle('dust'));
+}
+initParticles();
+
+function drawGrid(){
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+  ctx.lineWidth = 1;
+  const step = 60;
+  for(let x=0;x<canvas.width;x+=step){
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();
+  }
+  for(let y=0;y<canvas.height;y+=step){
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawBlobs(time){
+  ctx.save();
+  const blobs = [
+    {x:canvas.width*0.2,y:canvas.height*0.3,r:180,dx:0.3,dy:0.2,color:'27,67,50'},
+    {x:canvas.width*0.8,y:canvas.height*0.6,r:150,dx:-0.2,dy:0.3,color:'45,106,79'},
+    {x:canvas.width*0.5,y:canvas.height*0.8,r:120,dx:0.15,dy:-0.25,color:'27,67,50'}
+  ];
+  blobs.forEach(b=>{
+    const x = b.x + Math.sin(time*0.0005+b.dx)*50;
+    const y = b.y + Math.cos(time*0.0005+b.dy)*50;
+    const grad = ctx.createRadialGradient(x,y,0,x,y,b.r);
+    grad.addColorStop(0,`rgba(${b.color},0.08)`);
+    grad.addColorStop(1,`rgba(${b.color},0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x,y,b.r,0,Math.PI*2);
+    ctx.fill();
+  });
+  ctx.restore();
+}
+
+let animTime = 0;
+function animateBackground(){
+  animTime++;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawGrid();
+  drawBlobs(animTime);
+  particles.forEach(p=>{
+    p.update(animTime);
+    p.draw();
+  });
+  requestAnimationFrame(animateBackground);
+}
+animateBackground();
+
+// ========== 3D TEXT SLIDE 1 ==========
+function create3DText(){
+  const h1 = document.getElementById('titulo3d');
+  if(!h1) return;
+  let shadow = '';
+  const colors = ['#1B4332','#1F4D3A','#235742','#27614A','#2B6B52','#2F755A','#337F62','#37896A','#3B9372','#3F9D7A',
+    '#43A782','#47B18A','#4BBB92','#4FC59A','#53CFA2','#57D9AA','#5BE3B2','#5FEDBA','#63F7C2','#67FFCA',
+    '#6FFFD0','#77FFD6','#7FFFDC','#87FFE2','#8FFFE8','#97FFEE','#9FFFF4','#A7FFFA','#AFFFFF','#B5FFFF'];
+  for(let i=0;i<30;i++){
+    const offset = i+1;
+    shadow += `${-offset}px ${offset}px 0 ${colors[i]},`;
+  }
+  shadow += '0 0 20px rgba(149,213,178,0.5)';
+  h1.style.textShadow = shadow;
+  h1.style.perspective = '800px';
+}
+create3DText();
+
+// ========== NAVIGATION ==========
+function updateSlide(num, animate=true){
+  if(num < 1 || num > TOTAL_SLIDES || isTransitioning) return;
+  const from = currentSlide;
+  if(from === num) return;
+  isTransitioning = true;
+
+  const fromSlide = slides[from-1];
+  const toSlide = slides[num-1];
+
+  const goingForward = num > from;
+  const transitionType = goingForward ? transitionMap[from] : 'fade';
+
+  if(animate){
+    // Keep fromSlide visible during exit by setting z-index above toSlide
+    fromSlide.style.zIndex = '3';
+    fromSlide.classList.add('exit-' + transitionType);
+    toSlide.style.display = 'flex';
+
+    // Small delay before entering
+    setTimeout(()=>{
+      toSlide.classList.add('enter-' + transitionType);
+      toSlide.classList.add('active');
+    }, 50);
+
+    const dur = transitionType === 'glitch' || transitionType === 'cube' ? 800 : 600;
+    setTimeout(()=>{
+      fromSlide.classList.remove('active');
+      fromSlide.classList.remove('exit-' + transitionType);
+      fromSlide.style.zIndex = '';
+      toSlide.classList.remove('enter-' + transitionType);
+      fromSlide.style.display = 'none';
+      isTransitioning = false;
+    }, dur);
+  } else {
+    fromSlide.classList.remove('active');
+    fromSlide.style.display = 'none';
+    toSlide.style.display = 'flex';
+    toSlide.classList.add('active');
+    isTransitioning = false;
+  }
+
+  currentSlide = num;
+  updateUI();
+  triggerStagger(toSlide);
+}
+
+function goToSlide(num){
+  if(num < 1 || num > TOTAL_SLIDES) return;
+  if(num === currentSlide) return;
+  updateSlide(num, true);
+}
+
+function nextSlide(){
+  if(currentSlide < TOTAL_SLIDES) goToSlide(currentSlide + 1);
+}
+
+function prevSlide(){
+  if(currentSlide > 1) goToSlide(currentSlide - 1);
+}
+
+// ========== UI UPDATE ==========
+function updateUI(){
+  const pct = (currentSlide / TOTAL_SLIDES) * 100;
+  progressFill.style.width = pct + '%';
+  slideCounter.textContent = String(currentSlide).padStart(2,'0') + ' / ' + String(TOTAL_SLIDES).padStart(2,'0');
+
+  if(currentSlide === 1){
+    nav.classList.remove('visible');
+    fullscreenBtn.classList.remove('visible');
+  } else {
+    nav.classList.add('visible');
+    fullscreenBtn.classList.add('visible');
+  }
+  prevBtn.style.opacity = currentSlide === 1 ? '0.3' : '1';
+  prevBtn.style.pointerEvents = currentSlide === 1 ? 'none' : 'auto';
+}
+
+// ========== STAGGER ==========
+function triggerStagger(slide){
+  const items = slide.querySelectorAll('.stagger-item');
+  items.forEach((el,i)=>{
+    el.classList.remove('visible');
+    el.style.animationDelay = (i * 150) + 'ms';
+    void el.offsetWidth; // reflow
+    el.classList.add('visible');
+  });
+}
+
+// ========== KEYBOARD ==========
+document.addEventListener('keydown', e=>{
+  const key = e.key;
+  if(key === 'ArrowRight' || key === 'PageDown' || key === ' ' || key === 'l' || key === 'L'){
+    e.preventDefault(); nextSlide();
+  } else if(key === 'ArrowLeft' || key === 'PageUp' || key === 'h' || key === 'H'){
+    e.preventDefault(); prevSlide();
+  } else if(key === 'Home'){ e.preventDefault(); goToSlide(1); }
+  else if(key === 'End'){ e.preventDefault(); goToSlide(TOTAL_SLIDES); }
+  else if(key === 'f' || key === 'F'){ toggleFullscreen(); }
+  else if(key === 'Escape'){
+    if(modalOverlay.classList.contains('active')) closeModal();
+    else if(indexOverlay.classList.contains('active')) closeIndex();
+    else if(document.fullscreenElement) document.exitFullscreen();
+  }
+  else if(key === 'i' || key === 'I'){ toggleIndex(); }
+  else if(key >= '1' && key <= '9'){ goToSlide(parseInt(key)); }
+  else if(key === '0'){ goToSlide(10); }
+});
+
+// ========== WHEEL ==========
+document.addEventListener('wheel', e=>{
+  const now = Date.now();
+  if(now - wheelTimeout < 800) return;
+  wheelTimeout = now;
+  if(e.deltaY > 0) nextSlide();
+  else prevSlide();
+}, {passive:true});
+
+// ========== TOUCH ==========
+document.addEventListener('touchstart', e=>{
+  touchStartX = e.changedTouches[0].screenX;
+}, {passive:true});
+document.addEventListener('touchend', e=>{
+  const dx = e.changedTouches[0].screenX - touchStartX;
+  if(Math.abs(dx) > 50){
+    if(dx < 0) nextSlide();
+    else prevSlide();
+  }
+}, {passive:true});
+
+// ========== BUTTONS ==========
+prevBtn.addEventListener('click', prevSlide);
+nextBtn.addEventListener('click', nextSlide);
+
+// ========== FULLSCREEN ==========
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(()=>{});
+  } else {
+    document.exitFullscreen();
+  }
+}
+fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+// ========== CURSOR ==========
+document.addEventListener('mousemove', e=>{
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.addEventListener('mouseleave', ()=>{ cursor.style.opacity = '0'; });
+document.addEventListener('mouseenter', ()=>{ cursor.style.opacity = '1'; });
+document.querySelectorAll('button, .glass-card, .tree-node, .tree-leaf, .index-item, a, .mockup-label').forEach(el=>{
+  el.addEventListener('mouseenter', ()=>{
+    cursor.classList.add('hover-btn');
+    if(el.closest('[data-popup]')) cursor.classList.add('hover-gold');
+  });
+  el.addEventListener('mouseleave', ()=>{
+    cursor.classList.remove('hover-btn','hover-gold');
+  });
+});
+
+// ========== MAGNETIC BUTTONS ==========
+function initMagnetic(){
+  const btns = [prevBtn, nextBtn];
+  btns.forEach(btn=>{
+    btn.addEventListener('mousemove', e=>{
+      const rect = btn.getBoundingClientRect();
+      const cx = rect.left + rect.width/2;
+      const cy = rect.top + rect.height/2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist < 50){
+        const maxMove = 8;
+        const strength = Math.max(0, 1 - dist/50);
+        btn.style.transform = `translate(${dx*strength}px, ${dy*strength}px) scale(1.05)`;
+      } else {
+        btn.style.transform = '';
+      }
+    });
+    btn.addEventListener('mouseleave', ()=>{ btn.style.transform = ''; });
+  });
+}
+initMagnetic();
+
+// ========== TOOLTIPS ==========
+document.querySelectorAll('[data-tooltip]').forEach(el=>{
+  el.addEventListener('mouseenter', e=>{
+    tooltipEl.textContent = el.dataset.tooltip;
+    tooltipEl.classList.add('visible');
+    const rect = el.getBoundingClientRect();
+    tooltipEl.style.left = (rect.left + rect.width/2) + 'px';
+    tooltipEl.style.top = (rect.bottom + 8) + 'px';
+    tooltipEl.style.transform = 'translateX(-50%)';
+  });
+  el.addEventListener('mouseleave', ()=>{ tooltipEl.classList.remove('visible'); });
+});
+
+// ========== POPUPS ==========
+const popupData = {
+  'popup-farm': {title:'Farm Together', desc:'Jogo multiplayer relaxante onde os jogadores constroem e gerenciam fazendas juntos. O foco está na colaboração e no ritmo tranquilo de jogo.', highlight:'Inspiração para o sistema multiplayer cooperativo'},
+  'popup-stardew': {title:'Stardew Valley', desc:'RPG agrícola com mecânicas profundas de cultivo, criação de animais, mineração e relacionamentos. Referência máxima em jogos de fazenda.', highlight:'Inspiração para a progressão e sistema de economia'},
+  'popup-hayday': {title:'Hay Day', desc:'Clássico mobile de fazenda com produção de bens, vendas e expansão gradual. Interface otimizada para dispositivos touch.', highlight:'Inspiração para a interface simplificada e tutorial'},
+  'popup-grow': {title:'Grow a Garden (Roblox)', desc:'Experiência de jardinagem dentro do Roblox. Referência direta de como implementar mecânicas agrícolas na plataforma.', highlight:'Inspiração para a implementação técnica no Roblox Studio'},
+  'demo-plantio': {title:'Sistema de Plantio', desc:'O jogador seleciona sementes, prepara o solo com a enxada e planta. O sistema gerencia o estado de cada plantação individualmente.', highlight:'Status: ✅ Funcional — Tecnologias: Attributes, RemoteEvents'},
+  'demo-colheita': {title:'Sistema de Colheita', desc:'Quando a planta atinge o estágio final, o jogador pode colher os frutos. Cada cultura tem um tempo de crescimento específico.', highlight:'Status: ✅ Funcional — Tecnologias: Timers, DataStore'},
+  'demo-venda': {title:'Sistema de Venda', desc:'Os produtos colhidos podem ser vendidos por moedas. O valor varia conforme o tipo e qualidade da cultura.', highlight:'Status: ✅ Funcional — Tecnologias: EconomySystem, DataStore'},
+  'demo-interface': {title:'Interface do Usuário', desc:'HUD completa com barra de moedas, inventário, missões ativas e barra de ferramentas. Interface responsiva e intuitiva.', highlight:'Status: ✅ Funcional — Tecnologias: StarterGui, LocalScripts'},
+  'demo-evolucao': {title:'Evolução da Fazenda', desc:'A fazenda começa pequena e pode ser expandida com melhorias. Novas áreas são desbloqueadas conforme o jogador progride.', highlight:'Status: ✅ Funcional — Tecnologias: Workspace, CollectionService'}
+};
+
+function openModal(id){
+  const data = popupData[id];
+  if(!data) return;
+  modalBody.innerHTML = '<h3>'+data.title+'</h3><p>'+data.desc+'</p><p class="modal-highlight">'+data.highlight+'</p>';
+  modalOverlay.classList.add('active');
+}
+
+function closeModal(){
+  modalOverlay.classList.remove('active');
+}
+
+document.querySelectorAll('[data-popup]').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const id = el.dataset.popup;
+    openModal(id);
+  });
+});
+
+modalClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', e=>{
+  if(e.target === modalOverlay) closeModal();
+});
+
+// ========== INDEX ==========
+function toggleIndex(){
+  if(indexOverlay.classList.contains('active')){
+    closeIndex();
+  } else {
+    openIndex();
+  }
+}
+
+function openIndex(){
+  indexGrid.innerHTML = '';
+  const names = ['Capa','Objetivo','Público-Alvo','Inspirações','História','Gameplay','Plantio','Crescimento','Ferramentas','Economia','Inventário','Salvamento','Interface','Tecnologias','Estrutura','Desafios','Melhorias','Resultados','Demonstração','Conclusão'];
+  for(let i=1;i<=TOTAL_SLIDES;i++){
+    const div = document.createElement('div');
+    div.className = 'index-item' + (i === currentSlide ? ' active' : '');
+    div.innerHTML = `<span>${i}</span><span class="index-sub">${names[i-1]}</span>`;
+    div.addEventListener('click', ()=>{ closeIndex(); goToSlide(i); });
+    indexGrid.appendChild(div);
+  }
+  indexOverlay.classList.add('active');
+}
+function closeIndex(){
+  indexOverlay.classList.remove('active');
+}
+indexOverlay.addEventListener('click', e=>{
+  if(e.target === indexOverlay) closeIndex();
+});
+
+// ========== COUNTER ANIMATION ==========
+function animateCounters(slide){
+  const counters = slide.querySelectorAll('[data-count]');
+  counters.forEach(el=>{
+    const target = parseInt(el.dataset.count);
+    if(isNaN(target)) return;
+    el.textContent = '0';
+    const dur = 1500;
+    const start = performance.now();
+    function update(now){
+      const pct = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - pct, 3);
+      const val = Math.round(eased * target);
+      el.textContent = val;
+      if(pct < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  });
+}
+
+// Override triggerStagger to also handle counters
+const origStagger = triggerStagger;
+triggerStagger = function(slide){
+  origStagger(slide);
+  if(slide.id === 'slide10' || slide.id === 'slide11' || slide.id === 'slide18'){
+    setTimeout(()=> animateCounters(slide), 300);
+  }
+};
+
+// ========== INIT ==========
+function init(){
+  // Show first slide
+  slides.forEach((s,i)=>{
+    if(i === 0) {
+      s.style.display = 'flex';
+      s.classList.add('active');
+    } else {
+      s.style.display = 'none';
+    }
+  });
+  updateUI();
+  triggerStagger(slides[0]);
+
+  // Init Lucide icons
+  if(typeof lucide !== 'undefined'){
+    lucide.createIcons();
+  }
+
+  // Resize observer
+  const ro = new ResizeObserver(()=> resizeCanvas());
+  ro.observe(document.body);
+}
+
+// Handle visibility changes for canvas
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden) resizeCanvas();
+});
+
+init();
+
+console.log('Apresentação carregada! Use ← → ou espaço para navegar.');
+})();
+</script>
+</body>
+</html>
