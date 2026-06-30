@@ -1,0 +1,1315 @@
+================================================================================
+  ESPECIFICAÇÃO COMPLETA DE DIREÇÃO DE ARTE, DESIGN E EXPERIÊNCIA
+  APRESENTAÇÃO: TYPESCRIPT — JAVASCRIPT COM TIPAGEM INTELIGENTE
+================================================================================
+
+INSTRUÇÃO PARA A IA EXECUTORA:
+- Crie UM ÚNICO arquivo HTML contendo toda a apresentação (HTML + CSS + JavaScript inline).
+- Use codificação UTF-8, sem BOM. NÃO permita caracteres corrompidos.
+- NÃO crie tela de loading.
+- NÃO acesse nenhum outro arquivo da pasta. Trabalhe exclusivamente com o que está neste documento.
+- Todas as imagens/ícones devem ser gerados via SVG inline ou emojis/unicode. NÃO use arquivos externos.
+- Toda a apresentação deve funcionar offline em um único arquivo.
+- Use viewport adequada para responsividade.
+
+================================================================================
+1. IDENTIDADE VISUAL GERAL
+================================================================================
+
+Tema: TypeScript — tecnologia Microsoft, linguagem de programação moderna.
+Público: desenvolvedores, estudantes de tecnologia, profissionais de TI.
+Objetivo: educar, informar e convencer sobre os benefícios do TypeScript.
+Estilo: moderno, tecnológico, limpo, premium, dark-mode, código-foco.
+Sensação: profissional, confiável, inovadora, clara, organizada.
+
+A identidade visual se inspira na marca TypeScript (azul característico) combinada
+com uma estética dark-mode de IDE de programação — como VS Code em tema escuro.
+A apresentação deve parecer uma ferramenta de desenvolvimento viva: elegante,
+precisa, com fluidez digital e um toque de sofisticação tecnológica.
+
+================================================================================
+2. PALETA DE CORES
+================================================================================
+
+Cada cor está nomeada para referência no CSS:
+
+--primary-blue:       #3178C6   (TypeScript azul oficial — cor da marca)
+--primary-dark:       #0a0e17   (fundo principal — preto azulado profundo)
+--secondary-dark:     #0f1525   (fundo secundário — cards, painéis)
+--surface-dark:       #1a2138   (superfície — código, elementos elevados)
+--surface-light:      #222b45   (superfície mais clara para hover)
+--text-primary:       #ffffff   (texto principal)
+--text-secondary:     #94a3b8   (texto secundário, legendas)
+--text-muted:         #64748b   (texto pouco importante)
+--accent-cyan:        #00b4d8   (destaque, links, gradientes)
+--accent-green:       #22c55e   (vantagens, acertos, checkmarks)
+--accent-orange:      #f59e0b   (desvantagens, alertas)
+--accent-red:         #ef4444   (erros, problemas)
+--code-bg:            #0d1117   (fundo de blocos de código)
+--code-text:          #e6edf3   (texto de código)
+--code-keyword:       #ff7b72   (palavras-chave no código — rosa/vermelho)
+--code-string:        #a5d6ff   (strings no código — azul claro)
+--code-number:        #79c0ff   (números no código)
+--code-function:      #d2a8ff   (funções no código — roxo)
+--glass-bg:           rgba(26, 33, 56, 0.6)  (glassmorphism)
+--glass-border:       rgba(49, 120, 198, 0.2)
+--shadow-color:       rgba(0, 0, 0, 0.5)
+--glow-blue:          rgba(49, 120, 198, 0.4)
+--glow-cyan:          rgba(0, 180, 216, 0.3)
+
+REGRAS DE USO:
+- Fundo principal: sempre --primary-dark.
+- Cards e painéis: --secondary-dark com borda sutil ou glassmorphism.
+- Títulos grandes: gradiente de --primary-blue para --accent-cyan.
+- Subtítulos: --text-primary.
+- Corpo: --text-secondary.
+- Links e destaques: --accent-cyan.
+- Código: fundo --code-bg em blocos dedicados.
+- Ícones: --primary-blue ou --text-secondary dependendo do contexto.
+
+================================================================================
+3. TIPOGRAFIA
+================================================================================
+
+Fontes (carregadas via Google Fonts ou inclusas inline):
+
+- Títulos grandes (h1, h2 slide-title): 'Inter', sans-serif  — peso 700 a 800
+- Subtítulos (h3, slide-subtitle): 'Inter', sans-serif  — peso 500 a 600
+- Corpo (p, li, span): 'Inter', sans-serif  — peso 300 a 400
+- Código (pre, code): 'Fira Code', 'Cascadia Code', monospace  — peso 400
+
+Tamanhos:
+- Título de capa: clamp(2.5rem, 6vw, 4.5rem) — weight 800
+- Título de slide: clamp(1.8rem, 4vw, 3rem) — weight 700
+- Subtítulo: clamp(1rem, 2vw, 1.5rem) — weight 500
+- Corpo: clamp(0.9rem, 1.5vw, 1.1rem) — weight 400
+- Legenda/meta: 0.8rem — weight 300
+- Código: clamp(0.8rem, 1.2vw, 1rem) — weight 400
+
+Espaçamentos:
+- Título para subtítulo: 0.5em
+- Subtítulo para conteúdo: 1.2em
+- Parágrafos: 0.8em
+- Itens de lista: 0.5em
+- Entre cards: 1rem
+
+Hierarquia visual:
+- O título do slide SEMPRE aparece primeiro com animação de entrada.
+- Subtítulo ou descrição aparece 0.3s após o título.
+- Conteúdo principal aparece 0.6s após o título.
+- Itens individuais entram com stagger de 0.1s entre cada um.
+
+================================================================================
+4. ESTILO VISUAL
+================================================================================
+
+- Dark Mode (tema escuro como base única — sem alternância claro/escuro).
+- Tecnológico-moderno com influência de interface de IDE/editor de código.
+- Glassmorphism para cards, painéis e elementos flutuantes.
+- Gradientes sutis em títulos e elementos decorativos.
+- Cantos arredondados (border-radius: 12px a 16px para cards).
+- Sombras suaves com glow azul em elementos de destaque.
+- Blur sutil em elementos glassmorphism (backdrop-filter: blur(12px)).
+- Ícones minimalistas em estilo outline, cor primária ou branca.
+- Linhas decorativas finas com gradiente azul-ciano.
+- Código com syntax highlighting temático (estilo GitHub Dark).
+
+O visual NÃO deve ser cyberpunk, NÃO deve ser lúdico, NÃO deve ser infantil.
+Deve ser SÉRIO, PROFISSIONAL e MODERNO — como uma conferência de tecnologia.
+
+================================================================================
+5. CONCEITO ARTÍSTICO
+================================================================================
+
+"A IDE viva" — a apresentação simula a experiência de estar dentro de um ambiente
+de desenvolvimento moderno. O fundo escuro remete ao VS Code. Os elementos surgem
+como código sendo digitado ou compilado. Partículas sutis no fundo lembram dados
+trafegando. O azul TypeScript é a luz guia. Tudo é preciso, organizado e fluido.
+
+A sensação deve ser de clareza, confiança e inovação. O espectador deve sentir
+que está aprendendo algo sólido e bem estruturado.
+
+Palavras-chave: precisão, clareza, tecnologia, confiança, modernidade.
+
+================================================================================
+6. BACKGROUND GLOBAL
+================================================================================
+
+O background é um elemento vivo mas NUNCA deve distrair do conteúdo.
+
+Estrutura:
+- Camada 1 (fundo sólido): gradiente radial sutil em --primary-dark, com ponto
+  de luz suave no centro da tela (pequeno radial gradient de rgba(49,120,198,0.05)).
+- Camada 2 (partículas): canvas ou divs com partículas animadas simulando dados.
+- Camada 3 (decorativa dinâmica por slide): cada slide pode ter seu próprio
+  elemento decorativo de fundo (ex: grade de pontos, linhas, formas abstratas).
+
+PARTÍCULAS GLOBAIS (camada 2):
+- Tipo: pequenos pontos/retângulos que lembram caracteres de código.
+- Quantidade: 40-60 partículas.
+- Tamanho: 1px a 3px.
+- Cor: rgba(49, 120, 198, 0.3) a rgba(0, 180, 216, 0.2).
+- Movimento: flutuação lenta vertical e horizontal, com drift.
+- Velocidade: muito lenta (2-4px/s), quase imperceptível.
+- Profundidade: algumas partículas maiores na frente (mais rápidas),
+  outras menores atrás (mais lentas) — simulando paralaxe.
+- As partículas NUNCA devem se sobrepor ao texto principal.
+- Opcional: ocasionalmente uma partícula emite um breve glow (0.5s) aleatório.
+
+NÃO use: vídeo de fundo, fundo líquido, aurora, holograma, cyberpunk, estrelas,
+galáxia ou qualquer elemento que desvie a atenção.
+
+================================================================================
+7. NAVEGAÇÃO GLOBAL
+================================================================================
+
+A navegação deve ser intuitiva, responsiva e funcionar em múltiplos dispositivos.
+
+MECANISMOS DE NAVEGAÇÃO:
+- Teclado (setas esquerda/direita, PageUp/PageDown, Home/End, Espaço).
+- Mouse (roda de rolagem — scroll para avançar/voltar).
+- Touch (swipe horizontal).
+- Botões na tela (seta anterior, seta próxima, indicadores).
+- Barra de progresso inferior.
+- Clique em indicadores de slide (dots).
+
+COMPORTAMENTO:
+- Avançar para o próximo slide: Seta Direita, PageDown, Espaço, Scroll para
+  baixo, Swipe para esquerda em touch, clique no botão "→" ou no dot à direita.
+- Voltar ao slide anterior: Seta Esquerda, PageUp, Scroll para cima, Swipe para
+  direita em touch, clique no botão "←" ou no dot à esquerda.
+- Ir ao primeiro slide: tecla Home.
+- Ir ao último slide: tecla End.
+- Atalho "G" + número: ir para slide específico (opcional avançado).
+
+BARRA DE PROGRESSO INFERIOR (fixa, fora do fluxo dos slides):
+- Posição: parte inferior da tela, centralizada.
+- Altura: 4px, largura: 30% da tela, arredondada.
+- Cor: gradiente de --primary-blue para --accent-cyan.
+- Preenchimento animado conforme o slide atual.
+- Abaixo da barra: contador "01 / 15" em --text-muted, tamanho 0.7rem.
+- Ao lado esquerdo: botão "←" em --text-secondary, hover fica --accent-cyan.
+- Ao lado direito: botão "→" em --text-secondary, hover fica --accent-cyan.
+- Botão fullscreen (⛶) no canto inferior direito, com tooltip "Tela cheia".
+- Os dots (indicadores) ficam acima da barra de progresso: 15 bolinhas de 6px
+  com espaçamento de 10px. A bolinha ativa tem 8px e cor --primary-blue.
+  Ao passar o mouse sobre um dot, mostrar tooltip com número do slide.
+
+NAVEGAÇÃO POR TOQUE:
+- Swipe horizontal: detectar movimento > 50px para trocar de slide.
+- Prevenir scroll vertical acidental (apenas horizontal ou com contain).
+- Touch feedback: leve brilho no canto ao swipar.
+
+================================================================================
+8. ANIMAÇÕES GLOBAIS
+================================================================================
+
+TODAS as animações devem usar a curva customizada:
+--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1)
+
+Ela é responsiva, moderna e profissional.
+
+TEMPOS PADRÃO:
+- Transição entre slides: 600ms a 800ms.
+- Animação de entrada de elementos: 500ms a 900ms (com stagger).
+- Hover effects: 200ms a 300ms.
+- Microinterações: 150ms.
+
+ELEMENTOS DENTRO DO SLIDE — REGRA DE STAGGER:
+1. Título do slide: 0ms (entra imediatamente na transição)
+2. Subtítulo/descrição: 200ms após
+3. Bloco de conteúdo principal: 400ms após
+4. Itens individuais: stagger de 100ms entre cada
+5. Elementos decorativos: 600ms após
+
+DIRETRIZES:
+- NUNCA use animações puramente decorativas que não agreguem ao entendimento.
+- Animações de entrada DEVEM ser rápidas o suficiente para não testar paciência.
+- Elementos entram SEMPRE com Fade + Slide (de baixo para cima ou lateral).
+- Evite bounce, elastic ou spring — são informais demais para este tema.
+- O easing --ease-out-expo é o padrão para quase tudo.
+
+================================================================================
+9. ELEMENTOS INTERATIVOS GLOBAIS
+================================================================================
+
+CURSOR PERSONALIZADO:
+- Cursor padrão substituído por um ponto de 8px branco com glow azul ao redor
+  (apenas em desktop, desabilitar em touch).
+- Ao passar sobre botões/link: o ponto cresce para 16px com glow mais intenso.
+- Ao passar sobre código: cursor vira text.
+
+HOVER EM BOTÕES:
+- Botões de navegação (← →): opacidade escala de 0.5 para 1, glow sutil.
+- Botões interativos: leve elevação (translateY(-2px)) e shadow intensifica.
+- Cards: elevate + 2px, borda com glow azul.
+
+TOOLTIPS:
+- Usar tooltips ricos com fundo escuro (--secondary-dark), borda --primary-blue,
+  texto --text-primary, aparecimento suave (fade in 200ms).
+- Tooltips para: indicadores de slide, botões, códigos explicativos.
+
+BOTÃO FULLSCREEN:
+- Canto inferior direito, ícone ⛶, tooltip "Tela cheia (F11)".
+- Ao clicar, alterna fullscreen. Estado ativo mostra ícone diferente (⛶ → ✕).
+
+================================================================================
+===============================================================================
+  ESPECIFICAÇÃO POR SLIDE
+===============================================================================
+===============================================================================
+
+================================================================================
+SLIDE 1 — CAPA
+================================================================================
+
+OBJETIVO: Causar impacto visual imediato, estabelecer o tema e criar expectativa.
+
+EMOÇÃO: Impacto, admiração, curiosidade, profissionalismo.
+
+LAYOUT: Hero Layout — centralizado vertical e horizontalmente.
+- Título grande no centro-superior.
+- Logotipo do TypeScript acima ou ao lado do título.
+- Nome do apresentador e data no terço inferior.
+- Grid decorativo de linhas no fundo (camada 3 do background).
+
+ORGANIZAÇÃO DOS ELEMENTOS (de cima para baixo):
+1. Logotipo TypeScript SVG (azul #3178C6 — o ícone do "TS" em azul escuro
+   dentro de um quadrado azul). Tamanho: 80px x 80px. Entra com zoom + fade.
+2. Título "TypeScript: JavaScript com Tipagem Inteligente" — gradiente de
+   --primary-blue a --accent-cyan, weight 800. Entra com fade + slide up.
+3. Linha decorativa fina (1px) com gradiente azul-ciano, 60% largura da tela.
+   Entra com scaleX de 0 para 1 (expansão horizontal).
+4. Nome do apresentador e data: "Apresentado por [Nome] • [Data]" — 
+   --text-secondary, tamanho 1rem. Entra com fade 0.5s após o título.
+5. Disciplina (se houver): texto menor 0.85rem --text-muted.
+
+BACKGROUND DO SLIDE (além do global):
+- Camada extra: grade de wireframe sutil no fundo — linhas de grid 3D em
+  perspectiva, opacidade 0.03, cor --primary-blue. Animação de rotação lenta
+  (360° em 60s) dando sensação de profundidade tecnológica.
+
+ELEMENTOS VISUAIS (selecionados do Visual.txt):
+- Slide de capa (tipo).
+- Hero Layout.
+- Gradiente textual no título (Gradient Text).
+- Logotipo SVG animado (logo TypeScript — quadrado azul com "TS" branco).
+- Malha/grade de wireframe como elemento decorativo de fundo.
+- Partículas globais ativas.
+
+ILUMINAÇÃO:
+- Glow azul suave atrás do logotipo (box-shadow com 40px de blur, --glow-blue).
+- Um leve "god ray" saindo do centro para as bordas (muito sutil, opacidade 0.02).
+
+PARTÍCULAS: usar as partículas globais, nenhuma extra neste slide.
+
+ORDEM DE ENTRADA DOS ELEMENTOS (após transição):
+1. Logotipo: 0ms — fade in + zoom (0.8→1) em 700ms
+2. Título: 300ms — fade in + slide up (30px→0) em 800ms
+3. Linha decorativa: 600ms — scaleX(0→1) em 600ms, origem central
+4. Nome e data: 900ms — fade in em 500ms
+5. Disciplina: 1100ms — fade in em 500ms
+
+TRANSIÇÃO PARA O SLIDE 2:
+- Efeito: Fade + Scale (zoom out leve do slide 1 + fade in do slide 2).
+- Duração: 700ms.
+- Enquanto a transição ocorre, o slide 1 faz scale(1→0.95) + opacity(1→0).
+- Slide 2 começa com scale(1.05→1) + opacity(0→1).
+
+OBSERVAÇÕES:
+- Neste slide, o nome do apresentador e data devem ser fáceis de editar no HTML.
+- Colocar como comentário no HTML: "EDITAR AQUI: nome do apresentador e data".
+
+================================================================================
+SLIDE 2 — O QUE É TYPESCRIPT?
+================================================================================
+
+OBJETIVO: Explicar o conceito fundamental do TypeScript de forma clara e direta.
+
+EMOÇÃO: Clareza, aprendizado, descoberta.
+
+LAYOUT: Dividido em duas seções:
+- Esquerda (50%): Título + descrição curta + 5 bullet points com ícones.
+- Direita (50%): Diagrama visual mostrando TS → Compilador → JS.
+
+ORGANIZAÇÃO:
+- Lado esquerdo:
+  1. Título: "O que é TypeScript?" — gradiente azul-ciano.
+  2. Descrição curta: "Linguagem desenvolvida pela Microsoft (2012)."
+  3. 5 bullets com ícone de check (✓) azul à esquerda:
+     a. "Superset do JavaScript"
+     b. "Adiciona tipagem estática"
+     c. "Novos recursos"
+     d. "Compilado para JavaScript"
+     e. "Executado em qualquer ambiente JS"
+  4. Nota secundária no final: "Navegadores não executam TypeScript diretamente."
+     em itálico, --text-muted, com ícone de informação (ℹ️).
+
+- Lado direito:
+  1. Um retângulo (card glassmorphism) com o fluxo visual:
+     "[TS] Code  →  [tsc] Compiler  →  [JS] Code  →  ✓ Browser/Node"
+     Cada etapa em um bloco com seta animada entre eles.
+     Cores: TS em azul, tsc em ciano, JS em amarelo (muito sutil),
+     destino em verde.
+  2. As setas são SVG animadas (linhas que se "desenham" - draw SVG path).
+
+BACKGROUND:
+- Fundo global padrão com partículas.
+- No lado direito, um leve gradiente radial azul (rgba(49,120,198,0.03)) para
+  destacar a área do diagrama.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Slide dividido em colunas (Split Screen).
+- Ícones SVG minimalistas (checkmarks).
+- SVG animado (setas de fluxo se desenhando).
+- Cards com glassmorphism.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Tooltip nos ícones de informação (ℹ️): ao passar o mouse, mostrar
+  "A compilação é feita pelo tsc (TypeScript Compiler)".
+- Os elementos do fluxo à direita têm hover: cada bloco (TS, tsc, JS, destino)
+  glow sutil ao passar o mouse.
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up (30px→0)
+2. Descrição: 200ms — fade
+3. Bullets: 400ms, 500ms, 600ms, 700ms, 800ms — cada um com slide in da esquerda
+   (distância 20px)
+4. Diagrama à direita: 300ms — fade + slide in da direita (40px→0)
+5. Setas animadas: 600ms — draw path (1.2s para desenhar cada seta)
+6. Nota final: 1000ms — fade
+
+TRANSIÇÃO PARA SLIDE 3:
+- Efeito: Slide (horizontal — conteúdo desliza para a esquerda, novo slide
+  desliza da direita).
+- Duração: 600ms.
+
+================================================================================
+SLIDE 3 — HISTÓRIA DO TYPESCRIPT
+================================================================================
+
+OBJETIVO: Contar a evolução do TypeScript de forma visual e cronológica.
+
+EMOÇÃO: Credibilidade, tradição, evolução.
+
+LAYOUT: Timeline vertical centralizada.
+- Uma linha vertical central (1px, gradiente azul-ciano) que percorre o slide.
+- 5 marcos na linha, alternando entre esquerda e direita.
+- Título no topo.
+
+ORGANIZAÇÃO:
+1. Título: "História do TypeScript" — topo centralizado.
+2. Linha do tempo vertical:
+   Marco 1 (esquerda): "2012" (grande, bold) abaixo "Primeira versão"
+   Marco 2 (direita): "Microsoft" abaixo "Criado por"
+   Marco 3 (esquerda): "Anders Hejlsberg" abaixo "Criador do C# liderou"
+   Marco 4 (direita): "Angular" abaixo "Crescimento impulsionado"
+   Marco 5 (esquerda): "Atualmente" abaixo "Milhares de empresas"
+3. Cada marco tem um círculo (8px) na linha central, cor --primary-blue, com
+   glow. Ao passar o mouse, o glow aumenta.
+4. Conectando os círculos aos textos: linhas horizontais finas.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Slide de linha do tempo (Timeline).
+- Animação sequencial (linha desenhando de cima para baixo).
+- Glow nos pontos.
+- Texto com destaque automático (ano "2012" maior).
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Timeline interativa: ao clicar em um marco, ele se expande com mais detalhes
+  (tooltip rico com descrição extra). Ao clicar novamente, recolhe.
+- Scroll vertical suave se necessário (navegação padrão continua horizontal).
+
+PARTÍCULAS:
+- Além das partículas globais, adicionar 10 partículas extras neste slide,
+  em formato de "estrela cadente" — traços finos que cruzam a tela
+  verticalmente em velocidade lenta, simulando o avanço do tempo.
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Linha vertical: 300ms — draw SVG (do topo para baixo), 1s
+3. Marcos alternados: 700ms, 900ms, 1100ms, 1300ms, 1500ms
+   — cada um com fade + slide do lado correspondente (esquerda: slide right,
+     direita: slide left)
+4. Conectores: aparecem junto com cada marco, draw horizontal
+
+TRANSIÇÃO PARA SLIDE 4:
+- Efeito: Cube (rotação 3D horizontal) — o slide 3 rotaciona para a esquerda
+  revelando o slide 4. Duração: 800ms.
+- O cube é suave, com leve perspectiva.
+
+================================================================================
+SLIDE 4 — POR QUE O TYPESCRIPT FOI CRIADO?
+================================================================================
+
+OBJETIVO: Mostrar os problemas do JavaScript e como o TypeScript os resolve.
+
+EMOÇÃO: Contraste (problema → solução), alívio, entendimento.
+
+LAYOUT: Split Screen vertical — duas colunas lado a lado.
+- Esquerda (50%): "Problemas do JavaScript" — fundo levemente avermelhado
+  (rgba(239,68,68,0.03)).
+- Direita (50%): "Solução TypeScript" — fundo levemente esverdeado
+  (rgba(34,197,94,0.03)).
+- Título no topo centralizado.
+- Divisor central vertical fino com gradiente.
+
+ORGANIZAÇÃO:
+Topo central: Título "Por que o TypeScript foi criado?"
+
+Coluna Esquerda (Problemas):
+1. Lista com 4 itens, cada um com ícone ✕ (vermelho) à esquerda:
+   - Erros descobertos apenas na execução
+   - Dificuldade em manter projetos grandes
+   - Falta de tipos
+   - Código difícil de entender em equipe
+
+Coluna Direita (Soluções):
+2. Lista com 4 itens, cada um com ícone ✓ (verde) à esquerda:
+   - Tipagem estática
+   - Melhor organização
+   - Maior produtividade
+   - Menos bugs
+
+Efeito: os itens da esquerda e direita aparecem em pares sincronizados.
+Cada par (problema + solução) entra ao mesmo tempo, mostrando o contraste.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Slide comparativo.
+- Split Screen.
+- Ícones animados (✓ e ✕ com animação de aparecimento — scale + fade).
+- Destaque por cor de fundo (vermelho suave / verde suave).
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Hover nos itens: ao passar o mouse sobre um problema, a solução
+  correspondente do lado direito brilha (glow verde), e vice-versa.
+- Tooltip nos ícones ✓ e ✕ explicando o benefício.
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Divisor central: 300ms — scaleY(0→1) de cima para baixo
+3. Cabeçalhos das colunas: 400ms — fade
+4. Par 1 (Problema 1 + Solução 1): 600ms — fade + slide up
+5. Par 2: 800ms
+6. Par 3: 1000ms
+7. Par 4: 1200ms
+
+TRANSIÇÃO PARA SLIDE 5:
+- Efeito: Morph (o slide atual "mofa" suavemente, distorcendo levemente como
+  uma onda líquida, revelando o próximo). Duração: 700ms.
+- Este efeito é sutil — apenas um pequeno ripple (como ondas na água).
+
+================================================================================
+SLIDE 5 — COMO FUNCIONA?
+================================================================================
+
+OBJETIVO: Explicar visualmente o fluxo de compilação do TypeScript.
+
+EMOÇÃO: Compreensão, clareza, lógica.
+
+LAYOUT: Centralizado — fluxograma horizontal com etapas.
+- Título no topo.
+- Fluxograma no centro, ocupando 80% da largura.
+- Cada etapa é um card.
+
+ORGANIZAÇÃO:
+1. Título: "Como funciona?"
+2. Subtítulo: "O processo de compilação do TypeScript"
+3. Fluxograma horizontal com 4 etapas:
+
+   [ Código TypeScript ]  ──→  [ Compilador (tsc) ]  ──→  [ Código JavaScript ]  ──→  [ Navegador / Node.js ]
+
+   Cada etapa: card retangular (glassmorphism) com ícone + rótulo.
+   - Card 1: ícone de arquivo (📄) + "Código TypeScript" — cor azul
+   - Card 2: ícone de engrenagem (⚙️) + "Compilador (tsc)" — cor ciano
+   - Card 3: ícone de arquivo (📄) + "Código JavaScript" — cor branca
+   - Card 4: ícone de globo (🌐) + "Navegador / Node.js" — cor verde
+
+4. Setas entre os cards: SVG animado (draw path) com brilho gradiente.
+
+5. Abaixo do fluxograma: nota explicativa "O compilador remove as informações
+   de tipo e gera JavaScript equivalente" — itálico, --text-muted.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Slide de conteúdo centralizado.
+- Cards com glassmorphism.
+- SVG animado (setas se desenhando).
+- Partículas extras em forma de "dados" fluindo entre os cards
+  (linhas pontilhadas animadas).
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Cada card é clicável: expande com tooltip explicando detalhes.
+- Hover nos cards: glow na borda, leve elevação.
+- As setas, ao passar o mouse, têm seu brilho intensificado.
+
+PARTÍCULAS:
+- Além das partículas globais, adicionar 15 "dados" — pequenos pontos
+  brilhantes que viajam da esquerda para a direita entre os cards,
+  simulando o fluxo de dados. Cor: --accent-cyan.
+  Velocidade: 2-3 px/s, movimento horizontal.
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Subtítulo: 200ms — fade
+3. Card 1: 400ms — fade + slide up (30px→0)
+4. Seta 1: 600ms — draw SVG (500ms)
+5. Card 2: 900ms — fade + slide up
+6. Seta 2: 1100ms — draw SVG
+7. Card 3: 1400ms — fade + slide up
+8. Seta 3: 1600ms — draw SVG
+9. Card 4: 1900ms — fade + slide up
+10. Nota explicativa: 2200ms — fade
+
+TRANSIÇÃO PARA SLIDE 6:
+- Efeito: Fade (transparente → opaco). Duração: 500ms.
+- Transição mais suave e direta, já que o próximo slide é código.
+
+================================================================================
+SLIDE 6 — TIPAGEM ESTÁTICA
+================================================================================
+
+OBJETIVO: Mostrar na prática como a tipagem estática funciona no TypeScript.
+
+EMOÇÃO: Aprendizado prático, demonstração, exemplificação.
+
+LAYOUT: Duas colunas + painel de tipos.
+- Esquerda (55%): Bloco de código com syntax highlighting.
+- Direita (45%): Cards com tipos comuns do TypeScript.
+
+ORGANIZAÇÃO:
+1. Título: "Tipagem Estática" — topo, gradiente azul-ciano.
+
+2. Esquerda — Editor de código simulado:
+   - Um retângulo que simula o VS Code (borda arredondada, fundo --code-bg).
+   - Tem uma "barra de título" no topo (linha com "example.ts" em --text-muted,
+     e três bolinhas 🟡🟢🔴 no estilo macOS).
+   - Abaixo, o código com syntax highlighting:
+     ```typescript
+     let idade: number = 20;
+     let nome: string = "Carlos";
+     let ativo: boolean = true;
+     ```
+   - Animação: o código aparece com efeito de "digitação" (typing effect),
+     letra por letra, como se estivesse sendo digitado.
+   - Syntax highlighting:
+     - "let": --code-keyword (rosa)
+     - "idade", "nome", "ativo": --code-text (branco)
+     - ":": --text-secondary (cinza)
+     - "number", "string", "boolean": --accent-cyan (ciano)
+     - "=", ";": --text-secondary (cinza)
+     - "20", ""Carlos"", "true": --code-string (azul claro) ou --code-number
+
+3. Direita — Tipos comuns:
+   - Grid 3x4 de cards pequenos (glassmorphism, 80px x 40px cada).
+   - Cada card: nome do tipo em --text-primary com ícone pequeno.
+   - Tipos: string, number, boolean, object, array, any, unknown, void,
+     null, undefined.
+   - Ao passar o mouse, o card brilha e mostra uma breve descrição em tooltip.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Typing Effect (máquina de escrever para o código).
+- Cards com glassmorphism.
+- Bloco de código com syntax highlighting.
+- Grid de tipos.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Tooltip em cada card de tipo: "string — sequência de caracteres",
+  "number — valores numéricos", etc.
+- Hover nos cards: glow + elevação.
+- Clique no bloco de código: cópia do código para a área de transferência
+  (com feedback visual — "Copiado!").
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Bloco de código: 300ms — fade + slide in da esquerda
+3. Código digitando: 400ms — typing effect (cerca de 2s — palavra a palavra)
+4. Cards de tipos: 1200ms — fade + slide up, stagger 80ms entre cada
+   (grid inteiro aparece em cascata das primeiras fileiras para as últimas)
+
+TRANSIÇÃO PARA SLIDE 7:
+- Efeito: Cross Fade (slide 6 fade out, slide 7 fade in, com sobreposição
+  de 200ms). Duração: 600ms.
+
+================================================================================
+SLIDE 7 — RECURSOS PRINCIPAIS
+================================================================================
+
+OBJETIVO: Apresentar as principais features do TypeScript de forma organizada.
+
+EMOÇÃO: Admiração técnica, amplitude, poder.
+
+LAYOUT: Bento Grid — grades irregulares de cards.
+- Título no topo.
+- Grid assimétrico (Bento Grid) com 9 cards de tamanhos variados.
+- Inspirado em dashboards modernos e interfaces de documentação.
+
+ORGANIZAÇÃO:
+1. Título: "Recursos Principais" — topo centralizado.
+
+2. Bento Grid com 9 cards (3 colunas, linhas irregulares):
+
+   Linha 1 (3 cards iguais, 1fr cada):
+   [ Interfaces ]  [ Types ]  [ Classes ]
+
+   Linha 2 (2 cards: o do meio maior, ocupando 2fr):
+   [ Generics ]  [     Enums (grande)     ]
+
+   Linha 3 (4 cards, 1fr cada):
+   [ Herança ]  [ Módulos ]  [ Decorators ]  [ Inferência ]
+
+   Cada card tem:
+   - Ícone representativo no topo (SVG minimalista).
+   - Nome do recurso em --text-primary, bold.
+   - Breve descrição (1 frase) em --text-secondary, tamanho 0.85rem.
+   - Borda sutil com hover glow.
+   - Fundo glassmorphism (--secondary-dark com rgba(49,120,198,0.05)).
+
+   Ícones sugeridos para cada card (usar SVG inline ou unicode):
+   - Interfaces: 🧩 / duas engrenagens encaixadas
+   - Types: 📋 / T maiúsculo
+   - Classes: 🏛️ / diagrama de classe
+   - Generics: ⬛ / \<T\>
+   - Enums: 📊 / lista numerada
+   - Herança: 🔗 / elo de corrente
+   - Módulos: 📦 / caixa
+   - Decorators: ✨ / @
+   - Inferência: 🎯 / alvo
+
+3. Efeito: cada card, ao entrar, faz um leve "floating" (flutuação sutil
+   vertical, 3px para cima e para baixo, animação contínua com períodos
+   diferentes para cada card — aleatório entre 3s e 5s).
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Bento Grid.
+- Cards com glassmorphism.
+- Floating (flutuação contínua).
+- Hover com glow.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Cards expansíveis: ao clicar em um card, ele se expande com mais detalhes.
+  O card expandido ocupa o dobro do espaço, mostrando 2-3 bullet points
+  explicativos. Ao clicar novamente ou clicar em outro, recolhe.
+- Hover: glow azul na borda, leve elevação.
+- Tooltip rápido no hover: nome do recurso + descrição breve.
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Card "Interfaces": 300ms — fade + slide up (stagger 100ms)
+3. Card "Types": 400ms
+4. Card "Classes": 500ms
+5. Card "Generics": 600ms
+6. Card "Enums": 600ms (mesmo tempo de Generics — entra junto)
+7. Card "Herança": 700ms
+8. Card "Módulos": 800ms
+9. Card "Decorators": 900ms
+10. Card "Inferência": 1000ms
+
+   Os cards da mesma linha entram aproximadamente juntos (stagger de 100ms).
+   A animação de floating começa 500ms após cada card terminar sua entrada.
+
+TRANSIÇÃO PARA SLIDE 8:
+- Efeito: Scale (slide 7 escala para 0.8 + fade out, slide 8 escala de 1.2
+  para 1 + fade in). Duração: 600ms.
+
+================================================================================
+SLIDE 8 — EXEMPLO DE CÓDIGO
+================================================================================
+
+OBJETIVO: Demonstrar um exemplo real e funcional de código TypeScript.
+
+EMOÇÃO: Compreensão, aplicação prática, "faz sentido".
+
+LAYOUT: Código centralizado com saída/resultado abaixo.
+- Título no topo.
+- Bloco de código grande e centralizado.
+- Abaixo, um mini "terminal" mostrando a saída.
+- Ícone de "play" ao lado do código.
+
+ORGANIZAÇÃO:
+1. Título: "Exemplo de Código" — gradiente azul-ciano.
+2. Subtítulo: "TypeScript na prática" — --text-secondary.
+
+3. Bloco de código (simulando VS Code novamente):
+   - Fundo --code-bg, borda arredondada, barra de título "example.ts".
+   - Código com syntax highlighting:
+     ```typescript
+     interface Pessoa {
+         nome: string;
+         idade: number;
+     }
+
+     function apresentar(pessoa: Pessoa): string {
+         return `Olá, meu nome é ${pessoa.nome}
+                 e tenho ${pessoa.idade} anos.`;
+     }
+
+     console.log(apresentar({
+         nome: "Ana",
+         idade: 22
+     }));
+     ```
+   - Syntax highlighting detalhado:
+     - "interface", "function", "return": --code-keyword (rosa)
+     - "Pessoa" (após interface): --code-function (roxo)
+     - "Pessoa" (como tipo): --accent-cyan
+     - "nome", "idade", "apresentar", "console", "log": --code-text (branco)
+     - "string", "number": --accent-cyan
+     - ": string" e ": number": todo o tipo em --accent-cyan
+     - ""Ana"", "22": --code-string (azul claro) e --code-number
+     - `Olá...`: --code-string (azul claro)
+     - "pessoa" (parâmetro): --text-primary
+     - "pessoa.nome", "pessoa.idade": --code-text
+   - Animação: o código aparece com typing effect acelerado
+     (linha por linha, cada linha aparece em 300ms).
+
+4. Abaixo do código (após a animação do código terminar):
+   - Mini terminal: retângulo escuro (--code-bg) com borda 1px --surface-light,
+     cantos arredondados. Tamanho: 80% da largura do código.
+   - Conteúdo do terminal:
+     "❯ node example.js"
+     "Olá, meu nome é Ana e tenho 22 anos."
+   - Animação: primeira linha aparece (fade + typing), depois 300ms de pausa,
+     depois a segunda linha com cursor piscando ao final (barra vertical).
+
+5. Botão "▶ Executar" discretamente ao lado superior direito do código.
+   - Ao clicar: animação do terminal se repete (como se executasse novamente).
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Bloco de código com syntax highlighting.
+- Typing Effect (linha a linha).
+- Terminal simulado.
+- Botão com ícone.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Botão "▶ Executar" — replay da animação do terminal.
+- Clique no código: copiar para área de transferência (tooltip "Copiado!").
+- Hover em palavras do código: tooltip com explicação do tipo (ex: ao passar
+  em "string", tooltip "Tipo primário: string").
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Subtítulo: 200ms — fade
+3. Bloco de código: 400ms — fade + slide up
+4. Código linha a linha: 600ms — cada linha 300ms (total ~4s)
+5. Botão "▶ Executar": aparece junto com o código (fade)
+6. Terminal: após o código terminar — fade + slide up (300ms delay)
+7. Linha 1 do terminal: imediatamente — typing effect rápido
+8. Linha 2 do terminal: 400ms após linha 1 — typing effect, cursor pisca
+
+TRANSIÇÃO PARA SLIDE 9:
+- Efeito: Slide (horizontal — para a esquerda). Duração: 600ms.
+
+================================================================================
+SLIDE 9 — VANTAGENS DO TYPESCRIPT
+================================================================================
+
+OBJETIVO: Consolidar os benefícios de usar TypeScript de forma persuasiva.
+
+EMOÇÃO: Motivação, convencimento, entusiasmo controlado.
+
+LAYOUT: Grid de cards 3x2 (ou 2x3).
+- Cada card é uma vantagem com ícone grande e texto.
+- Cores alegres (verde, azul, ciano) para transmitir positividade.
+
+ORGANIZAÇÃO:
+1. Título: "Vantagens do TypeScript" — gradiente azul-ciano.
+2. Subtítulo: "Por que tantos desenvolvedores escolhem TypeScript?" — 
+   --text-secondary.
+
+3. Grid de 6 cards (3 colunas x 2 linhas):
+   Card 1: 🛡️ "Detecta erros antes da execução" — borda verde
+   Card 2: 📐 "Código mais organizado" — borda azul
+   Card 3: 🔧 "Facilita manutenção" — borda ciano
+   Card 4: ⌨️ "Melhor autocomplete" — borda verde
+   Card 5: 🏗️ "Escalável" — borda azul
+   Card 6: 🏢 "Usado por grandes empresas" — borda ciano
+
+   Cada card:
+   - Fundo glassmorphism ou --secondary-dark.
+   - Ícone grande no centro-superior (32px, SVG ou unicode).
+   - Texto do benefício abaixo, bold.
+   - Borda esquerda com 3px da cor correspondente.
+   - Ao hover: fundo mais claro, glow na borda.
+
+4. Abaixo: barra de "satisfação" decorativa (apenas visual) — uma linha que
+   se preenche com gradiente, com porcentagens. "TypeScript: 97% satisfação
+   entre desenvolvedores" (dado ilustrativo) — itálico.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Cards grid.
+- Ícones SVG ou unicode grandes.
+- Glassmorphism.
+- Barra de progresso decorativa.
+- Gradiente.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Cards com hover glow.
+- Ao clicar em um card: expande com depoimento curto (fake quote).
+  Ex: clicar em "Detecta erros" expande: "Economizamos horas de debug
+  graças à tipagem estática." — recolhe ao clicar novamente.
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Subtítulo: 200ms — fade
+3. Cards: 400ms, 480ms, 560ms, 640ms, 720ms, 800ms
+   — cada um com fade + slide up, stagger 80ms
+   — ordem: linha 1 (esq→dir), linha 2 (esq→dir)
+4. Barra de satisfação: 1200ms — scaleX(0→1), 1s de duração
+
+TRANSIÇÃO PARA SLIDE 10:
+- Efeito: Push (slide 10 empurra slide 9 para cima). Duração: 700ms.
+
+================================================================================
+SLIDE 10 — DESVANTAGENS
+================================================================================
+
+OBJETIVO: Ser honesto sobre as limitações, gerando confiança.
+
+EMOÇÃO: Honestidade, equilíbrio, confiança.
+
+LAYOUT: Lista centralizada com cards inclinados ou estilo "notas adesivas".
+- Tom mais contido, menos comemorativo.
+- Cores neutras com acento laranja suave.
+
+ORGANIZAÇÃO:
+1. Título: "Desvantagens" — cor --text-primary (sem gradiente, tom neutro).
+2. Subtítulo: "Nenhuma tecnologia é perfeita" — --text-secondary, itálico.
+
+3. 5 cards empilhados verticalmente, levemente deslocados (como cartas):
+   Card 1: 📚 "Curva de aprendizado maior" — ícone de livro
+   Card 2: ⚙️ "Necessidade de compilação" — ícone de engrenagem
+   Card 3: 📁 "Mais arquivos no projeto" — ícone de pasta
+   Card 4: 🔧 "Exige configuração inicial" — ícone de chave inglesa
+   Card 5: 📝 "Pode ser verboso para projetos pequenos" — ícone de papel
+
+   Cada card:
+   - Fundo --secondary-dark, borda sutil com --surface-light (sem cor vibrante).
+   - Ícone à esquerda em --text-muted (não destaque).
+   - Texto do lado direito.
+   - Ao hover: glow laranja muito suave (--accent-orange com opacidade 0.2).
+
+4. Abaixo: nota de equilíbrio:
+   "Apesar disso, os benefícios geralmente compensam em aplicações maiores."
+   — --text-primary, fundo glassmorphism sutil, borda esquerda --primary-blue.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Cards empilhados.
+- Tom minimalista.
+- Nota de destaque.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Tooltip em cada card: "Curva de aprendizado: leva cerca de 2-4 semanas
+  para um dev JS se adaptar."
+- Hover: leve elevação e glow.
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Subtítulo: 200ms — fade
+3. Cards: 400ms, 550ms, 700ms, 850ms, 1000ms
+   — cada um com fade + slide up, entrando de baixo
+   — cada card chega com um leve deslocamento lateral aleatório (entre -5px e 5px),
+     como se estivessem sendo colocados sobre uma mesa
+4. Nota de equilíbrio: 1200ms — fade + slide up
+
+TRANSIÇÃO PARA SLIDE 11:
+- Efeito: Fade direto. Duração: 500ms.
+- Transição mais neutra para um slide de comparação.
+
+================================================================================
+SLIDE 11 — TYPESCRIPT X JAVASCRIPT
+================================================================================
+
+OBJETIVO: Comparar diretamente as duas linguagens de forma clara e visual.
+
+EMOÇÃO: Objetividade, clareza, decisão.
+
+LAYOUT: Tabela comparativa moderna (não é uma tabela HTML tradicional — é um
+grid visual com cards para cada célula).
+
+ORGANIZAÇÃO:
+1. Título: "TypeScript vs JavaScript" — gradiente azul-ciano.
+
+2. Subtítulo: "Entendendo as diferenças" — --text-secondary.
+
+3. Grid de comparação (2 colunas, 6 linhas):
+
+   Coluna 1: "JavaScript" — cabeçalho em --text-primary com fundo
+   rgba(255,255,255,0.05).
+   Coluna 2: "TypeScript" — cabeçalho em --primary-blue com fundo
+   rgba(49,120,198,0.1).
+
+   Linhas (cada linha um aspecto comparado):
+
+   1. Tipagem
+      JS: "Dinâmica" — badge laranja suave
+      TS: "Estática" — badge verde/azul
+
+   2. Execução
+      JS: "Direta" — badge laranja
+      TS: "Compilado" — badge azul
+
+   3. Complexidade
+      JS: "Mais simples" — badge laranja
+      TS: "Mais seguro" — badge verde
+
+   4. Rigidez
+      JS: "Menos rígido" — badge laranja
+      TS: "Mais organizado" — badge azul
+
+   5. Ideal para
+      JS: "Projetos pequenos" — badge laranja
+      TS: "Projetos grandes" — badge verde
+
+   Cada badge: um chip arredondado (border-radius: 20px), padding horizontal
+   12px, vertical 4px, fonte 0.85rem.
+
+4. Layout: as linhas alternam cores de fundo sutilmente (striped effect).
+
+5. Efeito: as badges do lado TypeScript brilham levemente, enquanto as do
+   lado JavaScript são mais neutras. Isso direciona o olhar.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Tabela comparativa (grid visual).
+- Badges/chips.
+- Striped rows.
+- Destaque por cor.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Hover em qualquer célula: destaca toda a linha (fundo mais claro).
+- Tooltip em cada badge: explicação detalhada.
+  Ex: "Tipagem dinâmica: o tipo é inferido em tempo de execução."
+  Ex: "Tipagem estática: o tipo é verificado em tempo de compilação."
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Subtítulo: 200ms — fade
+3. Cabeçalhos: 400ms — fade (JS fade in, TS fade in com atraso de 100ms)
+4. Linha 1 "Tipagem": 600ms — fade + slide up (ambas células juntas)
+5. Linha 2 "Execução": 750ms
+6. Linha 3 "Complexidade": 900ms
+7. Linha 4 "Rigidez": 1050ms
+8. Linha 5 "Ideal para": 1200ms
+   — cada linha: fade + slide up, stagger 150ms
+
+TRANSIÇÃO PARA SLIDE 12:
+- Efeito: Glitch (distorção digital rápida — 400ms). Duração total: 600ms.
+- O glitch é sutil: apenas uma pequena fragmentação de 100ms no meio da
+  transição.
+
+================================================================================
+SLIDE 12 — ONDE O TYPESCRIPT É UTILIZADO?
+================================================================================
+
+OBJETIVO: Mostrar a versatilidade e amplitude de uso do TypeScript.
+
+EMOÇÃO: Versatilidade, onipresença, admiração.
+
+LAYOUT: Tag cloud / icon mosaic — uma nuvem visual de tags/ícones.
+- Cada aplicação é um elemento flutuante no espaço.
+- Organização orgânica (não em grid rígido).
+
+ORGANIZAÇÃO:
+1. Título: "Onde o TypeScript é utilizado?" — gradiente azul-ciano.
+
+2. Nuvem de tags (9 tags, tamanhos e posições variadas):
+
+   Posições: distribuídas organicamente pela área central do slide.
+
+   - 🌐 "Desenvolvimento Web" — tamanho grande (destaque)
+   - ⚙️ "Back-end" — tamanho médio-grande
+   - 📱 "Aplicativos Mobile" — tamanho médio
+   - 💻 "Desktop" — tamanho médio
+   - 🔗 "APIs" — tamanho médio-grande
+   - 🏢 "Sistemas empresariais" — tamanho pequeno-médio
+   - 🎮 "Jogos" — tamanho pequeno
+   - 🤖 "Inteligência Artificial" — tamanho pequeno
+   - ☁️ "Cloud Computing" — tamanho pequeno
+
+   Cada tag:
+   - Fundo glassmorphism com borda sutil.
+   - Ícone + texto, centralizados.
+   - Tamanhos: grande (120px x 50px), médio (100px x 42px), pequeno (85px x 36px).
+   - Ao hover: glow azul, escala 1.05.
+   - Leve floating (flutuação vertical aleatória, 2-3px, período 4-7s).
+
+3. Linhas de conexão finas e sutis entre tags relacionadas (ex: "Web" conectado
+   a "APIs" e "Back-end"). SVG animado (draw path lento, contínuo).
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Tag cloud.
+- Floating (flutuação contínua).
+- Glassmorphism.
+- Conexões SVG animadas.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Hover: glow + escala.
+- Clique em uma tag: expande com tooltip rico mostrando 1-2 exemplos.
+  Ex: "Desenvolvimento Web: React, Angular, Vue — todos suportam TS nativamente."
+- As conexões brilham ao passar o mouse sobre qualquer tag conectada.
+
+PARTÍCULAS:
+- Partículas globais.
+- Extra: pequenas "faíscas" ocasionais (1px branco que surge e some em 1s)
+  nos pontos de conexão entre tags, dando sensação de dados fluindo.
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Tags: 300ms a 1200ms — fade + zoom (0.8→1), stagger 100ms
+   — ordem aleatória mas começando pelas tags maiores
+3. Linhas de conexão: 1000ms — draw path (suave, contínuo, 2s)
+
+TRANSIÇÃO PARA SLIDE 13:
+- Efeito: Zoom (slide 12 dá zoom out, slide 13 dá zoom in). Duração: 600ms.
+
+================================================================================
+SLIDE 13 — FRAMEWORKS E FERRAMENTAS
+================================================================================
+
+OBJETIVO: Listar as principais tecnologias que suportam/usam TypeScript.
+
+EMOÇÃO: Familiaridade, reconhecimento, utilidade prática.
+
+LAYOUT: Grid de cards 4x2 com logotipos estilizados.
+- Cards grandes e visualmente ricos.
+- Cada card representa uma ferramenta.
+
+ORGANIZAÇÃO:
+1. Título: "Frameworks & Ferramentas" — gradiente azul-ciano.
+2. Subtítulo: "Tecnologias com suporte nativo ou recomendado ao TypeScript"
+   — --text-secondary.
+
+3. Grid 4x2 de cards:
+
+   [ Angular ] [ React ] [ Next.js ] [ Vue ]
+   [ NestJS ] [ Node.js ] [ Electron ] [ Deno ]
+
+   Cada card:
+   - Fundo glassmorphism ou --secondary-dark.
+   - Logotipo da tecnologia no centro (SVG inline ou emoji/unicode estilizado).
+     (Criar logotipos simplificados com SVG ou usar texto estilizado.)
+   - Nome abaixo do logotipo.
+   - Bordas arredondadas (16px).
+   - Ao hover: 3D tilt (inclinação seguindo o cursor), glow na borda.
+
+   Dica para logotipos SVG inline:
+   - Angular: "<A>" estilizado ou escudo.
+   - React: círculo com três elipses (átomo).
+   - Next.js: "N" com fundo.
+   - Vue: "V" estilizado.
+   - NestJS: "N" com asas.
+   - Node.js: "node" ou "n" com hexágono.
+   - Electron: "E" com elétron.
+   - Deno: "D" com chamas.
+
+4. Abaixo: nota "Quase todas essas tecnologias oferecem suporte nativo
+   ao TypeScript" — itálico, --text-muted.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Cards grid.
+- 3D Tilt (inclinação conforme mouse).
+- Glassmorphism.
+- Ícones SVG estilizados.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- 3D Tilt nos cards (seguindo o cursor).
+- Clique em um card: tooltip expandido com "Usado por: [empresas]" ou
+  "Versão atual: [x.y.z]" (dados ilustrativos).
+- Hover: glow + elevação.
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Subtítulo: 200ms — fade
+3. Cards da linha 1: 400ms a 700ms (stagger 100ms)
+4. Cards da linha 2: 900ms a 1200ms (stagger 100ms)
+   — cada card: fade + scale(0.9→1) + slide up
+5. Nota final: 1400ms — fade
+
+TRANSIÇÃO PARA SLIDE 14:
+- Efeito: Cube (rotação 3D horizontal). Duração: 800ms.
+
+================================================================================
+SLIDE 14 — MERCADO DE TRABALHO
+================================================================================
+
+OBJETIVO: Mostrar a relevância profissional e a demanda por TypeScript.
+
+EMOÇÃO: Oportunidade, carreira, futuro promissor.
+
+LAYOUT: Dashboard de indicadores.
+- Estilo "painel de KPIs" com cards de métricas.
+- Tom profissional e motivador.
+
+ORGANIZAÇÃO:
+1. Título: "Mercado de Trabalho" — gradiente azul-ciano.
+2. Subtítulo: "TypeScript no mercado profissional" — --text-secondary.
+
+3. Grid de 5 cards de indicadores (linha única ou 3+2):
+
+   Card 1 — "Alta Demanda"
+   Indicador: contador numérico animado de 0 até 85 (como percentual de
+   vagas que pedem TS entre vagas JS).
+   Ícone: 🔥
+   Cor: verde/azul
+   Animação: contador (count up) de 0 a 85 em 2s.
+
+   Card 2 — "Projetos Modernos"
+   Indicador: contador de 0 a 78 (percentual de novos projetos usando TS)
+   Ícone: 🚀
+   Cor: azul
+
+   Card 3 — "Trabalho em Equipe"
+   Ícone: 👥
+   Texto: "Facilita colaboração"
+   Cor: ciano
+
+   Card 4 — "Grandes Aplicações"
+   Ícone: 🏢
+   Texto: "Presente em grandes apps"
+   Cor: azul escuro
+
+   Card 5 — "Full Stack"
+   Ícone: 🔄
+   Texto: "Valorizado em vagas Full Stack"
+   Cor: verde
+
+   Cards 1 e 2: contadores animados com número grande (3rem), label abaixo.
+   Cards 3, 4, 5: ícone + texto descritivo.
+
+4. Abaixo (após a animação dos contadores): barra decorativa com gradiente
+   e texto: "TypeScript: a linguagem que mais cresce no ecossistema JS"
+   — itálico, --text-secondary.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Dashboard.
+- Contadores numéricos (Count Up).
+- Cards grid.
+- Ícones.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Contadores animados (números crescentes).
+- Hover nos cards: glow + elevação.
+- Tooltip: "Dado ilustrativo baseado em pesquisas de mercado de 2024."
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Subtítulo: 200ms — fade
+3. Cards: 400ms a 800ms (stagger 100ms)
+   — fade + slide up
+4. Contadores (cards 1 e 2): começam a contar 500ms após o card aparecer.
+   Duração da contagem: 2s, com easing ease-out.
+   O número deve pular animadamente (efeito de contador digital).
+   Fonte para números: 'Fira Code' ou 'Inter', weight 700.
+5. Barra decorativa: 2500ms — fade
+
+TRANSIÇÃO PARA SLIDE 15:
+- Efeito: Cross Fade. Duração: 600ms.
+
+================================================================================
+SLIDE 15 — CONCLUSÃO
+================================================================================
+
+OBJETIVO: Finalizar com impacto, reforçar a mensagem principal e deixar uma
+impressão duradoura.
+
+EMOÇÃO: Inspiração, conclusão, motivação, encerramento elegante.
+
+LAYOUT: Centro — resumo + citação de destaque.
+- Limpo, minimalista.
+- Tom azul escuro com destaque para a mensagem final.
+
+ORGANIZAÇÃO:
+1. Título: "Conclusão" — topo, gradiente azul-ciano.
+
+2. 6 cards de resumo em dois grupos de 3 (horizontal), depois a citação:
+
+   Grupo superior (3 cards em linha):
+   🛡️ "Mais segurança"
+   📋 "Melhor organização"
+   ✨ "Código mais limpo"
+
+   Grupo inferior (3 cards em linha):
+   🐛 "Menos bugs"
+   ⚡ "Melhor experiência de desenvolvimento"
+   🔗 "Compatibilidade total com JavaScript"
+
+   Cada card:
+   - Fundo glassmorphism, ícone + texto curto.
+   - Tamanho: aproximadamente 180px x 60px.
+   - Ao hover: glow azul.
+
+3. Citação final (grande destaque):
+   "TypeScript não substitui o JavaScript; ele o torna mais confiável, escalável
+   e adequado para aplicações modernas."
+   — Texto em itálico, cor --text-primary, tamanho 1.3rem.
+   — Fundo glassmorphism (maior destaque), border-left 4px --primary-blue.
+   — Aspas decorativas grandes (" ") em --primary-blue com opacidade 0.2
+     antes e depois do texto, tamanho 4rem.
+
+4. Abaixo: "Obrigado!" ou "Fim" — --text-secondary, tamanho 1rem, com
+   animação de fade pulse (opacidade varia entre 0.6 e 1, 3s loop).
+
+5. Opcional: os cards do resumo, após entrarem, podem ter um leve glow que
+   "acende" em cascata (um após o outro), como uma celebração silenciosa.
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Slide de conclusão.
+- Cards resumo.
+- Citação destacada (quote).
+- Animação pulse no "Fim".
+- Glassmorphism.
+
+ELEMENTOS INTERATIVOS (Interativos.txt):
+- Hover nos cards: glow.
+- Ao clicar na citação: tooltip "Compartilhe esta mensagem" (apenas visual).
+
+PARTÍCULAS:
+- Partículas globais continuam.
+- No "Fim" ou "Obrigado", algumas partículas extras (5-10) podem convergir
+  lentamente em direção ao texto, como se fossem atraídas.
+
+ORDEM DE ENTRADA:
+1. Título: 0ms — fade + slide up
+2. Grupo superior de cards: 300ms, 380ms, 460ms (stagger 80ms)
+   — fade + slide up (de baixo)
+3. Grupo inferior de cards: 700ms, 780ms, 860ms (stagger 80ms)
+   — fade + slide up
+4. Citação: 1100ms — fade + slide up (distância 40px), duração 800ms
+5. "Obrigado!" / "Fim": 1800ms — fade + pulse animation (inicia 2s após)
+
+   O glow em cascata nos cards: 1500ms — cada card acende glow por 300ms,
+   começando do primeiro ao último (cascata).
+
+TRANSIÇÃO: NÃO HÁ — é o último slide.
+- Não exibir seta de próximo.
+- O botão de próximo fica desabilitado (opacidade reduzida, cursor default).
+- A barra de progresso mostra 15/15 completa.
+- Opcional: ao tentar avançar, um leve "pulse" no indicador mostrando que
+  é o fim.
+
+================================================================================
+INSTRUÇÕES FINAIS PARA A IA EXECUTORA
+================================================================================
+
+- Crie UM ÚNICO arquivo HTML com tudo inline (HTML + CSS + JavaScript).
+- Use UTF-8 sem BOM.
+- NÃO crie tela de loading.
+- NÃO acesse nenhum outro arquivo externo (nem fontes, nem imagens — tudo
+  gerado inline com SVG ou web safe fonts com fallback).
+- Para as fontes, inclua Google Fonts via @import no CSS ou use fontes
+  embutidas com @font-face (preferir Google Fonts com display=swap).
+- Garanta que a apresentação funcione offline em um único arquivo.
+- Use viewport meta tag para responsividade.
+- Todo o código deve ser acessível e semanticamente correto.
+- Teste mentalmente todas as transições e animações antes de finalizar.
+- O easing padrão para quase tudo é: cubic-bezier(0.16, 1, 0.3, 1).
+- Os slides devem ocupar 100vw x 100vh cada, com overflow hidden.
+- Navegação por teclado (setas, page up/down, home, end, espaço) obrigatória.
+- Navegação por swipe em touch obrigatória.
+- Responsividade para desktop (1920x1080 otimizado), tablets, celulares.
+
+IMPORTANTE: A IA que está executando este documento NÃO DEVE consultar nenhum
+outro arquivo na pasta. Trabalhe exclusivamente com este documento de especificação.
+
+================================================================================
+FIM DA ESPECIFICAÇÃO
+================================================================================

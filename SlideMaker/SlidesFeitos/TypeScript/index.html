@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeScript: JavaScript com Tipagem Inteligente</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+
+:root {
+  --primary-blue: #3178C6;
+  --primary-dark: #0a0e17;
+  --secondary-dark: #0f1525;
+  --surface-dark: #1a2138;
+  --surface-light: #222b45;
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-cyan: #00b4d8;
+  --accent-green: #22c55e;
+  --accent-orange: #f59e0b;
+  --accent-red: #ef4444;
+  --code-bg: #0d1117;
+  --code-text: #e6edf3;
+  --code-keyword: #ff7b72;
+  --code-string: #a5d6ff;
+  --code-number: #79c0ff;
+  --code-function: #d2a8ff;
+  --glass-bg: rgba(26, 33, 56, 0.6);
+  --glass-border: rgba(49, 120, 198, 0.2);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --glow-blue: rgba(49, 120, 198, 0.4);
+  --glow-cyan: rgba(0, 180, 216, 0.3);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--primary-dark);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
+  cursor: none;
+}
+
+body.no-cursor { cursor: default; }
+body.no-cursor #custom-cursor { display: none; }
+
+#presentation {
+  width: 100%; height: 100%;
+  position: relative;
+  perspective: 1200px;
+}
+
+.slide {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: 4rem 6rem;
+  overflow: hidden;
+  opacity: 0; pointer-events: none;
+  transition: none;
+}
+.slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+.slide.exiting { z-index: 2; }
+.slide.entering { z-index: 3; }
+
+/* Background layer */
+.slide-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+
+/* Slide content wrapper */
+.slide-content {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 1200px;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+.slide-title {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.3em;
+  text-align: center;
+}
+
+.slide-subtitle {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.8em;
+  text-align: center;
+}
+
+/* Glass card */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s var(--ease-out-expo);
+}
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px var(--glow-blue);
+}
+
+/* Code block */
+.code-block {
+  background: var(--code-bg);
+  border-radius: 12px;
+  border: 1px solid var(--surface-light);
+  overflow: hidden;
+  width: 100%;
+}
+.code-header {
+  display: flex; align-items: center;
+  padding: 0.5rem 1rem;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--surface-light);
+  gap: 6px;
+}
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-dot.r { background: #ff5f57; }
+.code-dot.y { background: #ffbd2e; }
+.code-dot.g { background: #28c840; }
+.code-filename { margin-left: auto; font-size: 0.75rem; color: var(--text-muted); font-family: 'Fira Code', monospace; }
+.code-body {
+  padding: 1rem 1.5rem;
+  font-family: 'Fira Code', monospace;
+  font-size: clamp(0.75rem, 1.2vw, 0.95rem);
+  line-height: 1.7;
+  color: var(--code-text);
+  white-space: pre;
+  overflow-x: auto;
+}
+.code-body .kw { color: var(--code-keyword); }
+.code-body .fn { color: var(--code-function); }
+.code-body .str { color: var(--code-string); }
+.code-body .num { color: var(--code-number); }
+.code-body .typ { color: var(--accent-cyan); }
+.code-body .cm { color: var(--text-muted); font-style: italic; }
+.code-body .op { color: var(--text-secondary); }
+
+/* Buttons */
+.btn-nav {
+  position: fixed; bottom: 40px; z-index: 100;
+  background: none; border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  width: 40px; height: 40px; border-radius: 50%;
+  font-size: 1.2rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s var(--ease-out-expo);
+  backdrop-filter: blur(8px);
+  background: var(--glass-bg);
+}
+.btn-nav:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); box-shadow: 0 0 20px var(--glow-cyan); }
+.btn-nav:disabled { opacity: 0.3; cursor: default; }
+.btn-nav.prev { left: 20px; }
+.btn-nav.next { right: 20px; }
+
+/* Progress */
+#progress-container {
+  position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+#progress-bar {
+  width: clamp(150px, 30vw, 400px); height: 4px;
+  background: var(--surface-dark); border-radius: 2px; overflow: hidden;
+}
+#progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--primary-blue), var(--accent-cyan));
+  border-radius: 2px;
+  transition: width 0.6s var(--ease-out-expo);
+}
+#slide-counter {
+  font-size: 0.7rem; color: var(--text-muted);
+  font-family: 'Fira Code', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* Dots */
+#slide-dots {
+  position: fixed; bottom: 68px; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+  display: flex; gap: 8px;
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+.dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--surface-light);
+  border: none; cursor: pointer;
+  transition: all 0.3s var(--ease-out-expo);
+  padding: 0; position: relative;
+}
+.dot.active { width: 10px; height: 10px; background: var(--primary-blue); box-shadow: 0 0 10px var(--glow-blue); }
+.dot:hover { background: var(--text-muted); }
+
+/* Fullscreen */
+#fullscreen-btn {
+  position: fixed; bottom: 40px; right: 80px; z-index: 100;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  color: var(--text-secondary); cursor: pointer;
+  width: 36px; height: 36px; border-radius: 8px;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s var(--ease-out-expo);
+  backdrop-filter: blur(8px);
+}
+#fullscreen-btn:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); }
+
+/* Custom cursor */
+#custom-cursor {
+  position: fixed; pointer-events: none; z-index: 9999;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: white;
+  box-shadow: 0 0 12px var(--glow-blue), 0 0 24px rgba(49,120,198,0.2);
+  transition: width 0.2s, height 0.2s, box-shadow 0.2s;
+  transform: translate(-50%, -50%);
+}
+#custom-cursor.hover { width: 16px; height: 16px; box-shadow: 0 0 20px var(--glow-blue), 0 0 40px rgba(49,120,198,0.3); }
+
+/* Particles canvas */
+#particles-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+
+/* Tooltip */
+.tooltip {
+  position: fixed; z-index: 9998;
+  background: var(--secondary-dark);
+  border: 1px solid var(--primary-blue);
+  color: var(--text-primary);
+  padding: 6px 12px; border-radius: 8px;
+  font-size: 0.8rem; font-family: 'Inter', sans-serif;
+  pointer-events: none;
+  opacity: 0; transition: opacity 0.2s;
+  max-width: 260px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+.tooltip.show { opacity: 1; }
+
+/* ======== TRANSITIONS ======== */
+.transitioning .slide.exiting { animation: var(--exit-anim) 600ms var(--ease-out-expo) forwards; }
+.transitioning .slide.entering { animation: var(--enter-anim) 600ms var(--ease-out-expo) forwards; }
+
+/* Fade + Scale */
+@keyframes exit-fade-scale { to { transform: scale(0.95); opacity: 0; } }
+@keyframes enter-fade-scale { from { transform: scale(1.05); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Slide */
+@keyframes exit-slide { to { transform: translateX(-100%); opacity: 0; } }
+@keyframes enter-slide { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* Cube */
+@keyframes exit-cube { from { transform: rotateY(0) translateZ(0); } to { transform: rotateY(-90deg) translateZ(-200px); opacity: 0; } }
+@keyframes enter-cube { from { transform: rotateY(90deg) translateZ(-200px); opacity: 0; } to { transform: rotateY(0) translateZ(0); opacity: 1; } }
+
+/* Morph */
+@keyframes exit-morph { 0% { filter: blur(0); transform: scale(1); } 50% { filter: blur(2px); transform: scale(1.02); } 100% { filter: blur(0); transform: scale(0.98); opacity: 0; } }
+@keyframes enter-morph { from { filter: blur(4px); transform: scale(1.02); opacity: 0; } to { filter: blur(0); transform: scale(1); opacity: 1; } }
+
+/* Fade */
+@keyframes exit-fade { to { opacity: 0; } }
+@keyframes enter-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Cross Fade */
+@keyframes exit-crossfade { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 0; } }
+@keyframes enter-crossfade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Scale */
+@keyframes exit-scale { to { transform: scale(0.8); opacity: 0; } }
+@keyframes enter-scale { from { transform: scale(1.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Push */
+@keyframes exit-push { to { transform: translateY(-100%); opacity: 0; } }
+@keyframes enter-push { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Glitch */
+@keyframes exit-glitch { 0% { transform: translate(0); } 20% { transform: translate(-3px, 2px) skewX(2deg); clip-path: inset(20% 0 60% 0); } 40% { transform: translate(3px, -1px) skewX(-2deg); clip-path: inset(40% 0 40% 0); } 60% { transform: translate(-2px, 1px) skewX(1deg); clip-path: inset(60% 0 20% 0); } 80% { transform: translate(1px, -2px) skewX(-1deg); } 100% { opacity: 0; transform: translate(0); } }
+@keyframes enter-glitch { from { opacity: 0; } to { opacity: 1; } }
+
+/* Zoom */
+@keyframes exit-zoom { to { transform: scale(1.5); opacity: 0; } }
+@keyframes enter-zoom { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ======== ENTRY ANIMATIONS ======== */
+.anim-fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo); }
+.anim-fade-up.done { opacity: 1; transform: translateY(0); }
+
+.anim-fade-left { opacity: 0; transform: translateX(-20px); transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo); }
+.anim-fade-left.done { opacity: 1; transform: translateX(0); }
+
+.anim-fade-right { opacity: 0; transform: translateX(20px); transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo); }
+.anim-fade-right.done { opacity: 1; transform: translateX(0); }
+
+.anim-fade-in { opacity: 0; transition: opacity 0.5s var(--ease-out-expo); }
+.anim-fade-in.done { opacity: 1; }
+
+.anim-scale-in { opacity: 0; transform: scale(0.8); transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo); }
+.anim-scale-in.done { opacity: 1; transform: scale(1); }
+
+/* ======== SLIDE SPECIFIC ======== */
+/* Slide 1 - Capa */
+#slide-0 { text-align: center; }
+#slide-0 .ts-logo { width: 80px; height: 80px; margin-bottom: 1rem; }
+#slide-0 .ts-logo rect { fill: var(--primary-blue); }
+#slide-0 .ts-logo text { fill: white; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 42px; }
+#slide-0 .capa-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.2em; }
+#slide-0 .capa-line { width: 60%; height: 1px; background: linear-gradient(90deg, transparent, var(--primary-blue), var(--accent-cyan), transparent); margin: 1rem auto; transform: scaleX(0); transition: transform 0.8s var(--ease-out-expo); transform-origin: center; }
+#slide-0 .capa-line.done { transform: scaleX(1); }
+#slide-0 .capa-meta { color: var(--text-secondary); font-size: 1rem; margin-top: 0.5rem; }
+#slide-0 .capa-disciplina { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem; }
+#slide-0 .wireframe-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.03; z-index: 0; }
+
+/* Slide 2 - O que é TypeScript */
+#slide-2 .split { display: flex; gap: 2rem; width: 100%; align-items: flex-start; }
+#slide-2 .split-left { flex: 1; }
+#slide-2 .split-right { flex: 1; display: flex; justify-content: center; align-items: center; }
+#slide-2 .bullet-list { list-style: none; margin: 1rem 0; }
+#slide-2 .bullet-list li { display: flex; align-items: center; gap: 0.6rem; color: var(--text-secondary); margin-bottom: 0.6rem; font-size: clamp(0.85rem, 1.3vw, 1rem); }
+#slide-2 .bullet-list li .check { color: var(--primary-blue); font-weight: 700; flex-shrink: 0; }
+#slide-2 .flow-diagram { display: flex; align-items: center; gap: 0.5rem; padding: 1.5rem; flex-wrap: wrap; justify-content: center; }
+#slide-2 .flow-step { padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; font-family: 'Fira Code', monospace; white-space: nowrap; }
+#slide-2 .flow-step.ts { background: rgba(49,120,198,0.2); color: var(--primary-blue); border: 1px solid rgba(49,120,198,0.3); }
+#slide-2 .flow-step.tsc { background: rgba(0,180,216,0.15); color: var(--accent-cyan); border: 1px solid rgba(0,180,216,0.3); }
+#slide-2 .flow-step.js { background: rgba(245,158,11,0.15); color: var(--accent-orange); border: 1px solid rgba(245,158,11,0.3); }
+#slide-2 .flow-step.dest { background: rgba(34,197,94,0.15); color: var(--accent-green); border: 1px solid rgba(34,197,94,0.3); }
+#slide-2 .flow-arrow { color: var(--text-muted); font-size: 1.2rem; animation: arrow-pulse 1.5s infinite; }
+@keyframes arrow-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+#slide-2 .note { color: var(--text-muted); font-style: italic; font-size: 0.85rem; margin-top: 1rem; }
+
+/* Slide 3 - História */
+.timeline-container { position: relative; width: 100%; max-width: 800px; }
+.timeline-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--primary-blue), var(--accent-cyan)); transform: translateX(-50%); }
+.timeline-item { display: flex; align-items: center; margin-bottom: 1.2rem; position: relative; }
+.timeline-item .tl-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--primary-blue); position: absolute; left: 50%; transform: translateX(-50%); z-index: 2; box-shadow: 0 0 10px var(--glow-blue); transition: box-shadow 0.3s; cursor: pointer; }
+.timeline-item .tl-dot:hover { box-shadow: 0 0 20px var(--glow-blue), 0 0 40px rgba(49,120,198,0.3); }
+.timeline-item .tl-content { width: calc(50% - 30px); padding: 0.8rem 1rem; background: var(--glass-bg); backdrop-filter: blur(8px); border: 1px solid var(--glass-border); border-radius: 10px; transition: all 0.3s; cursor: pointer; }
+.timeline-item .tl-content:hover { border-color: var(--primary-blue); box-shadow: 0 0 20px var(--glow-blue); }
+.timeline-item.left { justify-content: flex-start; }
+.timeline-item.left .tl-content { margin-left: auto; margin-right: calc(50% + 20px); }
+.timeline-item.right { justify-content: flex-end; }
+.timeline-item.right .tl-content { margin-right: auto; margin-left: calc(50% + 20px); }
+.timeline-item .tl-year { font-size: 1.8rem; font-weight: 800; color: var(--primary-blue); line-height: 1; }
+.timeline-item .tl-desc { font-size: 0.85rem; color: var(--text-secondary); }
+.tl-detail { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; padding: 0 0.5rem; color: var(--text-muted); font-size: 0.8rem; }
+.tl-detail.open { max-height: 100px; padding: 0.5rem; }
+
+/* Slide 4 - Por que foi criado */
+#slide-4 .split { display: flex; gap: 2rem; width: 100%; }
+#slide-4 .col-probs, #slide-4 .col-sols { flex: 1; padding: 1.5rem; border-radius: 16px; }
+#slide-4 .col-probs { background: rgba(239,68,68,0.03); border: 1px solid rgba(239,68,68,0.1); }
+#slide-4 .col-sols { background: rgba(34,197,94,0.03); border: 1px solid rgba(34,197,94,0.1); }
+#slide-4 .col-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+#slide-4 .col-title.prob { color: var(--accent-red); }
+#slide-4 .col-title.sol { color: var(--accent-green); }
+.comparison-pair { display: flex; gap: 2rem; margin-bottom: 0.5rem; }
+.comparison-pair .pair-item { flex: 1; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.8rem; border-radius: 8px; transition: all 0.3s; cursor: pointer; font-size: 0.9rem; color: var(--text-secondary); }
+.comparison-pair .pair-item:hover { background: rgba(49,120,198,0.08); }
+.comparison-pair .pair-item .icon { font-size: 1.1rem; flex-shrink: 0; }
+
+/* Slide 5 - Como funciona */
+.flow-horizontal { display: flex; align-items: center; justify-content: center; gap: 0.8rem; flex-wrap: wrap; width: 100%; padding: 0 1rem; }
+.flow-card { padding: 1rem 1.2rem; border-radius: 12px; text-align: center; min-width: 130px; transition: all 0.3s; cursor: pointer; }
+.flow-card .fc-icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
+.flow-card .fc-label { font-size: 0.75rem; font-weight: 600; }
+.flow-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px var(--glow-blue); }
+.flow-arrow-lg { color: var(--text-muted); font-size: 1.5rem; animation: arrow-pulse 1.5s infinite; }
+
+/* Slide 6 - Tipagem Estática */
+#slide-6 .duo { display: flex; gap: 2rem; width: 100%; }
+#slide-6 .code-area { flex: 1.3; }
+#slide-6 .types-area { flex: 0.7; }
+.type-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.type-chip { padding: 0.6rem; text-align: center; border-radius: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); cursor: pointer; font-size: 0.8rem; font-family: 'Fira Code', monospace; color: var(--text-primary); transition: all 0.3s; }
+.type-chip:hover { border-color: var(--primary-blue); box-shadow: 0 0 15px var(--glow-blue); transform: translateY(-2px); }
+.type-chip .tc-desc { display: block; font-size: 0.6rem; color: var(--text-muted); font-family: 'Inter', sans-serif; margin-top: 2px; }
+
+/* Slide 7 - Recursos Principais */
+.bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; width: 100%; max-width: 900px; }
+.bento-card { padding: 1rem; border-radius: 12px; background: var(--glass-bg); backdrop-filter: blur(8px); border: 1px solid var(--glass-border); cursor: pointer; transition: all 0.4s; text-align: center; }
+.bento-card .bc-icon { font-size: 1.8rem; margin-bottom: 0.3rem; }
+.bento-card .bc-title { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
+.bento-card .bc-desc { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.2rem; }
+.bento-card .bc-detail { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; font-size: 0.75rem; color: var(--text-muted); }
+.bento-card .bc-detail.open { max-height: 80px; }
+.bento-card:hover { border-color: var(--primary-blue); box-shadow: 0 0 25px var(--glow-blue); transform: translateY(-2px); }
+.bento-card.wide { grid-column: span 2; }
+
+/* Slide 8 - Exemplo */
+#slide-8 .code-area { width: 100%; max-width: 700px; position: relative; }
+#slide-8 .terminal { background: var(--code-bg); border: 1px solid var(--surface-light); border-radius: 10px; padding: 0.8rem 1rem; font-family: 'Fira Code', monospace; font-size: 0.85rem; margin-top: 1rem; width: 100%; max-width: 560px; }
+#slide-8 .terminal .line { opacity: 0; }
+#slide-8 .terminal .line.show { opacity: 1; transition: opacity 0.3s; }
+#slide-8 .terminal .cursor { display: inline-block; width: 2px; height: 1em; background: var(--accent-cyan); animation: cursor-blink 0.8s infinite; margin-left: 2px; vertical-align: text-bottom; }
+@keyframes cursor-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+#slide-8 .exec-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(49,120,198,0.2); border: 1px solid rgba(49,120,198,0.3); color: var(--primary-blue); padding: 0.3rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.3s; z-index: 2; }
+#slide-8 .exec-btn:hover { background: rgba(49,120,198,0.3); }
+
+/* Slide 9 - Vantagens */
+.adv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; width: 100%; max-width: 900px; }
+.adv-card { padding: 1.2rem; border-radius: 12px; background: var(--glass-bg); backdrop-filter: blur(8px); border-left: 3px solid var(--primary-blue); cursor: pointer; transition: all 0.3s; text-align: center; }
+.adv-card .ac-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.adv-card .ac-text { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+.adv-card .ac-detail { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; font-size: 0.75rem; color: var(--text-muted); }
+.adv-card .ac-detail.open { max-height: 60px; }
+.adv-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px var(--glow-blue); }
+.adv-card.border-green { border-left-color: var(--accent-green); }
+.adv-card.border-cyan { border-left-color: var(--accent-cyan); }
+.satisfaction-bar { width: 100%; max-width: 500px; margin-top: 1rem; }
+.satisfaction-bar .bar { width: 100%; height: 6px; background: var(--surface-dark); border-radius: 3px; overflow: hidden; }
+.satisfaction-bar .fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--primary-blue), var(--accent-cyan)); border-radius: 3px; transition: width 1.5s var(--ease-out-expo); }
+.satisfaction-bar .label { font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-top: 0.3rem; }
+
+/* Slide 10 - Desvantagens */
+.disad-list { width: 100%; max-width: 600px; }
+.disad-card { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; margin-bottom: 0.6rem; background: var(--glass-bg); border: 1px solid var(--surface-light); border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+.disad-card .dc-icon { font-size: 1.3rem; color: var(--text-muted); flex-shrink: 0; }
+.disad-card .dc-text { color: var(--text-secondary); font-size: 0.9rem; }
+.disad-card:hover { border-color: rgba(245,158,11,0.3); box-shadow: 0 0 15px rgba(245,158,11,0.15); transform: translateX(5px); }
+.equilibrium-note { margin-top: 1rem; padding: 0.8rem 1rem; background: var(--glass-bg); border-left: 3px solid var(--primary-blue); border-radius: 8px; color: var(--text-primary); font-size: 0.85rem; max-width: 600px; }
+
+/* Slide 11 - TS vs JS */
+.compare-grid { width: 100%; max-width: 700px; border-collapse: separate; border-spacing: 0 4px; }
+.compare-grid .cg-header { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-bottom: 8px; }
+.compare-grid .cg-header div { padding: 0.6rem; text-align: center; font-weight: 600; font-size: 0.9rem; border-radius: 8px; }
+.compare-grid .cg-header .h-label { background: transparent; color: var(--text-muted); }
+.compare-grid .cg-header .h-js { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+.compare-grid .cg-header .h-ts { background: rgba(49,120,198,0.15); color: var(--primary-blue); }
+.compare-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; padding: 0.5rem 0; border-radius: 8px; transition: background 0.3s; cursor: pointer; }
+.compare-row:hover { background: rgba(49,120,198,0.05); }
+.compare-row .cr-label { font-size: 0.85rem; color: var(--text-secondary); text-align: center; display: flex; align-items: center; justify-content: center; }
+.compare-row .cr-badge { text-align: center; }
+.compare-row .badge { display: inline-block; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.78rem; font-weight: 500; }
+.compare-row .badge.orange { background: rgba(245,158,11,0.15); color: var(--accent-orange); }
+.compare-row .badge.blue { background: rgba(49,120,198,0.15); color: var(--primary-blue); }
+.compare-row .badge.green { background: rgba(34,197,94,0.15); color: var(--accent-green); }
+
+/* Slide 12 - Onde é utilizado */
+.tag-cloud { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1rem; max-width: 700px; padding: 1rem; }
+.tag-item { padding: 0.6rem 1rem; border-radius: 10px; background: var(--glass-bg); backdrop-filter: blur(8px); border: 1px solid var(--glass-border); cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 0.5rem; }
+.tag-item .ti-icon { font-size: 1rem; }
+.tag-item .ti-text { font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+.tag-item:hover { transform: scale(1.08); border-color: var(--primary-blue); box-shadow: 0 0 20px var(--glow-blue); }
+.tag-item.lg { padding: 0.9rem 1.4rem; font-size: 1rem; }
+.tag-item.md { padding: 0.7rem 1.1rem; font-size: 0.9rem; }
+.tag-item.sm { padding: 0.5rem 0.9rem; font-size: 0.8rem; }
+.tag-detail { position: fixed; max-width: 260px; padding: 0.6rem 1rem; border-radius: 8px; background: var(--secondary-dark); border: 1px solid var(--primary-blue); color: var(--text-primary); font-size: 0.8rem; z-index: 9998; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+.tag-detail.show { opacity: 1; }
+
+/* Slide 13 - Frameworks */
+.fw-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; max-width: 800px; }
+.fw-card { padding: 1.2rem 0.8rem; border-radius: 14px; text-align: center; background: var(--glass-bg); backdrop-filter: blur(8px); border: 1px solid var(--glass-border); cursor: pointer; transition: all 0.3s; perspective: 400px; }
+.fw-card .fw-logo { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.3rem; }
+.fw-card .fw-name { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+.fw-card:hover { transform: translateY(-4px) rotateX(2deg) rotateY(2deg); box-shadow: 0 12px 40px var(--glow-blue); border-color: var(--primary-blue); }
+.fw-tooltip { position: fixed; max-width: 200px; padding: 0.5rem 0.8rem; background: var(--secondary-dark); border: 1px solid var(--primary-blue); border-radius: 8px; color: var(--text-primary); font-size: 0.75rem; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 9998; }
+.fw-tooltip.show { opacity: 1; }
+
+/* Slide 14 - Mercado */
+.kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; width: 100%; max-width: 900px; }
+.kpi-card { padding: 1.2rem 0.8rem; border-radius: 12px; text-align: center; background: var(--glass-bg); backdrop-filter: blur(8px); border: 1px solid var(--glass-border); cursor: pointer; transition: all 0.3s; }
+.kpi-card .kpi-icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
+.kpi-card .kpi-number { font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 700; font-family: 'Fira Code', monospace; color: var(--primary-blue); }
+.kpi-card .kpi-number .percent { font-size: clamp(0.8rem, 1.5vw, 1.2rem); color: var(--text-muted); }
+.kpi-card .kpi-label { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.2rem; }
+.kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px var(--glow-blue); }
+.kpi-card .kpi-desc { font-size: 0.85rem; color: var(--text-primary); font-weight: 500; padding: 0.5rem; }
+.market-note { font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-top: 0.8rem; }
+
+/* Slide 15 - Conclusão */
+.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; max-width: 700px; width: 100%; }
+.summary-card { padding: 0.7rem 0.8rem; border-radius: 10px; background: var(--glass-bg); backdrop-filter: blur(8px); border: 1px solid var(--glass-border); cursor: pointer; transition: all 0.3s; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.summary-card .sc-icon { font-size: 1.2rem; }
+.summary-card .sc-text { font-size: 0.8rem; font-weight: 500; }
+.summary-card:hover { border-color: var(--primary-blue); box-shadow: 0 0 20px var(--glow-blue); transform: translateY(-2px); }
+.quote-block { max-width: 650px; padding: 1.2rem 1.5rem; border-left: 4px solid var(--primary-blue); border-radius: 10px; background: var(--glass-bg); position: relative; margin-top: 1rem; }
+.quote-block .quote-mark { position: absolute; font-size: 4rem; color: var(--primary-blue); opacity: 0.15; font-family: Georgia, serif; line-height: 1; }
+.quote-block .quote-mark.left { top: -0.5rem; left: 0.2rem; }
+.quote-block .quote-mark.right { bottom: -1rem; right: 0.2rem; }
+.quote-block .quote-text { font-size: clamp(1rem, 1.5vw, 1.3rem); font-style: italic; color: var(--text-primary); line-height: 1.5; padding: 0 1.5rem; }
+.fim-text { margin-top: 1rem; font-size: 1rem; color: var(--text-secondary); animation: fim-pulse 3s infinite; }
+@keyframes fim-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .slide { padding: 2rem 1.5rem; }
+  #slide-2 .split, #slide-4 .split, .comparison-pair { flex-direction: column; }
+  #slide-6 .duo { flex-direction: column; }
+  .bento-grid { grid-template-columns: repeat(2, 1fr); }
+  .bento-card.wide { grid-column: span 2; }
+  .adv-grid { grid-template-columns: repeat(2, 1fr); }
+  .fw-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .timeline-item .tl-content { width: calc(45% - 15px); padding: 0.5rem; }
+  .timeline-item.left .tl-content { margin-right: calc(50% + 12px); }
+  .timeline-item.right .tl-content { margin-left: calc(50% + 12px); }
+  .timeline-item .tl-year { font-size: 1.2rem; }
+  #slide-dots { display: none; }
+  .btn-nav { bottom: 20px; }
+  .btn-nav.prev { left: 10px; }
+  .btn-nav.next { right: 10px; }
+  #progress-container { bottom: 28px; }
+  #fullscreen-btn { right: 60px; bottom: 20px; }
+  .code-body { font-size: 0.7rem; padding: 0.8rem; }
+}
+
+@media (max-width: 480px) {
+  .slide { padding: 1.5rem 1rem; }
+  .bento-grid, .adv-grid, .fw-grid, .summary-grid { grid-template-columns: 1fr; }
+  .bento-card.wide { grid-column: span 1; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .flow-horizontal { flex-direction: column; }
+  .flow-arrow-lg { transform: rotate(90deg); }
+  .type-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+<div id="custom-cursor"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<div id="presentation">
+
+<!-- === SLIDE 1 - CAPA === -->
+<div class="slide active" id="slide-0" data-index="0">
+  <svg class="wireframe-grid" viewBox="0 0 1000 600" preserveAspectRatio="none">
+    <defs><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M 60 0 L 0 0 0 60" fill="none" stroke="#3178C6" stroke-width="0.5" opacity="0.3"/></pattern></defs>
+    <rect width="100%" height="100%" fill="url(#grid)"/>
+  </svg>
+  <div class="slide-content" style="z-index:1; text-align:center;">
+    <div class="anim-fade-in" data-delay="0">
+      <svg class="ts-logo" viewBox="0 0 80 80"><rect x="2" y="2" width="76" height="76" rx="8" fill="#3178C6"/><text x="40" y="54" text-anchor="middle" fill="white" font-family="'Inter', sans-serif" font-weight="800" font-size="42">TS</text></svg>
+    </div>
+    <div class="capa-title anim-fade-up" data-delay="300" style="position:relative; z-index:1;">TypeScript: JavaScript com Tipagem Inteligente</div>
+    <div class="capa-line" data-delay="600"></div>
+    <div class="capa-meta anim-fade-in" data-delay="900">Apresentado por Leandro Ogawa • 2026</div>
+    <div class="capa-disciplina anim-fade-in" data-delay="1100">Desenvolvimento Web</div>
+    <!-- EDITAR AQUI: nome do apresentador e data -->
+  </div>
+</div>
+
+<!-- === SLIDE 2 - O QUE É TYPESCRIPT === -->
+<div class="slide" id="slide-2" data-index="1">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0" style="text-align:center;">O que é TypeScript?</div>
+    <div class="slide-subtitle anim-fade-in" data-delay="200" style="text-align:center;">Linguagem desenvolvida pela Microsoft (2012)</div>
+    <div class="split">
+      <div class="split-left">
+        <ul class="bullet-list">
+          <li class="anim-fade-left" data-delay="400"><span class="check">✓</span> Superset do JavaScript</li>
+          <li class="anim-fade-left" data-delay="500"><span class="check">✓</span> Adiciona tipagem estática</li>
+          <li class="anim-fade-left" data-delay="600"><span class="check">✓</span> Novos recursos</li>
+          <li class="anim-fade-left" data-delay="700"><span class="check">✓</span> Compilado para JavaScript</li>
+          <li class="anim-fade-left" data-delay="800"><span class="check">✓</span> Executado em qualquer ambiente JS</li>
+        </ul>
+        <div class="note anim-fade-in" data-delay="1000">ℹ️ Navegadores não executam TypeScript diretamente.</div>
+      </div>
+      <div class="split-right">
+        <div class="flow-diagram glass-card anim-fade-right" data-delay="300">
+          <span class="flow-step ts">TS Code</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step tsc">tsc Compiler</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step js">JS Code</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step dest">✓ Browser/Node</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- === SLIDE 3 - HISTÓRIA === -->
+<div class="slide" id="slide-3" data-index="2">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">História do TypeScript</div>
+    <div class="timeline-container anim-fade-in" data-delay="200">
+      <div class="timeline-line"></div>
+      <div class="timeline-item left anim-fade-left" data-delay="700">
+        <div class="tl-content" data-detail="Primeira versão lançada em outubro de 2012, após 2 anos de desenvolvimento interno na Microsoft.">
+          <div class="tl-year">2012</div>
+          <div class="tl-desc">Primeira versão</div>
+          <div class="tl-detail">Primeira versão lançada em outubro de 2012, após 2 anos de desenvolvimento interno na Microsoft.</div>
+        </div>
+        <div class="tl-dot"></div>
+      </div>
+      <div class="timeline-item right anim-fade-right" data-delay="900">
+        <div class="tl-dot"></div>
+        <div class="tl-content" data-detail="Criado por Anders Hejlsberg, arquiteto principal do C# e criador do Turbo Pascal.">
+          <div class="tl-year">Microsoft</div>
+          <div class="tl-desc">Criado por Anders Hejlsberg</div>
+          <div class="tl-detail">Criado por Anders Hejlsberg, arquiteto principal do C# e criador do Turbo Pascal.</div>
+        </div>
+      </div>
+      <div class="timeline-item left anim-fade-left" data-delay="1100">
+        <div class="tl-content" data-detail="Anders Hejlsberg, também criador do C#, liderou o design da linguagem.">
+          <div class="tl-year">Anders Hejlsberg</div>
+          <div class="tl-desc">Criador do C# liderou o desenvolvimento</div>
+          <div class="tl-detail">Anders Hejlsberg, também criador do C#, liderou o design da linguagem.</div>
+        </div>
+        <div class="tl-dot"></div>
+      </div>
+      <div class="timeline-item right anim-fade-right" data-delay="1300">
+        <div class="tl-dot"></div>
+        <div class="tl-content" data-detail="O Angular 2+ adotou TypeScript como linguagem padrão, impulsionando sua adoção em massa.">
+          <div class="tl-year">Angular</div>
+          <div class="tl-desc">Crescimento impulsionado pelo Angular</div>
+          <div class="tl-detail">O Angular 2+ adotou TypeScript como linguagem padrão, impulsionando sua adoção em massa.</div>
+        </div>
+      </div>
+      <div class="timeline-item left anim-fade-left" data-delay="1500">
+        <div class="tl-content" data-detail="TypeScript é usado por milhares de empresas, incluindo Google, Netflix, Airbnb e muitas outras.">
+          <div class="tl-year">Atualmente</div>
+          <div class="tl-desc">Milhares de empresas utilizam</div>
+          <div class="tl-detail">TypeScript é usado por milhares de empresas, incluindo Google, Netflix, Airbnb e muitas outras.</div>
+        </div>
+        <div class="tl-dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- === SLIDE 4 - POR QUE FOI CRIADO === -->
+<div class="slide" id="slide-4" data-index="3">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">Por que o TypeScript foi criado?</div>
+    <div class="split" style="width:100%;max-width:900px;">
+      <div class="col-probs anim-fade-in" data-delay="300">
+        <div class="col-title prob">✕ Problemas do JavaScript</div>
+        <div class="comparison-pair" data-pair="0">
+          <div class="pair-item prob-item"><span class="icon" style="color:var(--accent-red)">✕</span> Erros descobertos apenas na execução</div>
+        </div>
+        <div class="comparison-pair" data-pair="1">
+          <div class="pair-item prob-item"><span class="icon" style="color:var(--accent-red)">✕</span> Dificuldade em manter projetos grandes</div>
+        </div>
+        <div class="comparison-pair" data-pair="2">
+          <div class="pair-item prob-item"><span class="icon" style="color:var(--accent-red)">✕</span> Falta de tipos</div>
+        </div>
+        <div class="comparison-pair" data-pair="3">
+          <div class="pair-item prob-item"><span class="icon" style="color:var(--accent-red)">✕</span> Código difícil de entender em equipe</div>
+        </div>
+      </div>
+      <div class="col-sols anim-fade-in" data-delay="400">
+        <div class="col-title sol">✓ Solução TypeScript</div>
+        <div class="comparison-pair" data-pair="0">
+          <div class="pair-item sol-item"><span class="icon" style="color:var(--accent-green)">✓</span> Tipagem estática</div>
+        </div>
+        <div class="comparison-pair" data-pair="1">
+          <div class="pair-item sol-item"><span class="icon" style="color:var(--accent-green)">✓</span> Melhor organização</div>
+        </div>
+        <div class="comparison-pair" data-pair="2">
+          <div class="pair-item sol-item"><span class="icon" style="color:var(--accent-green)">✓</span> Maior produtividade</div>
+        </div>
+        <div class="comparison-pair" data-pair="3">
+          <div class="pair-item sol-item"><span class="icon" style="color:var(--accent-green)">✓</span> Menos bugs</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- === SLIDE 5 - COMO FUNCIONA === -->
+<div class="slide" id="slide-5" data-index="4">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">Como funciona?</div>
+    <div class="slide-subtitle anim-fade-in" data-delay="200">O processo de compilação do TypeScript</div>
+    <div class="flow-horizontal">
+      <div class="flow-card glass-card anim-fade-up" data-delay="400" style="border-color:rgba(49,120,198,0.3);" data-detail="Arquivos .ts contêm código TypeScript com anotações de tipo.">
+        <div class="fc-icon">📄</div>
+        <div class="fc-label" style="color:var(--primary-blue)">TypeScript</div>
+      </div>
+      <div class="flow-arrow-lg anim-fade-in" data-delay="600">→</div>
+      <div class="flow-card glass-card anim-fade-up" data-delay="900" style="border-color:rgba(0,180,216,0.3);" data-detail="O tsc (TypeScript Compiler) analisa e transpila o código, removendo os tipos.">
+        <div class="fc-icon">⚙️</div>
+        <div class="fc-label" style="color:var(--accent-cyan)">Compilador tsc</div>
+      </div>
+      <div class="flow-arrow-lg anim-fade-in" data-delay="1100">→</div>
+      <div class="flow-card glass-card anim-fade-up" data-delay="1400" style="border-color:rgba(255,255,255,0.15);" data-detail="Gera arquivos .js padrão, sem tipos, prontos para execução.">
+        <div class="fc-icon">📄</div>
+        <div class="fc-label" style="color:var(--text-primary)">JavaScript</div>
+      </div>
+      <div class="flow-arrow-lg anim-fade-in" data-delay="1600">→</div>
+      <div class="flow-card glass-card anim-fade-up" data-delay="1900" style="border-color:rgba(34,197,94,0.3);" data-detail="O JS gerado pode ser executado em qualquer ambiente JavaScript.">
+        <div class="fc-icon">🌐</div>
+        <div class="fc-label" style="color:var(--accent-green)">Navegador/Node</div>
+      </div>
+    </div>
+    <div class="anim-fade-in" data-delay="2200" style="color:var(--text-muted);font-style:italic;font-size:0.85rem;margin-top:1rem;">O compilador remove as informações de tipo e gera JavaScript equivalente</div>
+  </div>
+</div>
+
+<!-- === SLIDE 6 - TIPAGEM ESTÁTICA === -->
+<div class="slide" id="slide-6" data-index="5">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0" style="text-align:center;">Tipagem Estática</div>
+    <div class="duo" style="margin-top:0.5rem;">
+      <div class="code-area anim-fade-left" data-delay="300">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span>
+            <span class="code-filename">example.ts</span>
+          </div>
+          <div class="code-body typing-code"><span class="kw">let</span> idade: <span class="typ">number</span> = <span class="num">20</span>;
+<span class="kw">let</span> nome: <span class="typ">string</span> = <span class="str">"Carlos"</span>;
+<span class="kw">let</span> ativo: <span class="typ">boolean</span> = <span class="kw">true</span>;
+
+<span class="kw">let</span> dados: <span class="typ">string</span>[] = [<span class="str">"a"</span>, <span class="str">"b"</span>];</div>
+        </div>
+      </div>
+      <div class="types-area anim-fade-right" data-delay="500">
+        <div class="type-grid">
+          <div class="type-chip" data-desc="Sequência de caracteres"><span class="typ">string</span><span class="tc-desc">Texto</span></div>
+          <div class="type-chip" data-desc="Valores numéricos"><span class="num">number</span><span class="tc-desc">Número</span></div>
+          <div class="type-chip" data-desc="Verdadeiro ou falso"><span class="kw">boolean</span><span class="tc-desc">Lógico</span></div>
+          <div class="type-chip" data-desc="Estrutura de dados"><span class="typ">object</span><span class="tc-desc">Objeto</span></div>
+          <div class="type-chip" data-desc="Lista de elementos"><span class="typ">array</span><span class="tc-desc">Array</span></div>
+          <div class="type-chip" data-desc="Qualquer tipo"><span class="kw">any</span><span class="tc-desc">Qualquer</span></div>
+          <div class="type-chip" data-desc="Tipo desconhecido"><span class="kw">unknown</span><span class="tc-desc">Desconhecido</span></div>
+          <div class="type-chip" data-desc="Sem retorno"><span class="kw">void</span><span class="tc-desc">Vazio</span></div>
+          <div class="type-chip" data-desc="Valor nulo"><span class="kw">null</span><span class="tc-desc">Nulo</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- === SLIDE 7 - RECURSOS PRINCIPAIS === -->
+<div class="slide" id="slide-7" data-index="6">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">Recursos Principais</div>
+    <div class="bento-grid">
+      <div class="bento-card anim-fade-up" data-delay="300" data-detail="Define contratos para objetos. Suporta extends e implements.">
+        <div class="bc-icon">⚙️</div>
+        <div class="bc-title">Interfaces</div>
+        <div class="bc-desc">Definem contratos</div>
+        <div class="bc-detail">Define contratos para objetos. Suporta extends e implements.</div>
+      </div>
+      <div class="bento-card anim-fade-up" data-delay="400" data-detail="Cria tipos personalizados combinando tipos existentes com union, intersection, etc.">
+        <div class="bc-icon">📋</div>
+        <div class="bc-title">Types</div>
+        <div class="bc-desc">Tipos personalizados</div>
+        <div class="bc-detail">Cria tipos personalizados combinando tipos existentes.</div>
+      </div>
+      <div class="bento-card anim-fade-up" data-delay="500" data-detail="Suporte completo a classes, herança, modificadores de acesso e abstract.">
+        <div class="bc-icon">🏛️</div>
+        <div class="bc-title">Classes</div>
+        <div class="bc-desc">Orientação a objetos</div>
+        <div class="bc-detail">Suporte completo a classes, herança e modificadores.</div>
+      </div>
+      <div class="bento-card anim-fade-up" data-delay="600" data-detail="Permite criar componentes reutilizáveis que funcionam com múltiplos tipos.">
+        <div class="bc-icon">⬛</div>
+        <div class="bc-title">Generics</div>
+        <div class="bc-desc">Reutilização com tipos</div>
+        <div class="bc-detail">Componentes reutilizáveis com múltiplos tipos.</div>
+      </div>
+      <div class="bento-card wide anim-fade-up" data-delay="700" data-detail="Conjunto de valores nomeados. Por padrão começam em 0.">
+        <div class="bc-icon">📊</div>
+        <div class="bc-title">Enums</div>
+        <div class="bc-desc">Conjunto de valores nomeados</div>
+        <div class="bc-detail">Conjunto de valores nomeados. Por padrão começam em 0.</div>
+      </div>
+      <div class="bento-card anim-fade-up" data-delay="800" data-detail="Classes podem herdar propriedades e métodos de outras classes.">
+        <div class="bc-icon">🔗</div>
+        <div class="bc-title">Herança</div>
+        <div class="bc-desc">extends</div>
+        <div class="bc-detail">Classes herdam propriedades e métodos de outras.</div>
+      </div>
+      <div class="bento-card anim-fade-up" data-delay="900" data-detail="Organiza código em módulos importáveis e exportáveis.">
+        <div class="bc-icon">📦</div>
+        <div class="bc-title">Módulos</div>
+        <div class="bc-desc">Organização</div>
+        <div class="bc-detail">Organiza código em módulos importáveis e exportáveis.</div>
+      </div>
+      <div class="bento-card anim-fade-up" data-delay="1000" data-detail="Metadados para classes, métodos e propriedades. Usado em Angular e NestJS.">
+        <div class="bc-icon">✨</div>
+        <div class="bc-title">Decorators</div>
+        <div class="bc-desc">Metadados</div>
+        <div class="bc-detail">Metadados para classes, métodos e propriedades.</div>
+      </div>
+      <div class="bento-card anim-fade-up" data-delay="1100" data-detail="TypeScript infere automaticamente o tipo baseado no valor atribuído.">
+        <div class="bc-icon">🎯</div>
+        <div class="bc-title">Inferência</div>
+        <div class="bc-desc">Tipos automáticos</div>
+        <div class="bc-detail">TypeScript infere automaticamente o tipo.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- === SLIDE 8 - EXEMPLO DE CÓDIGO === -->
+<div class="slide" id="slide-8" data-index="7">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">Exemplo de Código</div>
+    <div class="slide-subtitle anim-fade-in" data-delay="200">TypeScript na prática</div>
+    <div class="code-area anim-fade-up" data-delay="400">
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span>
+          <span class="code-filename">example.ts</span>
+        </div>
+        <div class="code-body demo-code"><span class="kw">interface</span> <span class="fn">Pessoa</span> {
+    nome: <span class="typ">string</span>;
+    idade: <span class="typ">number</span>;
+}
+
+<span class="kw">function</span> <span class="fn">apresentar</span>(pessoa: <span class="typ">Pessoa</span>): <span class="typ">string</span> {
+    <span class="kw">return</span> <span class="str">`Olá, meu nome é ${pessoa.nome} e tenho ${pessoa.idade} anos.`</span>;
+}
+
+console.<span class="fn">log</span>(<span class="fn">apresentar</span>({
+    nome: <span class="str">"Ana"</span>,
+    idade: <span class="num">22</span>
+}));</div>
+      </div>
+      <button class="exec-btn" id="exec-btn">▶ Executar</button>
+    </div>
+    <div class="terminal anim-fade-up" id="terminal" data-delay="0">
+      <div class="line" id="term-line1">❯ node example.js</div>
+      <div class="line" id="term-line2">Olá, meu nome é Ana e tenho 22 anos.<span class="cursor"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- === SLIDE 9 - VANTAGENS === -->
+<div class="slide" id="slide-9" data-index="8">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">Vantagens do TypeScript</div>
+    <div class="slide-subtitle anim-fade-in" data-delay="200">Por que tantos desenvolvedores escolhem TypeScript?</div>
+    <div class="adv-grid">
+      <div class="adv-card border-green anim-fade-up" data-delay="400" data-detail='"Economizamos horas de debug graças à tipagem estática."'>
+        <div class="ac-icon">🛡️</div>
+        <div class="ac-text">Detecta erros antes da execução</div>
+        <div class="ac-detail">"Economizamos horas de debug graças à tipagem estática."</div>
+      </div>
+      <div class="adv-card anim-fade-up" data-delay="480" data-detail='"O código se torna auto-documentado com os tipos."'>
+        <div class="ac-icon">📐</div>
+        <div class="ac-text">Código mais organizado</div>
+        <div class="ac-detail">"O código se torna auto-documentado com os tipos."</div>
+      </div>
+      <div class="adv-card border-cyan anim-fade-up" data-delay="560" data-detail='"A manutenção se torna muito mais previsível."'>
+        <div class="ac-icon">🔧</div>
+        <div class="ac-text">Facilita manutenção</div>
+        <div class="ac-detail">"A manutenção se torna muito mais previsível."</div>
+      </div>
+      <div class="adv-card border-green anim-fade-up" data-delay="640" data-detail='"O IntelliSense no VS Code é muito mais poderoso."'>
+        <div class="ac-icon">⌨️</div>
+        <div class="ac-text">Melhor autocomplete</div>
+        <div class="ac-detail">"O IntelliSense no VS Code é muito mais poderoso."</div>
+      </div>
+      <div class="adv-card anim-fade-up" data-delay="720" data-detail='"Projetos TS crescem sem perder qualidade."'>
+        <div class="ac-icon">🏗️</div>
+        <div class="ac-text">Escalável</div>
+        <div class="ac-detail">"Projetos TS crescem sem perder qualidade."</div>
+      </div>
+      <div class="adv-card border-cyan anim-fade-up" data-delay="800" data-detail='"Google, Microsoft, Airbnb — todos usam TS."'>
+        <div class="ac-icon">🏢</div>
+        <div class="ac-text">Usado por grandes empresas</div>
+        <div class="ac-detail">"Google, Microsoft, Airbnb — todos usam TS."</div>
+      </div>
+    </div>
+    <div class="satisfaction-bar anim-fade-in" data-delay="1200">
+      <div class="bar"><div class="fill" id="sat-bar"></div></div>
+      <div class="label">TypeScript: <strong>97%</strong> satisfação entre desenvolvedores (dado ilustrativo)</div>
+    </div>
+  </div>
+</div>
+
+<!-- === SLIDE 10 - DESVANTAGENS === -->
+<div class="slide" id="slide-10" data-index="9">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0" style="-webkit-text-fill-color:var(--text-primary);background:none;color:var(--text-primary);">Desvantagens</div>
+    <div class="slide-subtitle anim-fade-in" data-delay="200">Nenhuma tecnologia é perfeita</div>
+    <div class="disad-list">
+      <div class="disad-card anim-fade-up" data-delay="400" data-detail="Curva de aprendizado: leva cerca de 2-4 semanas para um dev JS se adaptar.">
+        <span class="dc-icon">📚</span>
+        <span class="dc-text">Curva de aprendizado maior</span>
+      </div>
+      <div class="disad-card anim-fade-up" data-delay="550" data-detail="É necessário configurar e executar o compilador tsc antes de executar.">
+        <span class="dc-icon">⚙️</span>
+        <span class="dc-text">Necessidade de compilação</span>
+      </div>
+      <div class="disad-card anim-fade-up" data-delay="700" data-detail="Arquivos .ts, .d.ts, tsconfig.json — mais arquivos para gerenciar.">
+        <span class="dc-icon">📁</span>
+        <span class="dc-text">Mais arquivos no projeto</span>
+      </div>
+      <div class="disad-card anim-fade-up" data-delay="850" data-detail="tsconfig.json, configurações de build, integração com ferramentas.">
+        <span class="dc-icon">🔧</span>
+        <span class="dc-text">Exige configuração inicial</span>
+      </div>
+      <div class="disad-card anim-fade-up" data-delay="1000" data-detail="Para scripts pequenos, a verbosidade dos tipos pode ser desnecessária.">
+        <span class="dc-icon">📝</span>
+        <span class="dc-text">Pode ser verboso para projetos pequenos</span>
+      </div>
+    </div>
+    <div class="equilibrium-note anim-fade-up" data-delay="1200">Apesar disso, os benefícios geralmente compensam em aplicações maiores.</div>
+  </div>
+</div>
+
+<!-- === SLIDE 11 - TS vs JS === -->
+<div class="slide" id="slide-11" data-index="10">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">TypeScript vs JavaScript</div>
+    <div class="slide-subtitle anim-fade-in" data-delay="200">Entendendo as diferenças</div>
+    <div class="compare-grid anim-fade-in" data-delay="400">
+      <div class="cg-header">
+        <div class="h-label">Aspecto</div>
+        <div class="h-js">JavaScript</div>
+        <div class="h-ts">TypeScript</div>
+      </div>
+      <div class="compare-row anim-fade-up" data-delay="600">
+        <div class="cr-label">Tipagem</div>
+        <div class="cr-badge"><span class="badge orange">Dinâmica</span></div>
+        <div class="cr-badge"><span class="badge blue">Estática</span></div>
+      </div>
+      <div class="compare-row anim-fade-up" data-delay="750">
+        <div class="cr-label">Execução</div>
+        <div class="cr-badge"><span class="badge orange">Direta</span></div>
+        <div class="cr-badge"><span class="badge blue">Compilado</span></div>
+      </div>
+      <div class="compare-row anim-fade-up" data-delay="900">
+        <div class="cr-label">Complexidade</div>
+        <div class="cr-badge"><span class="badge orange">Mais simples</span></div>
+        <div class="cr-badge"><span class="badge green">Mais seguro</span></div>
+      </div>
+      <div class="compare-row anim-fade-up" data-delay="1050">
+        <div class="cr-label">Rigidez</div>
+        <div class="cr-badge"><span class="badge orange">Menos rígido</span></div>
+        <div class="cr-badge"><span class="badge blue">Mais organizado</span></div>
+      </div>
+      <div class="compare-row anim-fade-up" data-delay="1200">
+        <div class="cr-label">Ideal para</div>
+        <div class="cr-badge"><span class="badge orange">Projetos pequenos</span></div>
+        <div class="cr-badge"><span class="badge green">Projetos grandes</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- === SLIDE 12 - ONDE É UTILIZADO === -->
+<div class="slide" id="slide-12" data-index="11">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">Onde o TypeScript é utilizado?</div>
+    <div class="tag-cloud anim-fade-in" data-delay="200">
+      <div class="tag-item lg anim-scale-in" data-delay="300" data-detail="React, Angular, Vue — todos suportam TS nativamente."><span class="ti-icon">🌐</span><span class="ti-text">Desenvolvimento Web</span></div>
+      <div class="tag-item md anim-scale-in" data-delay="400" data-detail="Node.js + TS é a combinação mais usada para back-end moderno."><span class="ti-icon">⚙️</span><span class="ti-text">Back-end</span></div>
+      <div class="tag-item md anim-scale-in" data-delay="500" data-detail="React Native e NativeScript suportam TypeScript."><span class="ti-icon">📱</span><span class="ti-text">Aplicativos Mobile</span></div>
+      <div class="tag-item md anim-scale-in" data-delay="600" data-detail="Electron usa TypeScript para apps desktop multiplataforma."><span class="ti-icon">💻</span><span class="ti-text">Desktop</span></div>
+      <div class="tag-item md anim-scale-in" data-delay="700" data-detail="APIs REST e GraphQL são frequentemente construídas com TS."><span class="ti-icon">🔗</span><span class="ti-text">APIs</span></div>
+      <div class="tag-item sm anim-scale-in" data-delay="800" data-detail="Grandes corporações usam TS em seus sistemas internos."><span class="ti-icon">🏢</span><span class="ti-text">Sistemas empresariais</span></div>
+      <div class="tag-item sm anim-scale-in" data-delay="900" data-detail="Unity e engines baseadas em JS/TS."><span class="ti-icon">🎮</span><span class="ti-text">Jogos</span></div>
+      <div class="tag-item sm anim-scale-in" data-delay="1000" data-detail="Bibliotecas de IA/ML estão adotando TS."><span class="ti-icon">🤖</span><span class="ti-text">Inteligência Artificial</span></div>
+      <div class="tag-item sm anim-scale-in" data-delay="1100" data-detail="Serverless e cloud functions com TS."><span class="ti-icon">☁️</span><span class="ti-text">Cloud Computing</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- === SLIDE 13 - FRAMEWORKS === -->
+<div class="slide" id="slide-13" data-index="12">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">Frameworks & Ferramentas</div>
+    <div class="slide-subtitle anim-fade-in" data-delay="200">Tecnologias com suporte nativo ou recomendado ao TypeScript</div>
+    <div class="fw-grid anim-fade-in" data-delay="300">
+      <div class="fw-card" data-detail="Framework completo para SPAs. Usa TS nativamente desde o Angular 2.">
+        <div class="fw-logo" style="color:#dd0031;">A</div>
+        <div class="fw-name">Angular</div>
+      </div>
+      <div class="fw-card" data-detail="Biblioteca para UIs. Suporte oficial a TS com definições de tipo incluídas.">
+        <div class="fw-logo" style="color:#61dafb;">⚛</div>
+        <div class="fw-name">React</div>
+      </div>
+      <div class="fw-card" data-detail="Framework React full-stack. TS é cidadão de primeira classe.">
+        <div class="fw-logo" style="color:#fff;">N</div>
+        <div class="fw-name">Next.js</div>
+      </div>
+      <div class="fw-card" data-detail="Framework progressivo. Suporte TS oficial e recomendado.">
+        <div class="fw-logo" style="color:#42b883;">V</div>
+        <div class="fw-name">Vue</div>
+      </div>
+      <div class="fw-card" data-detail="Framework Node.js com TS nativo e injeção de dependência.">
+        <div class="fw-logo" style="color:#e0234e;">N</div>
+        <div class="fw-name">NestJS</div>
+      </div>
+      <div class="fw-card" data-detail="Runtime JS multiplataforma. Suporte TS via definições de tipo.">
+        <div class="fw-logo" style="color:#339933;">n</div>
+        <div class="fw-name">Node.js</div>
+      </div>
+      <div class="fw-card" data-detail="Framework para apps desktop. TS suportado nativamente.">
+        <div class="fw-logo" style="color:#9feaf9;">e⁻</div>
+        <div class="fw-name">Electron</div>
+      </div>
+      <div class="fw-card" data-detail="Runtime TS/JS moderno. Executa TS diretamente sem compilação.">
+        <div class="fw-logo" style="color:#fff;">D</div>
+        <div class="fw-name">Deno</div>
+      </div>
+    </div>
+    <div class="anim-fade-in" data-delay="1400" style="color:var(--text-muted);font-style:italic;font-size:0.8rem;margin-top:0.8rem;">Quase todas essas tecnologias oferecem suporte nativo ao TypeScript</div>
+  </div>
+</div>
+
+<!-- === SLIDE 14 - MERCADO === -->
+<div class="slide" id="slide-14" data-index="13">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">Mercado de Trabalho</div>
+    <div class="slide-subtitle anim-fade-in" data-delay="200">TypeScript no mercado profissional</div>
+    <div class="kpi-grid">
+      <div class="kpi-card anim-fade-up" data-delay="400">
+        <div class="kpi-icon">🔥</div>
+        <div class="kpi-number"><span class="count-up" data-target="85">0</span><span class="percent">%</span></div>
+        <div class="kpi-label">Alta Demanda</div>
+      </div>
+      <div class="kpi-card anim-fade-up" data-delay="500">
+        <div class="kpi-icon">🚀</div>
+        <div class="kpi-number"><span class="count-up" data-target="78">0</span><span class="percent">%</span></div>
+        <div class="kpi-label">Projetos Modernos</div>
+      </div>
+      <div class="kpi-card anim-fade-up" data-delay="600">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-desc">Facilita colaboração</div>
+      </div>
+      <div class="kpi-card anim-fade-up" data-delay="700">
+        <div class="kpi-icon">🏢</div>
+        <div class="kpi-desc">Presente em grandes apps</div>
+      </div>
+      <div class="kpi-card anim-fade-up" data-delay="800">
+        <div class="kpi-icon">🔄</div>
+        <div class="kpi-desc">Valorizado em vagas Full Stack</div>
+      </div>
+    </div>
+    <div class="market-note anim-fade-in" data-delay="2500">TypeScript: a linguagem que mais cresce no ecossistema JS</div>
+  </div>
+</div>
+
+<!-- === SLIDE 15 - CONCLUSÃO === -->
+<div class="slide" id="slide-15" data-index="14">
+  <div class="slide-content">
+    <div class="slide-title anim-fade-up" data-delay="0">Conclusão</div>
+    <div class="summary-grid">
+      <div class="summary-card anim-fade-up" data-delay="300"><span class="sc-icon">🛡️</span><span class="sc-text">Mais segurança</span></div>
+      <div class="summary-card anim-fade-up" data-delay="380"><span class="sc-icon">📋</span><span class="sc-text">Melhor organização</span></div>
+      <div class="summary-card anim-fade-up" data-delay="460"><span class="sc-icon">✨</span><span class="sc-text">Código mais limpo</span></div>
+      <div class="summary-card anim-fade-up" data-delay="700"><span class="sc-icon">🐛</span><span class="sc-text">Menos bugs</span></div>
+      <div class="summary-card anim-fade-up" data-delay="780"><span class="sc-icon">⚡</span><span class="sc-text">Melhor experiência de desenvolvimento</span></div>
+      <div class="summary-card anim-fade-up" data-delay="860"><span class="sc-icon">🔗</span><span class="sc-text">Compatibilidade total com JavaScript</span></div>
+    </div>
+    <div class="quote-block anim-fade-up" data-delay="1100">
+      <span class="quote-mark left">"</span>
+      <div class="quote-text">TypeScript não substitui o JavaScript; ele o torna mais confiável, escalável e adequado para aplicações modernas.</div>
+      <span class="quote-mark right">"</span>
+    </div>
+    <div class="fim-text anim-fade-in" data-delay="1800">Obrigado!</div>
+  </div>
+</div>
+
+</div><!-- /presentation -->
+
+<!-- Navigation -->
+<button class="btn-nav prev" id="prev-btn" aria-label="Anterior">←</button>
+<button class="btn-nav next" id="next-btn" aria-label="Próximo">→</button>
+
+<div id="progress-container">
+  <div id="slide-dots"></div>
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+  <div id="slide-counter">01 / 15</div>
+</div>
+
+<button id="fullscreen-btn" aria-label="Tela cheia">⛶</button>
+
+<script>
+(function() {
+  'use strict';
+
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  let current = 0;
+  let isTransitioning = false;
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const progressFill = document.getElementById('progress-fill');
+  const slideCounter = document.getElementById('slide-counter');
+  const dotsContainer = document.getElementById('slide-dots');
+  const fsBtn = document.getElementById('fullscreen-btn');
+  const tooltip = document.getElementById('tooltip');
+  const cursor = document.getElementById('custom-cursor');
+
+  // Transitions between slides (index i -> i+1)
+  const transitions = [
+    'fade-scale', 'slide', 'cube', 'morph', 'fade',
+    'cross-fade', 'scale', 'slide', 'push', 'fade',
+    'glitch', 'zoom', 'cube', 'cross-fade'
+  ];
+
+  // Create dots
+  for (let i = 0; i < totalSlides; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('data-index', i);
+    dot.setAttribute('aria-label', `Slide ${i + 1}`);
+    dot.addEventListener('click', function() { goToSlide(parseInt(this.getAttribute('data-index'))); });
+    dotsContainer.appendChild(dot);
+  }
+
+  function updateUI() {
+    // Update dots
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+    // Progress
+    const pct = ((current + 1) / totalSlides) * 100;
+    progressFill.style.width = pct + '%';
+    // Counter
+    slideCounter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(totalSlides).padStart(2, '0');
+    // Buttons
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === totalSlides - 1;
+  }
+
+  function goToSlide(index) {
+    if (isTransitioning || index === current || index < 0 || index >= totalSlides) return;
+    const from = current;
+    const to = index;
+    const direction = to > from ? 'next' : 'prev';
+    const transIdx = direction === 'next' ? from : from - 1;
+    const effect = direction === 'next' ? (transitions[from] || 'fade') : (transitions[to] || 'fade');
+    const duration = 700;
+
+    isTransitioning = true;
+
+    const fromSlide = slides[from];
+    const toSlide = slides[to];
+
+    // Set up for transition
+    fromSlide.classList.add('exiting');
+    fromSlide.style.setProperty('--exit-anim', 'exit-' + effect);
+    toSlide.style.setProperty('--enter-anim', 'enter-' + effect);
+    toSlide.classList.add('entering', 'active');
+
+    // Reflow
+    void toSlide.offsetWidth;
+    void fromSlide.offsetWidth;
+
+    // Trigger animations
+    fromSlide.style.animation = 'exit-' + effect + ' ' + duration + 'ms var(--ease-out-expo) forwards';
+    toSlide.style.animation = 'enter-' + effect + ' ' + duration + 'ms var(--ease-out-expo) forwards';
+
+    setTimeout(function() {
+      fromSlide.classList.remove('active', 'exiting');
+      fromSlide.style.animation = '';
+      toSlide.classList.remove('entering');
+      toSlide.style.animation = '';
+      current = to;
+      isTransitioning = false;
+      updateUI();
+      runSlideAnimations(to);
+    }, duration);
+  }
+
+  function nextSlide() {
+    if (current < totalSlides - 1) {
+      if (current === totalSlides - 2) {
+        // Last transition: button visual feedback
+        nextBtn.style.opacity = '0.5';
+      }
+      goToSlide(current + 1);
+    } else {
+      nextBtn.style.transform = 'scale(0.9)';
+      setTimeout(function() { nextBtn.style.transform = ''; }, 200);
+    }
+  }
+
+  function prevSlide() {
+    if (current > 0) goToSlide(current - 1);
+  }
+
+  // Entry animations per slide
+  function runSlideAnimations(index) {
+    const slide = slides[index];
+    const els = slide.querySelectorAll('[class*="anim-"]');
+    els.forEach(function(el) {
+      el.classList.remove('done');
+    });
+
+    // Force reflow
+    void slide.offsetWidth;
+
+    els.forEach(function(el) {
+      var delay = parseInt(el.getAttribute('data-delay')) || 0;
+      setTimeout(function() {
+        el.classList.add('done');
+      }, delay);
+    });
+
+    // Special slide animations
+    runSpecialAnimations(index);
+  }
+
+  function runSpecialAnimations(index) {
+    // Slide 0 - Capa line
+    if (index === 0) {
+      setTimeout(function() {
+        document.querySelector('#slide-0 .capa-line').classList.add('done');
+      }, 600);
+    }
+
+    // Slide 8 - Terminal lines
+    if (index === 7) {
+      setTimeout(function() {
+        var l1 = document.getElementById('term-line1');
+        var l2 = document.getElementById('term-line2');
+        if (l1) l1.classList.add('show');
+        setTimeout(function() {
+          if (l2) l2.classList.add('show');
+        }, 400);
+      }, 5200);
+    }
+
+    // Slide 9 - Satisfaction bar
+    if (index === 8) {
+      setTimeout(function() {
+        var bar = document.getElementById('sat-bar');
+        if (bar) bar.style.width = '97%';
+      }, 2000);
+    }
+
+    // Slide 13 - Count up
+    if (index === 13) {
+      setTimeout(function() {
+        document.querySelectorAll('.count-up').forEach(function(el) {
+          var target = parseInt(el.getAttribute('data-target'));
+          animateCount(el, target);
+        });
+      }, 1000);
+    }
+
+    // Slide 1 - Wireframe rotation
+    if (index === 0) {
+      var wf = document.querySelector('#slide-0 .wireframe-grid');
+      if (wf) {
+        wf.style.transformOrigin = 'center';
+        wf.style.animation = 'rotate-grid 60s linear infinite';
+      }
+    }
+  }
+
+  // Count up animation
+  function animateCount(el, target) {
+    var start = 0;
+    var duration = 2000;
+    var startTime = null;
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var progress = Math.min((timestamp - startTime) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var currentVal = Math.floor(eased * target);
+      el.textContent = currentVal;
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    switch(e.key) {
+      case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ': e.preventDefault(); nextSlide(); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp': e.preventDefault(); prevSlide(); break;
+      case 'Home': e.preventDefault(); goToSlide(0); break;
+      case 'End': e.preventDefault(); goToSlide(totalSlides - 1); break;
+      case 'f': case 'F': toggleFullscreen(); break;
+    }
+  });
+
+  // Mouse wheel
+  document.addEventListener('wheel', function(e) {
+    if (e.deltaY > 0) nextSlide();
+    else prevSlide();
+  }, { passive: true });
+
+  // Touch swipe
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    var diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) nextSlide();
+      else prevSlide();
+    }
+  }, { passive: true });
+
+  // Button events
+  prevBtn.addEventListener('click', prevSlide);
+  nextBtn.addEventListener('click', nextSlide);
+
+  // Fullscreen
+  fsBtn.addEventListener('click', toggleFullscreen);
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(function(){});
+      fsBtn.textContent = '✕';
+    } else {
+      document.exitFullscreen().catch(function(){});
+      fsBtn.textContent = '⛶';
+    }
+  }
+  document.addEventListener('fullscreenchange', function() {
+    fsBtn.textContent = document.fullscreenElement ? '✕' : '⛶';
+  });
+
+  // Custom cursor
+  let cursorVisible = true;
+  if (window.matchMedia('(pointer: fine)').matches) {
+    document.body.classList.remove('no-cursor');
+    document.addEventListener('mousemove', function(e) {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+    document.addEventListener('mouseover', function(e) {
+      var target = e.target;
+      if (target.matches('button, a, .clickable, .glass-card, .bento-card, .adv-card, .fw-card, .kpi-card, .summary-card, .tag-item, .type-chip, .flow-card, .timeline-item .tl-content, .disad-card, .compare-row, .pair-item, .dot')) {
+        cursor.classList.add('hover');
+      }
+    });
+    document.addEventListener('mouseout', function(e) {
+      cursor.classList.remove('hover');
+    });
+    document.addEventListener('mouseleave', function() {
+      cursor.style.opacity = '0';
+    });
+    document.addEventListener('mouseenter', function() {
+      cursor.style.opacity = '1';
+    });
+  } else {
+    document.body.classList.add('no-cursor');
+  }
+
+  // Particle system
+  var canvas = document.getElementById('particles-canvas');
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var PARTICLE_COUNT = 50;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function createParticle() {
+    return {
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      size: Math.random() * 2.5 + 1,
+      alpha: Math.random() * 0.3 + 0.1,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.02 + 0.005
+    };
+  }
+
+  for (var i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push(createParticle());
+  }
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(function(p) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.pulse += p.pulseSpeed;
+
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+
+      var alpha = p.alpha * (0.7 + 0.3 * Math.sin(p.pulse));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(49, 120, 198, ' + alpha + ')';
+      ctx.fill();
+
+      // Rare glow
+      if (Math.abs(Math.sin(p.pulse * 3)) > 0.98) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(49, 120, 198, ' + (alpha * 0.15) + ')';
+        ctx.fill();
+      }
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  // Tooltip system
+  var tooltipEl = document.getElementById('tooltip');
+  var tooltipTimer = null;
+
+  document.addEventListener('mouseover', function(e) {
+    var target = e.target.closest('[data-detail]');
+    if (target && tooltipEl) {
+      tooltipEl.textContent = target.getAttribute('data-detail');
+      tooltipEl.classList.add('show');
+      positionTooltip(e);
+    }
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (tooltipEl && tooltipEl.classList.contains('show')) {
+      positionTooltip(e);
+    }
+  });
+
+  document.addEventListener('mouseout', function(e) {
+    var target = e.target.closest('[data-detail]');
+    if (target && tooltipEl) {
+      tooltipEl.classList.remove('show');
+    }
+  });
+
+  function positionTooltip(e) {
+    var x = e.clientX + 15;
+    var y = e.clientY + 15;
+    var rect = tooltipEl.getBoundingClientRect();
+    if (x + rect.width > window.innerWidth) x = e.clientX - rect.width - 15;
+    if (y + rect.height > window.innerHeight) y = e.clientY - rect.height - 15;
+    tooltipEl.style.left = x + 'px';
+    tooltipEl.style.top = y + 'px';
+  }
+
+  // Expandable cards
+  document.addEventListener('click', function(e) {
+    // Bento cards
+    var bento = e.target.closest('.bento-card');
+    if (bento) {
+      var detail = bento.querySelector('.bc-detail');
+      if (detail) detail.classList.toggle('open');
+      return;
+    }
+    // Adv cards
+    var adv = e.target.closest('.adv-card');
+    if (adv) {
+      var ad = adv.querySelector('.ac-detail');
+      if (ad) ad.classList.toggle('open');
+      return;
+    }
+    // Timeline items
+    var tl = e.target.closest('.timeline-item .tl-content');
+    if (tl) {
+      var td = tl.querySelector('.tl-detail');
+      if (td) td.classList.toggle('open');
+      return;
+    }
+  });
+
+  // Execute button on slide 8
+  var execBtn = document.getElementById('exec-btn');
+  if (execBtn) {
+    execBtn.addEventListener('click', function() {
+      var l1 = document.getElementById('term-line1');
+      var l2 = document.getElementById('term-line2');
+      if (l1) { l1.classList.remove('show'); void l1.offsetWidth; l1.classList.add('show'); }
+      if (l2) { l2.classList.remove('show'); void l2.offsetWidth; setTimeout(function() { l2.classList.add('show'); }, 400); }
+    });
+  }
+
+  // Wireframe spin keyframe
+  var styleSheet = document.createElement('style');
+  styleSheet.textContent = '@keyframes rotate-grid { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+  document.head.appendChild(styleSheet);
+
+  // Initialize
+  updateUI();
+  runSlideAnimations(0);
+
+})();
+</script>
+</body>
+</html>

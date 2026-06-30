@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ponte de Tijolos acima das Nuvens</title>
+<style>
+*{margin:0;padding:0}
+body{overflow:hidden;background:#000;width:100vw;height:100vh}
+canvas{display:block;width:100%;height:100%}
+</style>
+</head>
+<body>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const BL = 280;
+const BW = 6;
+const BLOCK_W = 0.5;
+const BLOCK_H = 0.12;
+const BLOCK_D = 0.3;
+const COLS = 10;
+const ROWS = Math.floor(BL / BLOCK_D);
+const HALF_W = BW / 2;
+const SUN_DIR = new THREE.Vector3(0.5, 0.6, -0.7).normalize();
+
+function seededRandom(s) {
+  let seed = s;
+  return () => { seed = (seed * 16807 + 0) % 2147483647; return (seed - 1) / 2147483646; };
+}
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
+
+function hash2D(x, y) {
+  const h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return h - Math.floor(h);
+}
+function valueNoise2D(x, y) {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = x - ix, fy = y - iy;
+  const sx = fx * fx * (3 - 2 * fx);
+  const sy = fy * fy * (3 - 2 * fy);
+  const v00 = hash2D(ix, iy);
+  const v10 = hash2D(ix + 1, iy);
+  const v01 = hash2D(ix, iy + 1);
+  const v11 = hash2D(ix + 1, iy + 1);
+  return lerp(lerp(v00, v10, sx), lerp(v01, v11, sx), sy);
+}
+function fbm2D(x, y, o) {
+  let v = 0, a = 0.5, f = 1;
+  for (let i = 0; i < o; i++) { v += a * valueNoise2D(x * f, y * f); f *= 2; a *= 0.5; }
+  return v;
+}
+
+function genStoneTex(w, h) {
+  const bD = new Uint8Array(w * h * 4);
+  const cD = new Uint8Array(w * h * 4);
+  const rD = new Uint8Array(w * h * 4);
+  const nD = new Uint8Array(w * h * 4);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const u = x / w, v = y / h;
+
+      const grain = fbm2D(u * 40, v * 40, 3);
+      const struct = fbm2D(u * 8, v * 8, 4);
+      const crack = Math.pow(Math.abs(Math.sin(u * 53 + v * 37) * Math.sin(v * 47 - u * 31)), 0.35);
+      const poreV = Math.max(0, fbm2D(u * 60, v * 60, 2) - 0.85) * 6;
+      const bump = clamp(grain * 0.35 + struct * 0.35 + crack * 0.2 + poreV * 0.1, 0, 1);
+      const bv = clamp(bump * 255, 0, 255);
+      bD[i] = bv; bD[i+1] = bv; bD[i+2] = bv; bD[i+3] = 255;
+
+      const base = 0.65 + fbm2D(u * 4, v * 4, 3) * 0.25;
+      const stain = fbm2D(u * 5 + 100, v * 5 + 100, 3) * 0.1;
+      const cv = clamp(base + stain, 0, 1);
+      const cc = clamp(cv * 255, 0, 255);
+      cD[i] = cc; cD[i+1] = cc; cD[i+2] = cc; cD[i+3] = 255;
+
+      const rv = clamp(0.5 + fbm2D(u * 10, v * 10, 3) * 0.4, 0, 1);
+      const rc = clamp(rv * 255, 0, 255);
+      rD[i] = rc; rD[i+1] = rc; rD[i+2] = rc; rD[i+3] = 255;
+
+      const dx = 1 / w;
+      const bx = x === w - 1 ? 0 : x + 1;
+      const by = y === h - 1 ? 0 : y + 1;
+      const b0 = bump;
+      const bxVal = (x === w - 1) ? (bD[(y * w + 0) * 4] / 255) : (bD[(y * w + (x + 1)) * 4] / 255);
+      const byVal = (y === h - 1) ? (bD[(0 * w + x) * 4] / 255) : (bD[((y + 1) * w + x) * 4] / 255);
+      const nxVal = (b0 - bxVal);
+      const nyVal = (b0 - byVal);
+      const nzVal = Math.sqrt(1 - clamp(nxVal * nxVal + nyVal * nyVal, 0, 1));
+      nD[i] = clamp((nxVal * 0.5 + 0.5) * 255, 0, 255);
+      nD[i+1] = clamp((nyVal * 0.5 + 0.5) * 255, 0, 255);
+      nD[i+2] = clamp(nzVal * 255, 0, 255);
+      nD[i+3] = 255;
+    }
+  }
+  const makeTex = (d, r, rep) => {
+    const t = new THREE.DataTexture(d, w, h, THREE.RGBAFormat);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(r, r);
+    t.needsUpdate = true;
+    return t;
+  };
+  return {
+    bumpTex: makeTex(bD, 8, 8),
+    colTex: makeTex(cD, 8, 8),
+    rghTex: makeTex(rD, 8, 8),
+    normTex: makeTex(nD, 8, 8),
+  };
+}
+
+function createBlockGeo() {
+  const geo = new THREE.BoxGeometry(1, 1, 1, 4, 3, 4);
+  const pos = geo.attributes.position;
+  const a = pos.array;
+  const r = seededRandom(999);
+  for (let i = 0; i < a.length; i += 3) {
+    const x = a[i], y = a[i+1], z = a[i+2];
+    const len = Math.sqrt(x*x + y*y + z*z);
+    if (len < 0.01) continue;
+    const nx = x/len, ny = y/len, nz = z/len;
+    const d1 = (r() - 0.5) * 0.12;
+    const d2 = Math.sin(x*14 + y*9 + z*11) * 0.06;
+    const d3 = Math.cos(x*22 - y*15 + z*8) * 0.04;
+    const cf = Math.max(Math.abs(x), Math.abs(y), Math.abs(z));
+    const chip = cf > 0.75 ? (r() - 0.5) * 0.2 * (cf - 0.75) / 0.25 : 0;
+    const disp = d1 + d2 + d3 + chip;
+    a[i] += nx * disp; a[i+1] += ny * disp; a[i+2] += nz * disp;
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  geo.attributes.uv.needsUpdate = false;
+  return geo;
+}
+
+function getStoneColor(r) {
+  const b = lerp(0.65, 0.88, r());
+  return new THREE.Color(
+    clamp(b + lerp(-0.05, 0.06, r()), 0, 1),
+    clamp(b + lerp(-0.04, 0.04, r()), 0, 1),
+    clamp(b + lerp(-0.07, 0.03, r()), 0, 1)
+  );
+}
+
+function createBridge(scene, tex) {
+  const blockGeo = createBlockGeo();
+  const mat = new THREE.MeshStandardMaterial({
+    map: tex.colTex,
+    bumpMap: tex.bumpTex, bumpScale: 0.06,
+    roughnessMap: tex.rghTex, roughness: 0.9,
+    metalness: 0,
+    vertexColors: true,
+  });
+
+  const total = COLS * ROWS + 500;
+  const mesh = new THREE.InstancedMesh(blockGeo, mat, total);
+  mesh.castShadow = true; mesh.receiveShadow = true;
+  const d = new THREE.Object3D();
+  const cols = new Float32Array(total * 3);
+  let idx = 0;
+  const rng = seededRandom(54321);
+
+  for (let r = 0; r < ROWS; r++) {
+    const zPos = -r * BLOCK_D;
+    if (zPos < -BL) break;
+    for (let c = 0; c < COLS; c++) {
+      const xPos = -HALF_W + (c + 0.5) * (BW / COLS);
+      d.position.set(
+        xPos + (rng() - 0.5) * 0.08,
+        (rng() - 0.5) * 0.04,
+        zPos + (rng() - 0.5) * 0.05
+      );
+      d.scale.set(
+        (1 + (rng() - 0.5) * 0.2) * BLOCK_W,
+        (1 + (rng() - 0.5) * 0.25) * BLOCK_H,
+        (1 + (rng() - 0.5) * 0.2) * BLOCK_D
+      );
+      d.rotation.set(
+        (rng() - 0.5) * 0.03,
+        (rng() - 0.5) * 0.05,
+        (rng() - 0.5) * 0.02
+      );
+      d.updateMatrix();
+      mesh.setMatrixAt(idx, d.matrix);
+      const c2 = getStoneColor(rng);
+      cols[idx * 3] = c2.r; cols[idx * 3 + 1] = c2.g; cols[idx * 3 + 2] = c2.b;
+      idx++;
+    }
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+  mesh.instanceColor = new THREE.InstancedBufferAttribute(cols, 3);
+  mesh.instanceColor.needsUpdate = true;
+  scene.add(mesh);
+
+  const baseMat = new THREE.MeshStandardMaterial({ color: 0x4a3d30, roughness: 0.95, metalness: 0 });
+  const base = new THREE.Mesh(new THREE.BoxGeometry(BW, 0.8, BL), baseMat);
+  base.position.set(0, -0.4, -BL / 2);
+  base.receiveShadow = true;
+  scene.add(base);
+}
+
+function createRailings(scene, tex) {
+  const PI = 1.1;
+  const PC = Math.floor(BL / PI);
+  const postGeo = new THREE.BoxGeometry(0.2, 0.5, 0.2, 2, 2, 2);
+  const pp = postGeo.attributes.position.array;
+  for (let i = 0; i < pp.length; i += 3) {
+    const n = Math.sin(pp[i] * 19 + pp[i+1] * 13 + pp[i+2] * 7) * 0.03;
+    pp[i] += pp[i] * n; pp[i+1] += pp[i+1] * n; pp[i+2] += pp[i+2] * n;
+  }
+  postGeo.attributes.position.needsUpdate = true;
+  postGeo.computeVertexNormals();
+
+  const pMat = new THREE.MeshStandardMaterial({
+    map: tex.colTex, bumpMap: tex.bumpTex, bumpScale: 0.04,
+    roughness: 0.9, metalness: 0, vertexColors: true,
+  });
+  const posts = new THREE.InstancedMesh(postGeo, pMat, PC * 2 + 100);
+  posts.castShadow = true;
+  const pd = new THREE.Object3D();
+  const pC = new Float32Array((PC * 2 + 100) * 3);
+  let pi = 0;
+  const rP = seededRandom(111);
+
+  for (let s = 0; s < 2; s++) {
+    const sign = s === 0 ? -1 : 1;
+    for (let i = 0; i < PC; i++) {
+      const z = -i * PI;
+      if (z < -BL + 1) break;
+      pd.position.set(sign * (HALF_W - 0.15) + (rP() - 0.5) * 0.06, 0.2 + (rP() - 0.5) * 0.03, z + (rP() - 0.5) * 0.05);
+      pd.scale.set(1 + (rP() - 0.5) * 0.12, 1 + (rP() - 0.5) * 0.1, 1 + (rP() - 0.5) * 0.12);
+      pd.rotation.set(0, (rP() - 0.5) * 0.04, 0);
+      pd.updateMatrix();
+      posts.setMatrixAt(pi, pd.matrix);
+      const c2 = getStoneColor(rP);
+      pC[pi * 3] = c2.r; pC[pi * 3 + 1] = c2.g; pC[pi * 3 + 2] = c2.b;
+      pi++;
+    }
+  }
+  posts.instanceMatrix.needsUpdate = true;
+  posts.instanceColor = new THREE.InstancedBufferAttribute(pC, 3);
+  posts.instanceColor.needsUpdate = true;
+  scene.add(posts);
+
+  const railGeo = new THREE.BoxGeometry(0.25, 0.12, 1, 1, 1, 2);
+  const rMat = new THREE.MeshStandardMaterial({
+    map: tex.colTex, bumpMap: tex.bumpTex, bumpScale: 0.03,
+    roughness: 0.9, metalness: 0, vertexColors: true,
+  });
+  const rails = new THREE.InstancedMesh(railGeo, rMat, PC * 4 + 100);
+  rails.castShadow = true;
+  const rd = new THREE.Object3D();
+  const rC = new Float32Array((PC * 4 + 100) * 3);
+  let ri = 0;
+  const rR = seededRandom(222);
+
+  for (let s = 0; s < 2; s++) {
+    const sign = s === 0 ? -1 : 1;
+    for (let i = 0; i < PC - 1; i++) {
+      const z = -i * PI;
+      if (z - PI < -BL) break;
+      const gap = PI + (rR() - 0.5) * 0.06;
+      rd.position.set(sign * (HALF_W - 0.15) + (rR() - 0.5) * 0.04, 0.45 + (rR() - 0.5) * 0.02, z - gap/2 + (rR() - 0.5) * 0.04);
+      rd.scale.set(1 + (rR() - 0.5) * 0.1, 1 + (rR() - 0.5) * 0.12, gap * 0.92);
+      rd.rotation.set((rR() - 0.5) * 0.025, (rR() - 0.5) * 0.025, (rR() - 0.5) * 0.02);
+      rd.updateMatrix();
+      rails.setMatrixAt(ri, rd.matrix);
+      const c2 = getStoneColor(rR);
+      rC[ri * 3] = c2.r; rC[ri * 3 + 1] = c2.g; rC[ri * 3 + 2] = c2.b;
+      ri++;
+    }
+  }
+  for (let s = 0; s < 2; s++) {
+    const sign = s === 0 ? -1 : 1;
+    for (let i = 0; i < PC - 1; i++) {
+      const z = -i * PI;
+      if (z - PI < -BL) break;
+      const gap = PI + (rR() - 0.5) * 0.06;
+      rd.position.set(sign * (HALF_W - 0.2) + (rR() - 0.5) * 0.04, 0.08 + (rR() - 0.5) * 0.02, z - gap/2 + (rR() - 0.5) * 0.04);
+      rd.scale.set(1 + (rR() - 0.5) * 0.1, 0.9 + (rR() - 0.5) * 0.12, gap * 0.92);
+      rd.rotation.set((rR() - 0.5) * 0.025, (rR() - 0.5) * 0.025, (rR() - 0.5) * 0.02);
+      rd.updateMatrix();
+      rails.setMatrixAt(ri, rd.matrix);
+      const c2 = getStoneColor(rR);
+      rC[ri * 3] = c2.r; rC[ri * 3 + 1] = c2.g; rC[ri * 3 + 2] = c2.b;
+      ri++;
+    }
+  }
+  rails.instanceMatrix.needsUpdate = true;
+  rails.instanceColor = new THREE.InstancedBufferAttribute(rC, 3);
+  rails.instanceColor.needsUpdate = true;
+  scene.add(rails);
+}
+
+function createSky(scene) {
+  const c = document.createElement('canvas');
+  c.width = 2; c.height = 512;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 0, 512);
+  g.addColorStop(0, '#4875b5');
+  g.addColorStop(0.2, '#6a9bd5');
+  g.addColorStop(0.4, '#8dbae8');
+  g.addColorStop(0.6, '#b0d4f4');
+  g.addColorStop(0.8, '#cde0f4');
+  g.addColorStop(1, '#e2ecf5');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 2, 512);
+  const tex = new THREE.CanvasTexture(c);
+  const mat = new THREE.ShaderMaterial({
+    vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+    fragmentShader: `uniform sampler2D uTex;varying vec2 vUv;void main(){vec2 uv=vUv;uv.y=uv.y*0.85+0.15;gl_FragColor=texture2D(uTex,uv);}`,
+    uniforms: { uTex: { value: tex } },
+    side: THREE.BackSide, depthWrite: false,
+  });
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(350, 32, 32), mat);
+  sky.renderOrder = -10;
+  scene.add(sky);
+}
+
+function createCloudVolume(scene) {
+  const volWidth = 400, volHeight = 10, volDepth = 300;
+  const volCenter = new THREE.Vector3(0, -5, -140);
+  const vMin = new THREE.Vector3(volCenter.x - volWidth/2, volCenter.y - volHeight/2, volCenter.z - volDepth/2);
+  const vMax = new THREE.Vector3(volCenter.x + volWidth/2, volCenter.y + volHeight/2, volCenter.z + volDepth/2);
+
+  const vert = `varying vec3 vW;void main(){vec4 wp=modelMatrix*vec4(position,1.0);vW=wp.xyz;gl_Position=projectionMatrix*viewMatrix*wp;}`;
+
+  const frag = `
+    precision highp float;
+    varying vec3 vW;
+    uniform vec3 uBMin, uBMax, uSun;
+    uniform float uT;
+
+    vec2 hash2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+    float n2(vec2 p){
+      vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+      return mix(mix(hash2(i),hash2(i+vec2(1,0)),f.x),mix(hash2(i+vec2(0,1)),hash2(i+vec2(1,1)),f.x),f.y);
+    }
+    float f2(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n2(p);p*=2.;a*=.5;}return v;}
+
+    float cd(vec3 p){
+      float h=smoothstep(-7.,-2.5,p.y)*(1.-smoothstep(-2.5,.5,p.y));
+      float n=f2(p.xz*.008+uT*.00004);
+      float d=n2(p.xz*.05+uT*.00006)*.3;
+      float c=smoothstep(.2,.5,n+d);
+      float e=1.-smoothstep(0.,.15,max(abs(p.x-vMin.x-(vMax.x-vMin.x)*.5)/((vMax.x-vMin.x)*.5)-.7,0.));
+      return h*c*.5*e;
+    }
+
+    vec2 rb(vec3 ro,vec3 rd,vec3 bmin,vec3 bmax){
+      vec3 t1=(bmin-ro)/rd,t2=(bmax-ro)/rd,tn=min(t1,t2),tx=max(t1,t2);
+      return vec2(max(max(tn.x,tn.y),tn.z),min(min(tx.x,tx.y),tx.z));
+    }
+
+    void main(){
+      vec3 ro=cameraPosition,rd=normalize(vW-ro);
+      vec2 t=rb(ro,rd,uBMin,uBMax);
+      if(t.x>t.y||t.y<0.)discard;
+      t.x=max(t.x,0.);
+      float td=0.;vec3 tc=vec3(0.);
+      float ss=(t.y-t.x)/36.;
+      for(float i=0.;i<36.;i++){
+        vec3 p=ro+rd*(t.x+i*ss);
+        float d=cd(p);
+        if(d>.01){
+          float l=.3+.7*max(0.,dot(normalize(p-ro),uSun));
+          float ph=1.+.2*pow(max(0.,dot(rd,uSun)),2.);
+          vec3 co=mix(vec3(.62,.59,.55),vec3(.85,.82,.78),l*ph);
+          tc+=co*d*ss*3.;td+=d*ss;
+        }
+        if(td>1.)break;
+      }
+      td=min(td,1.);
+      if(td<.01)discard;
+      tc/=max(td,.01);
+      gl_FragColor=vec4(tc,td*.75);
+    }
+  `;
+
+  const mkVol = (w, h, d, pos, bmin, bmax, c1, c2, ro) => {
+    const mat = new THREE.ShaderMaterial({
+      vertexShader: vert,
+      fragmentShader: frag,
+      transparent: true, depthWrite: false, side: THREE.FrontSide,
+      uniforms: { uBMin: { value: bmin }, uBMax: { value: bmax }, uSun: { value: SUN_DIR }, uT: { value: 0 } },
+    });
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+    m.position.copy(pos);
+    m.renderOrder = ro;
+    scene.add(m);
+    return m;
+  };
+
+  const near = mkVol(volWidth, volHeight, volDepth, volCenter, vMin, vMax, null, null, -5);
+
+  const farFrag = frag.replace('smoothstep(.2,.5,n+d)', 'smoothstep(.1,.35,n+d)').replace('vec3(.62,.59,.55)', 'vec3(.52,.5,.46)').replace('36.', '24.');
+  const farMat = new THREE.ShaderMaterial({
+    vertexShader: vert,
+    fragmentShader: farFrag,
+    transparent: true, depthWrite: false, side: THREE.FrontSide,
+    uniforms: { uBMin: { value: new THREE.Vector3(-500, -12, -500) }, uBMax: { value: new THREE.Vector3(500, 0, -150) }, uSun: { value: SUN_DIR }, uT: { value: 0 } },
+  });
+  const far = new THREE.Mesh(new THREE.BoxGeometry(1000, 12, 350), farMat);
+  far.position.set(0, -6, -350);
+  far.renderOrder = -6;
+  scene.add(far);
+
+  return [near, far];
+}
+
+function createAtmoFog(scene) {
+  const mat = new THREE.ShaderMaterial({
+    vertexShader: `
+      varying vec3 vW;
+      void main() {
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vW = wp.xyz;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vW;
+      uniform vec3 uCam;
+      uniform vec3 uCol;
+      uniform float uTime;
+      void main() {
+        float dist = length(vW.xz - uCam.xz);
+        float h = smoothstep(0.0, 20.0, vW.y + 2.0);
+        float a = h * 0.06 * smoothstep(0.0, 300.0, dist);
+        a *= 1.0 - smoothstep(0.0, 0.4, abs(vW.z + 160.0) / 250.0);
+        if (a < 0.005) discard;
+        gl_FragColor = vec4(uCol, a);
+      }
+    `,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uCam: { value: new THREE.Vector3() }, uCol: { value: new THREE.Color(0.82, 0.85, 0.9) }, uTime: { value: 0 } },
+    side: THREE.DoubleSide,
+  });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(600, 200), mat);
+  m.position.set(0, 0.5, -BL / 2);
+  m.rotation.x = -Math.PI / 2;
+  m.renderOrder = 10;
+  scene.add(m);
+
+  const mat2 = new THREE.ShaderMaterial({
+    vertexShader: mat.vertexShader,
+    fragmentShader: mat.fragmentShader.replace('0.06', '0.04'),
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uCam: { value: new THREE.Vector3() }, uCol: { value: new THREE.Color(0.88, 0.9, 0.94) }, uTime: { value: 0 } },
+    side: THREE.DoubleSide,
+  });
+  const m2 = new THREE.Mesh(new THREE.PlaneGeometry(600, 200), mat2);
+  m2.position.set(0, -2, -BL / 2);
+  m2.rotation.x = -Math.PI / 2;
+  m2.renderOrder = 10;
+  scene.add(m2);
+  return [m, m2];
+}
+
+function init() {
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  document.body.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  createSky(scene);
+
+  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 600);
+  camera.position.set(22, 20, 18);
+  camera.lookAt(-10, 0.3, -35);
+
+  const hemi = new THREE.HemisphereLight(0x7bb8e6, 0x5a4a3a, 0.6);
+  scene.add(hemi);
+  const ambient = new THREE.AmbientLight(0x7799bb, 0.2);
+  scene.add(ambient);
+
+  const sun = new THREE.DirectionalLight(0xffe4c4, 2.2);
+  sun.position.copy(SUN_DIR).multiplyScalar(120);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.camera.near = 0.5;
+  sun.shadow.camera.far = 250;
+  sun.shadow.camera.left = -30;
+  sun.shadow.camera.right = 30;
+  sun.shadow.camera.top = 30;
+  sun.shadow.camera.bottom = -30;
+  sun.shadow.bias = -0.001;
+  scene.add(sun);
+
+  const fill = new THREE.DirectionalLight(0x7a9bcb, 0.35);
+  fill.position.set(-40, 30, 30);
+  scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xbbd4ee, 0.15);
+  rim.position.set(-30, 10, 100);
+  scene.add(rim);
+
+  scene.fog = new THREE.FogExp2(0xc8dff5, 0.0018);
+
+  const tex = genStoneTex(1024, 1024);
+  createBridge(scene, tex);
+  createRailings(scene, tex);
+
+  const clouds = createCloudVolume(scene);
+  const atmo = createAtmoFog(scene);
+
+  const sunGlow = (() => {
+    const g = new THREE.SphereGeometry(1, 16, 16);
+    const m = new THREE.ShaderMaterial({
+      vertexShader: `varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+      fragmentShader: `varying vec3 vP;void main(){float d=length(vP);gl_FragColor=vec4(1.0,0.95,0.85,smoothstep(1.0,0.0,d)*0.12);}`,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.BackSide,
+    });
+    const s = new THREE.Mesh(g, m);
+    s.scale.set(50, 50, 50);
+    s.position.copy(SUN_DIR).multiplyScalar(120);
+    scene.add(s);
+    return s;
+  })();
+
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.1, 0.2, 0.05));
+  composer.addPass(new OutputPass());
+
+  const cBase = camera.position.clone();
+  const cTarget = new THREE.Vector3(-10, 0.3, -35);
+  const clock = new THREE.Clock();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const dt = clock.getDelta();
+    const t = clock.getElapsedTime();
+
+    camera.position.x = cBase.x + Math.sin(t * 0.07) * 0.05;
+    camera.position.y = cBase.y + Math.sin(t * 0.05 + 1.0) * 0.04;
+    camera.position.z = cBase.z + Math.sin(t * 0.06 + 0.5) * 0.04;
+    camera.lookAt(
+      cTarget.x + Math.sin(t * 0.04 + 0.3) * 0.12,
+      cTarget.y + Math.sin(t * 0.03 + 1.5) * 0.03,
+      cTarget.z + Math.sin(t * 0.045 + 0.8) * 0.15
+    );
+
+    for (const c of clouds) {
+      if (c.material.uniforms && c.material.uniforms.uT) {
+        c.material.uniforms.uT.value += dt;
+      }
+    }
+    for (const a of atmo) {
+      a.material.uniforms.uCam.value.copy(camera.position);
+      a.material.uniforms.uTime.value += dt;
+    }
+
+    composer.render();
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+    composer.setSize(w, h);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
