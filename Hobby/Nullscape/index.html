@@ -312,56 +312,75 @@ class MapGenerator {
   }
 
   assignPresents(tiles) {
+    const presentSize = CONFIG.PRESENT_SIZE;
+    const halfSize = presentSize / 2;
+    const spacing = 0.8 * CONFIG.PLAYER_DIAMETER;
+    const centerDist = presentSize + spacing;
+    const minMargin = presentSize;
+
     for (const tile of tiles) {
-      const count = randomInt(CONFIG.PRESENTS_PER_TILE_MIN, CONFIG.PRESENTS_PER_TILE_MAX);
-      const margin = CONFIG.PRESENT_MARGIN;
       const L = tile.length;
       tile.presents = [];
 
-      if (tile.direction === DIR.NORTH) {
-        const startY = tile.entryY - L + margin;
-        const endY = tile.entryY - margin;
-        const step = (endY - startY) / count;
-        for (let i = 0; i < count; i++) {
-          tile.presents.push({
-            x: tile.entryX,
-            y: startY + step * (i + 0.5),
-            collected: false
-          });
+      const maxN = Math.floor((L - 2 * minMargin + spacing) / centerDist);
+      if (maxN < 1) continue;
+
+      const totalOccupied = maxN * presentSize + (maxN - 1) * spacing;
+      const margin = (L - totalOccupied) / 2;
+
+      const candidate = [];
+
+      for (let i = 0; i < maxN; i++) {
+        const t = margin + halfSize + i * centerDist;
+        let x, y;
+
+        switch (tile.direction) {
+          case DIR.NORTH:
+            x = tile.entryX;
+            y = tile.entryY - L + t;
+            break;
+          case DIR.SOUTH:
+            x = tile.entryX;
+            y = tile.entryY + t;
+            break;
+          case DIR.EAST:
+            x = tile.entryX + t;
+            y = tile.entryY;
+            break;
+          case DIR.WEST:
+            x = tile.entryX - L + t;
+            y = tile.entryY;
+            break;
         }
-      } else if (tile.direction === DIR.SOUTH) {
-        const startY = tile.entryY + margin;
-        const endY = tile.entryY + L - margin;
-        const step = (endY - startY) / count;
-        for (let i = 0; i < count; i++) {
-          tile.presents.push({
-            x: tile.entryX,
-            y: startY + step * (i + 0.5),
-            collected: false
-          });
+
+        candidate.push({ x, y, collected: false });
+      }
+
+      let valid = true;
+      for (const p of candidate) {
+        let t;
+        switch (tile.direction) {
+          case DIR.NORTH:
+            t = p.y - (tile.entryY - L);
+            break;
+          case DIR.SOUTH:
+            t = p.y - tile.entryY;
+            break;
+          case DIR.EAST:
+            t = p.x - tile.entryX;
+            break;
+          case DIR.WEST:
+            t = p.x - (tile.entryX - L);
+            break;
         }
-      } else if (tile.direction === DIR.EAST) {
-        const startX = tile.entryX + margin;
-        const endX = tile.entryX + L - margin;
-        const step = (endX - startX) / count;
-        for (let i = 0; i < count; i++) {
-          tile.presents.push({
-            x: startX + step * (i + 0.5),
-            y: tile.entryY,
-            collected: false
-          });
+        if (t - halfSize < margin - 0.001 || t + halfSize > L - margin + 0.001) {
+          valid = false;
+          break;
         }
-      } else if (tile.direction === DIR.WEST) {
-        const startX = tile.entryX - L + margin;
-        const endX = tile.entryX - margin;
-        const step = (endX - startX) / count;
-        for (let i = 0; i < count; i++) {
-          tile.presents.push({
-            x: startX + step * (i + 0.5),
-            y: tile.entryY,
-            collected: false
-          });
-        }
+      }
+
+      if (valid) {
+        tile.presents = candidate;
       }
     }
   }
