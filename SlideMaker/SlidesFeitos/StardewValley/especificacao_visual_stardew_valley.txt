@@ -1,0 +1,2115 @@
+================================================================================
+ESPECIFICAÇÃO VISUAL COMPLETA
+APRESENTAÇÃO: "Stardew Valley: Muito Além de um Simulador de Fazenda"
+================================================================================
+
+INSTRUÇÕES OBRIGATÓRIAS PARA A IA QUE IRÁ IMPLEMENTAR:
+
+- NÃO consulte nenhum outro arquivo dentro da pasta de trabalho. Todo o
+  conteúdo necessário está neste documento.
+- Gere UM ÚNICO ARQUIVO HTML contendo todo o CSS e JavaScript embutidos.
+- O documento HTML deve usar codificação UTF-8 (charset="UTF-8") e NÃO deve
+  conter caracteres corrompidos.
+- NÃO crie tela de Loading. A apresentação deve iniciar imediatamente.
+- Cada slide deve ocupar exatamente 100vw x 100vh (viewport cheia).
+- NENHUM slide pode ter scroll (proibido scroll horizontal ou vertical).
+- Todo o conteúdo de cada slide deve caber inteiramente dentro do viewport,
+  sem qualquer overflow.
+- A apresentação DEVE ser completamente responsiva para desktop, tablet e
+  celular. Use clamp(), flexbox, grid e media queries conforme necessário.
+- Todas as imagens devem ser carregadas via URL pública (use imagens de
+  domínio público ou placeholder services como picsum.photos, ou use
+  ícones SVG inline / emoji como fallback).
+- Use emoji e ícones SVG inline para substituir imagens do jogo quando
+  necessário, garantindo que a apresentação funcione sem assets externos
+  críticos.
+- A apresentação deve funcionar perfeitamente em modo tela cheia (Fullscreen API).
+
+================================================================================
+1. IDENTIDADE VISUAL — VISÃO GERAL
+================================================================================
+
+Estilo: Rural-natureza moderno com DNA Stardew Valley. Dark mode como base.
+A identidade visual mescla a estética acolhedora da vida no campo com um design
+moderno, limpo e sofisticado. A apresentação deve transmitir aconchego, nostalgia,
+natureza, comunidade e a sensação de um pôr do sol na fazenda.
+
+Sensação geral: "Uma apresentação que parece um passeio pelo campo ao entardecer.
+Acolhedora, visualmente rica, com cores quentes e elementos naturais. Cada slide
+respira a atmosfera única de Stardew Valley."
+
+Público-alvo: Estudantes, gamers, entusiastas de jogos independentes, professores
+e público geral interessado em jogos e desenvolvimento de games.
+
+Objetivo: Apresentar Stardew Valley em toda sua profundidade, desde suas mecânicas
+de fazenda até seu impacto na indústria de jogos, de forma visualmente memorável e
+envolvente.
+
+================================================================================
+2. PALETA DE CORES
+================================================================================
+
+CORES PRINCIPAIS:
+- Verde Floresta Escuro (Fundo principal): #0F1A0F
+- Verde Campo (Fundo secundário): #1A2E1A
+- Verde Stardew (Destaque primário): #5B8C3E
+- Verde Grama (Destaque vibrante): #7CB342
+- Dourado Colheita (Destaque quente): #E8B825
+- Laranja Abóbora (Destaque secundário): #E8893A
+- Azul Céu (Acento secundário): #6BB8D4
+- Azul Rio (Destaque para slides de água): #3A8FB5
+- Roxo Mina (Destaque para slides de mineração): #6B4F9A
+
+CORES DE FUNDO:
+- Fundo padrão: #0F1A0F com gradiente radial sutil para #1A2E1A
+- Fundo alternativo (slides escuros): #0A120A
+- Fundo de cards: rgba(26, 46, 26, 0.6)
+- Fundo de cards alternativo: rgba(20, 40, 20, 0.75)
+
+CORES DE TEXTO:
+- Títulos principais: #F5EDE0 (branco quente/creme)
+- Subtítulos: #E0D8C8 (creme suave)
+- Texto corrido: #C4D4B0 (verde sálvia claro)
+- Texto secundário: #8AA87A (verde musgo claro)
+- Links: #E8B825 (dourado)
+- Hover dos links: #F5D84A (dourado claro)
+
+CORES DE BOTÕES:
+- Botão primário: fundo #5B8C3E, texto #F5EDE0
+- Botão primário hover: fundo #6BBF4A, texto #F5EDE0
+- Botão secundário: fundo transparente, borda #5B8C3E, texto #5B8C3E
+- Botão secundário hover: fundo rgba(91, 140, 62, 0.15)
+- Botão de navegação: fundo rgba(245, 237, 224, 0.08), borda rgba(245, 237, 224, 0.15)
+- Botão de navegação hover: fundo rgba(245, 237, 224, 0.15)
+
+CORES ESPECÍFICAS:
+- Barra de progresso: gradiente horizontal #5B8C3E para #E8B825
+- Destaque de números/estatísticas: #E8B825
+- Bordas de cards: rgba(91, 140, 62, 0.2)
+- Glow verde: rgba(91, 140, 62, 0.3)
+- Glow dourado: rgba(232, 184, 37, 0.3)
+- Overlay de slides: rgba(15, 26, 15, 0.85)
+
+VARIAÇÕES POR SLIDE (cores de background):
+- Slides 1, 2, 4, 5, 6, 9, 10, 11, 12, 13, 15: Fundo padrão #0F1A0F
+- Slide 7 (Mineração): Fundo escuro #0A0D12 com tons roxos
+- Slide 8 (Pesca): Fundo azul escuro #0A1520
+- Slide 14 (Curiosidades): Fundo colorido com gradiente dinâmico
+
+================================================================================
+3. TIPOGRAFIA
+================================================================================
+
+FONTE DE TÍTULOS (Títulos principais e subtítulos):
+- Família: 'Playfair Display' (Google Fonts)
+- Pesos: 500 (medium), 600 (semibold), 700 (bold), 800 (extra bold)
+- Estilo: Serifa elegante que transmite calor e tradição, remetendo a um
+  diário de fazenda ou livro antigo de receitas.
+- Tamanhos:
+  - Título da capa: clamp(2.5rem, 7vw, 6rem)
+  - Títulos de slide: clamp(1.8rem, 4vw, 3.2rem)
+  - Subtítulos: clamp(1.2rem, 2.5vw, 1.8rem)
+
+FONTE DE CONTEÚDO (Texto corrido, legendas, detalhes):
+- Família: 'Nunito' (Google Fonts)
+- Pesos: 300 (light), 400 (regular), 600 (semi-bold), 700 (bold)
+- Estilo: Sem serifa arredondada, amigável e acolhedora, contrastando com a
+  serifa dos títulos.
+- Tamanhos:
+  - Texto corrido: clamp(0.85rem, 1.5vw, 1.1rem)
+  - Texto pequeno/legendas: clamp(0.7rem, 1vw, 0.85rem)
+  - Itens de lista: clamp(0.8rem, 1.3vw, 1rem)
+  - Cards descritivos: clamp(0.75rem, 1.2vw, 0.95rem)
+
+FONTE DE NÚMEROS/ESTATÍSTICAS:
+- Família: 'Playfair Display' (para números grandes e elegantes)
+- Peso: 700 (bold)
+- Tamanho: clamp(2rem, 5vw, 4rem)
+
+HIERARQUIA VISUAL:
+- Título do slide: Playfair Display, bold, cor #F5EDE0, margem inferior 16px
+- Subtítulo: Playfair Display, medium, cor #E0D8C8, margem inferior 12px
+- Corpo: Nunito, regular, cor #C4D4B0, line-height 1.6
+- Destaque inline: Nunito, bold, cor #E8B825
+- Rótulo/etiqueta: Nunito, bold, tamanho pequeno, cor #8AA87A, letter-spacing 1px
+
+ESPAÇAMENTOS:
+- H1 (título slide): margin-bottom 0.5em
+- H2 (subtítulo): margin-bottom 0.4em
+- Parágrafo: margin-bottom 0.8em
+- Lista: gap entre itens 8px
+- Cards: gap entre cards 16px (grid)
+
+================================================================================
+4. ESTILO VISUAL
+================================================================================
+
+Estilo: Rural-moderno com elementos de natureza. Combinação de:
+- Dark mode como base (remetendo ao entardecer no campo)
+- Glassmorphism em cards e painéis (efeito de vidro com fundo desfocado)
+- Gradientes sutis em verde e dourado
+- Elementos decorativos naturais (folhas, árvores, plantas, grãos)
+- Toques de pixel art (linhas pontilhadas, bordas com cantos arredondados
+  lembrando pixels, sem exagerar)
+- Minimalismo funcional: cada elemento tem propósito
+- Cores quentes e acolhedoras
+- Cards com cantos sutilmente arredondados (border-radius: 12px a 16px)
+- Ícones e ilustrações em estilo outline/line-art, consistentes
+
+O estilo NÃO deve ser:
+- Cyberpunk
+- Industrial
+- Extremamente futurista
+- Agressivo
+- Muito tecnológico (a não ser em contextos específicos como o slide de mineração)
+
+================================================================================
+5. CONCEITO ARTÍSTICO
+================================================================================
+
+A apresentação deve evocar a sensação de estar sentado na varanda de uma
+fazenda ao entardecer, observando o pôr do sol enquanto vagalumes começam a
+aparecer. O ar é fresco, a brisa é suave, e tudo está em paz.
+
+A paleta escura com acentos verdes e dourados cria uma atmosfera de "final de
+tarde no campo". Os gradientes simulam a transição do céu do dia para a noite.
+
+As partículas de fireflies (vagalumes) flutuam suavemente, dando vida ao fundo
+sem distrair.
+
+Elementos pixelados sutis nas bordas e transições homenageiam a estética do
+jogo, mas o design geral é moderno e refinado.
+
+Cada slide que aborda uma estação diferente (primavera, verão, outono, inverno)
+pode ter uma variação sutil na cor dominante.
+
+================================================================================
+6. BACKGROUND GLOBAL
+================================================================================
+
+FUNDO BASE:
+- Gradiente radial saindo do centro: centro #1A3A1A -> bordas #0F1A0F
+- Isso cria uma sensação de profundidade, como se houvesse uma luz suave no centro
+
+TEXTURA:
+- Camada de ruído (noise) sobre o gradiente com opacidade 3-5%
+- Crie um pseudo-elemento ::before com background em pattern SVG de ruído
+  ou use CSS com filter: url() para noise
+- A textura de noise evoca o grão do filme e o pixel art do jogo
+
+CAMADA DE PARTÍCULAS GLOBAIS:
+- Fireflies (vagalumes) em Canvas ou divs animadas
+- Quantidade: 15-25 fireflies
+- Tamanho: 2-4px cada
+- Cor: dourado suave #E8B825 com glow
+- Movimento: flutuação suave e errática, como insetos voando
+- Velocidade: muito lenta (3-5s para cruzar a tela)
+- Opacidade: piscando suavemente (alternando entre 0.3 e 0.8)
+- Aparecem em todos os slides, mas podem ter cores diferentes dependendo
+  do tema do slide (verde nos slides de agricultura, azul na pesca)
+
+CAMADA DE ÁRVORES SILHUETADAS (parallax lento):
+- No fundo de todos os slides (ou quase todos), silhuetas de árvores e
+  montanhas no horizonte
+- Crie 3 camadas de parallax usando CSS transform: translateX/Y em
+  resposta ao movimento do mouse
+- Camada 1 (mais distante): montanhas em tom #1A2E1A, movimento muito lento
+- Camada 2 (média): árvores em tom #152215, movimento médio
+- Camada 3 (próxima): arbustos/grama em tom #0F1A0F, movimento mais rápido
+- Essas silhuetas são simples formas SVG ou CSS com opacidade 0.15-0.25
+
+GRADIENTE DINÂMICO (opcional):
+- O gradiente de fundo pode mudar muito sutilmente entre os slides
+- Slide 1: tom mais alaranjado (pôr do sol)
+- Slide 5 (agricultura): tom mais verde
+- Slide 7 (mineração): tom mais escuro/roxo
+- Slide 8 (pesca): tom mais azulado
+- Slide 14 (curiosidades): tom mais vibrante
+
+================================================================================
+7. NAVEGAÇÃO
+================================================================================
+
+ESTRUTURA DE NAVEGAÇÃO:
+
+1. BOTÕES DE SETA (inferior da tela):
+   - Seta esquerda (◀) e seta direita (▶) fixas no canto inferior
+   - Posição: bottom 30px, left/right 30px
+   - Tamanho: 44x44px (área de clique)
+   - Estilo: círculo translúcido com seta SVG
+   - Fundo: rgba(245, 237, 224, 0.08), borda rgba(245, 237, 224, 0.15)
+   - Hover: fundo rgba(245, 237, 224, 0.18), glow verde sutil
+   - Transição: all 0.3s ease
+   - Desabilitado no primeiro/último slide: opacidade 0.2, cursor default
+
+2. BARRA DE PROGRESSO (inferior):
+   - Barra horizontal fina no centro inferior
+   - Posição: bottom 48px, left 50%, transform translateX(-50%)
+   - Largura: 200px (ou 30% da tela, máximo 300px)
+   - Altura: 3px
+   - Fundo: rgba(245, 237, 224, 0.12)
+   - Preenchimento: gradiente horizontal #5B8C3E para #E8B825
+   - Transição: width 0.5s ease (animação suave ao mudar de slide)
+
+3. CONTADOR DE SLIDES:
+   - Texto "01 / 15" ao lado da barra de progresso
+   - Posição: bottom 48px, abaixo da barra
+   - Fonte: Nunito, bold, 12px, cor #8AA87A
+   - Centralizado
+
+4. NAVEGAÇÃO POR TECLADO:
+   - Seta direita / Seta para baixo / Page Down / Espaço: próximo slide
+   - Seta esquerda / Seta para cima / Page Up: slide anterior
+   - Home: primeiro slide
+   - End: último slide
+   - ESC: sai do modo tela cheia (se ativo)
+   - Número 1-9: vai para o slide correspondente (atalho numérico)
+
+5. NAVEGAÇÃO POR MOUSE:
+   - Clique no lado direito da tela (50% direito): próximo slide
+   - Clique no lado esquerdo da tela (50% esquerdo): slide anterior
+   - Scroll do mouse (roda): próximo/anterior
+   - O cursor muda para uma seta apontando para a direita quando está
+     na metade direita, e para a esquerda na metade esquerda
+
+6. NAVEGAÇÃO POR TOQUE (touch/swipe):
+   - Swipe para a esquerda: próximo slide
+   - Swipe para a direita: slide anterior
+   - Tap no lado direito: próximo slide
+   - Tap no lado esquerdo: slide anterior
+
+7. BOTÃO FULLSCREEN:
+   - Ícone no canto superior direito
+   - Posição: top 20px, right 20px
+   - Tamanho: 36x36px
+   - Ícone: SVG de tela cheia/ minimizar
+   - Transição suave ao entrar/sair de tela cheia
+
+8. INDICADOR DE SLIDE ATIVO:
+   - Pequenos pontos (dots) na parte inferior, ao lado da barra de progresso
+   - Ou use apenas a barra de progresso para manter o minimalismo
+   - Decisão: usar apenas a barra de progresso + contador numérico
+     (mais elegante, menos poluição visual)
+
+================================================================================
+8. ANIMAÇÕES GLOBAIS
+================================================================================
+
+TRANSIÇÕES ENTRE SLIDES:
+
+Principal: Cross Fade (dissolve cruzado)
+- Duração: 600ms
+- Easing: ease-in-out
+- O slide atual desaparece enquanto o próximo aparece
+- Funciona para a maioria das transições
+
+Transições específicas por slide (variam para dar ritmo):
+- Slide 1 → 2: Cross Fade (600ms)
+- Slide 2 → 3: Fade (500ms)
+- Slide 3 → 4: Slide Up (700ms) - o slide novo vem de baixo
+- Slide 4 → 5: Cross Fade (600ms)
+- Slide 5 → 6: Fade (500ms)
+- Slide 6 → 7: Cross Fade com escurecimento (800ms) - mais dramático
+- Slide 7 → 8: Slide Right (700ms) - o slide novo vem da direita
+- Slide 8 → 9: Cross Fade (600ms)
+- Slide 9 → 10: Fade (500ms)
+- Slide 10 → 11: Zoom In suave (700ms)
+- Slide 11 → 12: Cross Fade (600ms)
+- Slide 12 → 13: Slide Up (700ms)
+- Slide 13 → 14: Rotate (800ms, 3D perspective, sutil)
+- Slide 14 → 15: Cross Fade (600ms)
+
+Implementação: use classes CSS para controlar a transição. Quando um slide
+entra, recebe classe "active" e o anterior "exit". Use requestAnimationFrame
+ou transitionend events para coordenar.
+
+ANIMAÇÕES DE ENTRADA DE ELEMENTOS (dentro de cada slide):
+
+Timing padrão (ativado quando o slide se torna ativo):
+- t=0ms: fundo e elementos decorativos já estão visíveis
+- t=200ms: título do slide (Fade In + Slide Up)
+- t=400ms: subtítulo (Fade In + Slide Up, ligeiramente mais lento)
+- t=600ms: elementos principais começam a aparecer (stagger)
+- Stagger entre itens: 100ms entre cada card/item
+
+Easing padrão para entradas: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+  (suave, natural)
+
+ATRASOS (delays) específicos:
+- Se um slide tem 4 cards, eles entram nos tempos:
+  Card 1: 600ms, Card 2: 720ms, Card 3: 840ms, Card 4: 960ms
+- Se tem 6 itens em grid:
+  Item 1: 600ms, Item 2: 680ms, Item 3: 760ms, Item 4: 840ms,
+  Item 5: 920ms, Item 6: 1000ms
+
+MICROINTERAÇÕES GLOBAIS:
+- Hover em botões: mudança de cor e escala 1.05 em 0.2s
+- Hover em cards: leve elevação (translateY -4px), glow na borda
+- Clique em botões: escala 0.95 momentânea (feedback tátil)
+- Transições de hover: todas com 0.3s ease
+
+CURSOR:
+- Cursor padrão: arrow normal
+- Em botões/links: pointer
+- Em cards clicáveis: pointer
+- Opcional: cursor personalizado com um pequeno ponto que segue o mouse
+  (apenas se não prejudicar a performance)
+
+================================================================================
+9. ELEMENTOS INTERATIVOS GLOBAIS
+================================================================================
+
+1. BOTÃO PRÓXIMO/ANTERIOR:
+   - Descritos na seção de navegação
+   - Hover: glow verde no círculo do botão
+   - Click: ripple effect (onda se expandindo a partir do clique)
+
+2. BOTÃO FULLSCREEN:
+   - No canto superior direito
+   - Alterna entre entrar e sair de tela cheia
+   - Ícone SVG de tela cheia
+
+3. CARDS (presentes em vários slides):
+   - Glassmorphism: fundo rgba(26, 46, 26, 0.5), backdrop-filter blur(10px)
+   - Borda: rgba(91, 140, 62, 0.2), 1px
+   - Hover: translateY(-4px), box-shadow aumenta, glow na borda
+   - Transição: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+   - Clicável: quando aplicável, expande ou revela mais conteúdo
+
+4. TOOLTIPS:
+   - Ativados em elementos que precisam de explicação extra
+   - Aparecem no hover, após 500ms de delay
+   - Fundo: rgba(15, 26, 15, 0.95), cor #F5EDE0
+   - Border-radius: 8px, padding: 8px 12px
+   - Seta apontando para o elemento
+   - Desaparecem ao tirar o mouse
+
+5. CONTADORES NUMÉRICOS (Slide 13 - Impacto):
+   - Números que contam de 0 até o valor final quando o slide entra
+   - Duração: 2s
+   - Easing: ease-out (começa rápido, desacelera no final)
+
+6. TABS (Slide 5 - Agricultura, para mostrar estações):
+   - Abas clicáveis para alternar entre Primavera, Verão, Outono, Inverno
+   - Aba ativa: sublinhado verde com glow
+   - Aba inativa: opacidade 0.6
+   - Transição do conteúdo: Fade (300ms)
+
+7. TIMELINE INTERATIVA (Slide 3 - Desenvolvimento):
+   - Linha do tempo vertical
+   - Cada ponto é clicável e expande informações
+   - Scroll automático animado entre os pontos
+
+8. CARROSSEL DE PERSONAGENS (Slide 9):
+   - Carrossel horizontal com cards de personagens
+   - Navegação por setas nos cantos do carrossel
+   - Auto-play opcional (pausa no hover)
+
+9. FAQ/ACCORDION (Slide 14 - Curiosidades):
+   - Perguntas clicáveis que expandem a resposta
+   - Animação suave de altura (max-height transition)
+   - Ícone de "+" que gira para "×" quando expandido
+
+10. HOVER REVEAL (Slide 6 - Animais, e Slide 7 - Mineração):
+    - Cards com informações que aparecem ao passar o mouse
+    - Efeito de "revelação" do conteúdo
+
+================================================================================
+================================================================================
+SLIDE 1 — CAPA
+================================================================================
+
+OBJETIVO:
+Causar impacto visual imediato. Apresentar o tema, o apresentador e estabelecer
+o tom visual da apresentação. Este slide deve ser o mais marcante visualmente.
+
+EMOÇÃO:
+Admiração, curiosidade, nostalgia. O espectador deve sentir que está prestes a
+embarcar em uma jornada acolhedora pelo mundo de Stardew Valley.
+
+LAYOUT:
+Hero layout com o título centralizado porém inclinado (conforme especificação
+de texto 3D), com elementos decorativos ao redor. O layout é assimétrico:
+o título ocupa o centro-superior, informações secundárias no canto inferior
+direito e o logo no canto superior esquerdo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Canto superior esquerdo (30x30px): logo do Stardew Valley (SVG inline de
+   uma folha verde ou o emoji 🌿 estilizado com glow)
+2. Centro da tela (vertical e horizontalmente): título principal "Stardew Valley"
+   com efeito 3D extrudado
+3. Abaixo do título (com espaçamento): subtítulo "Muito Além de um Simulador
+   de Fazenda" em tipografia normal
+4. Abaixo do subtítulo: frase de introdução "Um jogo independente que
+   revolucionou o gênero de simulação de fazenda." em texto menor
+5. Canto inferior direito: nome do apresentador, data, disciplina (se houver)
+   em texto pequeno e elegante
+6. Centro inferior: nome do desenvolvedor "Eric Barone (ConcernedApe)"
+   com um ícone de coração ❤️
+
+BACKGROUND:
+Gradiente de pôr do sol: do laranja-dourado no horizonte (#D4782A) ao
+verde-escuro no topo (#0F1A0F), suavemente mesclado.
+Camada de silhuetas de árvores no horizonte (parallax).
+Fireflies dourados flutuando.
+Feixes de luz (God Rays) sutis descendo do topo.
+
+ELEMENTOS DECORATIVOS:
+- Folhas caindo lentamente (SVG ou CSS, 8-10 folhas, cores douradas e verdes)
+- Silhuetas de montanhas e árvores no horizonte
+- Um brilho suave (lens flare simulado) no canto superior direito simulando
+  o sol se pondo
+
+ELEMENTOS INTERATIVOS:
+- Botão fullscreen no canto superior direito
+- Navegação padrão (setas inferior)
+
+ELEMENTOS VISUAIS:
+- Logo SVG de folha (ícone de Stardew Valley) no canto superior esquerdo
+- As folhas cadentes decorativas animadas
+
+PARTÍCULAS:
+- Fireflies (vagalumes): 20 partículas, cor dourada #E8B825, glow sutil
+- Folhas: 8-10 folhas SVG caindo com rotação suave
+
+ILUMINAÇÃO:
+- God Rays: feixes de luz descendo do topo, opacidade 0.05, ângulo 45°
+- Glow no texto: sombra externa dourada
+- Brilho no horizonte (gradiente radial no centro)
+
+EFEITOS:
+- Texto 3D extrudado no título (conforme especificação abaixo)
+- Blur no plano de fundo distante (desfoque nas silhuetas)
+- Parallax suave nas camadas de fundo (responde ao movimento do mouse)
+
+ÍCONES:
+- 🌿 (folha) como logo SVG no canto superior esquerdo
+- ❤️ coração ao lado do nome do desenvolvedor
+- Ícone de fullscreen no canto superior direito
+
+IMAGENS:
+- Nenhuma imagem externa necessária (use SVG e CSS para todos os elementos)
+
+TIPOGRAFIA:
+1. Título "Stardew Valley": Playfair Display, 800 (extra bold)
+   EFEITO 3D EXTRUDADO (especificação detalhada abaixo)
+2. Subtítulo "Muito Além de um Simulador de Fazenda": Nunito, 300 (light),
+   tamanho clamp(1.2rem, 2.5vw, 2rem), cor #E0D8C8
+3. Frase de introdução: Nunito, 300, itálico, cor #C4D4B0, tamanho
+   clamp(0.9rem, 1.5vw, 1.2rem)
+4. Nome do apresentador: Nunito, 400, cor #8AA87A, tamanho clamp(0.7rem, 1vw, 0.9rem)
+5. Nome do desenvolvedor: Playfair Display, itálico, cor #E8B825
+
+ESPECIFICAÇÃO DO EFEITO 3D DO TÍTULO "Stardew Valley":
+
+REGRAS ABSOLUTAS — O TÍTULO NÃO PODE SER RETO/HORIZONTAL:
+
+O texto deve ser inclinado usando transform: rotate(-28deg) skew(25deg);
+
+Isso faz com que:
+- O lado ESQUERDO do texto fique mais BAIXO
+- O lado DIREITO do texto fique mais ALTO
+- O texto suba na diagonal da esquerda para a direita (↗)
+
+PROPRIEDADES CSS:
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  color: #F5EDE0;
+  transform: rotate(-28deg) skew(25deg);
+  transform-origin: center center;
+  text-transform: none;
+  letter-spacing: 2px;
+  line-height: 1.1;
+
+EXTRUSÃO (text-shadow):
+Gerar 30 camadas de text-shadow com deslocamento progressivo.
+Cada camada i (de 0 a 29) deve ter:
+  offsetX = -i px      (desloca para a esquerda)
+  offsetY = i px       (desloca para baixo)
+  blur = 0
+  cor = gradiente escurecendo progressivamente
+
+Cores das camadas (exemplo):
+  i=0: #F5EDE0 (cor original)
+  i=1 a 5: #D4C9B0 (transição)
+  i=6 a 15: #A09070 (tons médios)
+  i=16 a 25: #706050 (tons escuros)
+  i=26 a 29: #403020 (quase preto)
+
+OU use uma única cor #BFBFBF para todas as camadas como no exemplo de
+referência e varie a opacidade.
+
+Algoritmo JS para gerar o text-shadow:
+  let shadow = "";
+  for(let i = 0; i < 30; i++){
+    const intensity = Math.max(0, 1 - (i / 30));
+    const r = Math.round(200 * intensity + 50);
+    const g = Math.round(190 * intensity + 40);
+    const b = Math.round(170 * intensity + 30);
+    shadow += (shadow ? "," : "") +
+              (-i) + "px " +
+              i + "px 0 rgb(" + r + "," + g + "," + b + ")";
+  }
+
+SOMBRA AMBIENTE (::before):
+Criar um pseudo-elemento ::before com o mesmo texto, posicionado atrás,
+com:
+  content: attr(data-text);
+  position: absolute;
+  left: 20px;    /* deslocado para baixo e direita */
+  top: 20px;
+  color: rgba(0, 0, 0, 0.3);
+  filter: blur(8px);
+  transform: rotate(-28deg) skew(25deg);
+  z-index: -1;
+
+O elemento que contém o texto deve usar:
+  position: relative;
+  data-text = "Stardew Valley"
+
+E envie o texto "Stardew Valley" duplicado no atributo data-text.
+
+RESUMO: O resultado deve ser um texto grande, branco, extrudado, inclinado em
+perspectiva isométrica (rotate -28deg, skew 25deg), com a extremidade
+esquerda mais baixa e a direita mais alta. Uma sombra desfocada atrás
+aumenta a profundidade. NÃO FAÇA O TÍTULO NA HORIZONTAL.
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background e partículas (fireflies, folhas)
+2. [t=300ms] Logo superior esquerdo (fade in)
+3. [t=500ms] Título 3D "Stardew Valley" (fade in + escala 0.95→1.0)
+4. [t=900ms] Subtítulo (fade in + slide up)
+5. [t=1200ms] Frase de introdução (fade in)
+6. [t=1500ms] Informações do apresentador (fade in)
+7. [t=1500ms] Nome do desenvolvedor (fade in)
+
+INTERAÇÕES:
+- Movimento parallax: as camadas de fundo se movem suavemente com o mouse
+- Os fireflies continuam seu movimento independente
+
+TRANSIÇÃO PARA SLIDE 2:
+Cross Fade (600ms). O fundo escurece enquanto o slide 2 aparece.
+
+OBSERVAÇÕES:
+- O logo do jogo (folha) no canto superior esquerdo pode ser um SVG simples
+  ou usar o emoji 🌿 com font-size 36px e um glow verde
+- Certifique-se de que o texto 3D fique visível em telas menores
+  (reduza o font-size proporcionalmente)
+- O título 3D não deve ultrapassar os limites da tela
+
+================================================================================
+SLIDE 2 — O QUE É STARDEW VALLEY?
+================================================================================
+
+OBJETIVO:
+Definir o jogo de forma clara e apresentar seus principais elementos de gameplay
+de maneira visual e organizada.
+
+EMOÇÃO:
+Curiosidade, descoberta. O espectador deve começar a entender a profundidade
+do jogo.
+
+LAYOUT:
+Split screen: lado esquerdo com texto de definição, lado direito com grid de
+cards dos elementos principais.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+Lado esquerdo (35%):
+  - Título: "O que é Stardew Valley?"
+  - Parágrafo de definição
+  - Ficha técnica (lançamento, plataformas, gênero) em formato de lista
+Lado direito (65%):
+  - Grid 3x3 de cards com os elementos principais:
+    Agricultura, Pecuária, Pesca, Mineração, Combate, Exploração,
+    Construção, Socialização, Liberdade
+
+BACKGROUND:
+Fundo padrão (#0F1A0F com gradiente radial).
+Silhuetas de árvores e celeiro ao fundo (opacidade muito baixa).
+
+ELEMENTOS DECORATIVOS:
+- Grid sutis de linhas (como se fosse um caderno de fazendeiro) com
+  opacidade 0.03
+- Fireflies globais
+
+ELEMENTOS INTERATIVOS:
+- Cards do grid (9 cards) com hover reveal
+- Ao passar o mouse sobre um card, ele se eleva e mostra um glow verde
+
+ELEMENTOS VISUAIS:
+- Cada card tem: um ícone SVG ou emoji representando o elemento
+  🌾 Agricultura, 🐄 Pecuária, 🎣 Pesca, ⛏️ Mineração, ⚔️ Combate,
+  🗺️ Exploração, 🏗️ Construção, 👥 Socialização, 🎮 Liberdade
+- Texto descritivo curto dentro de cada card
+
+PARTÍCULAS:
+Apenas as fireflies globais.
+
+ILUMINAÇÃO:
+- Glow nos cards em hover
+- Iluminação padrão ambiente
+
+EFEITOS:
+- Glassmorphism nos cards
+- Blur sutil no fundo distante
+
+ÍCONES:
+9 ícones/emoji representando cada elemento do grid
+
+IMAGENS:
+Nenhuma imagem externa.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0, clamp(1.8rem, 3.5vw, 2.8rem)
+2. Definição: Nunito, 400, #C4D4B0, clamp(0.85rem, 1.3vw, 1rem)
+3. Ficha técnica: Nunito, 300, #8AA87A, tamanho pequeno
+4. Cards: título Nunito 700, descrição Nunito 400
+
+CONTEÚDO DOS CARDS (texto breve dentro de cada card):
+
+1. 🌾 Agricultura — Plante, cultive e colha dezenas de culturas
+2. 🐄 Pecuária — Crie animais e produza itens valiosos
+3. 🎣 Pesca — Domine o minigame e capture peixes raros
+4. ⛏️ Mineração — Explore cavernas em busca de minérios
+5. ⚔️ Combate — Enfrente monstros nas profundezas
+6. 🗺️ Exploração — Descubra áreas secretas e tesouros
+7. 🏗️ Construção — Expanda e personalize sua fazenda
+8. 👥 Socialização — Faça amigos e encontre o amor
+9. 🎮 Liberdade — Jogue do seu jeito, sem roteiro fixo
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background
+2. [t=200ms] Título (fade in + slide up)
+3. [t=400ms] Parágrafo de definição (fade in)
+4. [t=600ms] Ficha técnica (fade in)
+5. [t=600ms a 1400ms] Cards entrando em sequência (3 linhas, cada linha com
+   200ms de intervalo entre si, cada card com 100ms de stagger dentro da linha)
+   Linha 1: 600ms, 700ms, 800ms
+   Linha 2: 900ms, 1000ms, 1100ms
+   Linha 3: 1200ms, 1300ms, 1400ms
+
+INTERAÇÕES:
+- Hover nos cards: elevação + glow
+- Clique nos cards: poderia expandir (mas manteremos simples, apenas hover)
+- Parallax de fundo com mouse
+
+TRANSIÇÃO PARA SLIDE 3:
+Fade (500ms).
+
+OBSERVAÇÕES:
+- Os cards devem ter tamanhos iguais no grid
+- O grid deve usar CSS Grid com 3 colunas
+- Em mobile, reduzir para 2 colunas
+
+================================================================================
+SLIDE 3 — HISTÓRIA DO DESENVOLVIMENTO
+================================================================================
+
+OBJETIVO:
+Contar a inspiradora história de Eric Barone e o desenvolvimento solo do jogo.
+
+EMOÇÃO:
+Inspiração, admiração pelo trabalho solo e dedicação.
+
+LAYOUT:
+Timeline vertical centralizada com cards alternando entre esquerda e direita.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título no topo: "História do Desenvolvimento"
+- Linha do tempo vertical central
+  - 2012: Início do desenvolvimento
+  - 2013: Programação e arte solo
+  - 2014: Trilha sonora e animações
+  - 2015: Testes e polimento
+  - 26 Fev 2016: Lançamento oficial
+  - 2016-2024: Atualizações constantes
+- Cada ponto da timeline: ano à esquerda (ou direita), descrição, ícone
+
+BACKGROUND:
+Fundo padrão com tom levemente mais claro, simulando um pergaminho digital.
+
+ELEMENTOS DECORATIVOS:
+- A linha da timeline (traçada verticalmente)
+- Pequenos pontos (círculos) em cada marco
+- Brilho pulsante no ponto "ativo"
+
+ELEMENTOS INTERATIVOS:
+- Timeline interativa: cada ponto pode ser clicado para expandir detalhes
+- Efeito de hover nos pontos da timeline (glow dourado)
+
+ELEMENTOS VISUAIS:
+- Ícones/emoji para cada marco:
+  💻 (computador, início)
+  🎨 (arte, criação)
+  🎵 (música, trilha)
+  🧪 (testes)
+  🚀 (lançamento)
+  🔄 (atualizações)
+
+PARTÍCULAS:
+Fireflies globais + algumas faíscas douradas subindo (dando sensação de
+criação/magia)
+
+ILUMINAÇÃO:
+- Glow dourado pulsante no ponto atual da timeline
+- Iluminação ambiente no restante
+
+EFEITOS:
+- A linha da timeline pode ser desenhada animadamente (draw SVG line)
+- Cards com glassmorphism
+
+ÍCONES:
+6 ícones/emoji para cada marco
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Ano: Playfair Display, 800, #E8B825, tamanho grande (clamp(1.5rem, 3vw, 2.5rem))
+3. Descrição: Nunito, 400, #C4D4B0
+
+CONTEÚDO DOS MARCOS:
+1. 2012 — Eric Barone inicia o desenvolvimento solo. Inspirado por Harvest Moon,
+   decide criar seu próprio jogo de fazenda.
+2. 2013 — Programação, pixel art e design são feitos inteiramente por Eric.
+   Cada sprite é desenhado à mão.
+3. 2014 — Eric compõe a trilha sonora completa do jogo. Mais de 2 horas de
+   música original.
+4. 2015 — Testes e polimento intensivos. Eric refina cada detalhe do jogo.
+5. 26 Fev 2016 — Lançamento oficial para PC. Sucesso instantâneo de crítica
+   e público.
+6. 2016+ — Atualizações gratuitas massivas: multiplayer, novo conteúdo,
+   Ilha Gengibre e muito mais.
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background
+2. [t=200ms] Título
+3. [t=400ms] Linha vertical desenhando (animação SVG draw)
+4. [t=600ms a 1600ms] Marcos aparecendo em sequência de cima para baixo,
+   cada um com 200ms de intervalo
+
+INTERAÇÕES:
+- Hover nos marcos: destaca o card com glow
+- Clique: expande um texto adicional com mais detalhes (opcional)
+
+TRANSIÇÃO PARA SLIDE 4:
+Slide Up (700ms) — o slide 4 sobe de baixo, como se estivesse "virando a página".
+
+OBSERVAÇÕES:
+- A timeline deve funcionar bem em mobile (pode simplificar para cards
+  empilhados verticalmente)
+- Em telas pequenas, os cards podem ficar todos de um lado
+
+================================================================================
+SLIDE 4 — HISTÓRIA DO JOGO
+================================================================================
+
+OBJETIVO:
+Narrar a história introdutória do jogo de forma envolvente, como se fosse
+o início de uma aventura.
+
+EMOÇÃO:
+Nostalgia, storytelling, imersão. O espectador deve sentir que está ouvindo
+o início de uma história emocionante.
+
+LAYOUT:
+Layout de storytelling com o texto fluindo como uma narrativa. O fundo tem uma
+imagem sutil de uma carta envelhecida.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "História do Jogo"
+- Card principal central (formato de carta) com a narrativa
+- A carta tem texto com parágrafos bem espaçados
+- Ícones ou emoji ilustrando pontos-chave ao lado do texto
+- Abaixo da carta: "Joja Corporation" e "Centro Comunitário" como dois cards
+  lado a lado (dualidade)
+
+BACKGROUND:
+Fundo padrão com uma textura sutil de papel envelhecido sobre o gradiente
+(opacidade 0.05). Silhuetas de árvores ao fundo.
+
+ELEMENTOS DECORATIVOS:
+- Linhas horizontais finas simulando um papel de carta
+- Uma pena ou candle (🕯️) decorativo ao lado da carta (SVG)
+- Cantos da carta levemente curvados (CSS border-radius)
+
+ELEMENTOS INTERATIVOS:
+- Dois cards lado a lado no final: "Centro Comunitário" vs "Joja Corporation"
+- Hover nos cards revela mais detalhes
+
+ELEMENTOS VISUAIS:
+- 📜 pergaminho como ícone do slide
+- 🏢 Joja Corporation com ícone de prédio
+- 🏘️ Centro Comunitário com ícone de comunidade
+- Silhueta da cidade de Pelican Town ao fundo
+
+PARTÍCULAS:
+Fireflies globais + pequenas partículas de poeira mágica (✨) subindo
+lentamente da carta.
+
+ILUMINAÇÃO:
+- Foco de luz (spotlight) suave sobre a carta central
+- Glow dourado nas bordas da carta
+
+EFEITOS:
+- Glassmorphism na carta central
+- Blur no fundo distante
+
+ÍCONES:
+📜 (história), 🏢 (Joja), 🏘️ (comunidade), ✉️ (carta)
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Texto da carta: Playfair Display, 400 (itálico para dar tom de narrativa),
+   #E0D8C8, line-height 1.8
+3. Cards inferiores: título Nunito 700, descrição Nunito 400
+
+TEXTO DA CARTA (resumido):
+"Você está cansado da rotina da cidade grande. Um dia, recebe uma carta do seu
+avô, que já faleceu. Ele lhe deixou a antiga fazenda da família, em Stardew
+Valley. Você decide largar tudo e começar uma nova vida no campo.
+
+Ao chegar em Pelican Town, você encontra uma fazenda abandonada, coberta de
+matos e pedras. A vila está decadente desde que a Joja Corporation instalou
+seus negócios por lá. Agora cabe a você restaurar a fazenda, fazer amigos e
+decidir o futuro do vale.
+
+Não há um final obrigatório. Você define seus próprios objetivos."
+
+CARDS INFERIORES:
+Centro Comunitário: "Restaurar o centro comunitário fortalece a vila e
+desbloqueia recompensas mágicas. Uma escolha tradicional."
+
+Joja Corporation: "Comprar a associação Joja moderniza a cidade rapidamente,
+mas a que custo? Uma escolha corporativa."
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background
+2. [t=200ms] Título
+3. [t=500ms] Carta principal (fade in com escala suave)
+4. [t=900ms] Parágrafos dentro da carta aparecendo um por um (400ms cada)
+5. [t=2000ms] Cards "Centro Comunitário" e "Joja" (entram juntos, um de cada lado)
+
+INTERAÇÕES:
+- Hover nos cards inferiores: revela descrição estendida
+- A carta pode ter um efeito de "desdobramento" suave na entrada
+
+TRANSIÇÃO PARA SLIDE 5:
+Cross Fade (600ms).
+
+================================================================================
+SLIDE 5 — AGRICULTURA
+================================================================================
+
+OBJETIVO:
+Explicar o sistema de agricultura do jogo, mostrando as culturas, estações e
+mecânicas de plantio.
+
+EMOÇÃO:
+Produtividade, crescimento, planejamento. O espectador deve entender a
+profundidade do sistema agrícola.
+
+LAYOUT:
+Split horizontal: título e texto no topo, grid de cards com as culturas abaixo.
+Tabs para alternar entre as 4 estações.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Agricultura" + breve texto introdutório
+- Abaixo do título: 4 tabs (Primavera, Verão, Outono, Inverno)
+- Abaixo das tabs: grid de cards mostrando as culturas da estação selecionada
+  (4 cards por linha, 3 linhas visíveis)
+- Cada card: nome da cultura, tempo de crescimento, lucro, emoji
+
+BACKGROUND:
+Fundo padrão com tom mais verde (como se estivesse em um campo ensolarado).
+Silhuetas de plantas e árvores frutíferas ao fundo.
+
+ELEMENTOS DECORATIVOS:
+- Pequenas plantas/folhas crescendo nas bordas do grid
+- Ícones de sol ☀️ e água 💧 decorativos
+
+ELEMENTOS INTERATIVOS:
+- Tabs clicáveis para trocar a estação
+- Cards com hover (elevação + glow verde)
+- A estação ativa muda o tom do fundo
+
+ELEMENTOS VISUAIS:
+- Emoji para cada cultura:
+  Primavera: 🌷🥬🍓🥔
+  Verão: 🌻🍉🌶️🌽
+  Outono: 🎃🍠🍇🌾
+  Inverno: ❄️ (apenas culturas da estufa e forrageamento)
+
+PARTÍCULAS:
+Fireflies verdes (em vez de douradas) + pólen dourado subindo.
+
+ILUMINAÇÃO:
+- God Rays sutis (simulando luz do sol)
+- Glow verde nas culturas
+
+EFEITOS:
+- Transição suave entre as estações (muda o fundo e o grid)
+- Glassmorphism nos cards
+
+ÍCONES:
+Emoji de culturas + ícones de estação (🌸🌻🍂❄️)
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Texto introdutório: Nunito, 400, #C4D4B0
+3. Nome da cultura: Nunito, 700, #F5EDE0
+4. Detalhes: Nunito, 300, #8AA87A
+
+CONTEÚDO DAS TABS:
+
+PRIMAVERA:
+🌷 Tulipa (6 dias, 30g), 🥬 Couve (6 dias, 110g), 🍓 Morango (8 dias, 120g),
+🥔 Batata (6 dias, 80g), 🌱 Feijão (10 dias, 40g), 🌿 Salsa (4 dias, 35g)
+
+VERÃO:
+🌻 Girassol (8 dias, 80g), 🍉 Melancia (14 dias, 310g), 🌶️ Pimenta (5 dias, 40g),
+🌽 Milho (14 dias, 50g), 🍅 Tomate (11 dias, 60g), 🫐 Mirtilo (13 dias, 50g)
+
+OUTONO:
+🎃 Abóbora (13 dias, 320g), 🍠 Batata-doce (10 dias, 160g), 🍇 Uva (10 dias, 80g),
+🌾 Trigo (4 dias, 25g), 🥬 Couve-flor (12 dias, 175g), 🍎 Maçã (28 dias, 100g)
+
+INVERNO:
+❄️ Inverno — sem culturas externas. Use a Estufa ou foque em forrageamento,
+mineração e pesca.
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background
+2. [t=200ms] Título
+3. [t=400ms] Texto introdutório
+4. [t=600ms] Tabs (entram juntas)
+5. [t=800ms] Grid de cards (stagger 100ms entre cards)
+
+INTERAÇÕES:
+- Clicar em uma tab troca o grid de culturas (transição fade de 300ms)
+- Hover nos cards: elevação + glow
+- A tab ativa tem destaque (sublinhado verde + glow)
+
+TRANSIÇÃO PARA SLIDE 6:
+Fade (500ms).
+
+================================================================================
+SLIDE 6 — ANIMAIS DA FAZENDA
+================================================================================
+
+OBJETIVO:
+Apresentar todos os animais disponíveis no jogo e seus produtos.
+
+EMOÇÃO:
+Aconchego, fofura, produtividade rural.
+
+LAYOUT:
+Grid de cards com ícones de animais. Cada card mostra o animal, seu produto
+e o lucro. Organização em 3 linhas.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Animais da Fazenda"
+- Grid de 4 colunas por 3 linhas (12 cards no total)
+- Cada card: emoji do animal, nome, produto, preço de venda
+- Abaixo do grid: uma nota sobre "Felicidade dos animais" afeta a produção
+
+BACKGROUND:
+Fundo padrão com campina verde ao fundo. Silhuetas de árvores e uma cerca
+simples.
+
+ELEMENTOS DECORATIVOS:
+- Cerca decorativa (linhas horizontais e verticais finas) na parte inferior
+- Ícone de celeiro e galinheiro no canto
+
+ELEMENTOS INTERATIVOS:
+- Cards com hover reveal: ao passar o mouse, mostra informações adicionais
+  (ex: "Galinha: Produz ovos grandes quando feliz")
+- Efeito de "pular" (bounce suave) no hover
+
+ELEMENTOS VISUAIS:
+Emoji para cada animal:
+🐔 Galinha, 🐄 Vaca, 🦆 Pato, 🐐 Cabra, 🐑 Ovelha, 🐇 Coelho,
+🐖 Porco, 🦕 Dinossauro, 🦃 Avestruz (use 🦆 como placeholder),
+🐔 Frango (galo), 🐄 Bezerro, 🐑 Cordeiro
+
+PARTÍCULAS:
+Fireflies globais + pequenos corações 💕 flutuando nos animais (sutis).
+
+ILUMINAÇÃO:
+- Iluminação ambiente quente (tom dourado)
+- Glow suave em cada card
+
+EFEITOS:
+- Glassmorphism nos cards
+- Cards com ícone grande e centralizado
+
+ÍCONES:
+Emoji de animais.
+
+IMAGENS:
+Nenhuma (tudo com emoji).
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Nome do animal: Nunito, 700, #F5EDE0
+3. Produto: Nunito, 400, #C4D4B0
+4. Preço: Nunito, 700, #E8B825
+
+LISTA DE ANIMAIS (12 cards):
+🐔 Galinha → Ovo (50g)
+🐄 Vaca → Leite (125g)
+🦆 Pato → Ovo de Pato (95g)
+🐐 Cabra → Leite de Cabra (180g)
+🐑 Ovelha → Lã (340g)
+🐇 Coelho → Pé de Coelho (565g)
+🐖 Porco → Trufa (625g)
+🦕 Dinossauro → Ovo de Dinossauro (350g)
+🦃 Avestruz → Ovo de Avestruz (600g)
+🐤 Pintinho → (evolui para galinha)
+🐮 Bezerro → (evolui para vaca)
+🐑 Cordeiro → (evolui para ovelha)
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background
+2. [t=200ms] Título
+3. [t=500ms] Grid de cards (stagger de 100ms)
+   Linha 1: 500, 600, 700, 800ms
+   Linha 2: 900, 1000, 1100, 1200ms
+   Linha 3: 1300, 1400, 1500, 1600ms
+
+INTERAÇÕES:
+- Hover nos cards: bounce suave (scale 1.05) + glow
+- Informações detalhadas aparecem no hover (tooltip ou texto extra)
+
+TRANSIÇÃO PARA SLIDE 7:
+Cross Fade com escurecimento (800ms). O fundo escurece gradualmente enquanto
+o slide 7 (mineração, mais escuro) aparece.
+
+================================================================================
+SLIDE 7 — MINERAÇÃO E COMBATE
+================================================================================
+
+OBJETIVO:
+Explicar o sistema de mineração e combate, com suas mecânicas e recompensas.
+
+EMOÇÃO:
+Aventura, perigo, descoberta, emoção. Deve contrastar com a tranquilidade dos
+slides anteriores.
+
+LAYOUT:
+Split screen vertical: lado esquerdo com informações de mineração, lado direito
+com informações de combate. Cards com ícones no centro.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Mineração e Combate"
+- Lado esquerdo (50%): seção de Mineração
+  - Minérios: ⛓️ Ferro, ouro, carvão, pedras preciosas
+  - Ferramentas: picaretas, upgrades
+  - Progressão por andares
+- Lado direito (50%): seção de Combate
+  - Armas: ⚔️ Espadas, 🔨 Martelos, 🗡️ Adagas
+  - Monstros: 🟢 Slimes, 🦇 Morcegos, 👻 Fantasmas
+  - Anéis e botas como equipamentos
+- Centro: ilustração de uma mina/caverna (silhueta)
+
+BACKGROUND:
+Fundo escuro #0A0D12 com gradiente radial roxo escuro. Pequenos cristais
+brilhando nas paredes da caverna (efeito visual). Silhuetas de estalactites.
+
+ELEMENTOS DECORATIVOS:
+- Cristais brilhando (CSS animation com glow pulsante em cores roxas/azuis)
+- Estalactites no topo (triângulos invertidos escuros)
+- Gotejamento (partículas de água caindo ocasionalmente)
+- Veios de minério nas bordas
+
+ELEMENTOS INTERATIVOS:
+- Cards com hover reveal
+- Ao clicar em um minério, ele "brilha" mais intensamente
+- Ao clicar em um monstro, ele "pisca" vermelho
+
+ELEMENTOS VISUAIS:
+Ícones/emoji de cada elemento:
+Minérios: 💎⛓️🪨💎
+Armas: ⚔️🔨🗡️🛡️
+Monstros: 🟢🦇👻🕷️
+Equipamentos: 💍👢
+
+PARTÍCULAS:
+- Pequenos cristais/temperos brilhantes flutuando (partículas roxas/azuis)
+- Gotas de água caindo ocasionalmente (partículas azuis)
+- Faíscas de picareta (amarelas, aleatórias)
+
+ILUMINAÇÃO:
+- Iluminação dramática: spots de luz descendo
+- Cristais com glow pulsante (roxo, azul, verde)
+- Efeito de "caverna escura" com pouca luz ambiente
+- Lanterna do jogador simulada: um círculo de luz que segue o mouse
+  (efeito spotlight) com opacidade suave
+
+EFEITOS:
+- Vignette escura nas bordas da tela (simula escuridão da caverna)
+- Blur sutil no fundo
+- Pulsação de glow nos minérios valiosos
+
+ÍCONES:
+💎 (diamante), ⛏️ (picareta), ⚔️ (espada), 🛡️ (escudo), 💍 (anel), 👢 (bota)
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0 (com glow roxo sutil)
+2. Subtítulo (Mineração / Combate): Playfair Display, 600, #E8B825
+3. Itens: Nunito, 400, #C4D4B0
+4. Destaques: Nunito, 700, #F5EDE0
+
+CONTEÚDO:
+
+MINERAÇÃO:
+• Mina principal: 120 andares de progressão
+• Minérios comuns: Carvão (andares 1-40), Ferro (41-80), Ouro (81-120)
+• Pedras preciosas: Ametista, Topázio, Esmeralda, Rubi
+• Ferramentas: Picareta (madeira → pedra → cobre → ferro → ouro → irídio)
+• Caverna da Caveira: desafio infinito no deserto
+
+COMBATE:
+• Armas: Espadas (equilíbrio), Martelos (danos altos), Adagas (velocidade)
+• Monstros: Slimes (verdes, azuis, vermelhos), Morcegos, Fantasmas,
+  Esqueletos, Golem, Múmias, Serpentes
+• Equipamentos: Anéis (imunidade, ataque, defesa), Botas (defesa)
+• Energia e Vida: sistema de gerenciamento de recursos
+• Vulcão da Ilha Gengibre: desafio avançado
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background escuro com cristais
+2. [t=200ms] Título (fade in com glow)
+3. [t=500ms] Seção Mineração (lado esquerdo, slide in da esquerda)
+4. [t=500ms] Seção Combate (lado direito, slide in da direita)
+5. [t=800ms] Itens de mineração (stagger 100ms)
+6. [t=800ms] Itens de combate (stagger 100ms)
+
+INTERAÇÕES:
+- Mouse: spotlight de lanterna segue o cursor (círculo radial gradiente)
+- Hover nos minérios: pulse de glow
+- Hover nos monstros: glow vermelho
+- Parallax nas estalactites e cristais com o mouse
+
+TRANSIÇÃO PARA SLIDE 8:
+Slide Right (700ms). O slide 8 (pesca, azul) vem da direita, como se estivesse
+"empurrando" a escuridão da mina.
+
+================================================================================
+SLIDE 8 — PESCA
+================================================================================
+
+OBJETIVO:
+Explicar o sistema de pesca, os tipos de peixes e o minigame.
+
+EMOÇÃO:
+Calma, paciência, conexão com a natureza. O ritmo deve desacelerar após a
+intensidade da mineração.
+
+LAYOUT:
+Layout centralizado com um visual de "lagoa" ou "rio". A tela simula estar
+à beira d'água.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Pesca"
+- Esquerda: minijogo de pesca simulado (barra de progresso vertical interativa)
+- Direita: cards com tipos de peixes, iscas e equipamentos
+- Abaixo: peixes lendários em destaque
+
+BACKGROUND:
+Fundo azul escuro #0A1520 com gradiente para azul médio, simulando água.
+Ondas suaves na parte inferior da tela (animação SVG ou CSS).
+
+ELEMENTOS DECORATIVOS:
+- Ondas animadas na parte inferior (SVG animado se movendo lateralmente)
+- Bolhas subindo ocasionalmente (partículas)
+- Anzol balançando (SVG com animação suave)
+- Juncos/caniços nas bordas (silhuetas finas)
+
+ELEMENTOS INTERATIVOS:
+- Barra de progresso do minijogo de pesca (clicável para simular)
+- Ao clicar, a barra sobe/desce (simulando o minigame real do Stardew Valley)
+- Cards de peixes com hover (mostra estações e horários)
+
+ELEMENTOS VISUAIS:
+- 🎣 Vara de pesca (ícone)
+- 🐟 Peixes comuns, 🌟 Peixes lendários
+- 🪱 Iscas, 🦀 Armadilhas
+- Ondas azuis animadas
+
+PARTÍCULAS:
+- Bolhas subindo (15-20 bolhas, azul claro, transparentes, tamanhos variados)
+- Reflexos de luz na água (pontos brancos cintilantes)
+
+ILUMINAÇÃO:
+- Reflexos de luz na superfície da água (caustics animados)
+- Luz azul suave envolvendo o slide
+- Brilho nos peixes lendários (glow dourado)
+
+EFEITOS:
+- Ondas líquidas animadas no fundo
+- Glassmorphism nos cards com tom azul
+- Efeito de "mergulho" na transição de entrada
+
+ÍCONES:
+🎣 (pesca), 🐟 (peixe), 🌟 (lendário), 🪱 (isca), 🦀 (armadilha)
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #E8F4F8 (azul claro gelado)
+2. Subtítulos: Playfair Display, 600, #6BB8D4
+3. Texto: Nunito, 400, #C4E0E8
+4. Nome dos peixes: Nunito, 700, #E8F4F8
+
+CONTEÚDO:
+
+SISTEMA DE PESCA:
+• Minigame: barra verde deve acompanhar o peixe
+• Dificuldade varia por espécie
+• Varas de madeira → fibra de vidro → irídio
+• Iscas atraem peixes mais rápido
+• Armadilhas para caranguejos: pegam crustáceos
+
+PEIXES POR ESTAÇÃO:
+• Primavera: 🐟 Sardinha, Linguado, Salmão
+• Verão: 🐟 Atum, Dourada, Pufferfish
+• Outono: 🐟 Salmão, Sável, Enguia
+• Inverno: 🐟 Lúcio, Esturjão, Peixe-Gelo
+• Qualquer estação: 🐟 Carpa, Peixinho
+
+PEIXES LENDÁRIOS:
+• 🌟 Crimsonfish (Verão, Praia Oriental)
+• 🌟 Angler (Outono, Ponte Norte)
+• 🌟 Glacierfish (Inverno, Floresta)
+• 🌟 Legend (Primavera, Montanha)
+• 🌟 Mutant Carp (Esgoto)
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background aquático com ondas
+2. [t=200ms] Título
+3. [t=400ms] Minijogo de pesca (lado esquerdo)
+4. [t=600ms] Cards de peixes (stagger 100ms)
+5. [t=1000ms] Peixes lendários em destaque
+
+INTERAÇÕES:
+- Clique na barra de minijogo: simula o pressionar do botão de pesca
+- Hover nos peixes lendários: glow dourado e leve escala
+- Bolhas reagem sutilmente ao movimento do mouse
+
+TRANSIÇÃO PARA SLIDE 9:
+Cross Fade (600ms).
+
+================================================================================
+SLIDE 9 — PERSONAGENS E RELACIONAMENTOS
+================================================================================
+
+OBJETIVO:
+Apresentar o rico sistema de relacionamentos do jogo, com seus mais de 30 NPCs.
+
+EMOÇÃO:
+Conexão, comunidade, amizade, afeto.
+
+LAYOUT:
+Grid de cards de personagens com carrossel horizontal. Organização em formato
+de "álbum de fotos".
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Personagens e Relacionamentos"
+- Carrossel horizontal com cards de personagens (scroll horizontal)
+- Cada card: retrato (emoji representando o personagem), nome, coração de
+  amizade ❤️ (preenchido até o nível), descrição curta
+- Abaixo do carrossel: cards de funcionalidades (casamento, eventos, etc.)
+
+BACKGROUND:
+Fundo padrão com praça da vila ao fundo (silhuetas de casinhas). Tom mais
+quente e social.
+
+ELEMENTOS DECORATIVOS:
+- Corações ❤️ flutuando (partículas)
+- Flores 🌸 na base do slide
+- Caminho de pedras (decorativo)
+
+ELEMENTOS INTERATIVOS:
+- Carrossel horizontal arrastável (mouse drag e swipe touch)
+- Botões de navegação do carrossel (setas)
+- Hover nos cards: card vira (flip) mostrando o presente favorito do personagem
+- Ao clicar em um card, expande com mais detalhes (opcional)
+
+ELEMENTOS VISUAIS:
+Emoji representando cada NPC principal:
+👨‍🌾 Alex, 👩‍🌾 Haley, 👨‍🍳 Gus, 👩‍🔬 Maru, 👨‍💻 Sebastian, 👩‍🎨 Leah,
+👨‍📚 Elliott, 👩‍🌾 Penny, 👨‍🏭 Sam, 👩‍💼 Abigail, 👨‍⚕️ Harvey, 👩‍🐱 Emily
+
+PARTÍCULAS:
+- Corações pequenos flutuando (❤️ em tamanho 8-12px, opacidade 0.3-0.6)
+- Pétalas de flores caindo (🌸)
+
+ILUMINAÇÃO:
+- Iluminação quente e suave (dourada)
+- Glow rosa suave nos corações
+
+EFEITOS:
+- Glassmorphism nos cards
+- Efeito flip (rotação 3D) no hover para revelar presente favorito
+- Parallax no fundo
+
+ÍCONES:
+Emoji de personagens, ❤️, 💍 (casamento), 👶 (filhos)
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Nome do personagem: Nunito, 700, #F5EDE0
+3. Descrição: Nunito, 400, #C4D4B0
+4. Dica do presente: Nunito, 300, itálico, #E8B825
+
+LISTA DE PERSONÁGENS (12 solteiros elegíveis, mais alguns):
+
+SOLTEIROS:
+• Alex — Esporte, fama, ego. Presente:🥚 Café da Manhã Completo
+• Elliott — Escritor romântico. Presente: 🦀 Lagosta
+• Harvey — Médico da cidade. Presente: ☕ Café
+• Sam — Guitarrista adolescente. Presente: 🏀 Cactus
+• Sebastian — Programador recluso. Presente: 🐟 Sashimi
+• Shane — Funcionário da Joja. Presente: 🍺 Cerveja
+
+SOLTEIRAS:
+• Abigail — Aventureira. Presente: 🎃 Abóbora
+• Emily — Bartender. Presente: 🐇 Lã
+• Haley — Socialite. Presente: 🌻 Girassol
+• Leah — Artista. Presente: 🥗 Salada
+• Maru — Cientista. Presente: 🔋 Bateria
+• Penny — Professora. Presente: 📚 Livro
+
+CARDS INFERIORES:
+• 💍 Casamento — após 10 corações, peça o pendente de sereia
+• 👶 Filhos — o casal pode ter filhos
+• 💔 Divórcio — possível, mas com consequências
+• ❤️ Eventos de coração — histórias especiais em cada nível
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background
+2. [t=200ms] Título
+3. [t=500ms] Carrossel de personagens (aparece com scroll animation)
+4. [t=1000ms] Cards de funcionalidades inferiores
+
+INTERAÇÕES:
+- Carrossel: swipe, drag, setas de navegação
+- Hover no card: flip 3D mostra presente favorito
+- Botões do carrossel: setas nos cantos
+
+TRANSIÇÃO PARA SLIDE 10:
+Fade (500ms).
+
+================================================================================
+SLIDE 10 — EXPLORAÇÃO DO MUNDO
+================================================================================
+
+OBJETIVO:
+Mostrar todos os locais que o jogador pode explorar no jogo.
+
+EMOÇÃO:
+Aventura, descoberta, curiosidade. O espectador deve sentir a vastidão do
+mundo do jogo.
+
+LAYOUT:
+Mapa visual com áreas clicáveis espalhadas pela tela, conectadas por linhas.
+Layout de "mapa do mundo".
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Exploração do Mundo"
+- Mapa conceitual central: ícones de cada área espalhados pela tela,
+  conectados por linhas tracejadas (como um mapa de jogo)
+- As áreas principais têm ícones maiores, as secundárias são menores
+- À direita ou em tooltip: descrição da área destacada
+
+BACKGROUND:
+Fundo padrão com tom de mapa antigo (papel vegetal digital). Grid de linhas
+finas como um mapa cartesiano.
+
+ELEMENTOS DECORATIVOS:
+- Linhas conectando as áreas (SVG lines, tracejadas, verdes)
+- Bússola decorativa 🧭 no canto
+- Grid cartesiano sutil no fundo
+
+ELEMENTOS INTERATIVOS:
+- Cada área no mapa é clicável
+- Ao clicar, a área "pisca" e mostra informações em um tooltip/popup
+- Hover nas áreas: glow e leve escala
+
+ELEMENTOS VISUAIS:
+📍 Marcadores de mapa para cada área:
+🏘️ Pelican Town, 🏖️ Praia, 🌲 Floresta Cindersap, ⛰️ Montanhas,
+🏜️ Deserto, 🌴 Ilha Gengibre, 🚂 Ferrovia, 🌳 Bosque Secreto,
+🏚️ Esgotos, 🗼 Torre do Mago, ⛏️ Mina, 🌋 Vulcão
+
+PARTÍCULAS:
+Fireflies globais + pequenos marcadores de "exploração" ✨
+
+ILUMINAÇÃO:
+- Áreas principais com glow pulsante
+- Efeito de "descoberta" quando uma área é clicada
+
+EFEITOS:
+- Parallax suave no mapa com o mouse (profundidade)
+- Tooltips com glassmorphism
+- Linhas SVG animadas (tracejado se movendo)
+
+ÍCONES:
+📍 (marcador), 🧭 (bússola), mais os emoji de cada área
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Nome da área: Nunito, 700, #F5EDE0
+3. Descrição da área: Nunito, 400, #C4D4B0
+
+LISTA DE ÁREAS (12 áreas):
+1. 🏘️ Pelican Town — Centro da vila, lojas e moradores
+2. 🏖️ Praia — Pesca, caranguejos, Wigglers
+3. 🌲 Floresta Cindersap — Forrageamento, torneira de bordo
+4. ⛰️ Montanhas — Mina, barragem, ferrovia
+5. 🏜️ Deserto — Caverna da Caveira, comércio de camelos
+6. 🌴 Ilha Gengibre — Paraíso tropical, vulcão, fazenda alternativa
+7. 🚂 Ferrovia — Trem, caverna da estação
+8. 🌳 Bosque Secreto — Slime, hardwood
+9. 🏚️ Esgotos — Krobus, itens raros
+10. 🗼 Torre do Mago — Magia, altar de casamento
+11. ⛏️ Mina — 120 andares de mineração
+12. 🌋 Vulcão — Desafio final na Ilha Gengibre
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background
+2. [t=200ms] Título
+3. [t=400ms] Linhas do mapa desenhando (SVG draw animation, 500ms)
+4. [t=500ms a 1600ms] Marcadores de área aparecendo em sequência
+   (stagger 100ms entre cada área)
+
+INTERAÇÕES:
+- Hover nos marcadores: glow + nome aparece
+- Clique: tooltip/popup com descrição da área
+- Arrastar o mapa? Não, manter fixo com parallax
+
+TRANSIÇÃO PARA SLIDE 11:
+Zoom In suave (700ms).
+
+================================================================================
+SLIDE 11 — PROGRESSÃO
+================================================================================
+
+OBJETIVO:
+Mostrar como o jogador evolui no jogo através de habilidades, dinheiro,
+ferramentas e coleções.
+
+EMOÇÃO:
+Realização, crescimento, evolução.
+
+LAYOUT:
+Dashboard com indicadores visuais de progressão. Vários cards mostrando
+diferentes aspectos da progressão.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Progressão"
+- Grid de 2x4 cards (8 cards) ou 4x2:
+  - 💰 Dinheiro: contador do maior lucro possível
+  - ⚒️ Ferramentas: evolução (madeira → irídio)
+  - 🏗️ Construções: celeiros, galinheiros, estufa
+  - 📈 Habilidades: 5 habilidades com níveis
+  - 🌟 Perfeição: indicador de 100%
+  - 📚 Coleções: minerais, artefatos, peixes
+  - 🏘️ Centro Comunitário: pacotes completados
+  - 🎯 Objetivos opcionais: desafios diversos
+
+BACKGROUND:
+Fundo padrão com gráficos de crescimento ao fundo (linhas ascendentes sutis).
+
+ELEMENTOS DECORATIVOS:
+- Linhas de gráfico ascendentes (SVG) no fundo
+- Pequenas estrelas ⭐ indicando conquistas
+
+ELEMENTOS INTERATIVOS:
+- Contadores animados (números sobem de 0 ao valor quando o slide entra)
+- Hover nos cards mostra detalhes
+
+ELEMENTOS VISUAIS:
+Cada card com ícone grande e número/indicador:
+💰 Dinheiro, ⚒️ Ferramentas, 🏗️ Construções, 📈 Habilidades,
+🌟 Perfeição, 📚 Coleções, 🏘️ Centro, 🎯 Desafios
+
+PARTÍCULAS:
+Fireflies globais + partículas de "upgrade" ⭐ subindo
+
+ILUMINAÇÃO:
+- Glow dourado nos cards de conquistas
+- Destaque no card de "Perfeição" com glow especial
+
+EFEITOS:
+- Contadores numéricos animados
+- Barra de progresso visual em cada card
+- Glassmorphism
+
+ÍCONES:
+💰, ⚒️, 🏗️, 📈, 🌟, 📚, 🏘️, 🎯
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Título do card: Nunito, 700, #F5EDE0
+3. Número/valor: Playfair Display, 800, #E8B825, tamanho grande
+4. Descrição: Nunito, 400, #C4D4B0
+
+CONTEÚDO DOS CARDS:
+💰 Dinheiro — Maior lucro possível: milhões por ano
+⚒️ Ferramentas — 6 níveis: Madeira → Pedra → Cobre → Ferro → Ouro → Irídio
+🏗️ Construções — Celeiros, Galinheiros, Estufa, Açude, Moinho
+📈 Habilidades — Agricultura, Mineração, Combate, Pesca, Forrageamento (nível 1-10)
+🌟 Perfeição — 100%: complete todos os objetivos do jogo
+📚 Coleções — 145 peixes, 75 minerais, 50 artefatos
+🏘️ Centro Comunitário — 6 salas, 42 pacotes para completar
+🎯 Desafios — Speedrun, desafios da comunidade, mods
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background
+2. [t=200ms] Título
+3. [t=500ms a 1200ms] Cards entrando em grid (stagger 100ms)
+4. [t=800ms] Contadores começam a animar (números sobem)
+
+INTERAÇÕES:
+- Hover nos cards: elevação + detalhes
+- Contadores disparam automaticamente ao entrar no slide
+
+TRANSIÇÃO PARA SLIDE 12:
+Cross Fade (600ms).
+
+================================================================================
+SLIDE 12 — TRILHA SONORA E ESTILO VISUAL
+================================================================================
+
+OBJETIVO:
+Destacar a trilha sonora original e o estilo pixel art que definem a identidade
+do jogo.
+
+EMOÇÃO:
+Nostalgia, apreciação artística, imersão sensorial.
+
+LAYOUT:
+Split vertical: lado esquerdo (estilo visual), lado direito (trilha sonora).
+Elementos audiovisuais combinados.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Trilha Sonora e Estilo Visual"
+- Lado esquerdo (50%): Estilo Visual
+  - Cards sobre pixel art, animações, estações, ciclo dia/noite
+  - Amostra visual: pequeno quadrado animado simulando pixel art
+- Lado direito (50%): Trilha Sonora
+  - Cards sobre a trilha composta por Eric Barone
+  - Visualizador de áudio simulado (barras que dançam)
+  - Efeitos sonoros e atmosfera
+- Centro: um equalizador visual animado separando os dois lados
+
+BACKGROUND:
+Fundo escuro com gradiente que transita de verde escuro para azul escuro.
+Elementos de pixel art (pequenos quadrados coloridos) flutuando no fundo.
+
+ELEMENTOS DECORATIVOS:
+- Pixel art flutuante: pequenos quadrados (8x8px) de cores variadas
+  se movendo lentamente como se fossem "sprites" no ar
+- Um mini player de música estilizado no centro
+- Barras de equalizador animadas (CSS animation com alturas variáveis)
+
+ELEMENTOS INTERATIVOS:
+- Equalizador animado (barras que se movem ao ritmo)
+- Cards com hover reveal
+- Botão "play" simbólico no centro (apenas visual, não toca áudio real)
+
+ELEMENTOS VISUAIS:
+- 🎵 Notas musicais flutuando
+- 🎨 Paleta de cores do jogo
+- 🖼️ Sprites pixelados (pequenos quadrados coloridos)
+- 🌅 Ciclo dia/noite representado visualmente
+
+PARTÍCULAS:
+- Notas musicais 🎵🎶 flutuando (partículas)
+- Pequenos pixels coloridos subindo/descendo
+- Fireflies globais
+
+ILUMINAÇÃO:
+- Luz ambiente suave
+- Glow nas notas musicais
+- Destaque no equalizador
+
+EFEITOS:
+- Equalizador animado com barras CSS
+- Pixel art flutuante (animação suave)
+- Glassmorphism nos cards
+
+ÍCONES:
+🎵 (música), 🎨 (arte), 🖼️ (pixel art), 🌅 (ciclo dia/noite)
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Subtítulo (Visual / Trilha): Playfair Display, 600, #E8B825
+3. Texto: Nunito, 400, #C4D4B0
+
+CONTEÚDO:
+
+ESTILO VISUAL:
+• Pixel Art — Sprites desenhados à mão por Eric Barone
+• Animações — Cada personagem tem animações únicas
+• 4 Estações — Mudanças visuais dramáticas na paisagem
+• Ciclo Dia/Noite — Iluminação muda conforme o horário
+• Clima — Chuva, neve, sol, tempestades
+• Interface — Simples, funcional, charmosa
+
+TRILHA SONORA:
+• Composta 100% por Eric Barone (ConcernedApe)
+• Mais de 2 horas de música original
+• Faixas por estação: Primavera (suave), Verão (alegre),
+  Outono (melancólica), Inverno (serena)
+• Efeitos sonoros de animais, ferramentas, ambiente
+• Música ambiente que muda conforme o horário do dia
+• Atmosfera relaxante e imersiva
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background com pixel art
+2. [t=200ms] Título
+3. [t=500ms] Lado visual (esquerda, slide in)
+4. [t=500ms] Lado trilha (direita, slide in)
+5. [t=800ms] Equalizador animado
+6. [t=600ms a 1000ms] Cards de cada lado (stagger)
+
+INTERAÇÕES:
+- Hover nos cards: elevação
+- Equalizador anima automaticamente
+- Pixel art flutuante reage ao mouse (leve deslocamento)
+
+TRANSIÇÃO PARA SLIDE 13:
+Slide Up (700ms).
+
+================================================================================
+SLIDE 13 — IMPACTO NA INDÚSTRIA
+================================================================================
+
+OBJETIVO:
+Mostrar o sucesso avassalador de Stardew Valley na indústria de jogos.
+
+EMOÇÃO:
+Orgulho, admiração, surpresa com os números impressionantes.
+
+LAYOUT:
+Dashboard de estatísticas com grandes números e indicadores visuais de sucesso.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Impacto na Indústria"
+- Grid de 4 cards grandes com estatísticas principais:
+  - 20+ milhões de cópias vendidas
+  - 97% de avaliações positivas (Steam)
+  - Traduzido para 12+ idiomas
+  - 1 desenvolvedor (Eric Barone)
+- Abaixo: cards secundários com impacto (comunidade de mods, multiplayer, prêmios)
+- Um gráfico simples de barras mostrando o crescimento ao longo dos anos
+
+BACKGROUND:
+Fundo padrão com destaque dourado. Elementos de "troféu" e "medalha" decorativos.
+
+ELEMENTOS DECORATIVOS:
+- Confetes dourados caindo (partículas)
+- Linhas de gráfico ascendentes
+- Pequenas estrelas ⭐ de rating
+
+ELEMENTOS INTERATIVOS:
+- Contadores animados: números sobem de 0 ao valor final
+- Hover nos cards: glow dourado intenso
+- Gráfico de crescimento animado (barras sobem)
+
+ELEMENTOS VISUAIS:
+- 🏆 Troféu, 💰 Vendas, ⭐ Avaliações, 🌍 Idiomas,
+  👨‍💻 Desenvolvedor, 🎮 Multiplayer, 🔧 Mods, 📰 Prêmios
+
+PARTÍCULAS:
+- Confetes dourados (🎉) caindo suavemente
+- Estrelas ⭐ subindo
+- Fireflies globais
+
+ILUMINAÇÃO:
+- Glow dourado intenso nos números
+- Spotlights nos cards principais
+
+EFEITOS:
+- Contadores numéricos animados (Playfair Display, muito grandes)
+- Gráfico de barras animado (CSS animation, barras crescem de 0 para o valor)
+- Glassmorphism nos cards
+
+ÍCONES:
+🏆, 💰, ⭐, 🌍, 👨‍💻, 🎮, 🔧, 📰
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Números grandes: Playfair Display, 800, #E8B825,
+   clamp(2.5rem, 6vw, 4.5rem)
+3. Rótulo: Nunito, 700, #F5EDE0
+4. Descrição: Nunito, 400, #C4D4B0
+
+CONTEÚDO DOS CARDS PRINCIPAIS:
+🏆 20M+ cópias vendidas — Um dos jogos independentes mais vendidos
+⭐ 97% positivas — Avaliação "Extremamente Positiva" no Steam
+🌍 12+ idiomas — Traduzido para os principais idiomas do mundo
+👨‍💻 1 desenvolvedor — Eric Barone criou praticamente tudo sozinho
+
+CARDS SECUNDÁRIOS:
+🎮 Multiplayer — Adicionado gratuitamente após o lançamento
+🔧 Comunidade de Mods — Milhares de mods criados por fãs
+📰 Prêmios — Diversos prêmios da indústria de games
+🔄 Atualizações — Anos de conteúdo gratuito pós-lançamento
+
+GRÁFICO:
+Um gráfico simples de barras horizontais mostrando o crescimento:
+2016: 1M → 2017: 3M → 2018: 5M → 2020: 10M → 2022: 15M → 2024: 20M+
+Cada barra aparece em sequência com animação de crescimento.
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background
+2. [t=200ms] Título
+3. [t=500ms] Cards principais entram (stagger 150ms)
+4. [t=500ms] Contadores disparam (números sobem por 2s)
+5. [t=1300ms] Cards secundários entram
+6. [t=1800ms] Gráfico animado (barras sobem em sequência)
+
+INTERAÇÕES:
+- Hover nos números: glow mais intenso
+- Hover nas barras do gráfico: tooltip com o valor exato
+
+TRANSIÇÃO PARA SLIDE 14:
+Rotate (800ms, 3D perspective) — uma rotação 3D no eixo Y, como um
+"virar de página" mais estilizado.
+
+================================================================================
+SLIDE 14 — CURIOSIDADES
+================================================================================
+
+OBJETIVO:
+Apresentar curiosidades e fatos interessantes sobre o jogo de forma divertida
+e interativa.
+
+EMOÇÃO:
+Surpresa, diversão, encantamento. O espectador deve descobrir coisas novas.
+
+LAYOUT:
+Layout de FAQ/accordion com cards espalhados em formato de grid interativo.
+Estilo mais lúdico e colorido.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Curiosidades" com um emoji de surpresa 😮
+- Grid de 6-8 cards em 2 colunas
+- Cada card: pergunta (título), resposta (expandível)
+- Formato de accordion: clica no card para expandir e mostrar a resposta
+- Os cards têm cores de fundo variadas (mas dentro da paleta)
+
+BACKGROUND:
+Fundo com gradiente mais vibrante e colorido (verde → dourado → azul),
+simulando a energia de curiosidades. Pequenos pontos de interrogação
+decorativos no fundo.
+
+ELEMENTOS DECORATIVOS:
+- Pontos de interrogação ❓ flutuando no fundo (opacidade 0.1)
+- Pequenas luzes coloridas (como se fossem "lâmpadas de ideia" 💡)
+- Estrelas cadentes ocasionais
+
+ELEMENTOS INTERATIVOS:
+- Accordion: cada card expande ao clicar (animação suave de altura)
+- O ícone no card muda de "+" para "−" (ou de "❓" para "💡")
+- Múltiplos cards podem ficar abertos simultaneamente
+
+ELEMENTOS VISUAIS:
+- 😮 (surpresa), 💡 (descoberta), 🎮 (jogo), 🤯 (mind-blown)
+- Cores variadas nos cards (dentro da paleta): verde, dourado, azul, roxo
+
+PARTÍCULAS:
+- Fireflies globais + estrelas ✨
+
+ILUMINAÇÃO:
+- Cards com cores de glow diferentes
+- Destaque no card aberto
+
+EFEITOS:
+- Accordion com transição suave de max-height
+- Glassmorphism nos cards (com diferentes matizes)
+- Background animado sutilmente
+
+ÍCONES:
+❓, 💡, 😮, 🤯, 🎮, ⏱️, 🗺️, 👨‍💻
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Pergunta (card fechado): Nunito, 700, #F5EDE0
+3. Resposta (card aberto): Nunito, 400, #C4D4B0
+
+CURIOSIDADES (8 cards):
+
+1. 🎮 Criado por uma pessoa só
+   Eric Barone fez programação, arte, música, som e design completamente sozinho.
+
+2. ⏱️ 4 anos de desenvolvimento
+   Eric trabalhou no jogo por cerca de 4 anos antes do lançamento.
+
+3. 🗺️ Mais de 50 personagens
+   Stardew Valley tem mais de 50 NPCs, cada um com rotina e diálogos próprios.
+
+4. 🐔 Dinossauros são reais
+   É possível encontrar ovos de dinossauro e chocar dinossauros na sua fazenda.
+
+5. 🎵 Trilha sonora icônica
+   Eric Barone compôs mais de 2 horas de música original para o jogo.
+
+6. 🤯 Easter Eggs secretos
+   O jogo está repleto de segredos, referências e eventos ocultos.
+
+7. 🔄 Atualizações gratuitas
+   Todo o conteúdo novo foi adicionado de graça por anos após o lançamento.
+
+8. 🎮 Multiplayer gratuito
+   O modo multiplayer foi adicionado inteiramente de graça em 2018.
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background
+2. [t=200ms] Título
+3. [t=500ms a 1200ms] Cards entrando (stagger 100ms)
+
+INTERAÇÕES:
+- Clique no card: expande/recolhe (accordion)
+- Hover no card: glow + elevação
+- Múltiplos cards podem ficar abertos ao mesmo tempo
+
+TRANSIÇÃO PARA SLIDE 15:
+Cross Fade (600ms).
+
+================================================================================
+SLIDE 15 — CONCLUSÃO
+================================================================================
+
+OBJETIVO:
+Finalizar a apresentação com um resumo poderoso, mensagem inspiradora e
+espaço para perguntas.
+
+EMOÇÃO:
+Inspiração, reflexão, gratidão. O espectador deve sair da apresentação com
+uma nova apreciação por Stardew Valley.
+
+LAYOUT:
+Layout centralizado com o resumo em colunas e uma mensagem final em destaque.
+Inferior com agradecimento.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo: título "Conclusão"
+- Grid de 3 colunas com resumo:
+  - 📝 O que é Stardew Valley (breve resumo)
+  - ⭐ Por que fez sucesso (motivos principais)
+  - 🎯 Lições e legado (aprendizados)
+- Centro: mensagem final em destaque (citação)
+- Inferior: "Obrigado!" e "Perguntas?" com ícones
+- Cantos: informações de contato do apresentador
+
+BACKGROUND:
+Fundo padrão com pôr do sol dourado mais intenso, como o final de um dia
+perfeito na fazenda. Silhuetas ao fundo com luz dourada.
+
+ELEMENTOS DECORATIVOS:
+- Pôr do sol simulado (gradiente dourado no horizonte)
+- Fireflies dourados mais intensos
+- Pássaros voando no horizonte (silhuetas SVG)
+
+ELEMENTOS INTERATIVOS:
+- Cards com hover (elevação)
+- Mensagem final com glow pulsante
+
+ELEMENTOS VISUAIS:
+- 🌟 (estrela), 📝 (resumo), 💡 (lição), ❤️ (agradecimento)
+- Ícone de perguntas ❓
+
+PARTÍCULAS:
+- Fireflies globais douradas
+- Pétalas ou folhas caindo suavemente (encerramento)
+
+ILUMINAÇÃO:
+- Pôr do sol: luz dourada quente
+- Glow na mensagem final
+- God Rays sutis descendo
+
+EFEITOS:
+- Glassmorphism nos cards
+- Pôr do sol animado (cores mudam muito sutilmente)
+- Efeito de "fechamento" com fade suave em tudo
+
+ÍCONES:
+📝, 💡, ❤️, ❓, 🌟, 🎯
+
+IMAGENS:
+Nenhuma.
+
+TIPOGRAFIA:
+1. Título: Playfair Display, 700, #F5EDE0
+2. Card título: Nunito, 700, #E8B825
+3. Card texto: Nunito, 400, #C4D4B0
+4. Mensagem final: Playfair Display, itálico, 600, #F5EDE0
+5. Agradecimento: Playfair Display, 700, #E8B825, clamp(1.5rem, 4vw, 3rem)
+
+CONTEÚDO:
+
+CARDS DE RESUMO:
+📝 Stardew Valley é um simulador de fazenda com elementos de RPG, ação e
+aventura, onde o jogador possui total liberdade para definir seu próprio
+caminho em um mundo vivo e acolhedor.
+
+⭐ O sucesso mundial se deve à combinação de jogabilidade viciante, trilha
+sonora memorável, pixel art encantadora e o carinho exemplar do desenvolvedor
+com a comunidade.
+
+🎯 O jogo ensina planejamento, administração de recursos, organização,
+estratégia e mostra que um projeto independente pode alcançar enorme sucesso
+com criatividade e dedicação.
+
+MENSAGEM FINAL:
+"Stardew Valley não é apenas um jogo sobre fazenda. É uma prova de que um
+projeto feito com amor, dedicação e atenção aos detalhes pode toçar o
+coração de milhões de pessoas ao redor do mundo."
+
+AGRADECIMENTO:
+❤️ Obrigado(a)!
+❓ Perguntas?
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. [já visível] Background com pôr do sol
+2. [t=200ms] Título
+3. [t=500ms] Cards de resumo (stagger 150ms)
+4. [t=1000ms] Mensagem final em destaque (fade in com escala suave)
+5. [t=1500ms] Agradecimento e "Perguntas?" (fade in)
+
+INTERAÇÕES:
+- Hover nos cards: elevação
+- Último slide: a navegação para a direita pode ir para um "fim" ou
+  simplesmente não fazer nada (desabilitado)
+
+TRANSIÇÃO:
+Não há próximo slide. O botão "próximo" fica desabilitado.
+Ao clicar em "anterior", volta para o slide 14.
+
+OBSERVAÇÕES:
+- A mensagem final deve ter um glow pulsante suave para chamar atenção
+- O fundo deve transmitir uma sensação de encerramento e paz
+- Os fireflies podem diminuir gradualmente de intensidade se o slide
+  ficar parado por muito tempo
+
+================================================================================
+REGRAS GLOBAIS DE RESPONSIVIDADE
+================================================================================
+
+1. Use clamp() para todos os font-size, padding e margin.
+   Exemplo: font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+
+2. Use CSS Grid e Flexbox para layouts flexíveis.
+
+3. Todos os slides devem usar height: 100vh e width: 100vw com
+   overflow: hidden.
+
+4. Em viewports menores que 768px (mobile):
+   - Grids de 3-4 colunas viram 2 colunas
+   - Grids de 2 colunas viram 1 coluna (empilhamento vertical)
+   - Fontes reduzem proporcionalmente
+   - Cards e elementos se reorganizam para caber na tela
+
+5. Em viewports entre 768px e 1024px (tablet):
+   - Grids de 4 colunas viram 3 colunas
+   - Espaçamentos reduzem moderadamente
+
+6. Teste mentalmente cada slide em 320px, 768px e 1920px de largura
+   para garantir que nada é cortado ou precisa de scroll.
+
+7. A barra de navegação (setas, progresso, contador) deve se ajustar
+   proporcionalmente em todas as telas.
+
+================================================================================
+REGRAS DE PERFORMANCE
+================================================================================
+
+1. Animações CSS devem usar transform e opacity (não use top, left, width,
+   height para animar — causa repaint).
+
+2. Use will-change: transform, opacity em elementos animados quando
+   apropriado (mas sem exageros).
+
+3. As partículas (fireflies) devem ser implementadas com elementos DOM
+   animados via CSS animation ou com Canvas 2D para maior performance
+   em quantidades maiores.
+
+4. Use requestAnimationFrame para animações JavaScript.
+
+5. Evite libraries pesadas. Tudo deve ser Vanilla JS + CSS puro.
+
+6. O backdrop-filter: blur() deve ser usado com moderação em mobile
+   (pode causar lentidão). Considere fallback com background semi-sólido.
+
+================================================================================
+ESPECIFICAÇÕES TÉCNICAS FINAIS
+================================================================================
+
+1. Estrutura HTML:
+   - Um container principal (#presentation) com 100vw x 100vh
+   - Cada slide como uma seção (<section class="slide">) com 100vw x 100vh
+   - Navegação fixa (overlay) com botões, barra de progresso, contador
+   - CSS embutido no <head> dentro de <style>
+   - JS embutido no final do <body> dentro de <script>
+
+2. Estados dos slides:
+   - .slide: display none, opacity 0
+   - .slide.active: display flex, opacity 1 (com transição)
+   - .slide.exit: animação de saída
+
+3. Controle via JavaScript:
+   - currentSlide (índice atual)
+   - goToSlide(index): função principal de navegação
+   - nextSlide() / prevSlide()
+   - Event listeners: teclado, mouse click, touch/swipe, scroll
+   - Atualização da barra de progresso e contador
+
+4. Animações de entrada:
+   - Use classes como .animate-in, .animate-out com delays via
+     transition-delay em CSS ou setTimeout em JS
+   - Para sequências (stagger), use data-delay attributes ou
+     índices pares/ímpares em CSS
+
+5. Transições entre slides:
+   - Use classes CSS diferentes para cada tipo de transição
+   - A transição ativa controla como o slide atual sai e o novo entra
+   - Exemplo: .transition-fade, .transition-slide-up, .transition-cube
+
+================================================================================
+FIM DA ESPECIFICAÇÃO VISUAL
+================================================================================

@@ -1,0 +1,1513 @@
+================================================================================
+ESPECIFICAÇÃO TÉCNICA E DE DIREÇÃO DE ARTE
+APRESENTAÇÃO HTML: RUBY — A LINGUAGEM DE PROGRAMAÇÃO SIMPLES E ELEGANTE
+================================================================================
+
+INSTRUÇÃO GERAL PARA A IA EXECUTORA:
+- NÃO acesse nenhum outro arquivo dentro da pasta de trabalho.
+- NÃO leia nenhum documento externo.
+- Crie UM ÚNICO ARQUIVO HTML contendo toda a apresentação.
+- Use codificação UTF-8.
+- NÃO inclua tela de loading.
+- A apresentação deve funcionar 100% em um único arquivo HTML (sem dependências externas).
+- Todo CSS e JavaScript devem estar embutidos no próprio HTML.
+- NÃO use bibliotecas externas (CDN ou locais). Use apenas Vanilla JS, CSS puro e HTML5.
+- Use ícones via Unicode ou criados com CSS puro (sem Font Awesome, sem SVG externo).
+
+================================================================================
+1. IDENTIDADE VISUAL GERAL
+================================================================================
+
+A apresentação é sobre a linguagem de programação Ruby. O design deve transmitir:
+- Elegância e simplicidade (filosofia Ruby)
+- Calor humano (filosofia "programadores felizes" - Matz)
+- Modernidade e tecnologia (linguagem utilizada em startups e web)
+- Profissionalismo
+
+O estilo geral é: MODERNO + MINIMALISTA + AQUECIDO (WARM).
+
+A apresentação usa fundo escuro como padrão (dark mode) para criar contraste dramático com os elementos vermelho-rubi brilhantes e textos claros.
+
+Cada slide possui uma identidade própria (cores de destaque, elementos decorativos específicos), mas todos compartilham a mesma paleta global e o mesmo sistema de design.
+
+================================================================================
+2. PALETA DE CORES
+================================================================================
+
+CORES PRINCIPAIS (RGB / HEX):
+- Ruby Red: rgb(226, 38, 58) / #E2263A — cor principal da marca, usada em títulos importantes, detalhes, bordas e elementos de destaque
+- Dark Background: rgb(15, 15, 25) / #0F0F19 — fundo padrão principal
+- Dark Card: rgb(22, 22, 38) / #161626 — fundo de cards e painéis
+- White: rgb(255, 255, 255) / #FFFFFF — textos principais, títulos
+- Light Gray: rgb(200, 200, 215) / #C8C8D7 — textos de conteúdo, parágrafos
+- Medium Gray: rgb(130, 130, 150) / #828296 — textos secundários, legendas
+
+CORES SECUNDÁRIAS (para variação e destaque em slides específicos):
+- Deep Ruby: rgb(180, 20, 40) / #B41428 — variante escura do vermelho
+- Light Ruby: rgb(255, 80, 100) / #FF5064 — variante clara, usada em glows e hover
+- Warm Gold: rgb(255, 200, 80) / #FFC850 — usado em detalhes de slides de destaque (Ruby on Rails, Vantagens)
+- Soft Pink: rgb(255, 150, 170) / #FF96AA — usado em detalhes suaves
+- Accent Cyan: rgb(80, 200, 255) / #50C8FF — usado em comparações (Python, JavaScript) e em gradientes específicos
+
+CORES DE FUNDO POR TIPO DE SLIDE:
+- Slides de conteúdo normal: #0F0F19
+- Slides de capa/destaque: gradiente radial (#0F0F19 no centro para #1A0A10 nas bordas)
+- Slide de comparação/tabela: #0F0F19 com overlay sutil
+
+CORES DE BOTÕES:
+- Padrão: background transparent, borda 1px solid #E2263A, texto branco
+- Hover: background #E2263A com glow sutil (box-shadow rgba(226,38,58,0.4))
+- Ativo/Pressed: background #B41428
+
+CORES DE LINKS:
+- Padrão: #E2263A
+- Hover: #FF5064
+
+CORES DE BARRA DE PROGRESSO:
+- Fundo: rgba(255,255,255,0.1)
+- Preenchimento: gradiente linear #E2263A até #FF5064
+
+================================================================================
+3. TIPOGRAFIA
+================================================================================
+
+Fonte principal: sistema (system-ui), com fallback para sans-serif.
+Todas as fontes são carregadas via font-family nativa do sistema para evitar dependências externas.
+
+HIERARQUIA VISUAL (tamanhos em telas desktop >= 1024px, ajustar proporcionalmente para mobile):
+
+Títulos principais (h1):
+- Tamanho: clamp(2.5rem, 5vw, 4rem)
+- Peso: 700 (bold)
+- Letter-spacing: -0.02em
+- Line-height: 1.1
+- Cor: #FFFFFF
+- Maiúsculo apenas na capa
+
+Subtítulos (h2):
+- Tamanho: clamp(1.8rem, 3.5vw, 2.8rem)
+- Peso: 600 (semi-bold)
+- Letter-spacing: -0.01em
+- Line-height: 1.2
+- Cor: #FFFFFF ou #E2263A (quando destacado)
+
+Títulos de seção dentro do slide (h3):
+- Tamanho: clamp(1.2rem, 2vw, 1.6rem)
+- Peso: 600
+- Letter-spacing: 0
+- Line-height: 1.3
+- Cor: #FFFFFF
+
+Conteúdo principal (p, li, td):
+- Tamanho: clamp(0.95rem, 1.5vw, 1.15rem)
+- Peso: 400 (regular)
+- Line-height: 1.6
+- Cor: #C8C8D7
+
+Conteúdo secundário / legendas (small, .caption):
+- Tamanho: clamp(0.75rem, 1vw, 0.9rem)
+- Peso: 400
+- Cor: #828296
+
+Código (code, pre):
+- Font-family: 'Courier New', monospace
+- Tamanho: clamp(0.85rem, 1.2vw, 1rem)
+- Cor de fundo: rgba(255,255,255,0.05)
+- Borda: 1px solid rgba(255,255,255,0.1)
+- Border-radius: 6px
+- Padding: 0.2em 0.4em (inline) ou 1em (bloco)
+- Cor do texto: #FF5064 (para syntax highlight no estilo Ruby)
+
+================================================================================
+4. ESTILO VISUAL
+================================================================================
+
+Combinação de:
+- MINIMALISTA: layouts limpos, espaçamentos generosos, poucos elementos por slide
+- TECNOLÓGICO: linhas finas, elementos sutis de grid, glow, partículas
+- AQUECIDO (WARM): tons vermelhos suaves, cantos arredondados, transições suaves
+
+Elementos visuais usados de Visual.txt:
+- Glassmorphism (para cards e painéis)
+- Partículas estilo fireflies (vermelhas, sutis)
+- Gradient Text (em títulos especiais)
+- Glow (em elementos de destaque e bordas)
+- Blur In (entrada de elementos)
+- Slide In (entrada de elementos)
+- Fade In (entrada base)
+- Staggered animations (elementos em sequência)
+- Texto 3D com text-shadow (apenas na capa, slide 1)
+- Timeline (slide 3 - História)
+- Tabela animada (slide 13 - Comparação)
+- Cards com Glow (slides 6, 11, 12)
+- Barra de progresso (global, inferior)
+- Bento Grid (slides 6, 7, 8 - características)
+- Split Screen (slide 13 - comparação)
+- Contador numérico (slides 11, 14 - vantagens, mercado)
+
+Elementos interativos usados de Interativos.txt:
+- Navegação por teclado (setas, Espaço, Home, End, Esc)
+- Navegação por swipe (touch)
+- Botão Próximo / Anterior / Início
+- Miniaturas clicáveis (sidebar)
+- Tooltip (em termos técnicos)
+- Card expansível (em detalhes de características)
+- Accordion (em slides com listas de características)
+- Tabs animadas (slide 13 - comparação)
+- Magnetic Buttons (botões de navegação)
+- Cursor personalizado (anel sutil)
+
+================================================================================
+5. CONCEITO ARTÍSTICO
+================================================================================
+
+A apresentação deve transmitir a sensação de estar em um ambiente elegante, tech e acolhedor ao mesmo tempo.
+
+Imaginação visual: "Uma interface minimalista em um espaço escuro, iluminada por um brilho vermelho-rubi suave. O conteúdo aparece flutuando em cards de vidro translúcido. Partículas vermelho-rubi (fireflies) se movem lentamente ao fundo, como se fossem pequenas brasas ou gemas flutuando no espaço."
+
+A direção artística mescla:
+- Fundo escuro profundo para evocar foco e concentração
+- Tons rubi para evocar paixão, energia e a identidade da linguagem
+- Transparência e vidro para evocar modernidade e leveza
+- Partículas sutis para evocar movimento e vida
+- Tipografia limpa para evocar a filosofia de simplicidade de Ruby
+
+================================================================================
+6. BACKGROUND GLOBAL
+================================================================================
+
+O background global é composto por 3 camadas:
+
+CAMADA 1 - FUNDO SÓLIDO:
+- Cor: #0F0F19 (preto-azulado muito escuro)
+- Aplica-se a todos os slides como base
+
+CAMADA 2 - GRADIENTE DINÂMICO POR SLIDE:
+- Cada slide pode ter um gradiente radial suave partindo do centro ou de um canto específico
+- Slide 1 (Capa): gradiente radial(#0F0F19 0%, #1A0A10 100%) - tom avermelhado sutil nas bordas
+- Slide 3 (História): gradiente sutil com tom levemente dourado
+- Slide 9 (Ruby on Rails): gradiente com tom mais quente (gold/ruby mix)
+- Demais slides: gradiente padrão #0F0F19 com variação de 5% para dar sensação de mudança
+- Todos os gradientes devem ser extremamente sutis, quase imperceptíveis
+
+CAMADA 3 - PARTÍCULAS (CANVAS):
+- Tipo: Fireflies (pequenos pontos luminosos)
+- Quantidade: entre 30 e 50 partículas
+- Tamanho: 2px a 4px de raio
+- Cor: rgba(226, 38, 58, 0.6) com variação para rgba(255, 150, 170, 0.4)
+- Movimento: flutuação lenta e suave, com trajetórias curvas e aleatórias
+- Velocidade: muito lenta (0.2 a 0.5 pixels por frame a 60fps)
+- Opacidade: oscila suavemente entre 0.2 e 0.8 (efeito de respiração)
+- Blur: desfoque suave (filtro blur 1px)
+- As partículas NÃO devem distrair o conteúdo
+- Implementar em canvas no fundo, atrás de todo conteúdo
+
+NENHUM parallax global é necessário (parallax será usado apenas em slides específicos).
+
+================================================================================
+7. NAVEGAÇÃO
+================================================================================
+
+A navegação deve permitir que o usuário se mova livremente entre os 15 slides.
+
+SISTEMA DE SLIDES:
+- Cada slide ocupa 100% da viewport (width: 100vw, height: 100vh)
+- Os slides são empilhados e controlados via JavaScript
+- Apenas um slide é visível por vez (display:none / display:flex)
+- Transição é controlada por animação CSS + JS
+
+BARRA DE NAVEGAÇÃO INFERIOR (GLOBAL):
+- Posição: fixed, bottom: 0, left: 0, width: 100%
+- Altura: 60px
+- Background: rgba(15, 15, 25, 0.85) com backdrop-filter: blur(10px)
+- Borda superior: 1px solid rgba(255,255,255,0.05)
+- Flex: space-between, alinhamento central
+- Elementos (da esquerda para a direita):
+  1. Botão "Anterior" (◀ ou seta para esquerda) - desabilitado no slide 1
+  2. Botão "Início" (◀◀ ou ícone de casa) - desabilitado no slide 1
+  3. Barra de progresso (central, flexível)
+  4. Contador de slides "03 / 15" (formato: slide atual com dois dígitos / total)
+  5. Botão "Próximo" (▶ ou seta para direita) - desabilitado no slide 15
+  6. Botão Fullscreen (⛶ ou ícone de tela cheia)
+
+BARRA DE PROGRESSO:
+- Largura: flex (ocupa espaço disponível entre os botões), max-width: 400px
+- Altura: 4px
+- Background: rgba(255,255,255,0.1)
+- Border-radius: 2px
+- Preenchimento: gradiente linear horizontal #E2263A → #FF5064
+- Largura do preenchimento = (slideAtual - 1) / (totalSlides - 1) * 100%
+- Transição: width 0.6s cubic-bezier(0.22, 1, 0.36, 1)
+
+NAVEGAÇÃO POR TECLADO:
+- Seta Direita / Seta Abaixo: próximo slide
+- Seta Esquerda / Seta Acima: slide anterior
+- Espaço: próximo slide
+- Home: primeiro slide
+- End: último slide
+- Esc: sair do modo tela cheia (se aplicável)
+- Número (1 a 9): ir para o slide correspondente (slides 1-9)
+- Número 0 + outro número: Ex: 1 + 0 = slide 10, 1 + 1 = slide 11 (digitação rápida)
+
+NAVEGAÇÃO POR MOUSE:
+- Roda do mouse: scroll para próximo/anterior (com debounce de 800ms)
+- Clique na metade direita da tela: próximo slide
+- Clique na metade esquerda da tela: slide anterior
+
+NAVEGAÇÃO POR TOQUE (TOUCH/SWIPE):
+- Swipe para esquerda: próximo slide
+- Swipe para direita: slide anterior
+- Sensibilidade: 50px de distância mínima
+- Apenao vertical: ignorar swipes verticais
+
+NAVEGAÇÃO POR ÍNDICE (SIDEBAR):
+- Botão de menu/hamburguer no canto superior direito (fixed, top: 20px, right: 20px)
+- Ao clicar, abre um painel lateral direito com a lista de todos os slides
+- Painel: largura 280px, background rgba(22,22,38,0.95), backdrop-filter blur(20px)
+- Cada item da lista tem: número + título do slide
+- O slide atual fica destacado em #E2263A
+- Ao clicar em um item, fecha o painel e navega para o slide
+- Fechar ao clicar no botão X ou clicar fora do painel (overlay)
+- Animação: slideIn da direita, 0.3s ease
+
+CURSOR PERSONALIZADO:
+- Substituir o cursor padrão por um anel circular sutil
+- Tamanho: 32px de diâmetro, borda 1.5px solid rgba(226,38,58,0.4)
+- Sem preenchimento (apenas borda)
+- Segue o mouse com delay de 0.05s (efeito de atraso suave)
+- Ao hover em botões e links, o anel aumenta para 48px e fica mais opaco
+- Em elementos clicáveis, o preenchimento do anel fica rgba(226,38,58,0.1)
+- Esconder o cursor em dispositivos touch
+
+MAGNETIC BUTTONS:
+- Botões "Próximo" e "Anterior" têm efeito magnético
+- Quando o mouse se aproxima (distância < 60px do centro do botão), o botão se desloca levemente em direção ao cursor (máximo 8px de deslocamento)
+- Implementar via JS calculando distância do mouse ao centro do botão
+
+================================================================================
+8. ANIMAÇÕES GLOBAIS
+================================================================================
+
+TRANSIÇÕES ENTRE SLIDES:
+- Tipo: Cross Fade (desbotamento cruzado)
+- Duração: 0.6s
+- Easing: cubic-bezier(0.22, 1, 0.36, 1) — ease-out suave
+- Funcionamento: slide saindo fadeOut (0.6s) e slide entrando fadeIn (0.6s) com overlap
+- Durante a transição, o slide de saída e o de entrada ficam visíveis simultaneamente por 0.3s
+- O background (camada de partículas) NÃO sofre transição — permanece contínuo
+
+EXCEÇÕES DE TRANSIÇÃO (slides específicos):
+- Slide 1 → Slide 2: Fade com blur (slide 1 desfoca enquanto desaparece e slide 2 aparece)
+- Slide 3 → Slide 4: Cross Fade padrão
+- Slide 8 → Slide 9 (Ruby on Rails): Fade com leve zoom in (1.0 → 1.05) no slide 9 entrando
+- Slide 14 → Slide 15 (Conclusão): Fade com glow (slide 15 entra com brilho aumentando)
+- Demais: Cross Fade padrão
+
+ANIMAÇÕES DE ENTRADA DE ELEMENTOS (dentro do slide):
+- Cada slide ativa sua animação quando se torna visível
+- Ao entrar no slide, os elementos aparecem em sequência (staggered)
+- Timing base: cada elemento atrasa 0.15s em relação ao anterior
+- Primeiro elemento: delay 0.3s (após transição do slide começar)
+- Easing padrão: cubic-bezier(0.22, 1, 0.36, 1)
+- Tipos de animação de entrada (escolher conforme o slide):
+  a) Fade In + Slide Up: elemento parte de translateY(30px) opacity(0) para translateY(0) opacity(1)
+  b) Fade In + Scale: elemento parte de scale(0.95) opacity(0) para scale(1) opacity(1)
+  c) Blur In: elemento parte de blur(10px) opacity(0) para blur(0) opacity(1)
+  d) Fade In: elemento parte de opacity(0) para opacity(1)
+- Duração de cada animação de entrada: 0.5s a 0.7s
+
+ANIMAÇÕES DE SAÍDA DE ELEMENTOS:
+- Ao sair de um slide, os elementos podem desaparecer sem animação (transição cross fade cuida disso)
+- Exceção: elementos decorativos específicos podem ter fade out rápido (0.3s)
+
+MICRO-INTERAÇÕES:
+- Hover em botões: transição 0.2s ease, background muda de transparent para #E2263A
+- Hover em cards: elevação suave (transform: translateY(-4px)) com box-shadow aumentando
+- Hover em links: cor muda para #FF5064 com transição 0.2s
+- Clique em botões: escala 0.95 por 0.1s (feedback tátil)
+- Tooltips: aparecem com fadeIn 0.2s, atraso de 0.3s após hover
+
+================================================================================
+9. ELEMENTOS INTERATIVOS GLOBAIS
+================================================================================
+
+TOOLTIPS:
+- Usar tooltips para termos técnicos (ex: "Garbage Collector", "Tipagem Dinâmica", etc.)
+- Aparecem ao hover, após 0.3s de delay
+- Background: rgba(22,22,38,0.95) com backdrop-filter blur(10px)
+- Texto: branco, 0.85rem
+- Seta apontando para o elemento
+- Animação: fadeIn + translateY(-5px), 0.2s
+
+BOTÕES DE NAVEGAÇÃO:
+- Estilo: fundo transparente, borda 1px solid rgba(255,255,255,0.2), border-radius 50%
+- Tamanho: 40x40px
+- Ícones: Unicode (◀ ▶ ⛶ ☰ ✕)
+- Hover: borda fica #E2263A, background rgba(226,38,58,0.1)
+- Desabilitado: opacity 0.3, cursor not-allowed
+- Transição: all 0.3s ease
+
+BOTÃO DE ÍNDICE (HAMBURGUER):
+- Canto superior direito, fixed
+- Tamanho: 40x40px
+- Ícone: ☰ (Unicode)
+- Ao abrir sidebar, ícone muda para ✕
+
+CARDS:
+- Usar Glassmorphism para cards de conteúdo
+- Background: rgba(255,255,255,0.04)
+- Backdrop-filter: blur(12px)
+- Border: 1px solid rgba(255,255,255,0.08)
+- Border-radius: 16px
+- Padding: 24px
+- Box-shadow: 0 8px 32px rgba(0,0,0,0.3)
+- Hover: border mais opaco, glow sutil rgba(226,38,58,0.1) ao redor
+
+CURSOR PERSONALIZADO (detalhamento técnico):
+- Um div fixo de 32px, border-radius 50%, border 1.5px solid rgba(226,38,58,0.4)
+- pointer-events: none
+- transform: translate(x, y)
+- Atualizar posição via JS (mousemove) com lerp suave de 0.05s
+- Em dispositivos touch, display: none
+
+================================================================================
+================================================================================
+ESPECIFICAÇÃO POR SLIDE
+================================================================================
+================================================================================
+
+================================================================================
+SLIDE 1 — CAPA
+================================================================================
+
+NOME DO SLIDE: Capa — "Ruby: A Linguagem de Programação Simples e Elegante"
+
+OBJETIVO: Causar a primeira impressão. Impactar visualmente com o título em texto 3D. Estabelecer identidade visual. Apresentar tema, apresentador e data.
+
+EMOÇÃO: Impacto, elegância, curiosidade, profissionalismo.
+
+LAYOUT: Centralizado (Hero Layout). Título grande no centro superior. Nome e data no centro inferior. Logo Ruby ao centro. Background com gradiente rubi escuro.
+
+ORGANIZAÇÃO DOS ELEMENTOS (de cima para baixo):
+1. Título principal "Ruby: A Linguagem de Programação Simples e Elegante" — grande, centralizado, texto 3D com text-shadow
+2. Espaçamento de 40px
+3. Logo Ruby (criada com CSS puro: um rubi/joia estilizado ou as letras "R" estilizadas) — tamanho médio (120x120px)
+4. Espaçamento de 30px
+5. Linha divisória fina (50px de largura, cor #E2263A)
+6. Espaçamento de 20px
+7. Nome do apresentador — texto médio, cor #C8C8D7
+8. Data — texto pequeno, cor #828296
+
+BACKGROUND:
+- Gradiente radial: center center, #0F0F19 0%, #1A0A10 60%, #0F0F19 100%
+- Sobreposição: mesh gradient sutil com tons rubi nas bordas
+- Partículas fireflies mais concentradas (60 partículas) em tons de rubi e dourado
+
+ELEMENTOS DECORATIVOS:
+- À esquerda e à direita do título: linhas horizontais finas (largura: 100px, altura: 1px, cor: rgba(226,38,58,0.3))
+- Ou: dois círculos concêntricos decorativos atrás do logo (círculo externo: 200px diâmetro, borda 1px rgba(226,38,58,0.15); círculo interno: 140px diâmetro, borda 1px rgba(226,38,58,0.1))
+
+ELEMENTOS INTERATIVOS:
+- Nenhum interativo neste slide (apenas navegação global)
+
+ELEMENTOS VISUAIS (Visual.txt):
+- Texto 3D com text-shadow: o título principal deve usar o efeito de texto 3D com múltiplas camadas de text-shadow (30 camadas) como especificado no prompt
+- Glow sutil no título (text-shadow com cor #E2263A com blur no final da pilha de sombras)
+- Logo Ruby: criar um SVG inline de um rubi (formato de joia) estilizado e minimalista, ou usar as letras "Ruby" com efeito gradiente
+
+PARTÍCULAS:
+- Tipo: Fireflies
+- Quantidade: 60 (mais concentrado que os outros slides)
+- Cor: rgba(226,38,58,0.5) e rgba(255,200,80,0.3) (dourado)
+- Movimento: flutuação lenta
+
+ILUMINAÇÃO:
+- Glow suave central vindo de trás do título
+- Spotlight sutil no centro da tela
+
+EFEITOS:
+- Texto 3D com text-shadow (30 camadas, deslocamento progressivo, última camada com blur e cor #E2263A para glow)
+- Gradient text no logo (gradiente linear #E2263A → #FF5064)
+
+ÍCONES: Nenhum (apenas o logo Ruby)
+
+IMAGENS: Nenhuma imagem externa. Logo Ruby é SVG inline.
+
+TIPOGRAFIA (ordem de entrada):
+- Título (h1): animação Fade In + Scale (scale 0.9 → 1.0), duração 1s, delay 0.5s
+- Logo: animação Fade In + Rotate (rotate -5deg → 0deg), duração 0.8s, delay 1.2s
+- Linha divisória: Scale X (0 → 1), duração 0.6s, delay 1.8s
+- Nome do apresentador: Fade In + Slide Up, duração 0.6s, delay 2.2s
+- Data: Fade In + Slide Up, duração 0.6s, delay 2.6s
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Título (delay 0.5s)
+2. Logo (delay 1.2s)
+3. Linha divisória (delay 1.8s)
+4. Nome (delay 2.2s)
+5. Data (delay 2.6s)
+
+INTERAÇÕES: Navegação global apenas. Este slide não tem interações internas.
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE:
+- Tipo: Fade com Blur
+- Slide 1 desfoca (blur 8px) enquanto desaparece (0.6s)
+- Slide 2 aparece com fade simultâneo (0.6s)
+- Duração total: 0.8s
+
+OBSERVAÇÕES:
+- O efeito de texto 3D com text-shadow no título é CRUCIAL. Deve ser implementado exatamente como descrito: 30 camadas de text-shadow empilhadas com deslocamento progressivo de -1px, +1px, -2px, +2px... e a última camada com blur(8px) e cor #E2263A para glow.
+- A cor das sombras do texto 3D deve ser gradiente: começa em #B41428 (mais escuro) nas primeiras camadas e vai clareando até #FF5064 nas últimas.
+
+================================================================================
+SLIDE 2 — O QUE É RUBY?
+================================================================================
+
+NOME DO SLIDE: O que é Ruby?
+
+OBJETIVO: Definir claramente a linguagem Ruby. Apresentar seu propósito e características essenciais.
+
+EMOÇÃO: Clareza, informação, acolhimento.
+
+LAYOUT: Split vertical (60% conteúdo / 40% espaço decorativo). O conteúdo fica à esquerda. Lado direito com elementos decorativos.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Subtítulo "Ruby" com gradient text (gradiente #E2263A → #FF5064) — tamanho h2
+2. Título "O que é Ruby?" — tamanho h1, cor branca
+3. Parágrafo de definição: "Ruby é uma linguagem de programação dinâmica, open source, focada em simplicidade e produtividade. Criada por Yukihiro 'Matz' Matsumoto, ela combina uma sintaxe elegante com o poder da orientação a objetos."
+4. Parágrafo de objetivo: "Seu objetivo principal é tornar a programação mais intuitiva e agradável, seguindo o princípio de que o código deve ser escrito para ser lido por humanos."
+5. Card glassmorphism com "Principais características":
+   - "Sintaxe simples e legível"
+   - "Orientação a objetos pura"
+   - "Tipagem dinâmica"
+   - "Garbage Collector integrado"
+6. Frase final pequena: "Usada em desenvolvimento web, automação, APIs e muito mais."
+
+BACKGROUND:
+- Fundo base #0F0F19
+- Gradiente radial sutil vindo do canto superior direito (rgba(226,38,58,0.03))
+
+ELEMENTOS DECORATIVOS (lado direito):
+- Um grande círculo decorativo translúcido (300px diâmetro) com borda fina rgba(226,38,58,0.1)
+- Dentro do círculo: formas abstratas geométricas (hexágonos) criadas com CSS
+- Três pontos pequenos (4px) em rgba(226,38,58,0.3) formando um triângulo no canto direito
+
+ELEMENTOS INTERATIVOS:
+- Tooltip no termo "Garbage Collector" (explicação: "Sistema automático que gerencia a memória, liberando objetos não utilizados")
+- Tooltip em "Tipagem dinâmica" (explicação: "Variáveis podem mudar de tipo durante a execução")
+
+ELEMENTOS VISUAIS:
+- Card glassmorphism para o box de características
+- Gradient text no subtítulo "Ruby"
+- Ícone decorativo: símbolo de diamante/joia pequeno ao lado do título (Unicode ◆) na cor #E2263A
+
+PARTÍCULAS: Fireflies globais (30-50, comportamento padrão)
+
+ILUMINAÇÃO: Glow sutil no canto superior direito do círculo decorativo
+
+EFEITOS:
+- Glassmorphism no card
+- Gradient text
+
+TIPOGRAFIA (ordem de entrada):
+1. Subtítulo "Ruby" — Fade In + Slide Up, 0.5s, delay 0.3s
+2. Título "O que é Ruby?" — Fade In + Slide Up, 0.6s, delay 0.5s
+3. Parágrafo de definição — Fade In + Slide Up, 0.5s, delay 0.7s
+4. Parágrafo de objetivo — Fade In + Slide Up, 0.5s, delay 0.9s
+5. Card de características — Fade In + Scale, 0.6s, delay 1.2s (os 4 itens dentro do card entram com stagger de 0.1s cada)
+6. Frase final — Fade In, 0.4s, delay 2.0s
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Subtítulo "Ruby"
+2. Título
+3. Parágrafo definição
+4. Parágrafo objetivo
+5. Card com itens (stagger)
+6. Frase final
+
+INTERAÇÕES:
+- Hover no card: elevacão suave (translateY -4px) e glow na borda
+- Hover nos termos com tooltip
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+================================================================================
+SLIDE 3 — HISTÓRIA DO RUBY
+================================================================================
+
+NOME DO SLIDE: História do Ruby
+
+OBJETIVO: Apresentar a origem da linguagem de forma visual e cronológica.
+
+EMOÇÃO: Respeito pela história, curiosidade, nostalgia tecnológica.
+
+LAYOUT: Timeline vertical no centro. O slide é dividido em duas metades: lado esquerdo com introdução, lado direito com a timeline.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "História do Ruby" — h1, branco
+2. Subtítulo "Da mente de Matz para o mundo" — h3, cor #C8C8D7
+3. Linha do tempo vertical (timeline) com 6 marcos:
+   - 1993: Matz começa a desenvolver Ruby
+   - 1995: Primeira versão pública (Ruby 0.95)
+   - 1998: Ruby 1.0 lançada
+   - 2005: Ruby on Rails revoluciona o desenvolvimento web
+   - 2011: Ruby 1.9.3 com melhorias de performance
+   - 2020+: Ruby 3.x com foco em performance (Ruby 3x3)
+
+BACKGROUND:
+- Gradiente radial sutil vindo do centro-esquerda
+- Background base #0F0F19
+
+ELEMENTOS DECORATIVOS:
+- Linha vertical fina (2px) no centro, cor rgba(226,38,58,0.3)
+- Em cada marco da timeline: um círculo (10px) na cor #E2263A com glow suave
+- Anos com destaque em #E2263A e negrito
+- Conexões entre marcos com animação de preenchimento gradual
+
+ELEMENTOS INTERATIVOS:
+- Cada marco da timeline é clicável: ao clicar, expande com mais detalhes (accordion)
+  - 1993: "Yukihiro Matsumoto começa a desenvolver Ruby em 1993, no Japão. Sua inspiração veio de linguagens como Perl, Smalltalk e Lisp."
+  - 1995: "Ruby 0.95 é lançada em grupos de notícias japoneses. A linguagem começa a ganhar seus primeiros adeptos."
+  - 1998: "Ruby 1.0 é oficialmente lançada. A linguagem começa a se espalhar fora do Japão."
+  - 2005: "Ruby on Rails, framework web de David Heinemeier Hansson, é lançado. Ruby ganha popularidade global."
+  - 2011: "Ruby 1.9.3 traz melhorias significativas de performance e novas funcionalidades."
+  - 2020+: "Ruby 3.0 é lançada com a promessa Ruby 3x3 — três vezes mais rápido que Ruby 2.0."
+- Tooltip no nome "Yukihiro Matsumoto" com foto/descrição: "Criador da linguagem Ruby, também conhecido como Matz"
+
+PARTÍCULAS: Fireflies globais + algumas partículas douradas extras nos marcos da timeline
+
+ILUMINAÇÃO:
+- Glow sutil em cada círculo da timeline ao passar o mouse
+- Iluminação ambiente uniforme
+
+EFEITOS:
+- Timeline animada (itens aparecem em sequência, de cima para baixo)
+- Linha vertical se desenhando (SVG draw animation) — a linha aparece crescendo de cima para baixo
+- Accordion nos marcos
+
+TIPOGRAFIA (ordem de entrada):
+1. Título — Fade In + Slide Up, 0.6s, delay 0.3s
+2. Subtítulo — Fade In, 0.5s, delay 0.6s
+3. Timeline (animação de desenho da linha + marcos aparecendo sequencialmente):
+   - 1993: delay 0.8s
+   - 1995: delay 1.2s
+   - 1998: delay 1.6s
+   - 2005: delay 2.0s
+   - 2011: delay 2.4s
+   - 2020+: delay 2.8s
+   Cada item: Fade In + Slide Right (vindo da esquerda para a direita), 0.4s
+
+INTERAÇÕES:
+- Clicar em um marco expande detalhes (accordion)
+- Hover nos marcos: glow aumenta, círculo escala 1.3x
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+OBSERVAÇÕES:
+- A timeline é o elemento central deste slide
+- O efeito de linha se desenhando (SVG draw) é importante para o impacto visual
+
+================================================================================
+SLIDE 4 — FILOSOFIA DA LINGUAGEM
+================================================================================
+
+NOME DO SLIDE: Filosofia da Linguagem
+
+OBJETIVO: Explicar a filosofia única de Ruby que a diferencia de outras linguagens. Transmitir o conceito de "programador feliz".
+
+EMOÇÃO: Inspiração, clareza, conexão emocional.
+
+LAYOUT: Grid 2x2 (Bento Grid). Quatro cards dispostos em grid com um card central maior ou destaque.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Filosofia da Linguagem" — h1, branco, centralizado no topo
+2. Subtítulo "A mente por trás do Ruby" — h3, #C8C8D7
+3. Quatro cards em grid 2x2 (quando desktop) ou empilhados (mobile):
+   - Card 1 (superior esquerdo): Ícone ◆ + "Simplicidade" + descrição: "Código deve ser simples e intuitivo, escrito para ser lido por humanos."
+   - Card 2 (superior direito): Ícone ◆ + "Produtividade" + descrição: "Menos código para fazer mais. O desenvolvedor deve ser eficiente."
+   - Card 3 (inferior esquerdo): Ícone ◆ + "Legibilidade" + descrição: "O código precisa ser claro e autoexplicativo. Ruby é como ler inglês."
+   - Card 4 (inferior direito, destacado): Background mais escuro com borda #E2263A + "Programadores devem ser felizes" + descrição: "─ Yukihiro Matsumoto. A principal filosofia de Ruby: a felicidade do desenvolvedor é a prioridade máxima. A linguagem foi projetada para tornar a programação uma experiência prazerosa."
+
+BACKGROUND:
+- Gradiente suave vindo do card 4 (inferior direito), com tom levemente mais quente
+
+ELEMENTOS DECORATIVOS:
+- Entre os cards: linhas sutis conectando-os (SVG ou CSS)
+- Pequenos pontos decorativos nos cantos do slide
+
+ELEMENTOS INTERATIVOS:
+- Cada card é expansível ao clicar: mostra uma citação adicional ou exemplo
+- Hover: cards elevam (translateY -6px) e glow aumenta
+- Tooltip no nome "Yukihiro Matsumoto"
+
+ELEMENTOS VISUAIS:
+- Cards com glassmorphism
+- Ícones ◆ em #E2263A
+- Card 4 com borda glow #E2263A
+
+PARTÍCULAS: Fireflies globais, com concentração levemente maior no card 4
+
+ILUMINAÇÃO: Card 4 com glow de fundo (halo sutil atrás do card)
+
+EFEITOS:
+- Glassmorphism
+- Glow no card 4
+- Stagger nos 4 cards
+
+TIPOGRAFIA (ordem de entrada):
+1. Título — Fade In + Slide Up, 0.5s, delay 0.3s
+2. Subtítulo — Fade In, 0.4s, delay 0.6s
+3. Cards (stagger):
+   - Card 1: delay 0.8s
+   - Card 2: delay 1.0s
+   - Card 3: delay 1.2s
+   - Card 4 (destaque): delay 1.4s (com glow aparecendo)
+
+INTERAÇÕES:
+- Clique em cada card: expande com detalhes
+- Hover: elevação e glow
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+================================================================================
+SLIDE 5 — COMO RUBY FUNCIONA
+================================================================================
+
+NOME DO SLIDE: Como Ruby Funciona
+
+OBJETIVO: Explicar visualmente o processo de execução de código Ruby, do código-fonte ao resultado.
+
+EMOÇÃO: Clareza, compreensão, lógica visual.
+
+LAYOUT: Fluxograma horizontal (centro do slide). Elementos conectados por setas.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Como Ruby Funciona" — h1, branco, topo
+2. Subtítulo "Do código-fonte à execução" — h3, #C8C8D7
+3. Fluxograma horizontal com 4 etapas conectadas por setas animadas:
+   [Código-fonte (.rb)] → [Parser/Análise] → [Interpretador Ruby] → [Execução/Resultado]
+4. Texto explicativo abaixo do fluxograma: "Ruby é uma linguagem interpretada. O código-fonte é analisado por um parser que constrói uma árvore sintática, que é então executada pelo interpretador Ruby (YARV desde a versão 1.9)."
+
+BACKGROUND: Fundo base #0F0F19
+- Sutil gradiente de linhas digitais (grid pattern) com opacidade 0.03
+
+ELEMENTOS DECORATIVOS:
+- Setas animadas (→) entre cada etapa, na cor #E2263A
+- Setas com glow pulsante (opacidade oscila entre 0.5 e 1.0)
+- Cada etapa: um hexágono estilizado ou retângulo com cantos arredondados (16px)
+
+ELEMENTOS INTERATIVOS:
+- Clicar em cada etapa do fluxograma mostra uma tooltip/detalhamento:
+  - Código-fonte: "Arquivos com extensão .rb contendo a sintaxe Ruby."
+  - Parser: "O interpretador analisa a sintaxe e constrói uma AST (Abstract Syntax Tree)."
+  - Interpretador: "YARV (Yet Another Ruby VM) executa o bytecode compilado."
+  - Execução: "O programa roda e produz a saída desejada."
+- Hover em cada etapa: glow aumenta, escala 1.05
+
+ELEMENTOS VISUAIS:
+- Formas geométricas (hexágonos ou retângulos arredondados) para cada etapa
+- Setas animadas com CSS (keyframes de opacidade)
+- Código exemplo pequeno: puts "Hello, Ruby!" → "Hello, Ruby!" (mostrar antes/depois)
+
+PARTÍCULAS: Partículas de dados (pixels) fluindo entre as etapas (muito sutil)
+
+ILUMINAÇÃO:
+- Cada etapa com glow ao hover
+- Seta pulsante com cor #E2263A
+
+EFEITOS:
+- Fluxograma animado
+- Seta pulsante
+- Blur In nas etapas
+
+TIPOGRAFIA (ordem de entrada):
+1. Título — Fade In + Slide Up, 0.5s, delay 0.3s
+2. Subtítulo — Fade In, 0.4s, delay 0.6s
+3. Etapa 1 (Código-fonte) — Blur In + Scale, 0.5s, delay 0.8s
+4. Seta 1 — Fade In, 0.3s, delay 1.1s
+5. Etapa 2 (Parser) — Blur In + Scale, 0.5s, delay 1.3s
+6. Seta 2 — Fade In, 0.3s, delay 1.6s
+7. Etapa 3 (Interpretador) — Blur In + Scale, 0.5s, delay 1.8s
+8. Seta 3 — Fade In, 0.3s, delay 2.1s
+9. Etapa 4 (Execução) — Blur In + Scale, 0.5s, delay 2.3s
+10. Texto explicativo — Fade In + Slide Up, 0.5s, delay 2.8s
+
+INTERAÇÕES:
+- Clique em cada etapa: detalhamento via tooltip
+- Hover: glow e escala
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+================================================================================
+SLIDE 6 — PRINCIPAIS CARACTERÍSTICAS
+================================================================================
+
+NOME DO SLIDE: Principais Características
+
+OBJETIVO: Listar as características técnicas mais importantes do Ruby de forma visual.
+
+EMOÇÃO: Informação, credibilidade, admiração técnica.
+
+LAYOUT: Bento Grid (grid assimétrico com cards de tamanhos variados).
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Principais Características" — h1, topo
+2. Grid de 5 cards em layout assimétrico (2 colunas desktop):
+   - Card 1 (grande, lado esquerdo ocupando 2 linhas): "Orientação a Objetos Pura"
+     Descrição: "Tudo em Ruby é um objeto — números, strings, classes, módulos. Até mesmo classes são objetos da classe Class."
+   - Card 2 (lado direito, superior): "Tipagem Dinâmica"
+     Descrição: "Variáveis em Ruby não têm tipo fixo. O tipo é determinado em tempo de execução."
+   - Card 3 (lado direito, inferior esquerdo): "Garbage Collector"
+     Descrição: "Ruby gerencia automaticamente a memória, liberando objetos que não estão mais em uso."
+   - Card 4 (lado direito, inferior direito): "Sintaxe Simples"
+     Descrição: "Código limpo e expressivo. Ruby se aproxima da linguagem natural."
+   - Card 5 (embaixo, largura total): "Código Legível"
+     Descrição: "Ruby prioriza a legibilidade humana acima de tudo. O código parece inglês."
+
+BACKGROUND: Fundo base #0F0F19
+
+ELEMENTOS DECORATIVOS:
+- Linhas finas conectando os cards visualmente (opcional)
+- Ícones pequenos no topo de cada card (usar Unicode):
+  - Card 1: ◈ (objeto)
+  - Card 2: ⇅ (dinâmico)
+  - Card 3: ♻ (reciclagem)
+  - Card 4: ✎ (sintaxe)
+  - Card 5: 📖 (leitura)
+
+ELEMENTOS INTERATIVOS:
+- Cada card é expansível (clique): revela um exemplo de código Ruby da característica
+  - Card 1: mostra um trecho "class Person; end" com explicação
+  - Card 2: mostra "x = 10; x = 'hello'" com explicação
+  - Card 3: mostra conceito de GC
+  - Card 4: mostra "10.times { puts 'Ruby' }"
+  - Card 5: mostra "if idade >= 18; puts 'Maior'"
+- Hover: elevação + glow
+
+ELEMENTOS VISUAIS:
+- Bento Grid (CSS Grid com áreas definidas)
+- Cards com glassmorphism
+- Cada card com ícone e cor de borda sutil
+
+PARTÍCULAS: Fireflies padrão (30-50)
+
+ILUMINAÇÃO: Glow nos cards ao hover
+
+EFEITOS:
+- Glassmorphism
+- Cards expansíveis (accordion suave)
+
+TIPOGRAFIA (ordem de entrada):
+1. Título — Fade In + Slide Up, 0.5s, delay 0.3s
+2. Cards aparecem em sequência com stagger de 0.2s:
+   - Card 1: delay 0.6s
+   - Card 2: delay 0.8s
+   - Card 3: delay 1.0s
+   - Card 4: delay 1.2s
+   - Card 5: delay 1.4s
+   Cada card: Fade In + Slide Up
+
+INTERAÇÕES:
+- Clique nos cards: expande exemplo de código
+- Hover: elevação e glow
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+================================================================================
+SLIDE 7 — SINTAXE BÁSICA
+================================================================================
+
+NOME DO SLIDE: Sintaxe Básica
+
+OBJETIVO: Mostrar exemplos práticos e simples de sintaxe Ruby.
+
+EMOÇÃO: Aprendizado, curiosidade, "uau, isso é simples".
+
+LAYOUT: Split screen (50% código / 50% explicação). Ou cards lado a lado com blocos de código.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Sintaxe Básica" — h1, topo
+2. Subtítulo "Simplicidade que encanta" — h3, #C8C8D7
+3. Grid 2x2 de cards, cada um com:
+   - Card A (superior esquerdo): "Variáveis"
+     Código: nome = "Ruby"; idade = 30; preco = 9.99
+     Explicação: "Não precisa declarar tipo. Ruby descobre automaticamente."
+   - Card B (superior direito): "Condicionais"
+     Código: if idade >= 18; puts "Maior"; end
+     Explicação: "Estrutura simples, legível e sem parênteses obrigatórios."
+   - Card C (inferior esquerdo): "Laços"
+     Código: 3.times { puts "Ruby!" }
+     Explicação: "Laços elegantes com blocos. Menos código, mais expressividade."
+   - Card D (inferior direito): "Métodos"
+     Código: def saudacao(nome); "Olá, #{nome}!"; end
+     Explicação: "Métodos simples, retorno implícito da última expressão."
+
+BACKGROUND: Fundo base #0F0F19
+
+ELEMENTOS DECORATIVOS:
+- Cada card com um pequeno indicador visual (bolinha colorida) no canto superior esquerdo:
+  - Card A: #E2263A
+  - Card B: #FF5064
+  - Card C: #FFC850
+  - Card D: #50C8FF
+
+ELEMENTOS INTERATIVOS:
+- Hover no bloco de código: glow na borda e fundo levemente mais claro
+- Clique no código: copia para área de transferência (com feedback visual "Copiado!" por 1.5s)
+- Tooltips nos termos técnicos
+
+ELEMENTOS VISUAIS:
+- Cards com glassmorphism
+- Blocos de código com fundo escuro e syntax highlight (cores Ruby-like)
+  - Palavras-chave (def, if, end, do): #FF5064 (rosa/rubi)
+  - Strings: #50C8FF (ciano)
+  - Números: #FFC850 (dourado)
+  - Variáveis: #C8C8D7 (cinza claro)
+  - Comentários: #828296 (cinza escuro) com prefixo #
+
+PARTÍCULAS: Fireflies padrão
+
+ILUMINAÇÃO: Glow suave nos blocos de código ao hover
+
+EFEITOS:
+- Glassmorphism
+- Syntax highlight via spans inline (gerar no JS ou HTML)
+- Código com typing effect opcional (aparece letra por letra) — apenas no primeiro card para não cansar
+
+TIPOGRAFIA (ordem de entrada):
+1. Título — Fade In + Slide Up, 0.5s, delay 0.3s
+2. Subtítulo — Fade In, 0.4s, delay 0.6s
+3. Cards (stagger 0.2s):
+   - Card A: delay 0.8s
+   - Card B: delay 1.0s
+   - Card C: delay 1.2s
+   - Card D: delay 1.4s
+   Cada card: Fade In + Slide Up
+
+INTERAÇÕES:
+- Clique no código: copiar
+- Hover: glow
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+================================================================================
+SLIDE 8 — ORIENTAÇÃO A OBJETOS
+================================================================================
+
+NOME DO SLIDE: Orientação a Objetos
+
+OBJETIVO: Explicar os conceitos de POO em Ruby com um exemplo prático e visual.
+
+EMOÇÃO: Compreensão, clareza, admiração pela elegância.
+
+LAYOUT: Exemplo prático central com diagrama visual.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Orientação a Objetos" — h1, branco
+2. Subtítulo "Tudo é objeto em Ruby" — h3, #C8C8D7
+3. Diagrama visual de classes e objetos (lado esquerdo):
+   - Card "Classe: Animal" com atributos (nome, idade) e métodos (falar, dormir)
+   - Seta apontando para baixo com texto "Herda de"
+   - Card "Classe: Cachorro < Animal" com método extra (abanar_rabo)
+   - Seta apontando para baixo com texto "Instância"
+   - Card "Objeto: rex = Cachorro.new('Rex')"
+4. Bloco de código (lado direito):
+   class Animal
+     attr_accessor :nome, :idade
+   
+     def falar
+       puts "Som genérico"
+     end
+   end
+   
+   class Cachorro < Animal
+     def falar
+       puts "Au au!"
+     end
+   
+     def abanar_rabo
+       puts "#{@nome} está feliz!"
+     end
+   end
+   
+   rex = Cachorro.new
+   rex.nome = "Rex"
+   rex.falar  # => "Au au!"
+
+BACKGROUND: Fundo base #0F0F19
+
+ELEMENTOS DECORATIVOS:
+- Setas entre os cards do diagrama (⇣) animadas (opacidade pulsante)
+- Ícones: ◆ no topo de cada card de classe/objeto
+
+ELEMENTOS INTERATIVOS:
+- Hover no código: destaque das linhas
+- Clique no código: copiar
+- Hover nos cards do diagrama: glow e elevação
+
+ELEMENTOS VISUAIS:
+- Cards com glassmorphism para classes e objetos
+- Bloco de código com syntax highlight
+- Diagrama visual com setas
+
+PARTÍCULAS: Fireflies padrão
+
+ILUMINAÇÃO: Glow nos cards ao hover
+
+EFEITOS:
+- Glassmorphism
+- Syntax highlight
+- Diagrama animado
+
+TIPOGRAFIA (ordEM de entrada):
+1. Título — delay 0.3s
+2. Subtítulo — delay 0.6s
+3. Diagrama (lado esquerdo) — cards do diagrama aparecem:
+   - Classe Animal: delay 0.8s
+   - Seta: delay 1.2s
+   - Classe Cachorro: delay 1.5s
+   - Seta: delay 1.9s
+   - Objeto rex: delay 2.2s
+4. BLOCO DE CÓDIGO (lado direito) — Fade In, delay 1.0s
+
+INTERAÇÕES:
+- Clique no código: copiar
+- Hover: glow
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Fade com leve Zoom In (slide 9 entra com scale 1.05 → 1.0)
+
+================================================================================
+SLIDE 9 — FRAMEWORK RUBY ON RAILS
+================================================================================
+
+NOME DO SLIDE: Framework Ruby on Rails
+
+OBJETIVO: Apresentar o principal ecossistema do Ruby. Mostrar seu poder e relevância.
+
+EMOÇÃO: Empolgação, credibilidade, reconhecimento.
+
+LAYOUT: Hero com destaque para o nome Rails e cards com vantagens e exemplos.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Ruby on Rails" com gradient text (gradiente #E2263A → #FFC850) — h1, grande
+2. Subtítulo: "O framework que revolucionou o desenvolvimento web" — h3, #C8C8D7
+3. Card de definição (glassmorphism, central):
+   "Ruby on Rails (ou apenas Rails) é um framework de desenvolvimento web full-stack escrito em Ruby. Criado por David Heinemeier Hansson em 2004, Rails popularizou conceitos como MVC (Model-View-Controller), 'Convention over Configuration' e 'Don't Repeat Yourself' (DRY)."
+4. Grid de 3 cards com vantagens:
+   - "Produtividade" — "Geração de código automática, scaffolding, gems"
+   - "Convenção" — "Menos configuração, mais foco no que importa"
+   - "Ecossistema" — "Milhares de gems, comunidade ativa, deploy simplificado"
+5. Lista de aplicações famosas que usam Rails:
+   "GitHub, Shopify, Airbnb (inicialmente), Basecamp, SoundCloud, Twitch (inicialmente), Hulu, Zendesk"
+
+BACKGROUND:
+- Gradiente quente vindo do centro (rgba(226,38,58,0.03) mesclado com rgba(255,200,80,0.02)
+- Mais claro/mais quente que os slides anteriores
+
+ELEMENTOS DECORATIVOS:
+- Grande "Rails" (apenas a palavra) em texto fantasma (ghost text) atrás do conteúdo — opacidade 0.03, tamanho enorme, como marca d'água
+- Faixa horizontal fina com gradiente (#E2263A → #FFC850) abaixo do título
+
+ELEMENTOS INTERATIVOS:
+- Hover nos cards: elevação com glow dourado
+- Tooltips nos termos "MVC", "Convention over Configuration", "DRY"
+
+ELEMENTOS VISUAIS:
+- Gradient text no título
+- Glassmorphism nos cards
+- Ghost text decorativo
+
+PARTÍCULAS: Fireflies com mix de vermelho e dourado (mais dourado que outros slides)
+
+ILUMINAÇÃO:
+- Glow dourado nos cards ao hover
+- Iluminação mais quente que slides anteriores
+
+EFEITOS:
+- Gradient text
+- Glassmorphism
+- Ghost text
+
+TIPOGRAFIA (ordem de entrada):
+1. Título "Ruby on Rails" — Fade In + Scale, 0.6s, delay 0.3s
+2. Subtítulo — Fade In, 0.5s, delay 0.7s
+3. Card de definição — Fade In + Slide Up, 0.6s, delay 1.0s
+4. Cards de vantagens (stagger 0.2s):
+   - Card 1: delay 1.5s
+   - Card 2: delay 1.7s
+   - Card 3: delay 1.9s
+5. Lista de aplicações — Fade In + Slide Up, 0.5s, delay 2.4s
+
+INTERAÇÕES:
+- Hover nos cards: elevação e glow
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+================================================================================
+SLIDE 10 — ONDE RUBY É UTILIZADO
+================================================================================
+
+NOME DO SLIDE: Onde Ruby é Utilizado
+
+OBJETIVO: Mostrar a versatilidade e os domínios de aplicação do Ruby.
+
+EMOÇÃO: Surpresa, amplitude, reconhecimento de utilidade.
+
+LAYOUT: Grid de cards (3 colunas, 2 linhas) com ícones representando cada área.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Onde Ruby é Utilizado" — h1, branco
+2. Subtítulo "Versatilidade em diversos domínios" — h3, #C8C8D7
+3. Grid 3x2 de cards com ícone + texto:
+   - Card 1: 🌐 "Desenvolvimento Web" — "Rails, Sinatra, Jekyll, aplicações completas"
+   - Card 2: 🔗 "APIs" — "APIs RESTful e GraphQL com Rails API"
+   - Card 3: 🤖 "Automação" — "Scripts de automação, web scraping, tarefas repetitivas"
+   - Card 4: 📜 "Scripts" — "Ferramentas de linha de comando, processamento de dados"
+   - Card 5: ⚙️ "DevOps" — "Chef, Puppet, Capistrano, automação de infraestrutura"
+   - Card 6: 🧪 "Prototipagem" — "MVP rápidos, validação de ideias, startups"
+
+BACKGROUND: Fundo base #0F0F19
+
+ELEMENTOS DECORATIVOS:
+- Ícones grandes e centrais em cada card (emojis ou Unicode)
+- Círculos decorativos atrás de cada ícone (30px, rgba(226,38,58,0.1))
+
+ELEMENTOS INTERATIVOS:
+- Hover nos cards: elevação e glow, ícone escala 1.1
+- Tooltips com exemplos adicionais
+
+ELEMENTOS VISUAIS:
+- Cards com glassmorphism
+- Ícones grandes
+
+PARTÍCULAS: Fireflies padrão
+
+ILUMINAÇÃO: Glow nos cards ao hover
+
+EFEITOS: Glassmorphism
+
+TIPOGRAFIA (ordem de entrada):
+1. Título — delay 0.3s
+2. Subtítulo — delay 0.6s
+3. Cards (stagger 0.15s):
+   - Card 1: delay 0.8s
+   - Card 2: delay 0.95s
+   - Card 3: delay 1.1s
+   - Card 4: delay 1.25s
+   - Card 5: delay 1.4s
+   - Card 6: delay 1.55s
+   Cada card: Fade In + Slide Up (vindo de baixo)
+
+INTERAÇÕES: Hover, tooltips
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+================================================================================
+SLIDE 11 — VANTAGENS
+================================================================================
+
+NOME DO SLIDE: Vantagens
+
+OBJETIVO: Listar os pontos fortes do Ruby de forma persuasiva e visual.
+
+EMOÇÃO: Confiança, entusiasmo, decisão positiva.
+
+LAYOUT: Grid 2x3 com cards de vantagens + contadores.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Vantagens" — h1, branco
+2. Subtítulo "Por que escolher Ruby?" — h3, #C8C8D7
+3. Lista de 5 cards com ícone e texto:
+   - Card 1: "Fácil aprendizado" — "Sintaxe intuitiva que se assemelha ao inglês. Curva de aprendizado suave."
+   - Card 2: "Código limpo" — "Legibilidade é prioridade. Código que parece documentação."
+   - Card 3: "Alta produtividade" — "Faça mais com menos código. Desenvolvimento acelerado."
+   - Card 4: "Grande quantidade de bibliotecas" — "RubyGems: mais de 180.000 gems disponíveis."
+   - Card 5: "Comunidade ativa" — "Fóruns, conferências, meetups e suporte constante."
+
+BACKGROUND: Fundo base #0F0F19
+- Gradiente suave com tom levemente dourado (#FFC850 com opacidade 0.02)
+
+ELEMENTOS DECORATIVOS:
+- Faixa decorativa na lateral ou no topo (linha fina com gradiente #E2263A → #FFC850)
+
+ELEMENTOS INTERATIVOS:
+- Hover nos cards: elevação e glow
+- Cards expansíveis (clique): revelam exemplos ou dados adicionais
+
+ELEMENTOS VISUAIS:
+- Cards com glassmorphism
+- Ícones ✓ (checkmarks) em #E2263A em cada card
+
+PARTÍCULAS: Fireflies padrão
+
+ILUMINAÇÃO: Glow nos cards
+
+EFEITOS: Glassmorphism
+
+TIPOGRAFIA (ordem de entrada):
+1. Título — delay 0.3s
+2. Subtítulo — delay 0.6s
+3. Cards (stagger 0.15s):
+   - Card 1: delay 0.8s
+   - Card 2: delay 0.95s
+   - Card 3: delay 1.1s
+   - Card 4: delay 1.25s
+   - Card 5: delay 1.4s
+
+INTERAÇÕES: Hover, clique para expandir
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+================================================================================
+SLIDE 12 — DESVANTAGENS
+================================================================================
+
+NOME DO SLIDE: Desvantagens
+
+OBJETIVO: Apresentar as limitações do Ruby de forma honesta e equilibrada.
+
+EMOÇÃO: Honestidade, transparência, credibilidade.
+
+LAYOUT: Grid 2x2 com cards que reconhecem as limitações.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Desvantagens" — h1, branco
+2. Subtítulo "Desafios a considerar" — h3, #C8C8D7
+3. Grid 2x2 de cards:
+   - Card 1: "Menor desempenho" — "Comparado a linguagens compiladas como Go, Rust ou Java, Ruby pode ser mais lento em operações computacionais intensivas."
+   - Card 2: "Menor popularidade" — "Ruby perdeu espaço para Python e JavaScript nos últimos anos, especialmente em Data Science e Machine Learning."
+   - Card 3: "Mercado regional" — "Menos oportunidades em algumas regiões fora do ecossistema Rails/startups."
+   - Card 4: "Consumo de memória" — "Em projetos de grande escala, Ruby pode consumir mais memória que alternativas como Go ou Elixir."
+
+BACKGROUND: Fundo base #0F0F19
+- Tom ligeiramente mais frio que outros slides (sutil)
+
+ELEMENTOS DECORATIVOS:
+- Cada card com um marcador "⚠" (atenção) no canto superior, cor #FFC850 (dourado para alerta)
+
+ELEMENTOS INTERATIVOS:
+- Hover nos cards: borda muda para #FFC850 (dourado)
+- Tooltip com dados adicionais
+
+ELEMENTOS VISUAIS:
+- Cards com glassmorphism (com borda sutil #FFC850)
+- Ícone ⚠ em cada card
+
+PARTÍCULAS: Fireflies padrão (menos quantidade, 20-30, mais sutis)
+
+ILUMINAÇÃO: Glow dourado nos cards ao hover
+
+EFEITOS: Glassmorphism
+
+TIPOGRAFIA (ordem de entrada):
+1. Título — delay 0.3s
+2. Subtítulo — delay 0.6s
+3. Cards (stagger 0.2s):
+   - Card 1: delay 0.8s
+   - Card 2: delay 1.0s
+   - Card 3: delay 1.2s
+   - Card 4: delay 1.4s
+
+INTERAÇÕES: Hover, tooltips
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+================================================================================
+SLIDE 13 — COMPARAÇÃO COM OUTRAS LINGUAGENS
+================================================================================
+
+NOME DO SLIDE: Comparação com Outras Linguagens
+
+OBJETIVO: Comparar Ruby com Python, JavaScript e Java de forma clara e visual.
+
+EMOÇÃO: Objetividade, informação, utilidade.
+
+LAYOUT: Split screen com abas (tabs). Tabela comparativa ao centro.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Comparação com Outras Linguagens" — h1, branco, topo
+2. Sistema de Tabs (abas) horizontais com 3 abas: "Python" | "JavaScript" | "Java"
+3. Ao selecionar uma aba, a tabela de comparação mostra:
+   Ruby vs [Linguagem selecionada]
+
+   ESTRUTURA DA TABELA (2 colunas: Ruby | Linguagem):
+   | Critério          | Ruby                    | Python                  |
+   |-------------------|-------------------------|-------------------------|
+   | Sintaxe           | Elegante, similar ao inglês | Limpa, indentação obrigatória |
+   | Aprendizado       | Fácil, intuitivo        | Fácil, muito didática   |
+   | Desempenho        | Interpretado, moderado  | Interpretado, moderado  |
+   | Aplicações        | Web, automação, scripts | Data Science, IA, Web   |
+
+   (O conteúdo muda conforme a aba selecionada)
+
+4. Abaixo da tabela: observação final:
+   "Cada linguagem tem seu ponto forte. Ruby brilha na produtividade web e na elegância do código."
+
+BACKGROUND: Fundo base #0F0F19
+- Linhas sutis de grid pattern (opacidade 0.02)
+
+ELEMENTOS DECORATIVOS:
+- Pequenos ícones de cada linguagem ao lado do nome da aba (usar CSS puro para criar um ícone minimalista)
+  - Python: dois quadrados sobrepostos (azul/amarelo via CSS)
+  - JavaScript: "JS" estilizado (amarelo)
+  - Java: "J" estilizado (azul)
+
+ELEMENTOS INTERATIVOS:
+- Tabs clicáveis com animação de slide (indicador desliza horizontalmente)
+- Hover nas linhas da tabela: destaque (background rgba(226,38,58,0.05))
+- Hover nas abas: glow suave
+
+ELEMENTOS VISUAIS:
+- Tabs animadas (indicador deslizante)
+- Tabela com linhas alternadas (opacidade 0.03 nas linhas pares)
+- Células com padding generoso
+
+PARTÍCULAS: Fireflies padrão
+
+ILUMINAÇÃO: Glow na aba ativa
+
+EFEITOS:
+- Tabs animadas
+- Tabela com hover highlight
+
+TIPOGRAFIA (ordem de entrada):
+1. Título — delay 0.3s
+2. Abas — Fade In + Slide Up, 0.4s, delay 0.7s (a aba ativa já vem selecionada)
+3. Tabela — Fade In, 0.5s, delay 1.0s
+4. Observação final — Fade In, 0.4s, delay 1.5s
+
+INTERAÇÕES:
+- Clicar nas abas troca a tabela (animação de crossfade na tabela)
+- Hover nas linhas da tabela
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+OBSERVAÇÕES:
+- A tabela deve ter um scroll horizontal em telas menores
+- As abas devem ter indicador animado (um sublinhado que desliza)
+
+================================================================================
+SLIDE 14 — MERCADO DE TRABALHO
+================================================================================
+
+NOME DO SLIDE: Mercado de Trabalho
+
+OBJETIVO: Apresentar dados sobre o mercado para desenvolvedores Ruby.
+
+EMOÇÃO: Oportunidade, otimismo realista, utilidade profissional.
+
+LAYOUT: Dashboard estilo KPI com cards de métricas e estatísticas.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Mercado de Trabalho" — h1, branco
+2. Subtítulo "Oportunidades para desenvolvedores Ruby" — h3, #C8C8D7
+3. Grid 2x2 de cards com métricas (contadores animados):
+   - Card 1: "Áreas de Atuação" — contador "5+" com descrição "Web, APIs, DevOps, Automação, Scripts"
+   - Card 2: "Empresas que usam Ruby" — "GitHub, Shopify, Airbnb, Basecamp, Zendesk..." (texto rolável ou com scroll)
+   - Card 3: "Demanda" — contador "Média-Alta" com indicador visual (barra de progresso circular ou reta)
+   - Card 4: "Tendências" — descrição: "Ruby 3x3, ecossistema Rails maduro, crescente uso em startups e SaaS"
+4. Texto adicional: "Perfil do desenvolvedor Ruby: profissional que valoriza código limpo, produtividade e boas práticas. Conhecimento em Rails, banco de dados e testes é altamente valorizado."
+
+BACKGROUND: Fundo base #0F0F19
+
+ELEMENTOS DECORATIVOS:
+- Gráfico de barras simples (CSS) mostrando a demanda relativa (Ruby vs outras) ao lado — opcional
+- Ícones nos cards: 💼, 🏢, 📈, 🔮
+
+ELEMENTOS INTERATIVOS:
+- Contadores animados (count up) — ao entrar no slide, os números incrementam de 0 até o valor final
+- Hover nos cards: elevação e glow
+
+ELEMENTOS VISUAIS:
+- Cards com glassmorphism
+- Contadores animados
+- Barra de progresso indicadora
+
+PARTÍCULAS: Fireflies padrão
+
+ILUMINAÇÃO: Glow nos cards
+
+EFEITOS:
+- Contador count up
+- Glassmorphism
+
+TIPOGRAFIA (ordem de entrada):
+1. Título — delay 0.3s
+2. Subtítulo — delay 0.6s
+3. Cards (stagger 0.2s):
+   - Card 1: delay 0.8s
+   - Card 2: delay 1.0s
+   - Card 3: delay 1.2s (com contador iniciando)
+   - Card 4: delay 1.4s
+4. Texto adicional — delay 2.0s
+
+INTERAÇÕES:
+- Hover nos cards
+- Contadores contam ao entrar no slide
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE: Cross Fade padrão (0.6s)
+
+================================================================================
+SLIDE 15 — CONCLUSÃO
+================================================================================
+
+NOME DO SLIDE: Conclusão
+
+OBJETIVO: Resumir os pontos principais e encerrar a apresentação de forma memorável com chamada para ação.
+
+EMOÇÃO: Inspiração, encerramento elegante, motivação.
+
+LAYOUT: Centralizado (Hero Layout), similar à capa, mas com tom mais inspiracional e de fechamento.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Conclusão" — h1, branco, com glow sutil
+2. Resumo em bullet points (3-4 itens máximos):
+   - "Ruby é uma linguagem elegante que prioriza a felicidade do desenvolvedor."
+   - "Sua sintaxe simples e poderosa permite alta produtividade."
+   - "O ecossistema Rails é maduro e amplamente adotado no mercado."
+   - "Aprender Ruby é uma experiência que transforma a forma como você programa."
+3. Frase de impacto (grande, em destaque):
+   "Ruby não é apenas uma linguagem. É uma filosofia de programação."
+   — com gradient text (#E2263A → #FFC850)
+4. Espaço para perguntas: "Perguntas?" — h2, branco, com underline animado
+5. Agradecimento: "Obrigado!" — grande, com efeito glow, no final
+6. "Apresentação criada por [Nome do Apresentador]" — pequeno, rodapé
+
+BACKGROUND:
+- Gradiente radial: center center, #0F0F19 0%, #1A0A10 60%, #0F0F19 100%
+- Similar ao slide 1 (capa), para criar simetria visual com o início
+
+ELEMENTOS DECORATIVOS:
+- Círculos concêntricos decorativos atrás do conteúdo (similar ao slide 1)
+- Linha divisória fina abaixo do resumo
+
+ELEMENTOS INTERATIVOS:
+- Nenhum interativo interno (apenas navegação global)
+
+ELEMENTOS VISUAIS:
+- Gradient text na frase de impacto
+- Glow no "Obrigado!"
+- Bullet points com marcadores ◆ em #E2263A
+- Underline animado em "Perguntas?" (largura 0 → 100%, 0.6s)
+
+PARTÍCULAS: Fireflies em concentração maior (60 partículas) com mix de vermelho e dourado
+
+ILUMINAÇÃO:
+- Glow atrás do "Obrigado!" (grande, suave)
+- Spotlight central no texto principal
+
+EFEITOS:
+- Gradient text
+- Glow
+- Underline animado
+- Texto 3D não se aplica aqui (apenas no slide 1)
+
+TIPOGRAFIA (ordem de entrada):
+1. Título "Conclusão" — Fade In + Slide Up, 0.5s, delay 0.3s
+2. Bullet points (stagger 0.2s):
+   - Item 1: delay 0.7s
+   - Item 2: delay 0.9s
+   - Item 3: delay 1.1s
+   - Item 4: delay 1.3s
+3. Linha divisória — Scale X, 0.5s, delay 1.7s
+4. Frase de impacto — Fade In + Scale, 0.8s, delay 2.0s
+5. "Perguntas?" — Fade In, 0.5s, delay 2.8s (com underline animado)
+6. "Obrigado!" — Fade In + Scale + Glow, 1.0s, delay 3.5s
+7. Nome do apresentador — Fade In, 0.5s, delay 4.5s
+
+INTERAÇÕES:
+- Navegação global apenas
+- "Perguntas?" com underline animado (auto) — sem interação
+
+TRANSIÇÃO: Não há próximo slide. Ao chegar no slide 15, o botão "Próximo" fica desabilitado. O slide final permanece visível até o usuário navegar para outro slide.
+
+OBSERVAÇÕES:
+- Este slide deve encerrar com elegância e impacto emocional
+- O gradiente da frase de impacto deve usar #E2263A → #FFC850 (dourado) para criar um clímax visual
+- O "Obrigado!" deve ser grande (clamp(2.5rem, 6vw, 4.5rem)) com glow pulsante
+
+================================================================================
+RESUMO DAS TRANSIÇÕES ENTRE SLIDES
+================================================================================
+
+Slide 1 → Slide 2: Fade com Blur (0.8s)
+Slide 2 → Slide 3: Cross Fade (0.6s)
+Slide 3 → Slide 4: Cross Fade (0.6s)
+Slide 4 → Slide 5: Cross Fade (0.6s)
+Slide 5 → Slide 6: Cross Fade (0.6s)
+Slide 6 → Slide 7: Cross Fade (0.6s)
+Slide 7 → Slide 8: Cross Fade (0.6s)
+Slide 8 → Slide 9: Fade com Zoom In (0.6s)
+Slide 9 → Slide 10: Cross Fade (0.6s)
+Slide 10 → Slide 11: Cross Fade (0.6s)
+Slide 11 → Slide 12: Cross Fade (0.6s)
+Slide 12 → Slide 13: Cross Fade (0.6s)
+Slide 13 → Slide 14: Cross Fade (0.6s)
+Slide 14 → Slide 15: Fade com Glow (0.6s)
+
+================================================================================
+RESUMO DOS ELEMENTOS VISUAIS UTILIZADOS (Visual.txt)
+================================================================================
+
+- Texto 3D com text-shadow (slide 1)
+- Glassmorphism (slides 2, 4, 6, 7, 8, 9, 10, 11, 12, 14)
+- Gradient text (slides 2, 9, 15)
+- Timeline vertical (slide 3)
+- Partículas Fireflies (todos os slides)
+- Bento Grid (slides 4, 6)
+- Blocos de código com syntax highlight (slides 7, 8)
+- Tabela (slide 13)
+- Tabs animadas (slide 13)
+- Contadores count up (slide 14)
+- Ghost text (slide 9)
+- Glow (vários slides)
+- Blur (transição 1→2, entrada de elementos)
+- Fade In, Slide In, Scale In (entradas de elementos)
+- Cross Fade entre slides (maioria)
+- Card expansível / accordion (slides 3, 6, 11)
+- Linha do tempo (slide 3)
+
+================================================================================
+RESUMO DOS ELEMENTOS INTERATIVOS UTILIZADOS (Interativos.txt)
+================================================================================
+
+- Navegação por teclado (setas, Espaço, Home, End, números)
+- Navegação por mouse (clique nas laterais, scroll)
+- Navegação por touch/swipe
+- Botões Próximo, Anterior, Início, Fullscreen
+- Barra de progresso
+- Sidebar com índice
+- Tooltips (termos técnicos)
+- Accordion / cards expansíveis
+- Tabs (slide 13)
+- Magnetic Buttons (botões de navegação)
+- Cursor personalizado (anel)
+- Copiar código (slides 7, 8)
+- Contadores (slide 14)
+
+================================================================================
+INSTRUÇÕES FINAIS PARA A IA EXECUTORA
+================================================================================
+
+1. Crie UM ÚNICO ARQUIVO HTML.
+2. NÃO use CDN, NÃO use fontes externas, NÃO use bibliotecas externas.
+3. Use UTF-8 na meta tag.
+4. NÃO inclua tela de loading.
+5. NÃO acesse nenhum outro arquivo na pasta.
+6. Use CSS Grid e Flexbox para layouts.
+7. Use animações CSS com @keyframes e transições.
+8. Use Vanilla JavaScript para navegação, partículas, contadores e interações.
+9. O HTML deve ser semanticamente correto.
+10. A apresentação deve ser 100% responsiva (desktop, tablet, mobile).
+11. Teste mentalmente cada transição e animação para garantir fluidez.
+12. Todo texto especificado deve aparecer exatamente como descrito.
+13. Mantenha a paleta de cores consistente em todos os slides.
+14. Cada slide ocupa 100vw x 100vh.
+15. As partículas (fireflies) rodam em um canvas HTML5 no fundo.
+16. O efeito de texto 3D do slide 1 deve usar text-shadow com 30 camadas via JavaScript.
+17. A barra de navegação inferior deve estar presente em todos os slides.
+18. A sidebar de índice deve abrir/fechar com animação suave.
+
+================================================================================
+FIM DA ESPECIFICAÇÃO
+================================================================================

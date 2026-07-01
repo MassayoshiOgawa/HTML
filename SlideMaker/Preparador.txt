@@ -489,54 +489,68 @@ Gerar apenas um único documento TXT.
 
 Especificar que no documento HTML deve estar sem caracteres corrompidos, use UTF-8 e sem tela de Loading.
 
-Na capa do slide(Vulgo primeiro slide, introdução), colocar o titulo em forma de texto 3D com text-shadow, que é basicamente isso aqui:
-O que é o efeito de texto 3D com text-shadow?
-O efeito de texto 3D com text-shadow é uma técnica visual feita apenas com HTML, CSS e, opcionalmente, JavaScript, que cria a ilusão de profundidade sem utilizar modelos 3D reais.
-A ideia consiste em desenhar várias sombras do texto, cada uma deslocada alguns pixels em relação à anterior. Quando essas sombras são empilhadas, elas formam uma "espessura" atrás das letras, fazendo com que o texto pareça extrudado (como se tivesse sido esticado para trás no eixo de profundidade).
-Quanto maior o número de camadas de sombra, mais profundo será o efeito. Além disso, é comum adicionar uma sombra desfocada atrás do texto para aumentar a sensação de volume e destacar ainda mais o efeito tridimensional.
-Essa técnica é bastante utilizada em páginas web por ser simples, leve e compatível com praticamente todos os navegadores modernos.
-Aqui está um exemplo de código:
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>Texto 3D</title>
-<style>
-body{
-    margin:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    background:#222;
-}
-h1{
-    color:white;
-    font-size:80px;
-    font-family:Arial, sans-serif;
-}
-</style>
-</head>
-<body>
-<h1 id="texto">Texto 3D</h1>
-<script>
-const texto = document.getElementById("texto");
-let sombra = "";
-for(let i = 0; i < 30; i++){
-    sombra += (sombra ? "," : "") +
+Título da capa (obrigatório)
+Na capa do slide (primeiro slide), o título deve utilizar um efeito de texto 3D extrudado com múltiplos text-shadow, porém o próprio texto deve estar inclinado, e não apenas sua sombra.
+A transformação (transform) deve ser aplicada diretamente ao elemento do título (<h1> ou equivalente). Não aplique a transformação apenas na extrusão ou nas sombras.
+O elemento do título deve obrigatoriamente possuir uma transformação equivalente a:
+transform: rotate(-28deg) skew(25deg);
+transform-origin: center center;
+ou valores muito próximos que produzam exatamente a mesma aparência.
+Aparência esperada
+O texto deve possuir exatamente esta orientação:
+
+                    Stardew Valley
+
+               Stardew Valley
+
+          Stardew Valley
+
+     Stardew Valley
+
+Stardew Valley
+Ou seja:
+o lado esquerdo do título fica mais baixo;
+o lado direito fica mais alto;
+o texto inteiro sobe na diagonal da esquerda para a direita (↗);
+o eixo principal do texto forma aproximadamente 28° com a horizontal;
+o próprio texto parece estar deitado em perspectiva isométrica.
+Extrusão
+A espessura deve ser criada utilizando dezenas de text-shadow, deslocando cada camada 1 pixel para a esquerda e 1 pixel para baixo, por exemplo:
+let shadow = "";
+for (let i = 0; i < 35; i++) {
+    shadow += (shadow ? "," : "") +
               (-i) + "px " +
-              i + "px 0 #bfbfbf";
+              i + "px 0 #cfcfcf";
 }
-texto.style.textShadow = sombra;
-</script>
-</body>
-</html>
+titulo.style.textShadow = shadow;
+Também deve existir uma segunda camada utilizando ::before, levemente deslocada, escurecida e desfocada (filter: blur(...)), simulando uma sombra ambiente.
+O que NÃO fazer
+Está incorreto se:
+o texto estiver paralelo ao topo da tela (horizontal);
+apenas a sombra estiver inclinada;
+apenas a extrusão estiver diagonal;
+o transform estiver em um elemento pai (div, section, container, etc.) enquanto o <h1> continua horizontal;
+o texto for lido normalmente da esquerda para a direita sem nenhuma rotação.
+O que fazer
+O próprio <h1> deve ser desenhado já inclinado, de forma semelhante ao exemplo abaixo:
+h1{
+    transform: rotate(-28deg) skew(25deg);
+}
+O resultado final deve ser visualmente equivalente a este efeito clássico:
+transform: rotate(-28deg) skew(25deg);
+text-shadow:
+-1px 1px 0 #d9d9d9,
+-2px 2px 0 #d9d9d9,
+-3px 3px 0 #d9d9d9,
+...
+-35px 35px 0 #d9d9d9;
+Se o título estiver horizontal, mesmo que a extrusão esteja correta, o resultado deve ser considerado incorreto e precisa ser refeito até que o próprio texto esteja inclinado.
 
 Esse documento será utilizado por outra IA para desenvolver toda a apresentação HTML em um único arquivo HTML contendo HTML, CSS e JavaScript.
 
 O documento deve ser extremamente detalhado.
 
-No final, não colocar um texto que tem o intuito de perguntar se há alguma dúvida.
+No final, não colocar um texto que tem o intuito de perguntar se há alguma dúvida, isso é ESTRITAMENTE probido, assim como colocar "Perguntas?" ou qualquer coisa que seja semelhante a dúvida no slide final também é proibido.
 
 Lembre-se que a IA que vai fazer o que este prompt pede, não terá nenhum tipo de acesso as informações contidas dentro desta pasta, então seja bem detalhista, pois essa IA não terá nenhum tipo de contexto prévio
 
@@ -545,5 +559,14 @@ Especifique também para a IA que irá executar o prompt a não acessar nenhum o
 Especificar quais são as cores principais da apresentação. Exemplo: Se a apresentação for sobre JavaScript, a cor principal da apresentação será amarelo, branco e preto. Se a apresentação for sobre Excel, as cores principais serão Branco, Preto, Verde, Verde Escuro, Verde Claro e Cinza. Deve-se saber que todas as apresentações devem conter ao menos branco e preto como as cores principais e as cores que se seriam ideias para aquele tipo de tópico(Exemplo: Imagine que o tópico é sobre carne vermelha e você usa a cor azul, o que absolutamente não combina, então pense bem quais serão as cores principais da apresentação.)
 
 A outra IA não deverá precisar tomar praticamente nenhuma decisão criativa.
+
+É completamente obrigatório que o conteúdo do documento HTML esteja completamente resposivo, para que nada fique fora da tela, tudo deve estar bem enquadrado na tela.
+
+É estritamente proíbido que um slide seja scrollável, tanto horizontalmente quanto verticalmente.
+
+O scroll do mouse não pode trocar de slides, apenas as setinhas do teclado(ou arrastando pro lado caso o usuário esteja no celular).
+Também é proibido trocar de slide caso o usuario clique com o botão do mouse em qualquer canto da tela
+
+É proibido criar linhas do tempo independentemente se foi pedido nos slides, faça de uma forma diferente.
 
 Todas as decisões devem ser tomadas por você durante a criação deste documento.

@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruby — A Linguagem de Programação Simples e Elegante</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #0F0F19; color: #fff; }
+body { cursor: none; }
+a { text-decoration: none; color: #E2263A; }
+a:hover { color: #FF5064; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+::-webkit-scrollbar-thumb { background: rgba(226,38,58,0.4); border-radius: 3px; }
+
+#customCursor { position: fixed; pointer-events: none; z-index: 9999; width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(226,38,58,0.4); transition: width 0.3s, height 0.3s, border-color 0.3s, background 0.3s; transform: translate(-50%, -50%); top: 0; left: 0; will-change: transform; }
+#customCursor.hover { width: 48px; height: 48px; border-color: rgba(226,38,58,0.7); background: rgba(226,38,58,0.1); }
+
+#particlesCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+.slide { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1; overflow-y: auto; overflow-x: hidden; padding: 40px 60px 100px; background: #0F0F19; }
+.slide.active { display: flex; }
+.slide.transitioning-out { display: flex; z-index: 2; }
+.slide.transitioning-in { display: flex; z-index: 3; }
+
+.slide-content { position: relative; z-index: 2; width: 100%; max-width: 1200px; margin: 0 auto; }
+
+h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; color: #fff; }
+h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; color: #fff; }
+h3 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 600; line-height: 1.3; color: #fff; }
+p, li, td { font-size: clamp(0.95rem, 1.5vw, 1.15rem); font-weight: 400; line-height: 1.6; color: #C8C8D7; }
+small, .caption { font-size: clamp(0.75rem, 1vw, 0.9rem); font-weight: 400; color: #828296; }
+code { font-family: 'Courier New', monospace; font-size: clamp(0.85rem, 1.2vw, 1rem); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 0.2em 0.4em; color: #FF5064; }
+
+.glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
+.glass:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 20px rgba(226,38,58,0.1); border-color: rgba(226,38,58,0.2); }
+.glow-border { border-color: rgba(226,38,58,0.3); }
+.gradient-text { background: linear-gradient(135deg, #E2263A, #FF5064); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.btn-nav { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; position: relative; overflow: hidden; }
+.btn-nav:hover { border-color: #E2263A; background: rgba(226,38,58,0.1); }
+.btn-nav:active { transform: scale(0.95); }
+.btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-nav:disabled:hover { border-color: rgba(255,255,255,0.2); background: transparent; }
+
+#bottomNav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: rgba(15,15,25,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 100; gap: 12px; }
+.nav-left, .nav-right { display: flex; align-items: center; gap: 8px; }
+.nav-center { flex: 1; display: flex; align-items: center; justify-content: center; gap: 16px; max-width: 500px; }
+#progressBar { flex: 1; max-width: 400px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+#progressFill { height: 100%; width: 0%; border-radius: 2px; background: linear-gradient(90deg, #E2263A, #FF5064); transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+#slideCounter { font-size: 13px; color: #828296; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+#menuBtn { position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); background: rgba(15,15,25,0.6); backdrop-filter: blur(8px); color: #fff; font-size: 18px; cursor: pointer; z-index: 101; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+#menuBtn:hover { border-color: #E2263A; background: rgba(226,38,58,0.1); }
+
+#sidebar { position: fixed; top: 0; right: -320px; width: 280px; height: 100vh; background: rgba(22,22,38,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 200; transition: right 0.3s ease; padding: 60px 0 20px; overflow-y: auto; border-left: 1px solid rgba(255,255,255,0.05); }
+#sidebar.open { right: 0; }
+#sidebarOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+#sidebarOverlay.visible { display: block; }
+#sidebarClose { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: #fff; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px 24px; color: #C8C8D7; font-size: 14px; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+.sidebar-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.sidebar-item.active { color: #E2263A; border-left-color: #E2263A; background: rgba(226,38,58,0.08); }
+.sidebar-num { font-size: 12px; font-weight: 700; color: #828296; min-width: 24px; }
+
+.tooltip { position: fixed; z-index: 300; pointer-events: none; background: rgba(22,22,38,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #fff; font-size: 0.85rem; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); max-width: 280px; opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease; transform: translateY(0); }
+.tooltip.visible { opacity: 1; transform: translateY(-5px); }
+.tooltip::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid rgba(22,22,38,0.95); }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes blurIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
+@keyframes scaleX { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes glowPulse { 0%, 100% { box-shadow: 0 0 10px rgba(226,38,58,0.3); } 50% { box-shadow: 0 0 25px rgba(226,38,58,0.6); } }
+@keyframes arrowPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+@keyframes drawLine { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
+@keyframes countUp { from { opacity: 0; } to { opacity: 1; } }
+
+.anim-fade { animation: fadeIn 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-fade-up { animation: fadeInUp 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-fade-scale { animation: fadeInScale 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-blur { animation: blurIn 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-scale-x { animation: scaleX 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-slide-right { animation: slideInRight 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-stagger-1 { animation-delay: 0.3s; }
+.anim-stagger-2 { animation-delay: 0.5s; }
+.anim-stagger-3 { animation-delay: 0.7s; }
+.anim-stagger-4 { animation-delay: 0.9s; }
+.anim-stagger-5 { animation-delay: 1.1s; }
+.anim-stagger-6 { animation-delay: 1.3s; }
+.anim-stagger-7 { animation-delay: 1.5s; }
+
+/* Slide 1 - Cover */
+#slide1 { background: radial-gradient(ellipse at center, #0F0F19 0%, #1A0A10 60%, #0F0F19 100%); }
+.s1-title { font-size: clamp(2rem, 5vw, 4rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; color: #fff; text-align: center; }
+.s1-divider { width: 50px; height: 2px; background: #E2263A; margin: 0 auto; }
+.s1-logo { width: 120px; height: 120px; margin: 0 auto; position: relative; }
+.s1-circle-outer { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 200px; height: 200px; border-radius: 50%; border: 1px solid rgba(226,38,58,0.15); }
+.s1-circle-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 140px; height: 140px; border-radius: 50%; border: 1px solid rgba(226,38,58,0.1); }
+
+/* Slide 2 - O que é Ruby */
+#slide2 { background: #0F0F19; }
+
+/* Slide 3 - História */
+#slide3 { background: #0F0F19; }
+.timeline { position: relative; padding-left: 40px; }
+.timeline::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: rgba(226,38,58,0.3); }
+.timeline-item { position: relative; margin-bottom: 20px; padding-left: 30px; cursor: pointer; }
+.timeline-dot { position: absolute; left: -32px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: #E2263A; box-shadow: 0 0 8px rgba(226,38,58,0.5); transition: transform 0.3s; }
+.timeline-item:hover .timeline-dot { transform: scale(1.3); }
+.timeline-year { color: #E2263A; font-weight: 700; font-size: clamp(1rem, 1.5vw, 1.2rem); }
+.timeline-text { color: #C8C8D7; }
+.timeline-detail { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0; font-size: 0.9rem; color: #828296; padding-left: 0; }
+.timeline-item.open .timeline-detail { max-height: 200px; opacity: 1; padding-top: 8px; }
+
+/* Slide 4 - Filosofia */
+#slide4 { background: #0F0F19; }
+.bento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.bento-card { padding: 24px; border-radius: 16px; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.3s ease; }
+.bento-card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+.bento-card.highlight { border-color: #E2263A; box-shadow: 0 0 30px rgba(226,38,58,0.1); }
+.bento-card.highlight:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 40px rgba(226,38,58,0.2); }
+.bento-icon { font-size: 1.5rem; margin-bottom: 8px; }
+.bento-detail { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.bento-card.open .bento-detail { max-height: 200px; }
+
+/* Slide 5 - Como funciona */
+#slide5 { background: #0F0F19; }
+.flow-container { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; }
+.flow-step { padding: 16px 20px; border-radius: 16px; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); text-align: center; cursor: pointer; transition: all 0.3s ease; min-width: 120px; }
+.flow-step:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(226,38,58,0.2); border-color: #E2263A; }
+.flow-arrow { font-size: 1.5rem; color: #E2263A; padding: 0 8px; animation: arrowPulse 2s ease-in-out infinite; }
+
+/* Slide 6 - Características */
+#slide6 { background: #0F0F19; }
+.feature-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+.feature-card { padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.3s ease; }
+.feature-card:hover { transform: translateY(-4px); box-shadow: 0 0 20px rgba(226,38,58,0.15); border-color: rgba(226,38,58,0.3); }
+.feature-card.tall { grid-row: span 2; }
+.feature-card.wide { grid-column: span 2; }
+.feature-icon { font-size: 1.3rem; margin-bottom: 6px; color: #E2263A; }
+.feature-code { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; font-size: 0.85rem; font-family: 'Courier New', monospace; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 0 12px; margin-top: 8px; color: #50C8FF; white-space: pre-wrap; }
+.feature-card.open .feature-code { max-height: 200px; padding: 12px; }
+
+/* Slide 7 - Sintaxe Básica */
+#slide7 { background: #0F0F19; }
+.syntax-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.syntax-card { padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+.syntax-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+.code-block { font-family: 'Courier New', monospace; font-size: clamp(0.8rem, 1.1vw, 0.95rem); background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin: 8px 0; color: #C8C8D7; white-space: pre-wrap; cursor: pointer; transition: border-color 0.3s; }
+.code-block:hover { border-color: rgba(226,38,58,0.3); }
+.code-keyword { color: #FF5064; }
+.code-string { color: #50C8FF; }
+.code-number { color: #FFC850; }
+.code-var { color: #C8C8D7; }
+.code-comment { color: #828296; }
+
+/* Slide 8 - Orientação a Objetos */
+#slide8 { background: #0F0F19; }
+.oo-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.oo-card { padding: 16px 20px; border-radius: 12px; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.3s ease; }
+.oo-card:hover { transform: translateY(-4px); box-shadow: 0 0 20px rgba(226,38,58,0.1); }
+.oo-arrow { text-align: center; font-size: 1.5rem; color: #E2263A; padding: 4px 0; animation: arrowPulse 2s ease-in-out infinite; }
+
+/* Slide 9 - Ruby on Rails */
+#slide9 { background: radial-gradient(ellipse at center, #0F0F19 0%, rgba(226,38,58,0.03) 50%, rgba(255,200,80,0.02) 100%); }
+.rails-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(226,38,58,0.3); font-size: 0.8rem; color: #FF5064; }
+
+/* Slide 10 - Onde é utilizado */
+#slide10 { background: #0F0F19; }
+.use-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.use-card { padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); text-align: center; transition: all 0.3s ease; }
+.use-card:hover { transform: translateY(-4px); box-shadow: 0 0 20px rgba(226,38,58,0.15); }
+.use-icon { font-size: 2rem; margin-bottom: 8px; }
+.use-icon-bg { width: 50px; height: 50px; border-radius: 50%; background: rgba(226,38,58,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; transition: transform 0.3s; }
+.use-card:hover .use-icon-bg { transform: scale(1.1); }
+
+/* Slide 11 & 12 - Vantagens / Desvantagens */
+#slide11 { background: #0F0F19; }
+#slide12 { background: #0F0F19; }
+.pros-grid, .cons-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.pros-card, .cons-card { padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.3s ease; }
+.pros-card:hover { transform: translateY(-4px); box-shadow: 0 0 20px rgba(226,38,58,0.15); }
+.cons-card { border-color: rgba(255,200,80,0.2); }
+.cons-card:hover { transform: translateY(-4px); border-color: #FFC850; box-shadow: 0 0 20px rgba(255,200,80,0.15); }
+.cons-card .pros-icon { color: #FFC850; }
+.pros-icon { font-size: 1.2rem; margin-bottom: 6px; color: #E2263A; }
+.pros-detail, .cons-detail { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; font-size: 0.85rem; color: #828296; }
+.pros-card.open .pros-detail, .cons-card.open .cons-detail { max-height: 200px; padding-top: 8px; }
+
+/* Slide 13 - Comparação */
+#slide13 { background: #0F0F19; }
+.tabs-container { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.tab-btn { padding: 10px 20px; font-size: 0.95rem; color: #828296; background: transparent; border: none; cursor: pointer; transition: all 0.3s; position: relative; font-family: inherit; }
+.tab-btn::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 0; height: 2px; background: #E2263A; transition: width 0.3s ease; }
+.tab-btn:hover { color: #C8C8D7; }
+.tab-btn.active { color: #fff; }
+.tab-btn.active::after { width: 100%; }
+.comparison-table { width: 100%; border-collapse: collapse; }
+.comparison-table th, .comparison-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: clamp(0.85rem, 1.2vw, 1rem); }
+.comparison-table th { color: #fff; font-weight: 600; background: rgba(255,255,255,0.03); }
+.comparison-table td { color: #C8C8D7; }
+.comparison-table tr:hover td { background: rgba(226,38,58,0.05); }
+.comparison-table .lang-col { color: #E2263A; font-weight: 600; }
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+
+/* Slide 14 - Mercado */
+#slide14 { background: #0F0F19; }
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.kpi-card { padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s ease; }
+.kpi-card:hover { transform: translateY(-4px); box-shadow: 0 0 20px rgba(226,38,58,0.15); }
+.kpi-value { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; color: #E2263A; font-variant-numeric: tabular-nums; }
+.kpi-label { color: #828296; font-size: 0.85rem; }
+.kpi-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+.kpi-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #E2263A, #FF5064); transition: width 1s ease; width: 0; }
+
+/* Slide 15 - Conclusão */
+#slide15 { background: radial-gradient(ellipse at center, #0F0F19 0%, #1A0A10 60%, #0F0F19 100%); }
+.s15-impact { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 600; line-height: 1.3; background: linear-gradient(135deg, #E2263A, #FFC850); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; }
+.underline-anim { position: relative; display: inline-block; }
+.underline-anim::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: #E2263A; animation: scaleX 0.6s 0.5s ease both; }
+.glow-text { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; text-align: center; animation: glowPulse 3s ease-in-out infinite; color: #fff; }
+
+/* SVG draw line */
+.timeline-svg { width: 100%; height: 100%; }
+.draw-line { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: drawLine 2s ease forwards; }
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .slide { padding: 20px 20px 80px; }
+  .bento-grid { grid-template-columns: 1fr; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .feature-card.tall { grid-row: span 1; }
+  .feature-card.wide { grid-column: span 1; }
+  .syntax-grid { grid-template-columns: 1fr; }
+  .oo-container { grid-template-columns: 1fr; }
+  .use-grid { grid-template-columns: 1fr 1fr; }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .flow-container { flex-direction: column; gap: 8px; }
+  .flow-arrow { transform: rotate(90deg); padding: 4px 0; }
+  #bottomNav { padding: 0 10px; }
+  .nav-left .btn-nav, .nav-right .btn-nav { width: 34px; height: 34px; font-size: 13px; }
+  #menuBtn { top: 10px; right: 10px; width: 36px; height: 36px; }
+}
+@media (max-width: 480px) {
+  .use-grid { grid-template-columns: 1fr; }
+  .pros-grid, .cons-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="customCursor"></div>
+<canvas id="particlesCanvas"></canvas>
+<div id="sidebarOverlay"></div>
+<div id="tooltip" class="tooltip"></div>
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <button id="sidebarClose" aria-label="Fechar">&#x2715;</button>
+  <div id="sidebarList"></div>
+</div>
+
+<!-- Menu Button -->
+<button id="menuBtn" aria-label="Menu">&#x2630;</button>
+
+<!-- SLIDE 1: Capa -->
+<section class="slide active" id="slide1" data-slide="1">
+  <div class="slide-content" style="text-align:center;">
+    <div style="position:relative;display:inline-block;">
+      <div class="s1-circle-outer"></div>
+      <div class="s1-circle-inner"></div>
+      <div class="s1-logo">
+        <svg viewBox="0 0 120 120" width="120" height="120">
+          <defs>
+            <linearGradient id="rubyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#E2263A"/>
+              <stop offset="100%" stop-color="#FF5064"/>
+            </linearGradient>
+          </defs>
+          <polygon points="60,10 95,35 85,90 35,90 25,35" fill="none" stroke="url(#rubyGrad)" stroke-width="3"/>
+          <polygon points="60,25 80,42 73,78 47,78 40,42" fill="url(#rubyGrad)" opacity="0.15"/>
+          <line x1="60" y1="10" x2="60" y2="90" stroke="url(#rubyGrad)" stroke-width="1.5" opacity="0.4"/>
+          <line x1="25" y1="35" x2="95" y2="35" stroke="url(#rubyGrad)" stroke-width="1.5" opacity="0.4"/>
+          <circle cx="60" cy="50" r="12" fill="url(#rubyGrad)" opacity="0.25"/>
+          <circle cx="60" cy="50" r="6" fill="url(#rubyGrad)" opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+    <div style="height:40px;"></div>
+    <h1 id="s1-title" class="s1-title" style="margin:0 auto;max-width:900px;">Ruby: A Linguagem de Programação Simples e Elegante</h1>
+    <div style="height:40px;"></div>
+    <div class="s1-divider"></div>
+    <div style="height:20px;"></div>
+    <p style="color:#C8C8D7;font-size:clamp(1rem,1.8vw,1.3rem);">Apresentação Técnica</p>
+    <small style="color:#828296;">2026</small>
+  </div>
+</section>
+
+<!-- SLIDE 2: O que é Ruby -->
+<section class="slide" id="slide2" data-slide="2">
+  <div class="slide-content" style="display:grid;grid-template-columns:1.5fr 1fr;gap:40px;align-items:start;">
+    <div>
+      <h2 class="gradient-text" style="font-size:clamp(1.2rem,2vw,1.6rem);margin-bottom:4px;">Ruby</h2>
+      <h1 style="margin-bottom:16px;">O que é Ruby?</h1>
+      <p style="margin-bottom:12px;">Ruby é uma linguagem de programação dinâmica, open source, focada em simplicidade e produtividade. Criada por Yukihiro "Matz" Matsumoto, ela combina uma sintaxe elegante com o poder da orientação a objetos.</p>
+      <p style="margin-bottom:20px;">Seu objetivo principal é tornar a programação mais intuitiva e agradável, seguindo o princípio de que o código deve ser escrito para ser lido por humanos.</p>
+      <div class="glass" style="margin-bottom:16px;">
+        <h3 style="margin-bottom:10px;font-size:1.1rem;">Principais características</h3>
+        <ul style="list-style:none;">
+          <li style="padding:4px 0;color:#C8C8D7;">&#x25C6; Sintaxe simples e legível</li>
+          <li style="padding:4px 0;color:#C8C8D7;">&#x25C6; Orientação a objetos pura</li>
+          <li style="padding:4px 0;color:#C8C8D7;" class="has-tooltip" data-tip="Variáveis podem mudar de tipo durante a execução">&#x25C6; Tipagem dinâmica</li>
+          <li style="padding:4px 0;color:#C8C8D7;" class="has-tooltip" data-tip="Sistema automático que gerencia a memória, liberando objetos não utilizados">&#x25C6; Garbage Collector integrado</li>
+        </ul>
+      </div>
+      <small>Usada em desenvolvimento web, automação, APIs e muito mais.</small>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;position:relative;">
+      <div style="width:280px;height:280px;border-radius:50%;border:1px solid rgba(226,38,58,0.1);display:flex;align-items:center;justify-content:center;position:relative;">
+        <div style="width:180px;height:180px;border-radius:50%;border:1px solid rgba(226,38,58,0.08);display:flex;align-items:center;justify-content:center;flex-direction:column;">
+          <span style="font-size:4rem;color:#E2263A;opacity:0.3;">&#x25C6;</span>
+        </div>
+      </div>
+      <div style="position:absolute;top:30%;right:10%;width:6px;height:6px;border-radius:50%;background:rgba(226,38,58,0.3);"></div>
+      <div style="position:absolute;bottom:35%;right:5%;width:4px;height:4px;border-radius:50%;background:rgba(226,38,58,0.2);"></div>
+      <div style="position:absolute;top:60%;right:20%;width:5px;height:5px;border-radius:50%;background:rgba(226,38,58,0.25);"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3: História -->
+<section class="slide" id="slide3" data-slide="3">
+  <div class="slide-content" style="max-width:900px;">
+    <h1 style="margin-bottom:4px;">História do Ruby</h1>
+    <h3 style="color:#C8C8D7;margin-bottom:30px;font-weight:400;">Da mente de Matz para o mundo</h3>
+    <div class="timeline" id="timeline">
+      <div class="timeline-item" data-detail="Yukihiro Matsumoto começa a desenvolver Ruby em 1993, no Japão. Sua inspiração veio de linguagens como Perl, Smalltalk e Lisp.">
+        <div class="timeline-dot"></div>
+        <span class="timeline-year">1993</span>
+        <span class="timeline-text">Matz começa a desenvolver Ruby</span>
+        <div class="timeline-detail"></div>
+      </div>
+      <div class="timeline-item" data-detail="Ruby 0.95 é lançada em grupos de notícias japoneses. A linguagem começa a ganhar seus primeiros adeptos.">
+        <div class="timeline-dot"></div>
+        <span class="timeline-year">1995</span>
+        <span class="timeline-text">Primeira versão pública (Ruby 0.95)</span>
+        <div class="timeline-detail"></div>
+      </div>
+      <div class="timeline-item" data-detail="Ruby 1.0 é oficialmente lançada. A linguagem começa a se espalhar fora do Japão.">
+        <div class="timeline-dot"></div>
+        <span class="timeline-year">1998</span>
+        <span class="timeline-text">Ruby 1.0 lançada</span>
+        <div class="timeline-detail"></div>
+      </div>
+      <div class="timeline-item" data-detail="Ruby on Rails, framework web de David Heinemeier Hansson, é lançado. Ruby ganha popularidade global.">
+        <div class="timeline-dot"></div>
+        <span class="timeline-year">2005</span>
+        <span class="timeline-text">Ruby on Rails revoluciona o desenvolvimento web</span>
+        <div class="timeline-detail"></div>
+      </div>
+      <div class="timeline-item" data-detail="Ruby 1.9.3 traz melhorias significativas de performance e novas funcionalidades.">
+        <div class="timeline-dot"></div>
+        <span class="timeline-year">2011</span>
+        <span class="timeline-text">Ruby 1.9.3 com melhorias de performance</span>
+        <div class="timeline-detail"></div>
+      </div>
+      <div class="timeline-item" data-detail="Ruby 3.0 é lançada com a promessa Ruby 3x3 — três vezes mais rápido que Ruby 2.0.">
+        <div class="timeline-dot"></div>
+        <span class="timeline-year">2020+</span>
+        <span class="timeline-text">Ruby 3.x com foco em performance (Ruby 3x3)</span>
+        <div class="timeline-detail"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4: Filosofia -->
+<section class="slide" id="slide4" data-slide="4">
+  <div class="slide-content" style="max-width:1000px;">
+    <h1 style="text-align:center;margin-bottom:4px;">Filosofia da Linguagem</h1>
+    <h3 style="text-align:center;color:#C8C8D7;font-weight:400;margin-bottom:30px;">A mente por trás do Ruby</h3>
+    <div class="bento-grid">
+      <div class="bento-card" data-detail="'Código deve ser simples e intuitivo. Menos é mais.' — Matz">
+        <div class="bento-icon">&#x25C6;</div>
+        <h3 style="margin-bottom:4px;">Simplicidade</h3>
+        <p style="font-size:0.95rem;">Código deve ser simples e intuitivo, escrito para ser lido por humanos.</p>
+        <div class="bento-detail"></div>
+      </div>
+      <div class="bento-card" data-detail="'Produtividade acima de tudo. O desenvolvedor deve ser eficiente.'">
+        <div class="bento-icon">&#x25C6;</div>
+        <h3 style="margin-bottom:4px;">Produtividade</h3>
+        <p style="font-size:0.95rem;">Menos código para fazer mais. O desenvolvedor deve ser eficiente.</p>
+        <div class="bento-detail"></div>
+      </div>
+      <div class="bento-card" data-detail="'Ruby é como ler inglês. Clareza é prioridade máxima.'">
+        <div class="bento-icon">&#x25C6;</div>
+        <h3 style="margin-bottom:4px;">Legibilidade</h3>
+        <p style="font-size:0.95rem;">O código precisa ser claro e autoexplicativo. Ruby é como ler inglês.</p>
+        <div class="bento-detail"></div>
+      </div>
+      <div class="bento-card highlight" data-detail="'Often people, especially computer engineers, focus on the machines. But in fact we need to focus on humans.' — Yukihiro Matsumoto">
+        <div class="bento-icon">&#x2665;</div>
+        <h3 style="margin-bottom:4px;color:#E2263A;">Programadores devem ser felizes</h3>
+        <p style="font-size:0.95rem;">A principal filosofia de Ruby: a felicidade do desenvolvedor é a prioridade máxima.</p>
+        <div class="bento-detail"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5: Como Ruby Funciona -->
+<section class="slide" id="slide5" data-slide="5">
+  <div class="slide-content" style="max-width:1000px;">
+    <h1 style="text-align:center;margin-bottom:4px;">Como Ruby Funciona</h1>
+    <h3 style="text-align:center;color:#C8C8D7;font-weight:400;margin-bottom:40px;">Do código-fonte à execução</h3>
+    <div class="flow-container">
+      <div class="flow-step" data-tip="Arquivos com extensão .rb contendo a sintaxe Ruby.">
+        <div style="font-size:2rem;margin-bottom:4px;">&#x1F4C4;</div>
+        <div style="font-weight:600;font-size:0.9rem;color:#fff;">Código-fonte</div>
+        <div style="font-size:0.75rem;color:#828296;">(.rb)</div>
+      </div>
+      <div class="flow-arrow">&#x25B6;</div>
+      <div class="flow-step" data-tip="O interpretador analisa a sintaxe e constrói uma AST (Abstract Syntax Tree).">
+        <div style="font-size:2rem;margin-bottom:4px;">&#x2699;</div>
+        <div style="font-weight:600;font-size:0.9rem;color:#fff;">Parser</div>
+        <div style="font-size:0.75rem;color:#828296;">Análise</div>
+      </div>
+      <div class="flow-arrow">&#x25B6;</div>
+      <div class="flow-step" data-tip="YARV (Yet Another Ruby VM) executa o bytecode compilado.">
+        <div style="font-size:2rem;margin-bottom:4px;">&#x1F5A5;</div>
+        <div style="font-weight:600;font-size:0.9rem;color:#fff;">Interpretador</div>
+        <div style="font-size:0.75rem;color:#828296;">YARV</div>
+      </div>
+      <div class="flow-arrow">&#x25B6;</div>
+      <div class="flow-step" data-tip="O programa roda e produz a saída desejada.">
+        <div style="font-size:2rem;margin-bottom:4px;">&#x2705;</div>
+        <div style="font-weight:600;font-size:0.9rem;color:#fff;">Execução</div>
+        <div style="font-size:0.75rem;color:#828296;">Resultado</div>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:30px;max-width:700px;margin-left:auto;margin-right:auto;">Ruby é uma linguagem interpretada. O código-fonte é analisado por um parser que constrói uma árvore sintática, que é então executada pelo interpretador Ruby (YARV desde a versão 1.9).</p>
+  </div>
+</section>
+
+<!-- SLIDE 6: Principais Características -->
+<section class="slide" id="slide6" data-slide="6">
+  <div class="slide-content" style="max-width:1000px;">
+    <h1 style="margin-bottom:20px;">Principais Características</h1>
+    <div class="feature-grid">
+      <div class="feature-card tall" data-code="class Person&#10;  attr_accessor :name, :age&#10;end&#10;&#10;p = Person.new&#10;p.name = 'Ruby'&#10;# Tudo é objeto!">
+        <div class="feature-icon">&#x25C8;</div>
+        <h3 style="margin-bottom:4px;font-size:1rem;">Orientação a Objetos Pura</h3>
+        <p style="font-size:0.9rem;">Tudo em Ruby é um objeto — números, strings, classes, módulos. Até mesmo classes são objetos da classe Class.</p>
+        <div class="feature-code"></div>
+      </div>
+      <div class="feature-card" data-code="x = 10&#10;x = 'hello'&#10;x = 3.14&#10;# Tipagem dinâmica!">
+        <div class="feature-icon">&#x21C5;</div>
+        <h3 style="margin-bottom:4px;font-size:1rem;">Tipagem Dinâmica</h3>
+        <p style="font-size:0.9rem;">Variáveis em Ruby não têm tipo fixo. O tipo é determinado em tempo de execução.</p>
+        <div class="feature-code"></div>
+      </div>
+      <div class="feature-card" data-code="# GC gerencia a memória&#10;# automaticamente&#10;objeto = 'memória'&#10;objeto = nil&#10;# Objeto anterior liberado">
+        <div class="feature-icon">&#x267B;</div>
+        <h3 style="margin-bottom:4px;font-size:1rem;">Garbage Collector</h3>
+        <p style="font-size:0.9rem;">Ruby gerencia automaticamente a memória, liberando objetos que não estão mais em uso.</p>
+        <div class="feature-code"></div>
+      </div>
+      <div class="feature-card" data-code="10.times { puts 'Ruby' }&#10;# 10 vezes!">
+        <div class="feature-icon">&#x270E;</div>
+        <h3 style="margin-bottom:4px;font-size:1rem;">Sintaxe Simples</h3>
+        <p style="font-size:0.9rem;">Código limpo e expressivo. Ruby se aproxima da linguagem natural.</p>
+        <div class="feature-code"></div>
+      </div>
+      <div class="feature-card wide" data-code="if idade >= 18&#10;  puts 'Maior de idade'&#10;end&#10;# Parece inglês!">
+        <div class="feature-icon">&#x1F4D6;</div>
+        <h3 style="margin-bottom:4px;font-size:1rem;">Código Legível</h3>
+        <p style="font-size:0.9rem;">Ruby prioriza a legibilidade humana acima de tudo. O código parece inglês.</p>
+        <div class="feature-code"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7: Sintaxe Básica -->
+<section class="slide" id="slide7" data-slide="7">
+  <div class="slide-content" style="max-width:1000px;">
+    <h1 style="margin-bottom:4px;">Sintaxe Básica</h1>
+    <h3 style="color:#C8C8D7;font-weight:400;margin-bottom:20px;">Simplicidade que encanta</h3>
+    <div class="syntax-grid">
+      <div class="syntax-card">
+        <div><span class="syntax-dot" style="background:#E2263A;"></span><span style="font-weight:600;color:#fff;">Variáveis</span></div>
+        <div class="code-block" data-code="nome = 'Ruby'&#10;idade = 30&#10;preco = 9.99"><span class="code-var">nome</span> = <span class="code-string">'Ruby'</span>
+<span class="code-var">idade</span> = <span class="code-number">30</span>
+<span class="code-var">preco</span> = <span class="code-number">9.99</span></div>
+        <small>Não precisa declarar tipo. Ruby descobre automaticamente.</small>
+      </div>
+      <div class="syntax-card">
+        <div><span class="syntax-dot" style="background:#FF5064;"></span><span style="font-weight:600;color:#fff;">Condicionais</span></div>
+        <div class="code-block" data-code="if idade >= 18&#10;  puts 'Maior'&#10;end"><span class="code-keyword">if</span> idade >= <span class="code-number">18</span>
+  puts <span class="code-string">'Maior'</span>
+<span class="code-keyword">end</span></div>
+        <small>Estrutura simples, legível e sem parênteses obrigatórios.</small>
+      </div>
+      <div class="syntax-card">
+        <div><span class="syntax-dot" style="background:#FFC850;"></span><span style="font-weight:600;color:#fff;">Laços</span></div>
+        <div class="code-block" data-code="3.times { puts 'Ruby!' }"><span class="code-number">3</span>.<span class="code-var">times</span> { puts <span class="code-string">'Ruby!'</span> }</div>
+        <small>Laços elegantes com blocos. Menos código, mais expressividade.</small>
+      </div>
+      <div class="syntax-card">
+        <div><span class="syntax-dot" style="background:#50C8FF;"></span><span style="font-weight:600;color:#fff;">Métodos</span></div>
+        <div class="code-block" data-code="def saudacao(nome)&#10;  &quot;Olá, #{nome}!&quot;&#10;end"><span class="code-keyword">def</span> <span class="code-var">saudacao</span>(nome)
+  <span class="code-string">"Olá, <span class="code-var">#{nome}</span>!"</span>
+<span class="code-keyword">end</span></div>
+        <small>Métodos simples, retorno implícito da última expressão.</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8: Orientação a Objetos -->
+<section class="slide" id="slide8" data-slide="8">
+  <div class="slide-content" style="max-width:1000px;">
+    <h1 style="margin-bottom:4px;">Orientação a Objetos</h1>
+    <h3 style="color:#C8C8D7;font-weight:400;margin-bottom:24px;">Tudo é objeto em Ruby</h3>
+    <div class="oo-container">
+      <div>
+        <div class="oo-card">
+          <div style="color:#E2263A;font-size:0.85rem;margin-bottom:4px;">&#x25C6; Classe: Animal</div>
+          <div style="font-size:0.9rem;color:#C8C8D7;">atributos: nome, idade</div>
+          <div style="font-size:0.9rem;color:#C8C8D7;">métodos: falar, dormir</div>
+        </div>
+        <div class="oo-arrow">&#x21E9;</div>
+        <div style="text-align:center;font-size:0.8rem;color:#828296;padding:2px 0;">Herda de</div>
+        <div class="oo-arrow">&#x21E9;</div>
+        <div class="oo-card" style="border-color:rgba(226,38,58,0.2);">
+          <div style="color:#FF5064;font-size:0.85rem;margin-bottom:4px;">&#x25C6; Classe: Cachorro &lt; Animal</div>
+          <div style="font-size:0.9rem;color:#C8C8D7;">método extra: abanar_rabo</div>
+        </div>
+        <div class="oo-arrow">&#x21E9;</div>
+        <div style="text-align:center;font-size:0.8rem;color:#828296;padding:2px 0;">Instância</div>
+        <div class="oo-arrow">&#x21E9;</div>
+        <div class="oo-card" style="border-color:rgba(226,38,58,0.3);background:rgba(226,38,58,0.05);">
+          <div style="color:#fff;font-size:0.85rem;">&#x25C6; Objeto: rex = Cachorro.new('Rex')</div>
+        </div>
+      </div>
+      <div>
+        <div class="code-block" style="cursor:pointer;white-space:pre-wrap;" data-code="Copiado!"><span class="code-keyword">class</span> <span class="code-var">Animal</span>
+  <span class="code-keyword">attr_accessor</span> <span class="code-var">:nome</span>, <span class="code-var">:idade</span>
+
+  <span class="code-keyword">def</span> <span class="code-var">falar</span>
+    puts <span class="code-string">"Som genérico"</span>
+  <span class="code-keyword">end</span>
+<span class="code-keyword">end</span>
+
+<span class="code-keyword">class</span> <span class="code-var">Cachorro</span> &lt; <span class="code-var">Animal</span>
+  <span class="code-keyword">def</span> <span class="code-var">falar</span>
+    puts <span class="code-string">"Au au!"</span>
+  <span class="code-keyword">end</span>
+
+  <span class="code-keyword">def</span> <span class="code-var">abanar_rabo</span>
+    puts <span class="code-string">"<span class="code-var">#{nome}</span> está feliz!"</span>
+  <span class="code-keyword">end</span>
+<span class="code-keyword">end</span>
+
+<span class="code-var">rex</span> = <span class="code-var">Cachorro</span>.<span class="code-keyword">new</span>
+<span class="code-var">rex</span>.nome = <span class="code-string">"Rex"</span>
+<span class="code-var">rex</span>.falar  <span class="code-comment"># => "Au au!"</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 9: Ruby on Rails -->
+<section class="slide" id="slide9" data-slide="9">
+  <div class="slide-content" style="max-width:1000px;text-align:center;">
+    <div style="position:relative;">
+      <div style="position:absolute;top:-80px;left:50%;transform:translateX(-50%);font-size:12rem;font-weight:900;color:rgba(226,38,58,0.03);pointer-events:none;white-space:nowrap;">Rails</div>
+      <h1 style="font-size:clamp(2rem,4vw,3.5rem);background:linear-gradient(135deg,#E2263A,#FFC850);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;">Ruby on Rails</h1>
+      <h3 style="color:#C8C8D7;font-weight:400;margin-bottom:24px;">O framework que revolucionou o desenvolvimento web</h3>
+      <div class="glass" style="text-align:left;max-width:800px;margin:0 auto 20px;">
+        <p>Ruby on Rails (ou apenas Rails) é um framework de desenvolvimento web full-stack escrito em Ruby. Criado por David Heinemeier Hansson em 2004, Rails popularizou conceitos como MVC (Model-View-Controller), <span class="has-tooltip" data-tip="Convenção sobre Configuração: o framework já vem com decisões padrão sensatas">'Convention over Configuration'</span> e <span class="has-tooltip" data-tip="Don't Repeat Yourself: evite duplicação de código">'Don't Repeat Yourself' (DRY)</span>.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
+        <div class="glass" style="text-align:center;padding:16px;">
+          <div style="font-size:1.5rem;margin-bottom:4px;">&#x26A1;</div>
+          <h3 style="font-size:1rem;">Produtividade</h3>
+          <small>Geração de código automática, scaffolding, gems</small>
+        </div>
+        <div class="glass" style="text-align:center;padding:16px;">
+          <div style="font-size:1.5rem;margin-bottom:4px;">&#x1F4CB;</div>
+          <h3 style="font-size:1rem;">Convenção</h3>
+          <small>Menos configuração, mais foco no que importa</small>
+        </div>
+        <div class="glass" style="text-align:center;padding:16px;">
+          <div style="font-size:1.5rem;margin-bottom:4px;">&#x1F30D;</div>
+          <h3 style="font-size:1rem;">Ecossistema</h3>
+          <small>Milhares de gems, comunidade ativa, deploy simplificado</small>
+        </div>
+      </div>
+      <div class="glass" style="text-align:center;padding:12px 20px;max-width:800px;margin:0 auto;">
+        <small style="color:#C8C8D7;">Empresas que usam Rails: GitHub, Shopify, Airbnb, Basecamp, SoundCloud, Twitch, Hulu, Zendesk</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 10: Onde é Utilizado -->
+<section class="slide" id="slide10" data-slide="10">
+  <div class="slide-content" style="max-width:1000px;">
+    <h1 style="text-align:center;margin-bottom:4px;">Onde Ruby é Utilizado</h1>
+    <h3 style="text-align:center;color:#C8C8D7;font-weight:400;margin-bottom:24px;">Versatilidade em diversos domínios</h3>
+    <div class="use-grid">
+      <div class="use-card">
+        <div class="use-icon-bg"><span class="use-icon">&#x1F310;</span></div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Desenvolvimento Web</h3>
+        <small>Rails, Sinatra, Jekyll, aplicações completas</small>
+      </div>
+      <div class="use-card">
+        <div class="use-icon-bg"><span class="use-icon">&#x1F517;</span></div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">APIs</h3>
+        <small>APIs RESTful e GraphQL com Rails API</small>
+      </div>
+      <div class="use-card">
+        <div class="use-icon-bg"><span class="use-icon">&#x1F916;</span></div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Automação</h3>
+        <small>Scripts de automação, web scraping, tarefas repetitivas</small>
+      </div>
+      <div class="use-card">
+        <div class="use-icon-bg"><span class="use-icon">&#x1F4DC;</span></div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Scripts</h3>
+        <small>Ferramentas de linha de comando, processamento de dados</small>
+      </div>
+      <div class="use-card">
+        <div class="use-icon-bg"><span class="use-icon">&#x2699;&#xFE0F;</span></div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">DevOps</h3>
+        <small>Chef, Puppet, Capistrano, automação de infraestrutura</small>
+      </div>
+      <div class="use-card">
+        <div class="use-icon-bg"><span class="use-icon">&#x1F9EA;</span></div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Prototipagem</h3>
+        <small>MVP rápidos, validação de ideias, startups</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 11: Vantagens -->
+<section class="slide" id="slide11" data-slide="11">
+  <div class="slide-content" style="max-width:1000px;">
+    <h1 style="text-align:center;margin-bottom:4px;">Vantagens</h1>
+    <h3 style="text-align:center;color:#C8C8D7;font-weight:400;margin-bottom:24px;">Por que escolher Ruby?</h3>
+    <div class="pros-grid">
+      <div class="pros-card" data-detail="Sintaxe intuitiva que se assemelha ao inglês. Curva de aprendizado suave. Ideal para iniciantes.">
+        <div class="pros-icon">&#x2713;</div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Fácil aprendizado</h3>
+        <p style="font-size:0.9rem;">Sintaxe intuitiva que se assemelha ao inglês. Curva de aprendizado suave.</p>
+        <div class="pros-detail"></div>
+      </div>
+      <div class="pros-card" data-detail="Legibilidade é prioridade máxima. Código que parece documentação. Manutenção simplificada.">
+        <div class="pros-icon">&#x2713;</div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Código limpo</h3>
+        <p style="font-size:0.9rem;">Legibilidade é prioridade. Código que parece documentação.</p>
+        <div class="pros-detail"></div>
+      </div>
+      <div class="pros-card" data-detail="Faça mais com menos código. Desenvolvimento acelerado. Ideal para MVPs e startups.">
+        <div class="pros-icon">&#x2713;</div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Alta produtividade</h3>
+        <p style="font-size:0.9rem;">Faça mais com menos código. Desenvolvimento acelerado.</p>
+        <div class="pros-detail"></div>
+      </div>
+      <div class="pros-card" data-detail="RubyGems: mais de 180.000 gems disponíveis. Soluções prontas para praticamente qualquer necessidade.">
+        <div class="pros-icon">&#x2713;</div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Grande quantidade de bibliotecas</h3>
+        <p style="font-size:0.9rem;">RubyGems: mais de 180.000 gems disponíveis.</p>
+        <div class="pros-detail"></div>
+      </div>
+      <div class="pros-card" data-detail="Fóruns ativos, conferências anuais (RubyConf, RailsConf), meetups locais e suporte constante da comunidade.">
+        <div class="pros-icon">&#x2713;</div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Comunidade ativa</h3>
+        <p style="font-size:0.9rem;">Fóruns, conferências, meetups e suporte constante.</p>
+        <div class="pros-detail"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 12: Desvantagens -->
+<section class="slide" id="slide12" data-slide="12">
+  <div class="slide-content" style="max-width:1000px;">
+    <h1 style="text-align:center;margin-bottom:4px;">Desvantagens</h1>
+    <h3 style="text-align:center;color:#C8C8D7;font-weight:400;margin-bottom:24px;">Desafios a considerar</h3>
+    <div class="cons-grid">
+      <div class="cons-card" data-detail="Comparado a linguagens compiladas como Go, Rust ou Java, Ruby pode ser mais lento em operações computacionais intensivas.">
+        <div style="font-size:1.2rem;margin-bottom:6px;color:#FFC850;">&#x26A0;</div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Menor desempenho</h3>
+        <p style="font-size:0.9rem;">Comparado a linguagens compiladas como Go, Rust ou Java, Ruby pode ser mais lento.</p>
+        <div class="cons-detail"></div>
+      </div>
+      <div class="cons-card" data-detail="Ruby perdeu espaço para Python e JavaScript nos últimos anos, especialmente em Data Science e Machine Learning.">
+        <div style="font-size:1.2rem;margin-bottom:6px;color:#FFC850;">&#x26A0;</div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Menor popularidade</h3>
+        <p style="font-size:0.9rem;">Ruby perdeu espaço para Python e JavaScript, especialmente em Data Science.</p>
+        <div class="cons-detail"></div>
+      </div>
+      <div class="cons-card" data-detail="Menos oportunidades em algumas regiões fora do ecossistema Rails/startups.">
+        <div style="font-size:1.2rem;margin-bottom:6px;color:#FFC850;">&#x26A0;</div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Mercado regional</h3>
+        <p style="font-size:0.9rem;">Menos oportunidades em algumas regiões fora do ecossistema Rails.</p>
+        <div class="cons-detail"></div>
+      </div>
+      <div class="cons-card" data-detail="Em projetos de grande escala, Ruby pode consumir mais memória que alternativas como Go ou Elixir.">
+        <div style="font-size:1.2rem;margin-bottom:6px;color:#FFC850;">&#x26A0;</div>
+        <h3 style="font-size:1rem;margin-bottom:4px;">Consumo de memória</h3>
+        <p style="font-size:0.9rem;">Em projetos de grande escala, Ruby pode consumir mais memória que alternativas.</p>
+        <div class="cons-detail"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 13: Comparação -->
+<section class="slide" id="slide13" data-slide="13">
+  <div class="slide-content" style="max-width:1000px;">
+    <h1 style="text-align:center;margin-bottom:20px;">Comparação com Outras Linguagens</h1>
+    <div class="tabs-container" id="tabsContainer">
+      <button class="tab-btn active" data-tab="python">Python</button>
+      <button class="tab-btn" data-tab="javascript">JavaScript</button>
+      <button class="tab-btn" data-tab="java">Java</button>
+    </div>
+    <div id="tabContentPython" class="tab-content active">
+      <table class="comparison-table">
+        <tr><th>Critério</th><th class="lang-col">Ruby</th><th>Python</th></tr>
+        <tr><td>Sintaxe</td><td>Elegante, similar ao inglês</td><td>Limpa, indentação obrigatória</td></tr>
+        <tr><td>Aprendizado</td><td>Fácil, intuitivo</td><td>Fácil, muito didática</td></tr>
+        <tr><td>Desempenho</td><td>Interpretado, moderado</td><td>Interpretado, moderado</td></tr>
+        <tr><td>Aplicações</td><td>Web, automação, scripts</td><td>Data Science, IA, Web</td></tr>
+        <tr><td>Foco principal</td><td>Produtividade web, elegância</td><td>Versatilidade, ciência de dados</td></tr>
+        <tr><td>Filosofia</td><td>Felicidade do desenvolvedor</td><td>Legibilidade e simplicidade</td></tr>
+      </table>
+    </div>
+    <div id="tabContentJavascript" class="tab-content">
+      <table class="comparison-table">
+        <tr><th>Critério</th><th class="lang-col">Ruby</th><th>JavaScript</th></tr>
+        <tr><td>Sintaxe</td><td>Elegante, similar ao inglês</td><td>Versátil, baseada em C</td></tr>
+        <tr><td>Aprendizado</td><td>Fácil, intuitivo</td><td>Moderado, complexidades (this, async)</td></tr>
+        <tr><td>Desempenho</td><td>Interpretado, moderado</td><td>Alto (JIT, V8), assíncrono</td></tr>
+        <tr><td>Aplicações</td><td>Web, automação, scripts</td><td>Web (front e back), mobile, desktop</td></tr>
+        <tr><td>Foco principal</td><td>Produtividade web, elegância</td><td>Web full-stack, ubiquidade</td></tr>
+        <tr><td>Ecosistema</td><td>RubyGems (180k+)</td><td>npm (2M+ pacotes)</td></tr>
+      </table>
+    </div>
+    <div id="tabContentJava" class="tab-content">
+      <table class="comparison-table">
+        <tr><th>Critério</th><th class="lang-col">Ruby</th><th>Java</th></tr>
+        <tr><td>Sintaxe</td><td>Elegante, similar ao inglês</td><td>Verbosa, baseada em C++</td></tr>
+        <tr><td>Aprendizado</td><td>Fácil, intuitivo</td><td>Curva íngreme, conceitos complexos</td></tr>
+        <tr><td>Desempenho</td><td>Interpretado, moderado</td><td>Alto (JIT, compilado)</td></tr>
+        <tr><td>Aplicações</td><td>Web, automação, scripts</td><td>Enterprise, Android, grandes sistemas</td></tr>
+        <tr><td>Foco principal</td><td>Produtividade web, elegância</td><td>Escalabilidade, robustez</td></tr>
+        <tr><td>Tipos</td><td>Dinâmico</td><td>Estático</td></tr>
+      </table>
+    </div>
+    <p style="text-align:center;margin-top:16px;color:#828296;">Cada linguagem tem seu ponto forte. Ruby brilha na produtividade web e na elegância do código.</p>
+  </div>
+</section>
+
+<!-- SLIDE 14: Mercado de Trabalho -->
+<section class="slide" id="slide14" data-slide="14">
+  <div class="slide-content" style="max-width:1000px;">
+    <h1 style="text-align:center;margin-bottom:4px;">Mercado de Trabalho</h1>
+    <h3 style="text-align:center;color:#C8C8D7;font-weight:400;margin-bottom:24px;">Oportunidades para desenvolvedores Ruby</h3>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div style="font-size:2rem;margin-bottom:4px;">&#x1F4BC;</div>
+        <div class="kpi-value" data-count="5">0</div>
+        <div class="kpi-value" style="font-size:1rem;color:#fff;display:inline;">+</div>
+        <div class="kpi-label">Áreas de Atuação</div>
+        <small>Web, APIs, DevOps, Automação, Scripts</small>
+      </div>
+      <div class="kpi-card">
+        <div style="font-size:2rem;margin-bottom:4px;">&#x1F3E2;</div>
+        <h3 style="font-size:1rem;color:#E2263A;">Empresas que usam Ruby</h3>
+        <p style="font-size:0.85rem;">GitHub, Shopify, Airbnb, Basecamp, SoundCloud, Twitch, Hulu, Zendesk</p>
+      </div>
+      <div class="kpi-card">
+        <div style="font-size:2rem;margin-bottom:4px;">&#x1F4C8;</div>
+        <h3 style="font-size:1rem;color:#E2263A;">Demanda</h3>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+          <span style="color:#fff;font-weight:600;">Média-Alta</span>
+          <div class="kpi-bar" style="flex:1;"><div class="kpi-bar-fill" data-width="75" style="width:0%;"></div></div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div style="font-size:2rem;margin-bottom:4px;">&#x1F52E;</div>
+        <h3 style="font-size:1rem;color:#E2263A;">Tendências</h3>
+        <p style="font-size:0.85rem;">Ruby 3x3, ecossistema Rails maduro, crescente uso em startups e SaaS</p>
+      </div>
+    </div>
+    <div class="glass" style="margin-top:16px;padding:16px 20px;">
+      <p style="font-size:0.95rem;">Perfil do desenvolvedor Ruby: profissional que valoriza código limpo, produtividade e boas práticas. Conhecimento em Rails, banco de dados e testes é altamente valorizado.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 15: Conclusão -->
+<section class="slide" id="slide15" data-slide="15">
+  <div class="slide-content" style="text-align:center;max-width:900px;">
+    <h1 style="margin-bottom:20px;">Conclusão</h1>
+    <div style="text-align:left;max-width:600px;margin:0 auto 24px;">
+      <p style="padding:6px 0;">&#x25C6; <span style="color:#fff;">Ruby</span> é uma linguagem elegante que prioriza a felicidade do desenvolvedor.</p>
+      <p style="padding:6px 0;">&#x25C6; Sua <span style="color:#fff;">sintaxe simples e poderosa</span> permite alta produtividade.</p>
+      <p style="padding:6px 0;">&#x25C6; O ecossistema <span style="color:#fff;">Rails</span> é maduro e amplamente adotado no mercado.</p>
+      <p style="padding:6px 0;">&#x25C6; Aprender Ruby é uma experiência que <span style="color:#fff;">transforma</span> a forma como você programa.</p>
+    </div>
+    <div style="width:50px;height:2px;background:#E2263A;margin:0 auto 20px;"></div>
+    <div class="s15-impact" style="margin-bottom:30px;">Ruby não é apenas uma linguagem.<br>É uma filosofia de programação.</div>
+    <h2 style="font-size:clamp(1.8rem,3.5vw,2.8rem);margin-bottom:20px;position:relative;display:inline-block;"><span class="underline-anim">Perguntas?</span></h2>
+    <div style="height:20px;"></div>
+    <div class="glow-text">Obrigado!</div>
+    <small style="margin-top:24px;display:block;color:#828296;">Apresentação criada por — 2026</small>
+  </div>
+</section>
+
+<!-- Bottom Navigation -->
+<div id="bottomNav">
+  <div class="nav-left">
+    <button class="btn-nav" id="btnFirst" aria-label="Início" disabled>&#x23EE;</button>
+    <button class="btn-nav" id="btnPrev" aria-label="Anterior" disabled>&#x25C0;</button>
+  </div>
+  <div class="nav-center">
+    <div id="progressBar"><div id="progressFill"></div></div>
+    <span id="slideCounter">01 / 15</span>
+  </div>
+  <div class="nav-right">
+    <button class="btn-nav" id="btnNext" aria-label="Próximo">&#x25B6;</button>
+    <button class="btn-nav" id="btnFullscreen" aria-label="Tela cheia">&#x2B1A;</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const TOTAL_SLIDES = 15;
+  let currentSlide = 1;
+  let isTransitioning = false;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let scrollTimeout = 0;
+  let numBuffer = '';
+  let numTimeout = 0;
+  let cursorX = 0, cursorY = 0;
+  let cursorTargetX = 0, cursorTargetY = 0;
+
+  const slides = document.querySelectorAll('.slide');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnFirst = document.getElementById('btnFirst');
+  const btnFullscreen = document.getElementById('btnFullscreen');
+  const progressFill = document.getElementById('progressFill');
+  const slideCounter = document.getElementById('slideCounter');
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const sidebarClose = document.getElementById('sidebarClose');
+  const sidebarList = document.getElementById('sidebarList');
+  const tooltipEl = document.getElementById('tooltip');
+  const cursorEl = document.getElementById('customCursor');
+
+  // Sidebar items
+  const slideNames = [
+    'Capa', 'O que é Ruby?', 'História do Ruby', 'Filosofia da Linguagem',
+    'Como Ruby Funciona', 'Principais Características', 'Sintaxe Básica',
+    'Orientação a Objetos', 'Ruby on Rails', 'Onde é Utilizado',
+    'Vantagens', 'Desvantagens', 'Comparação', 'Mercado de Trabalho', 'Conclusão'
+  ];
+
+  slideNames.forEach((name, i) => {
+    const div = document.createElement('div');
+    div.className = 'sidebar-item' + (i === 0 ? ' active' : '');
+    div.dataset.slide = i + 1;
+    div.innerHTML = '<span class="sidebar-num">' + String(i + 1).padStart(2, '0') + '</span> ' + name;
+    div.addEventListener('click', () => { goToSlide(i + 1); closeSidebar(); });
+    sidebarList.appendChild(div);
+  });
+
+  function updateSidebar() {
+    document.querySelectorAll('.sidebar-item').forEach(el => {
+      el.classList.toggle('active', parseInt(el.dataset.slide) === currentSlide);
+    });
+  }
+
+  function openSidebar() { sidebar.classList.add('open'); sidebarOverlay.classList.add('visible'); menuBtn.innerHTML = '&#x2715;'; }
+  function closeSidebar() { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('visible'); menuBtn.innerHTML = '&#x2630;'; }
+  menuBtn.addEventListener('click', () => { sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+  sidebarOverlay.addEventListener('click', closeSidebar);
+  sidebarClose.addEventListener('click', closeSidebar);
+
+  // Progress
+  function updateProgress() {
+    const pct = ((currentSlide - 1) / (TOTAL_SLIDES - 1)) * 100;
+    progressFill.style.width = pct + '%';
+    slideCounter.textContent = String(currentSlide).padStart(2, '0') + ' / ' + String(TOTAL_SLIDES).padStart(2, '0');
+    btnPrev.disabled = currentSlide === 1;
+    btnNext.disabled = currentSlide === TOTAL_SLIDES;
+    btnFirst.disabled = currentSlide === 1;
+    updateSidebar();
+  }
+
+  // 3D Text effect for slide 1
+  function apply3DText() {
+    const title = document.getElementById('s1-title');
+    if (!title) return;
+    let shadows = [];
+    const steps = 30;
+    for (let i = 1; i <= steps; i++) {
+      const offset = Math.ceil(i / 2) * (i % 2 === 0 ? 1 : -1);
+      const ratio = i / steps;
+      const r = Math.round(180 + (226 - 180) * ratio);
+      const g = Math.round(20 + (38 - 20) * (1 - ratio));
+      const b = Math.round(40 + (58 - 40) * ratio);
+      const blur = i === steps ? 8 : 0;
+      shadows.push(offset + 'px ' + offset + 'px ' + blur + 'px rgb(' + r + ',' + g + ',' + b + ')');
+    }
+    shadows.push('0 0 40px rgba(226,38,58,0.3)');
+    title.style.textShadow = shadows.join(',');
+  }
+  apply3DText();
+
+  // Slide transition
+  function goToSlide(num, transition) {
+    if (isTransitioning || num < 1 || num > TOTAL_SLIDES || num === currentSlide) return;
+    isTransitioning = true;
+
+    const oldSlide = document.querySelector('.slide.active');
+    const newSlide = document.getElementById('slide' + num);
+
+    oldSlide.classList.remove('active');
+    oldSlide.classList.add('transitioning-out');
+
+    newSlide.style.display = 'flex';
+    newSlide.classList.add('transitioning-in');
+
+    if (transition === 'blur') {
+      oldSlide.style.filter = 'blur(8px)';
+      oldSlide.style.transition = 'filter 0.6s ease, opacity 0.6s ease';
+      oldSlide.style.opacity = '0';
+      newSlide.style.opacity = '0';
+      newSlide.style.transition = 'opacity 0.6s ease';
+      setTimeout(() => { newSlide.style.opacity = '1'; }, 100);
+    } else if (transition === 'zoom') {
+      newSlide.style.transform = 'scale(1.05)';
+      newSlide.style.transition = 'transform 0.6s cubic-bezier(0.22,1,0.36,1), opacity 0.6s ease';
+      newSlide.style.opacity = '0';
+      setTimeout(() => {
+        newSlide.style.opacity = '1';
+        newSlide.style.transform = 'scale(1)';
+      }, 50);
+      oldSlide.style.transition = 'opacity 0.6s ease';
+      oldSlide.style.opacity = '0';
+    } else if (transition === 'glow') {
+      newSlide.style.opacity = '0';
+      newSlide.style.transition = 'opacity 0.6s ease, box-shadow 0.6s ease';
+      newSlide.style.boxShadow = '0 0 0px rgba(226,38,58,0)';
+      oldSlide.style.transition = 'opacity 0.6s ease';
+      oldSlide.style.opacity = '0';
+      setTimeout(() => {
+        newSlide.style.opacity = '1';
+        newSlide.style.boxShadow = 'inset 0 0 80px rgba(226,38,58,0.1)';
+      }, 50);
+    } else {
+      // Cross-fade
+      oldSlide.style.transition = 'opacity 0.6s ease';
+      newSlide.style.transition = 'opacity 0.6s ease';
+      oldSlide.style.opacity = '0';
+      newSlide.style.opacity = '0';
+      setTimeout(() => { newSlide.style.opacity = '1'; }, 50);
+    }
+
+    setTimeout(() => {
+      oldSlide.style.filter = '';
+      oldSlide.style.transform = '';
+      oldSlide.style.boxShadow = '';
+      oldSlide.style.opacity = '';
+      oldSlide.classList.remove('transitioning-out');
+      oldSlide.style.display = 'none';
+      newSlide.style.display = 'flex';
+      newSlide.classList.add('active');
+      newSlide.classList.remove('transitioning-in');
+      newSlide.style.filter = '';
+      newSlide.style.transform = '';
+      newSlide.style.boxShadow = '';
+      newSlide.style.opacity = '';
+      currentSlide = num;
+      updateProgress();
+      animateSlideIn(num);
+      isTransitioning = false;
+    }, 800);
+  }
+
+  // Animate elements entering a slide
+  function animateSlideIn(num) {
+    const slide = document.getElementById('slide' + num);
+    const animatables = slide.querySelectorAll('.anim-target');
+    animatables.forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = '';
+      const delay = 0.3 + i * 0.15;
+      setTimeout(() => {
+        el.style.transition = 'opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1)';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, delay * 1000);
+    });
+
+    // Trigger count-up on slide 14
+    if (num === 14) startCountUp();
+    // Start timeline fill on slide 3
+    if (num === 3) animateTimeline();
+  }
+
+  // Timeline animation
+  function animateTimeline() {
+    const items = document.querySelectorAll('.timeline-item');
+    items.forEach((item, i) => {
+      item.style.opacity = '0';
+      item.style.transform = 'translateX(-20px)';
+      setTimeout(() => {
+        item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        item.style.opacity = '1';
+        item.style.transform = 'translateX(0)';
+      }, 800 + i * 300);
+    });
+  }
+
+  // Timeline accordion
+  document.querySelectorAll('.timeline-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const detail = item.querySelector('.timeline-detail');
+      if (item.classList.contains('open')) {
+        item.classList.remove('open');
+      } else {
+        document.querySelectorAll('.timeline-item.open').forEach(el => el.classList.remove('open'));
+        item.classList.add('open');
+        detail.textContent = item.dataset.detail || '';
+      }
+    });
+  });
+
+  // Bento card expand
+  document.querySelectorAll('.bento-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const detail = card.querySelector('.bento-detail');
+      if (card.classList.contains('open')) {
+        card.classList.remove('open');
+      } else {
+        card.classList.add('open');
+        detail.textContent = card.dataset.detail || '';
+      }
+    });
+  });
+
+  // Feature card expand
+  document.querySelectorAll('.feature-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const code = card.querySelector('.feature-code');
+      if (card.classList.contains('open')) {
+        card.classList.remove('open');
+      } else {
+        card.classList.add('open');
+        code.textContent = card.dataset.code || '';
+      }
+    });
+  });
+
+  // Pros/Cons card expand
+  document.querySelectorAll('.pros-card, .cons-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const detail = card.querySelector('.pros-detail, .cons-detail');
+      if (card.classList.contains('open')) {
+        card.classList.remove('open');
+      } else {
+        card.classList.add('open');
+        detail.textContent = card.dataset.detail || '';
+      }
+    });
+  });
+
+  // Tabs (slide 13)
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      const target = document.getElementById('tabContent' + btn.dataset.tab.charAt(0).toUpperCase() + btn.dataset.tab.slice(1));
+      if (target) target.classList.add('active');
+    });
+  });
+
+  // Count-up (slide 14)
+  let countUpStarted = false;
+  function startCountUp() {
+    if (countUpStarted) return;
+    countUpStarted = true;
+    const counters = document.querySelectorAll('.kpi-value[data-count]');
+    counters.forEach(counter => {
+      const target = parseInt(counter.dataset.count);
+      let current = 0;
+      const step = Math.max(1, Math.floor(target / 30));
+      const interval = setInterval(() => {
+        current += step;
+        if (current >= target) { current = target; clearInterval(interval); }
+        counter.textContent = current;
+      }, 50);
+    });
+    // Animate bar
+    const bars = document.querySelectorAll('.kpi-bar-fill[data-width]');
+    bars.forEach(bar => {
+      setTimeout(() => { bar.style.width = bar.dataset.width + '%'; }, 300);
+    });
+  }
+
+  // Code copy
+  document.querySelectorAll('.code-block').forEach(block => {
+    block.addEventListener('click', function() {
+      const text = this.dataset.code || this.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = this.textContent;
+        this.textContent = 'Copiado!';
+        setTimeout(() => {
+          this.textContent = orig;
+          // Re-apply syntax spans if needed (simplified)
+        }, 1500);
+      }).catch(() => {});
+    });
+  });
+
+  // Tooltips
+  function showTooltip(el, e) {
+    const text = el.dataset.tip;
+    if (!text) return;
+    tooltipEl.textContent = text;
+    tooltipEl.classList.add('visible');
+    const rect = el.getBoundingClientRect();
+    let left = rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2;
+    let top = rect.top - tooltipEl.offsetHeight - 10;
+    if (left < 10) left = 10;
+    if (top < 10) top = rect.bottom + 10;
+    tooltipEl.style.left = left + 'px';
+    tooltipEl.style.top = top + 'px';
+  }
+  function hideTooltip() { tooltipEl.classList.remove('visible'); }
+
+  document.addEventListener('mouseover', function(e) {
+    const el = e.target.closest('.has-tooltip');
+    if (el) {
+      tooltipTimeout = setTimeout(() => showTooltip(el, e), 300);
+    }
+  });
+  document.addEventListener('mousemove', function(e) {
+    const el = e.target.closest('.has-tooltip');
+    if (el && tooltipEl.classList.contains('visible')) {
+      showTooltip(el, e);
+    }
+  });
+  document.addEventListener('mouseout', function(e) {
+    if (e.target.closest('.has-tooltip')) {
+      clearTimeout(tooltipTimeout);
+      hideTooltip();
+    }
+  });
+  // Flow step tooltips
+  document.querySelectorAll('.flow-step').forEach(el => {
+    el.addEventListener('mouseenter', function(e) { showTooltip(this, e); });
+    el.addEventListener('mousemove', function(e) { showTooltip(this, e); });
+    el.addEventListener('mouseleave', hideTooltip);
+  });
+  let tooltipTimeout = 0;
+
+  // Navigation
+  function nextSlide() {
+    const transMap = {
+      1: 'blur', 8: 'zoom', 14: 'glow'
+    };
+    goToSlide(currentSlide + 1, transMap[currentSlide] || '');
+  }
+  function prevSlide() { goToSlide(currentSlide - 1); }
+
+  btnNext.addEventListener('click', nextSlide);
+  btnPrev.addEventListener('click', prevSlide);
+  btnFirst.addEventListener('click', () => goToSlide(1));
+
+  // Fullscreen
+  btnFullscreen.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', function(e) {
+    const key = e.key;
+    if (key === 'ArrowRight' || key === 'ArrowDown' || key === ' ') { e.preventDefault(); nextSlide(); }
+    else if (key === 'ArrowLeft' || key === 'ArrowUp') { e.preventDefault(); prevSlide(); }
+    else if (key === 'Home') { e.preventDefault(); goToSlide(1); }
+    else if (key === 'End') { e.preventDefault(); goToSlide(TOTAL_SLIDES); }
+    else if (key === 'Escape') { if (document.fullscreenElement) document.exitFullscreen(); }
+    else if (key >= '1' && key <= '9') { goToSlide(parseInt(key)); }
+    else if (key === '0') { goToSlide(10); }
+    // Number typing buffer for 10+
+    if (key >= '0' && key <= '9') {
+      numBuffer += key;
+      clearTimeout(numTimeout);
+      numTimeout = setTimeout(() => { numBuffer = ''; }, 500);
+      const n = parseInt(numBuffer);
+      if (n >= 10 && n <= TOTAL_SLIDES) { goToSlide(n); numBuffer = ''; }
+    }
+  });
+
+  // Mouse click sides
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.btn-nav') || e.target.closest('#menuBtn') || e.target.closest('#sidebar') || e.target.closest('#sidebarOverlay') || e.target.closest('.code-block') || e.target.closest('.timeline-item') || e.target.closest('.bento-card') || e.target.closest('.feature-card') || e.target.closest('.pros-card') || e.target.closest('.cons-card') || e.target.closest('.tab-btn')) return;
+    if (e.clientX > window.innerWidth / 2) nextSlide();
+    else prevSlide();
+  });
+
+  // Mouse wheel
+  document.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    if (Date.now() - scrollTimeout < 800) return;
+    scrollTimeout = Date.now();
+    if (e.deltaY > 0) nextSlide();
+    else prevSlide();
+  }, { passive: false });
+
+  // Touch swipe
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  });
+  document.addEventListener('touchend', function(e) {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      if (dx < 0) nextSlide();
+      else prevSlide();
+    }
+  });
+
+  // Custom Cursor
+  let cursorRaf = 0;
+  document.addEventListener('mousemove', function(e) {
+    cursorTargetX = e.clientX;
+    cursorTargetY = e.clientY;
+  });
+
+  function updateCursor() {
+    cursorX += (cursorTargetX - cursorX) * 0.15;
+    cursorY += (cursorTargetY - cursorY) * 0.15;
+    cursorEl.style.transform = 'translate(' + cursorX + 'px, ' + cursorY + 'px)';
+    cursorRaf = requestAnimationFrame(updateCursor);
+  }
+  cursorRaf = requestAnimationFrame(updateCursor);
+
+  // Hover effects on cursor
+  document.addEventListener('mouseover', function(e) {
+    const el = e.target.closest('a, button, .btn-nav, .glass, .feature-card, .use-card, .pros-card, .cons-card, .kpi-card, .timeline-item, .bento-card, .flow-step, .code-block, .tab-btn');
+    if (el) cursorEl.classList.add('hover');
+  });
+  document.addEventListener('mouseout', function(e) {
+    if (e.target.closest('a, button, .btn-nav, .glass, .feature-card, .use-card, .pros-card, .cons-card, .kpi-card, .timeline-item, .bento-card, .flow-step, .code-block, .tab-btn')) cursorEl.classList.remove('hover');
+  });
+
+  // Hide cursor on touch
+  if ('ontouchstart' in window) cursorEl.style.display = 'none';
+
+  // Magnetic buttons
+  document.querySelectorAll('.btn-nav').forEach(btn => {
+    btn.addEventListener('mousemove', function(e) {
+      const rect = this.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 60 && dist > 0) {
+        const strength = Math.min(8, (60 - dist) / 60 * 8);
+        const angle = Math.atan2(dy, dx);
+        this.style.transform = 'translate(' + Math.cos(angle) * strength + 'px, ' + Math.sin(angle) * strength + 'px)';
+      }
+    });
+    btn.addEventListener('mouseleave', function() { this.style.transform = ''; });
+  });
+
+  // Particles (Fireflies)
+  const canvas = document.getElementById('particlesCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let particleCount = 40;
+  let animId = 0;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function createParticles(count) {
+    particles = [];
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        radius: 2 + Math.random() * 2,
+        color: Math.random() > 0.5 ? 'rgba(226,38,58,' : 'rgba(255,150,170,',
+        baseOpacity: 0.2 + Math.random() * 0.6,
+        opacitySpeed: 0.005 + Math.random() * 0.015,
+        opacityPhase: Math.random() * Math.PI * 2,
+        time: Math.random() * 1000
+      });
+    }
+  }
+
+  function drawParticles(time) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += Math.sin(time * 0.001 + p.opacityPhase) * 0.01;
+      p.vx += Math.cos(time * 0.0008 + p.opacityPhase) * 0.01;
+
+      if (p.x < -10) p.x = canvas.width + 10;
+      if (p.x > canvas.width + 10) p.x = -10;
+      if (p.y < -10) p.y = canvas.height + 10;
+      if (p.y > canvas.height + 10) p.y = -10;
+
+      const opacity = p.baseOpacity + Math.sin(time * p.opacitySpeed + p.opacityPhase) * 0.3;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + Math.max(0.1, Math.min(0.8, opacity)) + ')';
+      ctx.filter = 'blur(1px)';
+      ctx.fill();
+      ctx.filter = 'none';
+    });
+    animId = requestAnimationFrame(drawParticles);
+  }
+
+  // Adjust particle count per slide
+  function updateParticlesForSlide(num) {
+    let count = 40;
+    if (num === 1 || num === 15) count = 60;
+    else if (num === 12) count = 25;
+    else if (num === 9) count = 50;
+    createParticles(count);
+  }
+
+  // Override goToSlide to update particles
+  const origGoTo = goToSlide;
+  goToSlide = function(num, transition) {
+    updateParticlesForSlide(num);
+    origGoTo(num, transition);
+  };
+
+  createParticles(40);
+  drawParticles(0);
+
+  // Initial setup
+  slides.forEach(s => {
+    s.style.display = 'none';
+    s.style.opacity = '';
+    s.style.transform = '';
+    s.classList.remove('active');
+  });
+  document.getElementById('slide1').style.display = 'flex';
+  document.getElementById('slide1').classList.add('active');
+  updateProgress();
+  animateSlideIn(1);
+  updateParticlesForSlide(1);
+
+  // Expose for debugging
+  window.goToSlide = goToSlide;
+  window.nextSlide = nextSlide;
+  window.prevSlide = prevSlide;
+
+})();
+</script>
+</body>
+</html>
