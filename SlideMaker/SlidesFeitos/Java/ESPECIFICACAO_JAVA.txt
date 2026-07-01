@@ -1,0 +1,836 @@
+================================================================================
+ESPECIFICACAO COMPLETA — APRESENTACAO JAVA
+================================================================================
+
+INSTRUCOES PARA A IA EXECUTORA:
+- Nao acesse nenhum outro arquivo ou documento dentro da pasta.
+- Crie um UNICO arquivo HTML contendo HTML + CSS + JavaScript.
+- Use charset UTF-8. Nao use BOM.
+- Nao crie tela de loading.
+- O documento deve ser completamente responsivo (desktop, tablet, celular).
+- Nenhum slide pode ter scroll (horizontal ou vertical).
+- Scroll do mouse NAO troca de slides. Apenas setinhas do teclado (esquerda/direita) e swipe no celular.
+- Nao troque de slide ao clicar em qualquer canto da tela com o mouse.
+- Se houver muito conteudo em um slide, use botoes de toggle/accordion para revelar mais informacao.
+- Toda linha do tempo mencionada deve ser substituida por cards interativos ou apresentacao sequencial.
+- O slide final NAO deve conter "Perguntas?" ou qualquer pergunta. Use "Obrigado" ou "Conclusao".
+
+================================================================================
+1. IDENTIDADE VISUAL GERAL
+================================================================================
+
+Tema: Java — Linguagem de Programacao Multiplataforma
+Estilo: Tecnologico moderno + corporativo premium
+Sensacao: Profissional, solida, inovadora, confiavel
+Paleta inspirada no ecossistema Java: laranja iconico, tons escuros, azul tecnologico
+
+================================================================================
+2. PALETA DE CORES
+================================================================================
+
+Cores principais:
+  --java-orange: #ED8B00 (laranja iconico Java)
+  --java-orange-bright: #FF9A00
+  --java-orange-dark: #C77800
+  --java-blue: #007396 (azul Java secundario)
+  --java-blue-bright: #0096C7
+  --java-blue-dark: #005073
+
+Cores de fundo:
+  --bg-primary: #0D1117 (quase preto azulado)
+  --bg-secondary: #161B22
+  --bg-surface: #1C2333
+  --bg-card: rgba(22,27,34,0.7)
+
+Cores de texto:
+  --text-primary: #E6EDF3
+  --text-secondary: #8B949E
+  --text-muted: #5A6572
+  --text-white: #FFFFFF
+
+Cores de destaque/destaque:
+  --accent-green: #3FB950 (sucesso/codigo)
+  --accent-red: #F85149 (erro/excecao)
+  --accent-purple: #BC8CFF (features)
+  --accent-cyan: #58A6FF (links)
+
+Botoes:
+  --btn-primary-bg: var(--java-orange)
+  --btn-primary-text: #FFFFFF
+  --btn-primary-hover: var(--java-orange-bright)
+  --btn-secondary-bg: var(--bg-surface)
+  --btn-secondary-text: var(--text-primary)
+  --btn-secondary-hover: var(--java-blue)
+
+Glows:
+  --glow-orange: rgba(237,139,0,0.3)
+  --glow-blue: rgba(0,115,150,0.3)
+  --glow-green: rgba(63,185,80,0.3)
+
+================================================================================
+3. TIPOGRAFIA
+================================================================================
+
+Fontes (Google Fonts):
+  Titulos: 'JetBrains Mono', monospace (peso 700)
+  Subtitulos: 'JetBrains Mono', monospace (peso 500)
+  Conteudo: 'Inter', sans-serif (pesos 300, 400, 600)
+  Codigo: 'JetBrains Mono', monospace (peso 400)
+
+Hieraquia:
+  H1 (titulo capa): clamp(2rem, 5vw, 4rem) / line-height: 1.2
+  H2 (titulos slides): clamp(1.2rem, 2.5vw, 1.8rem) / line-height: 1.3
+  H3 (subtitulos): clamp(0.9rem, 1.5vw, 1.2rem) / line-height: 1.4
+  Body: clamp(0.7rem, 1.1vw, 0.95rem) / line-height: 1.6
+  Meta/codigo: clamp(0.6rem, 0.9vw, 0.8rem) / line-height: 1.5
+  Badge/tag: clamp(0.55rem, 0.8vw, 0.7rem)
+
+Espacamento:
+  Margin inferior titulos: 0.4em
+  Margin inferior paragrafos: 0.6em
+  Padding slides: 3rem 5rem (desktop), 2rem 1.5rem (tablet), 1.5rem 1rem (celular)
+
+================================================================================
+4. CONCEITO ARTISTICO
+================================================================================
+
+A apresentacao deve transmitir solidez, inovacao e profissionalismo.
+O fundo escuro com acentos laranja-azul cria uma atmosfera de terminal de programacao premium.
+Particulas sutis de "dados" e "conexoes" remetem a redes e codigo em execucao.
+Elementos de glassmorphism nos cards trazem modernidade sem perder seriedade.
+A estetica geral e de uma IDE de alto nivel combinada com uma dashboard futurista.
+Cada slide tem personalidade propria, mas todos compartilham a mesma paleta e sistema de design.
+
+================================================================================
+5. BACKGROUND GLOBAL
+================================================================================
+
+Fundo principal: gradient radial suave partindo do centro, escuro.
+  background: radial-gradient(ellipse at 50% 50%, #161B22 0%, #0D1117 100%)
+
+Mesh sutil sobre o fundo (opacidade muito baixa, ~0.03):
+  mesh de linhas de grid com perspectiva suave simulando profundidade.
+
+Particulas globais (canvas separado, z-index: 0, pointer-events: none):
+  - 50-80 particulas do tipo "pixel" pequeno (2x2px)
+  - Cores: laranja e azul claro
+  - Opacidade entre 0.1 e 0.4
+  - Movimento: flutuacao suave para cima, com leve oscilacao lateral
+  - Velocidade: muito lenta (3-5s de animacao)
+  - Nao use estrelas, use "dados" que lembram bits de codigo
+
+Para cada slide, um glow radial de fundo com cor diferente conforme o tema:
+  Slide 1: laranja
+  Slide 2: azul
+  Slide 3: dourado/amber
+  Slide 4: ciano
+  Slide 5: verde
+  Slide 6: laranja claro
+  Slide 7: azul claro
+  Slide 8: verde escuro
+  Slide 9: roxo
+  Slide 10: vermelho
+  Slide 11: azul
+  Slide 12: ciano
+  Slide 13: verde
+  Slide 14: laranja/vermelho
+  Slide 15: azul escuro
+  Slide 16: roxo
+  Slide 17: dourado
+  Slide 18: azul claro
+  Slide 19: ciano
+  Slide 20: laranja dourado
+
+================================================================================
+6. NAVEGACAO GLOBAL
+================================================================================
+
+Tipo: Navegacao por botoes + teclado + touch/swipe
+
+Botoes de navegacao:
+  - Botao "Anterior" (seta esquerda): fixo no canto inferior esquerdo, estilo glassmorphism
+  - Botao "Proximo" (seta direita): fixo no canto inferior direito, estilo glassmorphism
+  - Botoes aparecem apenas quando ha slide anterior/proximo
+
+Icones dos botoes: SVG inline, seta simple, stroke-width 2, cor var(--text-secondary)
+Hover: glow laranja suave, opacidade vai de 0.3 para 0.8
+
+Barra de progresso:
+  - Barra horizontal fina (3px) no topo da tela, z-index: 100
+  - Cor: gradient linear de var(--java-orange) para var(--java-blue)
+  - Largura varia conforme slide atual / total de slides
+  - Transicao: width 0.5s ease
+
+Contador de slides:
+  - Fixo canto inferior direito (acima do botao next)
+  - Fonte: 'JetBrains Mono', monospace
+  - Tamanho: 0.65rem
+  - Cor: var(--text-muted)
+  - Formato: "01 / 20"
+
+Indicadores de slide (dots):
+  - 20 dots pequenos (5px), alinhados no centro inferior
+  - Dot ativo: laranja brilhante, escala 1.3x
+  - Dot inativo: cinza medio, opacidade 0.3
+  - Nao sao clicaveis (apenas indicacao visual)
+
+Teclado:
+  - Seta direita / Page Down: proximo slide
+  - Seta esquerda / Page Up: slide anterior
+  - Home: primeiro slide
+  - End: ultimo slide
+  - Espaco: proximo slide
+  - ESC: sai do fullscreen (navegador)
+  - Digitar numero + Enter: vai para slide especifico (opcional, pode ser omitido)
+
+Touch:
+  - Swipe esquerda: proximo slide
+  - Swipe direita: slide anterior
+
+Mouse:
+  - Scroll do mouse NAO troca slides
+  - Clique em qualquer lugar NAO troca slides (apenas nos botoes)
+
+================================================================================
+7. ANIMACOES GLOBAIS
+================================================================================
+
+Transicao entre slides: Fade + Scale sutil
+  - Slide saindo: opacity 1 -> 0, transform scale(1) -> scale(0.95), duracao 0.4s
+  - Slide entrando: opacity 0 -> 1, transform scale(1.05) -> scale(1), duracao 0.5s, delay 0.1s
+  - Easing: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+Animacoes de entrada de elementos (dentro de cada slide):
+  - Tipo: Fade In + Translate Y (30px para cima)
+  - Duracao: 0.5s cada elemento
+  - Stagger: 0.12s entre cada elemento
+  - Easing: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+  - Primeiro elemento comeca com delay de 0.2s apos entrar no slide
+
+Classes CSS para animacao:
+  .animate { opacity: 0; transform: translateY(30px); transition: all 0.5s var(--ease-smooth); }
+  .animate-in { opacity: 1; transform: translateY(0); }
+
+================================================================================
+8. ELEMENTOS INTERATIVOS GLOBAIS
+================================================================================
+
+Hover em cards:
+  - Elevacao: translateY(-4px)
+  - Sombra: box-shadow aumenta
+  - Borda: glow sutil da cor do card
+  - Transicao: 0.3s ease
+
+Cursor personalizado:
+  - Cursor padrao: none
+  - Cursor custom: circulo pequeno (6px) laranja que segue o mouse
+  - Cursor trail: 3 circulos menores, opacidade decrescente, com lag suave
+  - Em botoes: cursor cresce para 12px, cor muda para azul
+  - Em links/cards clicaveis: cursor vira "pointer" com glow
+  - Implementar com CSS (cursor: none no body) + JS (mousemove)
+
+Magnetic buttons:
+  - Botoes de navegacao e botoes de acao
+  - Quando mouse esta proximo (dentro de 60px), botao se desloca levemente na direcao do mouse
+  - Easing suave, max deslocamento 8px
+
+Tooltips:
+  - Em badges e tags informativas
+  - Tooltip aparece no hover, abaixo do elemento
+  - Fundo: var(--bg-surface), borda 1px solid var(--java-orange)
+  - Texto: branco, 0.65rem
+  - Transicao: opacity 0.2s ease, transform translateY(4px) para 0
+
+================================================================================
+9. SLIDE POR SLIDE
+================================================================================
+
+================================================================================
+SLIDE 01 — CAPA
+================================================================================
+
+Objetivo: Impacto inicial. Apresentar o tema de forma marcante.
+Emocao: Profissionalismo, poder tecnologico, curiosidade.
+
+Layout: Hero Layout centralizado com elementos decorativos nas laterais.
+
+Background: Dark com radial gradient laranja escuro no centro.
+  radial-gradient(ellipse at 50% 50%, rgba(237,139,0,0.08) 0%, transparent 60%)
+
+Elementos de fundo:
+  - Particulas de dados (bits) flutuando lentamente (canvas)
+  - Grid wireframe sutil ao fundo (opacidade 0.03)
+
+Elementos decorativos:
+  - Canto superior esquerdo: icone SVG de chave/yin-yang de codigo (simbolo de programacao)
+  - Canto superior direito: icone SVG de globo/conexoes (simbolo de multiplataforma)
+  - Canto inferior esquerdo: texto "Oracle" em cinza escuro (0.6rem)
+  - Linhas ornamentais finas (stroke-width 1, opacidade 0.1, cor laranja) formando brackets { } gigantes nas laterais
+
+Conteudo (ordem de entrada):
+  1. Pequeno badge no topo: "LINGUAGEM DE PROGRAMACAO" (fonte mono, 0.6rem, borda laranja, delay 0.2s)
+  2. TITULO PRINCIPAL: "Java" (h1, fonte 'JetBrains Mono', peso 700, delay 0.4s)
+     - Efeito de texto 3D extrudado usando MULTIPLAS CAMADAS de text-shadow
+     - O texto DEVE permanecer COMPLETAMENTE RETO (horizontal)
+     - Nao use rotate, skew ou perspective no texto
+     - Crie extrusao com dezenas de text-shadow:
+       for (let i = 0; i < 35; i++) {
+           shadow += (shadow ? "," : "") + (-i) + "px " + i + "px 0 " + corProgressiveShadow(i);
+       }
+     - Cores das sombras: comecam em laranja escuro (#C77800) e vao clareando ate laranja medio
+     - Adicionar uma segunda camada usando ::before, com cor escurecida e filter: blur(4px), levemente deslocada (2px para baixo), simulando sombra projetada
+     - Tamanho: clamp(2.5rem, 6vw, 4.5rem)
+     - Cor do texto principal: var(--java-orange)
+     - Glow: text-shadow adicional com 0 0 40px var(--glow-orange)
+  3. Subtitulo: "A Linguagem de Programacao Multiplataforma" (fonte 'Inter', peso 300, cor var(--text-secondary), delay 0.7s)
+  4. Tagline: ""Escreva uma vez, execute em qualquer lugar."" (fonte 'JetBrains Mono', italico, cor var(--accent-cyan), delay 0.9s) (IMPORTANTE: usar aspas duplas)
+  5. Informacoes do apresentador (nome, data, disciplina) em formato de badges, delay 1.1s
+  6. Frase de introducao: breve resumo do que sera abordado, comeco do texto "Nesta apresentacao..." (fonte 'Inter', cor var(--text-muted), delay 1.3s)
+  7. Logo Java SVG estilizado (icone de cafe) no canto inferior direito, animado com float suave, delay 1.5s
+
+Navegacao: Botao "Proximo" visivel no canto inferior direito.
+
+Observacao: O texto "Java" NO TITULO deve ser exibido com a primeira letra maiuscula e o restante minusculo, exceto os slides 1 e 6.
+
+================================================================================
+SLIDE 02 — O QUE E JAVA?
+================================================================================
+
+Objetivo: Apresentar a definicao basica da linguagem.
+Emocao: Informativa, clara, acessivel.
+
+Layout: Titulo no topo, grid 2 colunas abaixo (texto + dados).
+
+Background: radial-gradient(ellipse at 60% 40%, rgba(0,115,150,0.06) 0%, transparent 60%)
+
+Conteudo (ordem de entrada):
+  1. Titulo "O QUE E JAVA?" (h2, fonte mono, delay 0.2s)
+  2. Coluna esquerda: paragrafo de definicao (delay 0.4s) + badges de caracteristicas (delay 0.5s cada)
+     Badges: "1995", "Orientada a Objetos", "Alto Nivel", "Compilada/Interpretada", "Multiplataforma", "Grande Comunidade"
+     Cada badge: inline-block, padding 4px 10px, border-radius 4px, border-left 3px solid (cores alternando entre laranja, azul, verde)
+  3. Coluna direita: grid 2x2 de cards estatisticos (delay 0.6s)
+     Cards com numeros grandes (fonte mono):
+       - "44+ MILHOES" | "Desenvolvedores"
+       - "3 BILHOES" | "Dispositivos"
+       - "#5" | "Indice TIOBE"
+       - "20+ ANOS" | "Evolucao"
+     Cards com estilo glassmorphism, borda sutil (1px solid rgba(237,139,0,0.15))
+
+================================================================================
+SLIDE 03 — HISTORIA DO JAVA
+================================================================================
+
+Objetivo: Contar a historia da linguagem de forma envolvente.
+Emocao: Nostalgia, respeito, evolucao.
+
+Background: radial-gradient(ellipse at 30% 40%, rgba(200,170,50,0.05) 0%, transparent 60%)
+
+Layout: Titulo + cards em formato de jornada (NÃO usar timeline visual)
+
+Conteudo:
+  1. Titulo "HISTORIA DO JAVA" (delay 0.2s)
+  2. Cards de jornada em grid, cada um contendo: ano (grande, cor laranja) + descricao + cor de borda diferente
+     Cards (ordem de aparicao com stagger 0.1s):
+       Card 1: 1991 | "Projeto Green — James Gosling inicia o desenvolvimento"
+       Card 2: 1995 | "Lancamento oficial do Java 1.0"
+       Card 3: 2000 | "Java 2 — Grandes melhorias na plataforma"
+       Card 4: 2006 | "Java 6 — Otimizacoes e performance"
+       Card 5: 2010 | "Oracle adquire a Sun Microsystems"
+       Card 6: 2014 | "Java 8 — Lambdas e Streams (marco historico)"
+       Card 7: 2018 | "Java 11 — LTS com modularizacao"
+       Card 8: 2021 | "Java 17 — LTS com Records e Pattern Matching"
+       Card 9: 2024+ | "Java moderno — Evolucao continua a cada 6 meses"
+  3. Frase final: "De um projeto secreto a uma das linguagens mais influentes do mundo." (delay 0.9s)
+
+Observacao: Nao criar linha do tempo. Usar cards em grid 3x3 com aspecto de "cartas de colecao".
+
+================================================================================
+SLIDE 04 — COMO O JAVA FUNCIONA
+================================================================================
+
+Objetivo: Explicar o fluxo de execucao.
+Emocao: Curiosidade tecnica, clareza.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(0,200,200,0.05) 0%, transparent 60%)
+
+Layout: Titulo + fluxograma visual em grid horizontal + explicacoes.
+
+Conteudo:
+  1. Titulo "COMO O JAVA FUNCIONA" (delay 0.2s)
+  2. Fluxograma visual (4 etapas em linha, com setas entre elas):
+     [.java] -> [javac] -> [.class] -> [JVM]
+     Cada etapa e um card com icone e texto
+     Setas: SVG animadas (stroke-dasharray + stroke-dashoffset, animando para parecer fluxo)
+     Delay entrada: 0.4s para os cards, setas aparecem depois
+  3. Abaixo, grid 2x3 de cards explicativos (delay 0.6s):
+     - "JDK" | Kit de desenvolvimento completo
+     - "JRE" | Ambiente de execucao
+     - "JVM" | Maquina Virtual — coracao da portabilidade
+     - "javac" | Compilador que gera bytecode
+     - "Bytecode" | Codigo intermediario (.class)
+     - "Portabilidade" | "Write Once, Run Anywhere"
+  4. Paragrafo explicativo no rodape: "O codigo fonte (.java) e compilado para bytecode (.class), que e interpretado pela JVM, permitindo execucao em qualquer sistema operacional." (delay 0.8s)
+
+================================================================================
+SLIDE 05 — PRINCIPAIS CARACTERISTICAS
+================================================================================
+
+Objetivo: Listar qualidades da linguagem.
+Emocao: Confianca, solidez.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(63,185,80,0.04) 0%, transparent 60%)
+
+Layout: Titulo + Bento Grid (grid assimetrico) de cards com caracteristicas.
+
+Conteudo:
+  1. Titulo "PRINCIPAIS CARACTERISTICAS" (delay 0.2s)
+  2. Bento Grid com cards de tamanhos variados (alguns ocupam 2 colunas):
+     Card grande (2 colunas): "Orientacao a Objetos" — icone + descricao completa
+     Cards medios (1 coluna): "Portabilidade", "Seguranca", "Robustez", "Alto Desempenho"
+     Cards pequenos: "Coleta Automatica de Lixo", "Multithreading", "Forte Tipagem", "Escalabilidade", "Facil Manutencao", "Ecossistema Consolidado", "Atualizacoes Frequentes"
+  3. Cada card tem: icone SVG pequeno no canto, titulo em negrito, descricao curta
+  4. Cards com entrada stagger 0.08s (rapida), comecando pelos grandes
+
+================================================================================
+SLIDE 06 — ESTRUTURA DE UM PROGRAMA JAVA
+================================================================================
+
+Objetivo: Mostrar codigo Java real de forma didatica.
+Emocao: Pratica, educativa.
+
+Background: radial-gradient(ellipse at 40% 50%, rgba(237,139,0,0.06) 0%, transparent 60%)
+
+Layout: Titulo + bloco de codigo + explicacoes ao lado.
+
+Conteudo:
+  1. Titulo "ESTRUTURA DE UM PROGRAMA JAVA" (delay 0.2s)
+  2. Bloco de codigo (delay 0.4s):
+     - Estilo: fundo escuro (#0D1117), borda 1px solid #30363D, border-radius 8px
+     - Fonte: 'JetBrains Mono', 0.75rem
+     - Syntax highlight com cores: keywords roxo (#BC8CFF), strings verde (#3FB950), comentarios cinza (#5A6572), tipos azul (#58A6FF)
+     - Codigo de exemplo:
+       ```java
+       public class HelloWorld {
+           public static void main(String[] args) {
+               System.out.println("Ola, Java!");
+           }
+       }
+       ```
+     - Animacao: efeito de typing suave nas linhas de codigo (cada linha aparece com 0.3s de intervalo)
+  3. Ao lado do codigo, cards explicativos (delay 0.6s):
+     - "Classe Principal" -> "public class HelloWorld"
+     - "Metodo main()" -> "Ponto de entrada do programa"
+     - "System.out" -> "Saida no console"
+     - "Importacoes" -> "import java.util.*;"
+  4. Abaixo: botoes de toggle para "Convencoes de Nomenclatura" e "Boas Praticas" que expandem conteudo extra (delay 0.8s)
+     Conteudo do toggle 1: PascalCase classes, camelCase variaveis, UPPER_CASE constantes
+     Conteudo do toggle 2: nomes descritivos, organizacao em pacotes, comentarios uteis
+
+================================================================================
+SLIDE 07 — TIPOS DE DADOS
+================================================================================
+
+Objetivo: Ensinar os tipos primitivos e objetos em Java.
+Emocao: Didatica, organizada.
+
+Background: radial-gradient(ellipse at 50% 40%, rgba(0,150,200,0.05) 0%, transparent 60%)
+
+Layout: Titulo + grid de cards por categoria.
+
+Conteudo:
+  1. Titulo "TIPOS DE DADOS" (delay 0.2s)
+  2. Abas (tabs) no topo para alternar entre "Primitivos" e "Objetos" (delay 0.3s)
+     Tabs: estilo pill, tab ativa com fundo laranja, inativa com fundo transparente
+  3. Conteudo dos tabs:
+     Tab "Primitivos":
+       Grid 4x2 de cards:
+         byte | 8 bits | -128 a 127
+         short | 16 bits | -32.768 a 32.767
+         int | 32 bits | -2B a 2B (mais usado)
+         long | 64 bits | numeros grandes (usar L)
+         float | 32 bits | decimais (usar f)
+         double | 64 bits | decimais precisos (padrao)
+         char | 16 bits | caractere Unicode
+         boolean | true/false | valores logicos
+       Cada card mostra nome do tipo (grande), descricao, e um badge com tamanho em bits
+     Tab "Objetos":
+       Grid:
+         String, Arrays, Classes, Wrappers (Integer, Double, etc.)
+  4. Abaixo dos tabs: cards extras (delay 0.5s):
+     - "Constantes (final)" | "Palavra-chave final define valores imutaveis"
+     - "Conversao de Tipos" | "Casting implicito e explicito"
+  5. Exemplos de codigo em badges menores
+
+================================================================================
+SLIDE 08 — ESTRUTURAS DE CONTROLE
+================================================================================
+
+Objetivo: Ensinar controle de fluxo.
+Emocao: Logica, pratica.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(0,115,150,0.05) 0%, transparent 60%)
+
+Layout: Titulo + grid misto de cards com exemplos de codigo.
+
+Conteudo:
+  1. Titulo "ESTRUTURAS DE CONTROLE" (delay 0.2s)
+  2. Grid de cards, cada um contendo nome + mini bloco de codigo:
+     Cards (stagger 0.1s):
+       - "if / else" + codigo: if (x > 0) { ... } else { ... }
+       - "switch" + codigo: switch(dia) { case 1: ... break; }
+       - "for" + codigo: for (int i = 0; i < 10; i++) { }
+       - "while" + codigo: while (condicao) { }
+       - "do while" + codigo: do { } while (condicao);
+       - "break / continue" + explicacao textual
+  3. Linha de badges com operadores (delay 0.5s):
+     "Operadores Logicos: &&, ||, !"
+     "Operadores Relacionais: ==, !=, <, >, <=, >="
+     "Operadores Aritmeticos: +, -, *, /, %"
+  4. Exemplo pratico no final: codigo completo de calculadora simples em um card grande (delay 0.7s)
+
+================================================================================
+SLIDE 09 — ORIENTACAO A OBJETOS
+================================================================================
+
+Objetivo: Explicar os pilares da OOP.
+Emocao: Estrutural, conceitual, importante.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(188,140,255,0.05) 0%, transparent 60%)
+
+Layout: Titulo + Bento Grid com os 4 pilares em destaque.
+
+Conteudo:
+  1. Titulo "ORIENTACAO A OBJETOS" (delay 0.2s)
+  2. 4 cards grandes (grid 2x2) para os pilares, com entradas independentes (delay 0.3s):
+     - "ENCAPSULAMENTO" (cor azul) | "Protecao de dados com modificadores private/public. Getters e setters controlam o acesso."
+       Exemplo de codigo mini: private String nome;
+     - "HERANCA" (cor verde) | "Reutilizacao de codigo com extends. Subclasses herdam atributos e metodos da superclasse."
+       Exemplo: class Gato extends Animal { }
+     - "POLIMORFISMO" (cor laranja) | "Mesmo metodo, comportamentos diferentes. Sobrescrita (@Override) de metodos."
+       Exemplo: animal.emitirSom(); // cada classe implementa diferente
+     - "ABSTRACAO" (cor roxa) | "Classes abstratas e interfaces definem contratos. Ocultacao da complexidade."
+       Exemplo: interface Veiculo { void mover(); }
+  3. Abaixo (stagger 0.1s):
+     Cards menores: "Classes vs Objetos", "Construtores", "Sobrecarga", "Sobrescrita", "Interfaces", "Classes Abstratas"
+  4. Botao toggle "Ver Exemplo Completo" expande um bloco de codigo completo de uma classe Java com todos os conceitos (delay 0.6s)
+
+================================================================================
+SLIDE 10 — TRATAMENTO DE EXCECOES
+================================================================================
+
+Objetivo: Ensinar como lidar com erros.
+Emocao: Cuidado, robustez.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(248,81,73,0.05) 0%, transparent 60%)
+
+Layout: Titulo + grid explicativo + bloco de codigo.
+
+Conteudo:
+  1. Titulo "TRATAMENTO DE EXCECOES" (delay 0.2s)
+  2. Cards em grid (stagger 0.12s):
+     - "try" | "Bloco que tenta executar codigo perigoso"
+     - "catch" | "Captura e trata a excecao"
+     - "finally" | "Sempre executa (mesmo com erro)"
+     - "throw" | "Lanca uma excecao manualmente"
+     - "throws" | "Declara que um metodo pode lancar excecao"
+     - "Checked" | "Excecoes verificadas em tempo de compilacao"
+     - "Unchecked" | "Excecoes em tempo de execucao (RuntimeException)"
+  3. Bloco de codigo mostrando exemplo completo (delay 0.5s):
+     try { int x = 10 / 0; } catch (ArithmeticException e) { ... } finally { ... }
+  4. Badge de "Boa Pratica" no final: "Nunca engole excecoes sem tratar. Sempre faca log do erro." (delay 0.7s)
+
+================================================================================
+SLIDE 11 — COLECOES E ESTRUTURAS DE DADOS
+================================================================================
+
+Objetivo: Apresentar o Collections Framework.
+Emocao: Organizacao, eficiencia.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(0,115,150,0.05) 0%, transparent 60%)
+
+Layout: Titulo + grid de colecoes com botoes de toggle para detalhes.
+
+Conteudo:
+  1. Titulo "COLECOES E ESTRUTURAS DE DADOS" (delay 0.2s)
+  2. Grid de cards com as principais colecoes (stagger 0.1s):
+     Cada card tem: nome + icone + descricao + exemplo de uso
+     - ArrayList | Lista dinamica | "Mais usada para listas"
+     - LinkedList | Lista encadeada | "Muitas insercoes/remocoes"
+     - HashMap | Chave-valor | "Buscas rapidas"
+     - HashSet | Conjunto unico | "Sem duplicatas"
+     - Queue | Fila | "FIFO"
+     - Stack | Pilha | "LIFO"
+  3. Abaixo: cards de suporte (delay 0.5s):
+     - "Collections Framework — Visao geral"
+     - "Iteradores — Percorrendo colecoes"
+     - "Generics <T> — Tipagem segura"
+     - "Quando usar cada estrutura?" (dica visual: arvore de decisao simples com badges)
+  4. Exemplo pratico em bloco de codigo (delay 0.6s)
+
+================================================================================
+SLIDE 12 — ONDE JAVA E UTILIZADO
+================================================================================
+
+Objetivo: Mostrar a abrangencia do Java.
+Emocao: Surpresa, admiração.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(0,200,200,0.05) 0%, transparent 60%)
+
+Layout: Titulo + grid tematico de areas de uso.
+
+Conteudo:
+  1. Titulo "ONDE JAVA E UTILIZADO" (delay 0.2s)
+  2. Grid de cards com categorias (stagger 0.08s):
+     Grid 4x3 com icones SVG + texto:
+     - "Desenvolvimento Web" | 🌐
+     - "Apps Android" | 📱
+     - "Sistemas Bancarios" | 🏦
+     - "Software Empresarial" | 🏢
+     - "APIs / Microservicos" | 🔌
+     - "Sistemas Embarcados" | ⚙️
+     - "Computacao em Nuvem" | ☁️
+     - "Big Data" | 📊
+     - "Inteligencia Artificial" | 🤖
+     - "Jogos" | 🎮
+     - "IoT" | 📡
+     - "Aplicacoes Desktop" | 💻
+  3. Badge no rodape: "Java esta presente em mais de 3 bilhoes de dispositivos no mundo" (delay 0.7s)
+
+================================================================================
+SLIDE 13 — FRAMEWORKS E FERRAMENTAS
+================================================================================
+
+Objetivo: Apresentar o ecossistema Java.
+Emocao: Poder, versatilidade.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(63,185,80,0.04) 0%, transparent 60%)
+
+Layout: Titulo + grid de botoes com toggle para detalhes de cada ferramenta.
+
+Conteudo:
+  1. Titulo "FRAMEWORKS E FERRAMENTAS" (delay 0.2s)
+  2. Grid de botoes/cards que ao passar o mouse revelam mais informacao (stagger 0.08s):
+     Frameworks:
+     - "Spring Boot" | "Microservicos e aplicacoes web"
+     - "Spring Framework" | "Base do ecossistema Spring"
+     - "Hibernate" | "ORM — Mapeamento objeto-relacional"
+     - "Jakarta EE" | "Plataforma empresarial"
+     Ferramentas:
+     - "Maven" | "Gerenciamento de dependencias"
+     - "Gradle" | "Automacao de build moderna"
+     - "JUnit" | "Testes unitarios"
+     - "Mockito" | "Mocks para testes"
+     IDEs:
+     - "IntelliJ IDEA" | "IDE preferida do mercado"
+     - "Eclipse" | "IDE classica e poderosa"
+     - "NetBeans" | "IDE oficial da Apache"
+     DevOps:
+     - "Apache Tomcat" | "Servidor web Java"
+     - "Jenkins" | "CI/CD"
+     - "Docker" | "Containerizacao"
+     - "Git" | "Controle de versao"
+  3. Cada card: nome grande, icone SVG, seta indicando hover para mais info
+  4. Efeito hover: card expande levemente para cima e mostra descricao
+
+================================================================================
+SLIDE 14 — VANTAGENS E DESVANTAGENS
+================================================================================
+
+Objetivo: Apresentar os pros e contras de forma equilibrada.
+Emocao: Honestidade, transparencia.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(237,139,0,0.05) 0%, rgba(248,81,73,0.03) 50%, transparent 60%)
+
+Layout: Titulo + dois blocos lado a lado (Vantagens x Desvantagens).
+
+Conteudo:
+  1. Titulo "VANTAGENS E DESVANTAGENS" (delay 0.2s)
+  2. Bloco esquerdo: "VANTAGENS" (delay 0.3s)
+     Grid de badges verdes/laranjas:
+       - Multiplataforma ☑️
+       - Muito estavel ☑️
+       - Grande comunidade ☑️
+       - Excelente documentacao ☑️
+       - Seguranca ☑️
+       - Alto desempenho ☑️
+       - Muitas bibliotecas ☑️
+       - Forte mercado de trabalho ☑️
+  3. Bloco direito: "DESVANTAGENS" (delay 0.5s)
+     Grid de badges vermelhos:
+       - Sintaxe extensa ❌
+       - Consumo maior de memoria ❌
+       - Inicializacao mais lenta ❌
+       - Curva de aprendizado ❌
+       - Codigo mais verboso ❌
+  4. Comparador visual: um slider/divisor no meio que separa os dois mundos (efeito visual)
+  5. Conclusao final: badge "Java e uma escolha solida para projetos que exigem estabilidade e escala" (delay 0.7s)
+
+================================================================================
+SLIDE 15 — MERCADO DE TRABALHO
+================================================================================
+
+Objetivo: Mostrar oportunidades profissionais.
+Emocao: Otimismo, oportunidade.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(0,115,150,0.06) 0%, transparent 60%)
+
+Layout: Titulo + cards de dados + grid de setores.
+
+Conteudo:
+  1. Titulo "MERCADO DE TRABALHO" (delay 0.2s)
+  2. Cards de dados grandes no topo (stagger 0.3s):
+     - "Grande Demanda Mundial" | icone globo
+     - "Salarios Competitivos" | icone cifrao
+     - "Oportunidades Internacionais" | icone aviao
+  3. Grid de setores (stagger 0.1s):
+     Bancos | Tech | Governo | Android | Back-end | Corporativo
+     Cada um com badge representando nivel de demanda (%)
+  4. Bloco de texto: "Perfil do Desenvolvedor Java" + "Certificacoes" (delay 0.5s)
+  5. Toggle: "Tendencias Futuras" expande texto sobre evolução do mercado (delay 0.6s)
+
+================================================================================
+SLIDE 16 — COMPARACAO COM OUTRAS LINGUAGENS
+================================================================================
+
+Objetivo: Posicionar Java entre outras linguagens.
+Emocao: Analitica, comparativa.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(188,140,255,0.04) 0%, transparent 60%)
+
+Layout: Titulo + tabela comparativa interativa.
+
+Conteudo:
+  1. Titulo "COMPARACAO COM OUTRAS LINGUAGENS" (delay 0.2s)
+  2. Tabela estilizada (delay 0.3s):
+     Colunas: Caracteristica | Java | Python | C# | JavaScript
+     Linhas:
+       - "Sintaxe" | Verbosa | Concisa | Verbosa | Dinamica
+       - "Desempenho" | Alto | Medio | Alto | Medio
+       - "Tipagem" | Forte | Dinamica | Forte | Dinamica
+       - "Orientacao a Objetos" | Total | Total | Total | Por prototipos
+       - "Facilidade Aprendizado" | Dificil | Facil | Dificil | Media
+       - "Mercado" | Excelente | Otimo | Bom | Excelente
+       - "Portabilidade" | Excelente | Otima | Boa | Otima
+     Cada celula: badge com cor (verde = bom, amarelo = medio, vermelho = ruim)
+  3. Hover nas linhas: destaca a linha inteira com glow suave
+
+================================================================================
+SLIDE 17 — CURIOSIDADES
+================================================================================
+
+Objetivo: Entreter com fatos interessantes.
+Emocao: Diversao, leveza.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(237,139,0,0.05) 0%, transparent 60%)
+
+Layout: Titulo + grid de cards 3x3 com bordas coloridas variadas.
+
+Conteudo:
+  1. Titulo "CURIOSIDADES" (delay 0.2s)
+  2. Cards de curiosidades (stagger 0.1s, cada um com cor de borda diferente):
+     - "O nome original era Oak" | borda verde
+     - "O mascote e o Duke" | borda azul
+     - "O cafe inspirou o nome Java" | borda laranja
+     - "Milhoes de desenvolvedores" | borda roxa
+     - "Presente em bilhoes de dispositivos" | borda ciano
+     - "Atualizacoes a cada 6 meses" | borda amarela
+     - "Compatibilidade entre versoes" | borda rosa
+     - "Forte presenca em universidades" | borda verde claro
+     - "30 anos de historia" | borda dourada
+  3. Animacao: cards entram com rotacao suave (rotate(0) de rotate(-2deg) para rotate(0))
+  4. Efeito hover: cada card brilha com a cor da borda
+
+================================================================================
+SLIDE 18 — EXEMPLOS DE EMPRESAS QUE UTILIZAM JAVA
+================================================================================
+
+Objetivo: Mostrar adocao corporativa.
+Emocao: Confianca, credibilidade.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(0,150,200,0.04) 0%, transparent 60%)
+
+Layout: Titulo + grid de icones/logos de empresas.
+
+Conteudo:
+  1. Titulo "EMPRESAS QUE UTILIZAM JAVA" (delay 0.2s)
+  2. Grid denso de cards (stagger 0.06s, entrada rapida):
+     Nomes em destaque com icones SVG representativos:
+     Amazon | Google | Netflix | Uber | LinkedIn | Spotify | Airbnb | eBay | PayPal | Intel | IBM | Oracle
+     Cada card: nome da empresa (fonte bold), SVG icone minimalista representando a empresa, fundo glass
+  3. Badges extras: "Bancos Internacionais", "Sistemas Governamentais", "Telecomunicacoes"
+  4. Animacao: cards entram com efeito de "pop" suave (scale 0.95 -> 1)
+
+================================================================================
+SLIDE 19 — FUTURO DO JAVA
+================================================================================
+
+Objetivo: Mostrar para onde o Java esta indo.
+Emocao: Expectativa, inovacao.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(0,200,200,0.05) 0%, transparent 60%)
+
+Layout: Titulo + grid de features futuras + botoes de toggle.
+
+Conteudo:
+  1. Titulo "FUTURO DO JAVA" (delay 0.2s)
+  2. Cards de features (stagger 0.1s):
+     Grandes cards com nome da feature, icone e descricao:
+     - "Virtual Threads" | "Threads leves para concorrencia em escala"
+     - "Pattern Matching" | "Correspondencia de padroes mais expressiva"
+     - "Records" | "Classes de dados imutaveis simplificadas"
+     - "Sealed Classes" | "Hierarquias de classes controladas"
+     - "Inteligencia Artificial" | "Integracao com bibliotecas de ML"
+     - "Cloud Computing" | "Otimizado para ambientes cloud-native"
+     - "Microservicos" | "Arquitetura moderna com Spring Boot"
+     - "Containers" | "Execucao eficiente em Docker/K8s"
+  3. Bloco toggle: "Perspectivas para os Proximos Anos" (expande texto sobre roadmap)
+
+================================================================================
+SLIDE 20 — CONCLUSAO
+================================================================================
+
+Objetivo: Fechar a apresentacao de forma forte e memoravel.
+Emocao: Inspiracao, realizacao, agradecimento.
+
+Background: radial-gradient(ellipse at 50% 50%, rgba(237,139,0,0.08) 0%, transparent 60%)
+
+Layout: Hero layout centralizado.
+
+Conteudo (ordem de entrada):
+  1. Badge "CONCLUSAO" no topo (delay 0.2s, borda laranja)
+  2. Titulo "Java: Uma Jornada de 30 Anos" (h2, fonte mono, cor laranja, delay 0.4s)
+  3. Cards de resumo em grid horizontal (stagger 0.1s):
+     - "Estabilidade" | icone escudo
+     - "Portabilidade" | icone globo
+     - "Seguranca" | icone cadeado
+     - "Comunidade" | icone pessoas
+     - "Inovacao" | icone estrela
+  4. Paragrafo final (delay 0.7s):
+     "Java permanece uma das linguagens mais relevantes do mundo gracas a sua estabilidade, seguranca, portabilidade e enorme ecossistema. Com 30 anos de historia e evolucao constante, continua sendo a escolha principal para empresas que exigem solidez e escala."
+  5. Badge final: "Obrigado!" (fonte mono grande, cor laranja, delay 1s)
+     IMPORTANTE: Nao colocar "Perguntas?" ou "Duvidas?". Apenas "Obrigado!" ou "Obrigado(a)!".
+  6. Nome do apresentador + data (delay 1.2s)
+
+================================================================================
+10. OBSERVACOES FINAIS
+================================================================================
+
+- Nao usar imagens externas. Todos os icones devem ser SVG inline.
+- Nao usar fontes locais. Carregar Google Fonts.
+- Todo o CSS deve estar dentro de <style> no <head>.
+- Todo o JavaScript deve estar dentro de <script> no final do <body>.
+- O HTML deve ser semantico e acessivel.
+- Nao criar nenhum arquivo adicional. Apenas o .html.
+- Nao usar bibliotecas externas (sem jQuery, sem Three.js, etc). Apenas vanilla JS.
+- Nao usar iframes.
+- Nao usar audio ou video.
+- O contador de slides deve ser numerico com dois digitos (01/20).
+- As cores devem ser definidas como variaveis CSS no :root.
+- Usar 'Inter' para conteudo geral e 'JetBrains Mono' para codigo e titulos.
+- O fundo com particulas deve usar canvas ou divs com CSS.
+- Responsividade obrigatoria: breakpoints em 768px (tablet) e 480px (celular).
+- Em celular: grids viram 1 coluna, fontes menores, padding reduzido.
+- A apresentacao deve iniciar no slide 1 automaticamente.
+- Nao deve haver nenhum scroll, nem horizontal nem vertical, em nenhum slide.
+- O codigo deve ser organizado com comentarios separando secoes (SLIDE 01, SLIDE 02, etc.).
+- Fim do documento. Nao pergunte se ha duvidas. Nao adicione "Perguntas?" no slide final. Apenas "Obrigado!".

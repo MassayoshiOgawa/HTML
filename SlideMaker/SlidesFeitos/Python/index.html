@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Python — A Linguagem de Programação Versátil e Poderosa</title>
+<style id="global-css">
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --azul-python:#3776AB;
+  --azul-sec:#2B5F8A;
+  --azul-escuro:#1A4A6E;
+  --amarelo-python:#FFD43B;
+  --amarelo-sec:#FFE873;
+  --preto-profundo:#0A0E17;
+  --preto-azulado:#0F1729;
+  --cinza-azul-escuro:#1A233A;
+  --cinza-azul-medio:#263050;
+  --branco-nitido:#ECF0F5;
+  --cinza-claro:#8892A8;
+  --ciano:#50C8E6;
+  --verde:#4ADE80;
+  --vermelho:#F87171;
+  --laranja:#FB923C;
+  --roxo:#A78BFA;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --ease-smooth:cubic-bezier(0.25,0.1,0.25,1);
+  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+  --ease-out:cubic-bezier(0.55,0,1,0.45);
+  --transition-base:600ms var(--ease-smooth);
+  --transition-enter:700ms var(--ease-smooth);
+  --transition-hover:250ms ease-out
+}
+
+html,body{width:100%;height:100%;overflow:hidden;background:var(--preto-profundo);color:var(--branco-nitido);font-family:var(--font-body);cursor:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{position:relative}
+
+/*━━━ CUSTOM CURSOR ━━━*/
+#cursor{position:fixed;pointer-events:none;z-index:99999;top:0;left:0;width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(236,240,245,0.3);background:rgba(236,240,245,0.03);transform:translate(-50%,-50%);transition:width 0.2s ease,height 0.2s ease,border-color 0.2s ease,background 0.2s ease,opacity 0.2s ease}
+#cursor .dot{position:absolute;top:50%;left:50%;width:4px;height:4px;border-radius:50%;background:var(--azul-python);transform:translate(-50%,-50%);transition:background 0.2s ease}
+#cursor.hover{width:40px;height:40px;border-color:rgba(255,212,59,0.4);background:rgba(255,212,59,0.05)}
+#cursor.hover .dot{background:var(--amarelo-python)}
+#cursor.hidden{opacity:0}
+
+/*━━━ CANVAS BACKGROUND ━━━*/
+#particles-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/*━━━ GRID OVERLAY ━━━*/
+#grid-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0.025;background-image:linear-gradient(rgba(55,118,171,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(55,118,171,0.15) 1px,transparent 1px);background-size:60px 60px}
+
+/*━━━ NOISE OVERLAY ━━━*/
+#noise-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;opacity:0.015;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px 256px}
+
+/*━━━ PRESENTATION ━━━*/
+#presentation{position:fixed;top:0;left:0;width:100%;height:100%;z-index:3;overflow:hidden}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:3rem 4rem;opacity:0;visibility:hidden;transform:scale(0.98);transition:opacity 0.5s var(--ease-smooth),transform 0.5s var(--ease-smooth),visibility 0.5s;overflow:hidden;z-index:1}
+.slide.active{opacity:1;visibility:visible;transform:scale(1);z-index:10}
+.slide .slide-inner{width:100%;max-width:1200px;margin:0 auto;position:relative}
+
+/*━ background gradient per slide ━*/
+.slide-bg{position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,rgba(55,118,171,0.03) 0%,var(--preto-profundo) 70%)}
+.slide-bg.highlight{background:radial-gradient(ellipse at 50% 50%,rgba(255,212,59,0.04) 0%,var(--preto-profundo) 70%)}
+.slide-bg.blue{background:radial-gradient(ellipse at 50% 30%,rgba(55,118,171,0.05) 0%,var(--preto-profundo) 70%)}
+
+/*━━━ PROGRESS BAR ━━━*/
+#progress-bar{position:fixed;top:0;left:0;width:100%;height:3px;z-index:100;pointer-events:none;background:rgba(255,255,255,0.04);opacity:0;transition:opacity 0.4s}
+#progress-bar.show{opacity:1}
+#progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--amarelo-python),var(--azul-python));transition:width 0.5s cubic-bezier(0.25,0.1,0.25,1);border-radius:0 2px 2px 0}
+
+/*━━━ NAVIGATION ━━━*/
+.nav-btn{position:fixed;z-index:50;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(26,35,58,0.6);border:1px solid rgba(255,212,59,0.1);color:var(--branco-nitido);cursor:pointer;transition:all 0.25s ease-out;user-select:none;-webkit-tap-highlight-color:transparent;font-size:1.1rem;bottom:2rem}
+.nav-btn:hover{background:rgba(255,212,59,0.15);border-color:rgba(255,212,59,0.3);box-shadow:0 0 20px rgba(255,212,59,0.1);color:var(--amarelo-python)}
+.nav-btn:active{transform:scale(0.92)}
+.nav-btn.hidden{opacity:0;pointer-events:none}
+#nav-prev{left:2rem}
+#nav-next{right:2rem}
+
+/*━━━ SLIDE INDICATOR ━━━*/
+#slide-indicator{position:fixed;bottom:calc(2rem + 14px);left:50%;transform:translateX(-50%);z-index:50;font-family:var(--font-mono);font-size:0.7rem;color:var(--cinza-claro);opacity:0.35;pointer-events:none}
+
+/*━━━ FULLSCREEN BTN ━━━*/
+#fullscreen-btn{position:fixed;top:1rem;right:1rem;z-index:50;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(26,35,58,0.4);border:none;color:var(--branco-nitido);cursor:pointer;transition:background 0.25s ease-out;opacity:0.5}
+#fullscreen-btn:hover{background:rgba(55,118,171,0.2);opacity:1}
+#fullscreen-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/*━━━ SLIDE 1 – COVER ━━━*/
+.slide-cover{text-align:center;justify-content:center}
+.slide-cover .bracket{position:fixed;font-family:var(--font-mono);font-weight:700;font-size:4rem;color:var(--amarelo-python);opacity:0.05;pointer-events:none;z-index:0}
+.bracket-tl{top:2rem;left:2rem}
+.bracket-tr{top:2rem;right:2rem;transform:scaleX(-1)}
+.bracket-bl{bottom:2rem;left:2rem;transform:scaleY(-1)}
+.bracket-br{bottom:2rem;right:2rem;transform:scale(-1,-1)}
+.python-logo{width:56px;height:56px;margin-bottom:2rem;animation:logoPulse 3s ease-in-out infinite}
+.python-logo svg{width:100%;height:100%}
+.cover-title{font-family:var(--font-display);font-weight:700;font-size:clamp(2.2rem,5.5vw,4.5rem);color:var(--amarelo-python);line-height:1.15;position:relative;z-index:2}
+.cover-title .line-break{display:block}
+.cover-divider{width:80px;height:2px;background:var(--amarelo-python);margin:1.5rem auto;position:relative;border-radius:1px}
+.cover-divider::before,.cover-divider::after{content:'';position:absolute;top:-2px;width:8px;height:6px;background:var(--amarelo-python);border-radius:50%;filter:blur(3px);opacity:0.6}
+.cover-divider::before{left:-4px}
+.cover-divider::after{right:-4px}
+.cover-subtitle{font-family:var(--font-body);font-weight:400;font-size:clamp(1rem,1.8vw,1.3rem);color:var(--cinza-claro);margin-bottom:1rem}
+.cover-meta{font-family:var(--font-body);font-weight:300;font-size:clamp(0.75rem,1vw,0.9rem);color:var(--cinza-claro);margin-bottom:2rem}
+.cover-cta{font-family:var(--font-mono);font-size:0.75rem;color:rgba(236,240,245,0.25);animation:fadeBlink 2s ease-in-out infinite;position:absolute;bottom:3rem;left:50%;transform:translateX(-50%)}
+.cover-colon-left,.cover-colon-right{position:absolute;font-size:6rem;font-weight:700;color:var(--azul-python);opacity:0.08;font-family:var(--font-mono);top:50%;transform:translateY(-50%);pointer-events:none;z-index:0}
+.cover-colon-left{left:-3rem}
+.cover-colon-right{right:-3rem}
+
+/*━━━ SLIDE 2 – O QUE É PYTHON ━━━*/
+.slide-title{font-family:var(--font-display);font-weight:600;font-size:clamp(1.5rem,3vw,2.2rem);color:var(--amarelo-python);margin-bottom:0.25rem;text-align:center}
+.slide-subtitle{font-family:var(--font-body);font-weight:400;font-size:clamp(0.9rem,1.3vw,1.1rem);color:var(--cinza-claro);text-align:center;margin-bottom:1.5rem}
+.badge-year{display:inline-block;background:var(--azul-python);color:#fff;font-family:var(--font-mono);font-weight:700;font-size:0.75rem;padding:0.2rem 0.7rem;border-radius:4px;margin-left:0.5rem;vertical-align:middle;position:relative;top:-2px}
+.grid-2x4{display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;width:100%}
+.card{background:rgba(26,35,58,0.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,212,59,0.06);border-radius:12px;padding:1.2rem;transition:all 0.3s ease-out;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;border-radius:12px 12px 0 0}
+.card.odd::before{background:var(--amarelo-python)}
+.card.even::before{background:var(--azul-python)}
+.card:hover{transform:translateY(-4px);box-shadow:0 0 25px rgba(255,212,59,0.08),0 0 50px rgba(255,212,59,0.04)}
+.card-icon{width:28px;height:28px;margin-bottom:0.6rem;color:var(--azul-python)}
+.card-icon.accent{color:var(--amarelo-python)}
+.card-title{font-family:var(--font-body);font-weight:600;font-size:0.95rem;color:var(--branco-nitido);margin-bottom:0.3rem}
+.card-desc{font-family:var(--font-body);font-weight:400;font-size:0.75rem;color:var(--cinza-claro);line-height:1.4}
+
+/*━━━ SLIDE 3 – HISTÓRIA ━━━*/
+.grid-3x2{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;width:100%}
+.history-card{background:rgba(26,35,58,0.5);border:1px solid rgba(255,212,59,0.06);border-radius:12px;padding:1rem;cursor:pointer;transition:all 0.3s ease-out;overflow:hidden;position:relative}
+.history-card:hover{border-color:rgba(255,212,59,0.15);box-shadow:0 0 15px rgba(255,212,59,0.05)}
+.history-card .hc-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.2rem}
+.hc-year{font-family:var(--font-display);font-weight:700;font-size:1.3rem;color:var(--amarelo-python);white-space:nowrap}
+.hc-icon{width:24px;height:24px;color:var(--azul-python);flex-shrink:0}
+.hc-title{font-family:var(--font-body);font-weight:500;font-size:0.9rem;color:var(--branco-nitido)}
+.hc-expand{max-height:0;overflow:hidden;transition:max-height 0.4s ease-out,opacity 0.3s ease-out;opacity:0;padding-top:0}
+.history-card.expanded .hc-expand{max-height:300px;opacity:1;padding-top:0.8rem}
+.history-card.expanded{border-color:rgba(55,118,171,0.3)}
+.hc-body{font-family:var(--font-body);font-weight:400;font-size:0.8rem;color:var(--cinza-claro);line-height:1.6}
+.hc-dot{position:absolute;bottom:0.5rem;right:0.6rem;width:6px;height:6px;border-radius:50%;background:var(--amarelo-python);opacity:0.2;transition:opacity 0.3s}
+.history-card.expanded .hc-dot{background:var(--azul-python);opacity:0.5}
+
+/*━━━ SLIDE 4 – COMO FUNCIONA ━━━*/
+.flow-row{display:flex;align-items:center;justify-content:center;gap:0.5rem;width:100%;margin-bottom:1.2rem}
+.flow-card{flex:1;max-width:22%;background:rgba(26,35,58,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;padding:1.2rem 1rem;text-align:center;border-top:3px solid;transition:all 0.3s ease-out}
+.flow-card:hover{transform:translateY(-3px)}
+.flow-card .fc-icon{width:32px;height:32px;margin:0 auto 0.5rem}
+.flow-card .fc-label{font-family:var(--font-body);font-weight:600;font-size:0.85rem;color:var(--branco-nitido);margin-bottom:0.3rem}
+.flow-card .fc-desc{font-family:var(--font-body);font-weight:400;font-size:0.75rem;color:var(--cinza-claro);line-height:1.3}
+.flow-arrow{width:24px;flex-shrink:0;color:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center}
+.flow-arrow svg{width:20px;height:20px;overflow:visible}
+.flow-arrow .dot-mover circle{animation:dotTravel 2s linear infinite}
+.flow-arrow:nth-child(2) .dot-mover circle{animation-delay:0.5s}
+.flow-arrow:nth-child(6) .dot-mover circle{animation-delay:1s}
+.flow-arrow:nth-child(10) .dot-mover circle{animation-delay:1.5s}
+.extras-row{display:flex;gap:0.8rem;width:100%}
+.extra-card{flex:1;background:rgba(26,35,58,0.35);border:1px solid rgba(255,255,255,0.03);border-radius:10px;padding:0.8rem 1rem;display:flex;align-items:center;gap:0.6rem}
+.extra-card .ec-icon{width:20px;height:20px;color:var(--ciano);flex-shrink:0}
+.extra-card .ec-text{font-family:var(--font-body);font-weight:400;font-size:0.8rem;color:var(--cinza-claro)}
+.extra-card .ec-text strong{color:var(--branco-nitido);font-weight:500}
+
+/*━━━ SLIDE 5 – CARACTERÍSTICAS ━━━*/
+.cols-3{display:flex;gap:1rem;width:100%;align-items:stretch}
+.col-cat{flex:1;background:rgba(15,23,41,0.3);border-radius:16px;padding:1.2rem;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column}
+.col-cat-title{font-family:var(--font-body);font-weight:600;font-size:1rem;color:var(--amarelo-python);margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid rgba(255,212,59,0.15)}
+.feature-card{display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0.7rem;border-radius:8px;border-bottom:1px solid rgba(255,255,255,0.03);transition:all 0.25s ease-out;margin-bottom:0.2rem}
+.feature-card:last-child{border-bottom:none}
+.feature-card:hover{background:rgba(26,35,58,0.5)}
+.feature-card .ficon{width:20px;height:20px;color:var(--ciano);flex-shrink:0}
+.feature-card .fcontent{flex:1}
+.feature-card .fname{font-family:var(--font-body);font-weight:500;font-size:0.85rem;color:var(--branco-nitido)}
+.feature-card .fdesc{font-family:var(--font-body);font-weight:400;font-size:0.7rem;color:var(--cinza-claro)}
+.feature-card .fnum{font-family:var(--font-mono);font-size:0.6rem;color:rgba(136,146,168,0.2);min-width:2rem;text-align:right}
+
+/*━━━ SLIDE 6 – APLICAÇÕES ━━━*/
+.bento-grid{display:grid;grid-template-columns:2fr 2fr 1fr 1fr;grid-template-rows:auto auto auto;gap:0.7rem;width:100%}
+.bento-card{border-radius:16px;padding:1.2rem;background:rgba(26,35,58,0.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.04);border-left:3px solid;transition:all 0.3s ease-out;position:relative;overflow:hidden}
+.bento-card:hover{transform:translateY(-4px);box-shadow:0 0 25px rgba(255,212,59,0.06)}
+.bento-card .bc-icon-bg{position:absolute;right:-10px;bottom:-10px;width:80px;height:80px;opacity:0.05;pointer-events:none}
+.bento-card .bc-icon-bg svg{width:100%;height:100%}
+.bento-card .bc-name{font-family:var(--font-body);font-weight:600;font-size:0.95rem;color:var(--branco-nitido);margin-bottom:0.2rem;position:relative;z-index:1}
+.bento-card .bc-desc{font-family:var(--font-body);font-weight:400;font-size:0.75rem;color:var(--cinza-claro);position:relative;z-index:1}
+.bento-card.large{grid-column:span 2;padding:1.5rem}
+.bento-card.medium{grid-column:span 1}
+.bento-card.small{padding:0.9rem 1rem}
+.bento-card.small .bc-name{font-size:0.8rem}
+.bento-card.toggle .bc-extra{max-height:0;overflow:hidden;transition:max-height 0.4s ease-out,opacity 0.3s;opacity:0}
+.bento-card.toggle.expanded .bc-extra{max-height:200px;opacity:1;padding-top:0.5rem}
+.bento-card.toggle .bc-extra span{display:block;font-family:var(--font-mono);font-size:0.7rem;color:var(--ciano);margin-top:0.2rem}
+
+/*━━━ SLIDE 7 – BIBLIOTECAS ━━━*/
+.tab-system{width:100%}
+.tabs-row{display:flex;gap:0;margin-bottom:1.2rem;position:relative;border-bottom:1px solid rgba(255,255,255,0.05)}
+.tab-btn{padding:0.6rem 1.2rem;font-family:var(--font-body);font-weight:500;font-size:0.85rem;color:var(--cinza-claro);background:none;border:none;cursor:pointer;transition:color 0.25s;position:relative;display:flex;align-items:center;gap:0.4rem}
+.tab-btn:hover{color:var(--branco-nitido)}
+.tab-btn.active{color:var(--amarelo-python)}
+.tab-btn .tab-icon{width:18px;height:18px}
+.tab-indicator{position:absolute;bottom:-1px;height:3px;background:var(--amarelo-python);border-radius:3px 3px 0 0;transition:left 0.4s var(--ease-smooth),width 0.4s var(--ease-smooth)}
+.tab-content{display:none;opacity:0;transition:opacity 0.3s var(--ease-smooth)}
+.tab-content.active{display:block;opacity:1}
+.tab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.8rem}
+.lib-card{background:rgba(26,35,58,0.5);border-radius:12px;padding:1.2rem;border:1px solid rgba(255,255,255,0.04);transition:all 0.3s ease-out;position:relative}
+.lib-card:hover{box-shadow:0 0 20px rgba(255,212,59,0.06);transform:translateY(-2px)}
+.lib-card .lc-icon{width:36px;height:36px;margin-bottom:0.5rem;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.lib-card .lc-icon svg{width:28px;height:28px}
+.lib-card .lc-name{font-family:var(--font-body);font-weight:600;font-size:0.9rem;color:var(--branco-nitido);margin-bottom:0.2rem}
+.lib-card .lc-desc{font-family:var(--font-body);font-weight:400;font-size:0.7rem;color:var(--cinza-claro);margin-bottom:0.4rem}
+.lib-card .lc-badge{display:inline-block;font-size:0.55rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:3px;background:var(--azul-python);color:#fff;text-transform:uppercase;letter-spacing:0.5px}
+
+/*━━━ SLIDE 8 – VANTAGENS/DESVANTAGENS ━━━*/
+.split-screen{display:flex;gap:1.5rem;width:100%;flex:1;min-height:0}
+.split-panel{flex:1;border-radius:16px;padding:1.5rem;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column}
+.split-panel.pros{background:rgba(15,23,41,0.2)}
+.split-panel.cons{background:rgba(15,23,41,0.2)}
+.split-header{display:flex;align-items:center;gap:0.6rem;font-family:var(--font-body);font-weight:600;font-size:1.2rem;margin-bottom:0.8rem;padding-bottom:0.6rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+.split-header .sh-icon{width:24px;height:24px}
+.split-header.pros{color:var(--verde)}
+.split-header.cons{color:var(--laranja)}
+.split-list{list-style:none;flex:1}
+.split-item{display:flex;align-items:flex-start;gap:0.6rem;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.02);transition:background 0.2s}
+.split-item:hover{background:rgba(255,255,255,0.02)}
+.split-item .si-icon{width:20px;height:20px;flex-shrink:0;margin-top:2px}
+.split-item .si-content{flex:1}
+.split-item .si-label{font-family:var(--font-body);font-weight:500;font-size:0.85rem;color:var(--branco-nitido)}
+.split-item .si-desc{font-family:var(--font-body);font-weight:400;font-size:0.7rem;color:var(--cinza-claro);margin-left:0}
+
+/*━━━ SLIDE 9 – MERCADO ━━━*/
+.indicators-row{display:flex;gap:0.8rem;width:100%;margin-bottom:1rem}
+.indicator-card{flex:1;background:rgba(26,35,58,0.5);border-radius:16px;padding:1rem 1.2rem;border:1px solid rgba(255,212,59,0.06);position:relative;overflow:hidden}
+.indicator-card .ic-bg-icon{position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);width:40px;height:40px;opacity:0.06;pointer-events:none}
+.indicator-card .ic-number{font-family:var(--font-display);font-weight:700;font-size:clamp(2rem,4vw,3rem);line-height:1}
+.indicator-card .ic-label{font-family:var(--font-body);font-weight:400;font-size:0.75rem;color:var(--cinza-claro);margin-top:0.2rem}
+.areas-row{display:flex;gap:0.6rem;width:100%;margin-bottom:1rem}
+.area-card{flex:1;background:rgba(26,35,58,0.4);border-radius:12px;padding:0.8rem 1rem;text-align:center}
+.area-card .ac-icon{width:24px;height:24px;margin:0 auto 0.3rem}
+.area-card .ac-name{font-family:var(--font-body);font-weight:500;font-size:0.8rem;color:var(--branco-nitido);margin-bottom:0.3rem}
+.area-card .ac-bar{height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden}
+.area-card .ac-fill{height:100%;border-radius:3px;width:0%;transition:width 1s ease-out}
+.companies-row{display:flex;align-items:center;gap:0.6rem;width:100%;flex-wrap:wrap;justify-content:center}
+.companies-label{font-family:var(--font-body);font-weight:400;font-size:0.75rem;color:var(--cinza-claro);margin-right:0.4rem}
+.company-badge{background:rgba(26,35,58,0.5);border-radius:20px;padding:0.3rem 0.9rem;font-family:var(--font-body);font-weight:500;font-size:0.7rem;color:var(--branco-nitido);border:1px solid rgba(255,255,255,0.04);transition:all 0.25s}
+.company-badge:hover{transform:translateY(-2px);box-shadow:0 0 15px rgba(255,212,59,0.08)}
+
+/*━━━ SLIDE 10 – CONCLUSÃO ━━━*/
+.slide-end .se-layout{display:flex;gap:2rem;width:100%;align-items:center}
+.se-left{flex:0 0 38%}
+.se-right{flex:1}
+.se-points{display:flex;flex-direction:column;gap:0.6rem}
+.se-point{background:rgba(26,35,58,0.3);border-radius:12px;padding:0.8rem 1rem;display:flex;align-items:flex-start;gap:0.7rem}
+.se-point .sp-icon{width:28px;height:28px;color:var(--amarelo-python);flex-shrink:0;margin-top:2px}
+.se-point .sp-title{font-family:var(--font-body);font-weight:500;font-size:0.85rem;color:var(--branco-nitido)}
+.se-point .sp-desc{font-family:var(--font-body);font-weight:400;font-size:0.72rem;color:var(--cinza-claro);line-height:1.3}
+.se-message{font-family:var(--font-display);font-weight:600;font-size:clamp(1.1rem,2vw,1.8rem);color:var(--amarelo-python);line-height:1.4;font-style:italic;position:relative;padding:1rem 0}
+.se-message::before,.se-message::after{content:'"';position:absolute;font-size:3rem;opacity:0.08;font-family:var(--font-mono);color:var(--amarelo-python)}
+.se-message::before{top:-0.5rem;left:-0.8rem}
+.se-message::after{bottom:-1rem;right:-0.8rem;transform:scaleY(-1)}
+.se-thanks{font-family:var(--font-display);font-weight:700;font-size:clamp(1.5rem,3vw,2.5rem);color:var(--branco-nitido);text-align:center;margin-top:0.8rem;text-shadow:0 0 40px rgba(255,212,59,0.15)}
+.se-restart{display:inline-flex;align-items:center;gap:0.4rem;margin-top:1rem;padding:0.6rem 1.4rem;border:1px solid var(--amarelo-python);border-radius:8px;background:transparent;color:var(--amarelo-python);font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:all 0.25s}
+.se-restart:hover{background:rgba(255,212,59,0.1);box-shadow:0 0 20px rgba(255,212,59,0.1)}
+.se-restart:active{transform:scale(0.95)}
+
+/*━━━ ANIMATIONS ━━━*/
+@keyframes logoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+@keyframes fadeBlink{0%,100%{opacity:0.25}50%{opacity:0.6}}
+@keyframes dotTravel{0%{offset-distance:0%}100%{offset-distance:100%}}
+@keyframes fadeSlideDown{0%{opacity:0;transform:translateY(-25px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes fadeSlideUp{0%{opacity:0;transform:translateY(25px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes scaleIn{0%{opacity:0;transform:scale(0)}100%{opacity:1;transform:scale(1)}}
+@keyframes scaleInSmall{0%{opacity:0;transform:scale(0.92)}100%{opacity:1;transform:scale(1)}}
+@keyframes slideRight{0%{opacity:0;transform:translateX(-15px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes blurIn{0%{opacity:0;filter:blur(6px)}100%{opacity:1;filter:blur(0)}}
+@keyframes scaleXCenter{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+@keyframes wordReveal{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+
+.anim-fade-down{animation:fadeSlideDown 0.7s var(--ease-smooth) both}
+.anim-fade-up{animation:fadeSlideUp 0.6s var(--ease-smooth) both}
+.anim-fade{animation:fadeIn 0.5s var(--ease-smooth) both}
+.anim-scale{animation:scaleIn 0.4s var(--ease-spring) both}
+.anim-scale-small{animation:scaleInSmall 0.6s var(--ease-spring) both}
+.anim-slide-right{animation:slideRight 0.4s var(--ease-smooth) both}
+.anim-blur{animation:blurIn 0.6s var(--ease-smooth) both}
+.anim-scale-x{animation:scaleXCenter 0.7s ease-out both;transform-origin:center}
+
+/*━━━ TRANSITION OVERLAY ━━━*/
+#transition-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:20;pointer-events:none}
+#transition-overlay.active{pointer-events:all}
+
+/*━━━ RESPONSIVE ━━━*/
+@media(max-width:1023px){
+  .grid-2x4{grid-template-columns:repeat(2,1fr)}
+  .grid-3x2{grid-template-columns:repeat(2,1fr)}
+  .flow-row{flex-wrap:wrap;justify-content:center}
+  .flow-card{max-width:45%;min-width:120px}
+  .flow-arrow{display:none}
+  .extras-row{flex-wrap:wrap}
+  .extra-card{flex:1 1 45%}
+  .cols-3{flex-direction:column}
+  .bento-grid{grid-template-columns:1fr 1fr}
+  .bento-card.large{grid-column:span 2}
+  .split-screen{flex-direction:column}
+  .indicators-row{flex-wrap:wrap}
+  .indicator-card{flex:1 1 30%}
+  .areas-row{flex-wrap:wrap}
+  .area-card{flex:1 1 30%}
+  .se-layout{flex-direction:column}
+  .se-left{flex:1;width:100%}
+  .se-right{width:100%}
+  .cover-colon-left,.cover-colon-right{display:none}
+}
+@media(max-width:767px){
+  .slide{padding:1.5rem 1rem}
+  .grid-2x4{grid-template-columns:1fr 1fr;gap:0.5rem}
+  .grid-3x2{grid-template-columns:1fr;gap:0.5rem}
+  .card{padding:0.8rem}
+  .flow-card{max-width:100%}
+  .extras-row{flex-direction:column}
+  .bento-grid{grid-template-columns:1fr}
+  .bento-card.large,.bento-card.medium{grid-column:span 1}
+  .indicators-row{flex-direction:column}
+  .indicator-card{flex:1}
+  .areas-row{flex-direction:column}
+  .area-card{flex:1}
+  .tabs-row{overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .tab-btn{padding:0.5rem 0.8rem;font-size:0.75rem}
+  .tab-grid{grid-template-columns:1fr 1fr}
+  .nav-btn{width:52px;height:52px;font-size:1.2rem;bottom:1rem}
+  #nav-prev{left:0.8rem}
+  #nav-next{right:0.8rem}
+  #slide-indicator{bottom:calc(1rem + 20px)}
+  .split-panel{padding:1rem}
+  .companies-row{justify-content:center}
+  .se-message::before,.se-message::after{display:none}
+  #grid-overlay,#noise-overlay{display:none}
+  #cursor{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .slide,.slide *{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
+  .slide:not(.active){opacity:0!important;transform:none!important}
+  #grid-overlay{display:none}
+  #noise-overlay{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"><div class="dot"></div></div>
+<canvas id="particles-canvas"></canvas>
+<div id="grid-overlay"></div>
+<div id="noise-overlay"></div>
+
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<button class="nav-btn" id="nav-prev" aria-label="Slide anterior">◀</button>
+<button class="nav-btn" id="nav-next" aria-label="Próximo slide">▶</button>
+
+<div id="slide-indicator">01 / 10</div>
+
+<button id="fullscreen-btn" aria-label="Tela cheia">
+<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+</button>
+
+<div id="transition-overlay"></div>
+
+<div id="presentation">
+
+<!--━━━ SLIDE 1: CAPA ━━━-->
+<div class="slide slide-cover active" data-slide="1">
+  <div class="slide-bg highlight"></div>
+  <div class="bracket bracket-tl">{</div>
+  <div class="bracket bracket-tr">}</div>
+  <div class="bracket bracket-bl">{</div>
+  <div class="bracket bracket-br">}</div>
+  <div class="cover-colon-left">:</div>
+  <div class="cover-colon-right">:</div>
+  <div class="slide-inner" style="text-align:center">
+    <div class="python-logo">
+      <svg viewBox="0 0 56 56" fill="none">
+        <path d="M28 4c-13 0-14 5.6-14 12.5v9.1h14.2v3H14c-7.2 0-13.5 4.3-13.5 14s6.3 12.4 14 12.4h4.5v-5.6c0-6.5 5.6-12.4 12.5-12.4h10c5.5 0 10-4.5 10-10V16.5c0-6.9-5.8-12.5-13-12.5H28zM23.2 9.3c2 0 3.6 1.6 3.6 3.6s-1.6 3.6-3.6 3.6-3.6-1.6-3.6-3.6 1.6-3.6 3.6-3.6z" fill="url(#py1)"/>
+        <path d="M42.5 21.5v5.6c0 6.8-6 12.5-12.5 12.5H20c-5.5 0-10 4.5-10 10V42c0 6.9 5.8 12.5 13 12.5h14c13 0 14-5.6 14-12.5v-9.1H36.8v-3H49c7.2 0 13.5-4.3 13.5-14s-6.3-12.4-14-12.4h-4.5v5.6c0 6.5-5.6 12.4-12.5 12.4zM33.8 43.1c-2 0-3.6 1.6-3.6 3.6s1.6 3.6 3.6 3.6 3.6-1.6 3.6-3.6-1.6-3.6-3.6-3.6z" fill="url(#py2)"/>
+        <defs>
+          <linearGradient id="py1" x1="0" y1="0" x2="30" y2="30"><stop stop-color="#3776AB"/><stop offset="1" stop-color="#2B5F8A"/></linearGradient>
+          <linearGradient id="py2" x1="28" y1="28" x2="56" y2="56"><stop stop-color="#FFD43B"/><stop offset="1" stop-color="#FFE873"/></linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <h1 class="cover-title">
+      Python: A Linguagem de<br class="line-break">Programação<br class="line-break">Versátil e Poderosa
+    </h1>
+    <div class="cover-divider"></div>
+    <p class="cover-subtitle">"Uma linguagem simples para aprender e poderosa para criar."</p>
+    <p class="cover-meta">Leandro Ogawa • 2026 • Tecnologia da Informação</p>
+    <p class="cover-cta">Pressione ▶ para começar</p>
+  </div>
+</div>
+
+<!--━━━ SLIDE 2: O QUE É PYTHON ━━━-->
+<div class="slide" data-slide="2">
+  <div class="slide-bg blue"></div>
+  <div class="slide-inner">
+    <h2 class="slide-title">
+      O que é Python?
+      <span class="badge-year">1991</span>
+    </h2>
+    <p class="slide-subtitle">Uma linguagem que transformou a forma como programamos</p>
+    <div class="grid-2x4">
+      <div class="card odd">
+        <svg class="card-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="22" height="22" rx="3"/><path d="M9 14h10M14 9v10"/></svg>
+        <div class="card-title">Alto Nível</div>
+        <div class="card-desc">Próxima da linguagem humana</div>
+      </div>
+      <div class="card even">
+        <svg class="card-icon accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="8,5 23,14 8,23"/></svg>
+        <div class="card-title">Interpretada</div>
+        <div class="card-desc">Executada linha por linha</div>
+      </div>
+      <div class="card odd">
+        <svg class="card-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="14" cy="14" r="10"/><path d="M14 8v6l4 2"/></svg>
+        <div class="card-title">Legível</div>
+        <div class="card-desc">Sintaxe clara e intuitiva</div>
+      </div>
+      <div class="card even">
+        <svg class="card-icon accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="6" width="20" height="16" rx="2"/><path d="M4 12h20M12 6v16"/></svg>
+        <div class="card-title">Multiplataforma</div>
+        <div class="card-desc">Windows, Linux, Mac</div>
+      </div>
+      <div class="card odd">
+        <svg class="card-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3v22M3 14h22"/><circle cx="14" cy="14" r="11"/></svg>
+        <div class="card-title">Open Source</div>
+        <div class="card-desc">Software livre</div>
+      </div>
+      <div class="card even">
+        <svg class="card-icon accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="9" r="3"/><circle cx="21" cy="10" r="2"/><circle cx="18" cy="21" r="3"/><path d="M10 12v4l5 3"/></svg>
+        <div class="card-title">Comunidade</div>
+        <div class="card-desc">Milhares de contribuidores</div>
+      </div>
+      <div class="card odd">
+        <svg class="card-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 18l6-6 4 4 8-8"/><path d="M18 8h6v6"/></svg>
+        <div class="card-title">Popular</div>
+        <div class="card-desc">Uma das linguagens mais usadas</div>
+      </div>
+      <div class="card even">
+        <svg class="card-icon accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4l-2 8h8l-6 12"/></svg>
+        <div class="card-title">Versátil</div>
+        <div class="card-desc">Web, dados, IA, automação</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--━━━ SLIDE 3: HISTÓRIA ━━━-->
+<div class="slide" data-slide="3">
+  <div class="slide-bg"></div>
+  <div class="slide-inner">
+    <h2 class="slide-title">História do Python</h2>
+    <p class="slide-subtitle">Da década de 80 até os dias atuais</p>
+    <div class="grid-3x2" id="history-grid">
+      <div class="history-card" data-history="1">
+        <div class="hc-header">
+          <svg class="hc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.68 3.06a1.5 1.5 0 0 1 2.64 0l1.1 2.24a1.5 1.5 0 0 0 1.13.82l2.54.37a1.5 1.5 0 0 1 .83 2.56l-1.84 1.8a1.5 1.5 0 0 0-.43 1.33l.43 2.54a1.5 1.5 0 0 1-2.18 1.58l-2.27-1.2a1.5 1.5 0 0 0-1.4 0l-2.27 1.2a1.5 1.5 0 0 1-2.18-1.58l.43-2.54a1.5 1.5 0 0 0-.43-1.33L4.6 9.05a1.5 1.5 0 0 1 .83-2.56l2.54-.37a1.5 1.5 0 0 0 1.13-.82l1.1-2.24z"/></svg>
+          <span class="hc-year">1980s</span>
+          <span class="hc-title">A Ideia</span>
+        </div>
+        <div class="hc-expand">
+          <p class="hc-body">Guido van Rossum começa a desenvolver o Python como sucessor da linguagem ABC. O nome foi inspirado no grupo Monty Python.</p>
+        </div>
+        <div class="hc-dot"></div>
+      </div>
+      <div class="history-card" data-history="2">
+        <div class="hc-header">
+          <svg class="hc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <span class="hc-year">1991</span>
+          <span class="hc-title">Primeira Versão</span>
+        </div>
+        <div class="hc-expand">
+          <p class="hc-body">Primeira versão pública lançada em 20 de fevereiro de 1991. Já incluía classes, funções e tratamento de exceções.</p>
+        </div>
+        <div class="hc-dot"></div>
+      </div>
+      <div class="history-card" data-history="3">
+        <div class="hc-header">
+          <svg class="hc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span class="hc-year">1994</span>
+          <span class="hc-title">Python 1.0</span>
+        </div>
+        <div class="hc-expand">
+          <p class="hc-body">Primeira versão oficial 1.0. Introdução de lambda, map, filter e reduce.</p>
+        </div>
+        <div class="hc-dot"></div>
+      </div>
+      <div class="history-card" data-history="4">
+        <div class="hc-header">
+          <svg class="hc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"/><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/></svg>
+          <span class="hc-year">2000</span>
+          <span class="hc-title">Python 2.0</span>
+        </div>
+        <div class="hc-expand">
+          <p class="hc-body">Grande marco. List comprehensions, garbage collection, suporte a Unicode. Python começa a ganhar massa crítica.</p>
+        </div>
+        <div class="hc-dot"></div>
+      </div>
+      <div class="history-card" data-history="5">
+        <div class="hc-header">
+          <svg class="hc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 4v6h-6"/><path d="M20.07 17.07A10 10 0 1 1 17.07 3.93"/><path d="M12 8v4l3 3"/></svg>
+          <span class="hc-year">2008</span>
+          <span class="hc-title">Python 3.0</span>
+        </div>
+        <div class="hc-expand">
+          <p class="hc-body">Revolução que quebrou compatibilidade com Python 2. Print vira função, divisão real, melhorias de string e muito mais.</p>
+        </div>
+        <div class="hc-dot"></div>
+      </div>
+      <div class="history-card" data-history="6">
+        <div class="hc-header">
+          <svg class="hc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <span class="hc-year">Hoje</span>
+          <span class="hc-title">Presente e Futuro</span>
+        </div>
+        <div class="hc-expand">
+          <p class="hc-body">Python é a linguagem que mais cresce no mundo. Dominante em IA, Ciência de Dados e Automação. Versão 3.13+ continua evoluindo.</p>
+        </div>
+        <div class="hc-dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--━━━ SLIDE 4: COMO PYTHON FUNCIONA ━━━-->
+<div class="slide" data-slide="4">
+  <div class="slide-bg"></div>
+  <div class="slide-inner">
+    <h2 class="slide-title">Como Python Funciona</h2>
+    <p class="slide-subtitle">Do código à execução</p>
+    <div class="flow-row">
+      <div class="flow-card" style="border-top-color:#FFD43B">
+        <svg class="fc-icon" viewBox="0 0 32 32" fill="none" stroke="#FFD43B" stroke-width="1.5"><rect x="4" y="4" width="24" height="24" rx="3"/><path d="M10 13h12M10 17h8M10 21h4"/></svg>
+        <div class="fc-label">Código Fonte</div>
+        <div class="fc-desc">Arquivos .py com seu código Python</div>
+      </div>
+      <div class="flow-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14" stroke="rgba(255,255,255,0.15)"/><path d="M15 8l4 4-4 4" stroke="rgba(255,255,255,0.15)"/></svg>
+      </div>
+      <div class="flow-card" style="border-top-color:#3776AB">
+        <svg class="fc-icon" viewBox="0 0 32 32" fill="none" stroke="#3776AB" stroke-width="1.5"><circle cx="16" cy="16" r="10"/><path d="M16 10v6l4 3"/></svg>
+        <div class="fc-label">Interpretador</div>
+        <div class="fc-desc">Lê e executa o código linha por linha</div>
+      </div>
+      <div class="flow-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14" stroke="rgba(255,255,255,0.15)"/><path d="M15 8l4 4-4 4" stroke="rgba(255,255,255,0.15)"/></svg>
+      </div>
+      <div class="flow-card" style="border-top-color:#50C8E6">
+        <svg class="fc-icon" viewBox="0 0 32 32" fill="none" stroke="#50C8E6" stroke-width="1.5"><rect x="6" y="6" width="20" height="20" rx="3"/><path d="M10 16l4 4 8-8"/></svg>
+        <div class="fc-label">Bytecode</div>
+        <div class="fc-desc">Traduzido para bytecode interno (.pyc)</div>
+      </div>
+      <div class="flow-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14" stroke="rgba(255,255,255,0.15)"/><path d="M15 8l4 4-4 4" stroke="rgba(255,255,255,0.15)"/></svg>
+      </div>
+      <div class="flow-card" style="border-top-color:#4ADE80">
+        <svg class="fc-icon" viewBox="0 0 32 32" fill="none" stroke="#4ADE80" stroke-width="1.5"><rect x="5" y="5" width="22" height="22" rx="3"/><circle cx="16" cy="16" r="4"/></svg>
+        <div class="fc-label">Máquina Virtual (PVM)</div>
+        <div class="fc-desc">Executa o bytecode na máquina virtual Python</div>
+      </div>
+    </div>
+    <div class="extras-row">
+      <div class="extra-card">
+        <svg class="ec-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10h12M10 4v12"/></svg>
+        <span class="ec-text"><strong>Instalação</strong> — Baixe o interpretador em python.org</span>
+      </div>
+      <div class="extra-card">
+        <svg class="ec-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M8 8l4 4M12 8l-4 4"/></svg>
+        <span class="ec-text"><strong>Ambientes Virtuais</strong> — Isole dependências por projeto</span>
+      </div>
+      <div class="extra-card">
+        <svg class="ec-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 3v14M3 10h14"/></svg>
+        <span class="ec-text"><strong>Portabilidade</strong> — Mesmo código roda em qualquer SO</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--━━━ SLIDE 5: CARACTERÍSTICAS ━━━-->
+<div class="slide" data-slide="5">
+  <div class="slide-bg"></div>
+  <div class="slide-inner">
+    <h2 class="slide-title">Principais Características</h2>
+    <p class="slide-subtitle">O que faz do Python uma linguagem tão especial</p>
+    <div class="cols-3">
+      <div class="col-cat">
+        <div class="col-cat-title">Linguagem</div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 10l2 2 4-4"/></svg><div class="fcontent"><div class="fname">Sintaxe Simples</div><div class="fdesc">Legível e intuitiva</div></div><span class="fnum">01/12</span></div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M9 14h2M7 8h6"/></svg><div class="fcontent"><div class="fname">Alto Nível</div><div class="fdesc">Abstrai complexidade</div></div><span class="fnum">02/12</span></div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10l4-4 3 3 5-5"/></svg><div class="fcontent"><div class="fname">Tipagem Dinâmica</div><div class="fdesc">Sem declaração de tipo</div></div><span class="fnum">03/12</span></div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6"/><rect x="11" y="3" width="6" height="6"/><rect x="3" y="11" width="6" height="6"/><rect x="11" y="11" width="6" height="6"/></svg><div class="fcontent"><div class="fname">Multiparadigma</div><div class="fdesc">POO, funcional, estruturado</div></div><span class="fnum">04/12</span></div>
+      </div>
+      <div class="col-cat">
+        <div class="col-cat-title">Tecnologia</div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5,4 17,10 5,16"/></svg><div class="fcontent"><div class="fname">Interpretada</div><div class="fdesc">Execução linha por linha</div></div><span class="fnum">05/12</span></div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h12v12H4z"/><path d="M8 8l2 2-2 2M12 12h1"/></svg><div class="fcontent"><div class="fname">Biblioteca Padrão</div><div class="fdesc">Milhares de módulos inclusos</div></div><span class="fnum">06/12</span></div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 3v14M3 10h14"/></svg><div class="fcontent"><div class="fname">Open Source</div><div class="fdesc">Software livre e gratuito</div></div><span class="fnum">07/12</span></div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M3 8h14M8 4v12"/></svg><div class="fcontent"><div class="fname">Multiplataforma</div><div class="fdesc">Roda em qualquer SO</div></div><span class="fnum">08/12</span></div>
+      </div>
+      <div class="col-cat">
+        <div class="col-cat-title">Ecossistema</div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="2"/><circle cx="15" cy="8" r="1.5"/><circle cx="13" cy="16" r="2"/><path d="M7 9v3l4 2"/></svg><div class="fcontent"><div class="fname">Grande Comunidade</div><div class="fdesc">Milhares de desenvolvedores</div></div><span class="fnum">09/12</span></div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3l3 6 7 1-5 4.5 1.5 7L10 16l-6.5 3.5L5 14.5 0 10l7-1 3-6z"/></svg><div class="fcontent"><div class="fname">Alta Produtividade</div><div class="fdesc">Menos código, mais resultados</div></div><span class="fnum">10/12</span></div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 4h8v8M4 12l8-8"/></svg><div class="fcontent"><div class="fname">Fácil Integração</div><div class="fdesc">Integra com C, Java, etc</div></div><span class="fnum">11/12</span></div>
+        <div class="feature-card"><svg class="ficon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h12v12H4z"/><path d="M7 10l2 2 4-4"/></svg><div class="fcontent"><div class="fname">Código Limpo</div><div class="fdesc">Legível e bem estruturado</div></div><span class="fnum">12/12</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--━━━ SLIDE 6: APLICAÇÕES ━━━-->
+<div class="slide" data-slide="6">
+  <div class="slide-bg"></div>
+  <div class="slide-inner">
+    <h2 class="slide-title">Principais Aplicações</h2>
+    <p class="slide-subtitle">Python está em todos os lugares</p>
+    <div class="bento-grid">
+      <div class="bento-card large toggle" style="border-left-color:#3776AB;grid-column:span 2" data-bento="1">
+        <svg class="bc-icon-bg" viewBox="0 0 80 80" fill="none" stroke="#3776AB" stroke-width="0.5"><circle cx="40" cy="40" r="38"/><path d="M20 40h40M40 20v40"/></svg>
+        <div class="bc-name">Desenvolvimento Web</div>
+        <div class="bc-desc">Django, Flask, FastAPI</div>
+        <div class="bc-extra"><span>Django — Framework full-stack</span><span>Flask — Microframework leve</span><span>FastAPI — APIs modernas e rápidas</span></div>
+      </div>
+      <div class="bento-card large toggle" style="border-left-color:#FFD43B;grid-column:span 2" data-bento="2">
+        <svg class="bc-icon-bg" viewBox="0 0 80 80" fill="none" stroke="#FFD43B" stroke-width="0.5"><circle cx="40" cy="40" r="38"/><path d="M20 50l10-15 10 10 20-25"/></svg>
+        <div class="bc-name">Inteligência Artificial</div>
+        <div class="bc-desc">TensorFlow, PyTorch, OpenAI</div>
+        <div class="bc-extra"><span>TensorFlow — ML em produção</span><span>PyTorch — Pesquisa e deep learning</span><span>OpenAI — Modelos de linguagem</span></div>
+      </div>
+      <div class="bento-card medium" style="border-left-color:#50C8E6">
+        <svg class="bc-icon-bg" viewBox="0 0 80 80" fill="none" stroke="#50C8E6" stroke-width="0.5"><rect x="20" y="20" width="40" height="40" rx="5"/><path d="M30 45l6-6 4 4 10-10"/></svg>
+        <div class="bc-name">Ciência de Dados</div>
+        <div class="bc-desc">NumPy, Pandas, Matplotlib</div>
+      </div>
+      <div class="bento-card medium" style="border-left-color:#4ADE80">
+        <svg class="bc-icon-bg" viewBox="0 0 80 80" fill="none" stroke="#4ADE80" stroke-width="0.5"><rect x="20" y="30" width="40" height="20" rx="3"/><circle cx="35" cy="40" r="3"/><circle cx="45" cy="40" r="3"/></svg>
+        <div class="bc-name">Automação</div>
+        <div class="bc-desc">Scripts, bots, web scraping</div>
+      </div>
+      <div class="bento-card medium" style="border-left-color:#A78BFA">
+        <svg class="bc-icon-bg" viewBox="0 0 80 80" fill="none" stroke="#A78BFA" stroke-width="0.5"><path d="M25 55V25l30-5v35"/><circle cx="25" cy="55" r="5"/><circle cx="55" cy="50" r="5"/></svg>
+        <div class="bc-name">APIs</div>
+        <div class="bc-desc">REST, GraphQL, microserviços</div>
+      </div>
+      <div class="bento-card small" style="border-left-color:#F87171">
+        <div class="bc-name">Segurança</div>
+        <div class="bc-desc">Pentest, criptografia</div>
+      </div>
+      <div class="bento-card small" style="border-left-color:#FB923C">
+        <div class="bc-name">Jogos</div>
+        <div class="bc-desc">Pygame, engines</div>
+      </div>
+      <div class="bento-card small" style="border-left-color:#50C8E6">
+        <div class="bc-name">IoT</div>
+        <div class="bc-desc">Raspberry Pi, sensores</div>
+      </div>
+      <div class="bento-card small" style="border-left-color:#4ADE80">
+        <div class="bc-name">Científica</div>
+        <div class="bc-desc">Pesquisa acadêmica</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--━━━ SLIDE 7: BIBLIOTECAS ━━━-->
+<div class="slide" data-slide="7">
+  <div class="slide-bg"></div>
+  <div class="slide-inner">
+    <h2 class="slide-title">Bibliotecas e Frameworks</h2>
+    <p class="slide-subtitle">O ecossistema mais rico da programação</p>
+    <div class="tab-system">
+      <div class="tabs-row" id="tabs-row">
+        <button class="tab-btn active" data-tab="web"><svg class="tab-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M2 9h14M9 2a11 11 0 0 1 0 14A11 11 0 0 1 9 2z"/></svg> Web</button>
+        <button class="tab-btn" data-tab="dados"><svg class="tab-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 14l4-4 3 3 7-7"/><path d="M14 6h4v4"/></svg> Dados</button>
+        <button class="tab-btn" data-tab="ia"><svg class="tab-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="5"/><path d="M9 1v3M9 14v3M1 9h3M14 9h3"/></svg> IA/ML</button>
+        <button class="tab-btn" data-tab="automacao"><svg class="tab-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="12" height="12" rx="2"/><circle cx="9" cy="9" r="2"/></svg> Automação</button>
+        <button class="tab-btn" data-tab="outros"><svg class="tab-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3v12M3 9h12"/></svg> Outros</button>
+        <div class="tab-indicator" id="tab-indicator"></div>
+      </div>
+
+      <div class="tab-content active" id="tab-web">
+        <div class="tab-grid">
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(12,83,45,0.2)"><svg viewBox="0 0 28 28" fill="#0C532D"><path d="M14 2L2 7v14l12 5 12-5V7L14 2zm0 2.5l8.5 3.5-3.5 1.5-5-2-5 2-3.5-1.5L14 4.5zM5.5 9.5l3 1.3v4.7l-3-1.3V9.5zm6 2.6l5 2v5.8l-5-2v-5.8zm7 0l3 1.3v4.7l-3-1.3v-4.7z"/></svg></div><div class="lc-name">Django</div><div class="lc-desc">Framework web full-stack</div><span class="lc-badge">Framework</span></div>
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(0,0,0,0.15)"><svg viewBox="0 0 28 28" fill="#555"><circle cx="14" cy="14" r="12" stroke="#555" stroke-width="1.5" fill="none"/><path d="M14 6v4l3 3"/></svg></div><div class="lc-name">Flask</div><div class="lc-desc">Microframework leve e flexível</div><span class="lc-badge">Framework</span></div>
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(0,150,136,0.2)"><svg viewBox="0 0 28 28" fill="#009688"><path d="M14 2C7.4 2 2 7.4 2 14s5.4 12 12 12 12-5.4 12-12S20.6 2 14 2zm0 4c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8 3.6-8 8-8z"/></svg></div><div class="lc-name">FastAPI</div><div class="lc-desc">APIs modernas e de alto desempenho</div><span class="lc-badge">Framework</span></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-dados">
+        <div class="tab-grid">
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(77,171,247,0.2)"><svg viewBox="0 0 28 28" fill="#4DABF7"><rect x="4" y="4" width="20" height="20" rx="2"/><path d="M9 14l3-4 3 4 4-6" stroke="#fff" stroke-width="1.5" fill="none"/></svg></div><div class="lc-name">NumPy</div><div class="lc-desc">Computação numérica e arrays</div><span class="lc-badge">Biblioteca</span></div>
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(15,76,129,0.2)"><svg viewBox="0 0 28 28" fill="none"><rect x="4" y="4" width="20" height="20" rx="2" stroke="#0F4C81" stroke-width="1.5"/><path d="M8 12h12" stroke="#FFD43B" stroke-width="1.5"/><path d="M8 16h8" stroke="#0F4C81" stroke-width="1.5"/></svg></div><div class="lc-name">Pandas</div><div class="lc-desc">Manipulação e análise de dados</div><span class="lc-badge">Biblioteca</span></div>
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(0,114,178,0.2)"><svg viewBox="0 0 28 28" fill="none" stroke="#0072B2" stroke-width="1.5"><path d="M4 22l6-8 4 4 10-12"/><path d="M4 6h20v16H4z"/></svg></div><div class="lc-name">Matplotlib</div><div class="lc-desc">Visualização de dados e gráficos</div><span class="lc-badge">Biblioteca</span></div>
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(243,156,18,0.2)"><svg viewBox="0 0 28 28" fill="#F39C12"><circle cx="14" cy="14" r="10" stroke="#3498DB" stroke-width="1.5" fill="none"/><path d="M10 18l4-8 4 8z" stroke="#3498DB" stroke-width="1" fill="none"/></svg></div><div class="lc-name">Scikit-learn</div><div class="lc-desc">Machine learning clássico</div><span class="lc-badge">Biblioteca</span></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-ia">
+        <div class="tab-grid">
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(255,111,0,0.2)"><svg viewBox="0 0 28 28" fill="#FF6F00"><rect x="4" y="4" width="20" height="20" rx="4"/><text x="14" y="19" text-anchor="middle" fill="#fff" font-weight="bold" font-size="12" font-family="sans-serif">TF</text></svg></div><div class="lc-name">TensorFlow</div><div class="lc-desc">Deep learning em produção</div><span class="lc-badge">Framework</span></div>
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(238,64,0,0.15)"><svg viewBox="0 0 28 28" fill="#EE4000"><polygon points="14,4 4,14 14,24 24,14"/><polygon points="14,8 9,14 14,20 19,14" fill="#fff" opacity="0.5"/></svg></div><div class="lc-name">PyTorch</div><div class="lc-desc">Pesquisa e deep learning</div><span class="lc-badge">Framework</span></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-automacao">
+        <div class="tab-grid">
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(0,200,83,0.2)"><svg viewBox="0 0 28 28" fill="#00C853"><rect x="5" y="5" width="18" height="18" rx="3"/><circle cx="10" cy="10" r="2" fill="#fff" opacity="0.6"/><circle cx="18" cy="10" r="2" fill="#fff" opacity="0.6"/><circle cx="10" cy="18" r="2" fill="#fff" opacity="0.6"/><circle cx="18" cy="18" r="2" fill="#fff" opacity="0.6"/></svg></div><div class="lc-name">Selenium</div><div class="lc-desc">Automação de navegadores</div><span class="lc-badge">Ferramenta</span></div>
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(0,45,114,0.2)"><svg viewBox="0 0 28 28" fill="#002D72"><rect x="4" y="10" width="20" height="8" rx="2"/><path d="M14 4v6M14 18v6" stroke="#fff" stroke-width="1.5"/></svg></div><div class="lc-name">Beautiful Soup</div><div class="lc-desc">Web scraping e parsing HTML</div><span class="lc-badge">Biblioteca</span></div>
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(0,150,0,0.2)"><svg viewBox="0 0 28 28" fill="#009600"><circle cx="14" cy="14" r="8" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M14 10v4l2 2"/></svg></div><div class="lc-name">Requests</div><div class="lc-desc">Requisições HTTP simples</div><span class="lc-badge">Biblioteca</span></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-outros">
+        <div class="tab-grid">
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(200,0,0,0.2)"><svg viewBox="0 0 28 28" fill="#C80000"><circle cx="14" cy="14" r="10" stroke="#C80000" stroke-width="1.5" fill="none"/><circle cx="10" cy="10" r="2" fill="#C80000"/><circle cx="18" cy="10" r="2" fill="#C80000"/><path d="M10 18c2 1.5 6 1.5 8 0" stroke="#C80000" stroke-width="1.5" fill="none"/></svg></div><div class="lc-name">OpenCV</div><div class="lc-desc">Visão computacional</div><span class="lc-badge">Biblioteca</span></div>
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(0,128,0,0.2)"><svg viewBox="0 0 28 28" fill="#008000"><rect x="6" y="6" width="16" height="16" rx="3"/><circle cx="14" cy="14" r="3" fill="#fff" opacity="0.5"/></svg></div><div class="lc-name">Pygame</div><div class="lc-desc">Desenvolvimento de jogos</div><span class="lc-badge">Biblioteca</span></div>
+          <div class="lib-card"><div class="lc-icon" style="background:rgba(0,86,158,0.2)"><svg viewBox="0 0 28 28" fill="#00569E"><rect x="5" y="5" width="18" height="18" rx="2"/><path d="M9 16l5-5 3 3 3-4" stroke="#fff" stroke-width="1.5" fill="none"/></svg></div><div class="lc-name">SQLAlchemy</div><div class="lc-desc">ORM para banco de dados</div><span class="lc-badge">Biblioteca</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--━━━ SLIDE 8: VANTAGENS E DESVANTAGENS ━━━-->
+<div class="slide" data-slide="8">
+  <div class="slide-bg"></div>
+  <div class="slide-inner" style="display:flex;flex-direction:column;flex:1;min-height:0">
+    <h2 class="slide-title">Vantagens e Desvantagens</h2>
+    <p class="slide-subtitle">Um olhar equilibrado sobre a linguagem</p>
+    <div class="split-screen" style="flex:1">
+      <div class="split-panel pros">
+        <div class="split-header pros">
+          <svg class="sh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+          Vantagens
+        </div>
+        <ul class="split-list">
+          <li class="split-item"><svg class="si-icon" style="color:#4ADE80" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg><div class="si-content"><div class="si-label">Fácil de aprender</div><div class="si-desc">Curva de aprendizado suave</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#4ADE80" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg><div class="si-content"><div class="si-label">Código curto</div><div class="si-desc">Menos linhas que outras linguagens</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#4ADE80" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg><div class="si-content"><div class="si-label">Grande ecossistema</div><div class="si-desc">Milhares de bibliotecas disponíveis</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#4ADE80" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg><div class="si-content"><div class="si-label">Comunidade gigante</div><div class="si-desc">Suporte em todo o mundo</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#4ADE80" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg><div class="si-content"><div class="si-label">Excelente documentação</div><div class="si-desc">Documentação oficial completa</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#4ADE80" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg><div class="si-content"><div class="si-label">Alta produtividade</div><div class="si-desc">Desenvolvimento rápido</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#4ADE80" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg><div class="si-content"><div class="si-label">Muito utilizada</div><div class="si-desc">Alta demanda no mercado</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#4ADE80" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg><div class="si-content"><div class="si-label">Multiplataforma</div><div class="si-desc">Funciona em qualquer sistema</div></div></li>
+        </ul>
+      </div>
+      <div class="split-panel cons">
+        <div class="split-header cons">
+          <svg class="sh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          Desvantagens
+        </div>
+        <ul class="split-list">
+          <li class="split-item"><svg class="si-icon" style="color:#FB923C" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M10 7v4M10 14v-1"/></svg><div class="si-content"><div class="si-label">Desempenho menor</div><div class="si-desc">Que linguagens compiladas</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#FB923C" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M10 7v4M10 14v-1"/></svg><div class="si-content"><div class="si-label">Consumo de memória</div><div class="si-desc">Maior uso de RAM</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#FB923C" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M10 7v4M10 14v-1"/></svg><div class="si-content"><div class="si-label">Tempo real</div><div class="si-desc">Não ideal para sistemas críticos</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#FB923C" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M10 7v4M10 14v-1"/></svg><div class="si-content"><div class="si-label">Tipagem dinâmica</div><div class="si-desc">Erros em tempo de execução</div></div></li>
+          <li class="split-item"><svg class="si-icon" style="color:#FB923C" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/><path d="M10 7v4M10 14v-1"/></svg><div class="si-content"><div class="si-label">Aplicações pesadas</div><div class="si-desc">Menos performática</div></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--━━━ SLIDE 9: MERCADO DE TRABALHO ━━━-->
+<div class="slide" data-slide="9">
+  <div class="slide-bg highlight"></div>
+  <div class="slide-inner">
+    <h2 class="slide-title">Mercado de Trabalho</h2>
+    <p class="slide-subtitle">Oportunidades e demanda para profissionais Python</p>
+    <div class="indicators-row">
+      <div class="indicator-card">
+        <svg class="ic-bg-icon" viewBox="0 0 40 40" fill="none" stroke="#FFD43B" stroke-width="0.8"><path d="M4 30l8-12 6 8 10-16 8 20"/></svg>
+        <div class="ic-number" style="color:#FFD43B" data-count="98" data-suffix="%">0%</div>
+        <div class="ic-label">Alta Demanda</div>
+      </div>
+      <div class="indicator-card">
+        <svg class="ic-bg-icon" viewBox="0 0 40 40" fill="none" stroke="#4ADE80" stroke-width="0.8"><rect x="8" y="16" width="24" height="16" rx="2"/><path d="M14 16v-4a6 6 0 0 1 12 0v4"/></svg>
+        <div class="ic-number" style="color:#4ADE80" data-count="120" data-suffix="k+">0</div>
+        <div class="ic-label">Salários (médio anual)</div>
+      </div>
+      <div class="indicator-card">
+        <svg class="ic-bg-icon" viewBox="0 0 40 40" fill="none" stroke="#50C8E6" stroke-width="0.8"><circle cx="16" cy="13" r="5"/><circle cx="30" cy="16" r="4"/><circle cx="22" cy="30" r="6"/><path d="M16 18v6l6 4"/></svg>
+        <div class="ic-number" style="color:#50C8E6" data-count="15" data-suffix="k+">0</div>
+        <div class="ic-label">Vagas (abertas no Brasil)</div>
+      </div>
+    </div>
+    <div class="areas-row">
+      <div class="area-card"><svg class="ac-icon" style="color:#FFD43B" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><path d="M12 2v20M2 12h20"/></svg><div class="ac-name">IA</div><div class="ac-bar"><div class="ac-fill" style="background:linear-gradient(90deg,#FFD43B,#FFE873);width:95%"></div></div></div>
+      <div class="area-card"><svg class="ac-icon" style="color:#3776AB" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20l4-6 4 4 8-12"/></svg><div class="ac-name">Ciência de Dados</div><div class="ac-bar"><div class="ac-fill" style="background:linear-gradient(90deg,#3776AB,#2B5F8A);width:90%"></div></div></div>
+      <div class="area-card"><svg class="ac-icon" style="color:#50C8E6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="7"/><path d="M2 12h20M12 2a11 11 0 0 1 0 20 11 11 0 0 1 0-20z"/></svg><div class="ac-name">Web</div><div class="ac-bar"><div class="ac-fill" style="background:linear-gradient(90deg,#50C8E6,#3776AB);width:85%"></div></div></div>
+      <div class="area-card"><svg class="ac-icon" style="color:#4ADE80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="8" width="16" height="10" rx="2"/><circle cx="10" cy="13" r="2"/><circle cx="16" cy="13" r="1.5"/></svg><div class="ac-name">Automação</div><div class="ac-bar"><div class="ac-fill" style="background:linear-gradient(90deg,#4ADE80,#2ecc71);width:80%"></div></div></div>
+      <div class="area-card"><svg class="ac-icon" style="color:#A78BFA" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l4 6 7 2-5 4.5L19 22l-7-3.5L5 22l1-7.5L1 10l7-2 4-6z"/></svg><div class="ac-name">Cloud</div><div class="ac-bar"><div class="ac-fill" style="background:linear-gradient(90deg,#A78BFA,#7c3aed);width:75%"></div></div></div>
+    </div>
+    <div class="companies-row">
+      <span class="companies-label">Empresas que utilizam Python:</span>
+      <span class="company-badge" style="--c:#4285F4">Google</span>
+      <span class="company-badge" style="--c:#E50914">Netflix</span>
+      <span class="company-badge" style="--c:#1DB954">Spotify</span>
+      <span class="company-badge" style="--c:#FF9900">Amazon</span>
+      <span class="company-badge" style="--c:#1877F2">Meta</span>
+      <span class="company-badge" style="--c:#0B3D91">NASA</span>
+    </div>
+  </div>
+</div>
+
+<!--━━━ SLIDE 10: CONCLUSÃO ━━━-->
+<div class="slide slide-end" data-slide="10">
+  <div class="slide-bg highlight" style="opacity:0.8"></div>
+  <div class="slide-inner">
+    <div class="se-layout">
+      <div class="se-left">
+        <div class="se-points">
+          <div class="se-point">
+            <svg class="sp-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <div><div class="sp-title">Simplicidade</div><div class="sp-desc">Python é fácil de aprender e ensinar</div></div>
+          </div>
+          <div class="se-point">
+            <svg class="sp-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 6 7 1-5 4.5 1.5 7L12 17l-6.5 3.5L7 13.5 2 9l7-1 3-6z"/></svg>
+            <div><div class="sp-title">Produtividade</div><div class="sp-desc">Menos código, mais resultados</div></div>
+          </div>
+          <div class="se-point">
+            <svg class="sp-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 4l-2 10h10L10 24l2-10H4l10-10z"/></svg>
+            <div><div class="sp-title">Versatilidade</div><div class="sp-desc">Funciona em todas as áreas da tecnologia</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="se-right">
+        <div class="se-message">
+          Python combina simplicidade,<br>
+          produtividade e versatilidade,<br>
+          sendo a escolha ideal para<br>
+          quem quer começar a programar<br>
+          ou para profissionais experientes.
+        </div>
+        <p class="se-thanks">Obrigado!</p>
+        <div style="text-align:center">
+          <button class="se-restart" onclick="goToSlide(1)">◄ Recomeçar Apresentação</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!--/presentation-->
+
+<script>
+/*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SLIDE MAKER — Python Presentation
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+(function(){
+'use strict';
+
+/* ===== STATE ===== */
+let currentSlide = 1;
+const totalSlides = 10;
+let isTransitioning = false;
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+const presentation = $('#presentation');
+const slides = $$('.slide');
+const progressFill = $('#progress-fill');
+const progressBar = $('#progress-bar');
+const indicator = $('#slide-indicator');
+const navPrev = $('#nav-prev');
+const navNext = $('#nav-next');
+const fsBtn = $('#fullscreen-btn');
+const transitionOverlay = $('#transition-overlay');
+
+/* ===== CURSOR ===== */
+const cursor = $('#cursor');
+const cursorDot = cursor.querySelector('.dot');
+let cursorX = -100, cursorY = -100;
+let cursorVisible = false;
+
+if (!('ontouchstart' in window)) {
+  document.addEventListener('mousemove', e => {
+    cursorX = e.clientX;
+    cursorY = e.clientY;
+    if (!cursorVisible) { cursorVisible = true; cursor.style.opacity = ''; }
+    cursor.style.transform = `translate(${cursorX}px,${cursorY}px) translate(-50%,-50%)`;
+  });
+  document.addEventListener('mouseleave', () => {
+    cursorVisible = false; cursor.style.opacity = '0';
+  });
+  document.addEventListener('mouseenter', () => {
+    cursorVisible = true; cursor.style.opacity = '';
+  });
+
+  document.querySelectorAll('a,button,.card,.history-card,.bento-card,.lib-card,.feature-card,.flow-card,.extra-card,.area-card,.indicator-card,.company-badge,.se-restart,.tab-btn,.nav-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+}
+
+/* ===== FULLSCREEN ===== */
+fsBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen?.();
+    fsBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>';
+  } else {
+    document.exitFullscreen?.();
+    fsBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
+  }
+});
+
+/* ===== NAVIGATION ===== */
+function goToSlide(n) {
+  if (isTransitioning || n === currentSlide) return;
+  if (n < 1) n = 1;
+  if (n > totalSlides) n = totalSlides;
+  isTransitioning = true;
+
+  const from = currentSlide;
+  const to = n;
+  const direction = to > from ? 'next' : 'prev';
+
+  const currentEl = slides[from - 1];
+  const nextEl = slides[to - 1];
+
+  /* run exit animations on outgoing slide */
+  const exitDur = 350;
+  currentEl.style.transition = `opacity ${exitDur}ms var(--ease-smooth), transform ${exitDur}ms var(--ease-smooth)`;
+  currentEl.style.opacity = '0';
+  currentEl.style.transform = `scale(0.97) translateY(${direction === 'next' ? '-10px' : '10px'})`;
+
+  setTimeout(() => {
+    currentEl.classList.remove('active');
+    currentEl.style.transform = '';
+    currentEl.style.transition = '';
+
+    nextEl.classList.add('active');
+    nextEl.style.opacity = '1';
+    nextEl.style.transform = 'scale(1)';
+
+    currentSlide = to;
+    updateUI();
+    runEntranceAnimations(nextEl);
+
+    isTransitioning = false;
+  }, exitDur + 50);
+}
+
+function nextSlide() {
+  if (currentSlide === totalSlides) { goToSlide(1); return; }
+  goToSlide(currentSlide + 1);
+}
+
+function prevSlide() {
+  if (currentSlide === 1) return;
+  goToSlide(currentSlide - 1);
+}
+
+function updateUI() {
+  /* progress bar */
+  if (currentSlide === 1) {
+    progressBar.classList.remove('show');
+  } else {
+    progressBar.classList.add('show');
+    progressFill.style.width = `${((currentSlide - 1) / (totalSlides - 1)) * 100}%`;
+  }
+
+  /* indicator */
+  indicator.textContent = `${String(currentSlide).padStart(2,'0')} / ${totalSlides}`;
+
+  /* nav buttons */
+  navPrev.classList.toggle('hidden', currentSlide === 1);
+  navNext.classList.toggle('hidden', currentSlide === totalSlides);
+}
+
+navPrev.addEventListener('click', prevSlide);
+navNext.addEventListener('click', nextSlide);
+
+/* ===== KEYBOARD ===== */
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+    e.preventDefault(); nextSlide();
+  }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    e.preventDefault(); prevSlide();
+  }
+  if (e.key === 'Home') { e.preventDefault(); goToSlide(1); }
+  if (e.key === 'End') { e.preventDefault(); goToSlide(totalSlides); }
+  if (e.key === 'f' || e.key === 'F') { fsBtn.click(); }
+  if (e.key === 'Escape' && document.fullscreenElement) { document.exitFullscreen?.(); }
+  /* number keys */
+  const num = parseInt(e.key);
+  if (num >= 1 && num <= 9) { goToSlide(num); }
+  if (e.key === '0') { goToSlide(10); }
+});
+
+/* ===== SCROLL PREVENTION (wheel does not change slides) ===== */
+document.addEventListener('wheel', e => e.preventDefault(), {passive:false});
+
+/* ===== SWIPE ===== */
+let touchStartX = 0;
+document.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+}, {passive:true});
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].screenX - touchStartX;
+  if (Math.abs(dx) > 50) {
+    if (dx < 0) nextSlide();
+    else prevSlide();
+  }
+}, {passive:true});
+
+/* ===== ENTRANCE ANIMATIONS ===== */
+function runEntranceAnimations(slideEl) {
+  const all = slideEl.querySelectorAll('.card,.history-card,.flow-card,.feature-card,.bento-card,.extra-card,.split-item,.indicator-card,.area-card,.company-badge,.se-point,.tab-btn,.lib-card');
+  all.forEach((el,i) => {
+    const delay = 100 + i * 80;
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px) scale(0.97)';
+    el.style.transition = `opacity 0.5s ease-out ${delay}ms, transform 0.5s ease-out ${delay}ms`;
+    requestAnimationFrame(() => {
+      el.style.opacity = '';
+      el.style.transform = '';
+    });
+  });
+  /* slide title animations */
+  const titles = slideEl.querySelectorAll('.slide-title,.slide-subtitle');
+  titles.forEach((el,i) => {
+    const delay = 200 + i * 150;
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(-15px)';
+    el.style.transition = `opacity 0.6s ease-out ${delay}ms, transform 0.6s ease-out ${delay}ms`;
+    requestAnimationFrame(() => {
+      el.style.opacity = '';
+      el.style.transform = '';
+    });
+  });
+}
+
+/* ===== SLIDE 1: 3D TITLE EXTRUSION ===== */
+(function initCoverTitle() {
+  const h1 = document.querySelector('.cover-title');
+  if (!h1) return;
+  let shadow = '';
+  for (let i = 0; i < 40; i++) {
+    shadow += (shadow ? ',' : '') +
+              (-i) + 'px ' +
+              i + 'px 0 ' +
+              (i < 20 ? '#2B5F8A' : '#1A4A6E');
+  }
+  h1.style.textShadow = shadow;
+  h1.style.position = 'relative';
+  const ambient = document.createElement('div');
+  ambient.style.cssText = `position:absolute;top:2px;left:2px;width:100%;height:100%;
+    font:inherit;color:transparent;text-shadow:0 0 30px rgba(0,0,0,0.5);
+    pointer-events:none;z-index:-1;`;
+  h1.appendChild(ambient);
+})();
+
+/* ===== SLIDE 3: ACCORDION (history) ===== */
+(function initHistoryAccordion() {
+  const cards = $$('.history-card');
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      const expanded = card.classList.contains('expanded');
+      cards.forEach(c => c.classList.remove('expanded'));
+      if (!expanded) card.classList.add('expanded');
+    });
+  });
+})();
+
+/* ===== SLIDE 6: BENTO TOGGLE ===== */
+(function initBentoToggle() {
+  $$('.bento-card.toggle').forEach(card => {
+    card.addEventListener('click', () => {
+      card.classList.toggle('expanded');
+    });
+  });
+})();
+
+/* ===== SLIDE 7: TABS ===== */
+(function initTabs() {
+  const btns = $$('.tab-btn');
+  const contents = $$('.tab-content');
+  const indicator2 = $('#tab-indicator');
+
+  function updateTabIndicator(btn) {
+    if (!indicator2) return;
+    indicator2.style.left = btn.offsetLeft + 'px';
+    indicator2.style.width = btn.offsetWidth + 'px';
+  }
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const tabId = btn.dataset.tab;
+      const content = document.getElementById('tab-' + tabId);
+      if (content) content.classList.add('active');
+      updateTabIndicator(btn);
+    });
+  });
+
+  /* init first tab */
+  if (btns.length) updateTabIndicator(btns[0]);
+  window.addEventListener('resize', () => {
+    const active = document.querySelector('.tab-btn.active');
+    if (active) updateTabIndicator(active);
+  });
+})();
+
+/* ===== SLIDE 9: COUNTERS ===== */
+(function initCounters() {
+  const counters = $$('.indicator-card .ic-number');
+  let counted = false;
+
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.count);
+    const suffix = el.dataset.suffix || '';
+    const duration = 2000;
+    const start = performance.now();
+    function frame(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const val = Math.round(eased * target);
+      el.textContent = val + suffix;
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = target + suffix;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* trigger when slide 9 becomes active */
+  const observer = new MutationObserver(() => {
+    const s9 = document.querySelector('.slide[data-slide="9"]');
+    if (s9 && s9.classList.contains('active') && !counted) {
+      counted = true;
+      counters.forEach(animateCounter);
+    }
+  });
+  slides.forEach(s => observer.observe(s, {attributes:true,attributeFilter:['class']}));
+
+  /* also check on page load */
+  if (document.querySelector('.slide[data-slide="9"].active')) {
+    setTimeout(() => counters.forEach(animateCounter), 1200);
+  }
+})();
+
+/* ===== PARTICLES ===== */
+(function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  let particles = [];
+  const particleCount = Math.min(90, Math.max(30, Math.floor(window.innerWidth / 12)));
+  const isMobile = window.innerWidth < 768;
+  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const actualCount = isMobile ? 30 : isTablet ? 50 : particleCount;
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  class Particle {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = Math.random() * W;
+      this.y = Math.random() * H;
+      this.size = Math.random() * 1.5 + 1;
+      this.isSpecial = Math.random() < 0.2;
+      if (this.isSpecial) {
+        this.size = Math.random() * 1.5 + 2;
+        this.color = Math.random() < 0.5 ? '#3776AB' : '#FFD43B';
+        this.opacity = Math.random() * 0.1 + 0.1;
+      } else {
+        this.color = '#ECF0F5';
+        this.opacity = Math.random() * 0.17 + 0.08;
+      }
+      this.speedY = -(Math.random() * 0.12 + 0.05);
+      this.speedX = (Math.random() - 0.5) * 0.04;
+      this.rotation = Math.random() * Math.PI * 2;
+      this.rotSpeed = (Math.random() - 0.5) * 0.002;
+      this.burstTimer = Math.random() * 300 + 100;
+      this.bursting = false;
+    }
+    update() {
+      if (reducedMotion) return;
+      this.y += this.speedY;
+      this.x += this.speedX;
+      this.rotation += this.rotSpeed;
+      this.burstTimer--;
+      if (this.burstTimer <= 0) {
+        this.burstTimer = Math.random() * 300 + 100;
+        this.bursting = true;
+        this.speedY = -(Math.random() * 0.3 + 0.2);
+        setTimeout(() => {
+          this.bursting = false;
+          this.speedY = -(Math.random() * 0.12 + 0.05);
+        }, 300);
+      }
+      if (this.y < -10) { this.y = H + 10; this.x = Math.random() * W; }
+      if (this.x < -10) this.x = W + 10;
+      if (this.x > W + 10) this.x = -10;
+    }
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = this.opacity;
+      ctx.fillStyle = this.color;
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      ctx.beginPath();
+      if (this.isSpecial) {
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+      } else {
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  for (let i = 0; i < actualCount; i++) {
+    particles.push(new Particle());
+  }
+
+  function drawConnections() {
+    if (isMobile || isTablet || reducedMotion) return;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(236,240,245,${0.03 * (1 - dist / 120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  let frameCount = 0;
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+    frameCount++;
+    for (const p of particles) {
+      p.update();
+      p.draw();
+    }
+    if (frameCount % 3 === 0) drawConnections();
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+/* ===== GRID PARALLAX ===== */
+(function initParallax() {
+  const grid = document.getElementById('grid-overlay');
+  if (window.innerWidth < 768) return;
+  let mx = 0, my = 0;
+  document.addEventListener('mousemove', e => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 10;
+    const y = (e.clientY / window.innerHeight - 0.5) * 10;
+    mx += (x - mx) * 0.05;
+    my += (y - my) * 0.05;
+    grid.style.transform = `translate(${mx}px,${my}px)`;
+  });
+})();
+
+/* ===== TILT 3D on cards ===== */
+(function initTilt() {
+  if (window.innerWidth < 768) return;
+  const reducedMotion2 = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion2) return;
+  const tiltCards = $$('.card,.history-card,.bento-card.large,.bento-card.medium');
+  tiltCards.forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      card.style.transform = `perspective(800px) rotateY(${x * 3}deg) rotateX(${-y * 3}deg) translateY(-4px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+})();
+
+/* ===== INIT ===== */
+updateUI();
+runEntranceAnimations(slides[0]);
+
+  /* cover CTA blink enhancement */
+  const cta = document.querySelector('.cover-cta');
+  if (cta) cta.style.animation = 'fadeBlink 2s ease-in-out infinite';
+
+  /* expose goToSlide globally for onclick attribute */
+  window.goToSlide = goToSlide;
+
+  console.log('Python Presentation loaded successfully.');
+
+})();
+</script>
+</body>
+</html>

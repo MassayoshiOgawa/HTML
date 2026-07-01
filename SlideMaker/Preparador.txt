@@ -490,32 +490,11 @@ Gerar apenas um único documento TXT.
 Especificar que no documento HTML deve estar sem caracteres corrompidos, use UTF-8 e sem tela de Loading.
 
 Título da capa (obrigatório)
-Na capa do slide (primeiro slide), o título deve utilizar um efeito de texto 3D extrudado com múltiplos text-shadow, porém o próprio texto deve estar inclinado, e não apenas sua sombra.
-A transformação (transform) deve ser aplicada diretamente ao elemento do título (<h1> ou equivalente). Não aplique a transformação apenas na extrusão ou nas sombras.
-O elemento do título deve obrigatoriamente possuir uma transformação equivalente a:
-transform: rotate(-28deg) skew(25deg);
-transform-origin: center center;
-ou valores muito próximos que produzam exatamente a mesma aparência.
-Aparência esperada
-O texto deve possuir exatamente esta orientação:
-
-                    Stardew Valley
-
-               Stardew Valley
-
-          Stardew Valley
-
-     Stardew Valley
-
-Stardew Valley
-Ou seja:
-o lado esquerdo do título fica mais baixo;
-o lado direito fica mais alto;
-o texto inteiro sobe na diagonal da esquerda para a direita (↗);
-o eixo principal do texto forma aproximadamente 28° com a horizontal;
-o próprio texto parece estar deitado em perspectiva isométrica.
+Na capa do slide (primeiro slide), o título deve utilizar um efeito de texto 3D extrudado com múltiplos text-shadow, simulando profundidade sem utilizar modelos 3D reais.
+O texto deve permanecer completamente reto (horizontal). Não aplique nenhuma rotação (rotate), inclinação (skew) ou perspectiva ao elemento do texto. O título deve ficar paralelo ao topo da tela, como um título convencional.
+A sensação de tridimensionalidade deve ser criada exclusivamente pela extrusão utilizando diversas camadas de text-shadow.
 Extrusão
-A espessura deve ser criada utilizando dezenas de text-shadow, deslocando cada camada 1 pixel para a esquerda e 1 pixel para baixo, por exemplo:
+A profundidade deve ser formada desenhando dezenas de sombras, cada uma deslocada 1 pixel em relação à anterior. Um exemplo de implementação é:
 let shadow = "";
 for (let i = 0; i < 35; i++) {
     shadow += (shadow ? "," : "") +
@@ -523,32 +502,26 @@ for (let i = 0; i < 35; i++) {
               i + "px 0 #cfcfcf";
 }
 titulo.style.textShadow = shadow;
-Também deve existir uma segunda camada utilizando ::before, levemente deslocada, escurecida e desfocada (filter: blur(...)), simulando uma sombra ambiente.
+Também deve existir uma segunda camada utilizando ::before, levemente deslocada, escurecida e desfocada (filter: blur(...)), simulando uma sombra ambiente para aumentar a percepção de profundidade.
+Aparência esperada
+O título deve permanecer totalmente horizontal
+Mas possuir uma extrusão espessa atrás das letras, semelhante a um texto esculpido ou extrudado
+Visualmente, o texto deve parecer um objeto sólido com espessura, mantendo a leitura perfeitamente horizontal.
 O que NÃO fazer
 Está incorreto se:
-o texto estiver paralelo ao topo da tela (horizontal);
-apenas a sombra estiver inclinada;
-apenas a extrusão estiver diagonal;
-o transform estiver em um elemento pai (div, section, container, etc.) enquanto o <h1> continua horizontal;
-o texto for lido normalmente da esquerda para a direita sem nenhuma rotação.
+o texto estiver rotacionado;
+o texto estiver inclinado na diagonal;
+for utilizado transform: rotate(...);
+for utilizado transform: skew(...);
+a profundidade for criada utilizando modelos 3D reais.
 O que fazer
-O próprio <h1> deve ser desenhado já inclinado, de forma semelhante ao exemplo abaixo:
-h1{
-    transform: rotate(-28deg) skew(25deg);
-}
-O resultado final deve ser visualmente equivalente a este efeito clássico:
-transform: rotate(-28deg) skew(25deg);
-text-shadow:
--1px 1px 0 #d9d9d9,
--2px 2px 0 #d9d9d9,
--3px 3px 0 #d9d9d9,
-...
--35px 35px 0 #d9d9d9;
-Se o título estiver horizontal, mesmo que a extrusão esteja correta, o resultado deve ser considerado incorreto e precisa ser refeito até que o próprio texto esteja inclinado.
+O efeito deve ser produzido apenas utilizando dezenas de camadas de text-shadow, criando uma extrusão suave, uniforme e realista. O texto principal deve permanecer totalmente reto e horizontal, enquanto somente a espessura atrás das letras fornece a ilusão de profundidade tridimensional.
 
 Esse documento será utilizado por outra IA para desenvolver toda a apresentação HTML em um único arquivo HTML contendo HTML, CSS e JavaScript.
 
 O documento deve ser extremamente detalhado.
+
+Lembre-se, este documento html estará sempre em tela cheia em um computador, então não se preocupe caso a página esteja no sentido vertical ou diminuida.
 
 No final, não colocar um texto que tem o intuito de perguntar se há alguma dúvida, isso é ESTRITAMENTE probido, assim como colocar "Perguntas?" ou qualquer coisa que seja semelhante a dúvida no slide final também é proibido.
 
@@ -567,6 +540,881 @@ A outra IA não deverá precisar tomar praticamente nenhuma decisão criativa.
 O scroll do mouse não pode trocar de slides, apenas as setinhas do teclado(ou arrastando pro lado caso o usuário esteja no celular).
 Também é proibido trocar de slide caso o usuario clique com o botão do mouse em qualquer canto da tela
 
+Caso haja muito conteúdo em um só slide, você pode/deve criar botões de toggle que abre e fecham pra revelar mais conteúdo e informação para que todo o conteúdo pedido caiba dentro do slide, mas lembre-se, apenas se houver conteúdo demais no slide, caso contrário NÃO use toggles para exibir/ocultar informações.
+
+Não se preocupe com o tamanho do arquivo e com a quantidade de elementos visuais e interativos que você escolheu, quanto mais detalhado e profissional os slides ficarem, melhor! eu conto com você.
+
 É proibido criar linhas do tempo independentemente se foi pedido nos slides, faça de uma forma diferente.
 
 Todas as decisões devem ser tomadas por você durante a criação deste documento.
+
+NÍVEL DE QUALIDADE VISUAL (OBRIGATÓRIO)
+
+O documento HTML NÃO deve parecer uma página HTML comum.
+
+Ele deve parecer um software profissional, um site premiado (Awwwards), uma apresentação criada por um estúdio de design ou uma interface de um produto premium.
+
+Cada elemento deve receber atenção individual.
+
+Nenhum elemento deve parecer genérico.
+
+Nenhum elemento deve parecer criado apenas com HTML padrão.
+
+Todos os componentes devem possuir acabamento visual profissional.
+
+MICRODETALHES (OBRIGATÓRIO)
+
+Todo componente deve possuir pequenos detalhes visuais que aumentem a sensação de qualidade.
+
+Exemplos:
+
+sombras extremamente suaves;
+múltiplas camadas de sombras;
+highlights;
+reflexos;
+gradientes internos;
+bordas iluminadas;
+cantos levemente diferentes;
+pequenas variações de opacidade;
+pequenas animações contínuas;
+profundidade;
+separação entre planos.
+
+Nenhum elemento deve parecer plano.
+
+MICROANIMAÇÕES
+
+Praticamente todos os elementos interativos devem possuir microanimações.
+
+Exemplos:
+
+hover;
+
+focus;
+
+click;
+
+entrada;
+
+saída;
+
+mudança de estado;
+
+transição.
+
+As animações devem ser suaves e naturais.
+
+Nunca instantâneas.
+
+VARIAÇÃO VISUAL
+
+Evite repetir exatamente o mesmo efeito em todos os slides.
+
+Cada slide deve possuir personalidade própria.
+
+Mesmo mantendo a identidade visual.
+
+Mas é obrigatório seguir a paleta de cores decidida de acordo com o tema escolhido dos slides.
+
+CAMADAS DE PROFUNDIDADE
+
+A apresentação inteira deve ser construída em diversas camadas.
+
+Exemplo:
+
+Background
+
+↓
+
+Partículas distantes
+
+↓
+
+Névoa
+
+↓
+
+Objetos decorativos
+
+↓
+
+Cards
+
+↓
+
+Textos
+
+↓
+
+Glow
+
+↓
+
+Cursor
+
+↓
+
+Partículas próximas
+
+↓
+
+Overlay
+
+Tudo deve transmitir profundidade.
+
+ILUMINAÇÃO
+
+Toda a interface deve possuir iluminação coerente.
+
+A luz deve parecer vir de uma direção específica.
+
+As sombras devem respeitar essa direção.
+
+Glow também deve respeitar a iluminação.
+
+Nunca criar luzes aleatórias.
+
+MATERIAIS
+
+Cada objeto deve possuir material próprio.
+
+Exemplos:
+
+Vidro.
+
+Metal.
+
+Plástico fosco.
+
+Pedra.
+
+Madeira.
+
+Concreto.
+
+Papel.
+
+Fibra de carbono.
+
+Tecido.
+
+Cada material deve possuir textura própria.
+
+Nunca utilizar cores chapadas.
+
+IMPERFEIÇÕES
+
+Evite aparência artificial.
+
+Sempre adicionar pequenas imperfeições.
+
+Exemplos:
+
+variação de cor;
+
+pequenos desgastes;
+
+ruído;
+
+grain;
+
+textura;
+
+manchas leves;
+
+desníveis;
+
+micro rachaduras;
+
+reflexos irregulares.
+
+Tudo deve parecer mais real.
+
+MOVIMENTO CONTÍNUO
+
+Mesmo quando o usuário não interage, a página nunca deve parecer completamente parada.
+
+Adicionar pequenas animações contínuas.
+
+Exemplos:
+
+partículas;
+
+névoa;
+
+luz;
+
+background;
+
+reflexos;
+
+objetos flutuando;
+
+leve respiração dos elementos.
+
+Esses movimentos devem ser extremamente discretos.
+
+COMPOSIÇÃO
+
+Evite grandes áreas vazias.
+
+Também evite excesso de elementos.
+
+Criar equilíbrio visual.
+
+Utilizar composição profissional.
+
+STORYTELLING VISUAL
+
+Cada slide deve contar uma história.
+
+O usuário deve olhar automaticamente para o elemento mais importante.
+
+Utilizar:
+
+contraste;
+
+hierarquia;
+
+movimento;
+
+cores;
+
+luz;
+
+escala;
+
+profundidade.
+
+CENÁRIO
+
+Sempre que possível, transformar o slide em um pequeno cenário.
+
+Não apenas colocar caixas e textos.
+
+Criar ambiente.
+
+Criar contexto.
+
+Criar atmosfera.
+
+ATMOSFERA
+
+Cada apresentação deve possuir atmosfera própria.
+
+Exemplos:
+
+científica;
+
+espacial;
+
+corporativa;
+
+medieval;
+
+tecnológica;
+
+cyberpunk;
+
+natural;
+
+luxuosa;
+
+industrial.
+
+Toda decisão visual deve reforçar essa atmosfera.
+
+COERÊNCIA
+
+Nenhum efeito deve existir apenas por existir.
+
+Todo elemento visual precisa reforçar:
+
+o tema;
+
+o conteúdo;
+
+a emoção;
+
+a leitura.
+
+EFEITO "UAU"
+
+A apresentação deve possuir momentos de alto impacto visual.
+
+Principalmente:
+
+Slide inicial.
+
+Mudança de capítulo.
+
+Slide mais importante.
+
+Slide final.
+
+Esses momentos devem impressionar imediatamente.
+
+QUALIDADE AAA(Triple A)
+
+Imagine que um estúdio especializado em interfaces passou semanas desenvolvendo essa apresentação.
+
+Cada pixel deve parecer pensado.
+
+Cada animação deve parecer refinada.
+
+Cada espaçamento deve parecer intencional.
+
+Nada deve parecer padrão.
+
+Nada deve parecer improvisado.
+
+Nada deve parecer gerado automaticamente.
+
+# CODIFICAÇÃO UTF-8 (OBRIGATÓRIO)
+
+A integridade dos caracteres do documento HTML é um requisito absolutamente obrigatório.
+
+Sob nenhuma hipótese o documento poderá conter caracteres corrompidos, símbolos de substituição ou problemas de codificação.
+
+É estritamente proibido que qualquer caractere seja exibido incorretamente.
+
+Exemplos de erros proibidos:
+
+* �
+* Ã
+* Ã©
+* Ã£
+* Ã§
+* Ã¡
+* Ã³
+* Ãª
+* Qualquer sequência semelhante causada por erro de codificação.
+
+Todo o documento deve utilizar exclusivamente a codificação **UTF-8** do início ao fim.
+
+É obrigatório que o documento HTML declare corretamente a codificação utilizando:
+
+```html
+<meta charset="UTF-8">
+```
+
+Entretanto, apenas declarar essa meta tag NÃO é suficiente.
+
+Você deve garantir que TODO o conteúdo do arquivo esteja realmente codificado em UTF-8.
+
+Todos os textos devem ser escritos corretamente.
+
+Todos os acentos devem permanecer intactos.
+
+Todos os caracteres especiais devem permanecer intactos.
+
+Todos os símbolos devem permanecer intactos.
+
+Todos os emojis (caso existam) devem permanecer intactos.
+
+Nenhum caractere poderá ser substituído pelo símbolo "�".
+
+Nenhuma palavra poderá apresentar corrupção de caracteres.
+
+Nenhum comentário do código poderá apresentar corrupção.
+
+Nenhuma string JavaScript poderá apresentar corrupção.
+
+Nenhum texto HTML poderá apresentar corrupção.
+
+Nenhuma propriedade CSS poderá apresentar corrupção.
+
+Antes de considerar o documento concluído, execute obrigatoriamente uma auditoria completa de todos os textos presentes no HTML.
+
+Percorra literalmente todo o documento e valide que:
+
+* todos os títulos estão corretos;
+* todos os subtítulos estão corretos;
+* todos os parágrafos estão corretos;
+* todos os botões estão corretos;
+* todos os menus estão corretos;
+* todos os tooltips estão corretos;
+* todos os popups estão corretos;
+* todas as mensagens estão corretas;
+* todos os comentários do código estão corretos;
+* todas as strings JavaScript estão corretas;
+* todo o CSS está correto.
+
+Caso seja encontrado qualquer caractere corrompido, por menor que seja, interrompa imediatamente a finalização do documento.
+
+Corrija a origem do problema.
+
+Depois da correção, realize novamente toda a auditoria de codificação.
+
+Repita esse processo quantas vezes forem necessárias.
+
+O documento HTML somente poderá ser considerado concluído quando NÃO existir absolutamente nenhum caractere corrompido em nenhuma parte do arquivo.
+
+A presença de apenas um único caractere inválido torna o documento considerado incorreto e exige nova revisão completa antes da entrega.
+
+# INSTRUÇÕES PARA A IA RESPONSÁVEL POR DESENVOLVER O DOCUMENTO HTML
+
+Ao final da implementação completa do documento HTML, você NÃO deve considerar o trabalho concluído imediatamente.
+
+Antes de entregar o arquivo final, você deve realizar uma auditoria completa de toda a apresentação.
+
+Essa auditoria é obrigatória.
+
+Você deve criar internamente um checklist extremamente detalhado contendo absolutamente todos os requisitos especificados neste documento.
+
+Esse checklist deve conter todos os aspectos da implementação, incluindo, mas não se limitando a:
+
+* Estrutura geral da apresentação;
+* Conteúdo de todos os slides;
+* Layout de todos os slides;
+* Posicionamento dos elementos;
+* Responsividade;
+* Hierarquia visual;
+* Identidade visual;
+* Paleta de cores;
+* Tipografia;
+* Backgrounds;
+* Partículas;
+* Efeitos visuais;
+* Efeitos 3D;
+* Glassmorphism;
+* Iluminação;
+* Sombras;
+* Reflexos;
+* Profundidade;
+* Texturas;
+* Materiais;
+* Microdetalhes;
+* Microanimações;
+* Animações principais;
+* Sequenciamento das animações;
+* Transições entre slides;
+* Elementos interativos;
+* Hover;
+* Focus;
+* Feedback visual;
+* Botões;
+* Navegação;
+* Barra de progresso;
+* Compatibilidade entre slides;
+* Consistência visual;
+* Atmosfera;
+* Storytelling visual;
+* Performance;
+* Fluidez das animações;
+* Organização do código;
+* Responsividade em diferentes resoluções;
+* Compatibilidade entre desktop e dispositivos móveis;
+* Todos os demais requisitos especificados neste documento.
+
+Após concluir a implementação, percorra esse checklist item por item.
+
+Você deve validar explicitamente cada requisito.
+
+Caso encontre qualquer inconsistência, qualquer elemento ausente, qualquer comportamento incorreto, qualquer desalinhamento, qualquer animação incompleta, qualquer problema visual, qualquer quebra de responsividade, qualquer incoerência estética ou qualquer detalhe diferente do especificado, você deve interromper imediatamente a finalização do trabalho.
+
+O problema deve ser corrigido antes de continuar a validação.
+
+Após a correção, reinicie o processo de auditoria para garantir que nenhuma nova inconsistência foi introduzida.
+
+Repita esse ciclo quantas vezes forem necessárias.
+
+O documento HTML somente poderá ser considerado concluído quando TODOS os requisitos deste documento tiverem sido implementados integralmente, sem exceções.
+
+Não simplifique soluções.
+
+Não omita funcionalidades.
+
+Não substitua requisitos por alternativas mais simples.
+
+Não ignore detalhes considerados "pequenos".
+
+Considere que os detalhes são responsáveis pela maior parte da qualidade percebida da apresentação.
+
+Seu objetivo não é apenas produzir um HTML funcional.
+
+Seu objetivo é produzir uma apresentação com aparência de produto premium, cuidadosamente refinada em todos os aspectos.
+
+Somente entregue o documento HTML após concluir toda a auditoria e confirmar que todos os requisitos foram integralmente atendidos.
+
+# CHECKLIST FINAL OBRIGATÓRIO (VALIDAÇÃO ABSOLUTA)
+
+**ATENÇÃO**
+
+Antes de finalizar o documento TXT, você deve realizar uma auditoria completa do seu próprio trabalho.
+
+Você deve reler todo o documento diversas vezes.
+
+Percorra este checklist item por item.
+
+Caso qualquer item não esteja completamente atendido, é obrigatório voltar ao documento e corrigi-lo antes de continuar.
+
+Você NÃO pode ignorar nenhum item.
+
+Você NÃO pode assumir que já fez.
+
+Você deve verificar explicitamente.
+
+Somente após TODOS os itens estarem completamente atendidos você poderá considerar o documento concluído.
+
+---
+
+# ETAPA 1 — CONTEÚDO
+
+☐ Todos os slides possuem objetivo claramente definido.
+
+☐ Todos os slides possuem emoção definida.
+
+☐ Todos os slides possuem identidade visual.
+
+☐ Nenhum slide ficou genérico.
+
+☐ Nenhum slide ficou incompleto.
+
+☐ Nenhum slide ficou visualmente vazio.
+
+☐ O conteúdo está distribuído corretamente.
+
+☐ Nenhum slide ficou sobrecarregado.
+
+☐ Nenhum slide precisará de scroll.
+
+☐ Todos os conteúdos cabem confortavelmente dentro do slide.
+
+☐ Caso necessário foram criados elementos Toggle.
+
+☐ Nenhuma informação importante ficou escondida.
+
+---
+
+# ETAPA 2 — IDENTIDADE VISUAL
+
+☐ Existe uma identidade visual extremamente consistente.
+
+☐ Existe uma direção artística clara.
+
+☐ Existe uma atmosfera definida.
+
+☐ Existe coerência entre todos os slides.
+
+☐ Existe uma linguagem visual única.
+
+☐ Existe um conceito artístico.
+
+☐ Existe uma paleta de cores coerente.
+
+☐ Todas as cores combinam com o tema.
+
+☐ Nenhuma cor parece fora de contexto.
+
+☐ Branco e preto foram utilizados corretamente.
+
+☐ As cores de destaque possuem propósito.
+
+---
+
+# ETAPA 3 — LAYOUT
+
+☐ Todos os slides possuem composição profissional.
+
+☐ Existe equilíbrio visual.
+
+☐ Existe hierarquia visual.
+
+☐ Existe ponto focal.
+
+☐ Existe boa distribuição dos elementos.
+
+☐ Existe bom uso dos espaços vazios.
+
+☐ Nenhum elemento ficou desalinhado.
+
+☐ Nenhum elemento parece colocado aleatoriamente.
+
+☐ Foi utilizada composição semelhante à utilizada por designers profissionais.
+
+☐ Sempre que possível aplicar regra dos terços.
+
+☐ Sempre que possível utilizar grids invisíveis.
+
+☐ Sempre que possível criar linhas que conduzam naturalmente o olhar do usuário.
+
+---
+
+# ETAPA 4 — BACKGROUND
+
+☐ O background possui profundidade.
+
+☐ O background possui identidade.
+
+☐ O background combina com o tema.
+
+☐ O background possui movimento.
+
+☐ O background nunca parece estático.
+
+☐ O background nunca compete com o conteúdo.
+
+☐ Existe separação clara entre fundo e conteúdo.
+
+☐ O background transmite atmosfera.
+
+---
+
+# ETAPA 5 — ELEMENTOS VISUAIS
+
+☐ Foram escolhidos diversos elementos do Visual.txt.
+
+☐ Cada elemento possui justificativa.
+
+☐ Nenhum efeito foi utilizado apenas porque é bonito.
+
+☐ Os elementos possuem propósito.
+
+☐ Existe variedade.
+
+☐ Não existe repetição excessiva.
+
+☐ Existe riqueza visual.
+
+☐ Existe sensação premium.
+
+---
+
+# ETAPA 6 — ELEMENTOS INTERATIVOS
+
+☐ Foram escolhidos diversos elementos do Interativos.txt.
+
+☐ Os elementos realmente agregam valor.
+
+☐ Nenhuma interação é desnecessária.
+
+☐ Os botões possuem feedback.
+
+☐ Existe hover.
+
+☐ Existe focus.
+
+☐ Existe animação de clique.
+
+☐ Existe resposta visual para todas as interações.
+
+---
+
+# ETAPA 7 — ANIMAÇÕES
+
+☐ Todos os elementos possuem animações coerentes.
+
+☐ As animações possuem duração definida.
+
+☐ Existe easing apropriado.
+
+☐ Existe sequência lógica.
+
+☐ Existe stagger quando necessário.
+
+☐ Nenhuma animação é brusca.
+
+☐ Nenhuma animação é repetitiva.
+
+☐ Existe ritmo.
+
+☐ Existe fluidez.
+
+☐ Existe sensação cinematográfica.
+
+---
+
+# ETAPA 8 — MICROANIMAÇÕES
+
+☐ Botões possuem microanimações.
+
+☐ Cards possuem microanimações.
+
+☐ Ícones possuem microanimações.
+
+☐ Hover possui transições suaves.
+
+☐ Focus possui transições suaves.
+
+☐ Clique possui feedback.
+
+☐ Nada muda instantaneamente.
+
+---
+
+# ETAPA 9 — PROFUNDIDADE
+
+☐ Existem diversas camadas visuais.
+
+☐ Existe sensação tridimensional.
+
+☐ Existe separação entre foreground e background.
+
+☐ Existe profundidade atmosférica.
+
+☐ Existem diferentes níveis de desfoque.
+
+☐ Existe paralaxe quando apropriado.
+
+---
+
+# ETAPA 10 — ILUMINAÇÃO
+
+☐ Existe direção de luz.
+
+☐ Glow respeita essa iluminação.
+
+☐ Sombras respeitam essa iluminação.
+
+☐ Reflexos respeitam essa iluminação.
+
+☐ Nada parece iluminado aleatoriamente.
+
+---
+
+# ETAPA 11 — MATERIAIS
+
+☐ Todos os materiais possuem aparência própria.
+
+☐ Vidro parece vidro.
+
+☐ Pedra parece pedra.
+
+☐ Metal parece metal.
+
+☐ Madeira parece madeira.
+
+☐ Papel parece papel.
+
+☐ Nenhum material parece plástico.
+
+☐ Existem imperfeições naturais.
+
+---
+
+# ETAPA 12 — TEXTURAS
+
+☐ Não existem cores chapadas.
+
+☐ Existem pequenas variações.
+
+☐ Existem detalhes.
+
+☐ Existe grain quando necessário.
+
+☐ Existem microtexturas.
+
+☐ Existem imperfeições.
+
+☐ Existem pequenas irregularidades.
+
+---
+
+# ETAPA 13 — ATMOSFERA
+
+☐ A apresentação transmite emoção.
+
+☐ Existe ambientação.
+
+☐ Existe clima.
+
+☐ Existe personalidade.
+
+☐ Existe storytelling visual.
+
+☐ Existe sensação de imersão.
+
+---
+
+# ETAPA 14 — MOMENTOS "UAU"
+
+☐ O slide inicial impressiona.
+
+☐ Os slides importantes impressionam.
+
+☐ O slide final impressiona.
+
+☐ Existem momentos memoráveis.
+
+☐ Existem momentos de surpresa.
+
+---
+
+# ETAPA 15 — RESPONSIVIDADE
+
+☐ Todos os elementos cabem em qualquer resolução.
+
+☐ Nada sai da tela.
+
+☐ Nada sobrepõe outro elemento.
+
+☐ Nada quebra em telas menores.
+
+☐ Nada quebra em telas maiores.
+
+☐ Tudo permanece proporcional.
+
+---
+
+# ETAPA 16 — ACABAMENTO
+
+☐ Todos os espaçamentos são consistentes.
+
+☐ Todas as margens fazem sentido.
+
+☐ Todos os alinhamentos são consistentes.
+
+☐ Todas as sombras possuem qualidade.
+
+☐ Todos os gradientes possuem qualidade.
+
+☐ Todos os efeitos parecem naturais.
+
+☐ Não existe aparência amadora.
+
+☐ Não existe aparência genérica.
+
+☐ Não existe aparência improvisada.
+
+---
+
+# ETAPA 17 — POLIMENTO
+
+☐ Cada slide parece feito manualmente.
+
+☐ Cada detalhe parece intencional.
+
+☐ Cada animação parece refinada.
+
+☐ Cada componente parece premium.
+
+☐ O documento parece desenvolvido por uma equipe profissional.
+
+☐ O resultado lembra apresentações de grandes empresas e estúdios de design.
+
+☐ O nível visual é comparável a projetos exibidos em galerias como Awwwards, FWA ou similares, sem copiar nenhum estilo específico.
+
+---
+
+# ETAPA 18 — VERIFICAÇÃO FINAL
+
+Agora releia TODO o documento uma última vez.
+
+Pergunte para si mesmo:
+
+"Existe qualquer decisão criativa que ainda será deixada para a outra IA?"
+
+Se a resposta for SIM:
+
+Volte ao documento imediatamente.
+
+Tome essa decisão.
+
+Documente essa decisão.
+
+Repita esse processo até que praticamente nenhuma decisão criativa precise ser tomada pela outra IA.
+
+A outra IA deve apenas executar fielmente esta especificação.
+
+Somente depois disso o documento poderá ser considerado concluído.
