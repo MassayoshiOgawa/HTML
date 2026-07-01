@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Terraria — Uma Jornada de Exploração, Construção e Sobrevivência</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0f0b14;
+  --bg-secondary: #1a1423;
+  --bg-surface: #261f33;
+  --bg-card: rgba(26,20,35,0.7);
+  --text-primary: #f0eae0;
+  --text-secondary: #b8a9c9;
+  --text-muted: #7a6b8a;
+  --terraria-green: #5aad4a;
+  --terraria-green-bright: #7ed957;
+  --terraria-brown: #8b6f47;
+  --terraria-blue: #3d7ed9;
+  --terraria-blue-bright: #5b9eff;
+  --terraria-red: #c73a3a;
+  --terraria-purple: #7b3fa0;
+  --terraria-pink: #e88cc0;
+  --terraria-cyan: #4ac7c7;
+  --terraria-gold: #f0c43f;
+  --terraria-orange: #e8833a;
+  --terraria-silver: #c0c0c0;
+  --accent-heart: #ff4d6d;
+  --accent-mana: #4d9eff;
+  --accent-star: #fff4b8;
+  --glow-green: rgba(90,173,74,0.4);
+  --glow-blue: rgba(61,126,217,0.4);
+  --glow-gold: rgba(240,196,63,0.4);
+  --glow-purple: rgba(123,63,160,0.4);
+  --glow-pink: rgba(232,140,192,0.4);
+  --glow-red: rgba(199,58,58,0.4);
+  --glass-bg: rgba(26,20,35,0.6);
+  --glass-border: rgba(90,173,74,0.15);
+  --shadow-color: rgba(0,0,0,0.6);
+  --ease-smooth: cubic-bezier(0.25,0.46,0.45,0.94);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-primary);color:var(--text-primary);font-family:'Space Mono',monospace;user-select:none;-webkit-user-select:none}
+#presentation{width:100vw;height:100vh;position:relative;overflow:hidden;background:var(--bg-primary)}
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.particle{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;pointer-events:none;animation:twinkle var(--dur,4s) ease-in-out infinite alternate;opacity:var(--op,0.3)}
+@keyframes twinkle{0%{opacity:var(--op,0.1)}100%{opacity:calc(var(--op,0.3)*0.3)}}
+.slide-bg-glow{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;transition:background 0.8s ease}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:3rem 5rem;overflow:hidden;opacity:0;pointer-events:none;z-index:0;transition:opacity 0.3s ease}
+.slide.active{opacity:1;pointer-events:auto;z-index:1}
+.slide-content{position:relative;z-index:1;width:100%;max-width:1200px;height:100%;display:flex;flex-direction:column;justify-content:center}
+.slide-title{font-family:'Press Start 2P',cursive;font-size:clamp(1.2rem,3vw,2.2rem);color:var(--terraria-gold);text-transform:uppercase;margin-bottom:0.4em;line-height:1.3;letter-spacing:0.02em;text-shadow:0 0 20px var(--glow-gold)}
+.slide-subtitle{font-family:'Space Mono',monospace;font-weight:700;font-size:clamp(0.9rem,1.8vw,1.3rem);color:var(--text-primary);margin-bottom:0.6em}
+.slide-body{font-size:clamp(0.75rem,1.2vw,0.95rem);color:var(--text-secondary);line-height:1.5}
+.slide-meta{font-size:clamp(0.6rem,0.9vw,0.75rem);color:var(--text-muted)}
+.badge{display:inline-block;padding:4px 12px;border-radius:4px;background:var(--bg-surface);font-size:clamp(0.6rem,0.9vw,0.75rem);font-family:'Space Mono',monospace;margin:3px;border-left:3px solid}
+.card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;padding:12px 16px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform 0.3s ease,box-shadow 0.3s ease}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,0.4)}
+.stat-number{font-family:'Press Start 2P',cursive;font-size:clamp(2rem,4vw,3.5rem);color:var(--terraria-gold);line-height:1.2}
+.stat-label{font-size:clamp(0.6rem,0.9vw,0.8rem);color:var(--text-secondary);font-family:'Space Mono',monospace}
+.gradient-text{background:linear-gradient(135deg,var(--terraria-gold),var(--terraria-green-bright));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gradient-green-gold{background:linear-gradient(90deg,var(--terraria-green),var(--terraria-gold))}
+.btn-nav{position:fixed;z-index:100;background:none;border:none;color:var(--text-muted);cursor:pointer;padding:12px;transition:opacity 0.3s ease,color 0.3s ease;opacity:0.2;pointer-events:auto;display:flex;align-items:center;justify-content:center}
+.btn-nav:hover{opacity:0.6;color:var(--terraria-gold)}
+.btn-nav.hidden{opacity:0!important;pointer-events:none!important}
+#btn-prev{left:10px;top:50%;transform:translateY(-50%)}
+#btn-next{right:10px;top:50%;transform:translateY(-50%)}
+#progress-bar{position:fixed;bottom:0;left:0;height:3px;z-index:100;background:linear-gradient(90deg,var(--terraria-green),var(--terraria-gold));transition:width 0.5s ease;border-radius:0 2px 2px 0}
+#slide-counter{position:fixed;bottom:8px;right:16px;z-index:100;font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--text-muted);pointer-events:none}
+#slide-dots{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:4px;pointer-events:none}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--text-muted);opacity:0.3;transition:all 0.3s ease}
+.dot.active{opacity:1;background:var(--terraria-gold);transform:scale(1.3)}
+.animate{opacity:0;transform:translateY(30px);transition:opacity 0.5s var(--ease-smooth),transform 0.5s var(--ease-smooth)}
+.animate-in{opacity:1;transform:translateY(0)}
+.animate-fade{opacity:0;transition:opacity 0.5s ease}
+.animate-fade-in{opacity:1}
+.animate-scale{opacity:0;transform:scale(0.9);transition:opacity 0.5s var(--ease-smooth),transform 0.5s var(--ease-smooth)}
+.animate-scale-in{opacity:1;transform:scale(1)}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 5px var(--glow-green)}50%{box-shadow:0 0 20px var(--glow-green)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes shootingStar{0%{transform:translate(-100px,-100px);opacity:0}10%{opacity:0.4}50%{transform:translate(calc(100vw + 100px),calc(100vh + 100px));opacity:0.1}100%{opacity:0}}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(0.6rem,1.2vw,1.2rem)}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(0.5rem,1vw,1rem)}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:clamp(0.4rem,0.8vw,0.8rem)}
+.grid-2x2{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:clamp(0.6rem,1.2vw,1.2rem)}
+.grid-3x2{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:clamp(0.5rem,1vw,1rem)}
+@media(max-width:768px){
+  .slide{padding:2rem 1.5rem}
+  .grid-4{grid-template-columns:1fr 1fr}
+  .grid-3{grid-template-columns:1fr 1fr}
+  .grid-3x2{grid-template-columns:1fr 1fr}
+  .grid-2{grid-template-columns:1fr}
+  .grid-2x2{grid-template-columns:1fr}
+  #btn-prev{left:4px;padding:8px}
+  #btn-next{right:4px;padding:8px}
+}
+@media(max-width:480px){
+  .slide{padding:1.5rem 1rem}
+  .grid-4{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="presentation">
+<div id="particles"></div>
+
+<!-- SLIDE 1: CAPA -->
+<section class="slide active" data-index="0">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 40% 50%,rgba(90,173,74,0.08) 0%,transparent 60%)"></div>
+<div class="slide-content" style="align-items:center;text-align:center">
+  <div class="deco-icon" style="position:absolute;top:8%;left:8%;animation:float 4s ease-in-out infinite;z-index:0">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--terraria-silver)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 40L24 12L40 40" stroke="var(--terraria-brown)"/><path d="M14 28L34 28" stroke="var(--terraria-silver)"/><rect x="22" y="6" width="4" height="10" fill="var(--terraria-brown)" stroke="var(--terraria-brown)"/>
+    </svg>
+  </div>
+  <div class="deco-icon" style="position:absolute;top:6%;right:8%;animation:float 4.5s ease-in-out infinite;z-index:0">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--terraria-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 14L10 42" stroke="var(--terraria-silver)"/><path d="M10 14L28 14L34 22L34 42" stroke="var(--terraria-silver)"/><path d="M10 26L34 26" stroke="var(--terraria-silver)"/><circle cx="16" cy="10" r="4" fill="var(--terraria-blue)" stroke="var(--terraria-blue)"/>
+    </svg>
+  </div>
+  <div class="deco-icon" style="position:absolute;bottom:20%;left:6%;animation:float 3.5s ease-in-out infinite;z-index:0">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="var(--accent-heart)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 28C16 28 4 20 4 12C4 7 8 4 12 4C14 4 16 6 16 6C16 6 18 4 20 4C24 4 28 7 28 12C28 20 16 28 16 28Z" fill="rgba(255,77,109,0.2)"/>
+    </svg>
+  </div>
+  <h1 id="main-title" style="font-family:'Press Start 2P',cursive;font-size:clamp(1.8rem,5vw,3.5rem);color:var(--terraria-gold);line-height:1.2;margin-bottom:0.3em;position:relative;z-index:1;text-shadow:0 0 30px var(--glow-gold);transform:rotate(-28deg) skew(25deg);transform-origin:center center">Terraria</h1>
+  <p style="font-size:clamp(0.85rem,1.5vw,1.1rem);color:var(--terraria-green-bright);font-style:italic;margin-bottom:1rem;z-index:1;position:relative">"Um pequeno mundo com possibilidades praticamente infinitas."</p>
+  <p style="font-size:clamp(0.7rem,1.2vw,1rem);color:var(--text-secondary);font-family:'Space Mono',monospace;z-index:1;position:relative">Nome do Apresentador | Data | Disciplina</p>
+  <p style="position:absolute;bottom:10%;left:5%;font-size:0.65rem;color:var(--text-muted);font-family:'Space Mono',monospace;z-index:1">Re-Logic | 2011</p>
+</div>
+</section>
+
+<!-- SLIDE 2: O QUE É TERRARIA? -->
+<section class="slide" data-index="1">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 60% 40%,rgba(61,126,217,0.06) 0%,transparent 60%)"></div>
+<svg style="position:absolute;top:5%;right:5%;opacity:0.08;width:120px;height:120px;z-index:0" viewBox="0 0 120 120" fill="none" stroke="var(--terraria-blue)" stroke-width="1"><rect x="10" y="30" width="100" height="60" rx="8"/><circle cx="35" cy="60" r="12" fill="var(--terraria-blue)"/><circle cx="85" cy="60" r="12" fill="var(--terraria-blue)"/><rect x="45" y="45" width="30" height="6"/><rect x="45" y="55" width="20" height="4"/></svg>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">O QUE É TERRARIA?</h2>
+  <div class="grid-2" style="flex:1;align-content:center">
+    <div class="animate" data-delay="0.3">
+      <p class="slide-body" style="margin-bottom:0.8rem">Terraria é um jogo sandbox de aventura 2D desenvolvido pela Re-Logic. Os jogadores exploram, constroem, craftam e combatem em um mundo gerado proceduralmente, cheio de biomas, chefes e segredos.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:0.5rem">
+        <span class="badge" style="border-color:var(--terraria-green);color:var(--terraria-green)">Sandbox</span>
+        <span class="badge" style="border-color:var(--terraria-blue);color:var(--terraria-blue)">Aventura</span>
+        <span class="badge" style="border-color:var(--terraria-red);color:var(--terraria-red)">Sobrevivência</span>
+        <span class="badge" style="border-color:var(--terraria-purple);color:var(--terraria-purple)">RPG</span>
+        <span class="badge" style="border-color:var(--terraria-brown);color:var(--terraria-brown)">Plataforma 2D</span>
+      </div>
+    </div>
+    <div class="grid-2 animate" data-delay="0.5" style="gap:0.5rem">
+      <div class="card" style="display:flex;align-items:center;gap:8px;padding:8px 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--terraria-gold)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="slide-body">Construção</span></div>
+      <div class="card" style="display:flex;align-items:center;gap:8px;padding:8px 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--terraria-gold)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg><span class="slide-body">Mineração</span></div>
+      <div class="card" style="display:flex;align-items:center;gap:8px;padding:8px 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--terraria-gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg><span class="slide-body">Exploração</span></div>
+      <div class="card" style="display:flex;align-items:center;gap:8px;padding:8px 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--terraria-gold)" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 13l-3 7-7-3"/></svg><span class="slide-body">Combate</span></div>
+      <div class="card" style="display:flex;align-items:center;gap:8px;padding:8px 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--terraria-gold)" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M12 7V3"/><path d="M8 3h8"/></svg><span class="slide-body">Crafting</span></div>
+      <div class="card" style="display:flex;align-items:center;gap:8px;padding:8px 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--terraria-gold)" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg><span class="slide-body">Progressão</span></div>
+    </div>
+  </div>
+  <p class="slide-meta animate" data-delay="0.8" style="text-align:center;margin-top:0.5rem">Disponível para PC, Console, Mobile, Switch, etc. | Mais de 44 milhões de jogadores</p>
+</div>
+</section>
+
+<!-- SLIDE 3: HISTÓRIA -->
+<section class="slide" data-index="2">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 30% 50%,rgba(240,196,63,0.05) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">HISTÓRIA DO DESENVOLVIMENTO</h2>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:0.5rem;padding:0.5rem 2rem">
+    <div class="card animate" data-delay="0.3" style="align-self:flex-start;max-width:55%"><span class="stat-number" style="font-size:clamp(1.2rem,2.5vw,2rem)">2011</span><p class="slide-body">Lançamento inicial — o fenômeno começa</p></div>
+    <div class="card animate" data-delay="0.4" style="align-self:flex-end;max-width:55%"><span class="stat-number" style="font-size:clamp(1.2rem,2.5vw,2rem);color:var(--terraria-green-bright)">2013</span><p class="slide-body">Atualização 1.2 — Expansão massiva gratuita</p></div>
+    <div class="card animate" data-delay="0.5" style="align-self:flex-start;max-width:55%"><span class="stat-number" style="font-size:clamp(1.2rem,2.5vw,2rem);color:var(--terraria-blue)">2015</span><p class="slide-body">Atualização 1.3 — Grandes expansões</p></div>
+    <div class="card animate" data-delay="0.6" style="align-self:flex-end;max-width:55%"><span class="stat-number" style="font-size:clamp(1.2rem,2.5vw,2rem);color:var(--terraria-cyan)">2020</span><p class="slide-body">Journey's End (1.4) — O capítulo final</p></div>
+    <div class="card animate" data-delay="0.7" style="align-self:flex-start;max-width:55%"><span class="stat-number" style="font-size:clamp(1.2rem,2.5vw,2rem);color:var(--terraria-pink)">2022</span><p class="slide-body">Labor of Love (1.4.4) — Surpresa pós-final</p></div>
+  </div>
+  <p class="slide-meta animate" data-delay="0.9" style="text-align:center">Milhões de cópias vendidas • Impacto duradouro na indústria indie</p>
+</div>
+</section>
+
+<!-- SLIDE 4: INÍCIO DA JORNADA -->
+<section class="slide" data-index="3">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 60%,rgba(139,111,71,0.06) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">INÍCIO DA JORNADA</h2>
+  <div class="grid-3" style="flex:1;align-content:center;gap:0.6rem">
+    <div class="card animate" data-delay="0.2" style="text-align:center;padding:10px"><span style="font-size:1.5rem">🧑</span><p class="slide-body" style="margin-top:4px;font-weight:700">Criação do Personagem</p><p class="slide-meta">Personalize seu aventureiro</p></div>
+    <div class="card animate" data-delay="0.28" style="text-align:center;padding:10px"><span style="font-size:1.5rem">⭐</span><p class="slide-body" style="margin-top:4px;font-weight:700">Escolha da Dificuldade</p><p class="slide-meta">Journey, Expert, Master</p></div>
+    <div class="card animate" data-delay="0.36" style="text-align:center;padding:10px"><span style="font-size:1.5rem">🌳</span><p class="slide-body" style="margin-top:4px;font-weight:700">Spawn Inicial</p><p class="slide-meta">Guia te aguarda</p></div>
+    <div class="card animate" data-delay="0.44" style="text-align:center;padding:10px"><span style="font-size:1.5rem">🪵</span><p class="slide-body" style="margin-top:4px;font-weight:700">Madeira & Pedra</p><p class="slide-meta">Seus primeiros recursos</p></div>
+    <div class="card animate" data-delay="0.52" style="text-align:center;padding:10px"><span style="font-size:1.5rem">🏠</span><p class="slide-body" style="margin-top:4px;font-weight:700">Primeiro Abrigo</p><p class="slide-meta">Proteção contra a noite</p></div>
+    <div class="card animate" data-delay="0.6" style="text-align:center;padding:10px"><span style="font-size:1.5rem">🌙</span><p class="slide-body" style="margin-top:4px;font-weight:700">Primeira Noite</p><p class="slide-meta">Zumbis e olhos voadores</p></div>
+    <div class="card animate" data-delay="0.68" style="text-align:center;padding:10px"><span style="font-size:1.5rem">⚔️</span><p class="slide-body" style="margin-top:4px;font-weight:700">Primeiros Equipamentos</p><p class="slide-meta">Espada de madeira</p></div>
+    <div class="card animate" data-delay="0.76" style="text-align:center;padding:10px"><span style="font-size:1.5rem">🗣️</span><p class="slide-body" style="margin-top:4px;font-weight:700">Guia NPC</p><p class="slide-meta">Dicas essenciais</p></div>
+    <div class="card animate" data-delay="0.84" style="text-align:center;padding:10px"><span style="font-size:1.5rem">📋</span><p class="slide-body" style="margin-top:4px;font-weight:700">Objetivos Iniciais</p><p class="slide-meta">Explore, colete, sobreviva</p></div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 5: EXPLORAÇÃO -->
+<section class="slide" data-index="4">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 50%,rgba(61,126,217,0.05) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">EXPLORAÇÃO DO MUNDO</h2>
+  <div class="grid-4" style="flex:1;align-content:center;gap:0.5rem">
+    <div class="card animate" data-delay="0.2" style="text-align:center;padding:8px;border-color:var(--terraria-brown)"><span style="font-size:1.8rem">🌿</span><p class="slide-body" style="font-weight:700;color:var(--terraria-brown)">Superfície</p></div>
+    <div class="card animate" data-delay="0.25" style="text-align:center;padding:8px;border-color:var(--terraria-brown)"><span style="font-size:1.8rem">🪨</span><p class="slide-body" style="font-weight:700;color:var(--terraria-brown)">Subsolo</p></div>
+    <div class="card animate" data-delay="0.3" style="text-align:center;padding:8px;border-color:var(--terraria-brown)"><span style="font-size:1.8rem">⛰️</span><p class="slide-body" style="font-weight:700;color:var(--terraria-brown)">Cavernas</p></div>
+    <div class="card animate" data-delay="0.35" style="text-align:center;padding:8px;border-color:var(--terraria-cyan)"><span style="font-size:1.8rem">🧊</span><p class="slide-body" style="font-weight:700;color:var(--terraria-cyan)">Camada de Gelo</p></div>
+    <div class="card animate" data-delay="0.4" style="text-align:center;padding:8px;border-color:var(--terraria-green-bright)"><span style="font-size:1.8rem">🌴</span><p class="slide-body" style="font-weight:700;color:var(--terraria-green-bright)">Selva</p></div>
+    <div class="card animate" data-delay="0.45" style="text-align:center;padding:8px;border-color:var(--terraria-gold)"><span style="font-size:1.8rem">🏜️</span><p class="slide-body" style="font-weight:700;color:var(--terraria-gold)">Deserto</p></div>
+    <div class="card animate" data-delay="0.5" style="text-align:center;padding:8px;border-color:var(--terraria-blue)"><span style="font-size:1.8rem">🌊</span><p class="slide-body" style="font-weight:700;color:var(--terraria-blue)">Oceano</p></div>
+    <div class="card animate" data-delay="0.55" style="text-align:center;padding:8px;border-color:var(--terraria-purple)"><span style="font-size:1.8rem">🏚️</span><p class="slide-body" style="font-weight:700;color:var(--terraria-purple)">Dungeon</p></div>
+    <div class="card animate" data-delay="0.6" style="text-align:center;padding:8px;border-color:var(--terraria-orange)"><span style="font-size:1.8rem">🔥</span><p class="slide-body" style="font-weight:700;color:var(--terraria-orange)">Underworld</p></div>
+    <div class="card animate" data-delay="0.65" style="text-align:center;padding:8px;border-color:var(--terraria-blue-bright)"><span style="font-size:1.8rem">🏝️</span><p class="slide-body" style="font-weight:700;color:var(--terraria-blue-bright)">Ilhas Flutuantes</p></div>
+    <div class="card animate" data-delay="0.7" style="text-align:center;padding:8px;border-color:var(--terraria-gold)"><span style="font-size:1.8rem">🏛️</span><p class="slide-body" style="font-weight:700;color:var(--terraria-gold)">Pirâmides</p></div>
+    <div class="card animate" data-delay="0.75" style="text-align:center;padding:8px;border-color:var(--terraria-green)"><span style="font-size:1.8rem">🗿</span><p class="slide-body" style="font-weight:700;color:var(--terraria-green)">Templos</p></div>
+    <div class="card animate" data-delay="0.8" style="text-align:center;padding:8px;border-color:var(--terraria-blue-bright)"><span style="font-size:1.8rem">🍄</span><p class="slide-body" style="font-weight:700;color:var(--terraria-blue-bright)">Cogumelos</p></div>
+    <div class="card animate" data-delay="0.85" style="text-align:center;padding:8px;border-color:var(--terraria-purple)"><span style="font-size:1.8rem">🌀</span><p class="slide-body" style="font-weight:700;color:var(--terraria-purple)">Corrupção</p></div>
+    <div class="card animate" data-delay="0.9" style="text-align:center;padding:8px;border-color:var(--terraria-red)"><span style="font-size:1.8rem">❤️</span><p class="slide-body" style="font-weight:700;color:var(--terraria-red)">Crimson</p></div>
+    <div class="card animate" data-delay="0.95" style="text-align:center;padding:8px;border-color:var(--terraria-pink)"><span style="font-size:1.8rem">✨</span><p class="slide-body" style="font-weight:700;color:var(--terraria-pink)">Hallow</p></div>
+  </div>
+  <p class="slide-meta animate" data-delay="1" style="text-align:center;margin-top:0.3rem">Mundo gerado proceduralmente • Segredos escondidos a cada esquina</p>
+</div>
+</section>
+
+<!-- SLIDE 6: MINERAÇÃO -->
+<section class="slide" data-index="5">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 50%,rgba(240,196,63,0.06) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">MINERAÇÃO E RECURSOS</h2>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:0.4rem;overflow:hidden">
+    <p class="slide-subtitle animate" data-delay="0.2" style="font-size:clamp(0.7rem,1.2vw,0.9rem);color:var(--terraria-silver)">MINÉRIOS BÁSICOS</p>
+    <div class="animate" data-delay="0.3" style="display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center">
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#c97a4a,#8b4513);margin:0 auto 2px;box-shadow:0 0 8px rgba(139,69,19,0.5)"></div><span class="slide-meta">Cobre</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#b0b0b0,#706060);margin:0 auto 2px;box-shadow:0 0 8px rgba(112,96,96,0.5)"></div><span class="slide-meta">Ferro</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8a7ab0,#5a4a7a);margin:0 auto 2px;box-shadow:0 0 8px rgba(90,74,122,0.5)"></div><span class="slide-meta">Chumbo</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#c0c0e0,#8080a0);margin:0 auto 2px;box-shadow:0 0 8px rgba(128,128,160,0.5)"></div><span class="slide-meta">Prata</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f0d060,#c8a830);margin:0 auto 2px;box-shadow:0 0 8px rgba(200,168,48,0.6)"></div><span class="slide-meta">Ouro</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e0e0f0,#a0a0c0);margin:0 auto 2px;box-shadow:0 0 8px rgba(160,160,192,0.6)"></div><span class="slide-meta">Platina</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#6040a0,#382060);margin:0 auto 2px;box-shadow:0 0 10px rgba(96,64,160,0.7)"></div><span class="slide-meta">Demonite</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#c04060,#802040);margin:0 auto 2px;box-shadow:0 0 10px rgba(192,64,96,0.7)"></div><span class="slide-meta">Crimtane</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e06030,#c04020);margin:0 auto 2px;box-shadow:0 0 12px rgba(224,96,48,0.8)"></div><span class="slide-meta">Hellstone</span></div>
+    </div>
+    <p class="slide-subtitle animate" data-delay="0.5" style="font-size:clamp(0.7rem,1.2vw,0.9rem);color:var(--terraria-gold);margin-top:0.2rem">MINÉRIOS HARDMODE</p>
+    <div class="animate" data-delay="0.6" style="display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center">
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#4080d0,#2050a0);margin:0 auto 2px;box-shadow:0 0 12px rgba(64,128,208,0.8)"></div><span class="slide-meta">Cobalt</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e06080,#b03050);margin:0 auto 2px;box-shadow:0 0 12px rgba(224,96,128,0.8)"></div><span class="slide-meta">Palladium</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#40a0c0,#207090);margin:0 auto 2px;box-shadow:0 0 12px rgba(64,160,192,0.8)"></div><span class="slide-meta">Mythril</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#50c050,#208020);margin:0 auto 2px;box-shadow:0 0 12px rgba(80,192,80,0.8)"></div><span class="slide-meta">Orichalcum</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e04060,#b02040);margin:0 auto 2px;box-shadow:0 0 12px rgba(224,64,96,0.8)"></div><span class="slide-meta">Adamantite</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#b080d0,#8050a0);margin:0 auto 2px;box-shadow:0 0 12px rgba(176,128,208,0.8)"></div><span class="slide-meta">Titanium</span></div>
+    </div>
+    <p class="slide-subtitle animate" data-delay="0.8" style="font-size:clamp(0.7rem,1.2vw,0.9rem);color:var(--terraria-green-bright);margin-top:0.2rem">LENDÁRIOS & GEMAS</p>
+    <div class="animate" data-delay="0.9" style="display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center">
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#60e060,#20a020);margin:0 auto 2px;box-shadow:0 0 16px rgba(96,224,96,0.9);animation:glowPulse 2s infinite"></div><span class="slide-meta">Chlorophyte</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#c0d0ff,#8090c0);margin:0 auto 2px;box-shadow:0 0 16px rgba(192,208,255,0.9);animation:glowPulse 2.5s infinite"></div><span class="slide-meta">Luminite</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff4040,#cc2020);margin:0 auto 2px;box-shadow:0 0 6px rgba(255,64,64,0.5)"></div><span class="slide-meta">Rubi</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#4080ff,#2040cc);margin:0 auto 2px;box-shadow:0 0 6px rgba(64,128,255,0.5)"></div><span class="slide-meta">Safira</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#40ff40,#20a020);margin:0 auto 2px;box-shadow:0 0 6px rgba(64,255,64,0.5)"></div><span class="slide-meta">Esmeralda</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffd040,#ccaa20);margin:0 auto 2px;box-shadow:0 0 6px rgba(255,208,64,0.5)"></div><span class="slide-meta">Topázio</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#d040ff,#aa20cc);margin:0 auto 2px;box-shadow:0 0 6px rgba(208,64,255,0.5)"></div><span class="slide-meta">Ametista</span></div>
+      <div class="ore-item" style="text-align:center;padding:4px 8px"><div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#80e0ff,#40a0cc);margin:0 auto 2px;box-shadow:0 0 6px rgba(128,224,255,0.5)"></div><span class="slide-meta">Diamante</span></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 7: CRAFTING -->
+<section class="slide" data-index="6">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 30% 40%,rgba(90,173,74,0.05) 0%,transparent 60%)"></div>
+<svg style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:180px;height:180px;opacity:0.04;z-index:0" viewBox="0 0 100 100" fill="none" stroke="var(--terraria-gold)" stroke-width="1"><circle cx="50" cy="50" r="45"/><circle cx="50" cy="50" r="30"/><circle cx="50" cy="50" r="15"/><line x1="50" y1="5" x2="50" y2="95"/><line x1="5" y1="50" x2="95" y2="50"/></svg>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">SISTEMA DE CRAFTING</h2>
+  <div class="grid-3" style="flex:1;align-content:center;gap:0.5rem">
+    <div class="card animate" data-delay="0.2" style="text-align:center;padding:8px"><span style="font-size:1.5rem">🪑</span><p class="slide-body" style="font-weight:700;margin-top:4px">Work Bench</p><p class="slide-meta">Itens básicos</p></div>
+    <div class="card animate" data-delay="0.28" style="text-align:center;padding:8px"><span style="font-size:1.5rem">🔥</span><p class="slide-body" style="font-weight:700;margin-top:4px">Furnace</p><p class="slide-meta">Fundir minérios</p></div>
+    <div class="card animate" data-delay="0.36" style="text-align:center;padding:8px"><span style="font-size:1.5rem">🔥</span><p class="slide-body" style="font-weight:700;margin-top:4px">Hellforge</p><p class="slide-meta">Fundir hellstone</p></div>
+    <div class="card animate" data-delay="0.44" style="text-align:center;padding:8px"><span style="font-size:1.5rem">🔨</span><p class="slide-body" style="font-weight:700;margin-top:4px">Iron Anvil</p><p class="slide-meta">Equipamentos básicos</p></div>
+    <div class="card animate" data-delay="0.52" style="text-align:center;padding:8px"><span style="font-size:1.5rem">🔨</span><p class="slide-body" style="font-weight:700;margin-top:4px">Mythril Anvil</p><p class="slide-meta">Equipamentos avançados</p></div>
+    <div class="card animate" data-delay="0.6" style="text-align:center;padding:8px"><span style="font-size:1.5rem">🔮</span><p class="slide-body" style="font-weight:700;margin-top:4px">Ancient Manipulator</p><p class="slide-meta">Itens lunares</p></div>
+    <div class="card animate" data-delay="0.68" style="text-align:center;padding:8px"><span style="font-size:1.5rem">⚗️</span><p class="slide-body" style="font-weight:700;margin-top:4px">Alchemy Table</p><p class="slide-meta">Poções</p></div>
+    <div class="card animate" data-delay="0.76" style="text-align:center;padding:8px"><span style="font-size:1.5rem">📚</span><p class="slide-body" style="font-weight:700;margin-top:4px">Bookcase</p><p class="slide-meta">Magias e decoração</p></div>
+    <div class="card animate" data-delay="0.84" style="text-align:center;padding:8px"><span style="font-size:1.5rem">🪡</span><p class="slide-body" style="font-weight:700;margin-top:4px">Loom</p><p class="slide-meta">Tecidos e roupas</p></div>
+  </div>
+  <p class="slide-body animate" data-delay="0.9" style="text-align:center;color:var(--text-secondary);margin-top:0.3rem">Milhares de itens disponíveis • Receitas • Equipamentos • Armaduras • Poções • Decorações</p>
+</div>
+</section>
+
+<!-- SLIDE 8: COMBATE -->
+<section class="slide" data-index="7">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 70% 40%,rgba(199,58,58,0.06) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">SISTEMA DE COMBATE</h2>
+  <div class="grid-2" style="flex:1;align-content:center;gap:1rem">
+    <div class="animate" data-delay="0.3">
+      <p class="slide-body" style="margin-bottom:0.6rem;color:var(--text-primary);font-weight:700">Combate em tempo real com diversos estilos:</p>
+      <ul style="list-style:none;padding:0">
+        <li class="slide-body" style="margin-bottom:0.3rem">🔴 Corpo a corpo</li>
+        <li class="slide-body" style="margin-bottom:0.3rem">🏹 Longo alcance</li>
+        <li class="slide-body" style="margin-bottom:0.3rem">🔮 Magia</li>
+        <li class="slide-body" style="margin-bottom:0.3rem">👻 Invocação</li>
+        <li class="slide-body" style="margin-bottom:0.3rem">🪢 Chicotes</li>
+      </ul>
+      <p class="slide-body" style="margin-top:0.4rem">Defesa • Vida • Mana • Esquiva • Buffs • Debuffs • Poções</p>
+    </div>
+    <div class="grid-2 animate" data-delay="0.5" style="gap:0.5rem;align-content:center">
+      <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.8rem">🗡️</span><p class="slide-meta">Espada</p></div>
+      <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.8rem">🏹</span><p class="slide-meta">Arco</p></div>
+      <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.8rem">🧪</span><p class="slide-meta">Poção Mágica</p></div>
+      <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.8rem">👑</span><p class="slide-meta">Cetro</p></div>
+      <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.8rem">🪢</span><p class="slide-meta">Chicote</p></div>
+      <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.8rem">🛡️</span><p class="slide-meta">Escudo</p></div>
+      <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.8rem">📖</span><p class="slide-meta">Livro de Magia</p></div>
+      <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.8rem">💚</span><p class="slide-meta">Cura</p></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 9: CLASSES -->
+<section class="slide" data-index="8">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 50%,rgba(123,63,160,0.04) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">CLASSES DO PERSONAGEM</h2>
+  <div class="grid-2x2" style="flex:1;align-content:center;gap:0.8rem">
+    <div class="card animate" data-delay="0.2" style="text-align:center;padding:12px;background:linear-gradient(135deg,rgba(199,58,58,0.12),var(--bg-card));border-color:rgba(199,58,58,0.3);--glow-green:rgba(199,58,58,0.4);animation:glowPulse 3s infinite">
+      <span style="font-size:2rem">⚔️</span>
+      <p class="slide-subtitle" style="font-size:clamp(0.7rem,1.2vw,0.9rem);color:var(--terraria-red);margin:4px 0">GUERREIRO</p>
+      <p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem)">Alta defesa • Dano corpo a corpo</p>
+      <p class="slide-meta">Alcance limitado</p>
+    </div>
+    <div class="card animate" data-delay="0.3" style="text-align:center;padding:12px;background:linear-gradient(135deg,rgba(77,158,255,0.12),var(--bg-card));border-color:rgba(77,158,255,0.3)">
+      <span style="font-size:2rem">🔮</span>
+      <p class="slide-subtitle" style="font-size:clamp(0.7rem,1.2vw,0.9rem);color:var(--accent-mana);margin:4px 0">MAGO</p>
+      <p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem)">Dano à distância • Área • Utilidade</p>
+      <p class="slide-meta">Baixa defesa • Consome mana</p>
+    </div>
+    <div class="card animate" data-delay="0.4" style="text-align:center;padding:12px;background:linear-gradient(135deg,rgba(90,173,74,0.12),var(--bg-card));border-color:rgba(90,173,74,0.3)">
+      <span style="font-size:2rem">🏹</span>
+      <p class="slide-subtitle" style="font-size:clamp(0.7rem,1.2vw,0.9rem);color:var(--terraria-green);margin:4px 0">ARQUEIRO</p>
+      <p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem)">Dano à distância • Precisão</p>
+      <p class="slide-meta">Munição necessária • Defesa média</p>
+    </div>
+    <div class="card animate" data-delay="0.5" style="text-align:center;padding:12px;background:linear-gradient(135deg,rgba(123,63,160,0.12),var(--bg-card));border-color:rgba(123,63,160,0.3)">
+      <span style="font-size:2rem">👻</span>
+      <p class="slide-subtitle" style="font-size:clamp(0.7rem,1.2vw,0.9rem);color:var(--terraria-purple);margin:4px 0">INVOCADOR</p>
+      <p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem)">Ataques automáticos • Suporte</p>
+      <p class="slide-meta">Baixa defesa • Dependente de summons</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 10: CHEFES -->
+<section class="slide" data-index="9">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 30%,rgba(199,58,58,0.06) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">CHEFES</h2>
+  <div class="grid-4" style="flex:1;align-content:center;gap:0.5rem">
+    <div class="card animate" data-delay="0.15" style="text-align:center;padding:6px;border-color:rgba(199,58,58,0.2)"><span style="font-size:1.5rem">👁️</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Eye of Cthulhu</p><p class="slide-meta" style="color:var(--terraria-gold)">★★☆☆☆</p></div>
+    <div class="card animate" data-delay="0.22" style="text-align:center;padding:6px;border-color:rgba(90,173,74,0.2)"><span style="font-size:1.5rem">🟢</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">King Slime</p><p class="slide-meta" style="color:var(--terraria-gold)">★☆☆☆☆</p></div>
+    <div class="card animate" data-delay="0.29" style="text-align:center;padding:6px;border-color:rgba(123,63,160,0.2)"><span style="font-size:1.5rem">🐛</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Eater of Worlds</p><p class="slide-meta" style="color:var(--terraria-gold)">★★☆☆☆</p></div>
+    <div class="card animate" data-delay="0.36" style="text-align:center;padding:6px;border-color:rgba(199,58,58,0.2)"><span style="font-size:1.5rem">🧠</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Brain of Cthulhu</p><p class="slide-meta" style="color:var(--terraria-gold)">★★☆☆☆</p></div>
+    <div class="card animate" data-delay="0.43" style="text-align:center;padding:6px;border-color:rgba(240,196,63,0.2)"><span style="font-size:1.5rem">🐝</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Queen Bee</p><p class="slide-meta" style="color:var(--terraria-gold)">★★☆☆☆</p></div>
+    <div class="card animate" data-delay="0.5" style="text-align:center;padding:6px;border-color:rgba(139,111,71,0.2)"><span style="font-size:1.5rem">💀</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Skeletron</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★☆☆</p></div>
+    <div class="card animate" data-delay="0.57" style="text-align:center;padding:6px;border-color:rgba(232,131,58,0.2)"><span style="font-size:1.5rem">👹</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Wall of Flesh</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★☆</p></div>
+    <div class="card animate" data-delay="0.64" style="text-align:center;padding:6px;border-color:rgba(199,58,58,0.2)"><span style="font-size:1.5rem">👥</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">The Twins</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★☆</p></div>
+    <div class="card animate" data-delay="0.71" style="text-align:center;padding:6px;border-color:rgba(123,63,160,0.2)"><span style="font-size:1.5rem">🐉</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Destroyer</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★☆</p></div>
+    <div class="card animate" data-delay="0.78" style="text-align:center;padding:6px;border-color:rgba(61,126,217,0.2)"><span style="font-size:1.5rem">⚙️</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Skeletron Prime</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★☆</p></div>
+    <div class="card animate" data-delay="0.85" style="text-align:center;padding:6px;border-color:rgba(90,173,74,0.2)"><span style="font-size:1.5rem">🌿</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Plantera</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★☆</p></div>
+    <div class="card animate" data-delay="0.92" style="text-align:center;padding:6px;border-color:rgba(240,196,63,0.3)"><span style="font-size:1.5rem">🌑</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Moon Lord</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★★</p></div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 11: NPCS -->
+<section class="slide" data-index="10">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 60% 60%,rgba(90,173,74,0.05) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">NPCS</h2>
+  <div class="grid-4" style="flex:1;align-content:center;gap:0.5rem">
+    <div class="card animate" data-delay="0.15" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🧑‍🏫</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Guide</p><p class="slide-meta">Início</p></div>
+    <div class="card animate" data-delay="0.22" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🧑‍💼</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Merchant</p><p class="slide-meta">50 moedas</p></div>
+    <div class="card animate" data-delay="0.29" style="text-align:center;padding:6px"><span style="font-size:1.3rem">👩‍⚕️</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Nurse</p><p class="slide-meta">Vida > 100</p></div>
+    <div class="card animate" data-delay="0.36" style="text-align:center;padding:6px"><span style="font-size:1.3rem">💣</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Demolitionist</p><p class="slide-meta">Explosivos</p></div>
+    <div class="card animate" data-delay="0.43" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🔫</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Arms Dealer</p><p class="slide-meta">Explosivos</p></div>
+    <div class="card animate" data-delay="0.5" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🌿</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Dryad</p><p class="slide-meta">Derrote um chefe</p></div>
+    <div class="card animate" data-delay="0.57" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🔧</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Goblin Tinkerer</p><p class="slide-meta">Invasão Goblin</p></div>
+    <div class="card animate" data-delay="0.64" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🔩</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Mechanic</p><p class="slide-meta">Dungeon</p></div>
+    <div class="card animate" data-delay="0.71" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🧙</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Wizard</p><p class="slide-meta">Hardmode</p></div>
+    <div class="card animate" data-delay="0.78" style="text-align:center;padding:6px"><span style="font-size:1.3rem">⚙️</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Steampunker</p><p class="slide-meta">Hardmode</p></div>
+    <div class="card animate" data-delay="0.85" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🐾</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Zoologist</p><p class="slide-meta">60% Bestiário</p></div>
+    <div class="card animate" data-delay="0.92" style="text-align:center;padding:6px"><span style="font-size:1.3rem">👸</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Princess</p><p class="slide-meta">Todos os NPCs</p></div>
+  </div>
+  <p class="slide-meta animate" data-delay="1" style="text-align:center;margin-top:0.3rem">Sistema de Felicidade • Preços • Pylons • Cada NPC tem preferências de bioma e vizinhança</p>
+</div>
+</section>
+
+<!-- SLIDE 12: CONSTRUÇÃO -->
+<section class="slide" data-index="11">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 40% 60%,rgba(240,196,63,0.05) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">CONSTRUÇÃO</h2>
+  <div class="grid-3" style="flex:1;align-content:center;gap:0.5rem">
+    <div class="card animate" data-delay="0.2" style="text-align:center;padding:10px"><span style="font-size:2rem">🏠</span><p class="slide-body" style="font-weight:700;margin-top:4px">Casas</p><p class="slide-meta">Abrigos e moradias</p></div>
+    <div class="card animate" data-delay="0.28" style="text-align:center;padding:10px"><span style="font-size:2rem">🏰</span><p class="slide-body" style="font-weight:700;margin-top:4px">Castelos</p><p class="slide-meta">Fortalezas épicas</p></div>
+    <div class="card animate" data-delay="0.36" style="text-align:center;padding:10px"><span style="font-size:2rem">🏘️</span><p class="slide-body" style="font-weight:700;margin-top:4px">Vilas</p><p class="slide-meta">Comunidades para NPCs</p></div>
+    <div class="card animate" data-delay="0.44" style="text-align:center;padding:10px"><span style="font-size:2rem">🏺</span><p class="slide-body" style="font-weight:700;margin-top:4px">Decoração</p><p class="slide-meta">Móveis e ornamentos</p></div>
+    <div class="card animate" data-delay="0.52" style="text-align:center;padding:10px"><span style="font-size:2rem">🔥</span><p class="slide-body" style="font-weight:700;margin-top:4px">Iluminação</p><p class="slide-meta">Tochas e lanternas</p></div>
+    <div class="card animate" data-delay="0.6" style="text-align:center;padding:10px"><span style="font-size:2rem">⚔️</span><p class="slide-body" style="font-weight:700;margin-top:4px">Arenas</p><p class="slide-meta">Campos de batalha</p></div>
+    <div class="card animate" data-delay="0.68" style="text-align:center;padding:10px"><span style="font-size:2rem">⚙️</span><p class="slide-body" style="font-weight:700;margin-top:4px">Fazendas Automáticas</p><p class="slide-meta">Sistemas eficientes</p></div>
+    <div class="card animate" data-delay="0.76" style="text-align:center;padding:10px"><span style="font-size:2rem">🎨</span><p class="slide-body" style="font-weight:700;margin-top:4px">Construções Temáticas</p><p class="slide-meta">Criatividade sem limites</p></div>
+    <div class="card animate" data-delay="0.84" style="text-align:center;padding:10px"><span style="font-size:2rem">🗺️</span><p class="slide-body" style="font-weight:700;margin-top:4px">Mapas Compartilhados</p><p class="slide-meta">Comunidade criativa</p></div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 13: EVENTOS -->
+<section class="slide" data-index="12">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 30% 70%,rgba(240,196,63,0.05) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">EVENTOS DO JOGO</h2>
+  <div class="grid-4" style="flex:1;align-content:center;gap:0.5rem">
+    <div class="card animate" data-delay="0.15" style="text-align:center;padding:8px;border-color:rgba(199,58,58,0.2)"><span style="font-size:1.5rem">🌕</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Blood Moon</p><p class="slide-meta" style="color:var(--terraria-gold)">★★☆☆☆</p></div>
+    <div class="card animate" data-delay="0.22" style="text-align:center;padding:8px;border-color:rgba(240,196,63,0.2)"><span style="font-size:1.5rem">☀️</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Solar Eclipse</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★☆</p></div>
+    <div class="card animate" data-delay="0.29" style="text-align:center;padding:8px;border-color:rgba(139,111,71,0.2)"><span style="font-size:1.5rem">👺</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Goblin Army</p><p class="slide-meta" style="color:var(--terraria-gold)">★★☆☆☆</p></div>
+    <div class="card animate" data-delay="0.36" style="text-align:center;padding:8px;border-color:rgba(61,126,217,0.2)"><span style="font-size:1.5rem">🏴‍☠️</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Pirate Invasion</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★☆☆</p></div>
+    <div class="card animate" data-delay="0.43" style="text-align:center;padding:8px;border-color:rgba(232,131,58,0.2)"><span style="font-size:1.5rem">🎃</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Pumpkin Moon</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★☆</p></div>
+    <div class="card animate" data-delay="0.5" style="text-align:center;padding:8px;border-color:rgba(90,173,74,0.2)"><span style="font-size:1.5rem">❄️</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Frost Moon</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★☆</p></div>
+    <div class="card animate" data-delay="0.57" style="text-align:center;padding:8px;border-color:rgba(199,58,58,0.2)"><span style="font-size:1.5rem">👽</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Martian Madness</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★☆</p></div>
+    <div class="card animate" data-delay="0.64" style="text-align:center;padding:8px;border-color:rgba(90,173,74,0.2)"><span style="font-size:1.5rem">💧</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Slime Rain</p><p class="slide-meta" style="color:var(--terraria-gold)">★☆☆☆☆</p></div>
+    <div class="card animate" data-delay="0.71" style="text-align:center;padding:8px;border-color:rgba(123,63,160,0.2)"><span style="font-size:1.5rem">🌌</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Lunar Events</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★★</p></div>
+    <div class="card animate" data-delay="0.78" style="text-align:center;padding:8px;border-color:rgba(240,196,63,0.2)"><span style="font-size:1.5rem">🌪️</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Sandstorm</p><p class="slide-meta" style="color:var(--terraria-gold)">★★☆☆☆</p></div>
+    <div class="card animate" data-delay="0.85" style="text-align:center;padding:8px;border-color:rgba(61,126,217,0.2)"><span style="font-size:1.5rem">🌧️</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Rain/Thunder</p><p class="slide-meta" style="color:var(--terraria-gold)">★☆☆☆☆</p></div>
+    <div class="card animate" data-delay="0.92" style="text-align:center;padding:8px;border-color:rgba(232,140,192,0.2)"><span style="font-size:1.5rem">🎄</span><p class="slide-body" style="font-weight:700;font-size:clamp(0.6rem,0.9vw,0.75rem)">Halloween/Christmas</p><p class="slide-meta" style="color:var(--terraria-gold)">★☆☆☆☆</p></div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 14: MODOS -->
+<section class="slide" data-index="13">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 30%,rgba(90,173,74,0.05) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">MODOS DE JOGO</h2>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:0.6rem">
+    <div class="grid-4 animate" data-delay="0.3" style="gap:0.6rem">
+      <div class="card" style="text-align:center;padding:12px"><span style="font-size:1.8rem">🟢</span><p class="slide-body" style="font-weight:700">Classic</p><p class="slide-meta">Modo padrão</p><p class="slide-meta" style="color:var(--terraria-gold)">★☆☆☆☆</p></div>
+      <div class="card" style="text-align:center;padding:12px"><span style="font-size:1.8rem">🟡</span><p class="slide-body" style="font-weight:700">Mediumcore</p><p class="slide-meta">Derruba itens</p><p class="slide-meta" style="color:var(--terraria-gold)">★★☆☆☆</p></div>
+      <div class="card" style="text-align:center;padding:12px"><span style="font-size:1.8rem">🔴</span><p class="slide-body" style="font-weight:700">Hardcore</p><p class="slide-meta">Morte permanente</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★☆☆</p></div>
+      <div class="card" style="text-align:center;padding:12px"><span style="font-size:1.8rem">🚀</span><p class="slide-body" style="font-weight:700">Journey Mode</p><p class="slide-meta">Poderes criativos</p><p class="slide-meta" style="color:var(--terraria-gold)">★☆☆☆☆</p></div>
+    </div>
+    <div class="grid-3 animate" data-delay="0.5" style="gap:0.6rem;max-width:80%;margin:0 auto;width:100%">
+      <div class="card" style="text-align:center;padding:12px"><span style="font-size:1.8rem">⚡</span><p class="slide-body" style="font-weight:700;color:var(--terraria-gold)">Expert Mode</p><p class="slide-meta">Mais difícil, melhores recompensas</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★☆</p></div>
+      <div class="card" style="text-align:center;padding:12px"><span style="font-size:1.8rem">💀</span><p class="slide-body" style="font-weight:700;color:var(--terraria-red)">Master Mode</p><p class="slide-meta">Desafio extremo</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★★</p></div>
+      <div class="card" style="text-align:center;padding:12px"><span style="font-size:1.8rem">👑</span><p class="slide-body" style="font-weight:700;color:var(--terraria-purple)">Legendary Mode</p><p class="slide-meta">Apenas para os corajosos</p><p class="slide-meta" style="color:var(--terraria-gold)">★★★★★</p></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 15: MULTIPLAYER -->
+<section class="slide" data-index="14">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 40%,rgba(61,126,217,0.05) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">MULTIPLAYER</h2>
+  <div class="grid-2" style="flex:1;align-content:center;gap:1rem">
+    <div class="animate" data-delay="0.3">
+      <ul style="list-style:none;padding:0">
+        <li class="slide-body" style="margin-bottom:0.4rem">🤝 Cooperação</li>
+        <li class="slide-body" style="margin-bottom:0.4rem">🌐 Servidores</li>
+        <li class="slide-body" style="margin-bottom:0.4rem">🎮 Host & Play (Steam)</li>
+        <li class="slide-body" style="margin-bottom:0.4rem">📦 Compartilhamento de recursos</li>
+        <li class="slide-body" style="margin-bottom:0.4rem">🏗️ Construções em equipe</li>
+        <li class="slide-body" style="margin-bottom:0.4rem">👾 Chefes em grupo</li>
+        <li class="slide-body" style="margin-bottom:0.4rem">⚔️ PvP</li>
+        <li class="slide-body" style="margin-bottom:0.4rem">🔧 Mods multiplayer</li>
+      </ul>
+    </div>
+    <div class="animate" data-delay="0.5" style="display:flex;justify-content:center;align-items:center;gap:1rem;position:relative">
+      <div style="width:80px;height:80px;border-radius:50%;background:rgba(199,58,58,0.15);border:2px solid rgba(199,58,58,0.3);display:flex;align-items:center;justify-content:center;animation:float 3s ease-in-out infinite"><span style="font-size:2rem">⚔️</span></div>
+      <div style="width:80px;height:80px;border-radius:50%;background:rgba(77,158,255,0.15);border:2px solid rgba(77,158,255,0.3);display:flex;align-items:center;justify-content:center;animation:float 3.5s ease-in-out infinite 0.5s"><span style="font-size:2rem">🔮</span></div>
+      <div style="width:80px;height:80px;border-radius:50%;background:rgba(90,173,74,0.15);border:2px solid rgba(90,173,74,0.3);display:flex;align-items:center;justify-content:center;animation:float 4s ease-in-out infinite 1s"><span style="font-size:2rem">🏹</span></div>
+      <div style="width:80px;height:80px;border-radius:50%;background:rgba(123,63,160,0.15);border:2px solid rgba(123,63,160,0.3);display:flex;align-items:center;justify-content:center;animation:float 3.2s ease-in-out infinite 1.5s"><span style="font-size:2rem">👻</span></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 16: TRILHA SONORA & PIXEL ART -->
+<section class="slide" data-index="15">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 50%,rgba(232,140,192,0.04) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0" style="font-size:clamp(0.9rem,2.2vw,1.8rem)">TRILHA SONORA & PIXEL ART</h2>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:0.4rem">
+    <p class="slide-subtitle animate" data-delay="0.2" style="font-size:clamp(0.75rem,1.4vw,1rem);color:var(--terraria-gold)">🎨 Pixel Art</p>
+    <div class="grid-3x2 animate" data-delay="0.3" style="gap:0.4rem">
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.2rem">🔲</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Pixel Art</p><p class="slide-meta">Estilo clássico</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.2rem">▶️</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Animações</p><p class="slide-meta">Fluidas e expressivas</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.2rem">🌓</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Ciclo Dia/Noite</p><p class="slide-meta">Mundo vivo</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.2rem">☁️</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Mudanças Climáticas</p><p class="slide-meta">Chuva, vento</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.2rem">💡</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Iluminação Dinâmica</p><p class="slide-meta">Tochas, glow</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.2rem">❤️</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Interface</p><p class="slide-meta">Vida, mana, buffs</p></div>
+    </div>
+    <p class="slide-subtitle animate" data-delay="0.5" style="font-size:clamp(0.75rem,1.4vw,1rem);color:var(--terraria-cyan);margin-top:0.2rem">🎵 Trilha Sonora</p>
+    <div class="grid-3x2 animate" data-delay="0.6" style="gap:0.4rem">
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.2rem">🎵</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Música por Bioma</p><p class="slide-meta">Cada área tem sua trilha</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.2rem">🌊</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Sons Ambientes</p><p class="slide-meta">Vento, água, criaturas</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.2rem">⚡</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Efeitos Especiais</p><p class="slide-meta">Magia, explosões</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.2rem">🌀</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Atmosfera</p><p class="slide-meta">Imersão total</p></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 17: ATUALIZAÇÕES -->
+<section class="slide" data-index="16">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 40%,rgba(90,173,74,0.05) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">ATUALIZAÇÕES</h2>
+  <div class="grid-3" style="flex:1;align-content:center;gap:0.6rem">
+    <div class="card animate" data-delay="0.2" style="text-align:center;padding:10px;border-color:rgba(90,173,74,0.2)"><p class="stat-number" style="font-size:clamp(1rem,2vw,1.5rem)">1.0</p><p class="slide-meta" style="color:var(--terraria-gold)">2011</p><p class="slide-body">Lançamento inicial</p></div>
+    <div class="card animate" data-delay="0.28" style="text-align:center;padding:10px;border-color:rgba(61,126,217,0.2)"><p class="stat-number" style="font-size:clamp(1rem,2vw,1.5rem);color:var(--terraria-blue)">1.1</p><p class="slide-meta" style="color:var(--terraria-gold)">2011</p><p class="slide-body">Hardmode, novos chefes</p></div>
+    <div class="card animate" data-delay="0.36" style="text-align:center;padding:10px;border-color:rgba(240,196,63,0.2)"><p class="stat-number" style="font-size:clamp(1rem,2vw,1.5rem);color:var(--terraria-gold)">1.2</p><p class="slide-meta" style="color:var(--terraria-gold)">2013</p><p class="slide-body">Expansão massiva</p></div>
+    <div class="card animate" data-delay="0.44" style="text-align:center;padding:10px;border-color:rgba(232,131,58,0.2)"><p class="stat-number" style="font-size:clamp(1rem,2vw,1.5rem);color:var(--terraria-orange)">1.3</p><p class="slide-meta" style="color:var(--terraria-gold)">2015</p><p class="slide-body">Eventos, multiplayer</p></div>
+    <div class="card animate" data-delay="0.52" style="text-align:center;padding:10px;border-color:rgba(232,140,192,0.2)"><p class="stat-number" style="font-size:clamp(1rem,2vw,1.5rem);color:var(--terraria-pink)">1.4</p><p class="slide-meta" style="color:var(--terraria-gold)">2020</p><p class="slide-body">Journey's End</p></div>
+    <div class="card animate" data-delay="0.6" style="text-align:center;padding:10px;border-color:rgba(90,173,74,0.3)"><p class="stat-number" style="font-size:clamp(1rem,2vw,1.5rem);color:var(--terraria-green-bright)">1.4.4</p><p class="slide-meta" style="color:var(--terraria-gold)">2022</p><p class="slide-body">Labor of Love</p></div>
+  </div>
+  <p class="slide-body animate" data-delay="0.7" style="text-align:center;color:var(--text-secondary);margin-top:0.3rem">Conteúdo gratuito • Participação da comunidade • Melhorias contínuas</p>
+</div>
+</section>
+
+<!-- SLIDE 18: CURIOSIDADES -->
+<section class="slide" data-index="17">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 60% 50%,rgba(240,196,63,0.05) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">CURIOSIDADES</h2>
+  <div class="grid-3" style="flex:1;align-content:center;gap:0.5rem">
+    <div class="card animate" data-delay="0.2" style="text-align:center;padding:8px"><span style="font-size:1.8rem">📦</span><p class="slide-body" style="font-weight:700;margin-top:4px">Mais de 5.000 itens</p><p class="slide-meta">Variedade imensa</p></div>
+    <div class="card animate" data-delay="0.28" style="text-align:center;padding:8px"><span style="font-size:1.8rem">👾</span><p class="slide-body" style="font-weight:700;margin-top:4px">Centenas de inimigos</p><p class="slide-meta">Criaturas únicas</p></div>
+    <div class="card animate" data-delay="0.36" style="text-align:center;padding:8px"><span style="font-size:1.8rem">💀</span><p class="slide-body" style="font-weight:700;margin-top:4px">Dezenas de chefes</p><p class="slide-meta">Desafios épicos</p></div>
+    <div class="card animate" data-delay="0.44" style="text-align:center;padding:8px"><span style="font-size:1.8rem">🥚</span><p class="slide-body" style="font-weight:700;margin-top:4px">Easter Eggs</p><p class="slide-meta">Segredos escondidos</p></div>
+    <div class="card animate" data-delay="0.52" style="text-align:center;padding:8px"><span style="font-size:1.8rem">🌱</span><p class="slide-body" style="font-weight:700;margin-top:4px">Seeds Secretas</p><p class="slide-meta">Mundos especiais</p></div>
+    <div class="card animate" data-delay="0.6" style="text-align:center;padding:8px"><span style="font-size:1.8rem">🤝</span><p class="slide-body" style="font-weight:700;margin-top:4px">Colaborações</p><p class="slide-meta">Don't Starve e mais</p></div>
+    <div class="card animate" data-delay="0.68" style="text-align:center;padding:8px"><span style="font-size:1.8rem">⏱️</span><p class="slide-body" style="font-weight:700;margin-top:4px">Speedruns</p><p class="slide-meta">Recordes incríveis</p></div>
+    <div class="card animate" data-delay="0.76" style="text-align:center;padding:8px"><span style="font-size:1.8rem">⚙️</span><p class="slide-body" style="font-weight:700;margin-top:4px">Mods Famosos</p><p class="slide-meta">Calamity, Thorium</p></div>
+    <div class="card animate" data-delay="0.84" style="text-align:center;padding:8px"><span style="font-size:1.8rem">🎬</span><p class="slide-body" style="font-weight:700;margin-top:4px">Referências Culturais</p><p class="slide-meta">Filmes, jogos e pop</p></div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 19: IMPACTO E LEGADO -->
+<section class="slide" data-index="18">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 40%,rgba(240,196,63,0.06) 0%,transparent 60%)"></div>
+<div class="slide-content">
+  <h2 class="slide-title animate" data-delay="0">IMPACTO E LEGADO</h2>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:0.5rem">
+    <div class="grid-3 animate" data-delay="0.3" style="gap:0.8rem;max-width:90%;margin:0 auto;width:100%">
+      <div class="card" style="text-align:center;padding:12px;border-color:rgba(240,196,63,0.2)"><p class="stat-number"><span class="counter" data-target="44">0</span>M+</p><p class="stat-label">Cópias Vendidas</p></div>
+      <div class="card" style="text-align:center;padding:12px;border-color:rgba(90,173,74,0.2)"><p class="stat-number" style="color:var(--terraria-green-bright)"><span class="counter" data-target="97">0</span>%</p><p class="stat-label">Avaliações Positivas</p></div>
+      <div class="card" style="text-align:center;padding:12px;border-color:rgba(61,126,217,0.2)"><p class="stat-number" style="color:var(--terraria-blue)">10+</p><p class="stat-label">Anos de Suporte</p></div>
+    </div>
+    <div class="grid-3x2 animate" data-delay="0.6" style="gap:0.4rem">
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🧩</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Comunidade de Mods</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.3rem">⭐</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Influência em Jogos</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.3rem">▶️</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Streamers e Criadores</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.3rem">📱</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Multiplataforma</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🏆</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Prêmios</p></div>
+      <div class="card" style="text-align:center;padding:6px"><span style="font-size:1.3rem">🚀</span><p class="slide-body" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700">Futuro da Franquia</p></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SLIDE 20: CONCLUSÃO -->
+<section class="slide" data-index="19">
+<div class="slide-bg-glow" style="background:radial-gradient(ellipse at 50% 50%,rgba(240,196,63,0.06) 0%,transparent 60%)"></div>
+<svg style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:120px;height:120px;opacity:0.06;z-index:0;animation:spin 15s linear infinite" viewBox="0 0 100 100" fill="var(--terraria-gold)" stroke="none"><polygon points="50,5 61,38 95,38 68,60 79,95 50,73 21,95 32,60 5,38 39,38"/></svg>
+<div class="slide-content" style="align-items:center;text-align:center">
+  <h2 class="slide-title animate" data-delay="0">CONCLUSÃO</h2>
+  <div class="grid-3x2 animate" data-delay="0.3" style="gap:0.5rem;max-width:80%;margin:0 auto;width:100%">
+    <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.3rem">🌍</span><p class="slide-body" style="font-weight:700">Exploração sem limites</p></div>
+    <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.3rem">📈</span><p class="slide-body" style="font-weight:700">Progressão profunda</p></div>
+    <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.3rem">🏗️</span><p class="slide-body" style="font-weight:700">Construção criativa</p></div>
+    <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.3rem">⚔️</span><p class="slide-body" style="font-weight:700">Combate desafiador</p></div>
+    <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.3rem">👥</span><p class="slide-body" style="font-weight:700">Comunidade ativa</p></div>
+    <div class="card" style="text-align:center;padding:8px"><span style="font-size:1.3rem">🔄</span><p class="slide-body" style="font-weight:700">Suporte contínuo</p></div>
+  </div>
+  <p class="slide-body animate" data-delay="0.6" style="max-width:80%;margin:0.6rem auto;color:var(--text-primary)">Terraria permanece relevante graças à combinação de exploração, combate, construção e suporte contínuo da desenvolvedora. Um pequeno mundo com possibilidades infinitas.</p>
+  <p class="slide-subtitle animate" data-delay="0.9" style="color:var(--terraria-gold);font-family:'Press Start 2P',cursive;font-size:clamp(0.7rem,1.2vw,0.9rem)">Obrigado(a) pela atenção!</p>
+</div>
+</section>
+
+<!-- NAVIGATION -->
+<button class="btn-nav" id="btn-prev" aria-label="Slide anterior">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+</button>
+<button class="btn-nav" id="btn-next" aria-label="Próximo slide">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+</button>
+
+<div id="progress-bar" style="width:5%"></div>
+<div id="slide-counter">01 / 20</div>
+<div id="slide-dots"></div>
+</div>
+
+<script>
+(function(){
+const slides=document.querySelectorAll('.slide');
+const total=slides.length;
+let current=0;
+let isAnimating=false;
+const prevBtn=document.getElementById('btn-prev');
+const nextBtn=document.getElementById('btn-next');
+const progressBar=document.getElementById('progress-bar');
+const counter=document.getElementById('slide-counter');
+const dotsContainer=document.getElementById('slide-dots');
+
+// Create dots
+for(let i=0;i<total;i++){
+  const dot=document.createElement('div');
+  dot.className='dot'+(i===0?' active':'');
+  dotsContainer.appendChild(dot);
+}
+const dots=document.querySelectorAll('.dot');
+
+function updateNav(){
+  prevBtn.classList.toggle('hidden',current===0);
+  nextBtn.classList.toggle('hidden',current===total-1);
+  const pct=((current+1)/total)*100;
+  progressBar.style.width=pct+'%';
+  counter.textContent=String(current+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+  dots.forEach((d,i)=>d.classList.toggle('active',i===current));
+}
+
+// Generate 3D text shadows for title
+(function(){
+  const title=document.getElementById('main-title');
+  if(!title)return;
+  let shadow='';
+  for(let i=1;i<=35;i++){
+    shadow+=(-i)+'px '+i+'px 0 #1a1423'+(i<35?',':'');
+  }
+  title.style.textShadow=shadow+', 0 0 30px var(--glow-gold)';
+})();
+
+function animateSlideIn(slide){
+  const anims=slide.querySelectorAll('.animate, .animate-fade, .animate-scale');
+  anims.forEach(el=>{
+    el.classList.remove('animate-in','animate-fade-in','animate-scale-in');
+    void el.offsetWidth;
+    const delay=parseFloat(el.getAttribute('data-delay'))||0;
+    const stagger=parseFloat(el.getAttribute('data-stagger'))||0;
+    let siblings=[];
+    if(stagger>0&&el.parentElement){
+      siblings=Array.from(el.parentElement.querySelectorAll(':scope > .animate, :scope > .animate-fade, :scope > .animate-scale'));
+    }
+    let actualDelay=delay;
+    if(stagger>0&&siblings.length>1){
+      const idx=siblings.indexOf(el);
+      actualDelay=delay+idx*stagger;
+    }
+    if(el.classList.contains('animate')){
+      setTimeout(()=>el.classList.add('animate-in'),actualDelay*1000);
+    }else if(el.classList.contains('animate-fade')){
+      setTimeout(()=>el.classList.add('animate-fade-in'),actualDelay*1000);
+    }else if(el.classList.contains('animate-scale')){
+      setTimeout(()=>el.classList.add('animate-scale-in'),actualDelay*1000);
+    }
+  });
+}
+
+function resetSlideAnims(slide){
+  slide.querySelectorAll('.animate').forEach(el=>el.classList.remove('animate-in'));
+  slide.querySelectorAll('.animate-fade').forEach(el=>el.classList.remove('animate-fade-in'));
+  slide.querySelectorAll('.animate-scale').forEach(el=>el.classList.remove('animate-scale-in'));
+}
+
+function goToSlide(n){
+  if(isAnimating||n===current||n<0||n>=total)return;
+  isAnimating=true;
+  const oldSlide=slides[current];
+  const newSlide=slides[n];
+  oldSlide.classList.remove('active');
+  resetSlideAnims(oldSlide);
+  newSlide.classList.add('active');
+  current=n;
+  updateNav();
+  setTimeout(()=>{
+    animateSlideIn(newSlide);
+    isAnimating=false;
+  },50);
+  // Handle counters
+  if(n===18)startCounters();
+}
+
+function nextSlide(){goToSlide(current+1);}
+function prevSlide(){goToSlide(current-1);}
+
+// Keyboard
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='Space'||e.key==='PageDown'){e.preventDefault();nextSlide();}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prevSlide();}
+  else if(e.key==='Home'){e.preventDefault();goToSlide(0);}
+  else if(e.key==='End'){e.preventDefault();goToSlide(total-1);}
+});
+
+// Touch swipe
+let touchStartX=0,touchStartY=0;
+document.addEventListener('touchstart',function(e){
+  touchStartX=e.changedTouches[0].screenX;
+  touchStartY=e.changedTouches[0].screenY;
+},{passive:true});
+document.addEventListener('touchend',function(e){
+  const dx=e.changedTouches[0].screenX-touchStartX;
+  const dy=e.changedTouches[0].screenY-touchStartY;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){
+    if(dx<0)nextSlide();
+    else prevSlide();
+  }
+},{passive:true});
+
+// Buttons
+prevBtn.addEventListener('click',prevSlide);
+nextBtn.addEventListener('click',nextSlide);
+
+// Particles
+(function(){
+  const container=document.getElementById('particles');
+  for(let i=0;i<60;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.left=Math.random()*100+'%';
+    p.style.top=Math.random()*100+'%';
+    p.style.setProperty('--dur',(3+Math.random()*4)+'s');
+    p.style.setProperty('--op',(0.1+Math.random()*0.2));
+    p.style.animationDelay=Math.random()*4+'s';
+    p.style.width=(1+Math.random()*1.5)+'px';
+    p.style.height=p.style.width;
+    container.appendChild(p);
+  }
+})();
+
+// Counters for slide 19
+let countersStarted=false;
+function startCounters(){
+  if(countersStarted)return;
+  countersStarted=true;
+  document.querySelectorAll('.counter').forEach(el=>{
+    const target=parseInt(el.getAttribute('data-target'));
+    if(!target)return;
+    const dur=2000;
+    const start=performance.now();
+    function update(now){
+      const t=Math.min((now-start)/dur,1);
+      const val=Math.floor(t*target);
+      el.textContent=val;
+      if(t<1)requestAnimationFrame(update);
+      else el.textContent=target;
+    }
+    requestAnimationFrame(update);
+  });
+}
+
+// Initialize first slide
+updateNav();
+animateSlideIn(slides[0]);
+})();
+</script>
+</body>
+</html>

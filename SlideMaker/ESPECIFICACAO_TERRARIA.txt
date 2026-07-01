@@ -1,0 +1,1315 @@
+================================================================================
+  ESPECIFICAÇÃO COMPLETA DE DIREÇÃO DE ARTE, DESIGN E EXPERIÊNCIA
+  APRESENTAÇÃO: TERRARIA — UMA JORNADA DE EXPLORAÇÃO, CONSTRUÇÃO E SOBREVIVÊNCIA
+================================================================================
+
+INSTRUÇÃO PARA A IA EXECUTORA:
+- Crie UM ÚNICO arquivo HTML contendo toda a apresentação (HTML + CSS + JavaScript inline).
+- Use codificação UTF-8, SEM BOM. NÃO permita caracteres corrompidos.
+- NÃO crie tela de loading.
+- NÃO acesse nenhum outro arquivo da pasta. Trabalhe exclusivamente com o que está neste documento.
+- Todas as imagens/ícones devem ser gerados via SVG inline ou emojis/unicode. NÃO use arquivos externos.
+- Toda a apresentação deve funcionar offline em um único arquivo.
+- Use viewport adequada para responsividade.
+- NÃO crie linhas do tempo.
+- NÃO use scroll do mouse para trocar de slides.
+- NÃO permita clique em qualquer canto da tela para trocar de slides.
+- Use apenas setas do teclado (esquerda/direita) e swipe em dispositivos touch para navegação.
+- A apresentação DEVE ser completamente responsiva. Nada deve ficar fora da tela. Nenhum slide deve ser scrollável (horizontal ou verticalmente).
+- O conteúdo do documento HTML deve estar completamente responsivo para que nada fique fora da tela, tudo deve estar bem enquadrado.
+
+================================================================================
+1. IDENTIDADE VISUAL GERAL
+================================================================================
+
+Tema: Terraria — jogo sandbox de aventura, exploração, construção e sobrevivência em 2D.
+Público: gamers, entusiastas de jogos indie, estudantes de game design, comunidade de jogos.
+Objetivo: celebrar, informar e demonstrar a riqueza e profundidade do jogo Terraria.
+Estilo: pixel-art moderno, aventureiro, colorido com elegância, fundo escuro com elementos vibrantes.
+Sensação: nostalgia, admiração, descoberta, criatividade, épico.
+
+A identidade visual mescla o charme do pixel art com uma apresentação moderna e refinada.
+As cores se inspiram nos biomas de Terraria: o verde vivo da selva, o azul profundo do oceano,
+o marrom da terra, o vermelho do Crimson, o roxo da Corrupção, o rosa/ciano do Hallow.
+O fundo escuro remete à exploração das cavernas, enquanto os elementos brilhantes evocam
+minérios, gems e a luz das tochas. A apresentação deve transmitir a sensação de aventura
+em um mundo vasto e cheio de possibilidades.
+
+================================================================================
+2. PALETA DE CORES
+================================================================================
+
+Cada cor está nomeada para referência no CSS:
+
+--bg-primary:        #0f0b14   (fundo principal — preto com leve tom roxo, como cavernas profundas)
+--bg-secondary:      #1a1423   (fundo secundário — cards, painéis)
+--bg-surface:        #261f33   (superfície para elementos elevados)
+--bg-card:           rgba(26, 20, 35, 0.7)  (glassmorphism de cards)
+
+--text-primary:      #f0eae0   (texto principal — tom de papel envelhecido)
+--text-secondary:    #b8a9c9   (texto secundário, legendas)
+--text-muted:        #7a6b8a   (texto de baixa importância)
+--text-dark:         #0f0b14   (texto sobre fundo claro)
+
+--terraria-green:    #5aad4a   (verde das gramíneas, selva, natureza)
+--terraria-green-bright: #7ed957 (verde brilhante para destaques)
+--terraria-brown:    #8b6f47   (marrom da terra, madeira, mineração)
+--terraria-blue:     #3d7ed9   (azul do oceano, céu, água)
+--terraria-blue-bright: #5b9eff (azul brilhante para destaques)
+--terraria-red:      #c73a3a   (vermelho do Crimson, coração, vida)
+--terraria-purple:   #7b3fa0   (roxo da Corrupção, masmorras)
+--terraria-pink:     #e88cc0   (rosa do Hallow)
+--terraria-cyan:     #4ac7c7   (ciano do Hallow, cristais)
+--terraria-gold:     #f0c43f   (ouro, minérios raros, itens lendários)
+--terraria-orange:   #e8833a   (laranja do fogo, hellstone, fornalhas)
+--terraria-silver:   #c0c0c0   (prata, platina, minérios)
+
+--accent-heart:      #ff4d6d   (vermelho vibrante de coração/vida)
+--accent-mana:       #4d9eff   (azul vibrante de mana)
+--accent-star:       #fff4b8   (amarelo claro de estrelas/cristais)
+
+--glow-green:        rgba(90, 173, 74, 0.4)
+--glow-blue:         rgba(61, 126, 217, 0.4)
+--glow-gold:         rgba(240, 196, 63, 0.4)
+--glow-purple:       rgba(123, 63, 160, 0.4)
+--glow-pink:         rgba(232, 140, 192, 0.4)
+--glow-red:          rgba(199, 58, 58, 0.4)
+
+--glass-bg:          rgba(26, 20, 35, 0.6)
+--glass-border:      rgba(90, 173, 74, 0.15)
+--shadow-color:      rgba(0, 0, 0, 0.6)
+
+REGRAS DE USO:
+- Fundo principal: sempre --bg-primary.
+- Cards e painéis: --bg-secondary com borda sutil ou glassmorphism.
+- Títulos de capa e slide: gradiente usando combinações de cores Terraria.
+- Subtítulos: --text-primary.
+- Corpo: --text-secondary.
+- Destaques e links: --terraria-green ou --terraria-gold.
+- Números/estatísticas: --terraria-gold ou --terraria-cyan.
+- Ícones: usar a cor do bioma/tema do slide específico.
+- Botões primários: gradiente verde-ouro com glow verde.
+- Elementos de destaque: glow sutil na cor correspondente ao conteúdo.
+
+================================================================================
+3. TIPOGRAFIA
+================================================================================
+
+Fontes (carregadas via Google Fonts):
+- Títulos grandes (h1, h2 slide-title): 'Press Start 2P', cursive — peso 400
+  (esta fonte é pixelada e evoca o estilo do jogo)
+- Subtítulos (h3, slide-subtitle): 'Space Mono', monospace — peso 700
+- Corpo (p, li, span): 'Space Mono', monospace — peso 400
+- Números e estatísticas: 'Space Mono', monospace — peso 700
+- Código/pre: 'Press Start 2P', cursive (apenas se necessário, em tamanho pequeno)
+
+ATENÇÃO: 'Press Start 2P' é muito grande em tamanhos normais. Use-a APENAS para:
+- Título da capa
+- Títulos principais de slide (apenas palavra-chave)
+- Números grandes
+Para textos longos, SEMPRE use 'Space Mono'.
+
+Tamanhos:
+- Título da capa (h1): clamp(1.8rem, 5vw, 3.5rem) — 'Press Start 2P'
+- Nome do apresentador: clamp(0.7rem, 1.2vw, 1rem) — 'Space Mono'
+- Título de slide: clamp(1.2rem, 3vw, 2.2rem) — 'Press Start 2P' para palavra-chave
+- Subtítulo: clamp(0.9rem, 1.8vw, 1.3rem) — 'Space Mono', weight 700
+- Corpo: clamp(0.75rem, 1.2vw, 0.95rem) — 'Space Mono', weight 400
+- Legenda/meta: clamp(0.6rem, 0.9vw, 0.75rem) — 'Space Mono', weight 400
+- Números grandes (estatísticas): clamp(2rem, 4vw, 3.5rem) — 'Press Start 2P'
+
+Espaçamentos:
+- Título para subtítulo: 0.6em
+- Subtítulo para conteúdo: 1em
+- Parágrafos: 0.6em
+- Itens de lista: 0.4em
+- Entre cards: 0.8rem
+- Line-height corpo: 1.5
+
+Hierarquia visual:
+- Título do slide entra primeiro.
+- Subtítulo ou descrição entra 0.4s após o título.
+- Conteúdo principal entra 0.7s após o título.
+- Itens individuais entram com stagger de 0.08s entre cada um.
+- Cards entram com stagger de 0.1s.
+
+================================================================================
+4. ESTILO VISUAL
+================================================================================
+
+Estilo principal: Pixel-art moderno com toques de aventura e fantasia.
+Sub-estilos combinados:
+- Dark mode como base.
+- Elementos de glassmorphism para cards e painéis (com opacidade e bordas sutis).
+- Gradientes suaves nos títulos (cores do jogo).
+- Glow sutil em elementos importantes (como minérios brilhando).
+- Partículas em momentos específicos (estrelas, faíscas, folhas, cristais).
+- Ícones em estilo pixel-art (SVG inline com cantos retos).
+- Transições com tema de "abrir baú" ou "descoberta" (efeitos de revelação).
+
+A apresentação é elegante e refinada, sem parecer infantil, mesmo usando referências
+pixeladas. O design é limpo, com bastante espaço negativo, e as cores vibrantes
+aparecem em pontos estratégicos para guiar a atenção.
+
+================================================================================
+5. CONCEITO ARTÍSTICO
+================================================================================
+
+A apresentação deve fazer o espectador sentir que está explorando um mundo.
+Cada slide é como um bioma diferente, mas todos pertencem ao mesmo planeta.
+O fundo escuro com estrelas cintilantes (partículas) remete ao céu noturno de Terraria.
+Os gradientes e glows lembram os minérios brilhando nas cavernas.
+Os elementos de glassmorphism evocam cristais e gelo.
+As transições suaves dão a sensação de "virar a página de um grimório de aventuras".
+
+A jornada começa com a capa (epicidade, descoberta), passa pela explicação do jogo
+(informação clara), explora a história (curiosidade), mergulha nas mecânicas
+(profundidade, complexidade), mostra chefes e NPCs (emoção, reconhecimento),
+e termina com legado e conclusão (reflexão, admiração).
+
+Tons emocionais por seção:
+- Slides 1 (Capa): épico, inspirador
+- Slides 2-3 (O que é, História): informativo, curioso
+- Slides 4-6 (Início, Exploração, Mineração): descoberta, maravilha
+- Slides 7-9 (Crafting, Combate, Classes): profundidade, estratégia
+- Slides 10-11 (Chefes, NPCs): emoção, reconhecimento
+- Slides 12-13 (Construção, Eventos): criatividade, diversão
+- Slides 14-15 (Modos, Multiplayer): comunidade, desafio
+- Slide 16 (Trilha Sonora): nostalgia, arte
+- Slide 17 (Atualizações): gratidão, admiração
+- Slide 18 (Curiosidades): surpresa, entretenimento
+- Slide 19 (Impacto e Legado): respeito, orgulho
+- Slide 20 (Conclusão): reflexão, encerramento inspirador
+
+================================================================================
+6. BACKGROUND GLOBAL
+================================================================================
+
+Background principal:
+- Cor sólida: --bg-primary (#0f0b14).
+- Sobreposição de gradiente radial suave: radial-gradient(ellipse at center, rgba(90, 173, 74, 0.03) 0%, transparent 70%).
+- Pequenas estrelas/partículas como se fosse o céu noturno do jogo (usar canvas ou divs animadas).
+- As estrelas são pontos brancos muito pequenos (1-2px), com opacidade variando entre 0.2 e 0.6,
+  distribuídas aleatoriamente pelo fundo, com leve cintilação (animação de opacidade).
+- A cada slide, o gradiente radial sutil muda de cor para combinar com o tema do slide.
+  Exemplo: slide sobre selva -> gradiente verde; slide sobre Crimson -> gradiente vermelho.
+
+Regras do background:
+- Não poluir visualmente.
+- As estrelas/partículas são MUITO sutis (opacidade máxima 0.3).
+- O gradiente de cor varia em transição suave entre slides.
+- NUNCA usar vídeo como background (não há arquivos externos).
+- NUNCA usar canvas pesado que consuma muitos recursos.
+
+Grid decorativo sutil (opcional):
+- Pequenos pontos formando um grid hexagonal ou quadrado com opacidade 0.03,
+  dando uma textura quase imperceptível de "mundo de jogo".
+
+================================================================================
+7. NAVEGAÇÃO
+================================================================================
+
+A navegação deve ser simples, intuitiva e discreta.
+
+TROCAR DE SLIDES:
+- Setas do teclado: Seta Direita (próximo), Seta Esquerda (anterior).
+- Swipe em dispositivos touch (detectar direção do toque).
+- Botões de navegação: seta esquerda e seta direita (pontas de flecha SVG), posicionadas
+  nas laterais da tela (esquerda e direita), com opacidade 0.2, aparecendo para 0.6 no hover.
+- Clicar no botão ou na área do botão.
+- NÃO trocar de slide ao clicar em qualquer lugar da tela. Apenas nos botões.
+- NÃO trocar de slide com scroll do mouse.
+- NÃO trocar de slide com clique em qualquer canto.
+- Tecla Home: volta ao primeiro slide.
+- Tecla End: vai ao último slide.
+
+BARRA DE PROGRESSO:
+- Barra fina (3px) na parte inferior da tela.
+- Cor: gradiente horizontal de --terraria-green para --terraria-gold.
+- A barra preenche conforme o progresso (slide atual / total).
+- Animação suave de largura (transition: width 0.5s ease).
+
+CONTADOR DE SLIDES:
+- Canto inferior direito: "01 / 20" em --text-muted, fonte 'Space Mono', tamanho 0.7rem.
+- Atualiza conforme navega.
+
+BOTÕES DE NAVEGAÇÃO:
+- Seta esquerda: canto inferior esquerdo (ou meio da lateral esquerda).
+- Seta direita: canto inferior direito (ou meio da lateral direita).
+- Ícones: setas SVG simples, sem preenchimento, traço branco com opacidade.
+- Tamanho: 28x28px.
+- Pointer-events: auto.
+- Opacidade base: 0.2. Hover: 0.6. Transição: 0.3s ease.
+- No primeiro slide, a seta esquerda fica invisível (opacity: 0, pointer-events: none).
+- No último slide, a seta direita fica invisível (opacity: 0, pointer-events: none).
+- Os botões não devem ter background, apenas o ícone da seta.
+
+Navegação por teclado adicional:
+- Espaço: próximo slide.
+- Page Down: próximo slide.
+- Page Up: slide anterior.
+
+Navegação touch:
+- Swipe para esquerda: próximo slide.
+- Swipe para direita: slide anterior.
+
+================================================================================
+8. ANIMAÇÕES GLOBAIS
+================================================================================
+
+Todas as animações devem usar a biblioteca CSS nativa com classes dinâmicas.
+JavaScript controla a adição/remoção de classes conforme o slide fica ativo.
+
+Duração padrão: 0.6s.
+Easing padrão: cubic-bezier(0.25, 0.46, 0.45, 0.94) — ease-out suave.
+
+ANIMAÇÕES DE ENTRADA (por slide):
+- Título: slideInUp (translada 40px para cima, opacidade 0 -> 1). Duração: 0.6s. Delay: 0s.
+- Subtítulo: slideInUp. Duração: 0.5s. Delay: 0.3s.
+- Conteúdo: fadeInUp (translada 30px, opacidade 0 -> 1). Duração: 0.5s. Delay: 0.5s.
+- Itens individuais: fadeInUp com stagger de 0.08s entre cada.
+- Cards: fadeInUp com stagger de 0.1s e scale de 0.95 -> 1.
+
+CLASSES CSS:
+- .animate-in — aplicada a todos os elementos que devem animar ao entrar.
+- Data attributes para delays: data-delay="0.3", data-stagger="0.08".
+- Ao mudar de slide, remover classes de animação, reposicionar elementos no estado inicial,
+  aplicar classe .animate-in com os delays corretos.
+
+KEYFRAMES GLOBAIS:
+@keyframes slideInUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 5px var(--glow-green); }
+  50% { box-shadow: 0 0 20px var(--glow-green); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+ANIMAÇÕES DE SAÍDA (ao sair do slide):
+- FadeOut com duração de 0.3s.
+- Opacidade vai para 0.
+- Após a animação de saída, o slide antigo fica display:none.
+
+TRANSIÇÕES ENTRE SLIDES:
+- Usar crossfade: o slide atual fade out (opacity 1 -> 0, 0.3s), depois o próximo fade in
+  (opacity 0 -> 1, 0.4s) com os elementos animando sequencialmente.
+- Pequena sobreposição: o novo slide começa a aparecer antes do anterior sumir completamente
+  (sobreposição de 0.1s).
+
+MICROINTERAÇÕES GLOBAIS:
+- Hover em botões: scale(1.05) + glow sutil. Transição: 0.2s.
+- Hover em cards interativos: translateY(-4px) + shadow aumentado. Transição: 0.3s.
+- Cursor: manter o padrão (não personalizar para não poluir).
+
+================================================================================
+9. ELEMENTOS INTERATIVOS GLOBAIS
+================================================================================
+
+Tooltips:
+- Em itens de listas com informações adicionais, usar tooltip simples que aparece no hover.
+- Tooltip: bg --bg-surface, cor --text-primary, padding 6px 10px, border-radius 4px,
+  fonte 'Space Mono', tamanho 0.65rem, position absolute, aparece após 0.5s de hover.
+- Seta indicadora no tooltip apontando para o elemento.
+
+Botões de navegação:
+- Já descritos na seção 7.
+
+Indicadores de slide:
+- Pequenos dots na parte inferior (ou contador) mostrando quantos slides existem e qual o atual.
+- Cada dot é um círculo de 6px, cor --text-muted, com borda sutil.
+- Dot ativo: cor --terraria-gold, escala 1.3x.
+- Ao passar o mouse sobre um dot, mostrar tooltip com o nome do slide?
+  NÃO. Manter simples. Apenas dots visuais.
+- Dots NÃO são clicáveis (para evitar navegação acidental). Apenas decorativos.
+
+Efeito de hover global:
+- Links e elementos clicáveis: mudança de cor com transição, ou underline animado.
+- Botões: glow pulsante sutil.
+
+================================================================================
+SLIDE 1 — CAPA
+================================================================================
+
+OBJETIVO:
+Apresentar o tema, causar impacto visual, estabelecer o tom épico e inspirador.
+
+EMOÇÃO:
+Admiração, mistério, epicidade, vontade de explorar.
+
+LAYOUT:
+Hero layout. Título centralizado com efeito 3D inclinado (conforme especificação rígida abaixo).
+Sobreposição de elementos decorativos ao redor.
+
+ORGANIZAÇÃO DOS ELEMENTOS (de trás para frente):
+1. Background com estrelas e gradiente radial verde.
+2. Elementos decorativos flutuando: uma pickaxe de mineração, uma espada, uma poção (SVGs).
+3. Título principal inclinado com extrusão 3D (spec obrigatória).
+4. Abaixo do título: texto descritivo "Um pequeno mundo com possibilidades praticamente infinitas."
+5. Abaixo: Nome do apresentador, data e disciplina.
+6. Logos / informações: "Re-Logic | 2011" no canto inferior esquerdo.
+7. Indicadores de navegação (dots + contador).
+
+BACKGROUND DO SLIDE 1:
+- Cor base: --bg-primary.
+- Gradiente radial: radial-gradient(ellipse at 40% 50%, rgba(90, 173, 74, 0.08) 0%, transparent 60%).
+- Estrelas/partículas sutis (já globais).
+- Um grande glow verde muito sutil no centro (opacidade 0.05).
+
+ELEMENTOS DECORATIVOS:
+- SVG de pickaxe: flutuando no canto superior esquerdo, tamanho 48px, cor --terraria-silver com detalhes --terraria-brown. Animação: float infinito (4s).
+- SVG de espada: flutuando no canto superior direito, tamanho 48px, cor --terraria-blue com detalhes --terraria-silver. Animação: float infinito (4.5s).
+- SVG de poção: flutuando no canto inferior esquerdo (acima dos botões), tamanho 32px, cor --terraria-red (coração) ou --accent-mana (azul). Animação: float infinito (3.5s).
+- Esses ícones são decorativos, não interativos.
+
+TÍTULO PRINCIPAL (SPEC OBRIGATÓRIA):
+Título: "Terraria: Uma Jornada de Exploração, Construção e Sobrevivência"
+
+ESPECIFICAÇÃO RÍGIDA DO EFEITO 3D EXTRUSADO INCLINADO:
+- O elemento <h1> deve possuir transform: rotate(-28deg) skew(25deg).
+- O transform-origin deve ser center center.
+- A extrusão 3D deve ser criada com dezenas de text-shadow (35 camadas).
+- JavaScript deve gerar dinamicamente os text-shadows:
+  for (let i = 1; i <= 35; i++) {
+    shadow += (-i) + "px " + i + "px 0 #1a1423";
+  }
+- O texto deve ter cor --terraria-gold (ouro).
+- Uma segunda camada de sombra via ::before, deslocada, escurecida (rgba(0,0,0,0.5)) e
+  com filter: blur(8px), simulando sombra ambiente projetada no chão.
+- O resultado final deve fazer o texto parecer estar em uma perspectiva isométrica,
+  subindo da esquerda para a direita (↗).
+- O texto NÃO pode estar horizontal. O próprio <h1> deve estar inclinado.
+
+TÍTULO (abaixo do principal, menor):
+"Nome do Apresentador | Data | Disciplina"
+- Fonte: 'Space Mono', tamanho clamp(0.7rem, 1.2vw, 1rem), cor --text-secondary.
+- Entrada com delay de 1s, fadeInUp.
+
+FRASE DE INTRODUÇÃO:
+"Um pequeno mundo com possibilidades praticamente infinitas."
+- Fonte: 'Space Mono', tamanho clamp(0.85rem, 1.5vw, 1.1rem), cor --terraria-green-bright, itálico.
+- Posição: abaixo do título principal, centralizado.
+- Delay: 0.8s.
+
+INFORMAÇÕES ADICIONAIS (canto inferior esquerdo):
+"Re-Logic | 2011"
+- Fonte: 'Space Mono', 0.65rem, cor --text-muted.
+- Entrada: fadeIn, delay 1.2s.
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Background (já está).
+2. Elementos decorativos flutuando (fadeIn, delay 0.3s).
+3. Título principal (slideInUp, delay 0.5s).
+4. Frase de introdução (fadeInUp, delay 0.8s).
+5. Nome do apresentador / data (fadeInUp, delay 1s).
+6. Re-Logic | 2011 (fadeIn, delay 1.2s).
+
+INTERAÇÕES:
+- Navegação padrão (setas, swipe).
+- Nenhuma interação específica neste slide.
+
+TRANSIÇÃO PARA PRÓXIMO SLIDE:
+Crossfade: o slide 1 fade out (0.3s), slide 2 fade in (0.4s).
+
+================================================================================
+SLIDE 2 — O QUE É TERRARIA?
+================================================================================
+
+OBJETIVO:
+Definir o jogo, explicar seus gêneros e sistemas principais.
+
+EMOÇÃO:
+Informativa, curiosa, organizada.
+
+LAYOUT:
+Split screen. Lado esquerdo: definição e gêneros. Lado direito: bullet points com sistemas.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "O QUE É TERRARIA?" no topo.
+- Abaixo do título, lado esquerdo: parágrafo de definição + lista de gêneros como tags.
+- Lado direito: lista de sistemas em formato de grid 2x4 de cards pequenos.
+- Plataformas e popularidade no rodapé.
+
+BACKGROUND DO SLIDE 2:
+- Gradiente radial sutil: radial-gradient(ellipse at 60% 40%, rgba(61, 126, 217, 0.06) 0%, transparent 60%).
+
+ELEMENTOS DECORATIVOS:
+- Ícone de gamepad SVG no canto superior direito (opacidade 0.1, grande, 120px, decorativo).
+
+GÊNEROS (lado esquerdo):
+Exibir como tags estilizadas (badges):
+- Sandbox (cor --terraria-green)
+- Aventura (cor --terraria-blue)
+- Sobrevivência (cor --terraria-red)
+- RPG (cor --terraria-purple)
+- Plataforma 2D (cor --terraria-brown)
+Cada badge: padding 6px 14px, border-radius 4px, bg --bg-surface, border-left 3px solid na cor correspondente.
+
+SISTEMAS (lado direito, grid 2 colunas):
+Cards pequenos (glassmorphism) para cada sistema:
+- Construção (ícone: casa SVG)
+- Mineração (ícone: pickaxe SVG)
+- Exploração (ícone: bússola SVG)
+- Combate (ícone: espada SVG)
+- Crafting (ícone: bancada SVG)
+- Progressão (ícone: seta para cima SVG)
+Cada card: ícone 24px + nome do sistema + descrição curta (2-3 palavras).
+
+DEFINIÇÃO:
+Parágrafo curto explicando o que é Terraria logo abaixo do título.
+
+PLATAFORMAS E POPULARIDADE (rodapé):
+Texto pequeno: "Disponível para PC, Console, Mobile, Switch, etc. | Mais de 44 milhões de jogadores"
+Fonte 0.7rem, cor --text-muted, centralizado.
+
+ORDEM DE ENTRADA:
+1. Título (slideInUp, delay 0s).
+2. Definição (fadeInUp, delay 0.3s).
+3. Badges de gêneros (fadeInUp, stagger 0.08s, delay 0.4s).
+4. Cards de sistemas (fadeInUp, stagger 0.1s, delay 0.5s).
+5. Rodapé (fadeIn, delay 0.8s).
+
+INTERAÇÕES:
+- Hover nos badges: glow sutil.
+- Hover nos cards de sistema: translateY(-3px) + shadow aumentado.
+
+================================================================================
+SLIDE 3 — HISTÓRIA DO DESENVOLVIMENTO
+================================================================================
+
+OBJETIVO:
+Contar a história do desenvolvimento de Terraria, desde a criação até o sucesso.
+
+EMOÇÃO:
+Curiosidade, admiração, nostalgia.
+
+LAYOUT:
+Layout assimétrico com linha do tempo vertical (mas NÃO criar uma timeline literal).
+Em vez de timeline, usar cards em zigue-zague (esquerda/direita) que sobem pela tela.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "HISTÓRIA DO DESENVOLVIMENTO".
+- Cards de marcos históricos (7-8 cards) em scroll vertical animado.
+- NÃO usar timeline visual (linha ou barra). Usar cards que aparecem com stagger.
+
+CARDS DE MARCOS:
+Cada card tem: ano (grande, cor --terraria-gold) + descrição curta.
+1. 2011: Lançamento inicial.
+2. 2013: Atualizações gratuitas massivas (1.2).
+3. 2015: Atualização 1.3 (grande expansão).
+4. 2017: Terraria: Otherworld (cancelado, curiosidade).
+5. 2018: Atualização 1.3.5 (4K, zoom).
+6. 2020: Journey's End (1.4).
+7. 2022: Labor of Love (1.4.4).
+8. Contínuo: Suporte após encerramento.
+
+Layout dos cards:
+- Alternam entre esquerda (text-align left) e direita (text-align right).
+- Card estilo glassmorphism, bg --glass-bg, border-radius 8px, padding 12px 16px.
+- Primeiro card: alinhado à esquerda.
+- Segundo: alinhado à direita.
+- Terceiro: esquerda, etc.
+- Espaçamento vertical entre cards: 1rem.
+
+No final: texto sobre milhões de cópias vendidas e impacto na indústria.
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 30% 50%, rgba(240, 196, 63, 0.05) 0%, transparent 60%).
+
+ELEMENTOS DECORATIVOS:
+- Partículas de estrelas cadentes (muito sutis, 2-3 estrelas cruzando a tela de vez em quando, opacidade 0.2).
+
+ORDEM DE ENTRADA:
+1. Título (slideInUp, delay 0s).
+2. Cards de marcos (fadeInUp, stagger 0.1s, delay 0.3s).
+3. Texto final sobre vendas (fadeIn, delay 0.9s).
+
+================================================================================
+SLIDE 4 — INÍCIO DA JORNADA
+================================================================================
+
+OBJETIVO:
+Explicar como o jogador começa sua jornada em Terraria.
+
+EMOÇÃO:
+Nostalgia das primeiras horas de jogo, descoberta.
+
+LAYOUT:
+Grid 3x3 com cards representando cada etapa inicial. Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "INÍCIO DA JORNADA".
+- Grid de 9 cards (3 colunas x 3 linhas), cada um com ícone + texto curto.
+- Os cards formam visualmente o "caminho do jogador" nas primeiras horas.
+
+CARDS (grid 3x3):
+1. Criação do Personagem (ícone: boneco SVG) — "Personalize seu aventureiro"
+2. Escolha da Dificuldade (ícone: estrela SVG) — "Journey, Expert, Master"
+3. Spawn Inicial (ícone: árvore SVG) — "Guia te aguarda"
+4. Madeira & Pedra (ícone: madeira SVG) — "Seus primeiros recursos"
+5. Primeiro Abrigo (ícone: casa SVG) — "Proteção contra a noite"
+6. Primeira Noite (ícone: lua SVG) — "Zumbis e olhos voadores"
+7. Primeiros Equipamentos (ícone: espada SVG) — "Espada de madeira"
+8. Guia NPC (ícone: cabeça SVG) — "Dicas essenciais"
+9. Objetivos Iniciais (ícone: lista SVG) — "Explore, colete, sobreviva"
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 60%, rgba(139, 111, 71, 0.06) 0%, transparent 60%).
+
+COR DOS CARDS:
+- Fundo: --bg-card com glassmorphism.
+- Bordas sutis de acordo com tema (marrom para recursos, azul para noite, etc.).
+- Ícones em --terraria-gold.
+
+ORDEM DE ENTRADA:
+1. Título (slideInUp, delay 0s).
+2. Cards em sequência: primeira linha (delays 0.2, 0.28, 0.36), segunda linha (0.44, 0.52, 0.6), terceira linha (0.68, 0.76, 0.84).
+
+================================================================================
+SLIDE 5 — EXPLORAÇÃO DO MUNDO
+================================================================================
+
+OBJETIVO:
+Mostrar a vastidão do mundo de Terraria e seus biomas.
+
+EMOÇÃO:
+Maravilha, admiração pela diversidade.
+
+LAYOUT:
+Mapa visual com biomas representados como cards interativos em posições geográficas.
+Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "EXPLORAÇÃO DO MUNDO".
+- Layout: grid 4x4 de cards (biomas), cada um com nome e ícone.
+- Cada card representa um bioma/lugar especial.
+
+CARDS DE BIOMAS (grid 4 colunas):
+Linha 1: Superfície, Subsolo, Cavernas, Camada de Gelo
+Linha 2: Selva, Deserto, Oceano, Dungeon
+Linha 3: Underworld, Ilhas Flutuantes, Colmeias, Pirâmides
+Linha 4: Templos, Cavernas de Cogumelos, Aether, Crimson/Corruption/Hallow
+
+Cada card:
+- Fundo glassmorphism.
+- Ícone SVG representando o bioma (folha para selva, água para oceano, fogo para underworld, etc.).
+- Nome do bioma abaixo do ícone.
+- No hover: glow na cor do bioma (verde para selva, azul para oceano, vermelho para crimson, etc.).
+
+CORES ESPECÍFICAS DOS BIOMAS:
+- Superfície/Cavernas: --terraria-brown
+- Selva: --terraria-green-bright
+- Oceano: --terraria-blue
+- Underworld: --terraria-orange
+- Crimson: --terraria-red
+- Corrupção: --terraria-purple
+- Hallow: --terraria-pink
+- Gelo: --terraria-cyan
+- Deserto: --terraria-gold
+- Cogumelos: --terraria-blue-bright
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 50%, rgba(61, 126, 217, 0.05) 0%, transparent 60%).
+
+TEXTO ADICIONAL (rodapé):
+"Mundo gerado proceduralmente | Segredos escondidos a cada esquina"
+
+================================================================================
+SLIDE 6 — MINERAÇÃO E RECURSOS
+================================================================================
+
+OBJETIVO:
+Mostrar todos os minérios e recursos, organizados por ordem de progressão.
+
+EMOÇÃO:
+Progressão, crescimento, riqueza.
+
+LAYOUT:
+Grid de cards com ícones brilhantes. Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "MINERAÇÃO E RECURSOS".
+- Grid de minérios em ordem de tier (do básico ao lendário).
+- Dividido em seções visuais: Minérios Básicos / Minérios de Hardmode / Minérios Lendários.
+- Cada seção com um subtítulo sutil.
+
+MINÉRIOS BÁSICOS:
+Cobre, Ferro, Chumbo, Prata, Ouro, Platina, Demonite, Crimtane, Hellstone
+- Cards pequenos (3-4 por linha), cada um com:
+  - Círculo colorido representando o minério (usar gradiente radial que simula o brilho do minério).
+  - Nome abaixo.
+  - Glow sutil (cada um na sua cor).
+
+MINÉRIOS HARDMODE:
+Cobalt, Palladium, Mythril, Orichalcum, Adamantite, Titanium
+- Glow mais intenso, cores mais vibrantes.
+
+MINÉRIOS LENDÁRIOS:
+Chlorophyte, Luminite
+- Glow pulsante, destaque extra.
+
+GEMAS (opcional, em uma linha separada):
+Rubi, Safira, Esmeralda, Topázio, Ametista, Diamante
+- Cores vibrantes, glow.
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 50%, rgba(240, 196, 63, 0.06) 0%, transparent 60%).
+
+ANIMAÇÃO ESPECIAL:
+- Cada minério tem um brilho pulsante sutil (animação glowPulse com delay aleatório entre 0 e 2s para cada um).
+- Isso simula o brilho dos minérios nas cavernas.
+
+================================================================================
+SLIDE 7 — SISTEMA DE CRAFTING
+================================================================================
+
+OBJETIVO:
+Explicar o sistema de crafting, suas estações e possibilidades.
+
+EMOÇÃO:
+Profundidade, complexidade, criatividade.
+
+LAYOUT:
+Layout centralizado com cards de estações de criação em grid 3x3.
+Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "SISTEMA DE CRAFTING".
+- Grid de estações de criação (cards).
+
+ESTAÇÕES (grid 3x3):
+1. Work Bench (ícone: mesa SVG)
+2. Furnace (ícone: fornalha SVG)
+3. Hellforge (ícone: fornalha de fogo SVG)
+4. Iron Anvil (ícone: bigorna SVG)
+5. Mythril Anvil (ícone: bigorna especial SVG)
+6. Ancient Manipulator (ícone: altar SVG)
+7. Alchemy Table (ícone: frasco SVG)
+8. Bookcase (ícone: livro SVG)
+9. Loom (ícone: tear SVG)
+
+Cada card:
+- Ícone estilizado.
+- Nome da estação.
+- Descrição curta do que faz.
+
+TEXTO ABAIXO:
+"Milhares de itens disponíveis | Receitas | Equipamentos | Armaduras | Poções | Decorações"
+- Fonte: 'Space Mono', 0.75rem, cor --text-secondary, centralizado.
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 30% 40%, rgba(90, 173, 74, 0.05) 0%, transparent 60%).
+
+ELEMENTO DECORATIVO:
+- Ícone de engrenagem SVG grande (120px) atrás do conteúdo, opacidade 0.04, rotacionando lentamente (animação rotate 20s linear infinite).
+
+================================================================================
+SLIDE 8 — SISTEMA DE COMBATE
+================================================================================
+
+OBJETIVO:
+Explicar as mecânicas de combate do jogo.
+
+EMOÇÃO:
+Ação, estratégia, empolgação.
+
+LAYOUT:
+Split com lado esquerdo (descrição + itens de combate) e lado direito (grid de ícones de armas).
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "SISTEMA DE COMBATE".
+- Lado esquerdo: descrição do combate em tempo real + lista de mecânicas.
+- Lado direito: grid 2x4 de ícones de armas (espada, arco, poção mágica, cetro de invocação, chicote, escudo, livro de magia, poção de cura).
+
+MECÂNICAS (lado esquerdo, como bullet points):
+- Combate em tempo real
+- Corpo a corpo | Longo alcance | Magia | Invocação | Chicotes
+- Defesa | Vida | Mana | Esquiva
+- Buffs | Debuffs | Poções
+- Dificuldade crescente
+
+Cada bullet: ícone pequeno (4px) redondo na cor --terraria-red, texto em --text-secondary.
+
+AREA DE ARMAS (lado direito):
+Grid de 2 colunas, 4 linhas.
+Cada card: ícone SVG da arma + nome curto.
+- Fundo glassmorphism.
+- Glow vermelho sutil no hover.
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 70% 40%, rgba(199, 58, 58, 0.06) 0%, transparent 60%).
+
+================================================================================
+SLIDE 9 — CLASSES DO PERSONAGEM
+================================================================================
+
+OBJETIVO:
+Explicar as 4 classes principais e suas características.
+
+EMOÇÃO:
+Identificação, estratégia, RPG.
+
+LAYOUT:
+4 cards grandes em grid 2x2, representando cada classe.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "CLASSES DO PERSONAGEM".
+- Grid 2x2 com cards para cada classe.
+
+CARDS (2x2):
+1. GUERREIRO (Warrior)
+   - Cor: --terraria-red
+   - ícone: espada larga SVG
+   - Pontos fortes: alta defesa, dano corpo a corpo
+   - Pontos fracos: alcance limitado
+   - Fundo do card: gradiente sutil vermelho
+
+2. MAGO (Mage)
+   - Cor: --accent-mana
+   - ícone: livro de magia SVG
+   - Pontos fortes: dano à distância, área, utilidade
+   - Pontos fracos: baixa defesa, consumo de mana
+   - Fundo: gradiente sutil azul
+
+3. ARQUEIRO (Ranger)
+   - Cor: --terraria-green
+   - ícone: arco e flecha SVG
+   - Pontos fortes: dano à distância, precisão
+   - Pontos fracos: munição necessária, defesa média
+   - Fundo: gradiente sutil verde
+
+4. INVOCADOR (Summoner)
+   - Cor: --terraria-purple
+   - ícone: cetro de invocação SVG
+   - Pontos fortes: ataques automáticos, suporte
+   - Pontos fracos: baixa defesa, dependente de summons
+   - Fundo: gradiente sutil roxo
+
+Cada card:
+- Título da classe em 'Press Start 2P' (tamanho pequeno: 0.8rem).
+- Ícone grande (48px).
+- Pontos fortes e fracos em listas pequenas.
+- No hover: glow da cor da classe + translateY(-5px).
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 50%, rgba(123, 63, 160, 0.04) 0%, transparent 60%).
+
+================================================================================
+SLIDE 10 — CHEFES (BOSSES)
+================================================================================
+
+OBJETIVO:
+Apresentar os principais chefes do jogo em ordem de progressão.
+
+EMOÇÃO:
+Adrenalina, desafio, conquista.
+
+LAYOUT:
+Grid de cards com chefes, organizados em "caminho de progressão" visual.
+Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "CHEFES".
+- Grid 4x3 com 12 cards de chefes principais (os mais icônicos).
+
+CARDS (grid 4 colunas x 3 linhas):
+Linha 1: Eye of Cthulhu, King Slime, Eater of Worlds, Brain of Cthulhu
+Linha 2: Queen Bee, Skeletron, Wall of Flesh, The Twins
+Linha 3: Destroyer, Skeletron Prime, Plantera, Moon Lord
+
+Cada card:
+- Nome do chefe em 'Space Mono' bold.
+- Ícone SVG representando o chefe (criar um ícone minimalista inspirado na silhueta do chefe).
+- Abaixo, uma badge com o nível de dificuldade (★ a ★★★★★).
+- Fundo glassmorphism.
+- Borda sutil na cor temática (roxo para Eye, verde para King Slime, vermelho para Wall of Flesh, etc.).
+- No hover: glow na cor temática + scale(1.03).
+
+ORDEM DE ENTRADA:
+1. Título (slideInUp).
+2. Cards em ordem de leitura (linha 1, linha 2, linha 3), stagger 0.08s entre cards.
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 30%, rgba(199, 58, 58, 0.06) 0%, transparent 60%).
+
+================================================================================
+SLIDE 11 — NPCS
+================================================================================
+
+OBJETIVO:
+Mostrar os principais NPCs, como desbloqueá-los e o sistema de felicidade.
+
+EMOÇÃO:
+Comunidade, aconchego, progressão.
+
+LAYOUT:
+Grid de cards com NPCs. Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "NPCS".
+- Grid 4x3 com cards de NPCs mais importantes.
+
+CARDS (grid 4 colunas x 3 linhas):
+Linha 1: Guide, Merchant, Nurse, Demolitionist
+Linha 2: Arms Dealer, Dryad, Goblin Tinkerer, Mechanic
+Linha 3: Wizard, Steampunker, Zoologist, Princess
+
+Cada card:
+- Nome do NPC em 'Space Mono'.
+- Ícone SVG representando o NPC (cabeça/corpo minimalista).
+- Requisito para desbloquear (texto pequeno, 0.6rem).
+- Badge: "Disponível" ou "Condicional" com cor.
+- Fundo glassmorphism.
+- No hover: glow verde sutil.
+
+TEXTO RODAPÉ:
+"Sistema de Felicidade | Preços | Pylons | Cada NPC tem preferências de bioma e vizinhança"
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 60% 60%, rgba(90, 173, 74, 0.05) 0%, transparent 60%).
+
+================================================================================
+SLIDE 12 — CONSTRUÇÃO
+================================================================================
+
+OBJETIVO:
+Mostrar as possibilidades criativas de construção.
+
+EMOÇÃO:
+Criatividade, inspiração, admiração.
+
+LAYOUT:
+Layout visual com exemplos de construções em cards. Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "CONSTRUÇÃO".
+- Grid 3x3 de cards com tipos de construção.
+
+CARDS (grid 3x3):
+1. Casas (ícone: casa SVG)
+2. Castelos (ícone: castelo SVG)
+3. Vilas (ícone: vila SVG)
+4. Decoração (ícone: vaso SVG)
+5. Iluminação (ícone: tocha SVG)
+6. Arenas (ícone: arena SVG)
+7. Fazendas Automáticas (ícone: engrenagem SVG)
+8. Construções Temáticas (ícone: estrela SVG)
+9. Mapas Compartilhados (ícone: mapa SVG)
+
+Cada card: glassmorphism, ícone grande, nome, short description.
+
+EFEITO ESPECIAL:
+- Ícone de casa/castelo com leve animação de shimmer (gradiente metálico passando).
+- Isso dá a sensação de "construção sendo criada".
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 40% 60%, rgba(240, 196, 63, 0.05) 0%, transparent 60%).
+
+================================================================================
+SLIDE 13 — EVENTOS DO JOGO
+================================================================================
+
+OBJETIVO:
+Listar os principais eventos e suas características.
+
+EMOÇÃO:
+Empolgação, variedade.
+
+LAYOUT:
+Grid de cards com eventos, categorizados. Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "EVENTOS DO JOGO".
+- Grid 4x3 de cards de eventos.
+
+CARDS (grid 4 colunas):
+Linha 1: Blood Moon, Solar Eclipse, Goblin Army, Pirate Invasion
+Linha 2: Pumpkin Moon, Frost Moon, Martian Madness, Slime Rain
+Linha 3: Lunar Events, Sandstorm, Rain/Thunder, Halloween/Christmas
+
+Cada card:
+- Nome do evento.
+- Ícone SVG representando (lua vermelha para Blood Moon, sol para Eclipse, etc.).
+- Indicador de dificuldade (★ a ★★★★★).
+- No hover: glow na cor do evento (vermelho para Blood Moon, amarelo para Eclipse, etc.).
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 30% 70%, rgba(240, 196, 63, 0.05) 0%, transparent 60%).
+
+================================================================================
+SLIDE 14 — MODOS DE JOGO
+================================================================================
+
+OBJETIVO:
+Explicar os modos de jogo disponíveis.
+
+EMOÇÃO:
+Desafio, escolha, identificação.
+
+LAYOUT:
+Lista vertical com cards descritivos. Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "MODOS DE JOGO".
+- 7 cards empilhados verticalmente (scroll within slide? NÃO. Ajustar tamanho para caber).
+
+Como caber 7 cards verticalmente: usar layout de grid 3 colunas:
+Coluna 1 (Modos de Personagem): Classic, Mediumcore, Hardcore
+Coluna 2 (Modos de Mundo): Expert, Master, Legendary
+Coluna 3 (Modos Especiais): Journey Mode
+
+Cada card:
+- Nome do modo.
+- Descrição muito curta (1 linha).
+- Ícone representativo.
+- Dificuldade indicada por estrelas.
+
+OU usar 2 linhas:
+Linha 1: Classic | Mediumcore | Hardcore | Journey Mode
+Linha 2: Expert Mode | Master Mode | Legendary Mode
+
+ESCOLHA: usar 2 linhas de cards (4 + 3), cada card um pouco mais largo.
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 30%, rgba(90, 173, 74, 0.05) 0%, transparent 60%).
+
+================================================================================
+SLIDE 15 — MULTIPLAYER
+================================================================================
+
+OBJETIVO:
+Mostrar as capacidades multiplayer e cooperativas.
+
+EMOÇÃO:
+Comunidade, cooperação, diversão compartilhada.
+
+LAYOUT:
+Split screen. Lado esquerdo: informações. Lado direito: ícones de multiplayer.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "MULTIPLAYER".
+- Lado esquerdo: bullet points sobre multiplayer.
+  - Cooperação
+  - Servidores
+  - Host & Play (Steam)
+  - Compartilhamento de recursos
+  - Construções em equipe
+  - Chefes em grupo
+  - PvP
+  - Mods multiplayer
+- Lado direito: ilustração de vários personagens juntos (ícones SVG de bonecos estilizados em círculo).
+
+ÍCONES DE MULTIPLAYER:
+3-4 ícones de personagens (silhuetas simplificadas) dispostos em círculo no lado direito.
+Cada um com uma cor diferente (representando classes diferentes).
+Animação: flutuação suave, cada um com timing diferente.
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 40%, rgba(61, 126, 217, 0.05) 0%, transparent 60%).
+
+================================================================================
+SLIDE 16 — TRILHA SONORA E PIXEL ART
+================================================================================
+
+OBJETIVO:
+Celebrar a arte visual e sonora do jogo.
+
+EMOÇÃO:
+Nostalgia, apreciação artística.
+
+LAYOUT:
+Split horizontal. Parte superior: Pixel Art. Parte inferior: Trilha Sonora.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "TRILHA SONORA & PIXEL ART".
+- Seção superior: "Pixel Art" + descrição do estilo visual.
+  - Cards com características: Estilo visual, Animações, Ciclo dia/noite, Iluminação dinâmica, Identidade artística.
+  - Grid 3x2 com ícones e textos.
+- Seção inferior: "Trilha Sonora" + descrição.
+  - Cards com características: Música por bioma, Sons ambientes, Efeitos especiais, Atmosfera.
+
+CARACTERÍSTICAS VISUAIS (grid 3x2):
+1. Pixel Art (ícone: grid SVG) — "Estilo clássico e charmoso"
+2. Animações (ícone: play SVG) — "Fluidas e expressivas"
+3. Ciclo Dia/Noite (ícone: sol/lua SVG) — "Mundo vivo"
+4. Mudanças Climáticas (ícone: nuvem SVG) — "Chuva, vento, tempestades"
+5. Iluminação Dinâmica (ícone: lâmpada SVG) — "Tochas, glow, sombras"
+6. Interface (ícone: coração SVG) — "Vida, mana, buffs, inventário"
+
+CARACTERÍSTICAS SONORAS (grid 3x2):
+1. Música por Bioma (ícone: nota musical SVG) — "Cada área tem sua trilha"
+2. Sons Ambientes (ícone: onda SVG) — "Vento, água, criaturas"
+3. Efeitos Especiais (ícone: raio SVG) — "Magia, explosões, golpes"
+4. Atmosfera (ícone: círculo SVG) — "Imersão total"
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 50%, rgba(232, 140, 192, 0.04) 0%, transparent 60%).
+
+================================================================================
+SLIDE 17 — ATUALIZAÇÕES
+================================================================================
+
+OBJETIVO:
+Mostrar a evolução do jogo através das atualizações.
+
+EMOÇÃO:
+Gratidão, admiração pelo suporte contínuo.
+
+LAYOUT:
+Layout visual com cards de atualizações em grid.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "ATUALIZAÇÕES".
+- Grid de cards com as principais versões (6-8 cards).
+
+CARDS (grid 3x2 ou 4x2):
+- 1.0 (2011) — Lançamento inicial
+- 1.1 (2011) — Hardmode, novos chefes
+- 1.2 (2013) — Expansão massiva, novos biomas
+- 1.3 (2015) — Eventos, multiplayer melhorado
+- 1.4 "Journey's End" (2020) — Conteúdo final
+- 1.4.4 "Labor of Love" (2022) — Surpresa pós-final
+
+Cada card:
+- Versão em destaque (grande, cor --terraria-gold).
+- Ano.
+- Descrição curta.
+- Ícone representativo.
+
+TEXTO ADICIONAL:
+"Conteúdo gratuito | Participação da comunidade | Melhorias contínuas"
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 40%, rgba(90, 173, 74, 0.05) 0%, transparent 60%).
+
+================================================================================
+SLIDE 18 — CURIOSIDADES
+================================================================================
+
+OBJETIVO:
+Apresentar fatos interessantes e pouco conhecidos sobre Terraria.
+
+EMOÇÃO:
+Surpresa, entretenimento, diversão.
+
+LAYOUT:
+Grid de cards com curiosidades. Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "CURIOSIDADES".
+- Grid 3x3 de cards de curiosidades.
+
+CARDS (grid 3x3):
+1. Mais de 5.000 itens (ícone: pacote SVG)
+2. Centenas de inimigos (ícone: monstro SVG)
+3. Dezenas de chefes (ícone: caveira SVG)
+4. Easter Eggs escondidos (ícone: ovo SVG)
+5. Seeds secretas (ícone: semente SVG) — "getfixedboi", "for the worthy"
+6. Colaborações (ícone: aperto de mãos SVG) — "Don't Starve, Minecraft, etc."
+7. Speedruns e Recordes (ícone: relógio SVG) — "Comunidade competitiva"
+8. Mods Famosos (ícone: engrenagem SVG) — "tModLoader, Thorium, Calamity"
+9. Referências Culturais (ícone: filme SVG) — "Referências a filmes, jogos e cultura pop"
+
+Cada card:
+- Ícone grande no centro.
+- Título da curiosidade.
+- Descrição de 1 linha (opcional).
+- Fundo glassmorphism.
+- No hover: glow + girar ícone levemente (5 graus).
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 60% 50%, rgba(240, 196, 63, 0.05) 0%, transparent 60%).
+
+================================================================================
+SLIDE 19 — IMPACTO E LEGADO
+================================================================================
+
+OBJETIVO:
+Demonstrar o sucesso e impacto cultural de Terraria.
+
+EMOÇÃO:
+Respeito, orgulho, admiração.
+
+LAYOUT:
+Estatísticas em destaque + texto. Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "IMPACTO E LEGADO".
+- Grid superior com números grandes (estatísticas).
+- Grid inferior com cards de aspectos do legado.
+
+ESTATÍSTICAS (grid 3 grandes números, no topo):
+1. "44M+" — Cópias Vendidas
+   - Fonte: 'Press Start 2P', 3rem, cor --terraria-gold
+   - Abaixo: texto explicativo
+2. "97%" — Avaliações Positivas (Steam)
+   - Fonte: 'Press Start 2P', 3rem, cor --terraria-green-bright
+3. "10+" — Anos de Suporte
+   - Fonte: 'Press Start 2P', 3rem, cor --terraria-blue
+   - Abaixo: texto explicativo
+
+Cada número: counter animado (de 0 até o valor) ao entrar no slide.
+Usar animação de contador via requestAnimationFrame.
+
+ASPECTOS DO LEGADO (grid 3x2 abaixo):
+1. Comunidade de Mods (ícone: puzzle SVG)
+2. Influência em outros jogos (ícone: estrela SVG)
+3. Streamers e Criadores (ícone: play SVG)
+4. Presença Multiplataforma (ícone: dispositivo SVG)
+5. Prêmios e Reconhecimento (ícone: troféu SVG)
+6. Futuro da Franquia (ícone: foguete SVG)
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 40%, rgba(240, 196, 63, 0.06) 0%, transparent 60%).
+
+ORDEM DE ENTRADA:
+1. Título (slideInUp).
+2. Estatísticas (fadeInUp, stagger 0.15s, delay 0.3s).
+3. Cards de legado (fadeInUp, stagger 0.08s, delay 0.6s).
+
+================================================================================
+SLIDE 20 — CONCLUSÃO
+================================================================================
+
+OBJETIVO:
+Finalizar a apresentação de forma inspiradora, resumindo os pontos principais.
+NÃO colocar "Perguntas?" ou "Dúvidas?".
+
+EMOÇÃO:
+Reflexão, inspiração, satisfação.
+
+LAYOUT:
+Centralizado com texto de resumo e mensagem final.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Título: "CONCLUSÃO" no topo.
+- Grid 3x2 com resumo dos pontos principais.
+- Mensagem final inspiradora.
+- Agradecimento.
+
+GRID DE RESUMO (6 cards pequenos, 3x2):
+1. Exploração sem limites
+2. Progressão profunda
+3. Construção criativa
+4. Combate desafiador
+5. Comunidade ativa
+6. Suporte contínuo
+
+Cada card: ícone + frase curta. Fundo glassmorphism.
+
+MENSAGEM FINAL (centralizada, abaixo do grid):
+"Terraria permanece relevante graças à combinação de exploração, combate, construção e suporte contínuo da desenvolvedora. Um pequeno mundo com possibilidades infinitas."
+- Fonte: 'Space Mono', tamanho 0.9rem, cor --text-primary, max-width 80%.
+- Efeito: fadeInUp, delay 0.8s.
+
+AGRADECIMENTO (centralizado, abaixo da mensagem):
+"Obrigado(a) pela atenção!"
+- Fonte: 'Press Start 2P' (pequeno, 0.8rem), cor --terraria-gold.
+- Efeito: fadeInUp, delay 1.2s.
+
+ÍCONE DECORATIVO:
+- Estrela dourada SVG grande (64px) no centro, atrás do texto, opacidade 0.08, animação de rotação lenta (15s, linear, infinite).
+
+BACKGROUND:
+- Gradiente radial: radial-gradient(ellipse at 50% 50%, rgba(240, 196, 63, 0.06) 0%, transparent 60%).
+- Partículas de estrelas cadentes (2-3, sutis) atravessando a tela.
+
+NÃO INCLUIR:
+- "Perguntas?"
+- "Dúvidas?"
+- "Q&A"
+- Qualquer referência a perguntas ou dúvidas da plateia.
+
+================================================================================
+ESPECIFICAÇÕES TÉCNICAS GLOBAIS
+================================================================================
+
+RESPONSIVIDADE:
+- Usar CSS clamp() para todos os tamanhos de fonte e dimensões de elementos.
+- Viewport: <meta name="viewport" content="width=device-width, initial-scale=1.0">
+- Layout flexível com CSS Grid e Flexbox.
+- NUNCA usar largura fixa em px para elementos de conteúdo.
+- Usar unidades relativas (%, vw, vh, rem, em).
+- Testar mentalmente: o conteúdo deve caber sem scroll em 1024x768, 1366x768, 1920x1080 e 375x667.
+- Em mobile (largura < 768px): reduzir grids para 2 colunas, depois 1 coluna se necessário.
+- Em mobile: aumentar padding lateral para 5%.
+- O slide inteiro deve usar width: 100vw; height: 100vh; overflow: hidden.
+
+SVGS:
+- Todos os ícones devem ser SVG inline.
+- Estilo dos SVGs: minimalista, outline simples, stroke-width 2, sem preenchimento (ou fill atual com cor).
+- Tamanho padrão: 24x24px, 32x32px para ícones de cards.
+- Os SVGs de chefes, NPCs e armas devem ser simplificados (silhuetas).
+- Use elementos path, circle, rect para compor os ícones.
+- NÃO use imagens raster (PNG, JPG).
+
+JAVASCRIPT:
+- Navegação entre slides: gerenciada por índice (currentSlide).
+- Funções: goToSlide(n), nextSlide(), prevSlide().
+- Atualizar barra de progresso e contador.
+- Animações de entrada: classes CSS adicionadas dinamicamente ao ativar slide.
+- Ao sair do slide: remover classes de animação, resetar posições.
+- Contadores animados (slide 19): requestAnimationFrame animando de 0 até o valor alvo.
+- Partículas de estrelas: criadas via JS, divs pequenas posicionadas randomicamente,
+  com animação CSS de cintilação (opacity varia entre 0.1 e 0.5).
+- Touch events: detectar touchstart e touchend para calcular direção do swipe.
+  Se deltaX > 50px: próximo/anterior.
+- Teclado: keydown listener para ArrowRight, ArrowLeft, Space, PageDown, PageUp, Home, End.
+
+CSS:
+- Todos os estilos inline ou em <style> no <head>.
+- Usar propriedades customizadas (--var) para todas as cores.
+- Animações via @keyframes.
+- Transições via transition.
+- Glassmorphism: background: var(--glass-bg), backdrop-filter: blur(10px), border: 1px solid var(--glass-border).
+- Gradientes nos títulos: background-image: linear-gradient, -webkit-background-clip: text, -webkit-text-fill-color: transparent.
+- Smooth scroll: não usar (slides são fixos, sem scroll).
+
+ESTRUTURA HTML:
+- Container principal: <div id="presentation"> com position: relative, width: 100vw, height: 100vh, overflow: hidden.
+- Cada slide: <section class="slide"> com position: absolute, width: 100%, height: 100%, top: 0, left: 0.
+- Slide ativo: class "active" (opacity: 1, z-index: 1).
+- Slide inativo: opacity: 0, z-index: 0, pointer-events: none.
+- Navegação: <nav> com botões seta.
+- Barra de progresso: <div id="progress-bar">.
+- Contador: <div id="slide-counter">.
+- Partículas: <div id="particles-container">.
+
+REGRA FINAL:
+- A IA que for executar este documento deve gerar o HTML completo de UMA SÓ VEZ.
+- Não deve consultar nenhum outro arquivo na pasta.
+- Todo o conteúdo (textos dos 20 slides) está descrito neste documento, na seção de conteúdo fornecida pelo usuário e que você deve integrar ao design especificado.
+- Use exatamente os textos fornecidos pelo usuário para cada slide, adaptando-os ao layout especificado.
+- Certifique-se de que nenhum slide tenha scroll.
+- Certifique-se de que a navegação por clique em qualquer lugar da tela NÃO funciona.
+- A apresentação deve ser visualmente impressionante, mas sem exageros.
+- Cada efeito tem um propósito.
+- O foco está no conteúdo, não nos efeitos.
+
+===== FIM DA ESPECIFICAÇÃO =====
