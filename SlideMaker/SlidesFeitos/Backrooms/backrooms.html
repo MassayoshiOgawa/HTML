@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BACKROOMS: O Universo Infinito dos Espaços Liminares</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#060606;font-family:'Courier New',Courier,monospace;color:#E8E0D4;-webkit-font-smoothing:antialiased;cursor:none}
+#slides-container{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:1}
+.slide{position:absolute;top:0;left:0;width:100vw;height:100vh;display:none;flex-direction:column;justify-content:center;align-items:center;padding:clamp(20px,5vw,60px);opacity:0;transition:opacity .6s ease-in-out;overflow:hidden;z-index:1}
+.slide.active{display:flex;opacity:1;z-index:2}
+#transition-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:100;pointer-events:none;opacity:0;background:#060606;transition:opacity .3s ease}
+#transition-overlay.active{opacity:1}
+#transition-overlay canvas{width:100%;height:100%;opacity:.5}
+#noise-canvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;opacity:.04}
+#particles-canvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
+.vignette{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:5;pointer-events:none;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.6) 100%)}
+.scanlines{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:4;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px)}
+.fog-layer{position:fixed;top:0;left:0;width:200vw;height:100vh;z-index:1;pointer-events:none;opacity:.06}
+.fog-layer.f1{background:linear-gradient(90deg,transparent,#8A8A8A,transparent);animation:fogMove1 90s linear infinite}
+.fog-layer.f2{background:linear-gradient(90deg,transparent,#3D2B1F,transparent);animation:fogMove2 120s linear infinite;opacity:.04}
+@keyframes fogMove1{0%{transform:translateX(-50vw)}100%{transform:translateX(50vw)}}
+@keyframes fogMove2{0%{transform:translateX(0)}100%{transform:translateX(100vw)}}
+#custom-cursor{position:fixed;width:12px;height:12px;border:1px solid #F5D742;border-radius:50%;pointer-events:none;z-index:9999;opacity:.7;transform:translate(-50%,-50%);transition:width .3s ease,height .3s ease,background .3s ease,opacity .3s ease}
+#custom-cursor.hover{width:20px;height:20px;background:rgba(245,215,66,.2);opacity:1}
+.nav-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:50;color:#F5D742;font-size:28px;font-family:'Courier New',Courier,monospace;opacity:.3;cursor:pointer;transition:opacity .3s ease;padding:20px;user-select:none;background:none;border:none;outline:none}
+.nav-arrow:hover{opacity:.8}
+.nav-arrow.left{left:10px}
+.nav-arrow.right{right:10px}
+.nav-arrow.hidden{display:none}
+#progress-container{position:fixed;bottom:0;left:0;width:100vw;z-index:50;pointer-events:none}
+#progress-bar{height:2px;background:linear-gradient(90deg,#F5D742,#B87333);transition:width .5s ease-out;width:0%}
+#progress-label{font-family:'Courier New',Courier,monospace;font-size:.65rem;color:#8A8A8A;text-align:right;padding:4px 20px 4px 0;letter-spacing:.1em}
+#mini-index-btn{position:fixed;top:15px;right:15px;z-index:50;background:rgba(245,215,66,.1);border:1px solid rgba(245,215,66,.3);color:#F5D742;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s ease}
+#mini-index-btn:hover{background:rgba(245,215,66,.25)}
+#mini-index-btn svg{width:16px;height:16px}
+#fullscreen-btn{position:fixed;bottom:40px;right:15px;z-index:50;background:rgba(245,215,66,.1);border:1px solid rgba(245,215,66,.3);color:#F5D742;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s ease}
+#fullscreen-btn:hover{background:rgba(245,215,66,.25)}
+#fullscreen-btn svg{width:16px;height:16px}
+#mini-index-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:200;background:rgba(6,6,6,.92);display:none;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;padding:40px}
+#mini-index-overlay.active{display:flex}
+.mini-thumb{width:80px;height:60px;background:rgba(245,215,66,.08);border:1px solid rgba(245,215,66,.2);color:#F5D742;font-family:'Courier New',Courier,monospace;font-size:1.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s ease}
+.mini-thumb:hover{background:rgba(245,215,66,.2);border-color:#F5D742;transform:scale(1.05)}
+.mini-thumb.active{background:rgba(245,215,66,.15);border-color:#F5D742}
+.hud-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:3;pointer-events:none}
+.hud-corner{position:absolute;width:30px;height:30px;border-color:rgba(245,215,66,.15)}
+.hud-corner.tl{top:15px;left:15px;border-top:1px solid;border-left:1px solid}
+.hud-corner.tr{top:15px;right:15px;border-top:1px solid;border-right:1px solid}
+.hud-corner.bl{bottom:60px;left:15px;border-bottom:1px solid;border-left:1px solid}
+.hud-corner.br{bottom:60px;right:15px;border-bottom:1px solid;border-right:1px solid}
+.hud-text{position:absolute;font-family:'Courier New',Courier,monospace;font-size:.6rem;color:rgba(245,215,66,.2);letter-spacing:.05em}
+.hud-coords{top:20px;left:55px}
+.hud-timestamp{bottom:65px;right:55px;text-align:right}
+.hud-status{top:20px;right:55px;text-align:right}
+.hud-signal{position:absolute;top:45px;right:55px;display:flex;gap:2px}
+.hud-signal span{width:2px;background:rgba(245,215,66,.15);display:block;animation:signalPulse 2s ease-in-out infinite}
+.hud-signal span:nth-child(1){height:4px;animation-delay:0s}
+.hud-signal span:nth-child(2){height:6px;animation-delay:.3s}
+.hud-signal span:nth-child(3){height:8px;animation-delay:.6s}
+.hud-signal span:nth-child(4){height:10px;animation-delay:.9s}
+.hud-signal span:nth-child(5){height:6px;animation-delay:1.2s}
+@keyframes signalPulse{0%,100%{background:rgba(245,215,66,.15)}50%{background:rgba(245,215,66,.4)}}
+h1{font-family:'Courier New',Courier,monospace;font-weight:700;color:#F5D742;text-transform:uppercase;letter-spacing:.02em;line-height:1.2;text-align:center}
+h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;color:#D4C5A9;letter-spacing:.03em;line-height:1.4;text-align:center}
+.slide-number{position:absolute;top:clamp(15px,3vh,30px);left:clamp(15px,3vw,40px);font-family:'Courier New',Courier,monospace;font-size:clamp(.75rem,1.2vw,1rem);color:#B87333;opacity:.7;z-index:10}
+.slide-title{font-size:clamp(1.2rem,3vw,3rem);margin-bottom:clamp(8px,1.5vh,20px);position:relative;z-index:10;text-align:center}
+.slide-content{font-size:clamp(.8rem,1.1vw,1.1rem);line-height:1.6;color:#E8E0D4;z-index:10;text-align:center;max-width:90%}
+.divider{width:40%;height:1px;background:rgba(245,215,66,.3);margin:clamp(10px,2vh,20px) auto}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(245,215,66,.15);border:1px solid #F5D742;color:#F5D742;font-family:'Courier New',Courier,monospace;font-size:clamp(.7rem,.9vw,.85rem);cursor:pointer;transition:all .3s ease;text-transform:uppercase;letter-spacing:.05em}
+.btn:hover{background:rgba(245,215,66,.3);transform:translateY(-1px);box-shadow:0 0 15px rgba(245,215,66,.15)}
+.btn:active{transform:scale(.95)}
+.btn.danger{background:rgba(255,106,0,.15);border-color:#FF6A00;color:#FF6A00}
+.btn.danger:hover{background:rgba(255,106,0,.3)}
+.card{background:rgba(20,20,20,.85);border:1px solid rgba(245,215,66,.15);padding:clamp(8px,1.2vh,16px);transition:all .3s ease;position:relative}
+.card:hover{transform:translateY(-2px);border-color:rgba(245,215,66,.3);box-shadow:0 4px 20px rgba(245,215,66,.08)}
+.modal-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:300;background:rgba(6,6,6,.85);display:none;justify-content:center;align-items:center;padding:40px}
+.modal-overlay.active{display:flex}
+.modal-content{background:rgba(20,20,20,.95);border:1px solid rgba(245,215,66,.2);padding:clamp(16px,3vw,32px);max-width:600px;width:90%;max-height:80vh;overflow-y:auto;position:relative}
+.modal-content .close-btn{position:absolute;top:10px;right:10px;color:#F5D742;font-size:1.2rem;cursor:pointer;background:none;border:none;font-family:'Courier New',Courier,monospace}
+.modal-content h3{color:#F5D742;font-family:'Courier New',Courier,monospace;font-size:1.1rem;text-transform:uppercase;margin-bottom:12px;letter-spacing:.02em}
+.modal-content p{color:#E8E0D4;font-size:.9rem;line-height:1.6;margin-bottom:8px}
+.anim-fade{opacity:0;transition:opacity .7s ease,transform .7s cubic-bezier(.25,.46,.45,.94)}
+.anim-fade.in{opacity:1}
+.anim-up{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s cubic-bezier(.25,.46,.45,.94)}
+.anim-up.in{opacity:1;transform:translateY(0)}
+.anim-scale{opacity:0;transform:scale(.95);transition:opacity .7s ease,transform .7s cubic-bezier(.25,.46,.45,.94)}
+.anim-scale.in{opacity:1;transform:scale(1)}
+.anim-blur{opacity:0;filter:blur(8px);transition:opacity .7s ease,filter .7s ease,transform .7s cubic-bezier(.25,.46,.45,.94)}
+.anim-blur.in{opacity:1;filter:blur(0)}
+.anim-expand{width:0;transition:width .6s cubic-bezier(.25,.46,.45,.94)}
+.anim-expand.in{width:40%}
+@keyframes flicker{0%,100%{opacity:1}50%{opacity:.97}}
+/* SLIDE 1 */
+#slide-1 .level0-bg{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+#slide-1 .l0-wall{position:absolute;top:5%;left:10%;width:30%;height:85%;background:linear-gradient(180deg,rgba(212,197,169,.04),rgba(212,197,169,.02));border-left:1px solid rgba(245,215,66,.06);border-right:1px solid rgba(245,215,66,.04);filter:blur(8px)}
+#slide-1 .l0-wall:nth-child(2){left:auto;right:10%}
+#slide-1 .l0-floor{position:absolute;bottom:0;left:0;width:100%;height:40%;background:repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(212,197,169,.03) 40px,rgba(212,197,169,.03) 41px);filter:blur(3px)}
+#slide-1 .l0-ceiling{position:absolute;top:0;left:0;width:100%;height:8%;background:rgba(0,0,0,.2)}
+#slide-1 .l0-light{position:absolute;top:2%;left:20%;width:4px;height:6%;background:rgba(245,215,66,.1);filter:blur(2px);animation:flicker 4s ease-in-out infinite}
+#slide-1 .l0-light:nth-child(5){left:40%;animation-delay:1.5s}
+#slide-1 .l0-light:nth-child(6){left:60%;animation-delay:3s}
+#slide-1 .l0-light:nth-child(7){left:80%;animation-delay:.8s}
+#slide-1 .l0-door{position:absolute;top:20%;left:43%;width:14%;height:40%;border:1px solid rgba(245,215,66,.06);background:rgba(245,215,66,.02);filter:blur(5px)}
+#slide-1 .ghost-number{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(8rem,15vw,15rem);font-family:'Courier New',Courier,monospace;font-weight:700;color:rgba(245,215,66,.03);pointer-events:none;z-index:1;letter-spacing:-.05em}
+#slide-1 .presenter-line{display:flex;gap:12px;align-items:center;color:rgba(232,224,212,.6);font-size:clamp(.7rem,.9vw,.85rem);font-family:'Courier New',Courier,monospace;z-index:10;justify-content:center}
+#slide-1 .presenter-line .sep{color:rgba(245,215,66,.3)}
+#slide-1 .tagline{color:rgba(245,215,66,.5);font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:clamp(.65rem,1vw,1rem);z-index:10;text-align:center;margin-top:clamp(20px,4vh,50px)}
+#slide-1 .hud-classified{position:absolute;top:clamp(15px,3vh,30px);left:clamp(15px,3vw,40px);font-size:clamp(.55rem,.7vw,.65rem);color:rgba(245,215,66,.15);letter-spacing:.15em;z-index:10}
+#slide-1 .hud-signal-bottom{position:absolute;bottom:clamp(60px,8vh,80px);right:clamp(15px,3vw,40px);font-size:clamp(.5rem,.65vw,.6rem);color:rgba(245,215,66,.12);letter-spacing:.1em;z-index:10;text-align:right}
+/* SLIDE 2 */
+#slide-2 .content-grid{display:flex;gap:clamp(12px,2vw,30px);width:100%;max-width:1200px;z-index:10;align-items:stretch;flex-wrap:wrap;justify-content:center}
+#slide-2 .left-panel{flex:0 0 clamp(250px,40%,400px);display:flex;flex-direction:column;gap:10px;justify-content:center}
+#slide-2 .right-panel{flex:0 0 clamp(280px,50%,500px)}
+#slide-2 .card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(6px,.8vw,12px)}
+#slide-2 .concept-card{background:rgba(20,20,20,.85);border:1px solid rgba(245,215,66,.12);padding:clamp(8px,1.2vh,16px);text-align:center;cursor:pointer;transition:all .3s ease;position:relative}
+#slide-2 .concept-card:hover{transform:translateY(-3px);border-color:rgba(245,215,66,.3);background:rgba(245,215,66,.05)}
+#slide-2 .concept-card .icon{font-size:clamp(1rem,1.8vw,1.5rem);margin-bottom:6px;color:#F5D742;line-height:1}
+#slide-2 .concept-card .label{font-size:clamp(.55rem,.8vw,.7rem);color:#D4C5A9;text-transform:uppercase;letter-spacing:.05em;font-family:'Courier New',Courier,monospace}
+#slide-2 .concept-card .desc{font-size:clamp(.5rem,.7vw,.65rem);color:#8A8A8A;margin-top:4px;line-height:1.3}
+#slide-2 .bottom-cta{color:#FF6A00;font-size:clamp(.65rem,.85vw,.8rem);font-family:'Courier New',Courier,monospace;letter-spacing:.05em;text-transform:uppercase;margin-top:clamp(10px,1.5vh,20px);z-index:10;text-align:center}
+#slide-2 .grid-bg{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(245,215,66,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,215,66,.03) 1px,transparent 1px);background-size:40px 40px}
+/* SLIDE 3 */
+#slide-3 .era-grid{display:flex;gap:clamp(8px,1.5vw,24px);width:100%;max-width:1200px;z-index:10;justify-content:center;flex-wrap:wrap}
+#slide-3 .era-col{flex:0 0 clamp(180px,28%,320px);display:flex;flex-direction:column;gap:clamp(6px,.8vh,12px)}
+#slide-3 .era-header{text-align:center;margin-bottom:4px}
+#slide-3 .era-header .year{font-size:clamp(2rem,4vw,4rem);font-family:'Courier New',Courier,monospace;font-weight:700;color:rgba(212,197,169,.06);line-height:1;position:relative;z-index:0}
+#slide-3 .era-header .era-label{font-size:clamp(.55rem,.75vw,.7rem);color:#B87333;text-transform:uppercase;letter-spacing:.15em;font-family:'Courier New',Courier,monospace;margin-top:-4px}
+#slide-3 .origin-card{background:rgba(20,20,20,.85);border:1px solid rgba(245,215,66,.1);padding:clamp(8px,1vh,14px);cursor:pointer;transition:all .3s ease}
+#slide-3 .origin-card:hover{transform:translateY(-2px);border-color:rgba(245,215,66,.25)}
+#slide-3 .origin-card .o-title{color:#F5D742;font-size:clamp(.6rem,.8vw,.75rem);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:'Courier New',Courier,monospace}
+#slide-3 .origin-card .o-text{color:#E8E0D4;font-size:clamp(.55rem,.7vw,.65rem);line-height:1.4}
+#slide-3 .origin-card .o-img-placeholder{width:100%;padding-top:56%;background:repeating-linear-gradient(0deg,rgba(212,197,169,.08),rgba(212,197,169,.08) 4px,rgba(212,197,169,.03) 4px,rgba(212,197,169,.03) 8px);border:1px solid rgba(245,215,66,.1);margin-bottom:6px;position:relative;filter:sepia(.3)}
+#slide-3 .origin-card .o-img-placeholder::after{content:'ORIGINAL // 2019';position:absolute;bottom:4px;right:6px;font-size:.45rem;color:rgba(232,224,212,.3);font-family:'Courier New',Courier,monospace}
+/* SLIDE 4 */
+#slide-4 .liminal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(4px,.6vw,10px);width:100%;max-width:1100px;z-index:10}
+#slide-4 .liminal-card{background:rgba(20,20,20,.85);border:1px solid rgba(245,215,66,.1);padding:clamp(6px,1vh,14px);text-align:center;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;min-height:clamp(60px,10vh,100px);display:flex;flex-direction:column;align-items:center;justify-content:center}
+#slide-4 .liminal-card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(212,197,169,.02) 3px,rgba(212,197,169,.02) 4px);pointer-events:none}
+#slide-4 .liminal-card::after{content:'';position:absolute;top:10%;left:5%;width:90%;height:1px;background:rgba(245,215,66,.05)}
+#slide-4 .liminal-card:hover{transform:translateY(-3px);border-color:rgba(245,215,66,.25)}
+#slide-4 .liminal-card .l-icon{font-size:clamp(.8rem,1.5vw,1.2rem);color:#F5D742;margin-bottom:4px}
+#slide-4 .liminal-card .l-label{font-size:clamp(.5rem,.65vw,.6rem);color:#D4C5A9;text-transform:uppercase;letter-spacing:.05em;font-family:'Courier New',Courier,monospace}
+#slide-4 .liminal-card .l-hover-text{position:absolute;bottom:0;left:0;right:0;padding:6px;background:rgba(20,20,20,.95);font-size:clamp(.45rem,.55vw,.55rem);color:#E8E0D4;opacity:0;transition:opacity .3s ease}
+#slide-4 .liminal-card:hover .l-hover-text{opacity:1}
+#slide-4 .psych-text{font-size:clamp(.6rem,.8vw,.75rem);color:#8A8A8A;line-height:1.5;z-index:10;text-align:center;max-width:800px;margin-top:clamp(6px,1vh,12px)}
+#slide-4 .quote-text{color:rgba(245,215,66,.5);font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:clamp(.6rem,.85vw,.8rem);z-index:10;text-align:center;margin-top:clamp(4px,.5vh,8px)}
+/* SLIDE 5 */
+#slide-5 .hex-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(4px,.5vw,8px);width:100%;max-width:700px;margin:0 auto;z-index:10;position:relative}
+#slide-5 .hex-item{width:clamp(70px,12vw,120px);height:clamp(80px,14vw,138px);position:relative;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#slide-5 .hex-item .hex-inner{width:100%;height:100%;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:rgba(20,20,20,.9);border:1px solid rgba(245,215,66,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .3s ease;position:relative}
+#slide-5 .hex-item .hex-inner::before{content:'';position:absolute;top:-1px;left:-1px;right:-1px;bottom:-1px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);border:1px solid transparent;background:conic-gradient(from 0deg,transparent,rgba(245,215,66,.2),transparent,rgba(245,215,66,.2),transparent) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:hexRotate 10s linear infinite;pointer-events:none}
+@keyframes hexRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+#slide-5 .hex-item:hover .hex-inner{transform:scale(1.05);background:rgba(245,215,66,.08);border-color:rgba(245,215,66,.3)}
+#slide-5 .hex-item.central{width:clamp(80px,14vw,140px);height:clamp(92px,16vw,160px);animation:hexPulse 3s ease-in-out infinite}
+@keyframes hexPulse{0%,100%{filter:drop-shadow(0 0 5px rgba(245,215,66,.1))}50%{filter:drop-shadow(0 0 20px rgba(245,215,66,.25))}}
+#slide-5 .hex-item .h-icon{font-size:clamp(.7rem,1.2vw,1.1rem);color:#F5D742;margin-bottom:2px;line-height:1}
+#slide-5 .hex-item .h-label{font-size:clamp(.35rem,.45vw,.45rem);color:#D4C5A9;text-transform:uppercase;letter-spacing:.03em;font-family:'Courier New',Courier,monospace;text-align:center;line-height:1.2;padding:0 4px}
+/* SLIDE 6 */
+#slide-6 .level0-scene{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden;perspective:800px}
+#slide-6 .l0-floor-persp{position:absolute;bottom:0;left:-20%;width:140%;height:60%;background:repeating-linear-gradient(90deg,transparent,transparent 30px,rgba(212,197,169,.05) 30px,rgba(212,197,169,.05) 31px);filter:blur(2px);animation:floorWave 20s ease-in-out infinite}
+@keyframes floorWave{0%,100%{transform:rotateX(60deg) translateY(0)}50%{transform:rotateX(60deg) translateY(-5px)}}
+#slide-6 .l0-wall-left{position:absolute;top:0;left:0;width:15%;height:100%;background:linear-gradient(90deg,rgba(212,197,169,.06),transparent)}
+#slide-6 .l0-wall-right{position:absolute;top:0;right:0;width:15%;height:100%;background:linear-gradient(270deg,rgba(212,197,169,.06),transparent)}
+#slide-6 .l0-ceiling-band{position:absolute;top:0;left:0;width:100%;height:15%;background:rgba(0,0,0,.3)}
+#slide-6 .l0-light-beam{position:absolute;top:0;left:20%;width:4px;height:30%;background:linear-gradient(180deg,rgba(245,215,66,.06),transparent);filter:blur(6px);animation:lightOsc 5s ease-in-out infinite}
+#slide-6 .l0-light-beam:nth-child(5){left:40%;width:3px;animation-delay:2s}
+#slide-6 .l0-light-beam:nth-child(6){left:60%;width:5px;animation-delay:3.5s}
+#slide-6 .l0-light-beam:nth-child(7){left:80%;width:3px;animation-delay:1.2s}
+@keyframes lightOsc{0%,100%{opacity:.5}50%{opacity:1}}
+#slide-6 .l0-panel{background:rgba(20,20,20,.88);border:1px solid rgba(245,215,66,.15);padding:clamp(16px,2.5vh,28px);z-index:10;max-width:900px;width:90%;position:relative;backdrop-filter:blur(4px)}
+#slide-6 .l0-title{font-size:clamp(1.8rem,4vw,4rem);font-family:'Courier New',Courier,monospace;font-weight:700;color:#F5D742;text-transform:uppercase;text-align:center;letter-spacing:.02em}
+#slide-6 .l0-sub{font-size:clamp(.65rem,.9vw,.85rem);color:#D4C5A9;text-align:center;margin-bottom:clamp(12px,2vh,24px);font-family:Georgia,'Times New Roman',serif;letter-spacing:.03em}
+#slide-6 .l0-cols{display:flex;gap:clamp(12px,2vw,30px);justify-content:center;flex-wrap:wrap}
+#slide-6 .l0-col{flex:1;min-width:140px}
+#slide-6 .l0-col h4{color:#B87333;font-size:clamp(.55rem,.7vw,.65rem);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-family:'Courier New',Courier,monospace}
+#slide-6 .l0-col ul{list-style:none;padding:0}
+#slide-6 .l0-col li{padding:3px 0;font-size:clamp(.55rem,.7vw,.65rem);color:#E8E0D4;cursor:pointer;transition:all .3s ease;border-bottom:1px solid rgba(245,215,66,.05);font-family:'Courier New',Courier,monospace}
+#slide-6 .l0-col li:hover{color:#F5D742;padding-left:8px}
+/* SLIDE 7 */
+#slide-7 .accordion-container{width:100%;max-width:700px;z-index:10;max-height:70vh;overflow-y:auto;padding:0 4px}
+#slide-7 .accordion-container::-webkit-scrollbar{width:3px}
+#slide-7 .accordion-container::-webkit-scrollbar-track{background:rgba(245,215,66,.05)}
+#slide-7 .accordion-container::-webkit-scrollbar-thumb{background:rgba(245,215,66,.2)}
+.accordion-item{border-bottom:1px solid rgba(245,215,66,.08)}
+.accordion-header{display:flex;align-items:center;gap:10px;padding:clamp(6px,.8vh,10px) clamp(8px,1vw,14px);cursor:pointer;transition:all .3s ease;background:rgba(20,20,20,.6);user-select:none}
+.accordion-header:hover{background:rgba(245,215,66,.05)}
+.accordion-header .ah-number{font-family:'Courier New',Courier,monospace;font-size:clamp(.7rem,.9vw,.85rem);color:rgba(245,215,66,.2);min-width:24px}
+.accordion-header .ah-name{flex:1;font-size:clamp(.6rem,.8vw,.75rem);color:#E8E0D4;font-family:'Courier New',Courier,monospace;text-transform:uppercase;letter-spacing:.03em}
+.accordion-header .ah-diff{font-size:clamp(.45rem,.55vw,.5rem);padding:1px 6px;border:1px solid;border-radius:2px;font-family:'Courier New',Courier,monospace;text-transform:uppercase;letter-spacing:.05em}
+.accordion-header .ah-diff.safe{color:#4CAF50;border-color:#4CAF50}
+.accordion-header .ah-diff.easy{color:#FFEB3B;border-color:#FFEB3B}
+.accordion-header .ah-diff.medium{color:#FF9800;border-color:#FF9800}
+.accordion-header .ah-diff.hard{color:#f44336;border-color:#f44336}
+.accordion-header .ah-diff.deadly{color:#9C27B0;border-color:#9C27B0}
+.accordion-header .ah-arrow{font-size:.6rem;color:rgba(245,215,66,.3);transition:transform .3s ease}
+.accordion-header.open .ah-arrow{transform:rotate(180deg)}
+.accordion-body{overflow:hidden;max-height:0;transition:max-height .4s ease-in-out;background:rgba(0,0,0,.2)}
+.accordion-body.open{max-height:200px}
+.accordion-body .ab-content{padding:clamp(6px,.8vh,12px) clamp(8px,1vw,14px);font-size:clamp(.5rem,.65vw,.6rem);color:#8A8A8A;line-height:1.5;font-family:'Courier New',Courier,monospace}
+/* SLIDE 8 */
+#slide-8 .entity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(6px,.8vw,14px);width:100%;max-width:800px;z-index:10;perspective:1000px}
+.entity-flip{aspect-ratio:3/4;perspective:1000px;cursor:pointer}
+.entity-flip-inner{position:relative;width:100%;height:100%;transition:transform .6s ease-in-out;transform-style:preserve-3d}
+.entity-flip.flipped .entity-flip-inner{transform:rotateY(180deg)}
+.entity-front,.entity-back{position:absolute;top:0;left:0;width:100%;height:100%;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;background:rgba(20,20,20,.9);border:1px solid rgba(245,215,66,.12);text-align:center}
+.entity-back{transform:rotateY(180deg);background:rgba(20,20,20,.95)}
+.entity-front .ef-icon{font-size:clamp(1rem,2vw,1.8rem);margin-bottom:4px;color:#F5D742}
+.entity-front .ef-name{font-size:clamp(.5rem,.7vw,.65rem);color:#F5D742;text-transform:uppercase;letter-spacing:.05em;font-family:'Courier New',Courier,monospace}
+.entity-back .eb-title{font-size:clamp(.45rem,.6vw,.55rem);color:#B87333;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:'Courier New',Courier,monospace}
+.entity-back .eb-desc{font-size:clamp(.4rem,.5vw,.5rem);color:#E8E0D4;line-height:1.4;font-family:'Courier New',Courier,monospace}
+.entity-back .eb-danger{font-size:clamp(.35rem,.45vw,.45rem);color:#FF6A00;margin-top:4px;text-transform:uppercase;font-family:'Courier New',Courier,monospace;letter-spacing:.05em}
+/* SLIDE 9 */
+#slide-9 .inv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(4px,.6vw,10px);width:100%;max-width:900px;z-index:10}
+.inv-card{background:rgba(20,20,20,.85);border:1px solid rgba(245,215,66,.1);padding:clamp(6px,1vh,14px);text-align:center;cursor:pointer;transition:all .3s ease;position:relative}
+.inv-card:hover{transform:translateY(-4px);border-color:rgba(245,215,66,.25);box-shadow:0 6px 20px rgba(245,215,66,.06)}
+.inv-card .inv-num{position:absolute;top:3px;left:5px;font-size:.45rem;color:rgba(245,215,66,.15);font-family:'Courier New',Courier,monospace}
+.inv-card .inv-icon{font-size:clamp(1rem,1.8vw,1.5rem);color:#F5D742;margin-bottom:4px;display:block}
+.inv-card .inv-name{font-size:clamp(.5rem,.65vw,.6rem);color:#D4C5A9;text-transform:uppercase;letter-spacing:.03em;font-family:'Courier New',Courier,monospace}
+.inv-card .inv-rarity{font-size:.5rem;color:#F5D742;margin-top:2px;letter-spacing:.1em}
+/* SLIDE 10 */
+#slide-10 .survival-grid{display:flex;gap:clamp(12px,2vw,30px);width:100%;max-width:1000px;z-index:10;flex-wrap:wrap;justify-content:center}
+#slide-10 .surv-left{flex:0 0 clamp(200px,35%,350px)}
+#slide-10 .surv-right{flex:0 0 clamp(250px,50%,450px)}
+#slide-10 .checklist{list-style:none;padding:0}
+#slide-10 .checklist li{padding:clamp(4px,.6vh,8px) 0;display:flex;align-items:center;gap:8px;font-size:clamp(.5rem,.65vw,.6rem);color:#E8E0D4;font-family:'Courier New',Courier,monospace;cursor:pointer;transition:all .3s ease;border-bottom:1px solid rgba(245,215,66,.04)}
+#slide-10 .checklist li:hover{color:#F5D742}
+#slide-10 .checklist .chk{width:12px;height:12px;border:1px solid rgba(245,215,66,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s ease}
+#slide-10 .checklist li.done .chk{background:#F5D742;border-color:#F5D742}
+#slide-10 .checklist li.done .chk::after{content:'\u2713';color:#060606;font-size:.5rem;font-weight:700}
+#slide-10 .checklist li.done{opacity:.5;text-decoration:line-through}
+#slide-10 .strat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(4px,.5vw,8px)}
+.strat-card{background:rgba(20,20,20,.85);border:1px solid rgba(245,215,66,.1);padding:clamp(6px,.8vh,12px);cursor:pointer;transition:all .3s ease;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.strat-card:hover{transform:translateY(-2px);border-color:rgba(245,215,66,.25)}
+.strat-card .s-icon{font-size:clamp(.8rem,1.2vw,1.1rem);color:#F5D742}
+.strat-card .s-label{font-size:clamp(.45rem,.55vw,.55rem);color:#D4C5A9;text-transform:uppercase;letter-spacing:.04em;font-family:'Courier New',Courier,monospace}
+</style>
+</head>
+<body>
+<div id="transition-overlay"><canvas id="transition-noise"></canvas></div>
+<canvas id="noise-canvas"></canvas>
+<canvas id="particles-canvas"></canvas>
+<div class="fog-layer f1"></div>
+<div class="fog-layer f2"></div>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+<div class="hud-overlay">
+  <div class="hud-corner tl"></div>
+  <div class="hud-corner tr"></div>
+  <div class="hud-corner bl"></div>
+  <div class="hud-corner br"></div>
+  <div class="hud-text hud-coords">N: 00.00.00 // E: 00.00.00</div>
+  <div class="hud-text hud-timestamp">SINAL: INSTÁVEL // TIMESTAMP: --:--:--</div>
+  <div class="hud-text hud-status">STATUS: MONITORANDO</div>
+  <div class="hud-signal"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+<div id="custom-cursor"></div>
+
+<button class="nav-arrow left" id="nav-left" aria-label="Anterior">&lt;</button>
+<button class="nav-arrow right" id="nav-right" aria-label="Próximo">&gt;</button>
+
+<div id="progress-container">
+  <div id="progress-bar"></div>
+  <div id="progress-label">SLIDE 01/20</div>
+</div>
+
+<button id="mini-index-btn" aria-label="Índice">
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>
+</button>
+<button id="fullscreen-btn" aria-label="Fullscreen">
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6V1h5M15 6V1h-5M1 10v5h5M15 10v5h-5"/></svg>
+</button>
+
+<div id="mini-index-overlay"></div>
+<div class="modal-overlay" id="modal-overlay"><div class="modal-content"><button class="close-btn" id="modal-close">X</button><div id="modal-body"></div></div></div>
+
+<div id="slides-container">
+
+<!-- SLIDE 1 - CAPA -->
+<div class="slide active" id="slide-1" data-slide="1">
+  <div class="level0-bg">
+    <div class="l0-wall"></div>
+    <div class="l0-wall"></div>
+    <div class="l0-floor"></div>
+    <div class="l0-ceiling"></div>
+    <div class="l0-light"></div>
+    <div class="l0-light"></div>
+    <div class="l0-light"></div>
+    <div class="l0-light"></div>
+    <div class="l0-door"></div>
+  </div>
+  <div class="ghost-number">00</div>
+  <div class="hud-classified">BACKROOMS DATABASE // CLASSIFIED</div>
+  <div class="hud-signal-bottom">SINAL: INSTÁVEL // 2024</div>
+  <h1 class="extruded-title" id="extruded-title" data-text="BACKROOMS: O UNIVERSO INFINITO DOS ESPACOS LIMINARES" style="font-size:clamp(1.2rem,3.5vw,3.5rem);max-width:90%;margin-bottom:clamp(8px,1.5vh,16px)">BACKROOMS: O UNIVERSO INFINITO DOS ESPAÇOS LIMINARES</h1>
+  <div class="divider anim-expand" style="z-index:10"></div>
+  <div class="presenter-line" style="z-index:10;margin-top:clamp(8px,1vh,16px)">
+    <span>APRESENTAÇÃO POR [NOME]</span>
+    <span class="sep">//</span>
+    <span>2024</span>
+  </div>
+  <div class="tagline">"E SE VOCÊ ATRAVESSASSE A REALIDADE POR ACIDENTE?"</div>
+</div>
+
+<!-- SLIDE 2 - O QUE SAO AS BACKROOMS -->
+<div class="slide" id="slide-2" data-slide="2">
+  <div class="grid-bg"></div>
+  <div class="slide-number">02</div>
+  <h1 class="slide-title anim-up">O QUE SÃO AS BACKROOMS?</h1>
+  <div class="content-grid">
+    <div class="left-panel">
+      <p style="font-size:clamp(.65rem,.85vw,.8rem);color:#D4C5A9;line-height:1.5;font-family:'Courier New',Courier,monospace">
+      As Backrooms são um fenômeno da internet que descreve um universo infinito de espaços liminares - lugares de transição que existem entre as camadas da realidade. Originado em um post do 4chan em 2019, o conceito cresceu para se tornar um dos maiores universos ficcionais colaborativos da internet.
+      </p>
+    </div>
+    <div class="right-panel">
+      <div class="card-grid">
+        <div class="concept-card anim-scale" data-tooltip="Atravessar uma parede ou objeto por uma falha na realidade, entrando em um espaço não destinado à percepção humana.">
+          <div class="icon">⬡</div>
+          <div class="label">NO-CLIP</div>
+          <div class="desc">Atravessar a realidade</div>
+        </div>
+        <div class="concept-card anim-scale" data-tooltip="As Backrooms não têm fim - corredores, salas e níveis se estendem infinitamente.">
+          <div class="icon">∞</div>
+          <div class="label">INFINITO</div>
+          <div class="desc">Espaços sem fim</div>
+        </div>
+        <div class="concept-card anim-scale" data-tooltip="A arquitetura se repete em padrões intermináveis, desorientando quem está dentro.">
+          <div class="icon">⊞</div>
+          <div class="label">REPETIÇÃO</div>
+          <div class="desc">Arquitetura repetitiva</div>
+        </div>
+        <div class="concept-card anim-scale" data-tooltip="Não há outras pessoas - apenas você, os corredores e o silêncio.">
+          <div class="icon">⛔</div>
+          <div class="label">ISOLAMENTO</div>
+          <div class="desc">Ausência de pessoas</div>
+        </div>
+        <div class="concept-card anim-scale" data-tooltip="Um zumbido constante de luzes fluorescentes preenche o ar.">
+          <div class="icon">♪</div>
+          <div class="label">RUÍDOS</div>
+          <div class="desc">Zumbidos constantes</div>
+        </div>
+        <div class="concept-card anim-scale" data-tooltip="A luz nunca se apaga - é sempre aquela fluorescência amarelada e doentia.">
+          <div class="icon">☀</div>
+          <div class="label">ILUMINAÇÃO</div>
+          <div class="desc">Luz artificial eterna</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-cta">POR QUE AS BACKROOMS DESPERTAM TANTO MEDO?</div>
+</div>
+
+<!-- SLIDE 3 - A ORIGEM -->
+<div class="slide" id="slide-3" data-slide="3">
+  <div class="slide-number">03</div>
+  <h1 class="slide-title anim-up">A ORIGEM DAS BACKROOMS</h1>
+  <div class="era-grid">
+    <div class="era-col">
+      <div class="era-header">
+        <div class="year">2019</div>
+        <div class="era-label">CRIAÇÃO</div>
+      </div>
+      <div class="origin-card">
+        <div class="o-img-placeholder"></div>
+        <div class="o-title">O Post Original</div>
+        <div class="o-text">Em maio de 2019, um post anônimo no 4chan mostra uma foto de um corredor amarelado com a legenda que deu origem a tudo.</div>
+      </div>
+      <div class="origin-card">
+        <div class="o-title">A Primeira Creepypasta</div>
+        <div class="o-text">"Se você não tomar cuidado, você pode noclipe para fora da realidade..." - o texto original que definiu o tom.</div>
+      </div>
+    </div>
+    <div class="era-col">
+      <div class="era-header">
+        <div class="year">2020</div>
+        <div class="era-label">EXPANSÃO</div>
+      </div>
+      <div class="origin-card">
+        <div class="o-title">A Comunidade</div>
+        <div class="o-text">Fãs começam a criar níveis, entidades e regras. O universo se expande colaborativamente.</div>
+      </div>
+      <div class="origin-card">
+        <div class="o-title">Wikis e Fóruns</div>
+        <div class="o-text">Surgem as primeiras wikis dedicadas, catalogando centenas de níveis e entidades.</div>
+      </div>
+    </div>
+    <div class="era-col">
+      <div class="era-header">
+        <div class="year">2023</div>
+        <div class="era-label">POPULARIZAÇÃO</div>
+      </div>
+      <div class="origin-card">
+        <div class="o-title">Kane Pixels</div>
+        <div class="o-text">A série found footage de Kane Pixels no YouTube leva as Backrooms para um público global.</div>
+      </div>
+      <div class="origin-card">
+        <div class="o-title">Fenômeno Mundial</div>
+        <div class="o-text">Jogos, filmes, livros e milhares de vídeos. As Backrooms se tornam um ícone cultural.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4 - ESPACOS LIMINARES -->
+<div class="slide" id="slide-4" data-slide="4">
+  <div class="slide-number">04</div>
+  <h1 class="slide-title anim-up">O CONCEITO DE ESPAÇOS LIMINARES</h1>
+  <p style="font-size:clamp(.6rem,.8vw,.75rem);color:#D4C5A9;z-index:10;text-align:center;max-width:800px;margin-bottom:clamp(6px,1vh,12px);font-family:'Courier New',Courier,monospace">
+  Lugares de transição - espaços entre um destino e outro - que nunca deveriam ser permanentemente habitados.
+  </p>
+  <div class="liminal-grid">
+    <div class="liminal-card"><div class="l-icon">⌂</div><div class="l-label">ESCOLAS</div><div class="l-hover-text">Corredores vazios durante o período noturno, salas sem alunos</div></div>
+    <div class="liminal-card"><div class="l-icon">☰</div><div class="l-label">SHOPPINGS</div><div class="l-hover-text">Galérias desertas, lojas fechadas, escadas rolantes paradas</div></div>
+    <div class="liminal-card"><div class="l-icon">☷</div><div class="l-label">CORREDORES</div><div class="l-hover-text">Hotéis com corredores infinitos, portas idênticas, silêncio absoluto</div></div>
+    <div class="liminal-card"><div class="l-icon">⎔</div><div class="l-label">ESCRITÓRIOS</div><div class="l-hover-text">Salas abandonadas, cadeiras vazias, luzes fluorescentes piscando</div></div>
+    <div class="liminal-card"><div class="l-icon">⏍</div><div class="l-label">ESTACIONAMENTOS</div><div class="l-hover-text">Andares infinitos de concreto, carros isolados, eco de passos</div></div>
+    <div class="liminal-card"><div class="l-icon">⌇</div><div class="l-label">PISCINAS</div><div class="l-hover-text">Água parada, azulejos brancos, eco de gotas, ausência total</div></div>
+    <div class="liminal-card"><div class="l-icon">✈</div><div class="l-label">AEROPORTOS</div><div class="l-hover-text">Terminais vazios, portões fechados, esteiras paradas, luz fria</div></div>
+    <div class="liminal-card"><div class="l-icon">☐</div><div class="l-label">SALAS DE ESPERA</div><div class="l-hover-text">Poltronas vazias, revistas antigas, relógio parado, ninguém chega</div></div>
+  </div>
+  <div class="psych-text">PSICOLOGIA: O desconforto vem do "uncanny" - familiaridade estranha. São lugares que conhecemos, mas vazios, sem propósito, sem pessoas. A nostalgia de um lugar que nunca existiu.</div>
+  <div class="quote-text">"Lugares de transição que nunca deveriam ser permanentemente habitados."</div>
+</div>
+
+<!-- SLIDE 5 - COMO ENTRAR -->
+<div class="slide" id="slide-5" data-slide="5">
+  <div class="slide-number">05</div>
+  <h1 class="slide-title anim-up">COMO ENTRAR NAS BACKROOMS</h1>
+  <p style="font-size:clamp(.55rem,.75vw,.7rem);color:#B87333;z-index:10;margin-bottom:clamp(8px,1.5vh,16px);text-transform:uppercase;letter-spacing:.1em;font-family:'Courier New',Courier,monospace;text-align:center">MÉTODOS DE ACESSO DOCUMENTADOS</p>
+  <div class="hex-grid">
+    <div class="hex-item"><div class="hex-inner"><span class="h-icon">☰</span><span class="h-label">SONHOS</span></div></div>
+    <div class="hex-item"><div class="hex-inner"><span class="h-icon">⚠</span><span class="h-label">FALHAS</span></div></div>
+    <div class="hex-item"><div class="hex-inner"><span class="h-icon">⊡</span><span class="h-label">LUGARES</span></div></div>
+    <div class="hex-item"><div class="hex-inner"><span class="h-icon">⊞</span><span class="h-label">PORTAIS</span></div></div>
+    <div class="hex-item central"><div class="hex-inner"><span class="h-icon">⬡</span><span class="h-label">NO-CLIP</span></div></div>
+    <div class="hex-item"><div class="hex-inner"><span class="h-icon">⌃</span><span class="h-label">ELEVADORES</span></div></div>
+    <div class="hex-item"><div class="hex-inner"><span class="h-icon">☐</span><span class="h-label">ESPELHOS</span></div></div>
+    <div class="hex-item"><div class="hex-inner"><span class="h-icon">☷</span><span class="h-label">PORTAS</span></div></div>
+    <div class="hex-item"><div class="hex-inner"><span class="h-icon">⊗</span><span class="h-label">ACIDENTES</span></div></div>
+  </div>
+  <p style="font-size:clamp(.5rem,.65vw,.6rem);color:#FF6A00;z-index:10;margin-top:clamp(8px,1vh,14px);text-transform:uppercase;letter-spacing:.05em;font-family:'Courier New',Courier,monospace;text-align:center">TUDO FAZ PARTE DA FICÇÃO // ERROS DA SIMULAÇÃO / TEORIAS DA COMUNIDADE</p>
+</div>
+
+<!-- SLIDE 6 - LEVEL 0 -->
+<div class="slide" id="slide-6" data-slide="6">
+  <div class="level0-scene">
+    <div class="l0-floor-persp"></div>
+    <div class="l0-wall-left"></div>
+    <div class="l0-wall-right"></div>
+    <div class="l0-ceiling-band"></div>
+    <div class="l0-light-beam"></div>
+    <div class="l0-light-beam"></div>
+    <div class="l0-light-beam"></div>
+    <div class="l0-light-beam"></div>
+  </div>
+  <div class="slide-number" style="z-index:11">06</div>
+  <div class="l0-panel">
+    <div class="l0-title">LEVEL 0</div>
+    <div class="l0-sub">O PRIMEIRO NÍVEL / O PONTO DE ENTRADA</div>
+    <div class="l0-cols">
+      <div class="l0-col">
+        <h4>CARACTERÍSTICAS</h4>
+        <ul>
+          <li data-detail="Tapete amarelo úmido, com manchas e cheiro de mofo">◈ Carpete amarelo</li>
+          <li data-detail="Papel de parede bege com padrão repetitivo, manchas de umidade">◈ Papel de parede</li>
+          <li data-detail="Luzes fluorescentes no teto, zumbido constante de 60Hz">◈ Luzes fluorescentes</li>
+          <li data-detail="Zumbido incessante que nunca para, causa enjoo e desorientação">◈ Zumbido constante</li>
+        </ul>
+      </div>
+      <div class="l0-col">
+        <h4>EXPERIÊNCIA</h4>
+        <ul>
+          <li data-detail="Você está completamente sozinho. Não há ninguém nos corredores.">◈ Solidão absoluta</li>
+          <li data-detail="Cheiro de carpete molhado, mofo e papel velho no ar">◈ Cheiro de carpete úmido</li>
+          <li data-detail="O tempo parece não passar. Relógios param. Sem dia ou noite.">◈ Sem noção de tempo</li>
+          <li data-detail="Apenas Almond Water e alguns itens básicos podem ser encontrados">◈ Poucos recursos</li>
+        </ul>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:clamp(8px,1vh,14px)">
+      <button class="btn" id="ambient-btn">♫ ATIVAR ÁUDIO AMBIENTE</button>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7 - OUTROS NÍVEIS -->
+<div class="slide" id="slide-7" data-slide="7">
+  <div class="slide-number">07</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(4px,.5vh,8px)">OUTROS NÍVEIS CONHECIDOS</h1>
+  <p style="font-size:clamp(.5rem,.65vw,.6rem);color:#8A8A8A;z-index:10;margin-bottom:clamp(6px,1vh,12px);font-family:'Courier New',Courier,monospace;text-align:center">SELECIONE UM NÍVEL PARA EXPANDIR</p>
+  <div class="accordion-container" id="accordion-container"></div>
+</div>
+
+<!-- SLIDE 8 - ENTIDADES -->
+<div class="slide" id="slide-8" data-slide="8">
+  <div class="slide-number">08</div>
+  <h1 class="slide-title anim-up">AS ENTIDADES</h1>
+  <p style="font-size:clamp(.5rem,.65vw,.6rem);color:#B87333;z-index:10;margin-bottom:clamp(6px,1vh,12px);text-transform:uppercase;letter-spacing:.1em;font-family:'Courier New',Courier,monospace;text-align:center">HABITANTES DAS BACKROOMS</p>
+  <div class="entity-grid" id="entity-grid"></div>
+</div>
+
+<!-- SLIDE 9 - OBJETOS -->
+<div class="slide" id="slide-9" data-slide="9">
+  <div class="slide-number">09</div>
+  <h1 class="slide-title anim-up">OBJETOS IMPORTANTES</h1>
+  <p style="font-size:clamp(.5rem,.65vw,.6rem);color:#8A8A8A;z-index:10;margin-bottom:clamp(6px,1vh,12px);text-transform:uppercase;letter-spacing:.08em;font-family:'Courier New',Courier,monospace;text-align:center">INVENTÁRIO DE SOBREVIVÊNCIA</p>
+  <div class="inv-grid" id="inv-grid"></div>
+</div>
+
+<!-- SLIDE 10 - SOBREVIVÊNCIA -->
+<div class="slide" id="slide-10" data-slide="10">
+  <div class="slide-number">10</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(4px,.5vh,8px)">SOBREVIVÊNCIA</h1>
+  <p style="font-size:clamp(.45rem,.55vw,.55rem);color:#B87333;z-index:10;margin-bottom:clamp(6px,1vh,12px);text-transform:uppercase;letter-spacing:.05em;font-family:'Courier New',Courier,monospace;text-align:center">PROTOCOLO DE SOBREVIVÊNCIA EM AMBIENTES LIMINARES</p>
+  <div class="survival-grid">
+    <div class="surv-left">
+      <p style="font-size:clamp(.5rem,.6vw,.55rem);color:#F5D742;margin-bottom:6px;font-family:'Courier New',Courier,monospace;letter-spacing:.05em">&gt; PROTOCOLO_01</p>
+      <ul class="checklist" id="checklist">
+        <li><span class="chk"></span>NUNCA CORRA SEM MOTIVO</li>
+        <li><span class="chk"></span>ECONOMIZE RECURSOS</li>
+        <li><span class="chk"></span>MANTENHA A CALMA</li>
+        <li><span class="chk"></span>EVITE ENTIDADES</li>
+        <li><span class="chk"></span>MEMORIZE CAMINHOS</li>
+        <li><span class="chk"></span>PROCURE BASES</li>
+        <li><span class="chk"></span>FORME GRUPOS</li>
+        <li><span class="chk"></span>IDENTIFIQUE NÍVEIS</li>
+      </ul>
+    </div>
+    <div class="surv-right">
+      <p style="font-size:clamp(.5rem,.6vw,.55rem);color:#F5D742;margin-bottom:6px;font-family:'Courier New',Courier,monospace;letter-spacing:.05em">&gt; ESTRATÉGIA</p>
+      <div class="strat-grid">
+        <div class="strat-card"><span class="s-icon">◈</span><span class="s-label">SANIDADE</span></div>
+        <div class="strat-card"><span class="s-icon">☰</span><span class="s-label">COMIDA</span></div>
+        <div class="strat-card"><span class="s-icon">⌇</span><span class="s-label">ÁGUA</span></div>
+        <div class="strat-card"><span class="s-icon">☀</span><span class="s-label">LUZ</span></div>
+        <div class="strat-card"><span class="s-icon">☎</span><span class="s-label">COMUNICAÇÃO</span></div>
+        <div class="strat-card"><span class="s-icon">⎔</span><span class="s-label">ESTRATÉGIAS</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- SLIDE 11 - ORGANIZAÇÕES -->
+<div class="slide" id="slide-11" data-slide="11">
+  <div class="slide-number">11</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(4px,.5vh,8px)">ORGANIZAÇÕES DAS BACKROOMS</h1>
+  <p style="font-size:clamp(.5rem,.65vw,.6rem);color:#8A8A8A;z-index:10;margin-bottom:clamp(6px,1vh,12px);font-family:'Courier New',Courier,monospace;text-align:center">DIVERSOS GRUPOS OPERAM DENTRO DAS BACKROOMS</p>
+  <div class="org-grid" id="org-grid"></div>
+  <div class="org-detail" id="org-detail">
+    <h4 id="org-detail-title"></h4>
+    <p id="org-detail-text"></p>
+  </div>
+</div>
+
+<!-- SLIDE 12 - KANE PIXELS -->
+<div class="slide" id="slide-12" data-slide="12">
+  <div class="slide-number">12</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(4px,.5vh,8px)">KANE PIXELS</h1>
+  <p style="font-size:clamp(.5rem,.65vw,.6rem);color:#D4C5A9;z-index:10;margin-bottom:clamp(8px,1.5vh,16px);font-family:Georgia,'Times New Roman',serif;text-align:center;letter-spacing:.03em">A SÉRIE QUE REVOLUCIONOU AS BACKROOMS</p>
+  <div class="kp-split">
+    <div class="kp-text">
+      <ul>
+        <li>Kane Pixels (Kane Parsons)</li>
+        <li>Série found footage no YouTube</li>
+        <li>Estilo documental / arquivo perdido</li>
+        <li>Expansão massiva da popularidade</li>
+        <li>ASYNC Research - organização fictícia</li>
+        <li>Complexo subterrâneo experimental</li>
+        <li>Viagens dimensionais controladas</li>
+        <li>Monstro "Bacteria" - entidade única</li>
+      </ul>
+    </div>
+    <div class="kp-frame" id="kp-frame">
+      <div class="kp-inner">
+        <canvas id="kp-footage"></canvas>
+        <div class="kp-overlay"></div>
+        <div class="kp-timestamp">ASYNC // 1991 // REC</div>
+        <div class="kp-rec">● REC</div>
+        <div class="chromatic"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13 - PSICOLOGIA -->
+<div class="slide" id="slide-13" data-slide="13">
+  <div class="slide-number">13</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(4px,.5vh,8px)">PSICOLOGIA DO MEDO</h1>
+  <p style="font-size:clamp(.5rem,.65vw,.6rem);color:#D4C5A9;z-index:10;margin-bottom:clamp(6px,1vh,12px);font-family:Georgia,'Times New Roman',serif;text-align:center;letter-spacing:.03em">POR QUE AS BACKROOMS NOS AFETAM TANTO?</p>
+  <div class="psych-map">
+    <div class="psych-card"><span class="p-icon">◌</span><span class="p-label">SOLIDÃO</span></div>
+    <div class="psych-card"><span class="p-icon">♪</span><span class="p-label">SILÊNCIO</span></div>
+    <div class="psych-card"><span class="p-icon">⊞</span><span class="p-label">MONOTONIA</span></div>
+    <div class="psych-card"><span class="p-icon">∞</span><span class="p-label">ARQ. INFINITA</span></div>
+    <div class="psych-card"><span class="p-icon">♡</span><span class="p-label">ANSIEDADE</span></div>
+    <div class="psych-card"><span class="p-icon">⎔</span><span class="p-label">CLAUSTROFOBIA</span></div>
+    <div class="psych-card"><span class="p-icon">⊡</span><span class="p-label">AGORAFOBIA</span></div>
+    <div class="psych-card"><span class="p-icon">?</span><span class="p-label">DESCONHECIDO</span></div>
+    <div class="psych-card"><span class="p-icon">◈</span><span class="p-label">PERDA REALIDADE</span></div>
+    <div class="psych-card"><span class="p-icon">⌇</span><span class="p-label">INFINITO</span></div>
+    <div class="psych-card"><span class="p-icon">☀</span><span class="p-label">LUZ ARTIFICIAL</span></div>
+    <div class="psych-card"><span class="p-icon">♫</span><span class="p-label">SONS REPETITIVOS</span></div>
+    <div class="psych-card"><span class="p-icon">⏎</span><span class="p-label">NOSTALGIA</span></div>
+  </div>
+</div>
+
+<!-- SLIDE 14 - CURIOSIDADES -->
+<div class="slide" id="slide-14" data-slide="14">
+  <div class="slide-number">14</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(8px,1.5vh,16px)">CURIOSIDADES</h1>
+  <div class="bento-grid">
+    <div class="bento-card wide"><span class="bc-num">#001</span><span class="bc-text">EXISTEM MILHARES DE NÍVEIS CRIADOS PELA COMUNIDADE</span></div>
+    <div class="bento-card"><span class="bc-num">#002</span><span class="bc-text">NEM TODOS SÃO OFICIAIS</span></div>
+    <div class="bento-card"><span class="bc-num">#003</span><span class="bc-text">ALGUMAS ENTIDADES NUNCA ATACAM</span></div>
+    <div class="bento-card"><span class="bc-num">#004</span><span class="bc-text">ALGUNS NÍVEIS SÃO COMPLETAMENTE SEGUROS</span></div>
+    <div class="bento-card wide"><span class="bc-num">#005</span><span class="bc-text">EXISTEM NÍVEIS PARADISÍACOS E NÍVEIS IMPOSSÍVEIS DE ESCAPAR</span></div>
+    <div class="bento-card"><span class="bc-num">#006</span><span class="bc-text">ALGUMAS REGRAS SE CONTRADIZEM</span></div>
+    <div class="bento-card"><span class="bc-num">#007</span><span class="bc-text">EXISTEM NÍVEIS VIVOS E CONSCIENTES</span></div>
+    <div class="bento-card"><span class="bc-num">#008</span><span class="bc-text">ALGUNS MUDAM CONSTANTEMENTE</span></div>
+  </div>
+</div>
+
+<!-- SLIDE 15 - CULTURA POP -->
+<div class="slide" id="slide-15" data-slide="15">
+  <div class="slide-number">15</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(8px,1.5vh,16px)">AS BACKROOMS NA CULTURA POP</h1>
+  <div class="pop-grid">
+    <div class="pop-card"><span class="pc-icon">▶</span><span class="pc-name">YOUTUBE</span><span class="pc-views">10M+ VIEWS</span></div>
+    <div class="pop-card"><span class="pc-icon">♫</span><span class="pc-name">TIKTOK</span><span class="pc-views">5M+ VIEWS</span></div>
+    <div class="pop-card"><span class="pc-icon">◈</span><span class="pc-name">ROBLOX</span><span class="pc-views">1M+ JOGADORES</span></div>
+    <div class="pop-card"><span class="pc-icon">⎔</span><span class="pc-name">MINECRAFT</span><span class="pc-views">100K+ MAPAS</span></div>
+    <div class="pop-card"><span class="pc-icon">⊞</span><span class="pc-name">GARRY'S MOD</span><span class="pc-views">50K+ CENAS</span></div>
+    <div class="pop-card"><span class="pc-icon">⌂</span><span class="pc-name">UNREAL ENGINE</span><span class="pc-views">DEMOS</span></div>
+    <div class="pop-card"><span class="pc-icon">⊡</span><span class="pc-name">FILMES</span><span class="pc-views">CURTAS</span></div>
+    <div class="pop-card"><span class="pc-icon">◌</span><span class="pc-name">ARTE DIGITAL</span><span class="pc-views">FANARTS</span></div>
+    <div class="pop-card"><span class="pc-icon">⏎</span><span class="pc-name">COSPLAYS</span><span class="pc-views">MODS</span></div>
+  </div>
+</div>
+
+<!-- SLIDE 16 - JOGOS -->
+<div class="slide" id="slide-16" data-slide="16">
+  <div class="slide-number">16</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(8px,1.5vh,16px)">JOGOS INSPIRADOS</h1>
+  <div class="game-grid">
+    <div class="game-card"><div class="gc-cover">ESCAPE</div><span class="gc-name">ESCAPE THE BACKROOMS</span><span class="gc-meta">Steam // 2022</span></div>
+    <div class="game-card"><div class="gc-cover">INSIDE</div><span class="gc-name">INSIDE THE BACKROOMS</span><span class="gc-meta">Steam // 2022</span></div>
+    <div class="game-card"><div class="gc-cover">LOST TAPE</div><span class="gc-name">THE BACKROOMS: LOST TAPE</span><span class="gc-meta">Itch.io // 2023</span></div>
+    <div class="game-card"><div class="gc-cover">ENTER</div><span class="gc-name">ENTER THE BACKROOMS</span><span class="gc-meta">Steam // 2023</span></div>
+    <div class="game-card"><div class="gc-cover">∞</div><span class="gc-name">APEIROPHOBIA</span><span class="gc-meta">Steam // 2022</span></div>
+    <div class="game-card"><div class="gc-cover">NICO</div><span class="gc-name">NICO'S NEXTBOTS</span><span class="gc-meta">Roblox</span></div>
+  </div>
+</div>
+
+<!-- SLIDE 17 - TEORIAS -->
+<div class="slide" id="slide-17" data-slide="17">
+  <div class="slide-number">17</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(4px,.5vh,8px)">TEORIAS</h1>
+  <p style="font-size:clamp(.5rem,.65vw,.6rem);color:#D4C5A9;z-index:10;margin-bottom:clamp(6px,1vh,12px);font-family:Georgia,'Times New Roman',serif;text-align:center">A VERDADEIRA NATUREZA DAS BACKROOMS</p>
+  <div class="theory-grid" id="theory-grid">
+    <div class="theory-card" data-theory="Universo paralelo que existe ao lado do nosso. Em alguns momentos, a barreira entre as dimensões se rompe, permitindo a passagem."><span class="tc-seal">NÃO CONFIRMADO</span><span class="tc-icon">◈</span><span class="tc-name">UNIVERSO PARALELO</span></div>
+    <div class="theory-card" data-theory="Falha em uma simulação de realidade. As Backrooms seriam um 'espaço não renderizado' entre as áreas carregadas."><span class="tc-seal">NÃO CONFIRMADO</span><span class="tc-icon">⊡</span><span class="tc-name">SIMULAÇÃO</span></div>
+    <div class="theory-card" data-theory="Manifestação do inconsciente coletivo da humanidade. Todos os medos e ansiedades se materializam em corredores infinitos."><span class="tc-seal">NÃO CONFIRMADO</span><span class="tc-icon">◌</span><span class="tc-name">SONHO COLETIVO</span></div>
+    <div class="theory-card" data-theory="Erro na estrutura do universo. Como uma falha em um programa, as Backrooms seriam um 'bug' na realidade."><span class="tc-seal">NÃO CONFIRMADO</span><span class="tc-icon">⚠</span><span class="tc-name">FALHA DA REALIDADE</span></div>
+    <div class="theory-card" data-theory="Resultado de um experimento científico que deu errado. Como a ASYNC Research de Kane Pixels."><span class="tc-seal">NÃO CONFIRMADO</span><span class="tc-icon">⎔</span><span class="tc-name">EXPERIMENTO</span></div>
+    <div class="theory-card" data-theory="Um lugar que a humanidade abandonou há muito tempo. Ruínas de uma civilização que se perdeu."><span class="tc-seal">NÃO CONFIRMADO</span><span class="tc-icon">⌂</span><span class="tc-name">DIMENSÃO ESQUECIDA</span></div>
+    <div class="theory-card" data-theory="Espaço entre a vida e a morte. Um limbo onde almas perdidas vagam eternamente."><span class="tc-seal">NÃO CONFIRMADO</span><span class="tc-icon">∞</span><span class="tc-name">LIMBO</span></div>
+    <div class="theory-card" data-theory="Criado por uma inteligência artificial avançada que não compreendemos totalmente."><span class="tc-seal">NÃO CONFIRMADO</span><span class="tc-icon">⊞</span><span class="tc-name">IA AVANÇADA</span></div>
+    <div class="theory-card" data-theory="Além da compreensão humana. Dimensões que nossa mente não consegue processar corretamente."><span class="tc-seal">NÃO CONFIRMADO</span><span class="tc-icon">?</span><span class="tc-name">EXTRADIMENSIONAL</span></div>
+  </div>
+</div>
+
+<!-- SLIDE 18 - FATOS -->
+<div class="slide" id="slide-18" data-slide="18">
+  <div class="slide-number">18</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(8px,1.5vh,16px)">FATOS INTERESSANTES</h1>
+  <div class="facts-grid">
+    <div class="fact-card"><span class="fc-num">#001</span><span class="fc-icon">◌</span><span class="fc-text">TUDO COMEÇOU COM UMA ÚNICA FOTO</span></div>
+    <div class="fact-card"><span class="fc-num">#002</span><span class="fc-icon">☰</span><span class="fc-text">NÃO EXISTE UM ÚNICO CRIADOR</span></div>
+    <div class="fact-card"><span class="fc-num">#003</span><span class="fc-icon">♡</span><span class="fc-text">GRANDE PARTE FOI CRIADA POR FÃS</span></div>
+    <div class="fact-card"><span class="fc-num">#004</span><span class="fc-icon">☷</span><span class="fc-text">MILHARES DE PÁGINAS NA WIKI</span></div>
+    <div class="fact-card"><span class="fc-num">#005</span><span class="fc-icon">⊞</span><span class="fc-text">ALGUMAS HISTÓRIAS TÊM CONTINUIDADE</span></div>
+    <div class="fact-card"><span class="fc-num">#006</span><span class="fc-icon">⚠</span><span class="fc-text">OUTRAS SE CONTRADIZEM</span></div>
+    <div class="fact-card"><span class="fc-num">#007</span><span class="fc-icon">∞</span><span class="fc-text">O UNIVERSO CONTINUA CRESCENDO</span></div>
+    <div class="fact-card"><span class="fc-num">#008</span><span class="fc-icon">⌂</span><span class="fc-text">MAPAS COMPLETOS DOS NÍVEIS</span></div>
+    <div class="fact-card"><span class="fc-num">#009</span><span class="fc-icon">◈</span><span class="fc-text">CADA COMUNIDADE TEM SUA INTERPRETAÇÃO</span></div>
+  </div>
+</div>
+
+<!-- SLIDE 19 - IMPACTO -->
+<div class="slide" id="slide-19" data-slide="19">
+  <div class="slide-number">19</div>
+  <h1 class="slide-title anim-up" style="margin-bottom:clamp(8px,1.5vh,16px)">IMPACTO NA INTERNET</h1>
+  <div class="impact-grid">
+    <div class="metric-card"><span class="m-icon">▶</span><div class="m-number" data-target="100">0</div><span class="m-label">MILHÕES DE VIEWS NO YT</span></div>
+    <div class="metric-card"><span class="m-icon">☰</span><div class="m-number" data-target="1">0</div><span class="m-label">MILHÃO DE MEMBROS</span></div>
+    <div class="metric-card"><span class="m-icon">⊞</span><div class="m-number" data-target="50">0</div><span class="m-label">JOGOS LANÇADOS</span></div>
+    <div class="metric-card"><span class="m-icon">☷</span><div class="m-number" data-target="10">0</div><span class="m-label">MIL PÁGINAS NA WIKI</span></div>
+    <div class="metric-card"><span class="m-icon">◈</span><div class="m-number" data-target="2020">0</div><span class="m-label">ANO DE EXPLOSÃO</span></div>
+    <div class="metric-card"><span class="m-icon">∞</span><div class="m-number">∞</div><span class="m-label">NÍVEIS CRIADOS</span></div>
+  </div>
+  <p style="font-size:clamp(.5rem,.65vw,.6rem);color:#8A8A8A;z-index:10;margin-top:clamp(12px,2vh,20px);text-align:center;font-family:'Courier New',Courier,monospace;letter-spacing:.03em">O FENÔMENO CONTINUA CRESCENDO</p>
+</div>
+
+<!-- SLIDE 20 - CONCLUSÃO -->
+<div class="slide" id="slide-20" data-slide="20">
+  <div class="slide-number">20 / FIM</div>
+  <ul class="end-topics" id="end-topics">
+    <li>O QUE SÃO AS BACKROOMS</li>
+    <li>ORIGEM E EVOLUÇÃO</li>
+    <li>ESPAÇOS LIMINARES</li>
+    <li>NÍVEIS E ENTIDADES</li>
+    <li>SOBREVIVÊNCIA</li>
+    <li>KANE PIXELS</li>
+    <li>IMPACTO CULTURAL</li>
+    <li>COMUNIDADE</li>
+  </ul>
+  <div class="divider" style="z-index:10;width:0;transition:width .7s ease;max-width:400px"></div>
+  <div class="end-reflection">
+    <p id="reflection-text">"TALVEZ O VERDADEIRO MEDO DAS BACKROOMS NÃO SEJAM OS MONSTROS, MAS A POSSIBILIDADE DE ESTAR COMPLETAMENTE SOZINHO EM UM LUGAR INFINITO, SEM SABER SE EXISTE UMA SAÍDA."</p>
+  </div>
+  <div class="end-credit">APRESENTAÇÃO POR [NOME] // BACKROOMS DATABASE</div>
+</div>
+
+</div><!-- /slides-container -->
+<script>
+(function(){
+'use strict';
+var TOTAL_SLIDES = 20;
+var currentSlide = 0;
+var isTransitioning = false;
+var slides = document.querySelectorAll('.slide');
+var navLeft = document.getElementById('nav-left');
+var navRight = document.getElementById('nav-right');
+var progressBar = document.getElementById('progress-bar');
+var progressLabel = document.getElementById('progress-label');
+var miniIndexBtn = document.getElementById('mini-index-btn');
+var miniIndexOverlay = document.getElementById('mini-index-overlay');
+var fullscreenBtn = document.getElementById('fullscreen-btn');
+var transOverlay = document.getElementById('transition-overlay');
+var cursorEl = document.getElementById('custom-cursor');
+var modalOverlay = document.getElementById('modal-overlay');
+var modalBody = document.getElementById('modal-body');
+var modalClose = document.getElementById('modal-close');
+// Extruded title setup
+var extrudedTitle = document.getElementById('extruded-title');
+if(extrudedTitle){
+  var shadows = [];
+  for(var i = 1; i <= 35; i++){
+    shadows.push(i + 'px ' + i + 'px 0 rgba(245,215,66,' + (0.12 - i * 0.003) + ')');
+  }
+  extrudedTitle.style.textShadow = shadows.join(', ');
+}
+// Navigation
+function goToSlide(idx){
+  if(isTransitioning) return;
+  if(idx < 0 || idx >= TOTAL_SLIDES) return;
+  if(idx === currentSlide) return;
+  isTransitioning = true;
+  var from = currentSlide;
+  currentSlide = idx;
+  transOverlay.classList.add('active');
+  var fromSlide = slides[from];
+   var toSlide = slides[idx];
+  if(fromSlide){
+    fromSlide.classList.remove('active');
+    fromSlide.style.opacity = '0';
+  }
+  setTimeout(function(){
+    if(fromSlide) fromSlide.style.display = 'none';
+    if(toSlide){
+      toSlide.style.display = 'flex';
+      toSlide.style.opacity = '0';
+      toSlide.classList.add('active');
+    }
+    setTimeout(function(){
+      transOverlay.classList.remove('active');
+      if(toSlide) toSlide.style.opacity = '1';
+      setTimeout(function(){
+        isTransitioning = false;
+        updateNav();
+        updateProgress();
+        animateEntries(currentSlide);
+        if(currentSlide === 5) startLevel0Audio();
+        if(currentSlide === 19) animateEnding();
+        if(currentSlide === 18) animateCounters();
+      }, 150);
+    }, 80);
+  }, 300);
+}
+function updateNav(){
+  navLeft.classList.toggle('hidden', currentSlide === 0);
+  navRight.classList.toggle('hidden', currentSlide === TOTAL_SLIDES - 1);
+}
+function updateProgress(){
+  var pct = ((currentSlide + 1) / TOTAL_SLIDES) * 100;
+  progressBar.style.width = pct + '%';
+  progressLabel.textContent = 'SLIDE ' + String(currentSlide + 1).padStart(2,'0') + '/' + TOTAL_SLIDES;
+}
+function animateEntries(idx){
+  var slide = slides[idx];
+  if(!slide) return;
+  var anims = slide.querySelectorAll('.anim-fade, .anim-up, .anim-scale, .anim-blur');
+  anims.forEach(function(el, i){
+    setTimeout(function(){ el.classList.add('in'); }, 100 + i * 80);
+  });
+}
+// Slide 20 ending animation
+function animateEnding(){
+  var items = document.querySelectorAll('#end-topics li');
+  items.forEach(function(li, i){
+    setTimeout(function(){ li.classList.add('in'); }, 400 + i * 100);
+  });
+  setTimeout(function(){
+    var ref = document.getElementById('reflection-text');
+    if(ref) ref.classList.add('in');
+    var div = document.querySelector('#slide-20 .divider');
+    if(div) div.style.width = '40%';
+  }, 1400);
+}
+// Slide 19 counters
+function animateCounters(){
+  document.querySelectorAll('#slide-19 .m-number[data-target]').forEach(function(el){
+    var target = parseInt(el.getAttribute('data-target'), 10);
+    if(isNaN(target)) return;
+    var current = 0;
+    var step = Math.max(1, Math.floor(target / 60));
+    var timer = setInterval(function(){
+      current += step;
+      if(current >= target){
+        current = target;
+        clearInterval(timer);
+      }
+      el.textContent = current + (target >= 100 ? '+' : '+');
+    }, 30);
+  });
+}
+// Keyboard
+var keyBuffer = '';
+var keyBufferTimeout = null;
+document.addEventListener('keydown', function(e){
+  var k = e.key;
+  if(k === 'ArrowRight' || k === 'ArrowDown'){ e.preventDefault(); goToSlide(currentSlide + 1); }
+  else if(k === 'ArrowLeft' || k === 'ArrowUp'){ e.preventDefault(); goToSlide(currentSlide - 1); }
+  else if(k === 'Home'){ e.preventDefault(); goToSlide(0); }
+  else if(k === 'End'){ e.preventDefault(); goToSlide(TOTAL_SLIDES - 1); }
+  else if(k === 'Escape'){
+    if(miniIndexOverlay.classList.contains('active')) miniIndexOverlay.classList.remove('active');
+    if(document.fullscreenElement) document.exitFullscreen();
+    modalOverlay.classList.remove('active');
+  }
+  else if(k >= '0' && k <= '9'){
+    e.preventDefault();
+    keyBuffer += k;
+    if(keyBufferTimeout) clearTimeout(keyBufferTimeout);
+    keyBufferTimeout = setTimeout(function(){
+      var num = parseInt(keyBuffer,10);
+      if(num >= 1 && num <= TOTAL_SLIDES) goToSlide(num - 1);
+      keyBuffer = '';
+    }, 400);
+  }
+});
+// Touch
+var touchX = 0;
+document.addEventListener('touchstart', function(e){ touchX = e.changedTouches[0].screenX; }, {passive:true});
+document.addEventListener('touchend', function(e){
+  var dx = e.changedTouches[0].screenX - touchX;
+  if(Math.abs(dx) > 50){ if(dx < 0) goToSlide(currentSlide + 1); else goToSlide(currentSlide - 1); }
+}, {passive:true});
+// Scroll disabled
+document.addEventListener('wheel', function(e){ e.preventDefault(); }, {passive:false});
+// Nav arrows
+navLeft.addEventListener('click', function(){ goToSlide(currentSlide - 1); });
+navRight.addEventListener('click', function(){ goToSlide(currentSlide + 1); });
+// Mini index
+function buildMiniIndex(){
+  miniIndexOverlay.innerHTML = '';
+  for(var i = 0; i < TOTAL_SLIDES; i++){
+    var t = document.createElement('div');
+    t.className = 'mini-thumb' + (i === currentSlide ? ' active' : '');
+    t.textContent = String(i + 1).padStart(2,'0');
+    t.addEventListener('click', (function(idx){ return function(){ miniIndexOverlay.classList.remove('active'); goToSlide(idx); }; })(i));
+    miniIndexOverlay.appendChild(t);
+  }
+}
+miniIndexBtn.addEventListener('click', function(){ buildMiniIndex(); miniIndexOverlay.classList.toggle('active'); });
+miniIndexOverlay.addEventListener('click', function(e){ if(e.target === miniIndexOverlay) miniIndexOverlay.classList.remove('active'); });
+// Fullscreen
+fullscreenBtn.addEventListener('click', function(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(function(){});
+  else document.exitFullscreen();
+});
+// Custom cursor
+document.addEventListener('mousemove', function(e){ cursorEl.style.left = e.clientX + 'px'; cursorEl.style.top = e.clientY + 'px'; });
+document.addEventListener('mouseover', function(e){
+  var t = e.target.closest('button, .btn, .concept-card, .origin-card, .liminal-card, .hex-item, .inv-card, .strat-card, .org-card, .pop-card, .game-card, .theory-card, .fact-card, .psych-card, .bento-card, .entity-flip, .accordion-header, .checklist li, .mini-thumb, .l0-col li');
+  cursorEl.classList.toggle('hover', !!t);
+});
+// Modal
+function showModal(title, content){ modalBody.innerHTML = '<h3>' + title + '</h3><p>' + content + '</p>'; modalOverlay.classList.add('active'); }
+modalClose.addEventListener('click', function(){ modalOverlay.classList.remove('active'); });
+modalOverlay.addEventListener('click', function(e){ if(e.target === modalOverlay) modalOverlay.classList.remove('active'); });
+// Slide 2 concept cards
+document.querySelectorAll('#slide-2 .concept-card').forEach(function(c){
+  c.addEventListener('click', function(){
+    var t = c.getAttribute('data-tooltip');
+    if(t) showModal(c.querySelector('.label').textContent, t);
+  });
+});
+// Slide 6 details
+document.querySelectorAll('#slide-6 .l0-col li').forEach(function(li){
+  li.addEventListener('click', function(){
+    var d = li.getAttribute('data-detail');
+    if(d) showModal(li.textContent.trim(), d);
+  });
+});
+// Slide 6 ambient audio
+var audioCtx = null, oscNodes = [], gainNode = null, isAudioPlaying = false;
+function startLevel0Audio(){
+  var btn = document.getElementById('ambient-btn');
+  if(!btn || btn._listener) return;
+  btn._listener = true;
+  btn.addEventListener('click', function(){
+    if(!audioCtx) try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ return; }
+    if(isAudioPlaying && gainNode){ gainNode.gain.value = 0; isAudioPlaying = false; btn.textContent = '\u266B ATIVAR ÁUDIO AMBIENTE'; return; }
+    if(gainNode && !isAudioPlaying){ gainNode.gain.value = 0.06; isAudioPlaying = true; btn.textContent = '\u266B PARAR ÁUDIO'; return; }
+    try{
+      gainNode = audioCtx.createGain();
+      gainNode.gain.value = 0.06;
+      gainNode.connect(audioCtx.destination);
+      [60,120,180].forEach(function(f){
+        var o = audioCtx.createOscillator();
+        o.type = 'sine'; o.frequency.value = f; o.connect(gainNode); o.start(); oscNodes.push(o);
+      });
+      isAudioPlaying = true; btn.textContent = '\u266B PARAR ÁUDIO';
+    }catch(e){}
+  });
+}
+// Slide 7 accordion
+var accordionData = [
+  {n:'Level 1 \u2014 O Infra-Mundo', d:'easy', t:'Ambiente urbano subterrâneo. Ruas escuras com névoa constante. Perigo moderado.'},
+  {n:'Level 2 \u2014 A Zona de Tubulações', d:'medium', t:'Túneis de serviço com vapor e calor intenso. Propenso a incêndios.'},
+  {n:'Level 3 \u2014 A Estação Elétrica', d:'hard', t:'Estação de energia abandonada. Choques elétricos e escuridão predominam.'},
+  {n:'Level 4 \u2014 O Escritório Abandonado', d:'safe', t:'Escritório vazio com recursos limitados. Relativamente seguro.'},
+  {n:'Level 5 \u2014 O Hotel Infinito', d:'medium', t:'Hotel interminável com arquitetura vitoriana decadente. Entidades hostis.'},
+  {n:'Level 6 \u2014 A Escuridão', d:'deadly', t:'Escuridão absoluta. Entidades desconhecidas. Perigo extremo.'},
+  {n:'Level 7 \u2014 O Oceano', d:'deadly', t:'Oceano infinito com ilhas esparsas. Perigo de afogamento.'},
+  {n:'Level 8 \u2014 A Caverna', d:'hard', t:'Caverna extensa com criaturas adaptadas à escuridão.'},
+  {n:'Level 11 \u2014 A Cidade Infinita', d:'medium', t:'Cidade urbana infinita. Ruas e prédios se estendem para sempre.'},
+  {n:'Level 37 \u2014 Poolrooms', d:'easy', t:'Salas de piscina infinitas. Água limpa mas labiríntica.'},
+  {n:'Level Fun', d:'medium', t:'Nível temático de festa. Partygoers são hostis e enganosos.'},
+  {n:'Level Run For Your Life', d:'deadly', t:'Corra ou morra. Entidades perseguem constantemente.'},
+  {n:'Level ! (Corrida)', d:'deadly', t:'Corredor infinito com portas. Corra sem parar.'},
+  {n:'Level 188 \u2014 A Biblioteca', d:'safe', t:'Biblioteca infinita. Conhecimento disponível mas perde-se facilmente.'},
+  {n:'Level 3999 \u2014 O Paraíso', d:'safe', t:'Paraíso aparente. Acolhedor mas misterioso.'}
+];
+var accContainer = document.getElementById('accordion-container');
+if(accContainer){
+  accordionData.forEach(function(a, i){
+    var item = document.createElement('div'); item.className = 'accordion-item';
+    var hdr = document.createElement('div'); hdr.className = 'accordion-header';
+    hdr.innerHTML = '<span class="ah-number">' + String(i+1).padStart(2,'0') + '</span><span class="ah-name">' + a.n + '</span><span class="ah-diff ' + a.d + '">' + a.d + '</span><span class="ah-arrow">\u25BC</span>';
+    var body = document.createElement('div'); body.className = 'accordion-body';
+    body.innerHTML = '<div class="ab-content">' + a.t + '</div>';
+    hdr.addEventListener('click', function(){
+      var isOpen = body.classList.contains('open');
+      var openCount = accContainer.querySelectorAll('.accordion-body.open').length;
+      if(!isOpen && openCount >= 3) return;
+      body.classList.toggle('open');
+      hdr.classList.toggle('open');
+    });
+    item.appendChild(hdr); item.appendChild(body); accContainer.appendChild(item);
+  });
+}
+// Slide 8 entity flip cards
+var entityData = [
+  {n:'Smilers', i:'\u263A', d:'Criaturas sorridentes que habitam locais escuros. O sorriso é a última coisa que você vê.', r:'PERIGO: ALTO'},
+  {n:'Hounds', i:'\u29FE', d:'Criaturas bestiais que caçam em matilhas. Extremamente agressivas.', r:'PERIGO: MUITO ALTO'},
+  {n:'Skin-Stealers', i:'\u2B55', d:'Entidades que roubam a pele de suas vítimas para se disfarçar de humano.', r:'PERIGO: CRÍTICO'},
+  {n:'Facelings', i:'\u25CB', d:'Humanoides sem rosto. Vagam pelos níveis em busca de companhia.', r:'PERIGO: BAIXO'},
+  {n:'Deathmoths', i:'\u2726', d:'Mariposas gigantes atraídas pela luz. Fatais se provocadas.', r:'PERIGO: ALTO'},
+  {n:'Partygoers', i:'\u263A', d:'Entidades festivas que tentam atrair vítimas com falsa alegria.', r:'PERIGO: MÉDIO'},
+  {n:'Partypoopers', i:'\u2639', d:'Caçadores de Partygoers. Violentos mas úteis para humanos.', r:'PERIGO: MÉDIO'},
+  {n:'Dullers', i:'\u2B1C', d:'Humanoides lentos e apáticos. Geralmente inofensivos.', r:'PERIGO: BAIXO'},
+  {n:'Clumps', i:'\u2B1B', d:'Aglomerados de carne e matéria orgânica. Múltiplas consciências.', r:'PERIGO: ALTO'}
+];
+var entityGrid = document.getElementById('entity-grid');
+if(entityGrid){
+  entityData.forEach(function(e){
+    var flip = document.createElement('div'); flip.className = 'entity-flip';
+    var inner = document.createElement('div'); inner.className = 'entity-flip-inner';
+    inner.innerHTML = '<div class="entity-front"><span class="ef-icon">' + e.i + '</span><span class="ef-name">' + e.n + '</span></div><div class="entity-back"><div class="eb-title">' + e.n + '</div><div class="eb-desc">' + e.d + '</div><div class="eb-danger">' + e.r + '</div></div>';
+    flip.appendChild(inner);
+    flip.addEventListener('click', function(){ flip.classList.toggle('flipped'); });
+    entityGrid.appendChild(flip);
+  });
+}
+// Slide 9 inventory
+var invData = [
+  {n:'Almond Water', i:'\u2B1A', r:'\u2605\u2605\u2605'},
+  {n:'Lucky O\' Milk', i:'\u2B1C', r:'\u2605\u2605\u2605\u2605'},
+  {n:'Fire Salt', i:'\u25B3', r:'\u2605\u2605\u2605'},
+  {n:'Royal Rations', i:'\u2B24', r:'\u2605\u2605\u2605\u2605'},
+  {n:'Super Almond Water', i:'\u2B1A', r:'\u2605\u2605\u2605\u2605\u2605'},
+  {n:'Batteries', i:'\u2550', r:'\u2605\u2605'},
+  {n:'Lanternas', i:'\u2606', r:'\u2605\u2605\u2605'},
+  {n:'Armas Improvisadas', i:'\u2726', r:'\u2605\u2605'},
+  {n:'Mochilas', i:'\u25A0', r:'\u2605\u2605'},
+  {n:'Equipamentos', i:'\u2692', r:'\u2605\u2605\u2605'},
+  {n:'Itens Raros', i:'\u2605', r:'\u2605\u2605\u2605\u2605\u2605'},
+  {n:'Itens Perigosos', i:'\u2620', r:'\u2605\u2605\u2605\u2605'}
+];
+var invGrid = document.getElementById('inv-grid');
+if(invGrid){
+  invData.forEach(function(o, i){
+    var c = document.createElement('div'); c.className = 'inv-card';
+    c.innerHTML = '<span class="inv-num">#' + String(i+1).padStart(3,'0') + '</span><span class="inv-icon">' + o.i + '</span><div class="inv-name">' + o.n + '</div><div class="inv-rarity">' + o.r + '</div>';
+    c.addEventListener('click', function(){ showModal(o.n, 'Item de inventário #' + String(i+1).padStart(3,'0') + '. Raridade: ' + o.r.replace(/\*/g,'★') + '. Essencial para sobrevivência nas Backrooms.'); });
+    invGrid.appendChild(c);
+  });
+}
+// Slide 10 checklist
+document.querySelectorAll('#checklist li').forEach(function(li){
+  li.addEventListener('click', function(){ li.classList.toggle('done'); });
+});
+// Slide 11 orgs
+var orgData = [
+  {n:'M.E.G.', i:'\u26E8', d:'Major Explorer Group - principal organização de exploração e mapeamento dos níveis.'},
+  {n:'B.N.T.G.', i:'\u2696', d:'Backroom Natural Trade Group - comércio e troca de recursos entre sobreviventes.'},
+  {n:'The Lost', i:'\u263D', d:'Grupo de sobreviventes que aceitaram a vida nas Backrooms.'},
+  {n:'Followers of Jerry', i:'\u263F', d:'Seguem os ensinamentos de Jerry, uma entidade pacífica.'},
+  {n:'Eternal Repository', i:'\u25A1', d:'Arquivo central do conhecimento das Backrooms.'},
+  {n:'Grupos Hostis', i:'\u2620', d:'Facções que atacam outros sobreviventes por recursos.'},
+  {n:'Comércio e Bases', i:'\u2302', d:'Redes de postos comerciais entre os níveis.'},
+  {n:'Pesquisa', i:'\u2697', d:'Grupos dedicados à pesquisa científica das Backrooms.'}
+];
+var orgGrid = document.getElementById('org-grid');
+var orgDetail = document.getElementById('org-detail');
+var orgDetailTitle = document.getElementById('org-detail-title');
+var orgDetailText = document.getElementById('org-detail-text');
+if(orgGrid){
+  orgData.forEach(function(o, i){
+    var c = document.createElement('div'); c.className = 'org-card';
+    c.innerHTML = '<div class="o-icon">' + o.i + '</div><div class="o-name">' + o.n + '</div>';
+    c.addEventListener('click', function(){
+      orgGrid.querySelectorAll('.org-card').forEach(function(c2){ c2.classList.remove('selected'); });
+      c.classList.add('selected');
+      orgDetailTitle.textContent = o.n;
+      orgDetailText.textContent = o.d;
+      orgDetail.classList.add('show');
+    });
+    orgGrid.appendChild(c);
+  });
+}
+// Slide 17 theories
+document.querySelectorAll('#slide-17 .theory-card').forEach(function(card){
+  card.addEventListener('click', function(){
+    var theory = card.getAttribute('data-theory');
+    if(theory) showModal(card.querySelector('.tc-name').textContent, theory);
+  });
+});
+// Slide 18 facts
+document.querySelectorAll('#slide-18 .fact-card').forEach(function(card){
+  card.addEventListener('click', function(){
+    showModal('FATO ' + (card.querySelector('.fc-num') ? card.querySelector('.fc-num').textContent : ''), card.querySelector('.fc-text').textContent);
+  });
+});
+// Noise canvas
+var noiseCanvas = document.getElementById('noise-canvas');
+if(noiseCanvas){
+  var nctx = noiseCanvas.getContext('2d');
+  function resizeNoise(){
+    noiseCanvas.width = window.innerWidth;
+    noiseCanvas.height = window.innerHeight;
+  }
+  resizeNoise();
+  window.addEventListener('resize', resizeNoise);
+  function drawNoise(){
+    var w = noiseCanvas.width, h = noiseCanvas.height;
+    var idata = nctx.createImageData(w, h);
+    var d = idata.data;
+    for(var i = 0; i < d.length; i += 4){
+      var v = Math.random() * 255;
+      d[i] = v; d[i+1] = v; d[i+2] = v; d[i+3] = 20;
+    }
+    nctx.putImageData(idata, 0, 0);
+  }
+  setInterval(drawNoise, 50);
+}
+// Particles canvas
+var particlesCanvas = document.getElementById('particles-canvas');
+if(particlesCanvas){
+  var pctx = particlesCanvas.getContext('2d');
+  var particles = [];
+  var PCOUNT = 80;
+  function initParticles(){
+    particlesCanvas.width = window.innerWidth;
+    particlesCanvas.height = window.innerHeight;
+    particles = [];
+    for(var i = 0; i < PCOUNT; i++){
+      particles.push({
+        x: Math.random() * particlesCanvas.width,
+        y: Math.random() * particlesCanvas.height,
+        vx: (Math.random() - 0.5) * 0.2,
+        vy: (Math.random() - 0.5) * 0.2 - 0.1,
+        r: 1 + Math.random() * 3,
+        o: 0.05 + Math.random() * 0.15
+      });
+    }
+  }
+  initParticles();
+  window.addEventListener('resize', initParticles);
+  function drawParticles(){
+    pctx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height);
+    particles.forEach(function(p){
+      p.x += p.vx;
+      p.y += p.vy;
+      if(p.x < 0) p.x = particlesCanvas.width;
+      if(p.x > particlesCanvas.width) p.x = 0;
+      if(p.y < 0) p.y = particlesCanvas.height;
+      if(p.y > particlesCanvas.height) p.y = 0;
+      // Brownian
+      p.vx += (Math.random() - 0.5) * 0.02;
+      p.vy += (Math.random() - 0.5) * 0.02;
+      p.vx = Math.max(-0.3, Math.min(0.3, p.vx));
+      p.vy = Math.max(-0.3, Math.min(0.3, p.vy));
+      pctx.beginPath();
+      pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      pctx.fillStyle = 'rgba(212,197,169,' + p.o + ')';
+      pctx.fill();
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+}
+// Kane Pixels footage canvas
+var kpCanvas = document.getElementById('kp-footage');
+if(kpCanvas){
+  var kctx = kpCanvas.getContext('2d');
+  var kpFrame = document.querySelector('.kp-frame');
+  function resizeKp(){
+    if(!kpFrame) return;
+    var rect = kpFrame.querySelector('.kp-inner');
+    if(rect){
+      kpCanvas.width = rect.clientWidth;
+      kpCanvas.height = rect.clientHeight;
+    }
+  }
+  resizeKp();
+  window.addEventListener('resize', resizeKp);
+  var kpTime = 0;
+  function drawKpFootage(){
+    var w = kpCanvas.width, h = kpCanvas.height;
+    if(w === 0 || h === 0){ requestAnimationFrame(drawKpFootage); return; }
+    kctx.fillStyle = '#0a0a0a';
+    kctx.fillRect(0, 0, w, h);
+    kpTime += 0.02;
+    // Dark shapes moving
+    for(var i = 0; i < 5; i++){
+      var x = (Math.sin(kpTime + i * 1.5) * 0.5 + 0.5) * w;
+      var y = (Math.cos(kpTime * 0.7 + i * 2) * 0.5 + 0.5) * h;
+      kctx.fillStyle = 'rgba(20,30,20,' + (0.1 + i * 0.03) + ')';
+      kctx.fillRect(x, y, 40 + i * 10, 60 + i * 15);
+    }
+    // Scanlines
+    for(var j = 0; j < h; j += 4){
+      kctx.fillStyle = 'rgba(0,0,0,' + (0.02 + Math.random() * 0.03) + ')';
+      kctx.fillRect(0, j, w, 1);
+    }
+    // Static
+    if(Math.random() < 0.05){
+      kctx.fillStyle = 'rgba(255,255,255,' + Math.random() * 0.1 + ')';
+      kctx.fillRect(0, 0, w, h);
+    }
+    // Green tint lines (night vision)
+    kctx.strokeStyle = 'rgba(45,180,100,0.03)';
+    kctx.lineWidth = 1;
+    for(var l = 0; l < 10; l++){
+      var ly = (Math.sin(kpTime * 2 + l) * 0.5 + 0.5) * h;
+      kctx.beginPath();
+      kctx.moveTo(0, ly);
+      kctx.lineTo(w, ly + Math.sin(kpTime + l) * 10);
+      kctx.stroke();
+    }
+    requestAnimationFrame(drawKpFootage);
+  }
+  drawKpFootage();
+}
+// Transition noise canvas
+var transNoiseCanvas = document.getElementById('transition-noise');
+if(transNoiseCanvas){
+  var tnctx = transNoiseCanvas.getContext('2d');
+  function resizeTransNoise(){
+    transNoiseCanvas.width = window.innerWidth;
+    transNoiseCanvas.height = window.innerHeight;
+  }
+  resizeTransNoise();
+  window.addEventListener('resize', resizeTransNoise);
+  function drawTransNoise(){
+    var w = transNoiseCanvas.width, h = transNoiseCanvas.height;
+    var idata = tnctx.createImageData(w, h);
+    var d = idata.data;
+    for(var i = 0; i < d.length; i += 4){
+      var v = Math.random() * 255;
+      d[i] = v; d[i+1] = v; d[i+2] = v; d[i+3] = 60;
+    }
+    tnctx.putImageData(idata, 0, 0);
+  }
+  setInterval(function(){
+    if(transOverlay.classList.contains('active')) drawTransNoise();
+  }, 50);
+}
+// Initial setup
+updateNav();
+updateProgress();
+animateEntries(0);
+startLevel0Audio();
+// End initial entries for slide 20
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(animateEnding, 100);
+});
+})();
+</script>
+</body>
+</html>

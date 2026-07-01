@@ -1,0 +1,1642 @@
+================================================================================
+ESPECIFICAÇÃO VISUAL COMPLETA
+APRESENTAÇÃO: BACKROOMS — O UNIVERSO INFINITO DOS ESPAÇOS LIMINARES
+================================================================================
+
+ATENÇÃO PARA A IA QUE IRÁ IMPLEMENTAR ESTE DOCUMENTO:
+
+- NÃO acesse nenhum outro arquivo ou documento dentro da pasta de trabalho.
+- Crie APENAS UM ÚNICO ARQUIVO HTML contendo toda a apresentação (HTML + CSS + JavaScript inline).
+- NÃO consulte arquivos externos, bibliotecas CDN ou assets. Tudo deve estar contido no HTML.
+- O documento DEVE ser codificado em UTF-8, com <meta charset="UTF-8"> no <head>.
+- Todos os caracteres acentuados e especiais DEVEM permanecer intactos. Faça uma auditoria completa de codificação antes de finalizar.
+- NÃO inclua tela de loading.
+- A apresentação DEVE ocupar 100% da viewport, sem scroll em nenhum slide.
+- O scroll do mouse NÃO troca de slides. Apenas as setas do teclado (← →) ou swipe em touch/swipe.
+- Clique com o botão do mouse NÃO troca slides.
+- Tudo deve estar perfeitamente responsivo para 1920x1080 até 1024x768 e mobile.
+- A implementação deve ser feita de uma só vez, sem necessidade de iterações.
+- Siga CADA DETALHE desta especificação sem tomar decisões criativas não previstas.
+
+================================================================================
+1. IDENTIDADE VISUAL — DESCRIÇÃO GERAL
+================================================================================
+
+Estilo: Liminal Horror / Tecnológico-decadente / Sci-Fi abandonado / Atmosfera de arquivo perdido.
+
+A apresentação deve simular um "arquivo digital encontrado" — como se fosse um terminal de dados corrompido de uma organização secreta (como a ASYNC Research), tentando documentar os níveis das Backrooms. A identidade visual mescla elementos de interface de sistemas antigos (CRT, scanlines, dados, coordenadas) com a atmosfera úmida, amarelada e opressiva dos espaços liminares.
+
+A sensação geral é de desconforto, solidão e vastidão infinita. Como estar perdido em um corredor sem fim, sob uma luz fluorescente que nunca se apaga.
+
+Material principal: Concreto envelhecido, carpete desgastado, metal oxidado, névoa, vidro sujo e papel amarelado.
+
+================================================================================
+2. PALETA DE CORES
+================================================================================
+
+CORES PRINCIPAIS (Tema da apresentação: Backrooms):
+- Preto absoluto: #060606 (fundos profundos)
+- Amarelo fluorescente: #F5D742 (luz de lâmpada fluorescente, elementos de destaque)
+- Bege envelhecido: #D4C5A9 (paredes, carpetes, papéis desgastados)
+- Laranja queimado: #B87333 (enferrujado, detalhes de perigo)
+- Cinza úmido: #8A8A8A (concreto, névoa)
+
+CORES SECUNDÁRIAS:
+- Marrom escuro: #3D2B1F (sujeira, cantos escuros)
+- Azul petróleo profundo: #1A2F3D (sombras frias, profundidade)
+- Verde musgo escuro: #2D3A2A (mofo, deterioração)
+
+CORES DE DESTAQUE:
+- Laranja néon: #FF6A00 (alertas, perigo, entidades)
+- Vermelho sangue: #8B0000 (emergência, morte, atenção máxima)
+- Ciano fantasma: #2DD4BF (hologramas, dados, elementos tecnológicos)
+
+CORES DE FUNDO:
+- Principal: #0A0A0A
+- Secundário: #1A1A1A
+- Cards e painéis: rgba(20, 20, 20, 0.85)
+- Vidro: rgba(255, 255, 255, 0.04)
+
+CORES DE TEXTO:
+- Texto principal: #E8E0D4 (off-white envelhecido, como papel velho)
+- Títulos: #F5D742 (amarelo fluorescente)
+- Subtítulos: #D4C5A9 (bege)
+- Links: #2DD4BF (ciano)
+- Texto secundário: #A09888 (cinza amarelado)
+- Texto de perigo: #FF6A00
+
+CORES DE BOTÃO:
+- Padrão: rgba(245, 215, 66, 0.15) com borda #F5D742
+- Hover: rgba(245, 215, 66, 0.3)
+- Perigo: rgba(255, 106, 0, 0.15) com borda #FF6A00
+- Hover perigo: rgba(255, 106, 0, 0.3)
+
+CORES DE NAVEGAÇÃO:
+- Setas: #F5D742 com opacidade 0.5, hover 1.0
+- Barra de progresso: gradiente de #F5D742 para #B87333
+- Indicador de slide ativo: #F5D742
+
+================================================================================
+3. TIPOGRAFIA
+================================================================================
+
+FONTE DOS TÍTULOS:
+- Família: 'Courier New', Courier, monospace (sensação de terminal antigo, documentos de arquivo, relatórios)
+- Peso: Bold
+- Tamanho: variável (3rem a 5rem dependendo da hierarquia e do slide)
+- Altura da linha: 1.2
+- Letter-spacing: 0.02em
+- Text-transform: uppercase (sempre que possível)
+- Cor: #F5D742
+
+FONTE DOS SUBTÍTULOS:
+- Família: 'Georgia', 'Times New Roman', serif (documentos, arquivos, sensação de papel)
+- Peso: Normal
+- Tamanho: 1.3rem a 1.8rem
+- Altura da linha: 1.4
+- Letter-spacing: 0.03em
+- Cor: #D4C5A9
+
+FONTE DO CONTEÚDO:
+- Família: 'Courier New', Courier, monospace
+- Peso: Normal
+- Tamanho: 0.95rem a 1.1rem (ajustar conforme necessidade para caber no viewport)
+- Altura da linha: 1.6
+- Letter-spacing: 0.01em
+- Cor: #E8E0D4
+
+FONTE DE DADOS/TÉCNICA:
+- Família: 'Courier New', Courier, monospace
+- Tamanho: 0.75rem a 0.85rem
+- Cor: #8A8A8A
+- Usada para: números de slide, coordenadas, labels técnicos, timestamps, metadados
+
+HIERARQUIA VISUAL (Ordem de importância):
+1. Título principal (maior, negrito, amarelo fluorescente, com glow)
+2. Número do slide / capítulo (courier, laranja queimado, estilo terminal)
+3. Subtítulo (serif, bege, itálico quando for citação)
+4. Corpo do texto (courier, off-white, tamanho legível)
+5. Metadados / dados técnicos (courier pequeno, cinza)
+6. Labels de interação (courier pequeno, ciano)
+
+================================================================================
+4. ESTILO VISUAL
+================================================================================
+
+O estilo é "Found Footage Meets Dystopian Terminal Interface":
+
+- Fundo escuro com textura de ruído (grain) constante
+- Elementos de interface simulando sistemas antigos de monitoramento
+- Efeito CRT sutil (scanlines quase imperceptíveis, leve chromatic aberration nas bordas)
+- HUD decorativo com coordenadas, timestamps, indicadores de sinal
+- Vignette escurecendo as bordas da tela
+- Glassmorphism apenas em elementos específicos (painéis de dados, telas de monitoramento)
+- Névoa volumétrica animada
+- Partículas de poeira suspensas, flutuando lentamente
+- Efeito de luz fluorescente pulsando (flicker muito sutil)
+- Bordas duplas estilo terminal/retrô em alguns elementos
+- Chromatic aberration e distortion em momentos de transição (como se a realidade estivesse "no-clipando")
+
+NÃO use: cyberpunk colorido, neon excessivo, estilo futurista limpo, minimalismo corporativo, ou qualquer estética que pareça "limpa" ou "nova". Tudo deve parecer degradado, envelhecido, abandonado.
+
+================================================================================
+5. CONCEITO ARTÍSTICO
+================================================================================
+
+A apresentação deve simular que o próprio sistema no qual ela roda está "corrompido" ou "instável" — como se fosse um terminal encontrado dentro das Backrooms. Cada slide é como se fosse um fragmento de um banco de dados tentando se reconstruir.
+
+A sensação a transmitir é:
+- Solidão (espaços vazios, silêncio visual, composição com muito espaço negativo)
+- Desconforto (cores amareladas doentias, ruído, flicker)
+- Vastidão (profundidade com névoa, elementos distantes, sensação de infinito)
+- Mistério (informações fragmentadas, dados parciais, glitch ocasional)
+- Decadência (texturas sujas, cores apagadas, imperfeições)
+
+A atmosfera deve ser opressiva mas hipnotizante. O espectador deve sentir que está em um lugar que não deveria existir.
+
+================================================================================
+6. BACKGROUND GLOBAL
+================================================================================
+
+O background de TODA a apresentação segue estas regras:
+
+Camada 1 — Fundo sólido: Preto #060606 com gradiente radial sutil que vai de #0F0F0F no centro para #060606 nas bordas.
+
+Camada 2 — Textura de ruído: Grain animado (via CSS/JS) com opacidade entre 0.03 e 0.06, criando a sensação de imagem antiga e degradada.
+
+Camada 3 — Névoa volumetrica: 2 a 3 camadas de névoa animadas horizontalmente em velocidades diferentes (movimento extremamente lento, 60-120s para atravessar a tela). Opacidade entre 0.04 e 0.08. Cores: #8A8A8A e #3D2B1F. Criam profundidade atmosférica.
+
+Camada 4 — Partículas de poeira: Canvas com 60-100 partículas. Movimento browniano extremamente lento. Tamanho entre 1px e 4px. Opacidade entre 0.05 e 0.2. Cor: #D4C5A9.
+
+Camada 5 — Linhas de HUD decorativas: Nos cantos da tela, coordenadas e timestamps simulando uma interface de monitoramento. Estilo terminal. Opacidade 0.15. Não interferem com o conteúdo.
+
+Camada 6 — Vignette: Overlay radial que escurece as bordas. Raio 70%. Transição suave. Opacidade máxima nas bordas: 0.6.
+
+O background MANTÉM-SE durante toda a apresentação, mas pode sofrer variações sutis conforme o slide (ex: slide sobre o Level 0 pode ter um tom mais amarelado no ar, slide sobre entidades pode ter o flicker mais intenso).
+
+================================================================================
+7. NAVEGAÇÃO GLOBAL
+================================================================================
+
+COMPONENTES DE NAVEGAÇÃO:
+
+1. Setas laterais:
+   - Seta esquerda (anterior): aparece no centro vertical, lado esquerdo. Opacidade 0.3, hover 0.8.
+   - Seta direita (próximo): aparece no centro vertical, lado direito. Opacidade 0.3, hover 0.8.
+   - Formato: seta simples estilo terminal ( >  e  < )
+   - Tamanho: 28px
+   - Cor: #F5D742
+   - Transição: 300ms ease
+   - Desaparecem quando não há slide anterior/próximo (primeiro e último slide)
+
+2. Barra de progresso inferior:
+   - Barra fina (2px) na parte inferior da tela
+   - Cor: gradiente horizontal de #F5D742 a #B87333
+   - Largura = (slideAtual / totalSlides) * 100%
+   - Transição: 500ms ease-out
+   - Abaixo da barra: contador "SLIDE XX/20" em courier, 0.65rem, #8A8A8A
+
+3. Navegação por teclado:
+   - Seta direita (→) ou Seta para baixo (↓): próximo slide
+   - Seta esquerda (←) ou Seta para cima (↑): slide anterior
+   - Home: primeiro slide (slide 1)
+   - End: último slide (slide 20)
+   - Número 1-0 (e combinações para 10-20): pular para slide específico (ex: tecla '1' + '5' vai para slide 15). Alternativamente, usar Ctrl+[nº] para slides 10-20.
+   - ESC: sai do modo tela cheia se ativado
+
+4. Navegação por touch/swipe:
+   - Swipe para esquerda: próximo slide
+   - Swipe para direita: slide anterior
+   - Detecção: mínimo 50px de deslocamento horizontal
+
+5. Navegação por mouse:
+   - NÃO troca slides no clique
+   - Roda do mouse: NÃO troca slides (desabilitada para navegação)
+
+6. Mini-índice (acessível por botão):
+   - Botão no canto superior direito: ícone de grid/grelha (4 quadrados pequenos)
+   - Ao clicar: abre um overlay semi-transparente com uma grade de miniaturas numeradas
+   - Cada miniatura: pequena prévia do slide (ou apenas o número em estilo terminal)
+   - Ao clicar em uma miniatura: fecha o overlay e navega para o slide
+   - Fechar: clique fora ou ESC
+
+7. Botão fullscreen:
+   - Canto inferior direito
+   - Ícone de expandir telas
+   - Ao clicar: ativa/desativa fullscreen
+
+================================================================================
+8. ANIMAÇÕES GLOBAIS
+================================================================================
+
+TRANSIÇÃO ENTRE SLIDES:
+
+- Tipo: Dissolve com ruído (efeito de estática/scanlines)
+- Duração: 600ms
+- Easing: ease-in-out
+- Como funciona:
+  1. Usuário solicita troca
+  2. Slide atual inicia dissolve: opacidade vai a 0, ruído de estática aumenta
+  3. Ao atingir opacidade 0 (e ruído máximo), o slide atual é ocultado
+  4. Pequeno delay de 50ms
+  5. Novo slide aparece com opacidade 0, ruído no máximo
+  6. Ruído diminui, opacidade do novo slide aumenta até 1
+  7. Duração total da transição: ~600ms
+  8. Após a transição, aguardar 100ms para iniciar animações de entrada do novo slide
+
+ANIMAÇÕES DE ENTRADA (GLOBAIS):
+
+- Timing: Iniciam 100ms após o slide estar totalmente visível
+- Stagger: Cada grupo de elementos com delay incremental de 80ms
+- Ordem geral: Background → Elementos decorativos/HUD → Título → Subtítulo → Conteúdo → Cards/Listas → Botões/Interações → Efeitos finais
+- Easing padrão: cubic-bezier(0.25, 0.46, 0.45, 0.94) — "ease-out suave"
+- Duração padrão: 700ms a 1000ms
+
+MICROANIMAÇÕES CONTÍNUAS:
+
+- Partículas: movimento browniano contínuo (sempre ativo)
+- Névoa: deslocamento horizontal contínuo (60-120s por ciclo)
+- Luz fluorescente: pulsação extremamente sutil (opacidade variando 2-3% a cada 3-5s, aleatório)
+- Glow dos títulos: leve pulsação (opacidade do text-shadow variando 5% a cada 4s)
+- Elementos decorativos (HUD): leve flutuação vertical (1-2px, 6-8s, sine wave)
+- Ruído/grain: sempre ativo, frame atualizado a cada 50ms (via canvas ou CSS)
+
+================================================================================
+9. ELEMENTOS INTERATIVOS GLOBAIS
+================================================================================
+
+CURSOR PERSONALIZADO:
+- Substituir o cursor padrão por uma versão customizada
+- Forma: um pequeno círculo vazado (12px diâmetro) com borda de 1px, cor #F5D742
+- Opacidade: 0.7
+- Transição de posição: suave, com leve atraso (50ms de lag para sensação de peso)
+- Ao hover em elementos clicáveis: o círculo preenche com opacidade 0.2 e aumenta para 20px
+
+HOVER EM GERAL:
+- Todos os elementos clicáveis: transição de 300ms ease em TODAS as propriedades
+- Botões: mudança de cor de fundo, glow sutil, leve elevação (translateY -1px)
+- Links: underline animado (expande do centro para as bordas)
+- Cards: leve elevação (+2px translateY), sombra mais pronunciada, glow na borda
+
+FEEDBACK DE CLIQUE:
+- Botões: escala momentânea de 95% (50ms), depois retorna (150ms) — efeito de "afundar e voltar"
+- Links: mudança de cor por 200ms
+
+ESTADOS DOS COMPONENTES:
+- Todo botão deve ter: idle, hover, active (pressed), disabled (se aplicável)
+- Todas as transições entre estados: 300ms ease
+
+BOTÃO DE REVELAR CONTEÚDO (USADO EM SLIDES COM MUITO CONTEÚDO):
+- Botão "MOSTRAR MAIS" / "Ler registro completo"
+- Ao clicar: expande (altura animada, opacidade) para revelar conteúdo adicional
+- Texto do botão muda para "OCULTAR" ao expandir
+- Animação: 400ms ease-in-out
+- Ícone: seta para baixo que rotaciona 180° ao expandir
+
+================================================================================
+================================================================================
+ESPECIFICAÇÃO POR SLIDE
+================================================================================
+================================================================================
+
+================================================================================
+SLIDE 1 — CAPA
+================================================================================
+
+OBJETIVO: Impactar imediatamente. Criar a atmosfera. Estabelecer o tom visual e emocional da apresentação. O espectador deve sentir que entrou em um lugar estranho.
+
+EMOÇÃO: Mistério, curiosidade, desconforto inicial, fascinação.
+
+LAYOUT: Centralizado dramático. Título no centro vertical com amplo espaço ao redor. Informações secundárias na parte inferior. Composição simétrica com leve assimetria nos elementos decorativos.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Centro: Título principal "BACKROOMS: O UNIVERSO INFINITO DOS ESPAÇOS LIMINARES" em 4 linhas (se necessário para caber)
+- Abaixo do título: uma linha fina horizontal (divisória decorativa) com 40% de largura
+- Abaixo da linha: nome do apresentador e data, lado a lado, separados por "//"
+- Muito abaixo (próximo ao rodapé): a frase "E SE VOCÊ ATRAVESSASSE A REALIDADE POR ACIDENTE?" em itálico, menor
+- Canto superior esquerdo: logo/identificador decorativo "BACKROOMS DATABASE // CLASSIFIED"
+- Canto inferior direito: timestamp "SINAL: INSTÁVEL // 2024"
+
+BACKGROUND:
+- Fundo padrão global (preto + ruído + névoa + poeira)
+- ADICIONAL: Imagem do Level 0 (carpete amarelo, papel de parede, luzes fluorescentes) renderizada via CSS com gradientes e formas geométricas — NÃO USE UMA IMAGEM REAL. Crie um ambiente abstrato com:
+  - Retângulos amarelados simulando paredes distantes (opacidade 0.06)
+  - Linhas horizontais simulando o carpete (opacidade 0.04, cor #D4C5A9)
+  - Retângulos verticais simulando portas/frestas de luz (opacidade 0.08, cor #F5D742)
+  - Tudo com blur suave (8-15px) para parecer névoa
+- Esta camada deve estar entre as partículas e o conteúdo
+
+ELEMENTOS DECORATIVOS:
+- Linhas de HUD: bordas com cantos em L (estilo terminal), nos cantos superior esquerdo e inferior direito
+- Linhas finas horizontais acima e abaixo do título (largura parcial)
+- Pequenos indicadores de "SINAL" e "STATUS" no topo, com barrinhas animadas (barras pulsam)
+- Número "00" grande e fantasma atrás do título (opacidade 0.03, 15rem, #F5D742) — como marcador de nível
+
+ELEMENTOS INTERATIVOS:
+- Nenhum neste slide, exceto a navegação global
+
+PARTÍCULAS:
+- Padrão global (poeira)
+- MAIS: 5-8 fireflies/pixels luminosos amarelos muito fracos (opacidade 0.15), movimento errático, simulando insetos ou falhas na visão
+
+ILUMINAÇÃO:
+- Foco central suave: gradiente radial no centro da tela de #F5D742 com opacidade 0.04, 50% de raio
+- Sugerindo que a luz das fluorescentes ilumina o centro da cena
+- Vignette padrão nas bordas
+
+EFEITOS:
+- Texto 3D extrudado no título (conforme especificado na seção de regras)
+- Chromatic aberration sutil e constante em todo o slide (deslocamento de 0.5px nos canais RGB)
+- Leve flicker (pisca-pisca muito sutil) em intervalos aleatórios de 5-12s
+
+ÍCONES: Nenhum neste slide
+
+IMAGENS: Nenhuma imagem real. Apenas a composição abstrata do Level 0 em CSS.
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. Elementos de HUD (coordenadas, linhas de borda) — fade in, 500ms, delay 0ms
+2. Background abstrato do Level 0 — fade in, 800ms, delay 100ms
+3. Título "BACKROOMS: O UNIVERSO INFINITO DOS ESPAÇOS LIMINARES" — fade in + blur 8px→0, 1000ms, delay 300ms. O text-shadow 3D extrudado aparece junto com o texto.
+4. Linha divisória — expandir horizontal do centro, 600ms, delay 500ms
+5. Nome do apresentador e data — fade in + mover 15px para cima, 700ms, delay 700ms
+6. Frase "E SE VOCÊ ATRAVESSASSE A REALIDADE POR ACIDENTE?" — fade in + mover 10px para cima, 800ms, delay 900ms
+7. Timestamp no canto inferior — fade in, 500ms, delay 1100ms
+
+INTERAÇÕES: Navegação global apenas.
+
+TRANSIÇÃO PARA SLIDE 2: Dissolve com ruído (padrão global). Durante os últimos 200ms do slide 1, as luzes fluorescentes no fundo podem piscar 2-3 vezes mais rápido.
+
+OBSERVAÇÕES:
+- O título DEVE usar o efeito 3D extrudado com text-shadow conforme especificado na seção de regras
+- O título deve permanecer completamente horizontal (SEM rotate, SEM skew, SEM perspectiva 3D no elemento)
+- Título: múltiplas camadas de text-shadow (35 sombras, deslocamento de 1px cada), mais ::before com blur para sombra ambiente
+
+================================================================================
+SLIDE 2 — O QUE SÃO AS BACKROOMS?
+================================================================================
+
+OBJETIVO: Apresentar o conceito fundamental das Backrooms. Estabelecer a base para todo o resto da apresentação.
+
+EMOÇÃO: Intriga, curiosidade intelectual, leve ansiedade.
+
+LAYOUT: Split vertical. Lado esquerdo (45%): título e definição curta. Lado direito (55%): cards com os conceitos-chave organizados em grid 3x3 (ou 2x4).
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+- Topo esquerdo: Número do slide "02" e título "O QUE SÃO AS BACKROOMS?"
+- Abaixo do título: definição curta em 2-3 linhas
+- Lado direito: 6 cards em grid 3 colunas x 2 linhas (ou 2x3), cada um com um conceito
+- Card 1: "NO-CLIP" — atravessar a realidade
+- Card 2: "INFINITO" — espaços sem fim
+- Card 3: "REPETIÇÃO" — arquitetura repetitiva
+- Card 4: "ISOLAMENTO" — ausência de pessoas
+- Card 5: "RUÍDOS" — zumbidos constantes
+- Card 6: "ILUMINAÇÃO" — luz artificial eterna
+- Abaixo dos cards: texto menor sobre a diferença entre creepypasta original e universo atual
+- Canto inferior esquerdo: "POR QUE AS BACKROOMS DESPERTAM TANTO MEDO?" em destaque
+
+BACKGROUND:
+- Fundo padrão global
+- Sutil grid de linhas no fundo (como plantas arquitetônicas), opacidade 0.03, cor #F5D742
+
+ELEMENTOS DECORATIVOS:
+- Pequenas marcas de coordenadas ao redor do título
+- Indicador de "REGISTRO #002" no topo direito
+- Linhas finas conectando o título aos cards visualmente (composição em Z)
+
+ELEMENTOS INTERATIVOS:
+- Cards têm hover: leve elevação (+3px translateY), glow na borda, cor de fundo muda para rgba(245, 215, 66, 0.05)
+- Ao clicar em um card: um tooltip rico aparece com uma explicação expandida (ex: "No-Clip: Atravessar uma parede ou objeto por uma falha na realidade, entrando em um espaço não destinado à percepção humana.")
+
+PARTÍCULAS: Padrão global apenas.
+
+ILUMINAÇÃO: Leve spotlight no centro da área de cards (gradiente radial, opacidade 0.03).
+
+EFEITOS: Nenhum adicional.
+
+ÍCONES: Pequenos ícones SVG minimalistas no topo de cada card (estilo outline, cor #F5D742). Ícones: portal, infinito, repeat, user-off, volume, lightbulb.
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD e elementos decorativos (fade in, 400ms, delay 0ms)
+2. Número do slide e título (fade in + mover 20px para baixo, 700ms, delay 200ms)
+3. Definição curta (fade in, 600ms, delay 400ms)
+4. Cards — cada um com 80ms de stagger (fade in + escala 95%→100% + mover 30px para cima, 600ms, delay 500ms + stagger)
+5. Texto sobre diferença entre creepypasta e universo atual (fade in, 500ms, delay 900ms)
+6. "POR QUE AS BACKROOMS DESPERTAM TANTO MEDO?" (fade in + glow aumentando, 700ms, delay 1100ms)
+
+INTERAÇÕES:
+- Clique nos cards: abre tooltip com explicação expandida
+- Hover nos cards: feedback visual
+- Fechar tooltip: clique no X ou fora do tooltip
+
+TRANSIÇÃO PARA SLIDE 3: Dissolve com ruído padrão.
+
+================================================================================
+SLIDE 3 — A ORIGEM DAS BACKROOMS
+================================================================================
+
+OBJETIVO: Contar a história de como as Backrooms surgiram, desde a imagem original de 2019 até o fenômeno mundial.
+
+EMOÇÃO: Fascínio, curiosidade histórica, surpresa.
+
+LAYOUT: Timeline horizontal (simulada como um fluxo progressivo, NÃO UMA LINHA DO TEMPO TRADICIONAL). Use cards conectados em zigue-zague ou cascata. Não crie uma linha do tempo visual.
+
+ORGANIZAÇÃO:
+- Alternativa à linha do tempo: Use 3 colunas verticais que representam eras (2019/Criação → 2020/Expansão → 2023/Popularização)
+- Coluna 1 (esquerda): "CRIAÇÃO" — imagem original, fórum 4chan, primeiro texto
+- Coluna 2 (centro): "EXPANSÃO" — comunidade, níveis, teorias
+- Coluna 3 (direita): "POPULARIZAÇÃO" — YouTube, redes sociais, fenômeno mundial
+- Topo: "03" + título "A ORIGEM DAS BACKROOMS"
+- Abaixo de cada coluna: 2-3 cards empilhados com informações
+- Canto inferior direito: curiosidade "TUDO COMEÇOU COM UMA ÚNICA IMAGEM"
+
+BACKGROUND:
+- Fundo padrão
+- Sutil textura de papel amarelado envelhecido nas laterais (opacidade 0.04)
+
+ELEMENTOS DECORATIVOS:
+- Linhas finas conectando as colunas horizontalmente (sugerindo fluxo do tempo)
+- Número "2019", "2020", "2023" grandes e fantasmas atrás de cada coluna (opacidade 0.04, 6rem, cor #D4C5A9)
+- Pequenos marcadores de "ERA" no topo de cada coluna
+
+ELEMENTOS INTERATIVOS:
+- Cards na coluna 1: hover revela imagem aumentada (a foto original descrita em CSS/texto)
+- Botão "Ler texto original da creepypasta" na coluna 1: abre um modal com o texto original
+- Cards clicáveis na coluna 2 e 3: expandem com mais informações
+
+PARTÍCULAS: Padrão global. Adicionar 10 partículas que se movem da esquerda para a direita (como se o tempo fluísse).
+
+ILUMINAÇÃO: Luz mais forte na coluna 1 (o início), diminuindo gradualmente para a direita.
+
+EFEITOS:
+- Na imagem original (descrição visual): efeito de foto antiga (sepia leve, grain mais forte, bordas arredondadas)
+
+ÍCONES: Ícone de calendário, comunidade, YouTube em cada coluna.
+
+IMAGENS: Nenhuma imagem real. A "imagem original" deve ser descrita visualmente com CSS: um quadrado com textura de carpete amarelo, proporção 4:3, moldura vintage.
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (fade, 700ms, delay 200ms)
+2. Coluna 1 com dados (fade + mover, 800ms, delay 400ms)
+3. Coluna 2 com dados (fade + mover, 800ms, delay 600ms)
+4. Coluna 3 com dados (fade + mover, 800ms, delay 800ms)
+5. Curiosidade no canto inferior (fade, 600ms, delay 1100ms)
+
+INTERAÇÕES:
+- Clique nos cards: expandem com mais informações
+- Botão "Ler texto original": abre modal
+- Fechar modal: clique no X ou ESC
+
+TRANSIÇÃO PARA SLIDE 4: Dissolve com ruído padrão.
+
+================================================================================
+SLIDE 4 — O CONCEITO DE ESPAÇOS LIMINARES
+================================================================================
+
+OBJETIVO: Explicar o que são espaços liminares e por que eles causam desconforto psicológico.
+
+EMOÇÃO: Reconhecimento ("eu já senti isso"), introspecção, leve inquietação.
+
+LAYOUT: Split horizontal. Metade superior: título + explicação. Metade inferior: grid de 8 cards pequenos (4x2) com exemplos de espaços liminares.
+
+ORGANIZAÇÃO:
+- Topo: "04" + título "O CONCEITO DE ESPAÇOS LIMINARES"
+- Abaixo do título: definição em 2-3 linhas
+- Abaixo: grid 4x2 de cards pequenos com exemplos
+  - Card 1: ESCOLAS vazias
+  - Card 2: SHOPPINGS fechados
+  - Card 3: CORREDORES de hotéis
+  - Card 4: ESCRITÓRIOS abandonados
+  - Card 5: ESTACIONAMENTOS
+  - Card 6: PISCINAS vazias
+  - Card 7: AEROPORTOS desertos
+  - Card 8: SALAS de espera
+- Abaixo do grid: dois parágrafos: "PSICOLOGIA POR TRÁS DA SENSAÇÃO" e "O CONCEITO DE 'UNCANNY' + NOSTALGIA ESTRANHA"
+- Canto inferior direito: citação "Lugares de transição que nunca deveriam ser permanentemente habitados"
+
+BACKGROUND:
+- Fundo padrão
+- ADICIONAL: Imagens espectrais e desbotadas de cada tipo de espaço liminar nos cards (criadas com CSS — formas geométricas, cores dessaturadas, blur)
+
+ELEMENTOS DECORATIVOS:
+- Cada card tem uma moldura dupla (borda interna + externa)
+- Pequenos riscos/arranhões decorativos nas bordas dos cards (via pseudo-elementos)
+
+ELEMENTOS INTERATIVOS:
+- Cards têm hover: revelam uma "memória" — um pequeno texto adicional aparece no card (ex: "Escolas vazias durante o período noturno, corredores sem alunos, cadeiras empilhadas")
+- Ao clicar em um card: ele se expande para mostrar 2-3 exemplos adicionais daquele tipo de espaço
+
+PARTÍCULAS: Padrão global.
+
+ILUMINAÇÃO: Luz uniforme, como um corredor iluminado por fluorescentes.
+
+EFEITOS: Leve blur nos backgrounds dos cards (para simular memórias distantes).
+
+ÍCONES: Pequeno ícone minimalista em cada card (prédio, loja, hotel, escritório, carro, piscina, avião, cadeira). Estilo outline, #F5D742.
+
+IMAGENS: Nenhuma real.
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Definição (600ms, delay 400ms)
+3. Cards — entrada em cascata com stagger de 60ms (500ms cada, delay 600ms + stagger)
+4. Parágrafos de psicologia (600ms cada, delay 1000ms e 1200ms)
+5. Citação (700ms, delay 1400ms)
+
+INTERAÇÕES:
+- Hover nos cards: revela texto adicional
+- Clique nos cards: expande
+
+TRANSIÇÃO PARA SLIDE 5: Dissolve com ruído padrão.
+
+================================================================================
+SLIDE 5 — COMO ENTRAR NAS BACKROOMS (SEGUNDO A FICÇÃO)
+================================================================================
+
+OBJETIVO: Explicar os métodos ficcionais de entrada nas Backrooms, com ênfase no No-Clip.
+
+EMOÇÃO: Curiosidade, suspense, sensação de que a realidade é frágil.
+
+LAYOUT: Grid 3x3 de "portais" — 9 cards em formato de hexágonos ou losangos (simulando portais/fendas). Cada portal representa um método de entrada.
+
+ORGANIZAÇÃO:
+- Topo: "05" + título "COMO ENTRAR NAS BACKROOMS"
+- Abaixo: subtítulo "MÉTODOS DE ACESSO DOCUMENTADOS"
+- Grid 3x3 de cards hexagonais (via CSS clip-path ou rotação de 45° com overflow hidden):
+  - Card 1: NO-CLIP (central, maior) — o método principal
+  - Card 2: SONHOS
+  - Card 3: FALHAS NA REALIDADE
+  - Card 4: LUGARES ESPECÍFICOS
+  - Card 5: PORTAIS
+  - Card 6: ELEVADORES
+  - Card 7: ESPELHOS
+  - Card 8: PORTAS
+  - Card 9: ACIDENTES
+- Abaixo do grid: "TUDO FAZ PARTE DA FICÇÃO" em destaque
+- Abaixo: "ERROS DA SIMULAÇÃO / TEORIAS DA COMUNIDADE"
+
+BACKGROUND:
+- Fundo padrão
+- ADICIONAL: Grid de linhas finas no fundo (0.5px, #F5D742, opacidade 0.03) formando um padrão técnico/arquitetônico
+- Pequenos glitch effects aleatórios (a cada 8-15s, um flash horizontal de 50ms com chromatic aberration)
+
+ELEMENTOS DECORATIVOS:
+- Ao redor de cada card hexagonal: borda animada (gradiente rotacionando, 10s, cor #F5D742 com transparência)
+- Pequenos números de "coordenadas" próximos a cada card
+
+ELEMENTOS INTERATIVOS:
+- O card central (NO-CLIP) é maior e pulsante (glow pulsando suavemente)
+- Hover em qualquer card: escala 1.05, glow mais forte, a borda animada acelera
+- Clique no card: ele "abre" (vira/expande) revelando uma explicação detalhada do método
+- O card NO-CLIP tem um efeito adicional: pequenas partículas saindo dele (simulando a passagem pela realidade)
+
+PARTÍCULAS:
+- Padrão global
+- ADICIONAL: 15 partículas saindo do centro do card NO-CLIP, indo para todas as direções, desaparecendo após 1.5s (ativado ao hover ou sempre ativo em baixa intensidade)
+
+ILUMINAÇÃO:
+- Spotlight centralizado na área do grid, sugestão de que os portais emitem luz
+- Cada card hexagonal tem um leve glow interno da cor do seu tipo
+
+EFEITOS:
+- Glitch effect randômico sutil em toda a tela
+- Os hexágonos têm clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)
+- Borda animada com gradiente conic
+
+ÍCONES: Pequenos ícones dentro de cada hexágono: portal (no-clip), moon (sonhos), alert-triangle (falhas), map-pin (lugares), door (portais), arrow-up (elevadores), square (espelhos), door (portas), alert-circle (acidentes).
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Subtítulo (500ms, delay 400ms)
+3. Cards hexagonais — do centro para as bordas (600ms cada, stagger 100ms, delay 500ms)
+4. "TUDO FAZ PARTE DA FICÇÃO" (fade + glow, 700ms, delay 1200ms)
+5. Texto complementar (500ms, delay 1400ms)
+
+INTERAÇÕES:
+- Clique nos hexágonos: revelam explicação
+- Hover: escala e glow
+- ESC ou clique fora: fecha explicação expandida
+
+TRANSIÇÃO PARA SLIDE 6: Dissolve com ruído, mas com um glitch mais pronunciado — como se a apresentação estivesse "no-clipando" para o próximo slide.
+
+================================================================================
+SLIDE 6 — O LEVEL 0
+================================================================================
+
+OBJETIVO: Descrever o Level 0 em detalhes — o primeiro e mais icônico nível das Backrooms.
+
+EMOÇÃO: Desconforto, claustrofobia, solidão, reconhecimento (a imagem mais famosa).
+
+LAYOUT: Cenário imersivo. O slide inteiro é uma representação abstrata do Level 0. O conteúdo é sobreposto ao cenário.
+
+ORGANIZAÇÃO:
+- O fundo do slide é uma composição visual abstrata do Level 0:
+  - Piso: gradiente horizontal repetitivo simulando carpete amarelo (listras, opacidade 0.1)
+  - Paredes: retângulos verticais nas laterais simulando papel de parede amarelado (opacidade 0.08)
+  - Teto: faixa escura no topo com retângulos de luz (fluorescentes)
+  - Perspectiva: as linhas do carpete convergem para um ponto de fuga central
+- Conteúdo sobreposto em um painel semi-transparente:
+  - "06" + "LEVEL 0" (grande, título)
+  - Abaixo: "O PRIMEIRO NÍVEL / O PONTO DE ENTRADA"
+  - Duas colunas abaixo:
+    - Esquerda: características (carpete, papel de parede, luzes, zumbido, sem janelas, infinito, labirinto)
+    - Direita: experiência (solidão, cheiro de carpete úmido, sem tempo, poucos recursos)
+
+BACKGROUND: O cenário do Level 0 é o próprio background deste slide. O fundo preto padrão dá lugar a esta composição.
+
+ELEMENTOS DECORATIVOS:
+- As linhas do carpete no fundo têm animação de leve ondulação (wave, 20s) como se o chão estivesse vivo
+- Luzes fluorescentes no teto piscam em intervalos aleatórios
+- Névoa mais densa na parte inferior do slide (sobe lentamente)
+
+ELEMENTOS INTERATIVOS:
+- Os itens das colunas (características e experiência) são clicáveis: cada um expande com uma descrição mais detalhada
+- Botão "ATIVAR ÁUDIO AMBIENTE": reproduz o zumbido das fluorescentes (áudio gerado via Web Audio API — tom puro de 60Hz com harmônicos)
+
+PARTÍCULAS:
+- Mais poeira que o normal (150 partículas)
+- Poeira mais visível nos feixes de luz
+
+ILUMINAÇÃO:
+- Feixes de luz verticais descendo do topo (simulando as fluorescentes)
+- Opacidade 0.04, cor #F5D742, animação de leve oscilação
+- Vignette mais escura que o normal (opacidade 0.7)
+
+EFEITOS:
+- Persistência de visão: leve afterimage nos cantos (como se algo estivesse se movendo)
+- O ponto de fuga central tem um leve pulsar
+
+ÍCONES: Ícone de lâmpada, som, infinito, relógio nos itens correspondentes.
+
+IMAGENS: Nenhuma real. Tudo construído com CSS e canvas.
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. Cenário do Level 0 (fade, 1000ms, delay 0ms)
+2. Luzes fluorescentes (fade, 800ms, delay 300ms)
+3. Título "LEVEL 0" (fade + blur 10→0 + escala 90%→100%, 1200ms, delay 500ms)
+4. Subtítulo (fade + mover, 700ms, delay 800ms)
+5. Colunas de características e experiência — cada item com stagger de 50ms (600ms, delay 1000ms + stagger)
+6. Botão de áudio (fade, 500ms, delay 1400ms)
+
+INTERAÇÕES:
+- Clique nos itens das colunas: expandem descrição
+- Botão "ATIVAR ÁUDIO AMBIENTE": toca/para o zumbido
+- O ambiente reage ao clique (leve distorção)
+
+TRANSIÇÃO PARA SLIDE 7: Dissolve com ruído. O zumbido (se estiver ativo) continua por 1s na transição e depois desaparece gradualmente.
+
+================================================================================
+SLIDE 7 — OUTROS NÍVEIS MAIS CONHECIDOS
+================================================================================
+
+OBJETIVO: Apresentar os principais níveis além do Level 0.
+
+EMOÇÃO: Sobrecarga de informação, curiosidade, crescente tensão (níveis mais perigosos).
+
+LAYOUT: Acordeão interativo (accordion). Os níveis são listados verticalmente com nome e breve descrição. Ao clicar em um, expande-se com detalhes completos.
+
+ORGANIZAÇÃO:
+- Topo: "07" + título "OUTROS NÍVEIS CONHECIDOS"
+- Subtítulo: "SELECIONE UM NÍVEL PARA EXPANDIR"
+- Abaixo: lista de accordions com 15 níveis
+  - Cada accordion: nome do nível (ex: "LEVEL 1 — O INFRA-MUNDO") com ícone de perigo/segurança
+  - Ao expandir: ambiente, dificuldade, perigos, curiosidades
+  - Accordions podem ser abertos individualmente (apenas um por vez, ou múltiplos)
+
+NÍVEIS NO ACCORDION:
+1. Level 1 — O Infra-Mundo
+2. Level 2 — A Zona de Tubulações
+3. Level 3 — A Estação Elétrica
+4. Level 4 — O Escritório Abandonado
+5. Level 5 — O Hotel Infinito
+6. Level 6 — A Escuridão
+7. Level 7 — O Oceano
+8. Level 8 — A Caverna
+9. Level 11 — A Cidade Infinita
+10. Level 37 — Poolrooms
+11. Level Fun
+12. Level Run For Your Life
+13. Level ! (Corrida)
+14. Level 188 — A Biblioteca
+15. Level 3999 — O Paraíso
+
+BACKGROUND:
+- Fundo padrão global
+- Os accordions têm um leve gradiente no fundo listrado (simulando as infinitas variações dos níveis)
+
+ELEMENTOS DECORATIVOS:
+- Pequenos indicadores de dificuldade ao lado de cada nível (Fácil/Médio/Difícil/Perigoso/Mortal) com cores (verde/amarelo/laranja/vermelho/roxo)
+- Número do nível em destaque (courier, 1.5rem, opacidade 0.2) ao lado do nome
+
+ELEMENTOS INTERATIVOS:
+- Accordion: clique no header expande/recolhe o conteúdo
+- Animação do accordion: altura animada com overflow hidden + opacidade no conteúdo
+- Duração: 400ms ease-in-out
+- Ícone de seta ao lado do nome rotaciona 180° ao expandir
+- Máximo de 3 accordions abertos simultaneamente para não sobrecarregar o slide
+
+PARTÍCULAS: Padrão global
+
+ILUMINAÇÃO: Padrão
+
+EFEITOS:
+- Scroll suave dentro do accordion se o conteúdo for maior que o espaço (mas o slide principal NÃO scrolla)
+
+ÍCONES: Shield (segurança), AlertTriangle (perigo), Skull (mortal), Home (seguro) ao lado de cada nível conforme classificação
+
+IMAGENS: Nenhuma
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Subtítulo (500ms, delay 400ms)
+3. Accordions — cada um com stagger de 50ms (500ms, delay 500ms + stagger)
+
+INTERAÇÕES:
+- Clique no header do accordion: expande/recolhe
+- Múltiplos accordions podem ficar abertos (máx 3)
+
+TRANSIÇÃO PARA SLIDE 8: Dissolve com ruído.
+
+================================================================================
+SLIDE 8 — AS ENTIDADES
+================================================================================
+
+OBJETIVO: Apresentar as entidades que habitam as Backrooms.
+
+EMOÇÃO: Medo, tensão, fascínio pelo grotesco.
+
+LAYOUT: Galeria de cards com rotação/efeito 3D sutil. Os cards podem ser "virados" (flip card) para revelar informações no verso.
+
+ORGANIZAÇÃO:
+- Topo: "08" + título "AS ENTIDADES"
+- Subtítulo: "HABITANTES DAS BACKROOMS"
+- Grid 3x3 de cards flip:
+
+Card 1 (frente): "SMILERS" + ícone de sorriso
+Card 1 (verso): descrição, comportamento, periculosidade
+
+Card 2 (frente): "HOUNDS" + ícone de pegada
+Card 2 (verso): descrição, comportamento, periculosidade
+
+Card 3 (frente): "SKIN-STEALERS" + ícone de rosto
+Card 3 (verso): descrição, comportamento, periculosidade
+
+Card 4 (frente): "FACELINGS" + ícone de face vazia
+Card 4 (verso): descrição, comportamento, periculosidade
+
+Card 5 (frente): "DEATHMOTHS" + ícone de mariposa
+Card 5 (verso): descrição, comportamento, periculosidade
+
+Card 6 (frente): "PARTYGOERS" + ícone de festa
+Card 6 (verso): descrição, comportamento, periculosidade
+
+Card 7 (frente): "PARTYPOOPERS" + ícone de festa riscado
+Card 7 (verso): descrição, comportamento, periculosidade
+
+Card 8 (frente): "DULLERS" + ícone de pessoa
+Card 8 (verso): descrição, comportamento, periculosidade
+
+Card 9 (frente): "CLUMPS" + ícone de aglomerado
+Card 9 (verso): descrição, comportamento, periculosidade
+
+BACKGROUND:
+- Fundo padrão global
+- ADICIONAL: Sombras vagas e distorcidas se movendo nas bordas da tela (opacidade 0.03-0.05, animação lenta)
+- Leve pulsar vermelho no fundo (gradiente radial #8B0000 opacidade 0.02)
+
+ELEMENTOS DECORATIVOS:
+- Marcas de garras (arranhões) nos cantos dos cards (via CSS, opacidade 0.05)
+- Pequenas "manchas" de sangue seco (círculos marrons opacidade 0.03) em alguns cards
+
+ELEMENTOS INTERATIVOS:
+- Flip card ao clicar: rotação 3D no eixo Y (180°), 600ms ease-in-out
+- Hover: card inclina levemente (3° no eixo X, seguindo o mouse — tilt 3D)
+- O glow do card muda conforme o nível de perigo da entidade
+
+PARTÍCULAS:
+- Padrão global
+- ADICIONAL: 20 partículas vermelhas escuras muito pequenas e lentas, como se fossem esporos ou sangue no ar
+
+ILUMINAÇÃO:
+- Mais escura que o normal (a vignette é mais forte, opacidade 0.65)
+- Pequenos focos de luz vermelha vindos de baixo em alguns cards
+
+EFEITOS:
+- Cada card tem um brilho sutil na cor da entidade (amarelo para Smilers, vermelho para Deathmoths, etc.)
+- Leve chromatic aberration nos cantos
+
+ÍCONES: SVG minimalistas em cada card, representando a entidade
+
+IMAGENS: Nenhuma real
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Subtítulo (500ms, delay 400ms)
+3. Cards — entrada com stagger de 70ms, vindo de baixo com fade + escala 90%→100% (600ms, delay 500ms + stagger)
+
+INTERAÇÕES:
+- Clique no card: flip (revela verso)
+- Hover: tilt 3D seguindo o mouse
+- Clique no verso: volta à frente
+
+TRANSIÇÃO PARA SLIDE 9: Dissolve com ruído. Durante a transição, silhuetas de entidades (formas abstratas) se movem rapidamente nas bordas.
+
+================================================================================
+SLIDE 9 — OBJETOS IMPORTANTES
+================================================================================
+
+OBJETIVO: Catalogar objetos e itens encontrados nas Backrooms que são essenciais para a sobrevivência.
+
+EMOÇÃO: Curiosidade, sensação de inventário/jogo, utilidade.
+
+LAYOUT: Grid de cards com ícones grandes, similar a inventário de jogo. Cada card mostra o objeto, seu nome e utilidade.
+
+ORGANIZAÇÃO:
+- Topo: "09" + título "OBJETOS IMPORTANTES"
+- Subtítulo: "INVENTÁRIO DE SOBREVIVÊNCIA"
+- Grid 4x3 de cards de inventário:
+  1. ALMOND WATER — ícone gota, utilidade, raridade
+  2. LUCKY O' MILK — ícone leite, utilidade, raridade
+  3. FIRE SALT — ícone fogo, utilidade, raridade
+  4. ROYAL RATIONS — ícone comida, utilidade, raridade
+  5. SUPER ALMOND WATER — ícone gota+, utilidade, raridade
+  6. BATTERIES — ícone pilha, utilidade, raridade
+  7. LANTERNAS — ícone lanterna, utilidade, raridade
+  8. ARMAS IMPROVISADAS — ícone arma, utilidade, raridade
+  9. MOCHILAS — ícone mochila, utilidade, raridade
+  10. EQUIPAMENTOS — ícone ferramentas, utilidade, raridade
+  11. ITENS RAROS — ícone estrela, utilidade, raridade
+  12. ITENS PERIGOSOS — ícone caveira, utilidade, raridade
+
+BACKGROUND:
+- Fundo padrão global
+- ADICIONAL: Grid sutil de quadrados (como células de inventário) atrás dos cards, opacidade 0.03
+
+ELEMENTOS DECORATIVOS:
+- Indicador de raridade no canto de cada card (estrelas: 1-5, cor #F5D742)
+- Pequeno número de inventário (#001, #002...) no topo de cada card
+- Moldura dupla em cada card (borda de terminal)
+
+ELEMENTOS INTERATIVOS:
+- Hover: o card se eleva (+4px) e o ícone aumenta 10%
+- Clique: abre tooltip rico com descrição detalhada do objeto, seus efeitos e onde encontrar
+
+PARTÍCULAS: Padrão
+
+ILUMINAÇÃO: Spotlight suave na área do grid
+
+EFEITOS: Nenhum adicional
+
+ÍCONES: SVG grandes (24px) dentro de círculos decorativos em cada card, cor #F5D742
+
+IMAGENS: Nenhuma
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Subtítulo (500ms, delay 400ms)
+3. Cards — grid completo com stagger de 50ms (500ms cada, delay 500ms + stagger, entrando fileira por fileira)
+
+INTERAÇÕES:
+- Hover nos cards: elevação + ícone cresce
+- Clique: tooltip detalhado
+
+TRANSIÇÃO PARA SLIDE 10: Dissolve com ruído.
+
+================================================================================
+SLIDE 10 — SOBREVIVÊNCIA
+================================================================================
+
+OBJETIVO: Ensinar estratégias de sobrevivência nas Backrooms. Guia prático.
+
+EMOÇÃO: Urgência controlada, atenção, preparação.
+
+LAYOUT: Dashboard/checklist interativo. Duas colunas. Esquerda: dicas numeradas com checkboxes. Direita: blocos de estratégia.
+
+ORGANIZAÇÃO:
+- Topo: "10" + título "SOBREVIVÊNCIA"
+- Subtítulo: "PROTOCOLO DE SOBREVIVÊNCIA EM AMBIENTES LIMINARES"
+- Coluna esquerda (40%): 8 dicas com checkboxes interativos
+  1. NUNCA CORRA SEM MOTIVO
+  2. ECONOMIZE RECURSOS
+  3. MANTENHA A CALMA
+  4. EVITE ENTIDADES
+  5. MEMORIZE CAMINHOS
+  6. PROCURE BASES
+  7. FORME GRUPOS
+  8. IDENTIFIQUE NÍVEIS
+- Coluna direita (60%): 6 cards de estratégia em grid 2x3
+  - SANIDADE (cuidar da mente)
+  - COMIDA (administrar)
+  - ÁGUA (recursos hídricos)
+  - LUZ (fontes de iluminação)
+  - COMUNICAÇÃO (como se comunicar)
+  - ESTRATÉGIAS (táticas avançadas)
+
+BACKGROUND:
+- Fundo padrão
+- ADICIONAL: Leve textura de checklist/manual militar (linhas horizontais finas, opacidade 0.02)
+
+ELEMENTOS DECORATIVOS:
+- Linha vertical separando as duas colunas (traço-estilo terminal)
+- Cabeçalhos de seção com estilo de terminal: "> PROTOCOLO_01" e "> ESTRATÉGIA"
+
+ELEMENTOS INTERATIVOS:
+- Checkboxes: ao clicar no item, um traço aparece sobre o texto (marcado como concluído) e o checkbox fica preenchido
+- Cards de estratégia: hover expande com detalhes, clique abre popup com guia completo
+
+PARTÍCULAS: Padrão
+
+ILUMINAÇÃO: Padrão
+
+EFEITOS: Nenhum
+
+ÍCONES: Checkbox circle, ícones nos cards de estratégia
+
+IMAGENS: Nenhuma
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Subtítulo (500ms, delay 400ms)
+3. Coluna esquerda: dicas com stagger de 40ms (400ms cada, delay 500ms + stagger)
+4. Coluna direita: cards com stagger de 60ms (500ms cada, delay 700ms + stagger)
+
+INTERAÇÕES:
+- Clique nos checkboxes: marca/desmarca item
+- Hover nos cards: escala + glow
+- Clique nos cards: popup com guia completo
+
+TRANSIÇÃO PARA SLIDE 11: Dissolve com ruído.
+
+================================================================================
+SLIDE 11 — ORGANIZAÇÕES DAS BACKROOMS
+================================================================================
+
+OBJETIVO: Apresentar os grupos e organizações que operam dentro das Backrooms.
+
+EMOÇÃO: Fascínio pela construção do universo, sensação de que o mundo é vivo e habitado.
+
+LAYOUT: Split horizontal com abas (tabs) na parte inferior para detalhar cada organização.
+
+ORGANIZAÇÃO:
+- Topo: "11" + título "ORGANIZAÇÕES DAS BACKROOMS"
+- Abaixo: breve introdução "DIVERSOS GRUPOS OPERAM DENTRO DAS BACKROOMS"
+- Grid 2x4 de cards com logos/nomes das organizações:
+  - Card 1: M.E.G. (Major Explorer Group)
+  - Card 2: B.N.T.G. (Backroom Natural Trade Group)
+  - Card 3: THE LOST (Os Perdidos)
+  - Card 4: FOLLOWERS OF JERRY (Seguintes de Jerry)
+  - Card 5: THE ETERNAL REPOSITORY (Repositório Eterno)
+  - Card 6: GRUPOS HOSTIS
+  - Card 7: COMÉRCIO E BASES
+  - Card 8: PESQUISA E EXPLORAÇÃO
+- Área inferior (após selecionar): aba com informações detalhadas da organização selecionada (estrutura, objetivos, bases, líderes)
+
+BACKGROUND: Fundo padrão
+
+ELEMENTOS DECORATIVOS:
+- Emblemas/logos minimalistas em cada card (círculos com iniciais, estilo militar)
+- Bandeiras decorativas
+
+ELEMENTOS INTERATIVOS:
+- Cards: hover eleva, clique seleciona
+- Abaixo: área de conteúdo que muda conforme o card selecionado
+- Aba (tab) animada: transição suave entre conteúdos (opacidade cruzada, 400ms)
+
+PARTÍCULAS: Padrão
+
+ILUMINAÇÃO: Padrão
+
+EFEITOS: Nenhum adicional
+
+ÍCONES: Shield, users, shopping-cart, crosshair, book, skull, building, flask nos cards
+
+IMAGENS: Nenhuma
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Introdução (500ms, delay 400ms)
+3. Cards — stagger 60ms (500ms, delay 500ms + stagger)
+4. Área de conteúdo detalhado (aparece após seleção)
+
+INTERAÇÕES:
+- Clique nos cards: seleciona organização e mostra detalhes na área inferior
+- Hover: feedback
+
+TRANSIÇÃO PARA SLIDE 12: Dissolve com ruído.
+
+================================================================================
+SLIDE 12 — KANE PIXELS
+================================================================================
+
+OBJETIVO: Apresentar o trabalho de Kane Pixels e sua influência na popularização das Backrooms.
+
+EMOÇÃO: Admiração, interesse cinematográfico, reconhecimento de um estilo único.
+
+LAYOUT: Hero com fundo escuro e elementos visuais que simulam found footage. Split entre texto (esquerda) e elementos visuais (direita).
+
+ORGANIZAÇÃO:
+- Topo: "12" + título "KANE PIXELS"
+- Abaixo: "A SÉRIE QUE REVOLUCIONOU AS BACKROOMS"
+- Lado esquerdo (45%): texto com informações em bullets
+  - Quem é Kane Pixels
+  - Série do YouTube
+  - Estilo Found Footage
+  - Expansão da popularidade
+  - ASYNC Research
+  - Complexo subterrâneo
+  - Viagens dimensionais
+  - Monstro Bacteria
+- Lado direito (55%): representação visual
+  - Moldura de vídeo antigo (proporção 4:3, bordas CRT, scanlines)
+  - Dentro da moldura: uma cena abstrata em movimento — formas geométricas escuras, linhas verdes (como visão noturna), estática
+  - Animação contínua dentro da moldura: linhas se movendo, névoa, estática
+
+BACKGROUND:
+- Fundo padrão
+- ADICIONAL: mais escuro que o normal, com um tom levemente esverdeado (como visão noturna)
+- Leve grain em toda a tela, mais forte que o normal (0.06)
+
+ELEMENTOS DECORATIVOS:
+- A moldura da "filmagem" tem todos os detalhes de found footage:
+  - Timestamp no canto: "ASYNC // 1991 // REC"
+  - Indicador de gravação (REC) piscando
+  - Bateria e qualidade de sinal
+  - Scanlines, chromatic aberration, vinheta forte
+- Marcas de fita magnética (linhas horizontais)
+
+ELEMENTOS INTERATIVOS:
+- A moldura de vídeo: hover faz o "vídeo" acelerar (a animação dentro fica mais rápida por 2s)
+- Clique na moldura: expande para um modal maior (toda a tela) com mais detalhes visuais
+
+PARTÍCULAS:
+- Padrão global
+- ADICIONAL: partículas de estática/ruído dentro da moldura de vídeo
+
+ILUMINAÇÃO:
+- Muito escura
+- A única luz forte vem da moldura de vídeo (como se a tela iluminasse o ambiente)
+- Leve glow verde ao redor da moldura
+
+EFEITOS:
+- Chromatic aberration mais forte dentro da moldura
+- Scanlines com opacidade 0.08
+- Vignette na moldura (bordas mais escuras)
+- Efeito de fita VHS (linhas horizontais ocasionais)
+
+ÍCONES: Nenhum
+
+IMAGENS: Nenhuma real
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Subtítulo (500ms, delay 400ms)
+3. Texto lado esquerdo — bullets com stagger de 40ms (500ms, delay 500ms + stagger)
+4. Moldura de vídeo (fade + escala 95%→100%, 800ms, delay 600ms)
+5. Indicadores de gravação (fade, 400ms, delay 1100ms)
+
+INTERAÇÕES:
+- Hover na moldura: acelera animação interna
+- Clique na moldura: expande para modal
+- Fechar modal: X ou ESC
+
+TRANSIÇÃO PARA SLIDE 13: Dissolve com ruído. Durante a transição, a estática da TV toma conta da tela por 300ms.
+
+================================================================================
+SLIDE 13 — PSICOLOGIA DO MEDO
+================================================================================
+
+OBJETIVO: Explicar os mecanismos psicológicos que tornam as Backrooms tão assustadoras.
+
+EMOÇÃO: Introspecção, reconhecimento, ansiedade controlada.
+
+LAYOUT: Grid de cards com ícones e textos, organizado em forma de "mapa mental" visual.
+
+ORGANIZAÇÃO:
+- Topo: "13" + título "PSICOLOGIA DO MEDO"
+- Subtítulo: "POR QUE AS BACKROOMS NOS AFETAM TANTO?"
+- Grid 4x3 de cards conectados visualmente por linhas finas (formando um mapa mental):
+  1. SOLIDÃO — ícone pessoa sozinha
+  2. SILÊNCIO — ícone silêncio
+  3. MONOTONIA — ícone repetição
+  4. ARQUITETURA INFINITA — ícone infinito
+  5. ANSIEDADE — ícone coração batendo
+  6. CLAUSTROFOBIA — ícone aperto
+  7. AGORAFOBIA — ícone espaço aberto
+  8. MEDO DO DESCONHECIDO — ícone ponto de interrogação
+  9. PERDA DA REALIDADE — ícone realidade distorcida
+  10. SENSAÇÃO DE INFINITO — ícone horizonte
+  11. ILUMINAÇÃO ARTIFICIAL — ícone lâmpada
+  12. SONS REPETITIVOS — ícone som
+  13. NOSTALGIA ESTRANHA — ícone passado
+
+BACKGROUND:
+- Fundo padrão
+- ADICIONAL: Background com padrão de ondas cerebrais (linhas senoidais, opacidade 0.02, animação lenta)
+
+ELEMENTOS DECORATIVOS:
+- Linhas finas (#F5D742, opacidade 0.1) conectando os cards, formando um grafo/rede neural
+- Pequenos nós (círculos de 4px) nos pontos de conexão
+
+ELEMENTOS INTERATIVOS:
+- Hover em um card: destaca o card e todas as suas conexões (as linhas ficam mais brilhantes)
+- Clique: expande o card com uma explicação detalhada do mecanismo psicológico
+
+PARTÍCULAS: Padrão global
+
+ILUMINAÇÃO: Padrão
+
+EFEITOS: Nenhum adicional
+
+ÍCONES: SVG minimalistas em cada card
+
+IMAGENS: Nenhuma
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Subtítulo (500ms, delay 400ms)
+3. Linhas de conexão (desenhar animado, 800ms, delay 400ms)
+4. Cards — entrada com stagger de 50ms (500ms, delay 500ms + stagger, animação vindo das bordas para o centro)
+5. Nós nas conexões (fade, 300ms, delay 900ms)
+
+INTERAÇÕES:
+- Hover: destaca card + conexões
+- Clique: expande com explicação
+
+TRANSIÇÃO PARA SLIDE 14: Dissolve com ruído.
+
+================================================================================
+SLIDE 14 — CURIOSIDADES
+================================================================================
+
+OBJETIVO: Apresentar fatos curiosos e surpreendentes sobre o universo das Backrooms.
+
+EMOÇÃO: Surpresa, fascínio, vontade de saber mais.
+
+LAYOUT: Grid assimétrico de cards com alturas variadas (Bento grid). Cards com diferentes tamanhos formando um mosaico.
+
+ORGANIZAÇÃO:
+- Topo: "14" + título "CURIOSIDADES"
+- Bento grid com 8 cards de tamanhos variados (alguns ocupam 2 colunas, outros 1):
+  - Card GRANDE (2x1): "EXISTEM MILHARES DE NÍVEIS CRIADOS PELA COMUNIDADE"
+  - Card MÉDIO (1x1): "NEM TODOS SÃO OFICIAIS"
+  - Card MÉDIO (1x1): "ALGUMAS ENTIDADES NUNCA ATACAM"
+  - Card MÉDIO (1x1): "ALGUNS NÍVEIS SÃO COMPLETAMENTE SEGUROS"
+  - Card GRANDE (2x1): "EXISTEM NÍVEIS PARADISÍACOS E NÍVEIS IMPOSSÍVEIS DE ESCAPAR"
+  - Card MÉDIO (1x1): "ALGUMAS REGRAS SE CONTRADIZEM"
+  - Card MÉDIO (1x1): "EXISTEM NÍVEIS VIVOS E CONSCIENTES"
+  - Card MÉDIO (1x1): "ALGUNS MUDAM CONSTANTEMENTE"
+
+BACKGROUND:
+- Fundo padrão
+
+ELEMENTOS DECORATIVOS:
+- Pequenos números (#001, #002...) no canto de cada card
+- Bordas duplas em todos os cards
+- Cantos decorados com pequenas linhas em L
+
+ELEMENTOS INTERATIVOS:
+- Hover: card se eleva, fundo muda sutilmente
+- Clique: card expande (se for grande) ou abre tooltip (se for médio) com mais detalhes
+
+PARTÍCULAS: Padrão
+
+ILUMINAÇÃO: Padrão
+
+EFEITOS: Nenhum adicional
+
+ÍCONES: Ícone de estrela/curiosidade em cada card
+
+IMAGENS: Nenhuma
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Cards — staggered por área: primeiro os grandes, depois os médios (600ms, delay 400ms + stagger 80ms)
+
+INTERAÇÕES:
+- Hover: elevação
+- Clique: expande ou tooltip
+
+TRANSIÇÃO PARA SLIDE 15: Dissolve com ruído.
+
+================================================================================
+SLIDE 15 — AS BACKROOMS NA CULTURA POP
+================================================================================
+
+OBJETIVO: Mostrar como as Backrooms influenciaram a cultura pop e a internet.
+
+EMOÇÃO: Reconhecimento, surpresa (sobre o alcance), admiração.
+
+LAYOUT: Grid de plataformas com ícones e cards descritivos. Inclui um carrossel de exemplos visuais.
+
+ORGANIZAÇÃO:
+- Topo: "15" + título "AS BACKROOMS NA CULTURA POP"
+- Grid 3x3 de cards de plataforma/mídia:
+  1. YOUTUBE — vídeos, canais, found footage
+  2. TIKTOK — trends, vídeos virais
+  3. ROBLOX — jogos, experiências
+  4. MINECRAFT — mapas, servidores
+  5. GARRY'S MOD — mapas, cenas
+  6. UNREAL ENGINE — demos, fan games
+  7. FILMES INDEPENDENTES — curtas
+  8. ARTE DIGITAL — fanarts, ilustrações
+  9. COSPLAYS E MODS — comunidade criativa
+
+BACKGROUND:
+- Fundo padrão
+- ADICIONAL: Sutil mosaico de ícones de redes sociais e plataformas no fundo (opacidade 0.02)
+
+ELEMENTOS DECORATIVOS:
+- Moldura de "post"/"card" de cada plataforma (ex: moldura do YouTube, moldura do TikTok)
+- Indicadores de "views": números estilizados (ex: "10M+ VIEWS")
+
+ELEMENTOS INTERATIVOS:
+- Hover: o card ganha a "identidade visual" da plataforma (ex: card YouTube fica vermelho no hover)
+- Clique: abre carrossel com exemplos específicos (vídeos, imagens, jogos)
+- Carrossel de exemplos: ao expandir, mini-carrossel horizontal com 3-4 "monitores" mostrando prints abstratos
+
+PARTÍCULAS: Padrão
+
+ILUMINAÇÃO: Padrão
+
+EFEITOS: Nenhum adicional
+
+ÍCONES: Logos simplificados de cada plataforma (YouTube, TikTok, Roblox, Minecraft, Garry's Mod, Unreal, film, palette, costume)
+
+IMAGENS: Nenhuma real
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Grid de cards — stagger 60ms (500ms, delay 400ms + stagger)
+3. Indicadores de views (fade, 400ms, delay 800ms)
+
+INTERAÇÕES:
+- Hover nos cards
+- Clique: abre carrossel com exemplos
+- Navegação no carrossel: setas ou swipe
+
+TRANSIÇÃO PARA SLIDE 16: Dissolve com ruído.
+
+================================================================================
+SLIDE 16 — JOGOS INSPIRADOS NAS BACKROOMS
+================================================================================
+
+OBJETIVO: Mostrar os principais jogos inspirados nas Backrooms.
+
+EMOÇÃO: Interesse, desejo de experimentar, nostalgia de jogos.
+
+LAYOUT: Grid de cards com estilo de "game covers"/pôsteres.
+
+ORGANIZAÇÃO:
+- Topo: "16" + título "JOGOS INSPIRADOS"
+- Grid 3x3 de cards com estilo de cartucho/capa de jogo:
+  1. ESCAPE THE BACKROOMS
+  2. INSIDE THE BACKROOMS
+  3. THE BACKROOMS: LOST TAPE
+  4. ENTER THE BACKROOMS
+  5. APEIROPHOBIA
+  6. NICO'S NEXTBOTS
+  7. (espaço) EXPERIÊNCIAS NO ROBLOX
+  8. (espaço) COOPERAÇÃO MULTIPLAYER
+  9. (espaço) DIFERENÇAS ENTRE JOGOS
+
+BACKGROUND:
+- Fundo padrão
+- ADICIONAL: Leve textura de pixel/retro nos cantos (simulando jogos)
+
+ELEMENTOS DECORATIVOS:
+- Cada card tem uma moldura que parece um cartridge/caixa de jogo
+- "Classificação indicativa" (12+, 16+, 18+) no canto dos cards
+- Nota de "crítica" estilo metacritic (#/10) em cada card
+
+ELEMENTOS INTERATIVOS:
+- Hover: card se inclina (3D tilt), brilho se move sobre o card (efeito de luz passando)
+- Clique: card expande com detalhes do jogo (plataforma, descrição, data de lançamento)
+
+PARTÍCULAS: Padrão
+
+ILUMINAÇÃO: Padrão
+
+EFEITOS: Leve efeito de "pixel scan" nos cards (linhas horizontais finas passando)
+
+ÍCONES: Gamepad, steam, roblox em alguns cards
+
+IMAGENS: Nenhuma real — capas abstratas criadas com CSS (gradientes + formas geométricas + título do jogo)
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Grid de cards — stagger 70ms (500ms, delay 400ms + stagger)
+
+INTERAÇÕES:
+- Hover: tilt 3D + luz passando
+- Clique: expande com detalhes
+
+TRANSIÇÃO PARA SLIDE 17: Dissolve com ruído.
+
+================================================================================
+SLIDE 17 — TEORIAS
+================================================================================
+
+OBJETIVO: Apresentar teorias sobre a verdadeira natureza das Backrooms.
+
+EMOÇÃO: Reflexão, curiosidade filosófica, sensação de mistério.
+
+LAYOUT: Cards em formato de "dossiê" com abas expansíveis.
+
+ORGANIZAÇÃO:
+- Topo: "17" + título "TEORIAS"
+- Subtítulo: "A VERDADEIRA NATUREZA DAS BACKROOMS"
+- Grid 3x3 de cards com estilo de "dossiê classificado":
+  1. UNIVERSO PARALELO — dimensão que existe ao lado da nossa
+  2. SIMULAÇÃO — falha em uma simulação de realidade
+  3. SONHO COLETIVO — manifestação do inconsciente coletivo
+  4. FALHA DA REALIDADE — erro na estrutura do universo
+  5. EXPERIMENTO CIENTÍFICO — resultado de um experimento
+  6. DIMENSÃO ESQUECIDA — lugar que a humanidade abandonou
+  7. LIMBO — espaço entre a vida e a morte
+  8. INTELIGÊNCIA ARTIFICIAL — criado por uma IA avançada
+  9. ESPAÇO EXTRADIMENSIONAL — além da compreensão humana
+
+BACKGROUND:
+- Fundo padrão
+- ADICIONAL: Textura de papel arquivado/velho (manchas, dobras) opacidade 0.03
+
+ELEMENTOS DECORATIVOS:
+- Cada card tem um selo "CLASSIFICADO" ou "NÃO CONFIRMADO" (vermelho, inclinado 15°)
+- Carimbo decorativo "TEORIA #XX" em cada card
+- Fita adesiva digital nos cantos dos cards (simulando dossiê)
+
+ELEMENTOS INTERATIVOS:
+- Clique no card: revela o conteúdo completo da teoria (abre como um folder/papel se desdobrando)
+- Animação de "desdobrar": o card se expande para os lados e para baixo, mostrando o texto completo
+- Hover: leve elevação
+
+PARTÍCULAS: Padrão
+
+ILUMINAÇÃO: Padrão, um pouco mais quente (como luz de uma sala de arquivos)
+
+EFEITOS: Sombra de papel (sombras projetadas mais longas, simulando papel sobre mesa)
+
+ÍCONES: Olho, cérebro, computador, portal, DNA, esfera, infinito, chip, galaxy
+
+IMAGENS: Nenhuma
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Subtítulo (500ms, delay 400ms)
+3. Cards — stagger 60ms (500ms, delay 500ms + stagger)
+
+INTERAÇÕES:
+- Clique: expande o card como um folder se desdobrando
+- Clique no X ou fora: fecha o folder
+- Apenas uma teoria pode estar expandida por vez
+
+TRANSIÇÃO PARA SLIDE 18: Dissolve com ruído.
+
+================================================================================
+SLIDE 18 — FATOS INTERESSANTES
+================================================================================
+
+OBJETIVO: Compartilhar fatos interessantes e curiosos sobre a construção do universo das Backrooms.
+
+EMOÇÃO: Surpresa, admiração pela comunidade, sensação de magnitude.
+
+LAYOUT: Cards com ícones em grid, estilo "fun facts".
+
+ORGANIZAÇÃO:
+- Topo: "18" + título "FATOS INTERESSANTES"
+- Grid 3x3 de cards com ícone grande e texto curto:
+  1. TUDO COMEÇOU COM UMA ÚNICA FOTO
+  2. NÃO EXISTE UM ÚNICO CRIADOR DO UNIVERSO
+  3. GRANDE PARTE FOI CRIADA POR FÃS
+  4. MILHARES DE PÁGINAS NA WIKI
+  5. ALGUMAS HISTÓRIAS TÊM CONTINUIDADE
+  6. OUTRAS SE CONTRADIZEM
+  7. O UNIVERSO CONTINUA CRESCENDO
+  8. MAPAS COMPLETOS DOS NÍVEIS
+  9. CADA COMUNIDADE TEM SUA PRÓPRIA INTERPRETAÇÃO
+
+BACKGROUND:
+- Fundo padrão
+
+ELEMENTOS DECORATIVOS:
+- Pequenos números (#001-#009) no canto de cada card
+- Borda iluminada em cada card (animação de glow que percorre a borda)
+
+ELEMENTOS INTERATIVOS:
+- Hover: glow na borda acelera, card escala 1.03
+- Clique: tooltip com detalhe adicional
+
+PARTÍCULAS: Padrão
+
+ILUMINAÇÃO: Padrão
+
+EFEITOS: A borda iluminada animada (gradiente que percorre o perímetro do card)
+
+ÍCONES: Image, users, heart, book, film, alert-triangle, trending-up, map, globe
+
+IMAGENS: Nenhuma
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Cards — stagger 50ms (500ms, delay 400ms + stagger)
+
+INTERAÇÕES:
+- Hover: escala + glow na borda
+- Clique: tooltip
+
+TRANSIÇÃO PARA SLIDE 19: Dissolve com ruído.
+
+================================================================================
+SLIDE 19 — IMPACTO NA INTERNET
+================================================================================
+
+OBJETIVO: Demonstrar a magnitude do fenômeno Backrooms na internet.
+
+EMOÇÃO: Impacto, admiração pela escala, sensação de pertencimento a algo enorme.
+
+LAYOUT: Dashboard com números grandes (contadores animados) e indicadores visuais.
+
+ORGANIZAÇÃO:
+- Topo: "19" + título "IMPACTO NA INTERNET"
+- Grid de métricas (2x3):
+  - Métrica 1: "100M+" — VISUALIZAÇÕES NO YOUTUBE (ícone play)
+  - Métrica 2: "1M+" — MEMBROS NA COMUNIDADE (ícone users)
+  - Métrica 3: "50+" — JOGOS LANÇADOS (ícone gamepad)
+  - Métrica 4: "10K+" — PÁGINAS NA WIKI (ícone book)
+  - Métrica 5: "2020" — ANO DE EXPLOSÃO (ícone calendar)
+  - Métrica 6: "∞" — NÍVEIS CRIADOS (ícone infinity)
+- Abaixo das métricas: texto descritivo em 2 linhas
+- Canto inferior: indicador "O FENÔMENO CONTINUA CRESCENDO"
+
+BACKGROUND:
+- Fundo padrão
+- ADICIONAL: Gradiente radial dourado sutil no centro (como luz de spotlight no fenômeno)
+
+ELEMENTOS DECORATIVOS:
+- Barras de progresso/medidor ao lado de cada métrica
+- Linhas de gráfico/onda abaixo das métricas (linhas senoidais animadas, opacidade 0.05)
+
+ELEMENTOS INTERATIVOS:
+- Os números contam crescentemente ao entrar no slide (contador animado de 0 até o valor final)
+- Hover em uma métrica: o glow ao redor do número aumenta, e um tooltip mostra o detalhe
+- Clique: não faz nada (apenas exibição)
+
+PARTÍCULAS: Padrão global. ADICIONAL: 10 partículas douradas subindo lentamente (como confetes distantes)
+
+ILUMINAÇÃO: Spotlight central no dashboard
+
+EFEITOS:
+- Números têm glow pulsante (respiração, 4s ciclo)
+- Efeito de "contagem" nos números (animação de contador)
+
+ÍCONES: Em cada métrica, ícone grande acima do número
+
+IMAGENS: Nenhuma
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + título (700ms, delay 200ms)
+2. Métricas — entrada com stagger 100ms (cada uma: fade + escala 90%→100%, 800ms, delay 500ms + stagger)
+3. Os contadores começam a contar 200ms após a métrica aparecer
+4. Texto descritivo (500ms, delay 1200ms)
+5. Indicador final (600ms, delay 1400ms)
+
+INTERAÇÕES:
+- Hover nas métricas: glow + tooltip
+
+TRANSIÇÃO PARA SLIDE 20: Dissolve com ruído. Nos últimos 300ms, a estática aumenta.
+
+================================================================================
+SLIDE 20 — CONCLUSÃO
+================================================================================
+
+OBJETIVO: Finalizar a apresentação com uma reflexão poderosa sobre o verdadeiro horror das Backrooms.
+
+EMOÇÃO: Melancolia, reflexão profunda, arrepio, sensação de solidão.
+
+LAYOUT: Centralizado dramático. Composição minimalista com muito espaço vazio para enfatizar a solidão.
+
+ORGANIZAÇÃO:
+- Topo distante: "20" + "/" + "FIM" (pequeno, no canto)
+- Centro vertical: texto de conclusão em formato de lista vertical, com espaçamento generoso entre itens
+  1. "O QUE SÃO AS BACKROOMS"
+  2. "ORIGEM E EVOLUÇÃO"
+  3. "ESPAÇOS LIMINARES"
+  4. "NÍVEIS E ENTIDADES"
+  5. "SOBREVIVÊNCIA"
+  6. "KANE PIXELS"
+  7. "IMPACTO CULTURAL"
+  8. "COMUNIDADE"
+- Grande espaço
+- A REFLEXÃO: "TALVEZ O VERDADEIRO MEDO DAS BACKROOMS NÃO SEJAM OS MONSTROS, MAS A POSSIBILIDADE DE ESTAR COMPLETAMENTE SOZINHO EM UM LUGAR INFINITO, SEM SABER SE EXISTE UMA SAÍDA."
+- Abaixo: "APRESENTAÇÃO POR [NOME]" + "//" + "BACKROOMS DATABASE"
+
+BACKGROUND:
+- Fundo padrão
+- ADICIONAL: Leve gradiente que escurece do centro para as bordas (como se a luz estivesse se apagando lentamente)
+- As partículas e névoa continuam, mas mais lentas, como se o tempo estivesse parando
+
+ELEMENTOS DECORATIVOS:
+- Uma única linha horizontal fina no centro do slide, abaixo da lista de tópicos (separando os tópicos da reflexão)
+- Canto inferior direito: logo decorativo "∞ // LIMINAL CORP"
+
+ELEMENTOS INTERATIVOS:
+- Nenhum elemento interativo neste slide (apenas navegação global)
+
+PARTÍCULAS:
+- Mais lentas que o normal (velocidade reduzida em 50%)
+- Menos partículas (30)
+
+ILUMINAÇÃO:
+- Muito escura
+- Apenas um ponto de luz fraco no centro da reflexão (gradiente radial, #F5D742, opacidade 0.03)
+
+EFEITOS:
+- A vignette é a mais forte de toda a apresentação (opacidade 0.75)
+- Blur muito sutil nas bordas (2px)
+- A reflexão tem um leve glow (text-shadow)#F5D742 com opacidade 0.3
+
+ÍCONES: Nenhum
+
+IMAGENS: Nenhuma
+
+TIPOGRAFIA — ORDEM DE ENTRADA:
+1. HUD + "20 / FIM" (fade, 600ms, delay 200ms)
+2. Lista de tópicos — entrada do topo para baixo, um por um, com stagger de 100ms (cada: fade + mover 15px para direita, 600ms, delay 400ms + stagger)
+3. Linha separadora (expandir horizontal do centro, 700ms, delay 1400ms)
+4. Reflexão — a mais demorada e impactante (fade + blur 15px→0 + escala 95%→100%, 2000ms, delay 1800ms)
+5. Nome do apresentador e rodapé (fade, 600ms, delay 2500ms)
+
+INTERAÇÕES:
+- Apenas navegação global
+- Ao chegar neste slide, a apresentação não termina abruptamente — o usuário pode ficar o tempo que quiser
+
+TRANSIÇÃO: Não há próximo slide. Se o usuário tentar avançar, não acontece nada (ou volta ao início se preferir).
+
+OBSERVAÇÕES:
+- Este slide é o mais lento propositalmente. Tudo deve ser mais lento, mais silencioso, mais vazio.
+- A reflexão deve aparecer com a animação mais cinematográfica de toda a apresentação.
+- O slide final deve deixar o usuário em silêncio por alguns segundos, processando a experiência.
+
+================================================================================
+REGRAS ADICIONAIS PARA A IMPLEMENTAÇÃO
+================================================================================
+
+1. NÃO USE IMAGENS EXTERNAS. Toda "imagem" deve ser criada com CSS, gradientes, formas, canvas ou SVG.
+
+2. ÁUDIO: O zumbido do Level 0 deve ser gerado via Web Audio API (OscillatorNode, 60Hz + 120Hz + 180Hz com ganho baixo). Não use arquivos de áudio externos.
+
+3. TODOS OS TEXTOS devem estar em português (PT-BR), exceto nomes próprios e títulos em inglês quando fizer sentido.
+
+4. ORGANIZAÇÃO DO CÓDIGO: Mesmo sendo um único HTML, organize com comentários claros:
+   <!-- SLIDE 1 — CAPA -->
+   <!-- SLIDE 2 — O QUE SÃO AS BACKROOMS -->
+   etc.
+
+5. PERFORMANCE: use transform e opacity para animações (GPU accelerated). Evite animar width, height, top, left, margin, padding.
+
+6. O slide ativo DEVE ter display:flex (ou a forma de exibição correta), os demais slides DEVEM ter display:none (ou visibility:hidden + pointer-events:none quando estiverem em transição). NUNCA deixe múltiplos slides visíveis simultaneamente.
+
+7. A apresentação DEVE ocupar toda a viewport (100vw x 100vh). NENHUM slide pode ter overflow.
+
+8. BARRA DE PROGRESSO INFERIOR: fina, 2px, cor gradiente de #F5D742 a #B87333, com transição suave de 500ms ease-out. Abaixo, o contador "SLIDE XX/20" em Courier New, 0.65rem, #8A8A8A.
+
+9. SETAS DE NAVEGAÇÃO: laterais (esquerda/direita), centro vertical, opacidade 0.3 (hover 0.8), cor #F5D742, tamanho 28px, fonte Courier New.
+
+10. A NÃO SER QUE especificado em contrário, TODAS as animações usam cubic-bezier(0.25, 0.46, 0.45, 0.94) como easing padrão.
+
+11. ORGANIZAÇÃO DOS SLIDES: o container de slides deve usar position:fixed, 100vw x 100vh, cada slide com position:absolute, 100vw x 100vh.
+
+12. RESPONSIVIDADE: A apresentação deve usar unidades relativas (vw, vh, %, rem, em) e clamp() para fontes. Testar em 1920x1080, 1366x768, 1024x768, e mobile (375x667). Em mobile, reorganizar grids para 1-2 colunas se necessário.
+
+13. MARGEM DE SEGURANÇA: Manter 5-8% de padding nas quatro bordas da tela em todos os slides. Nenhum conteúdo pode encostar na borda.
+
+14. CHECKLIST DE CODIFICAÇÃO: Antes de finalizar, percorra TODO o HTML e verifique que nenhum caractere acentuado está corrompido. Verifique strings em português, comentários, CSS content, JavaScript. Use <meta charset="UTF-8">. NENHUM caractere pode aparecer como "�".
+
+15. Não use framework, CDN, ou biblioteca externa. Apenas HTML, CSS e JavaScript puros em um único arquivo.
+
+16. NÃO INCLUA pergunta "Alguma dúvida?" ou variações no último slide. O slide final é uma reflexão, não uma pergunta.
+
+17. O scroll do mouse NÃO pode trocar slides. Desabilitar o evento wheel para navegação.
+
+18. O clique do mouse NÃO pode trocar slides. Desabilitar o evento click na área geral para navegação.
+
+19. APENAS as teclas de seta (←/→/↑/↓) navegam. Home = primeiro slide. End = último slide.
+
+20. O botão de mini-índice (grid) deve estar no canto superior direito. Ao clicar, abre overlay com miniaturas numeradas.
+
+21. O botão de fullscreen deve estar no canto inferior direito.
+
+22. ORGANIZAÇÃO: Os slides devem estar dentro de uma div#slides-container, cada slide dentro de uma div.slide.
+
+23. Na transição entre slides, use um overlay de ruído que aparece e desaparece, para camuflar a troca e criar o efeito de "estática".
+
+24. O ruído de fundo (grain) deve ser gerado com Canvas 2D (desenhar pixels aleatórios a cada ~50ms) ou CSS com pseudo-elemento e background-image com noise SVG.
+
+25. O título do slide 1 DEVE usar o efeito 3D extrudado com text-shadow conforme especificado: 35 camadas de text-shadow com loop JavaScript, texto horizontal (sem rotate, skew, ou transform 3d), mais ::before com filter:blur para sombra ambiente.
+
+================================================================================
+FIM DA ESPECIFICAÇÃO
+================================================================================
