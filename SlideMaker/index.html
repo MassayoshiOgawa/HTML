@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Placas de Vídeo: Como Elas Transformam Dados em Imagens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black-deep: #080B14;
+  --black-blue: #0D1225;
+  --graphite: #141C33;
+  --lead: #1E2A45;
+  --steel: #7B8AA8;
+  --ice: #E8EDF5;
+  --cyan: #00D4FF;
+  --cyan-dark: #0099CC;
+  --magenta: #A855F7;
+  --magenta-dark: #7C3AED;
+  --green-circuit: #22D3A4;
+  --orange: #FF6B35;
+  --amber: #F59E0B;
+  --red: #EF4444;
+  --green-success: #22C55E;
+  --neon-pink: #EC4899;
+  --bg-gradient: linear-gradient(180deg, #080B14 0%, #0A1020 50%, #080B14 100%);
+  --glow-cyan: rgba(0,212,255,0.15);
+  --glow-magenta: rgba(168,85,247,0.2);
+  --glow-orange: rgba(255,107,53,0.12);
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --transition-speed: 600ms;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: var(--font-body); background: var(--black-deep); color: var(--ice);
+  cursor: none; user-select: none; -webkit-user-select: none;
+}
+a { color: var(--cyan); text-decoration: none; }
+::-webkit-scrollbar { display: none; }
+canvas { display: block; }
+
+/* Custom Cursor */
+#cursor-dot {
+  position: fixed; pointer-events: none; z-index: 99999;
+  width: 6px; height: 6px; background: var(--cyan); border-radius: 50%;
+  box-shadow: 0 0 12px var(--cyan), 0 0 24px rgba(0,212,255,0.3);
+  transform: translate(-50%,-50%); transition: width 0.2s, height 0.2s, background 0.2s;
+}
+#cursor-ring {
+  position: fixed; pointer-events: none; z-index: 99998;
+  width: 30px; height: 30px; border: 1px solid rgba(0,212,255,0.3);
+  border-radius: 50%; transform: translate(-50%,-50%);
+  transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+#cursor-ring.hover {
+  width: 50px; height: 50px; border-color: var(--cyan);
+  box-shadow: 0 0 20px rgba(0,212,255,0.15);
+}
+
+/* Global Background Layers */
+#bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+#bg-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+  background: var(--bg-gradient);
+}
+#bg-grid {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+  opacity: 0.04; background-image:
+    linear-gradient(30deg, rgba(0,212,255,0.3) 1px, transparent 1px),
+    linear-gradient(120deg, rgba(0,212,255,0.3) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+#bg-fog {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+  overflow: hidden;
+}
+.fog-blob {
+  position: absolute; border-radius: 50%; filter: blur(80px);
+  animation: fogFloat 30s ease-in-out infinite alternate;
+}
+.fog-blob:nth-child(1) {
+  width: 50%; height: 50%; top: -10%; left: -10%;
+  background: radial-gradient(circle, rgba(0,212,255,0.06), transparent);
+  animation-duration: 35s;
+}
+.fog-blob:nth-child(2) {
+  width: 40%; height: 40%; bottom: -5%; right: -5%;
+  background: radial-gradient(circle, rgba(168,85,247,0.05), transparent);
+  animation-duration: 25s; animation-delay: -10s;
+}
+.fog-blob:nth-child(3) {
+  width: 35%; height: 35%; top: 50%; left: 60%;
+  background: radial-gradient(circle, rgba(255,107,53,0.04), transparent);
+  animation-duration: 40s; animation-delay: -15s;
+}
+@keyframes fogFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 30px) scale(0.95); }
+  100% { transform: translate(10px, -10px) scale(1.02); }
+}
+
+/* Data Lines */
+#data-lines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+/* Slide Container */
+#slides {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+}
+.slide {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: 5vh 5vw; opacity: 0; visibility: hidden;
+  transition: none;
+}
+.slide.active { opacity: 1; visibility: visible; }
+
+/* Transition Keyframes */
+@keyframes crossFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes crossFadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes slideLeftIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideLeftOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-100%); opacity: 0; } }
+@keyframes fadeScaleIn { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: scale(1); } }
+@keyframes fadeScaleOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
+@keyframes crossFadeBlurIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
+@keyframes crossFadeBlurOut { from { opacity: 1; filter: blur(0); } to { opacity: 0; filter: blur(10px); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes scaleFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes scaleFadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
+@keyframes fadeGlowIn { from { opacity: 0; filter: brightness(2); } to { opacity: 1; filter: brightness(1); } }
+@keyframes fadeGlowOut { from { opacity: 1; filter: brightness(1); } to { opacity: 0; filter: brightness(2); } }
+
+/* Navigation */
+#progress-bar {
+  position: fixed; bottom: 0; left: 0; width: 100%; height: 3px; z-index: 100;
+  background: rgba(30,42,69,0.5);
+}
+#progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  transition: width 500ms cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 0 10px rgba(0,212,255,0.3);
+}
+#progress-label {
+  position: fixed; bottom: 10px; right: 20px; z-index: 100;
+  font-family: var(--font-mono); font-size: 0.7rem; color: var(--lead); letter-spacing: 0.1em;
+}
+.nav-btn {
+  position: fixed; bottom: 50px; z-index: 100;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(30,42,69,0.5); border: 1px solid rgba(0,212,255,0.15);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  cursor: none; transition: all 300ms ease;
+  color: var(--steel);
+}
+.nav-btn:hover { background: rgba(0,212,255,0.15); color: var(--cyan); transform: scale(1.05); }
+.nav-btn:active { transform: scale(0.95); box-shadow: 0 0 20px var(--glow-cyan); }
+.nav-btn.hidden { opacity: 0; pointer-events: none; }
+.nav-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#nav-prev { left: 40px; }
+#nav-next { right: 40px; }
+
+/* Slide Index Indicator */
+#slide-index {
+  position: fixed; top: 20px; right: 20px; z-index: 100;
+  font-family: var(--font-mono); font-size: 0.75rem; color: var(--lead);
+  cursor: none; transition: all 300ms ease;
+}
+#slide-index-dots {
+  position: absolute; top: 100%; right: 0; margin-top: 8px;
+  display: flex; gap: 6px; padding: 8px 12px;
+  background: rgba(20,28,51,0.95); border: 1px solid rgba(0,212,255,0.15);
+  border-radius: 8px; backdrop-filter: blur(8px);
+  opacity: 0; visibility: hidden; transform: translateY(-5px);
+  transition: all 200ms ease; white-space: nowrap;
+}
+#slide-index:hover #slide-index-dots,
+#slide-index-dots:hover { opacity: 1; visibility: visible; transform: translateY(0); }
+.index-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--lead);
+  cursor: none; transition: all 300ms ease;
+  border: none; padding: 0;
+}
+.index-dot.active {
+  background: linear-gradient(135deg, var(--cyan), var(--magenta));
+  box-shadow: 0 0 8px rgba(0,212,255,0.5);
+}
+.index-dot:hover { transform: scale(1.5); }
+
+/* Element Entry Animations */
+.anim-enter { opacity: 0; }
+.anim-enter.active { animation: elemFadeUp 600ms cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes elemFadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.anim-enter-title { opacity: 0; }
+.anim-enter-title.active { animation: elemFadeDown 600ms cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes elemFadeDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.anim-enter-left { opacity: 0; }
+.anim-enter-left.active { animation: elemFadeLeft 600ms cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes elemFadeLeft { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
+.anim-enter-scale { opacity: 0; }
+.anim-enter-scale.active { animation: elemScaleIn 600ms cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes elemScaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+/* Card Breathing */
+.card { transition: all 400ms cubic-bezier(0.16,1,0.3,1); }
+.card:hover { transform: translateY(-8px); box-shadow: 0 8px 32px rgba(0,212,255,0.15); }
+.card .sweep {
+  position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,0.05), transparent);
+  transition: none; pointer-events: none;
+}
+.card:hover .sweep { animation: sweep 600ms ease forwards; }
+@keyframes sweep { to { left: 100%; } }
+
+/* Ripple Effect */
+.ripple {
+  position: absolute; border-radius: 50%;
+  background: rgba(0,212,255,0.3); pointer-events: none;
+  animation: rippleAnim 600ms ease-out forwards;
+}
+@keyframes rippleAnim {
+  from { width: 0; height: 0; opacity: 0.3; }
+  to { width: 200px; height: 200px; opacity: 0; transform: translate(-100px,-100px); }
+}
+
+/* Tooltip */
+.tooltip {
+  position: fixed; z-index: 1000; pointer-events: none;
+  background: rgba(20,28,51,0.95); border: 1px solid rgba(0,212,255,0.2);
+  backdrop-filter: blur(8px); border-radius: 6px;
+  padding: 6px 12px; font-size: 0.8rem; color: var(--ice);
+  font-family: var(--font-body); opacity: 0;
+  transform: translateY(0); transition: opacity 200ms, transform 200ms;
+}
+.tooltip.show { opacity: 1; transform: translateY(-5px); }
+.tooltip::after {
+  content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+  border-left: 6px solid transparent; border-right: 6px solid transparent;
+  border-top: 6px solid rgba(0,212,255,0.2);
+}
+
+/* ============================================================
+   SLIDE 1 — CAPA
+   ============================================================ */
+#slide-1 { text-align: center; }
+.title-3d {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(2.8rem, 6.5vw, 5.5rem);
+  color: var(--ice); letter-spacing: -0.02em; line-height: 1.1;
+  text-shadow: none; position: relative;
+}
+.title-3d::before {
+  content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  filter: blur(6px); opacity: 0.3; color: transparent;
+  -webkit-text-stroke: 1px rgba(0,212,255,0.1);
+  transform: translate(2px, -2px);
+}
+.s1-subtitle {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(1rem, 1.8vw, 1.4rem); color: var(--cyan);
+  text-shadow: 0 0 20px rgba(0,212,255,0.3); margin-top: 1.5rem;
+}
+.s1-meta {
+  font-family: var(--font-body); font-weight: 400;
+  font-size: clamp(0.8rem, 1.2vw, 1rem); color: var(--steel); margin-top: 2rem;
+}
+.s1-hint {
+  position: absolute; bottom: 8vh; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-body); font-weight: 300;
+  font-size: 0.75rem; color: var(--lead);
+  opacity: 1; transition: opacity 1s;
+}
+.s1-hint.fade { opacity: 0; }
+#s1-canvas {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+}
+.s1-glow {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 80%; height: 60%;
+  background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: -1;
+}
+
+/* ============================================================
+   SLIDE 2 — O que é uma Placa de Vídeo?
+   ============================================================ */
+#slide-2 .s2-wrap {
+  display: flex; width: 100%; height: 100%; align-items: center; gap: 3vw;
+}
+#slide-2 .s2-left { flex: 0 0 42%; padding: 2vw; }
+#slide-2 .s2-right { flex: 0 0 55%; position: relative; height: 80%; display: flex; align-items: center; justify-content: center; }
+.s2-bullets { list-style: none; margin-top: 1.5rem; }
+.s2-bullets li {
+  padding: 0.6rem 0; color: var(--steel); font-size: clamp(0.85rem,1.2vw,1rem);
+  line-height: 1.6; position: relative; padding-left: 1.5rem;
+}
+.s2-bullets li::before {
+  content: ''; position: absolute; left: 0; top: 1rem;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--cyan);
+  box-shadow: 0 0 8px rgba(0,212,255,0.4);
+}
+.s2-curiosity {
+  margin-top: 1.5rem; padding: 1rem 1.2rem;
+  background: rgba(20,28,51,0.75); border: 1px solid rgba(0,212,255,0.1);
+  border-radius: 12px; backdrop-filter: blur(12px);
+  font-family: var(--font-body); font-size: clamp(0.8rem,1vw,0.9rem); color: var(--ice);
+}
+#s2-diagram {
+  position: relative; width: 100%; height: 100%;
+}
+#s2-diagram canvas { width: 100%; height: 100%; }
+.s2-diagram-label {
+  position: absolute; font-family: var(--font-mono); font-size: 0.75rem; color: var(--lead);
+  pointer-events: none; transition: color 300ms;
+}
+
+/* ============================================================
+   SLIDE 3 — Métricas
+   ============================================================ */
+#slide-3 { padding: 3vh 4vw; }
+.s3-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem;
+  width: 100%; max-width: 1200px; margin: 0 auto;
+}
+.s3-card {
+  background: rgba(20,28,51,0.6); border: 1px solid rgba(0,212,255,0.08);
+  border-radius: 14px; padding: 1.2rem;
+  backdrop-filter: blur(6px); position: relative; overflow: hidden;
+  display: flex; flex-direction: column; gap: 0.4rem;
+}
+.s3-card .s3-icon { width: 28px; height: 28px; color: var(--cyan); margin-bottom: 0.3rem; }
+.s3-card .s3-name { font-family: var(--font-display); font-weight: 500; font-size: 0.9rem; color: var(--ice); }
+.s3-card .s3-value { font-family: var(--font-mono); font-weight: 700; font-size: 1.4rem; color: var(--cyan); }
+.s3-card .s3-desc { font-family: var(--font-body); font-weight: 400; font-size: 0.75rem; color: var(--steel); }
+.s3-card .s3-bar {
+  height: 4px; border-radius: 2px; background: rgba(30,42,69,0.5); margin-top: 0.3rem; overflow: hidden;
+}
+.s3-card .s3-bar-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  width: 0%; transition: width 1s ease;
+}
+.s3-tabs {
+  display: flex; gap: 0.5rem; margin-bottom: 1.5rem; justify-content: center;
+}
+.s3-tab {
+  padding: 0.5rem 1.2rem; border-radius: 20px; border: 1px solid rgba(0,212,255,0.2);
+  background: transparent; color: var(--steel); font-family: var(--font-body); font-size: 0.8rem;
+  cursor: none; transition: all 300ms;
+}
+.s3-tab.active { background: linear-gradient(135deg, var(--cyan), var(--cyan-dark)); color: var(--black-deep); border-color: transparent; }
+.s3-tab:hover:not(.active) { border-color: var(--cyan); color: var(--cyan); }
+.s3-tab-content { display: none; }
+.s3-tab-content.active { display: grid; animation: fadeIn 400ms ease; }
+.s3-curiosity {
+  margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 10px;
+  background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.2);
+  font-size: clamp(0.75rem,1vw,0.85rem); color: var(--ice);
+  display: inline-flex; align-items: center; gap: 0.6rem;
+}
+
+/* ============================================================
+   SLIDE 4 — Evolução
+   ============================================================ */
+#slide-4 { padding: 3vh 3vw; }
+.s4-bento {
+  display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(120px, auto);
+  gap: 1rem; width: 100%; max-width: 1200px; margin: 0 auto;
+}
+.s4-card {
+  border-radius: 14px; padding: 1.2rem; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  background: rgba(20,28,51,0.6); border: 1px solid rgba(0,212,255,0.08);
+  transition: all 400ms cubic-bezier(0.16,1,0.3,1);
+}
+.s4-card:hover { transform: translateY(-6px); }
+.s4-card .s4-year { font-family: var(--font-mono); font-size: 0.7rem; color: var(--lead); }
+.s4-card .s4-name { font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; color: var(--ice); margin-top: 0.2rem; }
+.s4-card .s4-badge {
+  display: inline-block; font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 4px;
+  margin-top: 0.3rem; font-family: var(--font-mono);
+}
+.s4-card.featured { grid-column: span 2; }
+.s4-card.highlight {
+  background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(20,28,51,0.8));
+  border-color: rgba(168,85,247,0.2);
+}
+.s4-metrics {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem;
+  width: 100%; max-width: 1200px; margin: 1rem auto 0;
+}
+.s4-metric {
+  background: rgba(20,28,51,0.4); border: 1px solid rgba(0,212,255,0.06);
+  border-radius: 10px; padding: 0.8rem; text-align: center;
+}
+.s4-metric .s4-m-val { font-family: var(--font-mono); font-weight: 700; font-size: 1.1rem; color: var(--cyan); }
+.s4-metric .s4-m-label { font-family: var(--font-body); font-size: 0.7rem; color: var(--steel); margin-top: 0.2rem; }
+
+/* ============================================================
+   SLIDE 5 — Ray Tracing e IA
+   ============================================================ */
+#slide-5 { padding: 3vh 4vw; }
+.s5-compare {
+  display: flex; gap: 2rem; width: 100%; max-width: 1100px; margin: 0 auto; align-items: stretch;
+}
+.s5-side {
+  flex: 1; border-radius: 14px; padding: 1.5rem; position: relative;
+  background: rgba(20,28,51,0.5); border: 1px solid rgba(0,212,255,0.08);
+  backdrop-filter: blur(6px); overflow: hidden;
+}
+.s5-side.raster { border-color: rgba(0,153,204,0.2); }
+.s5-side.raytrace { border-color: rgba(255,107,53,0.2); }
+.s5-side-title {
+  font-family: var(--font-display); font-weight: 600; font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+}
+.s5-side-desc { font-family: var(--font-body); font-weight: 400; font-size: 0.85rem; color: var(--steel); line-height: 1.5; }
+.s5-vs {
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.3rem;
+  color: var(--steel); flex-shrink: 0;
+}
+.s5-toggle-wrap {
+  display: flex; align-items: center; gap: 1rem; justify-content: center; margin: 0.8rem 0;
+}
+.s5-toggle {
+  width: 48px; height: 26px; border-radius: 13px; background: var(--lead);
+  position: relative; cursor: none; transition: background 300ms; border: none; padding: 0;
+}
+.s5-toggle::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%; background: var(--steel);
+  transition: transform 300ms, background 300ms;
+}
+.s5-toggle.active { background: var(--orange); }
+.s5-toggle.active::after { transform: translateX(22px); background: var(--ice); }
+.s5-tech-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem;
+  width: 100%; max-width: 1100px; margin: 0.8rem auto 0;
+}
+.s5-tech-card {
+  background: rgba(20,28,51,0.5); border: 1px solid rgba(0,212,255,0.08);
+  border-radius: 12px; padding: 0.8rem; backdrop-filter: blur(6px);
+  transition: all 400ms;
+}
+.s5-tech-card:hover { transform: translateY(-6px); box-shadow: 0 6px 24px rgba(0,212,255,0.1); }
+.s5-tech-card .s5-tc-title { font-family: var(--font-display); font-weight: 500; font-size: 0.85rem; color: var(--ice); }
+.s5-tech-card .s5-tc-desc { font-family: var(--font-body); font-size: 0.75rem; color: var(--steel); margin-top: 0.3rem; line-height: 1.4; }
+
+/* ============================================================
+   SLIDE 6 — O que Realmente Faz uma GPU ser Rápida?
+   ============================================================ */
+#slide-6 { padding: 3vh 4vw; }
+.s6-wrap { display: flex; width: 100%; max-width: 1200px; margin: 0 auto; gap: 2rem; align-items: flex-start; }
+.s6-left { flex: 0 0 48%; }
+.s6-right { flex: 0 0 48%; }
+.s6-accordion { display: flex; flex-direction: column; gap: 0.4rem; }
+.s6-acc-item {
+  border-radius: 10px; overflow: hidden;
+  background: rgba(20,28,51,0.5); border: 1px solid rgba(0,212,255,0.06);
+  transition: all 300ms;
+}
+.s6-acc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.8rem 1rem; cursor: none; transition: background 300ms;
+  font-family: var(--font-display); font-weight: 500; font-size: 0.95rem; color: var(--ice);
+}
+.s6-acc-header:hover { background: rgba(0,212,255,0.05); }
+.s6-acc-header .chevron { transition: transform 300ms; width: 16px; height: 16px; color: var(--steel); }
+.s6-acc-item.open .chevron { transform: rotate(180deg); }
+.s6-acc-body {
+  max-height: 0; padding: 0 1rem; overflow: hidden;
+  transition: max-height 400ms ease, padding 400ms ease;
+  font-family: var(--font-body); font-size: 0.85rem; color: var(--steel); line-height: 1.5;
+}
+.s6-acc-item.open .s6-acc-body { max-height: 200px; padding: 0 1rem 1rem; }
+.s6-compare-wrap {
+  background: rgba(20,28,51,0.4); border: 1px solid rgba(0,212,255,0.06);
+  border-radius: 14px; padding: 1.2rem;
+}
+.s6-compare-col { margin-bottom: 0.8rem; }
+.s6-compare-col .s6-cc-label { font-family: var(--font-mono); font-size: 0.75rem; color: var(--lead); margin-bottom: 0.2rem; }
+.s6-cc-bars { display: flex; gap: 1rem; align-items: center; }
+.s6-cc-bar-wrap { flex: 1; height: 20px; background: rgba(30,42,69,0.5); border-radius: 4px; overflow: hidden; position: relative; }
+.s6-cc-bar {
+  height: 100%; border-radius: 4px; width: 0%; transition: width 1s cubic-bezier(0.16,1,0.3,1);
+}
+.s6-cc-bar.cyan { background: var(--cyan); }
+.s6-cc-bar.violet { background: var(--magenta); }
+.s6-conclusion {
+  margin-top: 1rem; padding: 0.8rem; text-align: center;
+  font-family: var(--font-display); font-weight: 500; font-size: 0.9rem; color: var(--cyan);
+  border: 1px solid rgba(0,212,255,0.15); border-radius: 10px;
+  background: rgba(0,212,255,0.05);
+}
+
+/* ============================================================
+   SLIDE 7 — Curiosidades
+   ============================================================ */
+#slide-7 { padding: 3vh 3vw; }
+.s7-bento {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem;
+  width: 100%; max-width: 1200px; margin: 0 auto;
+}
+.s7-card {
+  border-radius: 14px; padding: 1rem; position: relative; overflow: hidden;
+  background: rgba(20,28,51,0.6); border: 1px solid rgba(0,212,255,0.08);
+  transition: all 400ms cubic-bezier(0.16,1,0.3,1);
+  display: flex; flex-direction: column;
+}
+.s7-card:hover { transform: translateY(-6px); }
+.s7-card .s7-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+.s7-card .s7-text { font-family: var(--font-body); font-size: 0.85rem; color: var(--ice); line-height: 1.4; }
+.s7-card .s7-highlight { font-family: var(--font-mono); font-weight: 700; font-size: 1.3rem; margin-bottom: 0.2rem; }
+.s7-card.accent-cyan { border-color: rgba(0,212,255,0.2); }
+.s7-card.accent-magenta { border-color: rgba(168,85,247,0.2); }
+.s7-card.accent-orange { border-color: rgba(255,107,53,0.2); }
+.s7-card.accent-green { border-color: rgba(34,211,164,0.2); }
+.s7-card.featured { grid-column: span 2; grid-row: span 1; }
+
+/* ============================================================
+   SLIDE 8 — Futuro
+   ============================================================ */
+#slide-8 { padding: 3vh 4vw; }
+.s8-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  width: 100%; max-width: 1000px; margin: 0 auto;
+}
+.s8-card {
+  border-radius: 14px; padding: 1.5rem; position: relative; overflow: hidden;
+  background: rgba(20,28,51,0.5); border: 1px solid rgba(0,212,255,0.1);
+  backdrop-filter: blur(8px); transition: all 400ms;
+}
+.s8-card:hover { transform: translateY(-6px); box-shadow: 0 8px 32px rgba(0,212,255,0.1); }
+.s8-card .s8-c-title { font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; color: var(--ice); margin-bottom: 0.5rem; }
+.s8-card .s8-c-desc { font-family: var(--font-body); font-size: 0.85rem; color: var(--steel); line-height: 1.5; }
+.s8-card .s8-c-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.s8-card.border-pink { border-color: rgba(236,72,153,0.2); }
+.s8-card.border-orange { border-color: rgba(255,107,53,0.2); }
+.s8-card.border-cyan { border-color: rgba(0,212,255,0.2); }
+.s8-card.border-green { border-color: rgba(34,211,164,0.2); }
+#s8-rings {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 200px; height: 200px; pointer-events: none;
+  z-index: 0;
+}
+.s8-ring {
+  position: absolute; top: 50%; left: 50%; border: 1px solid rgba(0,212,255,0.12);
+  border-radius: 50%; transform: translate(-50%,-50%);
+  animation: ringRotate 20s linear infinite;
+}
+.s8-ring:nth-child(1) { width: 120px; height: 120px; animation-duration: 20s; }
+.s8-ring:nth-child(2) { width: 160px; height: 160px; animation-duration: 25s; animation-direction: reverse; }
+.s8-ring:nth-child(3) { width: 200px; height: 200px; animation-duration: 30s; }
+@keyframes ringRotate { to { transform: translate(-50%,-50%) rotate(360deg); } }
+.s8-impact {
+  margin-top: 1rem; text-align: center;
+  font-family: var(--font-body); font-weight: 500; font-size: 0.95rem;
+  color: var(--neon-pink); padding: 0.8rem;
+  background: rgba(236,72,153,0.06); border-radius: 10px;
+  border: 1px solid rgba(236,72,153,0.12);
+}
+
+/* ============================================================
+   SLIDE 9 — Mitos e Verdades
+   ============================================================ */
+#slide-9 { padding: 0; }
+.s9-split { display: flex; width: 100%; height: 100%; }
+.s9-col { flex: 1; padding: 3vh 3vw; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
+.s9-col.myths { background: rgba(239,68,68,0.03); }
+.s9-col.truths { background: rgba(34,197,94,0.03); }
+.s9-col-header {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.5rem;
+  margin-bottom: 1.5rem; text-align: center; letter-spacing: 0.05em;
+}
+.s9-col.myths .s9-col-header { color: var(--red); text-shadow: 0 0 20px rgba(239,68,68,0.2); }
+.s9-col.truths .s9-col-header { color: var(--green-success); text-shadow: 0 0 20px rgba(34,197,94,0.2); }
+.s9-card {
+  padding: 0.8rem 1rem; margin-bottom: 0.6rem; border-radius: 10px;
+  background: rgba(20,28,51,0.5); cursor: none;
+  transition: all 300ms; position: relative;
+}
+.s9-card.myth { border-left: 3px solid rgba(239,68,68,0.3); }
+.s9-card.truth { border-left: 3px solid rgba(34,197,94,0.3); }
+.s9-card:hover { transform: translateX(4px); }
+.s9-card.myth:hover { background: rgba(239,68,68,0.08); }
+.s9-card.truth:hover { background: rgba(34,197,94,0.08); }
+.s9-card .s9-c-title { font-family: var(--font-display); font-weight: 500; font-size: 0.9rem; color: var(--ice); }
+.s9-card .s9-c-desc {
+  font-family: var(--font-body); font-size: 0.8rem; color: var(--steel);
+  max-height: 0; overflow: hidden; transition: max-height 300ms, margin 300ms;
+}
+.s9-card.open .s9-c-desc { max-height: 100px; margin-top: 0.4rem; }
+.s9-divider {
+  width: 2px; background: linear-gradient(180deg, var(--red), transparent 50%, var(--green-success));
+  flex-shrink: 0; box-shadow: 0 0 10px rgba(239,68,68,0.1), 0 0 10px rgba(34,197,94,0.1);
+}
+
+/* ============================================================
+   SLIDE 10 — Conclusão
+   ============================================================ */
+#slide-10 { text-align: center; padding: 5vh 5vw; }
+.s10-title {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2.5rem); color: var(--ice);
+  margin-bottom: 1.5rem;
+}
+.s10-bullets { list-style: none; margin: 0 auto; max-width: 700px; text-align: left; }
+.s10-bullets li {
+  padding: 0.5rem 0; font-family: var(--font-body); font-weight: 400;
+  font-size: clamp(0.85rem, 1.2vw, 1rem); color: var(--steel);
+  line-height: 1.5; padding-left: 1.8rem; position: relative;
+}
+.s10-bullets li::before {
+  content: ''; position: absolute; left: 0; top: 0.85rem;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--cyan);
+  box-shadow: 0 0 10px rgba(0,212,255,0.4);
+}
+.s10-facts {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+  max-width: 1100px; margin: 1.5rem auto; width: 100%;
+}
+.s10-fact {
+  background: rgba(20,28,51,0.6); border: 1px solid rgba(0,212,255,0.12);
+  border-radius: 14px; padding: 1.2rem; backdrop-filter: blur(6px);
+  transition: all 400ms;
+}
+.s10-fact:hover { transform: translateY(-6px); box-shadow: 0 8px 32px rgba(0,212,255,0.1); }
+.s10-fact .s10-f-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.s10-fact .s10-f-title { font-family: var(--font-display); font-weight: 600; font-size: 0.85rem; color: var(--ice); margin-bottom: 0.3rem; }
+.s10-fact .s10-f-desc { font-family: var(--font-body); font-size: 0.75rem; color: var(--steel); line-height: 1.4; }
+.s10-quote {
+  max-width: 700px; margin: 1rem auto;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(0.9rem, 1.3vw, 1.1rem); color: var(--ice);
+  line-height: 1.6; padding: 1rem;
+}
+.s10-quote em { color: var(--cyan); font-style: normal; }
+.s10-thanks {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2rem); color: var(--cyan);
+  text-shadow: 0 0 30px rgba(0,212,255,0.3);
+  margin-top: 0.5rem;
+}
+.s10-glow {
+  position: absolute; bottom: 15%; left: 50%; transform: translateX(-50%);
+  width: 400px; height: 200px;
+  background: radial-gradient(ellipse, rgba(0,212,255,0.06), transparent);
+  pointer-events: none; animation: pulseGlow 4s ease-in-out infinite;
+}
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.6; transform: translateX(-50%) scale(1.1); }
+}
+
+/* Touch hint */
+.touch-indicator { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  #cursor-dot, #cursor-ring { display: none !important; }
+  .touch-indicator { display: block; }
+}
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- Background Layers -->
+<div id="bg-overlay"></div>
+<div id="bg-grid"></div>
+<div id="bg-fog">
+  <div class="fog-blob"></div>
+  <div class="fog-blob"></div>
+  <div class="fog-blob"></div>
+</div>
+<canvas id="bg-canvas"></canvas>
+<div id="data-lines"></div>
+
+<!-- Navigation -->
+<div id="progress-bar"><div id="progress-fill"></div></div>
+<div id="progress-label">SLIDE 01/10</div>
+
+<button class="nav-btn" id="nav-prev" aria-label="Slide anterior">
+  <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+</button>
+<button class="nav-btn" id="nav-next" aria-label="Próximo slide">
+  <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+</button>
+
+<div id="slide-index">
+  <span id="slide-index-num">01/10</span>
+  <div id="slide-index-dots"></div>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- ============================================================
+     SLIDES
+     ============================================================ -->
+<div id="slides">
+
+<!-- SLIDE 1: CAPA -->
+<div class="slide active" id="slide-1" data-slide="0">
+  <div class="s1-glow"></div>
+  <canvas id="s1-canvas"></canvas>
+  <div class="anim-enter-title" data-delay="300">
+    <h1 class="title-3d" id="s1-title-3d" data-text="Placas de Vídeo:">Placas de Vídeo:</h1>
+    <h1 class="title-3d" id="s1-title-3d-2" data-text="Como Elas Transformam Dados em Imagens" style="font-size:clamp(1.6rem,3.5vw,2.8rem);margin-top:0.2rem">Como Elas Transformam Dados em Imagens</h1>
+  </div>
+  <div class="anim-enter s1-subtitle" data-delay="1200">O Universo das Placas de Vídeo</div>
+  <div class="anim-enter s1-meta" data-delay="1600">Apresentação Técnica &bull; 2026</div>
+  <div class="s1-hint" id="s1-hint">Use → para navegar</div>
+</div>
+
+<!-- SLIDE 2: O que é uma Placa de Vídeo? -->
+<div class="slide" id="slide-2" data-slide="1">
+  <div class="s2-wrap">
+    <div class="s2-left">
+      <h2 class="anim-enter-title" data-delay="300" style="font-family:var(--font-display);font-weight:700;font-size:clamp(1.8rem,3.8vw,3rem);color:var(--ice)">O que é uma Placa de Vídeo?</h2>
+      <div class="anim-enter" data-delay="450" style="font-family:var(--font-display);font-weight:500;font-size:clamp(1rem,1.6vw,1.3rem);color:var(--cyan);margin-top:0.3rem">GPU vs CPU — Processamento Paralelo</div>
+      <ul class="s2-bullets">
+        <li class="anim-enter-left" data-delay="550">A GPU (Graphics Processing Unit) é um processador especializado em operações gráficas e matemáticas paralelas</li>
+        <li class="anim-enter-left" data-delay="630">Enquanto a CPU tem poucos núcleos poderosos, a GPU tem milhares de núcleos menores e eficientes</li>
+        <li class="anim-enter-left" data-delay="710">Processamento paralelo: milhares de operações simultâneas vs. poucas sequenciais</li>
+        <li class="anim-enter-left" data-delay="790">Componentes principais: GPU Chip, VRAM, Sistema de Alimentação, Refrigeração, PCB</li>
+      </ul>
+      <div class="anim-enter s2-curiosity" data-delay="1000">
+        <strong style="color:var(--cyan)">Curiosidade:</strong> A primeira GPU do mundo foi a GeForce 256 (1999), que introduziu transformação e iluminação por hardware.
+      </div>
+    </div>
+    <div class="s2-right">
+      <div id="s2-diagram">
+        <canvas id="s2-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: Métricas -->
+<div class="slide" id="slide-3" data-slide="2">
+  <h2 class="anim-enter-title" data-delay="300" style="font-family:var(--font-display);font-weight:700;font-size:clamp(1.8rem,3.8vw,3rem);color:var(--ice);text-align:center">Como Medimos o Desempenho?</h2>
+  <div class="anim-enter" data-delay="400" style="font-family:var(--font-body);color:var(--steel);text-align:center;margin-bottom:0.8rem;font-size:clamp(0.85rem,1.1vw,1rem)">Métricas essenciais para avaliar uma GPU</div>
+  <div class="s3-tabs anim-enter" data-delay="450">
+    <button class="s3-tab active" data-tab="0">Métricas Principais</button>
+    <button class="s3-tab" data-tab="1">Mais Métricas</button>
+    <button class="s3-tab" data-tab="2">Contexto</button>
+  </div>
+  <div class="s3-tab-content active" data-tab-content="0">
+    <div class="s3-grid">
+      <div class="s3-card card anim-enter" data-delay="500"><div class="s3-icon">⬡</div><div class="s3-name">FPS</div><div class="s3-value">120+</div><div class="s3-desc">Quadros por segundo em 1440p Ultra</div><div class="s3-bar"><div class="s3-bar-fill" style="width:85%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="580"><div class="s3-icon">⏱</div><div class="s3-name">Frame Time</div><div class="s3-value">8.3ms</div><div class="s3-desc">Tempo para renderizar cada quadro</div><div class="s3-bar"><div class="s3-bar-fill" style="width:90%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="660"><div class="s3-icon">⟳</div><div class="s3-name">Clock</div><div class="s3-value">2.5 GHz</div><div class="s3-desc">Frequência de operação do chip</div><div class="s3-bar"><div class="s3-bar-fill" style="width:75%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="740"><div class="s3-icon">▦</div><div class="s3-name">VRAM</div><div class="s3-value">24 GB</div><div class="s3-desc">Memória de vídeo GDDR6X</div><div class="s3-bar"><div class="s3-bar-fill" style="width:70%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="820"><div class="s3-icon">⇄</div><div class="s3-name">Largura de Banda</div><div class="s3-value">1 TB/s</div><div class="s3-desc">Velocidade de transferência VRAM</div><div class="s3-bar"><div class="s3-bar-fill" style="width:80%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="900"><div class="s3-icon">⊞</div><div class="s3-name">CUDA Cores</div><div class="s3-value">16.384</div><div class="s3-desc">Núcleos de processamento paralelo</div><div class="s3-bar"><div class="s3-bar-fill" style="width:95%"></div></div><div class="sweep"></div></div>
+    </div>
+  </div>
+  <div class="s3-tab-content" data-tab-content="1">
+    <div class="s3-grid">
+      <div class="s3-card card anim-enter" data-delay="500"><div class="s3-icon">△</div><div class="s3-name">Stream Processors</div><div class="s3-value">5.120</div><div class="s3-desc">Núcleos em GPUs AMD</div><div class="s3-bar"><div class="s3-bar-fill" style="width:85%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="580"><div class="s3-icon">☰</div><div class="s3-name">Tensor Cores</div><div class="s3-value">512</div><div class="s3-desc">Núcleos de IA para DLSS</div><div class="s3-bar"><div class="s3-bar-fill" style="width:60%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="660"><div class="s3-icon">◎</div><div class="s3-name">RT Cores</div><div class="s3-value">128</div><div class="s3-desc">Núcleos de Ray Tracing</div><div class="s3-bar"><div class="s3-bar-fill" style="width:55%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="740"><div class="s3-icon">⚡</div><div class="s3-name">TDP</div><div class="s3-value">450W</div><div class="s3-desc">Consumo máximo de energia</div><div class="s3-bar"><div class="s3-bar-fill" style="width:40%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="820"><div class="s3-icon">🌡</div><div class="s3-name">Temperatura</div><div class="s3-value">72°C</div><div class="s3-desc">Temperatura típica em carga</div><div class="s3-bar"><div class="s3-bar-fill" style="width:50%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="900"><div class="s3-icon">⇅</div><div class="s3-name">Gargalos</div><div class="s3-value">CPU 15%</div><div class="s3-desc">Limitação por outros componentes</div><div class="s3-bar"><div class="s3-bar-fill" style="width:30%"></div></div><div class="sweep"></div></div>
+    </div>
+  </div>
+  <div class="s3-tab-content" data-tab-content="2">
+    <div class="s3-grid">
+      <div class="s3-card card anim-enter" data-delay="500"><div class="s3-icon">⬜</div><div class="s3-name">Resolução</div><div class="s3-value">4K</div><div class="s3-desc">3840×2160 pixels — 8.3M pixels/quadro</div><div class="s3-bar"><div class="s3-bar-fill" style="width:80%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="580"><div class="s3-icon">⚙</div><div class="s3-name">Config. Gráfica</div><div class="s3-value">Ultra</div><div class="s3-desc">Qualidade máxima de texturas e efeitos</div><div class="s3-bar"><div class="s3-bar-fill" style="width:90%"></div></div><div class="sweep"></div></div>
+      <div class="s3-card card anim-enter" data-delay="660"><div class="s3-icon">📊</div><div class="s3-name">Benchmark</div><div class="s3-value">28.500</div><div class="s3-desc">Pontuação no 3DMark Time Spy</div><div class="s3-bar"><div class="s3-bar-fill" style="width:75%"></div></div><div class="sweep"></div></div>
+    </div>
+  </div>
+  <div class="anim-enter s3-curiosity" data-delay="950" style="margin-top:0.8rem;width:100%;max-width:1200px;margin-left:auto;margin-right:auto">
+    💡 <strong style="color:var(--magenta)">Mais VRAM não significa mais desempenho:</strong> Uma RTX 3060 (12 GB) perde para uma RTX 4070 (12 GB) mesmo com a mesma VRAM.
+  </div>
+</div>
+
+<!-- SLIDE 4: Evolução -->
+<div class="slide" id="slide-4" data-slide="3">
+  <h2 class="anim-enter-title" data-delay="300" style="font-family:var(--font-display);font-weight:700;font-size:clamp(1.8rem,3.8vw,3rem);color:var(--ice);text-align:center">Evolução das GPUs</h2>
+  <div class="anim-enter" data-delay="400" style="font-family:var(--font-display);font-weight:500;font-size:clamp(0.9rem,1.4vw,1.1rem);color:var(--cyan);text-align:center;margin-bottom:0.8rem">Dos primeiros polígonos ao ray tracing em tempo real</div>
+  <div class="s4-bento">
+    <div class="s4-card anim-enter-scale" data-delay="450"><span class="s4-year">1995</span><span class="s4-name">Primeiras 3D</span><span class="s4-badge" style="background:rgba(0,212,255,0.1);color:var(--cyan)">Voodoo Graphics</span></div>
+    <div class="s4-card anim-enter-scale" data-delay="530"><span class="s4-year">1997</span><span class="s4-name">NVIDIA RIVA</span><span class="s4-badge" style="background:rgba(0,212,255,0.1);color:var(--cyan)">Aceleração 2D+3D</span></div>
+    <div class="s4-card anim-enter-scale" data-delay="610"><span class="s4-year">1999</span><span class="s4-name">GeForce 256</span><span class="s4-badge" style="background:rgba(168,85,247,0.15);color:var(--magenta)">Primeira GPU</span></div>
+    <div class="s4-card anim-enter-scale" data-delay="690"><span class="s4-year">2002</span><span class="s4-name">Radeon 9700 Pro</span><span class="s4-badge" style="background:rgba(0,212,255,0.1);color:var(--cyan)">DirectX 9</span></div>
+    <div class="s4-card anim-enter-scale" data-delay="770" style="background:rgba(255,107,53,0.08)"><span class="s4-year">2010</span><span class="s4-name">GTX 480</span><span class="s4-badge" style="background:rgba(255,107,53,0.2);color:var(--orange)">Alto consumo</span></div>
+    <div class="s4-card anim-enter-scale" data-delay="850"><span class="s4-year">2017</span><span class="s4-name">GTX 1080 Ti</span><span class="s4-badge" style="background:rgba(34,211,164,0.15);color:var(--green-circuit)">Lenda</span></div>
+    <div class="s4-card anim-enter-scale" data-delay="930"><span class="s4-year">2018</span><span class="s4-name">RTX 2080</span><span class="s4-badge" style="background:rgba(255,107,53,0.15);color:var(--orange)">Ray Tracing</span></div>
+    <div class="s4-card anim-enter-scale" data-delay="1010" style="background:linear-gradient(135deg,rgba(168,85,247,0.1),rgba(20,28,51,0.8))"><span class="s4-year">2020</span><span class="s4-name">RTX 3090</span><span class="s4-badge" style="background:rgba(168,85,247,0.2);color:var(--magenta)">XXL</span></div>
+    <div class="s4-card featured highlight anim-enter-scale" data-delay="1090" style="grid-column:span 2"><span class="s4-year">2022</span><span class="s4-name" style="font-size:1.2rem">RTX 4090</span><span class="s4-badge" style="background:rgba(168,85,247,0.25);color:var(--magenta);font-size:0.75rem">Atual — 76B transistores</span></div>
+  </div>
+  <div class="s4-metrics">
+    <div class="s4-metric anim-enter" data-delay="800"><div class="s4-m-val">800nm → 4nm</div><div class="s4-m-label">Litografia</div></div>
+    <div class="s4-metric anim-enter" data-delay="880"><div class="s4-m-val">2MB → 24GB</div><div class="s4-m-label">VRAM</div></div>
+    <div class="s4-metric anim-enter" data-delay="960"><div class="s4-m-val">3M → 76B</div><div class="s4-m-label">Transistores</div></div>
+    <div class="s4-metric anim-enter" data-delay="1040"><div class="s4-m-val">~30W → 450W+</div><div class="s4-m-label">TDP</div></div>
+  </div>
+  <div class="anim-enter" data-delay="1100" style="padding:0.6rem 1rem;border-radius:10px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.15);font-size:0.8rem;color:var(--ice);max-width:1200px;width:100%;margin:0.6rem auto 0;text-align:center">
+    💡 A RTX 4090 possui aproximadamente <strong style="color:var(--cyan)">76 bilhões</strong> de transistores — mais que o número de árvores em diversos países inteiros.
+  </div>
+</div>
+
+<!-- SLIDE 5: Ray Tracing e IA -->
+<div class="slide" id="slide-5" data-slide="4">
+  <h2 class="anim-enter-title" data-delay="300" style="font-family:var(--font-display);font-weight:700;font-size:clamp(1.8rem,3.8vw,3rem);color:var(--ice);text-align:center">Ray Tracing e IA</h2>
+  <div class="anim-enter" data-delay="400" style="font-family:var(--font-display);font-weight:500;font-size:clamp(0.9rem,1.4vw,1.1rem);color:var(--cyan);text-align:center;margin-bottom:0.6rem">O futuro da renderização em tempo real</div>
+  <div class="s5-compare anim-enter" data-delay="450">
+    <div class="s5-side raster"><div class="s5-side-title" style="color:var(--cyan-dark)">🔷 Rasterização</div><div class="s5-side-desc">Método tradicional: polígonos 3D são projetados em uma grade 2D de pixels. Cada pixel é preenchido com base em texturas e iluminação calculada por pixel. Eficiente, mas limitado em realismo.</div></div>
+    <div class="s5-vs">VS</div>
+    <div class="s5-side raytrace"><div class="s5-side-title" style="color:var(--orange)">🔶 Ray Tracing</div><div class="s5-side-desc">Simula o comportamento real da luz: raios são traçados da câmera para a cena, calculando reflexos, refrações e sombras pixel a pixel. Realismo máximo, alto custo computacional.</div></div>
+  </div>
+  <div class="s5-toggle-wrap anim-enter" data-delay="600">
+    <span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--lead)">Modo RT:</span>
+    <button class="s5-toggle" id="rt-toggle" aria-label="Alternar Ray Tracing"></button>
+    <span id="rt-toggle-label" style="font-family:var(--font-mono);font-size:0.75rem;color:var(--steel)">DESLIGADO</span>
+  </div>
+  <div class="s5-tech-grid anim-enter" data-delay="700">
+    <div class="s5-tech-card card" data-delay="700"><div class="s5-tc-title">🧠 Tensor Cores</div><div class="s5-tc-desc">Núcleos dedicados a operações de IA e aprendizado de máquina</div><div class="sweep"></div></div>
+    <div class="s5-tech-card card" data-delay="780"><div class="s5-tc-title">📇 Geração de Frames</div><div class="s5-tc-desc">DLSS 3/4: IA cria quadros adicionais entre os renderizados</div><div class="sweep"></div></div>
+    <div class="s5-tech-card card" data-delay="860"><div class="s5-tc-title">🔎 Upscaling</div><div class="s5-tc-desc">DLSS, FSR, XeSS: renderizar em baixa resolução, upscaling por IA</div><div class="sweep"></div></div>
+    <div class="s5-tech-card card" data-delay="940"><div class="s5-tc-title">⚡ Reflex + Latência</div><div class="s5-tc-desc">Tecnologia para reduzir latência de input-to-display</div><div class="sweep"></div></div>
+  </div>
+  <div class="anim-enter" data-delay="1100" style="padding:0.6rem 1rem;border-radius:10px;background:rgba(255,107,53,0.08);border:1px solid rgba(255,107,53,0.15);font-size:0.8rem;color:var(--ice);max-width:1100px;width:100%;margin:0.6rem auto 0;text-align:center">
+    💡 Sem DLSS, vários jogos modernos não rodariam em 4K com RT máximo em GPUs atuais.
+  </div>
+</div>
+
+<!-- SLIDE 6: O que Realmente Faz uma GPU ser Rápida? -->
+<div class="slide" id="slide-6" data-slide="5">
+  <h2 class="anim-enter-title" data-delay="300" style="font-family:var(--font-display);font-weight:700;font-size:clamp(1.8rem,3.8vw,3rem);color:var(--ice);text-align:center">O que Realmente Faz uma GPU ser Rápida?</h2>
+  <div class="anim-enter" data-delay="400" style="font-family:var(--font-body);color:var(--steel);text-align:center;margin-bottom:0.6rem;font-size:clamp(0.85rem,1.1vw,1rem)">Arquitetura importa mais que especificações brutas</div>
+  <div class="s6-wrap">
+    <div class="s6-left">
+      <div class="s6-accordion">
+        <div class="s6-acc-item anim-enter-left" data-delay="450">
+          <div class="s6-acc-header" data-factor="clock">Clock <span class="s6-acc-val" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--steel)">2.5 GHz</span><svg class="chevron" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.5"/></svg></div>
+          <div class="s6-acc-body">Frequência de operação do chip. Quanto maior o clock, mais operações por segundo. Mas clock mais alto também gera mais calor.</div>
+        </div>
+        <div class="s6-acc-item anim-enter-left" data-delay="530">
+          <div class="s6-acc-header" data-factor="ipc">IPC <span class="s6-acc-val" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--steel)">Instruções/ciclo</span><svg class="chevron" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.5"/></svg></div>
+          <div class="s6-acc-body">Instruções Por Ciclo. Uma arquitetura mais eficiente faz mais trabalho em cada ciclo de clock.</div>
+        </div>
+        <div class="s6-acc-item anim-enter-left" data-delay="610">
+          <div class="s6-acc-header" data-factor="arch">Arquitetura <span class="s6-acc-val" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--steel)">Ada vs Ampere</span><svg class="chevron" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.5"/></svg></div>
+          <div class="s6-acc-body">O design fundamental do chip. Arquiteturas mais novas trazem melhorias de eficiência, novos recursos e maior desempenho por watt.</div>
+        </div>
+        <div class="s6-acc-item anim-enter-left" data-delay="690">
+          <div class="s6-acc-header" data-factor="cores">Núcleos <span class="s6-acc-val" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--steel)">CUDA / Stream</span><svg class="chevron" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.5"/></svg></div>
+          <div class="s6-acc-body">Mais núcleos = mais paralelismo, mas apenas se a arquitetura conseguir mantê-los alimentados com dados.</div>
+        </div>
+        <div class="s6-acc-item anim-enter-left" data-delay="770">
+          <div class="s6-acc-header" data-factor="cache">Cache <span class="s6-acc-val" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--steel)">L1/L2</span><svg class="chevron" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.5"/></svg></div>
+          <div class="s6-acc-body">Memória dentro do chip. Cache maior reduz a dependência de acessos lentos à VRAM, melhorando desempenho.</div>
+        </div>
+        <div class="s6-acc-item anim-enter-left" data-delay="850">
+          <div class="s6-acc-header" data-factor="band">Banda <span class="s6-acc-val" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--steel)">1 TB/s</span><svg class="chevron" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.5"/></svg></div>
+          <div class="s6-acc-body">Largura de banda da memória. Determina quantos dados podem ser transferidos entre GPU e VRAM por segundo.</div>
+        </div>
+      </div>
+    </div>
+    <div class="s6-right">
+      <div class="s6-compare-wrap anim-enter-scale" data-delay="500">
+        <div style="text-align:center;font-family:var(--font-display);font-weight:600;font-size:0.95rem;color:var(--ice);margin-bottom:1rem">RTX 3090 vs RTX 4070</div>
+        <div class="s6-compare-col">
+          <div class="s6-cc-label">CUDA Cores</div>
+          <div class="s6-cc-bars">
+            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--magenta);min-width:32px">3090</span>
+            <div class="s6-cc-bar-wrap"><div class="s6-cc-bar violet" style="width:0%" data-width="100"></div></div>
+          </div>
+          <div class="s6-cc-bars">
+            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--cyan);min-width:32px">4070</span>
+            <div class="s6-cc-bar-wrap"><div class="s6-cc-bar cyan" style="width:0%" data-width="60"></div></div>
+          </div>
+        </div>
+        <div class="s6-compare-col">
+          <div class="s6-cc-label">Clock (Boost)</div>
+          <div class="s6-cc-bars">
+            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--magenta);min-width:32px">3090</span>
+            <div class="s6-cc-bar-wrap"><div class="s6-cc-bar violet" style="width:0%" data-width="70"></div></div>
+          </div>
+          <div class="s6-cc-bars">
+            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--cyan);min-width:32px">4070</span>
+            <div class="s6-cc-bar-wrap"><div class="s6-cc-bar cyan" style="width:0%" data-width="100"></div></div>
+          </div>
+        </div>
+        <div class="s6-compare-col">
+          <div class="s6-cc-label">Consumo (TDP)</div>
+          <div class="s6-cc-bars">
+            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--magenta);min-width:32px">3090</span>
+            <div class="s6-cc-bar-wrap"><div class="s6-cc-bar violet" style="width:0%" data-width="100"></div></div>
+          </div>
+          <div class="s6-cc-bars">
+            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--cyan);min-width:32px">4070</span>
+            <div class="s6-cc-bar-wrap"><div class="s6-cc-bar cyan" style="width:0%" data-width="45"></div></div>
+          </div>
+        </div>
+        <div class="s6-compare-col">
+          <div class="s6-cc-label">Desempenho Final (1440p)</div>
+          <div class="s6-cc-bars">
+            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--magenta);min-width:32px">3090</span>
+            <div class="s6-cc-bar-wrap"><div class="s6-cc-bar violet" style="width:0%" data-width="95"></div></div>
+          </div>
+          <div class="s6-cc-bars">
+            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--cyan);min-width:32px">4070</span>
+            <div class="s6-cc-bar-wrap"><div class="s6-cc-bar cyan" style="width:0%" data-width="90"></div></div>
+          </div>
+        </div>
+        <div class="s6-conclusion anim-enter" data-delay="1000">🏆 Arquitetura compensa menos núcleos — Ada Lovelace &gt; Ampere</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: Curiosidades -->
+<div class="slide" id="slide-7" data-slide="6">
+  <h2 class="anim-enter-title" data-delay="300" style="font-family:var(--font-display);font-weight:700;font-size:clamp(1.8rem,3.8vw,3rem);color:var(--ice);text-align:center">Curiosidades Impressionantes</h2>
+  <div class="anim-enter" data-delay="400" style="font-family:var(--font-display);font-weight:500;font-size:clamp(0.9rem,1.4vw,1.1rem);color:var(--cyan);text-align:center;margin-bottom:0.6rem">Fatos surpreendentes sobre o mundo das GPUs</div>
+  <div class="s7-bento">
+    <div class="s7-card featured accent-cyan anim-enter-scale" data-delay="450"><div class="s7-highlight" style="color:var(--cyan)">80+ TFLOPS</div><div class="s7-text">A RTX 4090 ultrapassa 80 TFLOPS de desempenho em precisão simples</div></div>
+    <div class="s7-card accent-magenta anim-enter-scale" data-delay="530"><div class="s7-icon">🔬</div><div class="s7-text">GPUs são usadas em descoberta de medicamentos e simulações moleculares</div></div>
+    <div class="s7-card accent-orange anim-enter-scale" data-delay="610"><div class="s7-icon">🌍</div><div class="s7-text">GPUs ajudam a prever o clima com simulações atmosféricas complexas</div></div>
+    <div class="s7-card accent-green anim-enter-scale" data-delay="690"><div class="s7-icon">🚀</div><div class="s7-text">Exploração espacial usa GPUs para processar dados de telescópios e sondas</div></div>
+    <div class="s7-card accent-cyan anim-enter-scale" data-delay="770"><div class="s7-icon">🧠</div><div class="s7-text">Treinamento de IA: modelos como GPT usam milhares de GPUs por meses</div></div>
+    <div class="s7-card accent-magenta anim-enter-scale" data-delay="850"><div class="s7-icon">🎬</div><div class="s7-text">Filmes como Avatar e Marvel são renderizados com GPUs</div></div>
+    <div class="s7-card accent-orange anim-enter-scale" data-delay="930"><div class="s7-icon">⚡</div><div class="s7-text">GPUs são atualmente os maiores consumidores de energia em data centers</div></div>
+    <div class="s7-card featured accent-cyan anim-enter-scale" data-delay="1010"><div class="s7-icon">💪</div><div class="s7-text">GPUs modernas pesam até <strong style="color:var(--cyan)">2,5kg</strong>, com 4 ventoinhas, LCD, watercooling e ocupam 4 slots</div></div>
+  </div>
+</div>
+
+<!-- SLIDE 8: Futuro -->
+<div class="slide" id="slide-8" data-slide="7">
+  <div id="s8-rings"><div class="s8-ring"></div><div class="s8-ring"></div><div class="s8-ring"></div></div>
+  <h2 class="anim-enter-title" data-delay="300" style="font-family:var(--font-display);font-weight:700;font-size:clamp(1.8rem,3.8vw,3rem);color:var(--ice);text-align:center;position:relative;z-index:1">O Futuro das Placas de Vídeo</h2>
+  <div class="anim-enter" data-delay="400" style="font-family:var(--font-display);font-weight:500;font-size:clamp(0.9rem,1.4vw,1.1rem);color:var(--cyan);text-align:center;margin-bottom:0.6rem;position:relative;z-index:1">Tendências que moldarão a próxima década</div>
+  <div class="s8-grid" style="position:relative;z-index:1">
+    <div class="s8-card border-pink anim-enter-scale" data-delay="500"><div class="s8-c-icon">🧠</div><div class="s8-c-title">IA + Neural Rendering</div><div class="s8-c-desc">Renderização neural, geração de texturas por IA, Frame Generation avançado. A imagem dos jogos será gerada por IA.</div></div>
+    <div class="s8-card border-orange anim-enter-scale" data-delay="580"><div class="s8-c-icon">🔦</div><div class="s8-c-title">RT Completo + Path Tracing</div><div class="s8-c-desc">Ray tracing completo em tempo real, path tracing substituindo rasterização para iluminação fotorrealista.</div></div>
+    <div class="s8-card border-cyan anim-enter-scale" data-delay="660"><div class="s8-c-icon">🔲</div><div class="s8-c-title">Chiplets + GDDR7</div><div class="s8-c-desc">Arquitetura modular com chiplets, memórias GDDR7 de altíssima velocidade e interconexão avançada.</div></div>
+    <div class="s8-card border-green anim-enter-scale" data-delay="740"><div class="s8-c-icon">☁️</div><div class="s8-c-title">Streaming + Eficiência</div><div class="s8-c-desc">Jogos via streaming com latência mínima, eficiência energética radical e GPUs com consumo otimizado.</div></div>
+  </div>
+  <div class="anim-enter s8-impact" data-delay="1000" style="position:relative;z-index:1">Especialistas acreditam que a imagem dos jogos será totalmente gerada por IA</div>
+</div>
+
+<!-- SLIDE 9: Mitos e Verdades -->
+<div class="slide" id="slide-9" data-slide="8">
+  <h2 class="anim-enter-title" data-delay="300" style="font-family:var(--font-display);font-weight:700;font-size:clamp(1.8rem,3.8vw,3rem);color:var(--ice);text-align:center;position:absolute;top:2vh;left:0;width:100%;z-index:2">Mitos e Verdades</h2>
+  <div class="s9-split">
+    <div class="s9-col myths">
+      <div class="s9-col-header anim-enter" data-delay="400">❌ MITOS</div>
+      <div class="s9-card myth anim-enter-left" data-delay="500"><div class="s9-c-title">Mais VRAM = mais FPS</div><div class="s9-c-desc">Largura de banda e arquitetura importam mais que quantidade bruta de VRAM.</div></div>
+      <div class="s9-card myth anim-enter-left" data-delay="580"><div class="s9-c-title">GPU mais cara sempre vale a pena</div><div class="s9-c-desc">Depende do uso e resolução. Uma GPU cara pode ser desperdício para 1080p.</div></div>
+      <div class="s9-card myth anim-enter-left" data-delay="660"><div class="s9-c-title">Ray Tracing diminui a qualidade</div><div class="s9-c-desc">RT aumenta realismo com iluminação precisa, mas tem custo de desempenho.</div></div>
+      <div class="s9-card myth anim-enter-left" data-delay="740"><div class="s9-c-title">Fonte mais potente aumenta FPS</div><div class="s9-c-desc">A fonte só precisa fornecer energia suficiente. Mais potência não = mais desempenho.</div></div>
+      <div class="s9-card myth anim-enter-left" data-delay="820"><div class="s9-c-title">Overclock dobra o desempenho</div><div class="s9-c-desc">Ganhos reais são marginais (5-15%) e podem comprometer estabilidade.</div></div>
+    </div>
+    <div class="s9-divider"></div>
+    <div class="s9-col truths">
+      <div class="s9-col-header anim-enter" data-delay="400">✔ VERDADES</div>
+      <div class="s9-card truth anim-enter-left" data-delay="500"><div class="s9-c-title">Drivers fazem diferença</div><div class="s9-c-desc">Drivers otimizados podem aumentar FPS em até 30% em lançamentos novos.</div></div>
+      <div class="s9-card truth anim-enter-left" data-delay="580"><div class="s9-c-title">Temperatura influencia desempenho</div><div class="s9-c-desc">Thermal throttling reduz clock automaticamente para proteger o chip.</div></div>
+      <div class="s9-card truth anim-enter-left" data-delay="660"><div class="s9-c-title">CPU também afeta FPS</div><div class="s9-c-desc">Gargalos de CPU limitam performance em resoluções baixas e muitos objetos.</div></div>
+      <div class="s9-card truth anim-enter-left" data-delay="740"><div class="s9-c-title">SSD melhora carregamento, não FPS</div><div class="s9-c-desc">SSD reduz loading times, mas não aumenta framerate durante o jogo.</div></div>
+      <div class="s9-card truth anim-enter-left" data-delay="820"><div class="s9-c-title">Jogos nem sempre usam 100% da GPU</div><div class="s9-c-desc">Podem haver gargalos em CPU, engine ou otimização do jogo.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10: Conclusão -->
+<div class="slide" id="slide-10" data-slide="9">
+  <div class="s10-glow"></div>
+  <div class="anim-enter-title s10-title" data-delay="300">O Universo das Placas de Vídeo</div>
+  <ul class="s10-bullets">
+    <li class="anim-enter-left" data-delay="500">GPUs transformam dados binários em imagens através de processamento paralelo massivo</li>
+    <li class="anim-enter-left" data-delay="580">Desempenho é multifatorial: arquitetura, clock, núcleos, cache, banda e drivers</li>
+    <li class="anim-enter-left" data-delay="660">Ray Tracing, IA e upscaling estão redefinindo os limites do realismo gráfico</li>
+    <li class="anim-enter-left" data-delay="740">GPUs vão além dos jogos: IA, ciência, medicina, cinema e exploração espacial</li>
+    <li class="anim-enter-left" data-delay="820">A evolução é impressionante — de 3M para 76B transistores em 25 anos</li>
+  </ul>
+  <div class="s10-facts">
+    <div class="s10-fact anim-enter-scale" data-delay="800"><div class="s10-f-icon">⚡</div><div class="s10-f-title">TRILHÕES/SEGUNDO</div><div class="s10-f-desc">Uma GPU topo executa dezenas de trilhões de operações por segundo</div></div>
+    <div class="s10-fact anim-enter-scale" data-delay="880"><div class="s10-f-icon">🖥</div><div class="s10-f-title">DATA CENTERS</div><div class="s10-f-desc">GPUs para IA custam dezenas de milhares de dólares cada. Data centers usam milhares.</div></div>
+    <div class="s10-fact anim-enter-scale" data-delay="960"><div class="s10-f-icon">🌎</div><div class="s10-f-title">ALÉM DOS JOGOS</div><div class="s10-f-desc">Filmes, ciência, medicina e espaço dependem de GPUs para processamento.</div></div>
+    <div class="s10-fact anim-enter-scale" data-delay="1040"><div class="s10-f-icon">📈</div><div class="s10-f-title">EVOLUÇÃO RÁPIDA</div><div class="s10-f-desc">Placa topo de linha de 8 anos perde para uma placa intermediária atual.</div></div>
+  </div>
+  <div class="anim-enter s10-quote" data-delay="1200">
+    As placas de vídeo deixaram de ser apenas componentes para jogos. Hoje elas impulsionam a <em>inteligência artificial</em>, a <em>ciência</em>, o <em>cinema</em>, a <em>engenharia</em> e muitas das tecnologias que moldam o mundo moderno.
+  </div>
+  <div class="anim-enter s10-thanks" data-delay="1600">OBRIGADO</div>
+</div>
+
+</div><!-- /#slides -->
+
+<script>
+// ============================================================
+// GLOBALS
+// ============================================================
+const TOTAL = 10;
+let currentSlide = 0;
+let isTransitioning = false;
+let touchStartX = 0;
+let touchStartY = 0;
+
+const slides = document.querySelectorAll('.slide');
+const progressFill = document.getElementById('progress-fill');
+const progressLabel = document.getElementById('progress-label');
+const navPrev = document.getElementById('nav-prev');
+const navNext = document.getElementById('nav-next');
+const slideIndexNum = document.getElementById('slide-index-num');
+const slideIndexDots = document.getElementById('slide-index-dots');
+const cursorDot = document.getElementById('cursor-dot');
+const cursorRing = document.getElementById('cursor-ring');
+const tooltipEl = document.getElementById('tooltip');
+const s1Hint = document.getElementById('s1-hint');
+
+// Build index dots
+for (let i = 0; i < TOTAL; i++) {
+  const dot = document.createElement('button');
+  dot.className = 'index-dot' + (i === 0 ? ' active' : '');
+  dot.dataset.index = i;
+  dot.addEventListener('click', () => goTo(i));
+  slideIndexDots.appendChild(dot);
+}
+
+// ============================================================
+// CURSOR
+// ============================================================
+let mouseX = 0, mouseY = 0;
+let ringX = 0, ringY = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  cursorDot.style.left = mouseX + 'px';
+  cursorDot.style.top = mouseY + 'px';
+});
+
+function animateRing() {
+  ringX += (mouseX - ringX) * 0.15;
+  ringY += (mouseY - ringY) * 0.15;
+  cursorRing.style.left = ringX + 'px';
+  cursorRing.style.top = ringY + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+document.querySelectorAll('a, button, .card, .s3-tab, .s6-acc-header, .s9-card, .s5-toggle, .s4-card, .s7-card, .s8-card, .s10-fact, .index-dot, .nav-btn, .s5-tech-card').forEach(el => {
+  el.addEventListener('mouseenter', () => cursorRing.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cursorRing.classList.remove('hover'));
+});
+
+// ============================================================
+// TOOLTIP
+// ============================================================
+function showTooltip(el, text) {
+  const rect = el.getBoundingClientRect();
+  tooltipEl.textContent = text;
+  tooltipEl.classList.add('show');
+  tooltipEl.style.left = (rect.left + rect.width / 2) + 'px';
+  tooltipEl.style.top = (rect.top - 10) + 'px';
+}
+function hideTooltip() { tooltipEl.classList.remove('show'); }
+
+// Add tooltips to diagram elements
+// ============================================================
+// NAVIGATION
+// ============================================================
+function updateNav() {
+  const pct = ((currentSlide + 1) / TOTAL) * 100;
+  progressFill.style.width = pct + '%';
+  const label = 'SLIDE ' + String(currentSlide + 1).padStart(2, '0') + '/' + String(TOTAL).padStart(2, '0');
+  progressLabel.textContent = label;
+  slideIndexNum.textContent = String(currentSlide + 1).padStart(2, '0') + '/' + String(TOTAL).padStart(2, '0');
+  
+  navPrev.classList.toggle('hidden', currentSlide === 0);
+  navNext.classList.toggle('hidden', currentSlide === TOTAL - 1);
+  
+  document.querySelectorAll('.index-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentSlide);
+  });
+}
+
+const transitionTypes = {
+  forward: [
+    'crossFade',      // 0→1
+    'slideLeft',      // 1→2
+    'fadeScale',      // 2→3
+    'crossFadeBlur',  // 3→4
+    'slideLeft',      // 4→5
+    'fade',           // 5→6
+    'scaleFade',      // 6→7
+    'crossFade',      // 7→8
+    'fadeGlow',       // 8→9
+  ],
+  backward: [
+    'crossFade',      // 1→0 (reverse)
+    'slideRight',     // 2→1
+    'fadeScale',      // 3→2 (reverse)
+    'crossFadeBlur',  // 4→3 (reverse)
+    'slideRight',     // 5→4
+    'fade',           // 6→5 (reverse)
+    'scaleFade',      // 7→6 (reverse)
+    'crossFade',      // 8→7 (reverse)
+    'fadeGlow',       // 9→8 (reverse)
+  ]
+};
+
+function applyTransition(fromIdx, toIdx, direction) {
+  const from = slides[fromIdx];
+  const to = slides[toIdx];
+  
+  // Get transition type
+  let type;
+  if (direction === 1) {
+    type = transitionTypes.forward[fromIdx] || 'crossFade';
+  } else {
+    type = transitionTypes.backward[toIdx] || 'crossFade';
+  }
+  
+  // Reset
+  from.style.animation = 'none';
+  to.style.animation = 'none';
+  from.classList.remove('active');
+  to.classList.remove('active');
+  
+  // Force reflow
+  void from.offsetHeight;
+  void to.offsetHeight;
+  
+  let duration = 800;
+  let outName, inName;
+  
+  switch (type) {
+    case 'crossFade':
+      outName = 'crossFadeOut'; inName = 'crossFadeIn'; duration = 800; break;
+    case 'slideLeft':
+      outName = 'slideLeftOut'; inName = 'slideLeftIn'; duration = 700; break;
+    case 'slideRight':
+      from.style.animation = 'slideLeftIn 700ms ease reverse forwards';
+      to.style.animation = 'slideLeftOut 700ms ease reverse forwards';
+      duration = 700;
+      setTimeout(() => {
+        from.style.animation = 'none';
+        to.style.animation = 'none';
+        from.classList.remove('active');
+        to.classList.add('active');
+        animateSlideEntries(toIdx);
+      }, duration);
+      from.classList.add('active');
+      to.style.visibility = 'visible';
+      return;
+    case 'fadeScale':
+      outName = 'fadeScaleOut'; inName = 'fadeScaleIn'; duration = 900; break;
+    case 'crossFadeBlur':
+      outName = 'crossFadeBlurOut'; inName = 'crossFadeBlurIn'; duration = 1000; break;
+    case 'fade':
+      outName = 'fadeOut'; inName = 'fadeIn'; duration = 600; break;
+    case 'scaleFade':
+      outName = 'scaleFadeOut'; inName = 'scaleFadeIn'; duration = 800; break;
+    case 'fadeGlow':
+      outName = 'fadeGlowOut'; inName = 'fadeGlowIn'; duration = 1000; break;
+    default:
+      outName = 'fadeOut'; inName = 'fadeIn'; duration = 600;
+  }
+  
+  from.style.animation = outName + ' ' + (duration * 0.6) + 'ms ease forwards';
+  from.classList.add('active');
+  to.style.visibility = 'visible';
+  
+  setTimeout(() => {
+    from.style.animation = 'none';
+    from.classList.remove('active');
+    
+    to.style.animation = inName + ' ' + duration + 'ms cubic-bezier(0.16,1,0.3,1) forwards';
+    to.classList.add('active');
+    
+    setTimeout(() => {
+      to.style.animation = 'none';
+      animateSlideEntries(toIdx);
+    }, duration);
+  }, duration * 0.6);
+}
+
+function goTo(idx, direction) {
+  if (isTransitioning || idx === currentSlide || idx < 0 || idx >= TOTAL) return;
+  isTransitioning = true;
+  
+  const dir = direction || (idx > currentSlide ? 1 : -1);
+  
+  applyTransition(currentSlide, idx, dir);
+  currentSlide = idx;
+  updateNav();
+  
+  setTimeout(() => { isTransitioning = false; }, 1200);
+}
+
+function nextSlide() { goTo(currentSlide + 1, 1); }
+function prevSlide() { goTo(currentSlide - 1, -1); }
+
+navPrev.addEventListener('click', prevSlide);
+navNext.addEventListener('click', nextSlide);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(TOTAL - 1); }
+  else if (e.key >= '1' && e.key <= '9') { goTo(parseInt(e.key) - 1); }
+  else if (e.key === '0') { goTo(9); }
+});
+
+// Touch
+document.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].screenX - touchStartX;
+  const dy = e.changedTouches[0].screenY - touchStartY;
+  if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) {
+    if (dx < 0) nextSlide();
+    else prevSlide();
+  }
+}, { passive: true });
+
+// ============================================================
+// SLIDE ENTRY ANIMATIONS
+// ============================================================
+function animateSlideEntries(slideIdx) {
+  const slide = slides[slideIdx];
+  const els = slide.querySelectorAll('.anim-enter, .anim-enter-title, .anim-enter-left, .anim-enter-scale');
+  
+  // Reset
+  els.forEach(el => {
+    el.classList.remove('active');
+    el.style.opacity = '0';
+  });
+  
+  els.forEach(el => {
+    const delay = parseInt(el.dataset.delay) || 500;
+    setTimeout(() => {
+      el.classList.add('active');
+      el.style.opacity = '';
+    }, delay);
+  });
+
+  // Animate bars in slide 6 if visible
+  if (slideIdx === 5) {
+    setTimeout(() => {
+      slide.querySelectorAll('.s6-cc-bar').forEach(bar => {
+        const w = bar.dataset.width;
+        if (w) bar.style.width = w + '%';
+      });
+    }, 700);
+  }
+}
+
+// ============================================================
+// SLIDE 1: 3D Text Shadow
+// ============================================================
+(function build3DText() {
+  const titles = [document.getElementById('s1-title-3d'), document.getElementById('s1-title-3d-2')];
+  titles.forEach((el, idx) => {
+    if (!el) return;
+    let shadow = '';
+    const layers = 35;
+    for (let i = 1; i <= layers; i++) {
+      const depth = i;
+      const r = Math.round(8 + (8 * i / layers));
+      const g = Math.round(11 + (26 * i / layers));
+      const b = Math.round(37 + (50 * i / layers));
+      shadow += (shadow ? ',' : '') + `-${depth*0.3}px ${depth*0.5}px 0 rgb(${r},${g},${b})`;
+    }
+    shadow += `, 0 0 15px rgba(0,212,255,0.15)`;
+    el.style.textShadow = shadow;
+  });
+})();
+
+// ============================================================
+// SLIDE 1 HINT FADE
+// ============================================================
+if (s1Hint) {
+  setTimeout(() => s1Hint.classList.add('fade'), 5000);
+}
+
+// ============================================================
+// SLIDE 3: Tabs
+// ============================================================
+document.querySelectorAll('.s3-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (tab.classList.contains('active')) return;
+    document.querySelectorAll('.s3-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const tabIdx = tab.dataset.tab;
+    document.querySelectorAll('.s3-tab-content').forEach((tc, i) => {
+      tc.classList.toggle('active', i === parseInt(tabIdx));
+    });
+  });
+});
+
+// ============================================================
+// SLIDE 5: RT Toggle
+// ============================================================
+const rtToggle = document.getElementById('rt-toggle');
+const rtLabel = document.getElementById('rt-toggle-label');
+if (rtToggle) {
+  rtToggle.addEventListener('click', () => {
+    rtToggle.classList.toggle('active');
+    const on = rtToggle.classList.contains('active');
+    rtLabel.textContent = on ? 'LIGADO' : 'DESLIGADO';
+    rtLabel.style.color = on ? 'var(--orange)' : 'var(--steel)';
+    // Visual change
+    document.querySelectorAll('.s5-side').forEach(side => {
+      side.style.transition = 'all 600ms';
+      if (on) {
+        if (side.classList.contains('raytrace')) {
+          side.style.boxShadow = '0 0 40px rgba(255,107,53,0.2)';
+          side.style.borderColor = 'rgba(255,107,53,0.4)';
+        } else {
+          side.style.opacity = '0.6';
+        }
+      } else {
+        side.style.boxShadow = 'none';
+        side.style.borderColor = '';
+        side.style.opacity = '1';
+      }
+    });
+  });
+}
+
+// ============================================================
+// SLIDE 6: Accordion
+// ============================================================
+document.querySelectorAll('.s6-acc-header').forEach(header => {
+  header.addEventListener('click', () => {
+    const item = header.parentElement;
+    const isOpen = item.classList.contains('open');
+    
+    // Close all
+    document.querySelectorAll('.s6-acc-item').forEach(i => i.classList.remove('open'));
+    
+    if (!isOpen) {
+      item.classList.add('open');
+      // Highlight in comparison
+      const factor = header.dataset.factor;
+      document.querySelectorAll('.s6-cc-bar-wrap').forEach(wrap => {
+        wrap.style.opacity = '0.3';
+        wrap.style.transition = 'opacity 400ms';
+      });
+      // Reset after a moment
+      setTimeout(() => {
+        document.querySelectorAll('.s6-cc-bar-wrap').forEach(wrap => {
+          wrap.style.opacity = '1';
+        });
+      }, 2000);
+    }
+  });
+});
+
+// ============================================================
+// SLIDE 9: Card click to expand
+// ============================================================
+document.querySelectorAll('.s9-card').forEach(card => {
+  card.addEventListener('click', () => {
+    card.classList.toggle('open');
+  });
+});
+
+// ============================================================
+// RIPPLE EFFECT
+// ============================================================
+document.addEventListener('click', e => {
+  const target = e.target.closest('button, .card, .s3-tab, .s6-acc-header, .s9-card, .s5-toggle, .index-dot, .nav-btn, .s4-card, .s7-card, .s8-card, .s10-fact, .s5-tech-card');
+  if (!target) return;
+  const rect = target.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  ripple.style.left = (e.clientX - rect.left) + 'px';
+  ripple.style.top = (e.clientY - rect.top) + 'px';
+  target.style.position = 'relative';
+  target.style.overflow = 'hidden';
+  target.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+});
+
+// ============================================================
+// BACKGROUND CANVAS (Particles + Circuit Grid)
+// ============================================================
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Particles
+  const particles = [];
+  const PCOUNT = 45;
+  for (let i = 0; i < PCOUNT; i++) {
+    particles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 1.5 + 0.5,
+      o: Math.random() * 0.15 + 0.05,
+      c: ['#fff', '#00D4FF', '#A855F7'][Math.floor(Math.random() * 3)]
+    });
+  }
+
+  // Data lines
+  const dataLines = [];
+  function spawnDataLine() {
+    if (dataLines.length > 4) return;
+    dataLines.push({
+      y: Math.random() * H,
+      x: 0,
+      w: Math.random() * 100 + 50,
+      speed: Math.random() * 2 + 1,
+      o: 0.04
+    });
+  }
+  setInterval(spawnDataLine, 3500);
+  
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    
+    // Particles
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0) p.x = W;
+      if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H;
+      if (p.y > H) p.y = 0;
+      
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.c;
+      ctx.globalAlpha = p.o;
+      ctx.fill();
+    });
+    
+    // Data lines
+    for (let i = dataLines.length - 1; i >= 0; i--) {
+      const l = dataLines[i];
+      l.x += l.speed;
+      if (l.x - l.w > W) { dataLines.splice(i, 1); continue; }
+      ctx.beginPath();
+      ctx.moveTo(l.x - l.w, l.y);
+      ctx.lineTo(l.x, l.y);
+      ctx.strokeStyle = '#00D4FF';
+      ctx.globalAlpha = l.o;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+    
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ============================================================
+// SLIDE 1: GPU Wireframe Canvas
+// ============================================================
+(function() {
+  const canvas = document.getElementById('s1-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // GPU wireframe
+  function drawGPU() {
+    ctx.clearRect(0, 0, W, H);
+    
+    const cx = W * 0.5;
+    const cy = H * 0.72;
+    const scale = Math.min(W, H) / 800;
+    
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+    ctx.globalAlpha = 0.08;
+    ctx.strokeStyle = '#00D4FF';
+    ctx.lineWidth = 1;
+    
+    // GPU chip (central square with chamfered corners)
+    const chipSize = 120;
+    const r = 12;
+    ctx.beginPath();
+    ctx.moveTo(-chipSize/2 + r, -chipSize/2);
+    ctx.lineTo(chipSize/2 - r, -chipSize/2);
+    ctx.quadraticCurveTo(chipSize/2, -chipSize/2, chipSize/2, -chipSize/2 + r);
+    ctx.lineTo(chipSize/2, chipSize/2 - r);
+    ctx.quadraticCurveTo(chipSize/2, chipSize/2, chipSize/2 - r, chipSize/2);
+    ctx.lineTo(-chipSize/2 + r, chipSize/2);
+    ctx.quadraticCurveTo(-chipSize/2, chipSize/2, -chipSize/2, chipSize/2 - r);
+    ctx.lineTo(-chipSize/2, -chipSize/2 + r);
+    ctx.quadraticCurveTo(-chipSize/2, -chipSize/2, -chipSize/2 + r, -chipSize/2);
+    ctx.stroke();
+    
+    // Inner lines on chip
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(-40 + i * 25, -40);
+      ctx.lineTo(-40 + i * 25, 40);
+      ctx.stroke();
+    }
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(-40, -40 + i * 25);
+      ctx.lineTo(40, -40 + i * 25);
+      ctx.stroke();
+    }
+    
+    // VRAM modules
+    ctx.strokeStyle = '#A855F7';
+    ctx.globalAlpha = 0.06;
+    const vramOffsets = [
+      [-chipSize/2 - 50, -chipSize/4],
+      [-chipSize/2 - 50, chipSize/4],
+      [chipSize/2 + 10, -chipSize/4],
+      [chipSize/2 + 10, chipSize/4]
+    ];
+    vramOffsets.forEach(([vx, vy]) => {
+      ctx.strokeRect(vx, vy, 36, 50);
+    });
+    
+    // PCB traces
+    ctx.strokeStyle = '#22D3A4';
+    ctx.globalAlpha = 0.04;
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const len = 80 + Math.random() * 60;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(angle) * len, Math.sin(angle) * len);
+      ctx.stroke();
+    }
+    
+    // Heat pipes
+    ctx.strokeStyle = '#22D3A4';
+    ctx.globalAlpha = 0.05;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(-chipSize/2 - 20, -chipSize/2 - 10 - i * 20);
+      ctx.quadraticCurveTo(-chipSize/4, -chipSize/2 - 30, 0, -chipSize/2 - 10 - i * 20);
+      ctx.quadraticCurveTo(chipSize/4, -chipSize/2 - 30, chipSize/2 + 20, -chipSize/2 - 10 - i * 20);
+      ctx.stroke();
+    }
+    
+    // LED dots
+    ctx.globalAlpha = 0.3;
+    const ledPositions = [
+      [-chipSize/2 - 10, chipSize/2 + 20, '#00D4FF'],
+      [-chipSize/2 + 10, chipSize/2 + 20, '#A855F7'],
+      [chipSize/2 - 10, chipSize/2 + 20, '#FF6B35']
+    ];
+    ledPositions.forEach(([lx, ly, col]) => {
+      ctx.beginPath();
+      ctx.arc(lx, ly, 3, 0, Math.PI * 2);
+      ctx.fillStyle = col;
+      ctx.fill();
+      ctx.shadowColor = col;
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    });
+    
+    ctx.restore();
+    
+    // Rotating hexagons
+    const time = Date.now() / 1000;
+    ctx.save();
+    ctx.globalAlpha = 0.03;
+    ctx.strokeStyle = '#00D4FF';
+    ctx.lineWidth = 1;
+    
+    [0.85, 0.12].forEach((pos, idx) => {
+      const hx = W * (idx === 0 ? 0.92 : 0.08);
+      const hy = H * (pos + 0.02);
+      const rot = time * (idx === 0 ? 0.1 : -0.08);
+      ctx.save();
+      ctx.translate(hx, hy);
+      ctx.rotate(rot);
+      const s = 30 + Math.sin(time * 0.5 + idx) * 5;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2 - Math.PI / 2;
+        ctx.lineTo(Math.cos(a) * s, Math.sin(a) * s);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    });
+    
+    ctx.restore();
+    
+    requestAnimationFrame(drawGPU);
+  }
+  drawGPU();
+})();
+
+// ============================================================
+// SLIDE 2: GPU Diagram Canvas
+// ============================================================
+(function() {
+  const canvas = document.getElementById('s2-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * (window.devicePixelRatio || 1);
+    canvas.height = rect.height * (window.devicePixelRatio || 1);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    W = canvas.width;
+    H = canvas.height;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const labels = [
+    { text: 'GPU Chip', x: 0.5, y: 0.4, col: '#00D4FF' },
+    { text: 'VRAM (GDDR6X)', x: 0.2, y: 0.55, col: '#A855F7' },
+    { text: 'Alimentação (VRM)', x: 0.78, y: 0.3, col: '#FF6B35' },
+    { text: 'Refrigeração', x: 0.75, y: 0.75, col: '#22D3A4' },
+    { text: 'PCB', x: 0.25, y: 0.25, col: '#22C55E' }
+  ];
+  
+  let dataParticles = [];
+  for (let i = 0; i < 15; i++) {
+    dataParticles.push({
+      x: Math.random(), y: Math.random(),
+      tx: Math.random(), ty: Math.random(),
+      speed: 0.002 + Math.random() * 0.004,
+      progress: Math.random(),
+      size: 1.5 + Math.random() * 1.5,
+      alpha: 0.2 + Math.random() * 0.3
+    });
+  }
+
+  function draw() {
+    const dpr = window.devicePixelRatio || 1;
+    ctx.clearRect(0, 0, W, H);
+    
+    // Background circle
+    const cx = W * 0.5, cy = H * 0.5;
+    const radius = Math.min(W, H) * 0.38;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+    grad.addColorStop(0, 'rgba(168,85,247,0.04)');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // PCB (green background)
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    ctx.fillStyle = '#0A1A10';
+    ctx.strokeStyle = '#22D3A4';
+    ctx.lineWidth = 1;
+    const pcb = { x: W*0.15, y: H*0.1, w: W*0.7, h: H*0.8 };
+    ctx.beginPath();
+    ctx.roundRect(pcb.x, pcb.y, pcb.w, pcb.h, 8);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+    
+    // Traces on PCB
+    ctx.save();
+    ctx.globalAlpha = 0.04;
+    ctx.strokeStyle = '#22D3A4';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < 12; i++) {
+      ctx.beginPath();
+      const x1 = pcb.x + Math.random() * pcb.w;
+      const y1 = pcb.y + Math.random() * pcb.h;
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x1 + (Math.random() - 0.5) * 100, y1 + (Math.random() - 0.5) * 100);
+      ctx.stroke();
+    }
+    ctx.restore();
+    
+    // GPU Chip
+    const chipCX = W * 0.5, chipCY = H * 0.38;
+    const chipW = W * 0.2, chipH = H * 0.22;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,212,255,0.3)';
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = 'rgba(0,212,255,0.08)';
+    ctx.strokeStyle = '#00D4FF';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(chipCX - chipW/2, chipCY - chipH/2, chipW, chipH, 8);
+    ctx.fill();
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    // Inner grid on chip
+    ctx.globalAlpha = 0.15;
+    ctx.strokeStyle = '#00D4FF';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath();
+      ctx.moveTo(chipCX - chipW/2 + 8 + i * chipW/5, chipCY - chipH/2 + 8);
+      ctx.lineTo(chipCX - chipW/2 + 8 + i * chipW/5, chipCY + chipH/2 - 8);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(chipCX - chipW/2 + 8, chipCY - chipH/2 + 8 + i * chipH/5);
+      ctx.lineTo(chipCX + chipW/2 - 8, chipCY - chipH/2 + 8 + i * chipH/5);
+      ctx.stroke();
+    }
+    ctx.restore();
+    
+    // VRAM modules
+    const vramW = W * 0.07, vramH = H * 0.1;
+    const vramPositions = [
+      [chipCX - chipW/2 - vramW - 10, chipCY - vramH/2],
+      [chipCX - chipW/2 - vramW - 10, chipCY - vramH/2 + vramH + 10],
+      [chipCX + chipW/2 + 10, chipCY - vramH/2],
+      [chipCX + chipW/2 + 10, chipCY - vramH/2 + vramH + 10]
+    ];
+    vramPositions.forEach(([vx, vy]) => {
+      ctx.save();
+      ctx.shadowColor = 'rgba(168,85,247,0.2)';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = 'rgba(168,85,247,0.06)';
+      ctx.strokeStyle = '#A855F7';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(vx, vy, vramW, vramH, 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      // Small lines inside
+      ctx.globalAlpha = 0.15;
+      ctx.strokeStyle = '#A855F7';
+      ctx.lineWidth = 0.5;
+      for (let j = 0; j < 3; j++) {
+        ctx.beginPath();
+        ctx.moveTo(vx + 4, vy + 6 + j * 8);
+        ctx.lineTo(vx + vramW - 4, vy + 6 + j * 8);
+        ctx.stroke();
+      }
+      ctx.restore();
+    });
+    
+    // Heat pipes (top)
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    ctx.strokeStyle = '#22D3A4';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(chipCX - chipW/2 - 15, chipCY - chipH/2 - 10 - i * 15);
+      ctx.quadraticCurveTo(chipCX, chipCY - chipH/2 - 25, chipCX + chipW/2 + 15, chipCY - chipH/2 - 10 - i * 15);
+      ctx.stroke();
+    }
+    ctx.restore();
+    
+    // Labels
+    ctx.save();
+    ctx.font = (11 * dpr) + 'px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    labels.forEach(l => {
+      const lx = W * l.x, ly = H * l.y;
+      ctx.fillStyle = l.col;
+      ctx.globalAlpha = 0.6;
+      ctx.fillText(l.text, lx, ly + 10);
+    });
+    ctx.restore();
+    
+    // Data particles flowing
+    const time = Date.now() / 1000;
+    dataParticles.forEach(p => {
+      p.progress += p.speed;
+      if (p.progress > 1) {
+        p.progress = 0;
+        p.tx = Math.random();
+        p.ty = Math.random();
+      }
+      const cx2 = chipCX;
+      const cy2 = chipCY;
+      const targetX = W * (0.2 + p.tx * 0.6);
+      const targetY = H * (0.15 + p.ty * 0.7);
+      const px = cx2 + (targetX - cx2) * p.progress;
+      const py = cy2 + (targetY - cy2) * p.progress;
+      
+      ctx.save();
+      ctx.globalAlpha = p.alpha * (1 - p.progress);
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(px, py, p.size * dpr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+    
+    requestAnimationFrame(draw);
+  }
+  
+  // Polyfill for roundRect if needed
+  if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+      if (typeof r === 'number') r = { tl: r, tr: r, br: r, bl: r };
+      this.moveTo(x + r.tl, y);
+      this.lineTo(x + w - r.tr, y);
+      this.quadraticCurveTo(x + w, y, x + w, y + r.tr);
+      this.lineTo(x + w, y + h - r.br);
+      this.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
+      this.lineTo(x + r.bl, y + h);
+      this.quadraticCurveTo(x, y + h, x, y + h - r.bl);
+      this.lineTo(x, y + r.tl);
+      this.quadraticCurveTo(x, y, x + r.tl, y);
+      this.closePath();
+      return this;
+    };
+  }
+  
+  draw();
+})();
+
+// ============================================================
+// INIT
+// ============================================================
+updateNav();
+// Initialize first slide entries
+setTimeout(() => animateSlideEntries(0), 100);
+</script>
+</body>
+</html>

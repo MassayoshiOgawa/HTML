@@ -1418,3 +1418,1155 @@ Repita esse processo até que praticamente nenhuma decisão criativa precise ser
 A outra IA deve apenas executar fielmente esta especificação.
 
 Somente depois disso o documento poderá ser considerado concluído.
+
+VALIDAÇÃO ABSOLUTA DO LAYOUT DOS SLIDES (OBRIGATÓRIO)
+Princípio Fundamental
+
+Cada slide representa uma tela inteira.
+
+Cada slide deve ser tratado como um quadro (frame) de uma apresentação profissional, semelhante ao PowerPoint, Canva, Google Slides, Keynote ou Figma.
+
+O usuário jamais deve precisar rolar a página para visualizar o conteúdo de um slide.
+
+Cada slide deve estar completamente contido dentro do viewport.
+
+Nenhum elemento poderá ultrapassar os limites visíveis da tela.
+
+Sob nenhuma hipótese qualquer conteúdo poderá ficar parcialmente oculto.
+
+Sob nenhuma hipótese qualquer conteúdo poderá sair da área útil do slide.
+
+A existência de apenas um único pixel fora da área visível deve ser considerada um erro crítico de layout.
+
+O VIEWPORT É O LIMITE ABSOLUTO
+
+Considere que o viewport é um retângulo rígido.
+
+Esse retângulo representa os limites físicos do slide.
+
+Todos os elementos devem permanecer integralmente dentro desse retângulo.
+
+Nenhum elemento poderá ultrapassar:
+
+topo
+esquerda
+direita
+parte inferior
+
+Isso inclui absolutamente qualquer componente:
+
+títulos
+subtítulos
+textos
+imagens
+vídeos
+gráficos
+tabelas
+cards
+botões
+partículas importantes
+timelines
+popups
+tooltips
+barras
+indicadores
+ícones
+elementos decorativos
+
+Tudo deve permanecer completamente visível.
+
+É PROIBIDO ASSUMIR QUE O CONTEÚDO CABERÁ
+
+Nunca posicione elementos utilizando apenas estimativas.
+
+Nunca suponha que "provavelmente cabe".
+
+Nunca finalize um slide sem validar visualmente toda sua composição.
+
+Sempre considere:
+
+altura ocupada;
+
+largura ocupada;
+
+espaçamentos;
+
+margens;
+
+padding;
+
+gap;
+
+tamanho real das fontes;
+
+altura real das linhas;
+
+altura real dos cards;
+
+altura real das imagens;
+
+altura real dos gráficos;
+
+altura total do layout.
+
+O LAYOUT DEVE SE ADAPTAR AO CONTEÚDO
+
+Jamais faça o conteúdo tentar se adaptar ao layout.
+
+O layout deve se adaptar ao conteúdo.
+
+Caso o conteúdo seja maior do que o espaço disponível, você deve automaticamente reorganizar o slide.
+
+As opções incluem:
+
+reduzir quantidade de colunas;
+
+aumentar quantidade de linhas;
+
+dividir informações em cards menores;
+
+reorganizar elementos;
+
+reduzir espaços desnecessários;
+
+reduzir margens;
+
+reduzir gaps;
+
+reposicionar imagens;
+
+alterar o layout;
+
+mover parte do conteúdo para outro slide;
+
+criar um slide complementar;
+
+transformar listas em accordions;
+
+transformar detalhes em popups;
+
+transformar explicações longas em elementos expansíveis;
+
+utilizar abas (tabs);
+
+utilizar carrosséis internos;
+
+utilizar comparadores;
+
+utilizar componentes interativos;
+
+criar novas páginas sempre que necessário.
+
+Nunca permita overflow apenas porque o slide ficou cheio.
+
+É PROIBIDO UTILIZAR OVERFLOW COMO SOLUÇÃO
+
+Não utilize:
+
+overflow: auto;
+
+overflow-y: scroll;
+
+overflow: scroll;
+
+overflow escondido para mascarar erro de layout;
+
+clip;
+
+máscaras que escondam conteúdo.
+
+Esses recursos não devem ser utilizados para esconder problemas de composição.
+
+Eles somente poderão ser utilizados quando fizerem parte de um componente específico (por exemplo um carrossel ou painel interno), nunca como solução para um slide inteiro.
+
+DISTRIBUIÇÃO INTELIGENTE DO CONTEÚDO
+
+Antes de posicionar qualquer elemento, estime quanto espaço ele ocupará.
+
+Depois disso, distribua o conteúdo utilizando uma composição profissional.
+
+Nunca concentre tudo em uma única região.
+
+Sempre procurar equilíbrio entre:
+
+altura;
+
+largura;
+
+peso visual;
+
+densidade visual;
+
+espaços vazios.
+
+LIMITE DE DENSIDADE VISUAL
+
+Cada slide possui uma capacidade máxima de informação.
+
+Ao perceber que essa capacidade foi atingida, interrompa imediatamente a adição de novos elementos.
+
+Em seguida escolha uma das soluções:
+
+criar novo slide;
+
+criar subslide;
+
+dividir o conteúdo;
+
+transformar parte do conteúdo em interação;
+
+transformar listas em cards;
+
+transformar textos em acordeões;
+
+transformar informações secundárias em popups;
+
+transformar detalhes em abas.
+
+Nunca tente "encaixar mais um elemento".
+
+RESPONSIVIDADE OBRIGATÓRIA
+
+Após finalizar cada slide, valide seu funcionamento em:
+
+1920×1080
+
+1600×900
+
+1536×864
+
+1440×900
+
+1366×768
+
+1280×720
+
+1024×768
+
+Tablets
+
+Celulares
+
+Em nenhuma resolução o conteúdo poderá sair da tela.
+
+Caso isso aconteça, reorganize completamente o layout.
+
+Nunca apenas reduza tudo proporcionalmente.
+
+HIERARQUIA DE REDUÇÃO
+
+Caso um slide fique muito cheio, siga exatamente esta ordem:
+
+reorganizar o layout;
+reduzir espaços vazios exagerados;
+reduzir gaps;
+reduzir margens;
+reorganizar colunas;
+transformar listas em componentes interativos;
+dividir em dois slides;
+criar slide complementar.
+
+A redução do tamanho da fonte deve ser uma das últimas alternativas.
+
+Nunca utilize fontes pequenas apenas para fazer o conteúdo caber.
+
+VALIDAÇÃO GEOMÉTRICA FINAL
+
+Antes de considerar um slide concluído, imagine um retângulo correspondente ao viewport.
+
+Percorra mentalmente todos os elementos.
+
+Confirme que o retângulo delimitador (bounding box) de cada elemento está inteiramente contido dentro da área útil do slide.
+
+Nenhuma bounding box poderá ultrapassar os limites do viewport.
+
+AUDITORIA FINAL DO SLIDE
+
+Cada slide somente poderá ser considerado concluído após responder SIM para todas as perguntas abaixo.
+
+□ Todo o conteúdo está completamente visível?
+
+□ Nenhum elemento ultrapassa a parte inferior?
+
+□ Nenhum elemento ultrapassa a parte superior?
+
+□ Nenhum elemento ultrapassa as laterais?
+
+□ Não existe necessidade de scroll?
+
+□ Existe margem de segurança em todos os lados?
+
+□ Os elementos possuem espaçamento adequado?
+
+□ O slide continua agradável visualmente?
+
+□ A leitura permanece confortável?
+
+□ Não existe poluição visual?
+
+□ Nenhum elemento está sobreposto?
+
+□ Nenhum elemento foi comprimido excessivamente?
+
+□ Nenhuma fonte ficou pequena demais?
+
+□ Todos os componentes permanecem funcionais?
+
+□ O slide possui equilíbrio visual?
+
+□ Existe espaço suficiente entre todos os elementos?
+
+□ Caso o conteúdo tenha aumentado, ele foi reorganizado em vez de apenas comprimido?
+
+Se qualquer resposta for NÃO, o slide deve ser reconstruído antes da entrega.
+
+Um detalhe que considero ainda mais importante
+
+Pelas capturas que você enviou, percebi que a IA não faz planejamento de layout antes de desenhar o slide. Ela simplesmente vai adicionando elementos.
+
+Eu acrescentaria mais uma regra obrigatória no início dessa seção:
+
+Antes de criar qualquer slide, calcule mentalmente um orçamento de espaço ("layout budget"). Estime aproximadamente quanto da altura e da largura disponível será consumido por cada bloco (título, subtítulo, imagens, cards, gráficos, listas, botões, rodapé etc.). Somente inicie a implementação quando houver uma distribuição que caiba integralmente dentro do viewport, mantendo uma margem de segurança de pelo menos 5% a 8% nas quatro bordas. Se o orçamento exceder a área disponível, reorganize ou divida o conteúdo antes de escrever o HTML.
+
+Essa mudança ataca exatamente a causa do problema que aparece nas suas imagens: a IA deixa de "descobrir no final que não cabe" e passa a projetar o slide já considerando os limites físicos da tela.
+
+SISTEMA DE ANIMAÇÕES E TRANSIÇÕES DOS SLIDES (OBRIGATÓRIO)
+Princípio Fundamental
+
+A apresentação deve transmitir a sensação de que todos os elementos estão sendo cuidadosamente coreografados.
+
+As animações não devem parecer independentes.
+
+Elas devem parecer fazer parte de uma única sequência cinematográfica.
+
+O usuário nunca deve perceber quando um slide terminou de carregar.
+
+A transição deve parecer completamente natural.
+
+É ABSOLUTAMENTE PROIBIDO EXIBIR O CONTEÚDO ANTES DAS ANIMAÇÕES
+
+Sob nenhuma hipótese qualquer elemento poderá aparecer instantaneamente na tela antes de sua animação começar.
+
+Isso inclui:
+
+títulos;
+subtítulos;
+textos;
+imagens;
+vídeos;
+gráficos;
+tabelas;
+cards;
+ícones;
+botões;
+partículas importantes;
+elementos decorativos;
+SVGs;
+componentes interativos;
+absolutamente qualquer elemento visível.
+
+O usuário jamais poderá ver o estado final do slide antes do início da sequência de animações.
+
+ESTADO INICIAL OBRIGATÓRIO
+
+Antes do slide tornar-se visível, todos os elementos devem permanecer em seus estados iniciais de animação.
+
+Exemplos:
+
+opacidade zero;
+
+posição inicial da animação;
+
+escala inicial;
+
+rotação inicial;
+
+blur inicial;
+
+máscara inicial;
+
+clip-path inicial;
+
+qualquer outro estado necessário.
+
+Somente após o slide tornar-se ativo é que as animações poderão iniciar.
+
+É PROIBIDO O "FLASH" DE CONTEÚDO
+
+Os seguintes comportamentos são considerados erros críticos:
+
+o slide aparecer completamente pronto;
+
+depois desaparecer;
+
+depois iniciar as animações;
+
+elementos piscarem;
+
+elementos surgirem por um frame;
+
+conteúdo aparecer antes da opacidade ser zerada;
+
+animações iniciarem após o conteúdo já estar visível.
+
+Caso qualquer um desses comportamentos ocorra, a implementação deve ser considerada incorreta.
+
+SINCRONIZAÇÃO ENTRE TROCA DE SLIDE E ANIMAÇÕES
+
+A troca do slide deve seguir exatamente esta sequência:
+
+Usuário solicita mudança de slide.
+
+↓
+
+Slide atual inicia sua animação de saída.
+
+↓
+
+Slide atual termina completamente.
+
+↓
+
+Novo slide torna-se ativo.
+
+↓
+
+Todos os elementos do novo slide ainda permanecem invisíveis.
+
+↓
+
+Aguardar um pequeno intervalo (alguns milissegundos) para garantir que toda a estrutura esteja estabilizada.
+
+↓
+
+Iniciar a sequência completa das animações de entrada.
+
+↓
+
+Os elementos aparecem exatamente através de suas animações.
+
+Nunca antes.
+
+A TROCA DEVE FUNCIONAR NOS DOIS SENTIDOS
+
+Todo esse comportamento deve funcionar igualmente quando:
+
+avançar slide;
+
+voltar slide;
+
+pular para qualquer slide;
+
+navegação pelo teclado;
+
+navegação pelo mouse;
+
+swipe;
+
+touch;
+
+miniaturas;
+
+índice.
+
+Não pode existir diferença entre avançar e retroceder.
+
+REINICIALIZAÇÃO DAS ANIMAÇÕES
+
+Sempre que um slide deixar de ser o slide ativo:
+
+todas as suas animações devem ser reinicializadas.
+
+Todos os elementos devem voltar ao estado inicial.
+
+Ao retornar posteriormente para esse slide, toda a sequência deve acontecer novamente.
+
+Nunca manter elementos parcialmente animados.
+
+Nunca manter estados intermediários.
+
+Nunca reutilizar estados anteriores.
+
+COREOGRAFIA DAS ANIMAÇÕES
+
+As animações não devem ocorrer aleatoriamente.
+
+Cada slide deve possuir uma ordem lógica de apresentação.
+
+Exemplo:
+
+background
+
+↓
+
+elementos decorativos
+
+↓
+
+formas geométricas
+
+↓
+
+imagens
+
+↓
+
+gráficos
+
+↓
+
+cards
+
+↓
+
+títulos
+
+↓
+
+subtítulos
+
+↓
+
+texto principal
+
+↓
+
+listas
+
+↓
+
+ícones
+
+↓
+
+botões
+
+↓
+
+efeitos finais
+
+Cada tipo de slide pode possuir sua própria sequência.
+
+CADA ELEMENTO DEVE POSSUIR SUA PRÓPRIA ANIMAÇÃO
+
+É proibido animar todos os elementos exatamente da mesma forma.
+
+Cada componente deve receber uma animação apropriada.
+
+Exemplos:
+
+Título
+
+Pode surgir utilizando:
+
+leve movimento vertical;
+
+fade;
+
+blur reduzindo;
+
+pequena escala;
+
+glow aumentando.
+
+Subtítulo
+
+Pode utilizar outra animação diferente.
+
+Texto
+
+Pode aparecer linha por linha.
+
+Ou palavra por palavra.
+
+Ou bloco por bloco.
+
+Ou utilizando máscara.
+
+Ou typing.
+
+Sempre de forma elegante.
+
+Ícones
+
+Podem girar.
+
+Flutuar.
+
+Escalar.
+
+Receber glow.
+
+Cards
+
+Podem surgir com:
+
+profundidade;
+
+leve inclinação;
+
+escala;
+
+blur;
+
+fade;
+
+pequena rotação.
+
+Gráficos
+
+Podem desenhar suas linhas.
+
+As barras podem crescer.
+
+Os números podem contar.
+
+As áreas podem preencher.
+
+Imagens
+
+Podem utilizar:
+
+Ken Burns;
+
+Zoom;
+
+Reveal;
+
+Máscaras;
+
+Parallax;
+
+Tilt;
+
+Fade.
+
+ANIMAÇÕES DENTRO DAS ANIMAÇÕES
+
+Sempre que fizer sentido, uma animação pode conter diversas microanimações simultâneas.
+
+Exemplo:
+
+Um título pode:
+
+surgir desfocado;
+
+aumentar levemente de escala;
+
+deslocar alguns pixels;
+
+ganhar nitidez;
+
+receber glow;
+
+estabilizar.
+
+Tudo em uma única animação.
+
+Outro exemplo:
+
+Um card pode:
+
+vir de baixo;
+
+reduzir blur;
+
+ganhar sombra;
+
+ganhar profundidade;
+
+receber brilho;
+
+estabilizar.
+
+Isso cria sensação cinematográfica.
+
+MICROANIMAÇÕES CONTÍNUAS
+
+Após terminar a animação principal, alguns elementos podem continuar vivos.
+
+Exemplos:
+
+leve flutuação;
+
+leve respiração;
+
+glow pulsando;
+
+reflexo passando;
+
+partículas;
+
+pequena oscilação.
+
+Esses movimentos devem ser discretos.
+
+RITMO
+
+Toda animação deve respeitar um ritmo.
+
+Evite:
+
+movimentos bruscos;
+
+paradas repentinas;
+
+mudanças instantâneas;
+
+velocidades incoerentes.
+
+As animações devem transmitir elegância.
+
+EASING
+
+Jamais utilizar movimentos lineares quando não houver necessidade.
+
+Preferir curvas naturais.
+
+As acelerações devem parecer físicas.
+
+DURAÇÃO
+
+Toda animação deve possuir duração claramente definida.
+
+Nunca utilizar tempos aleatórios.
+
+Cada elemento deve possuir:
+
+tempo de início;
+
+tempo de duração;
+
+tempo de atraso;
+
+curva de easing;
+
+tempo de estabilização.
+
+DOCUMENTAÇÃO DAS ANIMAÇÕES
+
+Para cada slide, documente explicitamente todas as animações.
+
+Exemplo:
+
+Título
+
+• Fade In
+
+• Move 20 px para cima
+
+• Blur 8 px → 0 px
+
+• Escala 96% → 100%
+
+• Glow aumenta durante 0,4 s
+
+• Duração: 850 ms
+
+• Delay: 150 ms
+
+• Easing: Ease Out Cubic
+
+Imagem Principal
+
+• Máscara horizontal
+
+• Zoom 108% → 100%
+
+• Fade
+
+• Pequena rotação de −1° → 0°
+
+• Duração: 1200 ms
+
+• Delay: 400 ms
+
+Card
+
+• Surge do fundo
+
+• Escala 94% → 100%
+
+• Blur 10 px → 0 px
+
+• Opacidade 0 → 100%
+
+• Sombra aumenta gradualmente
+
+• Duração: 900 ms
+
+• Delay: 600 ms
+
+STAGGER OBRIGATÓRIO
+
+Quando existirem vários elementos semelhantes (listas, cards, botões, gráficos, ícones etc.), é proibido que todos apareçam ao mesmo tempo.
+
+Utilize uma sequência ("stagger") com pequenos atrasos entre eles para criar um efeito de cascata fluido.
+
+O atraso deve ser suficiente para que o usuário perceba a ordem de entrada, mas curto o bastante para manter o ritmo da apresentação.
+
+AUDITORIA FINAL DAS ANIMAÇÕES
+
+Antes de entregar o documento HTML, valide cada slide respondendo:
+
+□ Algum elemento apareceu antes da animação iniciar?
+
+□ Algum elemento piscou durante a troca de slide?
+
+□ Algum elemento ficou visível por um único frame?
+
+□ Todas as animações iniciam apenas após o slide estar ativo?
+
+□ Todas as animações funcionam igualmente ao avançar?
+
+□ Todas as animações funcionam igualmente ao retroceder?
+
+□ Todos os elementos retornam ao estado inicial ao sair do slide?
+
+□ Cada componente possui uma animação própria?
+
+□ Existem microanimações enriquecendo a animação principal?
+
+□ O ritmo das animações está fluido e cinematográfico?
+
+□ Os delays estão organizados?
+
+□ As durações estão coerentes?
+
+□ A sequência conduz naturalmente o olhar do usuário?
+
+Se qualquer resposta for NÃO, o slide deve ser considerado incorreto e sua sequência de animações deve ser revisada antes da entrega.
+
+CHECKLIST — SISTEMA DE ANIMAÇÕES E TRANSIÇÕES (VALIDAÇÃO OBRIGATÓRIA)
+
+ATENÇÃO
+
+Antes de considerar o documento HTML concluído, realize uma auditoria completa do sistema de animações.
+
+Percorra este checklist item por item.
+
+Caso qualquer item não esteja completamente atendido, interrompa imediatamente a finalização do documento.
+
+Corrija o problema.
+
+Depois reinicie toda a auditoria.
+
+Somente entregue o HTML quando TODOS os itens abaixo estiverem marcados.
+
+ETAPA 1 — TROCA DE SLIDES
+
+☐ A troca entre slides é completamente fluida.
+
+☐ Não existe piscar de conteúdo.
+
+☐ Não existe flash de conteúdo.
+
+☐ O novo slide nunca aparece completamente pronto.
+
+☐ O conteúdo nunca fica visível antes da animação.
+
+☐ O slide atual finaliza corretamente sua saída.
+
+☐ O próximo slide só inicia após estar completamente preparado.
+
+☐ Existe pequeno intervalo entre a troca do slide e o início das animações.
+
+☐ O usuário nunca percebe carregamento.
+
+☐ A troca parece cinematográfica.
+
+ETAPA 2 — ESTADO INICIAL
+
+☐ Todos os elementos iniciam invisíveis.
+
+☐ Todos os elementos possuem opacidade inicial correta.
+
+☐ Todos os elementos iniciam na posição inicial da animação.
+
+☐ Escalas iniciais estão corretas.
+
+☐ Rotações iniciais estão corretas.
+
+☐ Blur inicial está correto.
+
+☐ Máscaras iniciam corretamente.
+
+☐ Nenhum elemento aparece antes da hora.
+
+ETAPA 3 — ENTRADA DOS ELEMENTOS
+
+☐ Todos os elementos possuem animação própria.
+
+☐ Nenhum elemento surge instantaneamente.
+
+☐ As animações iniciam apenas quando o slide já está ativo.
+
+☐ O usuário nunca vê o estado final antes da animação.
+
+☐ Todas as entradas parecem naturais.
+
+☐ Nenhuma entrada parece artificial.
+
+☐ Existe boa fluidez.
+
+ETAPA 4 — SAÍDA DOS ELEMENTOS
+
+☐ Todos os elementos possuem animação de saída quando necessário.
+
+☐ Nenhum elemento desaparece instantaneamente.
+
+☐ As saídas mantêm a fluidez da apresentação.
+
+☐ Não existem cortes bruscos.
+
+☐ O slide termina completamente antes do próximo iniciar.
+
+ETAPA 5 — RETORNO AO SLIDE
+
+☐ Ao voltar para um slide, todas as animações acontecem novamente.
+
+☐ Nenhum elemento permanece parcialmente animado.
+
+☐ Todos os estados são reiniciados.
+
+☐ Nenhuma animação fica "presa".
+
+☐ O comportamento é idêntico ao da primeira visualização.
+
+ETAPA 6 — COREOGRAFIA
+
+☐ Existe uma ordem lógica de entrada.
+
+☐ O background aparece antes do conteúdo.
+
+☐ Os elementos decorativos aparecem antes do conteúdo principal.
+
+☐ Os títulos aparecem antes do texto.
+
+☐ Os textos aparecem antes dos botões.
+
+☐ Os efeitos finais aparecem apenas no final da sequência.
+
+☐ Existe ritmo.
+
+☐ Existe progressão visual.
+
+☐ O olhar do usuário é conduzido naturalmente.
+
+ETAPA 7 — STAGGER
+
+☐ Listas aparecem sequencialmente.
+
+☐ Cards aparecem sequencialmente.
+
+☐ Botões aparecem sequencialmente.
+
+☐ Ícones aparecem sequencialmente.
+
+☐ Gráficos aparecem sequencialmente.
+
+☐ Não existem diversos elementos surgindo exatamente ao mesmo tempo.
+
+☐ Os delays são consistentes.
+
+☐ O stagger parece natural.
+
+ETAPA 8 — ANIMAÇÕES INDIVIDUAIS
+
+☐ Cada título possui animação exclusiva.
+
+☐ Cada subtítulo possui animação apropriada.
+
+☐ Cada bloco de texto possui animação própria.
+
+☐ Cada imagem possui animação própria.
+
+☐ Cada gráfico possui animação própria.
+
+☐ Cada card possui animação própria.
+
+☐ Cada botão possui animação própria.
+
+☐ Cada ícone possui animação própria.
+
+☐ Não existe repetição excessiva da mesma animação.
+
+ETAPA 9 — MICROANIMAÇÕES
+
+☐ Os títulos possuem microdetalhes.
+
+☐ Os cards possuem microdetalhes.
+
+☐ Os ícones possuem microdetalhes.
+
+☐ Os botões possuem microdetalhes.
+
+☐ Existem pequenas animações contínuas.
+
+☐ Glow respira suavemente.
+
+☐ Elementos flutuam discretamente.
+
+☐ Reflexos movimentam-se suavemente.
+
+☐ Nada parece completamente estático.
+
+ETAPA 10 — ANIMAÇÕES COMPOSTAS
+
+☐ Algumas animações combinam múltiplos efeitos.
+
+☐ Fade é combinado com movimento.
+
+☐ Movimento é combinado com escala.
+
+☐ Escala é combinada com blur.
+
+☐ Blur é combinado com glow.
+
+☐ Glow é combinado com estabilização.
+
+☐ As combinações parecem naturais.
+
+☐ Não existem exageros.
+
+ETAPA 11 — TEMPOS
+
+☐ Todas as animações possuem duração definida.
+
+☐ Todas possuem delay definido.
+
+☐ Todas possuem easing definido.
+
+☐ Todas possuem tempo de estabilização.
+
+☐ Nenhum tempo foi escolhido aleatoriamente.
+
+☐ Existe consistência entre slides.
+
+ETAPA 12 — EASING
+
+☐ Não existem animações lineares desnecessárias.
+
+☐ As curvas de aceleração parecem naturais.
+
+☐ Existe desaceleração suave.
+
+☐ Existe aceleração suave.
+
+☐ O movimento parece físico.
+
+ETAPA 13 — PERFORMANCE
+
+☐ Todas as animações permanecem suaves.
+
+☐ Não existem travamentos.
+
+☐ Não existem quedas perceptíveis de FPS.
+
+☐ Não existem engasgos.
+
+☐ Não existem animações concorrentes excessivas.
+
+ETAPA 14 — CONSISTÊNCIA
+
+☐ Todos os slides seguem a mesma linguagem de animação.
+
+☐ Cada slide possui personalidade própria.
+
+☐ Nenhuma animação quebra a identidade visual.
+
+☐ Existe unidade entre todas as transições.
+
+ETAPA 15 — DOCUMENTAÇÃO
+
+☐ Cada animação foi documentada.
+
+☐ Cada animação possui descrição.
+
+☐ Cada animação possui duração.
+
+☐ Cada animação possui delay.
+
+☐ Cada animação possui easing.
+
+☐ Cada animação possui ordem de execução.
+
+☐ Cada slide possui sua sequência documentada.
+
+ETAPA 16 — TESTES DE NAVEGAÇÃO
+
+Validar todas as animações utilizando:
+
+☐ Botão Próximo.
+
+☐ Botão Anterior.
+
+☐ Teclado.
+
+☐ Mouse.
+
+☐ Touch.
+
+☐ Swipe.
+
+☐ Índice.
+
+☐ Miniaturas.
+
+☐ Navegação rápida.
+
+☐ Pular para qualquer slide.
+
+Todas devem produzir exatamente o mesmo comportamento visual.
+
+ETAPA 17 — QUALIDADE CINEMATOGRÁFICA
+
+☐ As animações parecem cuidadosamente coreografadas.
+
+☐ Existe sensação de elegância.
+
+☐ Existe sensação de fluidez.
+
+☐ Existe sensação de continuidade.
+
+☐ Existe sensação de refinamento.
+
+☐ Existe sensação premium.
+
+☐ Existe sensação de produto profissional.
+
+☐ As animações valorizam o conteúdo em vez de distraírem.
+
+☐ A sequência parece planejada por um motion designer profissional.
+
+ETAPA 18 — VALIDAÇÃO FINAL
+
+Antes de entregar o HTML, responda:
+
+□ Algum elemento apareceu antes da animação começar?
+
+□ Algum elemento piscou?
+
+□ Algum elemento apareceu por apenas um frame?
+
+□ Alguma animação iniciou tarde demais?
+
+□ Alguma animação iniciou cedo demais?
+
+□ Alguma animação foi pulada?
+
+□ Alguma animação deixou de reiniciar ao voltar para um slide?
+
+□ Existe qualquer comportamento visual inconsistente?
+
+□ Existe qualquer sensação de carregamento?
+
+□ O usuário consegue perceber que o slide já estava renderizado antes das animações?
+
+Se qualquer resposta for SIM, o documento HTML deve ser considerado incorreto.
+
+Corrija todos os problemas.
+
+Reinicie toda a auditoria.
+
+Somente entregue o documento quando todas as respostas forem NÃO e todos os itens deste checklist estiverem completamente atendidos.
