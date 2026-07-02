@@ -1,0 +1,893 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PC Gamer Econômico - Análise Completa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg1:#070b17;--bg2:#0f172a;--bg3:#1e293b;--bg4:#0d1120;
+--cy:#06b6d4;--vi:#8b5cf6;--am:#f59e0b;--em:#10b981;--re:#ef4444;--bl:#3b82f6;
+--t1:#fff;--t2:#cbd5e1;--t3:#64748b;--t4:#475569;
+--gb:linear-gradient(135deg,#070b17,#0f172a,#070b17);
+--ga:linear-gradient(135deg,#06b6d4,#8b5cf6);
+--gp:linear-gradient(135deg,#f59e0b,#d97706);
+--gs:linear-gradient(135deg,#10b981,#059669);
+--glass:rgba(15,23,42,0.7);--gbd:rgba(255,255,255,0.08);
+--fo:'Orbitron',sans-serif;--fs:'Rajdhani',sans-serif;
+--fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
+--rc:14px;--rb:10px;--rn:50%;--rt:8px;
+--eo:cubic-bezier(0.16,1,0.3,1);--es:cubic-bezier(0.25,0.1,0.25,1)
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg1);font-family:var(--fb);color:var(--t2);-webkit-font-smoothing:antialiased}
+#bg{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--gb);background-size:200% 200%;animation:bgDrift 12s ease infinite;z-index:0;pointer-events:none}
+@keyframes bgDrift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+#bg-grid{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M60 0L0 0 0 60' fill='none' stroke='%2306b6d4' stroke-width='.5'/%3E%3C/svg%3E");background-size:60px}
+#bg-noise{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;opacity:.012;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#bg-v{position:fixed;top:0;left:0;width:100%;height:100%;z-index:3;pointer-events:none;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.5) 100%);opacity:.2}
+#pc{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;overflow:hidden;display:flex;flex-direction:column;padding:0 5%}
+.slide.active{opacity:1;visibility:visible;z-index:11}
+.slide.exiting{opacity:0;visibility:visible;z-index:12}
+.slide.entering{opacity:1;visibility:visible;z-index:11}
+.si{position:relative;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center}
+.st{font-family:var(--fo);font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;opacity:0;transform:translateY(20px) blur(4px)}
+.st.show{animation:ti 900ms var(--eo) forwards}
+@keyframes ti{0%{opacity:0;transform:translateY(20px) blur(6px)}100%{opacity:1;transform:translateY(0) blur(0)}}
+.ss{font-family:var(--fs);font-weight:500;color:var(--t2);letter-spacing:.03em;text-transform:uppercase;opacity:0;transform:translateY(15px)}
+.ss.show{animation:si 700ms var(--eo) forwards}
+@keyframes si{0%{opacity:0;transform:translateY(15px)}100%{opacity:1;transform:translateY(0)}}
+#nb{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:100;width:90%;max-width:900px;display:flex;align-items:center;gap:12px;opacity:0;transition:opacity .4s}
+#nb.show{opacity:1}
+#pt{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;position:relative;cursor:pointer;transition:height .2s}
+#pt:hover{height:6px}
+#pf{height:100%;border-radius:2px;background:var(--ga);transition:width .5s var(--es);position:relative}
+#pd{position:absolute;top:50%;left:0;width:100%;height:0;display:flex;justify-content:space-between;pointer-events:none}
+.pd{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);transform:translateY(-3px);transition:all .3s}
+.pd.act{width:8px;height:8px;background:var(--cy);box-shadow:0 0 8px rgba(6,182,212,.5);transform:translateY(-4px)}
+#ptt{position:absolute;bottom:14px;left:0;transform:translateX(-50%);background:rgba(15,23,42,.95);backdrop-filter:blur(12px);padding:4px 10px;border-radius:6px;font-size:.7rem;font-family:var(--fb);color:var(--t2);white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;border:1px solid rgba(255,255,255,.06)}
+#pt:hover #ptt{opacity:1}
+#sn{font-family:var(--fm);font-size:.7rem;color:var(--t3);letter-spacing:.05em;min-width:50px;text-align:center}
+#pb,#nb2{position:fixed;bottom:20px;z-index:100;width:40px;height:40px;border-radius:var(--rn);background:rgba(255,255,255,.04);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);color:var(--t2);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;overflow:hidden;opacity:0}
+#pb.show,#nb2.show{opacity:1}
+#pb{left:16px}#nb2{right:16px}
+#pb:hover,#nb2:hover{background:rgba(6,182,212,.15);transform:scale(1.08);box-shadow:0 0 20px rgba(6,182,212,.15);color:#fff}
+#pb:active,#nb2:active{transform:scale(.92)}
+#pb.dis,#nb2.dis{opacity:.3!important;pointer-events:none}
+.rip{position:absolute;border-radius:50%;background:rgba(6,182,212,.3);transform:scale(0);animation:rp .6s ease-out;pointer-events:none}
+@keyframes rp{to{transform:scale(4);opacity:0}}
+#si{position:fixed;top:16px;right:5%;z-index:100;font-family:var(--fm);font-size:.7rem;color:var(--t3);letter-spacing:.05em;opacity:0;transition:opacity .4s,transform .3s}
+#si.show{opacity:1}
+.ae{opacity:0}
+.ae.fu{transform:translateY(20px)}
+.ae.fs{transform:scale(.92)}
+.ae.fb{filter:blur(4px)}
+.ae.sl{transform:translateX(40px)}
+.ae.sr{transform:translateX(-40px)}
+.ae.zi{transform:scale(.8)}
+.ae.done{opacity:1;transform:translateY(0) translateX(0) scale(1) blur(0)!important;filter:blur(0)!important}
+.sl-ex-cf{transition:opacity .6s ease;opacity:0}
+.sl-en-cf{transition:opacity .6s ease 50ms}
+.sl-ex-sl{transition:all .5s var(--es);transform:translateX(-100%);opacity:0}
+.sl-en-sl{transition:all .5s var(--es) 50ms}
+.sl-ex-slb{transition:all .5s var(--es);transform:translateX(-80px);opacity:0;filter:blur(8px)}
+.sl-en-slb{transition:all .5s var(--es) 50ms}
+.sl-ex-sls{transition:all .5s var(--es);transform:translateX(-60px) scale(.96);opacity:0}
+.sl-en-sls{transition:all .5s var(--es) 50ms}
+.sl-ex-fa{transition:opacity .5s ease;opacity:0}
+.sl-en-fa{transition:opacity .5s ease 50ms}
+.sl-ex-fb{transition:all .5s ease;opacity:0;filter:blur(6px)}
+.sl-en-fb{transition:all .5s ease 50ms}
+.sl-ex-zo{transition:all .8s var(--es);transform:scale(1.1);opacity:0}
+.sl-en-zo{transition:all .8s var(--es) 50ms}
+.sl-ex-sr{transition:all .5s var(--es);transform:translateX(100%);opacity:0}
+.sl-en-sr{transition:all .5s var(--es) 50ms}
+.sl-en-zi{transition:all .8s var(--es) 50ms}
+
+/* SLIDE 1 */
+#s1 .si{align-items:center;text-align:center;justify-content:center}
+#s1 .c1{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden}
+#s1 .c1s{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:80%;max-width:700px;height:40%;opacity:.05}
+#s1 .c1g{position:absolute;top:-30%;left:-20%;width:60%;height:80%;background:linear-gradient(135deg,rgba(6,182,212,.04),transparent 70%);transform:rotate(-25deg)}
+#s1 .c1c{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+#s1 .c1c div{border:.5px solid rgba(6,182,212,.08);border-radius:50%;position:absolute;top:50%;left:50%;animation:cr 60s linear infinite}
+#s1 .c1c div:nth-child(1){width:600px;height:600px;margin:-300px 0 0 -300px}
+#s1 .c1c div:nth-child(2){width:500px;height:500px;margin:-250px 0 0 -250px;animation-direction:reverse;animation-duration:45s}
+#s1 .c1c div:nth-child(3){width:400px;height:400px;margin:-200px 0 0 -200px;animation-duration:50s}
+@keyframes cr{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+#s1 .c1d{position:absolute;opacity:.025;font-family:var(--fm);font-size:.5rem;color:var(--cy)}
+#s1 .cmt{font-family:var(--fo);font-weight:900;font-size:clamp(2rem,5vw,4.5rem);color:var(--t1);text-transform:uppercase;letter-spacing:.05em;line-height:1.1;z-index:5;opacity:0;transform:translateY(30px) blur(8px)}
+#s1 .cmt.show{animation:t3i 1s var(--eo) .2s forwards}
+@keyframes t3i{0%{opacity:0;transform:translateY(30px) blur(8px)}100%{opacity:1;transform:translateY(0) blur(0)}}
+#s1 .cl{width:40%;height:1px;background:linear-gradient(90deg,var(--cy),transparent);margin:12px auto;opacity:0}
+#s1 .cl.show{animation:li .5s var(--eo) .9s forwards}
+@keyframes li{0%{opacity:0;width:0}100%{opacity:1;width:40%}}
+#s1 .cs{font-family:var(--fs);font-weight:500;font-size:clamp(.85rem,1.4vw,1.1rem);color:var(--t2);letter-spacing:.04em;text-transform:uppercase;opacity:0}
+#s1 .cs.show{animation:si .7s var(--eo) .9s forwards}
+#s1 .cq{margin-top:24px;font-family:var(--fs);font-weight:500;font-size:clamp(.85rem,1.3vw,1.1rem);color:var(--cy);font-style:italic;opacity:0}
+#s1 .cq.show{animation:si .8s var(--eo) 1.3s forwards}
+#s1 .cq::before{content:'\201C';font-size:1.5em;color:var(--cy);opacity:.4;margin-right:4px}
+#s1 .cq::after{content:'\201D';font-size:1.5em;color:var(--cy);opacity:.4;margin-left:4px}
+#s1 .cm{position:absolute;bottom:12%;left:5%;text-align:left;z-index:5}
+#s1 .cm p{font-family:var(--fb);font-weight:300;font-size:clamp(.65rem,.8vw,.8rem);color:var(--t3);line-height:1.6;opacity:0}
+#s1 .cm p.show{animation:si .5s var(--eo) 1.5s forwards}
+#s1 .ci{position:absolute;bottom:12%;right:5%;max-width:400px;text-align:right;z-index:5}
+#s1 .ci p{font-family:var(--fb);font-weight:300;font-size:clamp(.6rem,.75vw,.75rem);color:var(--t4);line-height:1.5;opacity:0}
+#s1 .ci p.show{animation:si .5s var(--eo) 1.6s forwards}
+
+/* SLIDE 2 */
+#s2 .si{flex-direction:row;align-items:center;gap:2%}
+#s2 .s2l{flex:0 0 38%;height:80%;position:relative}
+#s2 .s2r{flex:0 0 58%;height:80%}
+#s2 .s2t{width:100%;margin-bottom:8px}
+#s2 .s2g{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:calc(100% - 50px)}
+.s2c{background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--gbd);border-radius:var(--rc);padding:12px 14px;cursor:pointer;perspective:800px;transition:all .3s;position:relative;opacity:0;transform:translateY(15px)}
+.s2c:hover{transform:translateY(-3px)!important;border-color:rgba(6,182,212,.2);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.s2ci{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.s2c.fl .s2ci{transform:rotateY(180deg)}
+.s2cf,.s2cb{position:absolute;top:0;left:0;width:100%;height:100%;backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center}
+.s2cb{transform:rotateY(180deg);background:rgba(6,182,212,.08);border-radius:var(--rc);padding:10px}
+.s2ci2{font-size:1.4rem;margin-bottom:4px}
+.s2cn{font-family:var(--fm);font-weight:500;font-size:.75rem;color:var(--cy);letter-spacing:.03em}
+.s2cd{font-family:var(--fb);font-weight:300;font-size:.65rem;color:var(--t3);margin-top:2px}
+.s2cfps{display:inline-block;padding:1px 6px;border-radius:3px;font-size:.55rem;font-family:var(--fm);margin-top:4px}
+.s2cfps.ht{background:rgba(16,185,129,.15);color:var(--em)}
+.s2cfps.md{background:rgba(245,158,11,.15);color:var(--am)}
+.s2cfps.bx{background:rgba(59,130,246,.15);color:var(--bl)}
+.s2cfps.nn{background:rgba(100,116,139,.15);color:var(--t3)}
+.s2cfps.in{background:rgba(139,92,246,.15);color:var(--vi)}
+.bl{font-family:var(--fb);font-weight:400;font-size:.6rem;color:var(--t2);margin-bottom:2px}
+.bv{font-family:var(--fm);font-weight:400;font-size:.65rem;color:var(--t3)}
+#s2d{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.s2dn{cursor:pointer;transition:all .4s}
+.s2dn.act circle{fill:var(--cy)!important;filter:drop-shadow(0 0 8px rgba(6,182,212,.5))}
+.s2dn.act text{fill:#fff!important}
+.s2dl{stroke:rgba(6,182,212,.15);stroke-width:1.5;stroke-dasharray:8,4;animation:dm 2s linear infinite}
+@keyframes dm{to{stroke-dashoffset:-24}}
+
+/* SLIDE 3 */
+#s3 .si{align-items:center}
+#s3 .s3b{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto auto auto;gap:10px;width:100%;max-width:1000px;margin-top:10px}
+.s3bk{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--gbd);border-radius:var(--rc);padding:14px 16px;opacity:0;transform:translateY(15px);transition:all .3s}
+.s3bk:hover{transform:translateY(-3px)!important;border-color:rgba(6,182,212,.15)}
+.s3bk.wd{grid-column:span 2}
+.s3bi{font-size:1rem;margin-bottom:4px}
+.s3bt{font-family:var(--fb);font-weight:600;font-size:.8rem;color:var(--t1);margin-bottom:2px}
+.s3bd{font-family:var(--fb);font-weight:300;font-size:.65rem;color:var(--t3);line-height:1.4}
+.s3ch{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;justify-content:center}
+.s3cp{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);border-radius:20px;padding:4px 12px;font-family:var(--fb);font-weight:400;font-size:.6rem;color:var(--cy);opacity:0;transform:scale(.9)}
+
+/* SLIDES 4 & 7 - Tables */
+#s4 .si,#s7 .si{align-items:center}
+#s4 .s4t,#s7 .s4t{width:100%;max-width:1000px;border-collapse:separate;border-spacing:0 4px;margin-top:8px}
+#s4 .s4t th,#s7 .s4t th{font-family:var(--fs);font-weight:600;font-size:.65rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;padding:6px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.04)}
+#s4 .s4t td,#s7 .s4t td{padding:8px 10px;font-size:.75rem;border-radius:4px;transition:all .2s}
+#s4 .s4t tr,#s7 .s4t tr{opacity:0;transform:translateY(10px);transition:all .2s}
+#s4 .s4t tr:hover td,#s7 .s4t tr:hover td{background:rgba(6,182,212,.04)}
+.pi{font-size:1rem;text-align:center;width:8%}
+.pn{font-family:var(--fb);font-weight:500;color:var(--t1);width:22%}
+.ps{font-family:var(--fm);font-weight:400;color:var(--t2);width:25%;font-size:.7rem}
+.pg{font-family:var(--fb);font-weight:300;color:var(--t3);width:12%}
+.pco{font-family:var(--fm);font-weight:400;color:var(--t3);width:10%;text-align:center}
+.pp{font-family:var(--fm);font-weight:500;color:var(--am);width:15%;text-align:right}
+.s4tc,#s7 .s4tc{position:absolute;bottom:10%;right:5%;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:var(--rc);padding:14px 24px;text-align:center;opacity:0;transform:scale(.9)}
+.s4tl{font-family:var(--fb);font-weight:300;font-size:.65rem;color:var(--t3);text-transform:uppercase;letter-spacing:.04em}
+.s4tv{font-family:var(--fm);font-weight:700;font-size:clamp(1.2rem,1.8vw,1.8rem);color:var(--am);text-shadow:0 0 20px rgba(245,158,11,.3);margin-top:4px}
+#s7 .s4t .gpu-dst td{border:1px solid rgba(139,92,246,.2);background:rgba(139,92,246,.04)}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="bg-grid"></div>
+<div id="bg-noise"></div>
+<div id="bg-v"></div>
+<canvas id="pc"></canvas>
+
+<div id="presentation">
+
+<!-- SLIDE 1 -->
+<div class="slide" id="s1" data-slide="1">
+<div class="si">
+<div class="c1">
+<div class="c1g"></div>
+<div class="c1c"><div></div><div></div><div></div></div>
+<div class="c1d" style="top:8%;left:4%">SPECS: RYZEN 5 4600G | VEGA 7 | 8GB DDR4</div>
+<div class="c1d" style="bottom:15%;right:6%">BENCHMARK: 1080p MEDIUM | 45-75 FPS</div>
+<div class="c1d" style="top:25%;right:12%">TDP: 65W | ARCH: ZEN 3 | 7NM</div>
+<div class="c1s"><svg viewBox="0 0 600 300" fill="none" stroke="currentColor"><rect x="50" y="20" width="200" height="130" rx="4" stroke-width="1.5" opacity=".6"/><rect x="55" y="25" width="190" height="120" rx="2" stroke-width=".5" opacity=".3"/><rect x="280" y="80" width="80" height="50" rx="4" stroke-width="1" opacity=".5"/><rect x="290" y="88" width="20" height="34" rx="2" stroke-width=".5" opacity=".4"/><rect x="420" y="100" width="120" height="30" rx="6" stroke-width="1" opacity=".4"/><rect x="430" y="105" width="40" height="20" rx="3" stroke-width=".5" opacity=".3"/><path d="M160 150L160 180L190 180" stroke-width=".8" opacity=".4"/><path d="M200 150L200 170L280 170" stroke-width=".8" opacity=".4"/><ellipse cx="160" cy="220" rx="40" ry="20" stroke-width="1" opacity=".4"/><path d="M0 280Q300 260 600 280" stroke-width=".5" opacity=".2"/><rect x="100" y="230" width="120" height="10" rx="3" stroke-width=".5" opacity=".3"/><rect x="380" y="230" width="120" height="10" rx="3" stroke-width=".5" opacity=".3"/><path d="M310 130L310 220" stroke-width=".5" opacity=".3"/><circle cx="310" cy="225" r="4" stroke-width=".5" opacity=".4"/></svg></div>
+</div>
+<div class="cmt ae" data-anim="title3d">PC Gamer<br>Econômico</div>
+<div class="cl ae" data-anim="line"></div>
+<div class="cs ae" data-anim="fu">Uma análise completa dos melhores computadores entre R$ 1.500 e R$ 2.000</div>
+<div class="cq ae" data-anim="fu">Nem sempre o computador mais caro é a melhor escolha</div>
+<div class="cm"><p class="ae" data-anim="fu">Leandro Ogawa<br>Julho 2026<br>Guia de Compra - Hardware Gamer</p></div>
+<div class="ci"><p class="ae" data-anim="fu">Descubra qual configuração entrega o melhor custo-benefício para jogar sem gastar uma fortuna. Analisamos componentes, desempenho e possibilidades de upgrade.</p></div>
+</div>
+</div>
+
+<!-- SLIDE 2 -->
+<div class="slide" id="s2" data-slide="2">
+<div class="si">
+<div class="s2t">
+<div class="st ae" data-anim="fb" style="font-size:clamp(1.2rem,2vw,1.8rem)">O que faz um PC Gamer?</div>
+<div class="ss ae" data-anim="fu">Conheça os componentes essenciais e suas funções</div>
+</div>
+<div class="s2l">
+<div id="s2d"><svg viewBox="0 0 300 400">
+<g class="s2dn" data-component="cpu"><circle cx="150" cy="40" r="20" fill="rgba(6,182,212,.1)" stroke="rgba(6,182,212,.3)" stroke-width="1.5"/><text x="150" y="45" text-anchor="middle" fill="#64748b" font-size="8" font-family="JetBrains Mono">CPU</text></g>
+<line class="s2dl" x1="150" y1="60" x2="90" y2="110"/><line class="s2dl" x1="150" y1="60" x2="210" y2="110"/><line class="s2dl" x1="150" y1="60" x2="150" y2="120"/>
+<g class="s2dn" data-component="gpu"><circle cx="90" cy="130" r="16" fill="rgba(139,92,246,.1)" stroke="rgba(139,92,246,.3)" stroke-width="1.5"/><text x="90" y="135" text-anchor="middle" fill="#64748b" font-size="7" font-family="JetBrains Mono">GPU</text></g>
+<g class="s2dn" data-component="ram"><circle cx="210" cy="130" r="14" fill="rgba(59,130,246,.1)" stroke="rgba(59,130,246,.3)" stroke-width="1.5"/><text x="210" y="135" text-anchor="middle" fill="#64748b" font-size="7" font-family="JetBrains Mono">RAM</text></g>
+<line class="s2dl" x1="150" y1="120" x2="60" y2="180"/><line class="s2dl" x1="150" y1="120" x2="240" y2="180"/>
+<g class="s2dn" data-component="ssd"><circle cx="60" cy="200" r="14" fill="rgba(16,185,129,.1)" stroke="rgba(16,185,129,.3)" stroke-width="1.5"/><text x="60" y="205" text-anchor="middle" fill="#64748b" font-size="7" font-family="JetBrains Mono">SSD</text></g>
+<line class="s2dl" x1="150" y1="120" x2="150" y2="190"/>
+<g class="s2dn" data-component="fonte"><circle cx="150" cy="210" r="15" fill="rgba(245,158,11,.1)" stroke="rgba(245,158,11,.3)" stroke-width="1.5"/><text x="150" y="215" text-anchor="middle" fill="#64748b" font-size="6" font-family="JetBrains Mono">FONTE</text></g>
+<g class="s2dn" data-component="placamae"><circle cx="240" cy="200" r="16" fill="rgba(139,92,246,.1)" stroke="rgba(139,92,246,.3)" stroke-width="1.5"/><text x="240" y="205" text-anchor="middle" fill="#64748b" font-size="6" font-family="JetBrains Mono">PLACA-MÃE</text></g>
+<g class="s2dn" data-component="gabinete"><circle cx="30" cy="280" r="14" fill="rgba(100,116,139,.1)" stroke="rgba(100,116,139,.3)" stroke-width="1.5"/><text x="30" y="285" text-anchor="middle" fill="#64748b" font-size="6" font-family="JetBrains Mono">GABINETE</text></g>
+<g class="s2dn" data-component="cooler"><circle cx="270" cy="280" r="14" fill="rgba(6,182,212,.1)" stroke="rgba(6,182,212,.3)" stroke-width="1.5"/><text x="270" y="285" text-anchor="middle" fill="#64748b" font-size="6" font-family="JetBrains Mono">COOLER</text></g>
+<line class="s2dl" x1="60" y1="214" x2="30" y2="266"/><line class="s2dl" x1="240" y1="216" x2="270" y2="266"/>
+</svg></div></div>
+<div class="s2r"><div class="s2g">
+<div class="s2c ae" data-anim="fs" data-component="cpu" onclick="this.classList.toggle('fl')"><div class="s2ci"><div class="s2cf"><div class="s2ci2">🧠</div><div class="s2cn">CPU</div><div class="s2cd">Executa instruções e processa dados</div><span class="s2cfps md">FPS: Médio</span></div><div class="s2cb"><div class="bl">Gargalo: Sim</div><div class="bv">Impacto direto em FPS</div><div class="bl" style="margin-top:4px">Curiosidade</div><div class="bv">CPU define o limite máximo de FPS</div></div></div></div>
+<div class="s2c ae" data-anim="fs" data-component="gpu" onclick="this.classList.toggle('fl')"><div class="s2ci"><div class="s2cf"><div class="s2ci2">🎮</div><div class="s2cn">GPU</div><div class="s2cd">Renderiza gráficos e imagens</div><span class="s2cfps ht">FPS: Alto</span></div><div class="s2cb"><div class="bl">Gargalo: Principal</div><div class="bv">Componente mais crítico para jogos</div><div class="bl" style="margin-top:4px">Curiosidade</div><div class="bv">GPU faz mais diferença que CPU em jogos</div></div></div></div>
+<div class="s2c ae" data-anim="fs" data-component="ram" onclick="this.classList.toggle('fl')"><div class="s2ci"><div class="s2cf"><div class="s2ci2">💾</div><div class="s2cn">RAM</div><div class="s2cd">Armazena dados temporários</div><span class="s2cfps md">FPS: Médio</span></div><div class="s2cb"><div class="bl">Capacidade</div><div class="bv">8GB mínimo, 16GB ideal</div><div class="bl" style="margin-top:4px">Curiosidade</div><div class="bv">Dual Channel dobra a largura de banda</div></div></div></div>
+<div class="s2c ae" data-anim="fs" data-component="ssd" onclick="this.classList.toggle('fl')"><div class="s2ci"><div class="s2cf"><div class="s2ci2">💿</div><div class="s2cn">SSD</div><div class="s2cd">Armazenamento rápido</div><span class="s2cfps bx">FPS: Baixo</span></div><div class="s2cb"><div class="bl">Impacto</div><div class="bv">Acelera loading, não FPS</div><div class="bl" style="margin-top:4px">Curiosidade</div><div class="bv">NVMe é 5x mais rápido que SATA</div></div></div></div>
+<div class="s2c ae" data-anim="fs" data-component="fonte" onclick="this.classList.toggle('fl')"><div class="s2ci"><div class="s2cf"><div class="s2ci2">🔌</div><div class="s2cn">Fonte</div><div class="s2cd">Fornece energia aos componentes</div><span class="s2cfps nn">FPS: Nenhum</span></div><div class="s2cb"><div class="bl">Importância</div><div class="bv">Essencial para estabilidade</div><div class="bl" style="margin-top:4px">Curiosidade</div><div class="bv">Fonte boa dura mais de 10 anos</div></div></div></div>
+<div class="s2c ae" data-anim="fs" data-component="placamae" onclick="this.classList.toggle('fl')"><div class="s2ci"><div class="s2cf"><div class="s2ci2">🔗</div><div class="s2cn">Placa-mãe</div><div class="s2cd">Conecta todos os componentes</div><span class="s2cfps nn">FPS: Nenhum</span></div><div class="s2cb"><div class="bl">Função</div><div class="bv">Base de conexão do sistema</div><div class="bl" style="margin-top:4px">Curiosidade</div><div class="bv">Chipset define compatibilidade</div></div></div></div>
+<div class="s2c ae" data-anim="fs" data-component="gabinete" onclick="this.classList.toggle('fl')"><div class="s2ci"><div class="s2cf"><div class="s2ci2">🖥️</div><div class="s2cn">Gabinete</div><div class="s2cd">Abriga e protege componentes</div><span class="s2cfps nn">FPS: Nenhum</span></div><div class="s2cb"><div class="bl">Função</div><div class="bv">Estrutura e airflow</div><div class="bl" style="margin-top:4px">Curiosidade</div><div class="bv">Bom airflow reduz 5-10°C</div></div></div></div>
+<div class="s2c ae" data-anim="fs" data-component="cooler" onclick="this.classList.toggle('fl')"><div class="s2ci"><div class="s2cf"><div class="s2ci2">❄️</div><div class="s2cn">Cooler</div><div class="s2cd">Remove calor do sistema</div><span class="s2cfps in">FPS: Indireto</span></div><div class="s2cb"><div class="bl">Impacto</div><div class="bv">Evita throttling térmico</div><div class="bl" style="margin-top:4px">Curiosidade</div><div class="bv">65°C é seguro, 90°C é alerta</div></div></div></div>
+</div></div></div></div>
+
+<!-- SLIDE 3 -->
+<div class="slide" id="s3" data-slide="3">
+<div class="si">
+<div class="st ae" data-anim="fb" style="font-size:clamp(1.2rem,2vw,1.8rem);text-align:center">Como Escolhemos os PCs</div>
+<div class="ss ae" data-anim="fu" style="text-align:center">Critérios utilizados para selecionar as melhores configurações</div>
+<div class="s3b">
+<div class="s3bk ae wd" data-anim="fs"><div class="s3bi">⚡</div><div class="s3bt">Desempenho em Jogos</div><div class="s3bd">Priorizamos configurações capazes de rodar jogos populares (Valorant, CS2, GTA V, Fortnite) com pelo menos 30 FPS estáveis em 1080p.</div></div>
+<div class="s3bk ae" data-anim="fs"><div class="s3bi">💰</div><div class="s3bt">Custo-Benefício</div><div class="s3bd">Cada real investido foi avaliado pelo retorno em desempenho real em jogos.</div></div>
+<div class="s3bk ae" data-anim="fs"><div class="s3bi">🔧</div><div class="s3bt">Compatibilidade</div><div class="s3bd">Todos os componentes foram verificados quanto à compatibilidade entre si.</div></div>
+<div class="s3bk ae" data-anim="fs"><div class="s3bi">📈</div><div class="s3bt">Potencial de Upgrade</div><div class="s3bd">Avaliamos a possibilidade de evoluir o PC no futuro sem trocar tudo.</div></div>
+<div class="s3bk ae wd" data-anim="fs"><div class="s3bi">🔋</div><div class="s3bt">Consumo de Energia</div><div class="s3bd">Consideramos a eficiência energética para não pesar na conta de luz e garantir que a fonte seja adequada.</div></div>
+<div class="s3bk ae" data-anim="fs"><div class="s3bi">📦</div><div class="s3bt">Disponibilidade</div><div class="s3bd">Componentes facilmente encontrados em lojas brasileiras com estoque regular.</div></div>
+<div class="s3bk ae" data-anim="fs"><div class="s3bi">🛡️</div><div class="s3bt">Garantia</div><div class="s3bd">Preferência por peças com garantia mínima de 1 ano (exceto usadas).</div></div>
+<div class="s3bk ae" data-anim="fs"><div class="s3bi">⭐</div><div class="s3bt">Avaliações</div><div class="s3bd">Consideramos reviews e testes de benchmarks da comunidade.</div></div>
+<div class="s3bk ae wd" data-anim="fs"><div class="s3bi">🔄</div><div class="s3bt">Peças Novas vs Usadas</div><div class="s3bd">Comparamos o desempenho de componentes novos e usados para determinar o melhor custo-benefício em cada faixa de preço.</div></div>
+</div>
+<div class="s3ch"><span class="s3cp ae" data-anim="fs">Orçamento</span><span class="s3cp ae" data-anim="fs">Objetivo</span><span class="s3cp ae" data-anim="fs">Público-alvo</span><span class="s3cp ae" data-anim="fs">Jogos</span></div>
+</div></div>
+
+<!-- SLIDE 4 -->
+<div class="slide" id="s4" data-slide="4">
+<div class="si">
+<div class="st ae" data-anim="fb" style="font-size:clamp(1.1rem,1.8vw,1.6rem)">PC Gamer de aproximadamente R$ 1.500</div>
+<div class="ss ae" data-anim="fu">Configuração de entrada com vídeo integrado</div>
+<table class="s4t"><thead><tr><th></th><th>Componente</th><th>Especificações</th><th>Garantia</th><th>Consumo</th><th>Preço</th></tr></thead><tbody>
+<tr class="ae" data-anim="fu"><td class="pi">🧠</td><td class="pn">Ryzen 5 4600G</td><td class="ps">6 núcleos / 12 threads · 3.7-4.2GHz · Vega 7</td><td class="pg">3 anos</td><td class="pco">65W</td><td class="pp">R$ 499</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">❄️</td><td class="pn">Hyper H410R</td><td class="ps">Torre 120mm · 150W TDP · RGB</td><td class="pg">2 anos</td><td class="pco">2W</td><td class="pp">R$ 89</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">🔗</td><td class="pn">A520M-HVS</td><td class="ps">mATX · AM4 · DDR4 · PCIe 3.0 · M.2</td><td class="pg">3 anos</td><td class="pco">50W</td><td class="pp">R$ 349</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">💾</td><td class="pn">8GB DDR4 3200MHz</td><td class="ps">1 pente · CL22 · 1.2V</td><td class="pg">Vitalícia</td><td class="pco">3W</td><td class="pp">R$ 149</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">💿</td><td class="pn">NV2 256GB NVMe</td><td class="ps">M.2 · PCIe 4.0 · 3500MB/s leitura</td><td class="pg">3 anos</td><td class="pco">4W</td><td class="pp">R$ 159</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">🔌</td><td class="pn">CV450 450W</td><td class="ps">80 Plus Bronze · PFC Ativo · Cabos fixos</td><td class="pg">3 anos</td><td class="pco">—</td><td class="pp">R$ 229</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">🖥️</td><td class="pn">Kazan 2</td><td class="ps">mATX · Lateral acrílica · 1 fan incluso</td><td class="pg">1 ano</td><td class="pco">—</td><td class="pp">R$ 139</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">🎮</td><td class="pn">Vega 7 (Integrado)</td><td class="ps">7 núcleos GPU · 1.9GHz · 448 GFLOPs</td><td class="pg">—</td><td class="pco">—</td><td class="pp">R$ 0</td></tr>
+</tbody></table>
+<div class="s4tc ae" data-anim="fs"><div class="s4tl">Valor Total</div><div class="s4tv" id="s4t">R$ 1.613</div></div>
+</div></div>
+
+<!-- SLIDE 5 -->
+<div class="slide" id="s5" data-slide="5">
+<div class="si">
+<div class="s5l" style="flex:0 0 48%;height:80%">
+<div class="st ae" data-anim="fb" style="font-size:clamp(.9rem,1.4vw,1.2rem)">Avaliação das Peças - R$ 1.500</div>
+<div class="ss ae" data-anim="fu" style="font-size:.75rem">Análise detalhada de cada componente</div>
+<div class="s5t" id="s5t"><span class="s5tb act" data-peca="cpu">CPU</span><span class="s5tb" data-peca="cooler">Cooler</span><span class="s5tb" data-peca="placamae">Placa-mãe</span><span class="s5tb" data-peca="ram">RAM</span><span class="s5tb" data-peca="ssd">SSD</span><span class="s5tb" data-peca="fonte">Fonte</span><span class="s5tb" data-peca="gabinete">Gabinete</span><span class="s5tb" data-peca="video">Vídeo</span></div>
+<div class="s5pc" id="s5pc"><div id="s5p"></div></div>
+</div>
+<div class="s5r" style="flex:0 0 48%;height:80%">
+<table class="s5tbl" id="s5rt"><thead><tr><th>Peça</th><th>Qualidade</th><th>Potência</th><th>Upgrade</th><th>Custo-Benefício</th></tr></thead><tbody id="s5tb"></tbody></table>
+</div>
+</div></div>
+
+<!-- SLIDE 6 -->
+<div class="slide" id="s6" data-slide="6">
+<div class="si">
+<div class="s6l" style="flex:0 0 55%;height:80%">
+<div class="st ae" data-anim="fb" style="font-size:clamp(.9rem,1.4vw,1.2rem)">Desempenho - R$ 1.500</div>
+<div class="ss ae" data-anim="fu" style="font-size:.75rem">FPS estimado em jogos populares (1080p Médio)</div>
+<div id="s6b" style="margin-top:8px"></div>
+</div>
+<div class="s6r" style="flex:0 0 41%;height:80%">
+<div class="ss ae" data-anim="fu" style="font-size:.7rem;text-align:center;margin-bottom:6px">Distribuição do Orçamento</div>
+<div id="s6d" class="ae" data-anim="fs"><svg viewBox="0 0 180 180"><g id="s6ds"></g></svg><div class="s6dc"><div class="s6dv">R$ 1.613</div><div class="s6dl">Total</div></div></div>
+<div class="s6st ae" data-anim="fu"><div class="s6stb"><div class="s6sv">103W</div><div class="s6sl">Consumo</div></div><div class="s6stb"><div class="s6sv">62°C</div><div class="s6sl">Temperatura</div></div><div class="s6stb"><div class="s6sv">38dB</div><div class="s6sl">Ruído</div></div></div>
+<div class="s6ch ae" data-anim="fu"><span class="s6cp">Valorant</span><span class="s6cp">Roblox</span><span class="s6cp">Minecraft</span><span class="s6cp">Fall Guys</span><span class="s6cp">LoL</span></div>
+</div>
+</div></div>
+<!-- SLIDE 7 -->
+<div class="slide" id="s7" data-slide="7">
+<div class="si">
+<div class="st ae" data-anim="fb" style="font-size:clamp(1.1rem,1.8vw,1.6rem)">PC Gamer de aproximadamente R$ 2.000</div>
+<div class="ss ae" data-anim="fu">Configuração intermediária com GPU dedicada usada</div>
+<table class="s4t"><thead><tr><th></th><th>Componente</th><th>Especificações</th><th>Garantia</th><th>Consumo</th><th>Preço</th></tr></thead><tbody>
+<tr class="ae" data-anim="fu"><td class="pi">🧠</td><td class="pn">Core i3-12100F</td><td class="ps">4 núcleos / 8 threads · 3.3-4.3GHz · LGA1700</td><td class="pg">3 anos</td><td class="pco">60W</td><td class="pp">R$ 449</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">❄️</td><td class="pn">Intel Stock Cooler</td><td class="ps">Cooler box original Intel · 95W TDP</td><td class="pg">—</td><td class="pco">1W</td><td class="pp">R$ 0</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">🔗</td><td class="pn">H610M DDR4</td><td class="ps">mATX · LGA1700 · DDR4 · PCIe 4.0 · M.2</td><td class="pg">3 anos</td><td class="pco">45W</td><td class="pp">R$ 399</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">💾</td><td class="pn">16GB (2x8) DDR4 3200MHz</td><td class="ps">Dual Channel · CL22 · 1.2V</td><td class="pg">Vitalícia</td><td class="pco">5W</td><td class="pp">R$ 239</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">💿</td><td class="pn">NV2 256GB NVMe</td><td class="ps">M.2 · PCIe 4.0 · 3500MB/s leitura</td><td class="pg">3 anos</td><td class="pco">4W</td><td class="pp">R$ 159</td></tr>
+<tr class="ae gpu-dst" data-anim="fu"><td class="pi">🎮</td><td class="pn">RX 580 8GB (Usada)</td><td class="ps">8GB GDDR5 · 2304 SP · 256-bit · 1366MHz</td><td class="pg">3 meses</td><td class="pco">185W</td><td class="pp">R$ 449</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">🔌</td><td class="pn">CV550 550W</td><td class="ps">80 Plus Bronze · PFC Ativo · Cabos fixos</td><td class="pg">3 anos</td><td class="pco">—</td><td class="pp">R$ 289</td></tr>
+<tr class="ae" data-anim="fu"><td class="pi">🖥️</td><td class="pn">Kazan 2</td><td class="ps">mATX · Lateral acrílica · 1 fan incluso</td><td class="pg">1 ano</td><td class="pco">—</td><td class="pp">R$ 139</td></tr>
+</tbody></table>
+<div class="s4tc ae" data-anim="fs"><div class="s4tl">Valor Total</div><div class="s4tv" id="s7t">R$ 2.123</div></div>
+</div></div>
+
+<!-- SLIDE 8 -->
+<div class="slide" id="s8" data-slide="8">
+<div class="si">
+<div class="s5l" style="flex:0 0 48%;height:80%">
+<div class="st ae" data-anim="fb" style="font-size:clamp(.9rem,1.4vw,1.2rem)">Avaliação das Peças - R$ 2.000</div>
+<div class="ss ae" data-anim="fu" style="font-size:.75rem">Análise detalhada de cada componente</div>
+<div class="s5t" id="s8t"><span class="s5tb act" data-peca="cpu">CPU</span><span class="s5tb" data-peca="cooler">Cooler</span><span class="s5tb" data-peca="placamae">Placa-mãe</span><span class="s5tb" data-peca="ram">RAM</span><span class="s5tb" data-peca="ssd">SSD</span><span class="s5tb" data-peca="gpu">GPU</span><span class="s5tb" data-peca="fonte">Fonte</span><span class="s5tb" data-peca="gabinete">Gabinete</span></div>
+<div class="s5pc" id="s8pc"><div id="s8p"></div></div>
+</div>
+<div class="s5r" style="flex:0 0 48%;height:80%">
+<table class="s5tbl" id="s8rt"><thead><tr><th>Peça</th><th>Qualidade</th><th>Potência</th><th>Upgrade</th><th>Custo-Benefício</th></tr></thead><tbody id="s8tb"></tbody></table>
+</div>
+</div></div>
+
+<!-- SLIDE 9 -->
+<div class="slide" id="s9" data-slide="9">
+<div class="si">
+<div class="s6l" style="flex:0 0 55%;height:80%">
+<div class="st ae" data-anim="fb" style="font-size:clamp(.9rem,1.4vw,1.2rem)">Desempenho - R$ 2.000</div>
+<div class="ss ae" data-anim="fu" style="font-size:.75rem">FPS estimado em jogos populares (1080p Médio)</div>
+<div id="s9b" style="margin-top:8px"></div>
+</div>
+<div class="s6r" style="flex:0 0 41%;height:80%">
+<div class="ss ae" data-anim="fu" style="font-size:.7rem;text-align:center;margin-bottom:6px">Distribuição do Orçamento</div>
+<div id="s9d" class="ae" data-anim="fs"><svg viewBox="0 0 180 180"><g id="s9ds"></g></svg><div class="s6dc"><div class="s6dv">R$ 2.123</div><div class="s6dl">Total</div></div></div>
+<div class="s6st ae" data-anim="fu"><div class="s6stb"><div class="s6sv">293W</div><div class="s6sl">Consumo</div></div><div class="s6stb"><div class="s6sv">68°C</div><div class="s6sl">Temperatura</div></div><div class="s6stb"><div class="s6sv">42dB</div><div class="s6sl">Ruído</div></div></div>
+<div class="s6ch ae" data-anim="fu"><span class="s6cp">Valorant</span><span class="s6cp">CS2</span><span class="s6cp">GTA V</span><span class="s6cp">Fortnite</span><span class="s6cp">+ todos</span></div>
+</div>
+</div></div>
+
+<!-- SLIDE 10 -->
+<div class="slide" id="s10" data-slide="10">
+<div class="si">
+<div class="st ae" data-anim="fb" style="font-size:clamp(.9rem,1.6vw,1.4rem);text-align:center">Comparação Entre os Dois PCs</div>
+<div class="ss ae" data-anim="fu" style="text-align:center;font-size:.75rem">Qual configuração é a melhor para você?</div>
+<div class="s10c"><div class="s10col"><div class="s10pc cy ae" data-anim="fs"><div class="s10pt" style="font-family:var(--fs);font-size:.65rem;color:var(--cy);text-transform:uppercase">PC R$ 1.500</div><div class="s10pr">R$ 1.613</div><div class="s10ps">Ryzen 5 4600G<br>Vega 7<br>8GB RAM<br>450W</div></div></div>
+<div class="s10cc"><div id="s10b"></div><div id="s10rc" class="ae" data-anim="fs"><canvas id="s10r" width="240" height="240"></canvas></div></div>
+<div class="s10col"><div class="s10pc vi ae" data-anim="fs"><div class="s10pt" style="font-family:var(--fs);font-size:.65rem;color:var(--vi);text-transform:uppercase">PC R$ 2.000</div><div class="s10pr">R$ 2.123</div><div class="s10ps">i3-12100F<br>RX 580 8GB<br>16GB RAM<br>550W</div></div></div></div>
+<div id="s10bg"><span class="s10bd cb ae" data-anim="fs">Melhor custo-benefício: R$ 1.500</span><span class="s10bd dp ae" data-anim="fs">Melhor desempenho: R$ 2.000</span><span class="s10bd ug ae" data-anim="fs">Melhor para upgrades: R$ 2.000</span></div>
+</div></div>
+
+<!-- SLIDE 11 -->
+<div class="slide" id="s11" data-slide="11">
+<div class="si">
+<div class="st ae" data-anim="fb" style="font-size:clamp(.9rem,1.6vw,1.4rem);text-align:center">Vale a Pena Comprar Usado?</div>
+<div class="ss ae" data-anim="fu" style="text-align:center;font-size:.7rem">Riscos e benefícios de peças de segunda mão</div>
+<div class="s11g"><div class="s11l"><div class="s11ct pr">✅ Vantagens</div>
+<div class="s11c ae" data-anim="sr"><div class="s11ci">⚡</div><div class="s11ct2">Mais desempenho pelo mesmo preço</div><div class="s11cd">Uma RX 580 usada custa R$ 449 e entrega 3x mais FPS que vídeo integrado.</div></div>
+<div class="s11c ae" data-anim="sr"><div class="s11ci">💎</div><div class="s11ct2">Componentes premium acessíveis</div><div class="s11cd">Peças que seriam inviáveis novas tornam-se viáveis no mercado de usados.</div></div>
+<div class="s11c ae" data-anim="sr"><div class="s11ci">📊</div><div class="s11ct2">Melhor custo-benefício</div><div class="s11cd">O desempenho por real investido é significativamente maior.</div></div></div>
+<div class="s11r"><div class="s11ct co">⚠️ Desvantagens</div>
+<div class="s11c ae" data-anim="sl"><div class="s11ci">📅</div><div class="s11ct2">Garantia reduzida</div><div class="s11cd">Peças usadas geralmente têm garantia curta ou nenhuma cobertura.</div></div>
+<div class="s11c ae" data-anim="sl"><div class="s11ci">🔧</div><div class="s11ct2">Risco de desgaste</div><div class="s11cd">Componentes podem ter sido usados em mineração ou overclock extremo.</div></div>
+<div class="s11c ae" data-anim="sl"><div class="s11ci">📜</div><div class="s11ct2">Histórico desconhecido</div><div class="s11cd">Não é possível saber como o componente foi tratado pelo dono anterior.</div></div></div></div>
+<div class="s11dc"><span class="s11da ae" data-anim="fs">Compre de vendedores confiáveis</span><span class="s11da ae" data-anim="fs">Peça fotos do componente funcionando</span><span class="s11da ae" data-anim="fs">Prefira GPUs com menos de 3 anos de uso</span><span class="s11da ae" data-anim="fs">Teste o componente antes de finalizar</span></div>
+</div></div>
+
+<!-- SLIDE 12 -->
+<div class="slide" id="s12" data-slide="12">
+<div class="si">
+<div class="st ae" data-anim="fb" style="font-size:clamp(.9rem,1.6vw,1.4rem);text-align:center">Curiosidades Sobre Hardware</div>
+<div class="ss ae" data-anim="fu" style="text-align:center;font-size:.7rem">Fatos interessantes que todo gamer deveria saber</div>
+<div class="s12g"><div class="s12c c1 ae" data-anim="fs"><div class="s12ci">💿</div><div class="s12ct">SSD não aumenta FPS</div><div class="s12cd">SSD acelera loading, mas não melhora taxa de quadros.</div></div>
+<div class="s12c c2 ae" data-anim="fs"><div class="s12ci">🔗</div><div class="s12ct">Dual Channel faz diferença</div><div class="s12cd">Dois pentes de RAM podem aumentar em até 20% o FPS.</div></div>
+<div class="s12c c3 ae" data-anim="fs"><div class="s12ci">🔌</div><div class="s12ct">Fonte boa dura 10 anos</div><div class="s12cd">Fontes de qualidade podem durar mais de uma década.</div></div>
+<div class="s12c c4 ae" data-anim="fs"><div class="s12ci">🌡️</div><div class="s12ct">Calor reduz desempenho</div><div class="s12cd">Acima de 85°C a CPU reduz frequência para se proteger.</div></div></div>
+<div class="s12gb"><div class="s12c c5 ae" data-anim="fs"><div class="s12ci">🧹</div><div class="s12ct">Limpeza reduz temperatura</div><div class="s12cd">Acúmulo de poeira pode aumentar a temperatura em 5-10°C.</div></div>
+<div class="s12c c6 ae" data-anim="fs"><div class="s12ci">🏷️</div><div class="s12ct">Mais caro nem sempre é melhor</div><div class="s12cd">Componentes bem escolhidos superam peças caras mal combinadas.</div></div>
+<div class="s12c c7 ae" data-anim="fs"><div class="s12ci">⚖️</div><div class="s12ct">CPU e GPU devem se equilibrar</div><div class="s12cd">Um gargalo acontece quando um componente limita o outro.</div></div></div>
+</div></div>
+
+<!-- SLIDE 13 -->
+<div class="slide" id="s13" data-slide="13">
+<div class="si">
+<div class="s13t ae" data-anim="fb">Conclusão</div>
+<div class="ss ae" data-anim="fu" style="text-align:center;font-size:.75rem">O ranking final dos melhores PCs para cada perfil</div>
+<div class="s13p"><div class="s13pc pr ae" data-anim="sr"><div class="s13pi">🥈</div><div class="s13pl">Melhor para Upgrades</div><div class="s13pt2">PC R$ 2.000</div><div class="s13ps">Fonte 550W permite upgrades futuros</div></div>
+<div class="s13pc ou ae" data-anim="zi"><div class="s13pi">🏆</div><div class="s13pl">Melhor para Jogar Hoje</div><div class="s13pt2">PC R$ 2.000</div><div class="s13ps">RX 580 + i3-12100F = 75-180 FPS</div></div>
+<div class="s13pc br ae" data-anim="sl"><div class="s13pi">🥉</div><div class="s13pl">Melhor Custo-Benefício</div><div class="s13pt2">PC R$ 1.500</div><div class="s13ps">Vega 7 já roda jogos competitivos</div></div></div>
+<div class="s13m ae" data-anim="fu"><p>Escolher um bom PC gamer não significa comprar a máquina mais cara, mas sim encontrar o melhor equilíbrio entre desempenho, qualidade e possibilidade de evolução. Com uma escolha inteligente de componentes, é possível aproveitar muitos jogos mesmo com um orçamento limitado.</p></div>
+</div></div>
+
+</div><!-- /presentation -->
+
+<button id="pb" aria-label="Slide anterior">◀</button>
+<button id="nb2" aria-label="Próximo slide">▶</button>
+<div id="si">01 / 13</div>
+<div id="nb"><div id="pt"><div id="pf"></div><div id="pd"></div><div id="ptt">Slide 1 de 13 - Capa</div></div><span id="sn">01 / 13</span></div>
+<style>
+/* SLIDE 5 & 8 */
+#s5 .si,#s8 .si{flex-direction:row;align-items:center;gap:2%}
+.s5t,.s5tb{font-size:.6rem}
+.s5tb{padding:4px 10px;border-radius:6px;font-family:var(--fm);font-weight:400;color:var(--t3);background:rgba(255,255,255,.03);border:1px solid transparent;cursor:pointer;transition:all .2s;display:inline-block;margin:2px}
+.s5tb:hover{color:var(--t2);border-color:rgba(255,255,255,.1)}
+.s5tb.act{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.3);color:var(--cy)}
+.s5pc{background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--gbd);border-radius:var(--rc);padding:16px;min-height:150px;opacity:0;transform:translateY(15px)}
+.s5pn{font-family:var(--fs);font-weight:600;font-size:.9rem;color:var(--t1);text-transform:uppercase;letter-spacing:.03em}
+.s5bd{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.55rem;font-family:var(--fm);margin-left:6px;vertical-align:middle}
+.s5bd.ml{background:rgba(16,185,129,.15);color:var(--em);border:1px solid rgba(16,185,129,.2)}
+.s5bd.fc{background:rgba(239,68,68,.15);color:var(--re);border:1px solid rgba(239,68,68,.2)}
+.s5bd.vl{background:rgba(6,182,212,.15);color:var(--cy);border:1px solid rgba(6,182,212,.2)}
+.s5bd.us{background:rgba(139,92,246,.15);color:var(--vi);border:1px solid rgba(139,92,246,.2)}
+.s5rt{display:flex;align-items:center;gap:6px;margin:6px 0}
+.s5rl{font-family:var(--fb);font-weight:300;font-size:.65rem;color:var(--t3);min-width:80px}
+.s5st{display:flex;gap:2px}
+.s5star{font-size:.9rem;color:rgba(255,255,255,.1)}
+.s5star.fi{color:var(--am);text-shadow:0 0 6px rgba(245,158,11,.3)}
+.s5pd{font-family:var(--fb);font-weight:300;font-size:.65rem;color:var(--t3);margin-top:6px;line-height:1.4}
+.s5tbl{width:100%;border-collapse:separate;border-spacing:0 4px;margin-top:10px}
+.s5tbl th{font-family:var(--fs);font-weight:600;font-size:.6rem;color:var(--t3);text-transform:uppercase;padding:4px 6px;text-align:left;border-bottom:1px solid rgba(255,255,255,.04)}
+.s5tbl td{padding:4px 6px;font-size:.65rem;font-family:var(--fb);color:var(--t2);border-radius:3px}
+.s5tbl tr{opacity:0;transform:translateY(8px)}
+.s5ci{display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 1px}
+.s5ci.fi{background:var(--cy)}
+.s5ci.em{background:rgba(255,255,255,.08)}
+/* SLIDE 6 & 9 */
+#s6 .si,#s9 .si{flex-direction:row;align-items:center;gap:2%}
+.s6bg{margin-bottom:6px;opacity:0;transform:translateY(8px)}
+.s6bh{display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:2px}
+.s6bl{font-family:var(--fb);font-weight:400;color:var(--t2)}
+.s6bv{font-family:var(--fm);font-weight:500;color:var(--t1)}
+.s6bt{height:14px;background:rgba(255,255,255,.04);border-radius:7px;overflow:hidden;position:relative}
+.s6bf{height:100%;border-radius:7px;width:0;transition:width 1s var(--eo);position:relative}
+.s6bf.vd{background:linear-gradient(90deg,rgba(16,185,129,.6),var(--em))}
+.s6bf.lj{background:linear-gradient(90deg,rgba(245,158,11,.6),var(--am))}
+.s6bf.vm{background:linear-gradient(90deg,rgba(239,68,68,.6),var(--re))}
+.s6bf::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:rgba(255,255,255,.1);border-radius:7px 7px 0 0}
+#s6d,#s9d{position:relative;width:160px;height:160px;margin:0 auto}
+#s6d svg,#s9d svg{transform:rotate(-90deg)}
+.s6dc{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.s6dv{font-family:var(--fm);font-weight:700;font-size:1.1rem;color:var(--t1)}
+.s6dl{font-family:var(--fb);font-weight:300;font-size:.55rem;color:var(--t3)}
+.s6st{display:flex;gap:10px;justify-content:center;margin-top:10px}
+.s6stb{background:rgba(255,255,255,.03);border-radius:8px;padding:6px 12px;text-align:center}
+.s6sv{font-family:var(--fm);font-weight:500;font-size:.75rem;color:var(--t1)}
+.s6sl{font-family:var(--fb);font-weight:300;font-size:.55rem;color:var(--t3);text-transform:uppercase}
+.s6ch{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;justify-content:center}
+.s6cp{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:2px 8px;font-size:.55rem;color:var(--em);font-family:var(--fm)}
+
+/* SLIDE 10 */
+#s10 .si{align-items:center}
+.s10c{width:100%;max-width:1100px;display:grid;grid-template-columns:20% 60% 20%;gap:6px;margin-top:6px;flex:1;align-content:center}
+.s10col{display:flex;flex-direction:column;gap:6px}
+.s10cc{display:flex;flex-direction:column;gap:8px;align-items:center}
+.s10pc{background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--gbd);border-radius:var(--rc);padding:12px;text-align:center;opacity:0;transform:translateY(15px);transition:all .3s}
+.s10pc:hover{transform:translateY(-3px)!important}
+.s10pr{font-family:var(--fm);font-weight:700;font-size:1.1rem;margin:4px 0}
+.s10ps{font-family:var(--fb);font-weight:300;font-size:.6rem;color:var(--t3);line-height:1.5}
+.s10pc.cy .s10pr{color:var(--cy)}
+.s10pc.cy{border-color:rgba(6,182,212,.15)}
+.s10pc.vi .s10pr{color:var(--vi)}
+.s10pc.vi{border-color:rgba(139,92,246,.15)}
+#s10b{width:100%}
+.s10br{display:grid;grid-template-columns:50px 1fr 1fr;gap:4px;align-items:center;opacity:0;transform:translateY(8px)}
+.s10bl{font-family:var(--fb);font-weight:400;font-size:.55rem;color:var(--t3)}
+.s10bt2{height:7px;background:rgba(255,255,255,.03);border-radius:4px;overflow:hidden}
+.s10bf{height:100%;border-radius:4px;width:0;transition:width 1s var(--eo)}
+.s10bf.cy{background:var(--cy)}
+.s10bf.vi{background:var(--vi)}
+.s10bv{font-family:var(--fm);font-weight:400;font-size:.55rem;color:var(--t2)}
+#s10rc{width:100%;max-width:240px;margin:0 auto}
+#s10r{width:100%;height:auto}
+#s10bg{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.s10bd{padding:4px 12px;border-radius:14px;font-family:var(--fm);font-weight:500;font-size:.55rem;opacity:0;transform:scale(.9)}
+.s10bd.cb{background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.25);color:var(--cy)}
+.s10bd.dp{background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);color:var(--vi)}
+.s10bd.ug{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--am)}
+
+/* SLIDE 11 */
+#s11 .si{align-items:center}
+.s11g{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:1000px;margin-top:8px;flex:1;align-content:center}
+.s11ct{font-family:var(--fs);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+.s11ct.pr{color:var(--em)}
+.s11ct.co{color:var(--re)}
+.s11c{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--gbd);border-radius:var(--rc);padding:12px 14px;margin-bottom:6px;opacity:0;transition:all .3s}
+.s11c:hover{transform:translateY(-2px)!important}
+.s11r .s11c{transform:translateX(15px)}
+.s11l .s11c{transform:translateX(-15px)}
+.s11ci{font-size:1rem;margin-bottom:2px}
+.s11ct2{font-family:var(--fb);font-weight:500;font-size:.75rem;color:var(--t1)}
+.s11cd{font-family:var(--fb);font-weight:300;font-size:.6rem;color:var(--t3);line-height:1.4}
+.s11dc{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;width:100%;max-width:1000px}
+.s11da{background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.15);border-radius:12px;padding:2px 10px;font-size:.55rem;color:var(--cy);font-family:var(--fm);opacity:0;transform:scale(.9)}
+
+/* SLIDE 12 */
+#s12 .si{align-items:center;justify-content:center}
+.s12g{display:flex;gap:10px;justify-content:center;width:100%;max-width:1000px;margin-top:10px;flex-wrap:wrap}
+.s12gb{display:flex;gap:10px;justify-content:center;width:100%;max-width:1000px;margin-top:10px;flex-wrap:wrap}
+.s12c{background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--gbd);border-radius:var(--rc);padding:16px;text-align:center;width:calc(25% - 10px);max-width:220px;min-width:150px;opacity:0;transition:opacity .6s var(--eo),transform .3s,box-shadow .3s}
+.s12c.show{opacity:1;animation:fl 4s ease-in-out infinite}
+.s12c.show:nth-child(2){animation-delay:.5s}
+.s12c.show:nth-child(3){animation-delay:1s}
+.s12c.show:nth-child(4){animation-delay:1.5s}
+.s12gb .s12c.show:nth-child(1){animation-delay:2s}
+.s12gb .s12c.show:nth-child(2){animation-delay:2.5s}
+.s12gb .s12c.show:nth-child(3){animation-delay:3s}
+.s12c:hover{transform:translateY(-5px)!important;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.s12ci{font-size:2rem;margin-bottom:6px}
+.s12ct{font-family:var(--fb);font-weight:600;font-size:.75rem;color:var(--t1);margin-bottom:4px}
+.s12cd{font-family:var(--fb);font-weight:300;font-size:.6rem;color:var(--t3);line-height:1.4}
+.s12c.c1 .s12ci{color:var(--cy)}
+.s12c.c2 .s12ci{color:var(--vi)}
+.s12c.c3 .s12ci{color:var(--em)}
+.s12c.c4 .s12ci{color:var(--bl)}
+.s12c.c5 .s12ci{color:var(--am)}
+.s12c.c6 .s12ci{color:#ec4899}
+.s12c.c7 .s12ci{color:#14b8a6}
+
+/* SLIDE 13 */
+#s13 .si{align-items:center;justify-content:center}
+.s13t{font-family:var(--fo);font-weight:700;font-size:clamp(1.4rem,2vw,2rem);color:var(--t1);text-transform:uppercase;letter-spacing:.05em;text-shadow:0 0 30px rgba(6,182,212,.3);opacity:0;transform:translateY(20px) blur(4px);transition:all .7s var(--eo)}
+.s13t.show{opacity:1;transform:translateY(0) blur(0)}
+.s13p{display:flex;align-items:flex-end;gap:8px;justify-content:center;margin-top:16px;width:100%;max-width:900px}
+.s13pc{background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--gbd);border-radius:var(--rc);padding:14px 18px;text-align:center;width:30%;max-width:260px;opacity:0;transition:all .6s var(--eo)}
+.s13pc.show{opacity:1!important;transform:translateY(0)!important}
+.s13pc:hover{transform:translateY(-5px)!important}
+.s13pc.ou{border:2px solid rgba(245,158,11,.3);background:rgba(245,158,11,.06);transform:translateY(-40px);z-index:2}
+.s13pc.pr{transform:translateY(0)}
+.s13pc.br{transform:translateY(0)}
+.s13pi{font-size:1.6rem;margin-bottom:4px}
+.s13pl{font-family:var(--fs);font-weight:600;font-size:.65rem;color:var(--t3);text-transform:uppercase;letter-spacing:.03em}
+.s13pt2{font-family:var(--fb);font-weight:500;font-size:.75rem;color:var(--t1);margin:4px 0}
+.s13ps{font-family:var(--fm);font-weight:400;font-size:.6rem;color:var(--t2)}
+.s13pc.ou .s13pi{color:var(--am)}
+.s13pc.pr .s13pi{color:#94a3b8}
+.s13pc.br .s13pi{color:#cd7f32}
+.s13m{background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--gbd);border-radius:var(--rc);padding:16px 24px;max-width:750px;margin-top:16px;text-align:center;position:relative;opacity:0;transform:translateY(15px);transition:all .8s var(--eo)}
+.s13m.show{opacity:1;transform:translateY(0)}
+.s13m p{font-family:var(--fs);font-weight:500;font-size:clamp(.75rem,1.1vw,1rem);color:var(--t2);font-style:italic;line-height:1.6}
+.s13m::before{content:'\201C';position:absolute;top:4px;left:8px;font-size:2.5rem;color:var(--cy);opacity:.15}
+.s13m::after{content:'\201D';position:absolute;bottom:-4px;right:8px;font-size:2.5rem;color:var(--cy);opacity:.15}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+.st{font-size:1.5rem!important}.ss{font-size:.8rem!important}
+#s2 .si{flex-direction:column}.s2l{flex:0 0 30%;height:auto;min-height:120px}.s2r{flex:0 0 65%}
+.s2c{padding:8px 10px}.s2cn{font-size:.65rem}
+.s3bk{padding:10px 12px}.s3bt{font-size:.7rem}
+#s4 .s4t td,#s7 .s4t td{font-size:.65rem;padding:4px 6px}
+#s5 .si,#s8 .si{flex-direction:column}.s5l,.s5r,.s6l,.s6r{flex:0 0 auto!important;width:100%!important;height:auto!important}
+#s6 .si,#s9 .si{flex-direction:column}
+.s10c{grid-template-columns:1fr;max-width:500px}.s10cc{order:-1}
+.s12c{width:calc(50% - 10px)}
+#s13 .s13p{flex-wrap:wrap}.s13pc.ou{transform:none!important}
+}
+@media(max-width:768px){
+.slide{padding:0 3%}
+.st{font-size:1.2rem!important;letter-spacing:.02em}.ss{font-size:.7rem!important}
+#s1 .cmt{font-size:1.6rem!important}#s1 .cq{font-size:.75rem}#s1 .cm p,#s1 .ci p{font-size:.55rem}
+.s2c{padding:6px 8px}.s2cn{font-size:.55rem}.s2cd{font-size:.5rem;display:none}
+#s3 .s3b{grid-template-columns:1fr 1fr;gap:6px}
+#s4 .s4t th,#s7 .s4t th{font-size:.5rem;padding:3px 4px}
+#s4 .s4t td,#s7 .s4t td{font-size:.55rem;padding:3px 4px}.ps{font-size:.5rem}
+.s5tb{font-size:.5rem;padding:2px 6px}.s5rl{font-size:.55rem;min-width:60px}.s5star{font-size:.7rem}
+.s6bh{font-size:.6rem}.s6bt{height:10px}#s6d,#s9d{width:130px;height:130px}
+.s6stb{padding:4px 8px}.s6sv{font-size:.65rem}
+.s12c{width:calc(50% - 10px);padding:8px;min-width:120px}.s12ci{font-size:1.4rem}.s12ct{font-size:.6rem}.s12cd{font-size:.5rem}
+.s13t{font-size:1.2rem!important}.s13pc{padding:10px 12px;width:45%}.s13pc.ou{transform:none!important}
+.s13pl{font-size:.55rem}.s13pt2{font-size:.65rem}.s13m{padding:12px 16px}.s13m p{font-size:.7rem}
+#nb{width:85%;bottom:12px}#pb,#nb2{width:32px;height:32px;font-size:.85rem;bottom:12px}
+#si{font-size:.6rem;top:10px}
+}
+</style>
+<script>
+const TS=13,TM={},RTM={};
+const SN=['Capa','O que faz um PC Gamer?','Como Escolhemos os PCs','PC Gamer R$ 1.500','Avaliação das Peças R$ 1.500','Desempenho R$ 1.500','PC Gamer R$ 2.000','Avaliação das Peças R$ 2.000','Desempenho R$ 2.000','Comparação','Vale a Pena Usado?','Curiosidades','Conclusão'];
+const TMAP={'1-2':{e:'cf',n:'cf'},'2-3':{e:'slb',n:'slb'},'3-4':{e:'fa',n:'fa'},'4-5':{e:'sls',n:'sls'},'5-6':{e:'fb',n:'fb'},'6-7':{e:'sl',n:'sl'},'7-8':{e:'sls',n:'sls'},'8-9':{e:'fb',n:'fb'},'9-10':{e:'cf',n:'cf'},'10-11':{e:'sl',n:'sl'},'11-12':{e:'fa',n:'fa'},'12-13':{e:'zo',n:'zo'}};
+for(let i=1;i<TS;i++){const k=i+'-'+(i+1);if(TMAP[k]){const nk=(i+1)+'-'+i;let e=TMAP[k].n,n=TMAP[k].e;if(e==='sl')e=n='sr';else if(e==='slb')e=n='sr';else if(e==='sls')e=n='sr';else if(e==='zo')e=n='zi';RTM[nk]={e:e,n:n}}}
+let CS=1,IA=false;
+
+function gt(f,t){const k=f+'-'+t;if(t>f)return TMAP[k]||{e:'fa',n:'fa'};else return RTM[k]||{e:'fa',n:'fa'}}
+
+function gs(n){
+  if(IA||n===CS||n<1||n>TS)return;IA=true;
+  const os=document.querySelector('#s'+CS),ns=document.querySelector('#s'+n);
+  const tr=gt(CS,n);
+  os.classList.remove('active');os.classList.add('exiting','sl-ex-'+tr.e);
+  setTimeout(function(){
+    os.classList.remove('exiting','sl-ex-'+tr.e);ra(os);rs(os);
+    ns.style.opacity='0';ns.style.visibility='visible';ns.classList.add('entering','sl-en-'+tr.n);
+    requestAnimationFrame(function(){
+      setTimeout(function(){
+        ns.style.opacity='';ns.style.visibility='';ns.classList.remove('entering','sl-en-'+tr.n);ns.classList.add('active');
+        CS=n;sa(ns);ui();is(n);setTimeout(function(){IA=false},400);
+      },80);
+    });
+  },550);
+}
+function nx(){if(CS<TS)gs(CS+1)}
+function pv(){if(CS>1)gs(CS-1)}
+function ra(s){s.querySelectorAll('.ae').forEach(function(e){e.classList.remove('show','done')})}
+function rs(s){
+  s.querySelectorAll('.s6bf,.s9bf,.s10bf').forEach(function(e){e.style.width='0'});
+  s.querySelectorAll('.s2c.fl').forEach(function(e){e.classList.remove('fl')})
+}
+
+function sa(slide){
+  // .ae elements with data-anim
+  slide.querySelectorAll('.ae').forEach(function(el){
+    var anim=el.getAttribute('data-anim')||'fu',delay=parseInt(el.getAttribute('data-delay'))||0,stagger=parseInt(el.getAttribute('data-stagger'))||0;
+    // handled by the generic animation queue below
+  });
+  // Table rows
+  slide.querySelectorAll('.s4t tr,.s5tbl tr,.s4t tr').forEach(function(r,i){
+    setTimeout(function(){r.style.transition='all .5s var(--eo)';r.style.opacity='1';r.style.transform='translateY(0)'},200+i*80);
+  });
+  // Bar groups
+  slide.querySelectorAll('.s6bg,.s9bg,.s10br').forEach(function(g,i){
+    setTimeout(function(){
+      g.style.transition='all .6s var(--eo)';g.style.opacity='1';g.style.transform='translateY(0)';
+      var f=g.querySelector('.s6bf,.s9bf,.s10bf');if(f){var w=f.getAttribute('data-w')||'0';setTimeout(function(){f.style.width=w},100)}
+    },300+i*100);
+  });
+  // Bento blocks
+  slide.querySelectorAll('.s3bk').forEach(function(b,i){
+    setTimeout(function(){b.style.transition='all .6s var(--eo)';b.style.opacity='1';b.style.transform='translateY(0)'},200+i*70);
+  });
+  // Chips
+  slide.querySelectorAll('.s3cp').forEach(function(c,i){
+    setTimeout(function(){c.style.transition='all .4s var(--eo)';c.style.opacity='1';c.style.transform='scale(1)'},800+i*100);
+  });
+  // S11 cards
+  slide.querySelectorAll('.s11c').forEach(function(c,i){
+    setTimeout(function(){c.style.transition='all .6s var(--eo)';c.style.opacity='1';c.style.transform='translateX(0)'},300+i*100);
+  });
+  // S11 dicas
+  slide.querySelectorAll('.s11da').forEach(function(d,i){
+    setTimeout(function(){d.style.transition='all .4s var(--eo)';d.style.opacity='1';d.style.transform='scale(1)'},900+i*80);
+  });
+  // S12 cards
+  slide.querySelectorAll('.s12c').forEach(function(c,i){
+    setTimeout(function(){c.style.transition='all .6s var(--eo)';c.style.opacity='1';c.style.transform='translateY(0)'},200+i*80);
+  });
+  // S10 badges
+  slide.querySelectorAll('.s10bd').forEach(function(b,i){
+    setTimeout(function(){b.style.transition='all .5s var(--eo)';b.style.opacity='1';b.style.transform='scale(1)'},600+i*100);
+  });
+  // Handle data-anim .ae elements - add show class to trigger CSS animations (CSS handles delays)
+  slide.querySelectorAll('.ae').forEach(function(el,i){
+    var anim=el.getAttribute('data-anim');
+    if(anim==='title3d'){el.classList.add('show');a3d(el)}
+    else if(anim){el.classList.add('show')}
+  });
+}
+
+function a3d(el){
+  var sh='';
+  for(var i=0;i<35;i++){var br=180-i*4.5,r=Math.max(0,br),g=Math.max(0,br-20),b=Math.max(0,br-10);sh+=(i>0?',':'')+(-i)+'px '+i+'px 0 rgb('+r+','+g+','+b+')'}
+  el.style.textShadow=sh;
+}
+
+// PARTICLES
+var PS={c:null,x:null,p:[],a:null,w:0,h:0,sm:1,
+  init:function(){this.c=document.getElementById('pc');this.x=this.c.getContext('2d');this.rs();var s=this;window.addEventListener('resize',function(){s.rs()});this.sp(55);this.an()},
+  rs:function(){this.w=this.c.width=window.innerWidth;this.h=this.c.height=window.innerHeight},
+  sp:function(n){this.p=[];for(var i=0;i<n;i++){this.p.push({x:Math.random()*this.w,y:Math.random()*this.h,r:1+Math.random()*2,vx:(Math.random()-.5)*.6,vy:(Math.random()-.5)*.6,o:.08+Math.random()*.27})}},
+  ss:function(m){this.sm=m},
+  an:function(){var s=this;this.x.clearRect(0,0,this.w,this.h);var p=this.p;
+    for(var i=0;i<p.length;i++){p[i].x+=p[i].vx*this.sm;p[i].y+=p[i].vy*this.sm;if(p[i].x<0)p[i].x=this.w;if(p[i].x>this.w)p[i].x=0;if(p[i].y<0)p[i].y=this.h;if(p[i].y>this.h)p[i].y=0;this.x.beginPath();this.x.arc(p[i].x,p[i].y,p[i].r,0,Math.PI*2);this.x.fillStyle='rgba(6,182,212,'+p[i].o+')';this.x.fill()}
+    for(var i=0;i<p.length;i++){for(var j=i+1;j<p.length;j++){var dx=p[i].x-p[j].x,dy=p[i].y-p[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<130){this.x.beginPath();this.x.moveTo(p[i].x,p[i].y);this.x.lineTo(p[j].x,p[j].y);this.x.strokeStyle='rgba(6,182,212,'+(.08*(1-dist/130))+')';this.x.lineWidth=.5;this.x.stroke()}}}
+    this.a=requestAnimationFrame(function(){s.an()})}
+};
+
+function ui(){
+  var nu=String(CS).padStart(2,'0'),to=String(TS).padStart(2,'0');
+  document.getElementById('si').textContent=nu+' / '+to;document.getElementById('si').classList.add('show');
+  document.getElementById('sn').textContent=nu+' / '+to;
+  var p=((CS-1)/(TS-1))*100;document.getElementById('pf').style.width=p+'%';document.getElementById('ptt').textContent='Slide '+CS+' de '+TS+' - '+SN[CS-1];
+  document.querySelectorAll('.pd').forEach(function(d,i){d.classList.toggle('act',i+1===CS)});
+  document.getElementById('pb').classList.toggle('dis',CS===1);document.getElementById('nb2').classList.toggle('dis',CS===TS);
+  PS.ss(CS===6||CS===9||CS===10?1.5:1);
+}
+
+// SLIDE-SPECIFIC
+function is(n){switch(n){case 1:is1();break;case 2:is2();break;case 4:is4();break;case 5:is5();break;case 6:is6();break;case 7:is7();break;case 8:is8();break;case 9:is9();break;case 10:is10();break}}
+function is1(){var t=document.querySelector('#s1 .cmt');a3d(t)}
+function is2(){document.querySelectorAll('#s2 .s2c').forEach(function(c){var comp=c.getAttribute('data-component');c.addEventListener('mouseenter',function(){document.querySelectorAll('#s2d [data-component="'+comp+'"]').forEach(function(n){n.classList.add('act')})});c.addEventListener('mouseleave',function(){document.querySelectorAll('#s2d .act').forEach(function(n){n.classList.remove('act')})})})}
+function is4(){cu(document.getElementById('s4t'),1613)}
+function is7(){cu(document.getElementById('s7t'),2123)}
+
+function cu(el,n){var c=0,step=Math.ceil(n/60);var t=setInterval(function(){c+=step;if(c>=n){c=n;clearInterval(t)}el.textContent='R$ '+c.toLocaleString('pt-BR')},25)}
+
+// SLIDE 5 & 8 Rating tabs
+var s5D={cpu:{name:'Ryzen 5 4600G',bd:'Melhor peça',bc:'ml',rt:[4,4,4,5,3],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Excelente custo-benefício. O vídeo integrado Vega 7 permite jogar sem GPU dedicada.'},
+cooler:{name:'Hyper H410R',bd:'Vale a pena',bc:'vl',rt:[4,4,3,4,5],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Cooler eficiente para o 4600G. Mantém temperaturas abaixo de 70°C.'},
+placamae:{name:'A520M-HVS',bd:'Vale a pena',bc:'vl',rt:[3,4,3,4,3],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Placa-mãe básica mas funcional. Tem M.2 e suporte a DDR4.'},
+ram:{name:'8GB DDR4 3200MHz',bd:'Peça mais fraca',bc:'fc',rt:[3,3,2,5,4],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'8GB é o mínimo para jogos atuais. Ideal seria 16GB em dual channel.'},
+ssd:{name:'NV2 256GB NVMe',bd:'Vale a pena',bc:'vl',rt:[4,4,3,5,4],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'SSD NVMe rápido. 256GB é pouco para muitos jogos, mas dá para começar.'},
+fonte:{name:'CV450 450W',bd:'Vale a pena',bc:'vl',rt:[4,4,3,4,5],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Fonte 80 Plus Bronze confiável. 450W é suficiente para este setup.'},
+gabinete:{name:'Kazan 2',bd:'Vale a pena',bc:'vl',rt:[3,4,2,4,4],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Gabinete simples mas funcional. Lateral acrílica e espaço básico.'},
+video:{name:'Vega 7 (Integrado)',bd:'Peça mais fraca',bc:'fc',rt:[2,5,2,5,1],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Vídeo integrado competente. Roda jogos leves, mas não espere milagres.'}};
+var s5R={cpu:{q:4,p:3,u:3,c:4},cooler:{q:4,p:3,u:5,c:4},placamae:{q:3,p:3,u:3,c:4},ram:{q:3,p:2,u:4,c:3},ssd:{q:4,p:3,u:4,c:4},fonte:{q:4,p:3,u:5,c:4},gabinete:{q:3,p:2,u:4,c:4},video:{q:2,p:2,u:1,c:5}};
+var s8D={cpu:{name:'Core i3-12100F',bd:'Melhor peça',bc:'ml',rt:[4,4,4,5,3],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Excelente CPU de entrada. 4 núcleos potentes para jogos.'},
+cooler:{name:'Intel Stock Cooler',bd:'Peça mais fraca',bc:'fc',rt:[2,5,2,5,4],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Cooler básico incluso. Funciona, mas é barulhento sob carga.'},
+placamae:{name:'H610M DDR4',bd:'Vale a pena',bc:'vl',rt:[3,3,3,4,2],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Placa-mãe básica para LGA1700. Sem overclock, mas funcional.'},
+ram:{name:'16GB (2x8) DDR4',bd:'Melhor peça',bc:'ml',rt:[5,4,4,4,4],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'16GB em Dual Channel é o ideal para jogos atuais.'},
+ssd:{name:'NV2 256GB NVMe',bd:'Vale a pena',bc:'vl',rt:[4,4,3,5,4],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Mesmo SSD do PC de R$ 1.500. Rápido e confiável.'},
+gpu:{name:'RX 580 8GB (Usada)',bd:'Peça usada',bc:'us',rt:[3,5,4,2,3],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'GPU usada que entrega desempenho excelente pelo preço. Risco moderado.'},
+fonte:{name:'CV550 550W',bd:'Vale a pena',bc:'vl',rt:[4,4,3,4,5],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'550W suficiente para a RX 580. Margem segura para upgrades.'},
+gabinete:{name:'Kazan 2',bd:'Vale a pena',bc:'vl',rt:[3,4,2,4,4],la:['Qualidade','Custo-Benefício','Desempenho','Consumo','Facil Upgrade'],de:'Mesmo gabinete do PC de R$ 1.500. Simples mas funcional.'}};
+var s8R={cpu:{q:4,p:4,u:3,c:4},cooler:{q:2,p:2,u:4,c:5},placamae:{q:3,p:3,u:2,c:3},ram:{q:5,p:4,u:4,c:4},ssd:{q:4,p:3,u:4,c:4},gpu:{q:3,p:4,u:3,c:5},fonte:{q:4,p:3,u:5,c:4},gabinete:{q:3,p:2,u:4,c:4}};
+
+function is5(){setupTabs('s5',s5D,s5R)}
+function is8(){setupTabs('s8',s8D,s8R)}
+
+function setupTabs(prefix,data,ratings){
+  var container=document.getElementById(prefix+'pc'),content=document.getElementById(prefix+'p'),tbody=document.getElementById(prefix+'tb');
+  var tabs=document.querySelectorAll('#'+prefix+'t .s5tb');
+  function showPeca(key){
+    var d=data[key];
+    if(!d){content.innerHTML='';return}
+    var html='<div class="s5pn">'+d.name+'<span class="s5bd '+d.bc+'">'+d.bd+'</span></div>';
+    for(var i=0;i<d.rt.length;i++){
+      html+='<div class="s5rt"><span class="s5rl">'+d.la[i]+'</span><div class="s5st">';
+      for(var j=0;j<5;j++){html+='<span class="s5star'+(j<d.rt[i]?' fi':'')+'">★</span>'}
+      html+='</div></div>';
+    }
+    html+='<div class="s5pd">'+d.de+'</div>';
+    content.innerHTML=html;
+    container.style.opacity='1';container.style.transform='translateY(0)';
+  }
+  function renderTable(){
+    var html='';var keys=Object.keys(ratings);
+    keys.forEach(function(k,i){
+      var r=ratings[k];
+      html+='<tr style="opacity:0;transform:translateY(8px)"><td style="font-family:var(--fm);font-size:.6rem;color:var(--t2)">'+k.charAt(0).toUpperCase()+k.slice(1)+'</td>';
+      html+='<td>'+Array(5).fill(0).map(function(_,j){return'<span class="s5ci'+(j<r.q?' fi':' em')+'"></span>'}).join('')+'</td>';
+      html+='<td>'+Array(5).fill(0).map(function(_,j){return'<span class="s5ci'+(j<r.p?' fi':' em')+'"></span>'}).join('')+'</td>';
+      html+='<td>'+Array(5).fill(0).map(function(_,j){return'<span class="s5ci'+(j<r.u?' fi':' em')+'"></span>'}).join('')+'</td>';
+      html+='<td>'+Array(5).fill(0).map(function(_,j){return'<span class="s5ci'+(j<r.c?' fi':' em')+'"></span>'}).join('')+'</td></tr>';
+    });
+    tbody.innerHTML=html;
+    tbody.querySelectorAll('tr').forEach(function(r,i){
+      setTimeout(function(){r.style.transition='all .5s var(--eo)';r.style.opacity='1';r.style.transform='translateY(0)'},300+i*60);
+    });
+  }
+  tabs.forEach(function(tab){
+    tab.addEventListener('click',function(){
+      tabs.forEach(function(t){t.classList.remove('act')});tab.classList.add('act');
+      showPeca(tab.getAttribute('data-peca'));
+    });
+  });
+  showPeca(tabs[0].getAttribute('data-peca'));
+  renderTable();
+}
+
+// SLIDE 6 & 9 Bars + Donut
+function renderBars(id,data){
+  var c=document.getElementById(id);if(!c)return;
+  var h='';
+  data.forEach(function(d){
+    h+='<div class="s6bg"><div class="s6bh"><span class="s6bl">'+d.label+'</span><span class="s6bv">'+d.value+' FPS</span></div><div class="s6bt"><div class="s6bf '+d.color+'" data-w="'+Math.min(100,d.value/2)+'%"></div></div></div>';
+  });
+  c.innerHTML=h;
+}
+function renderDonut(id,data){
+  var g=document.getElementById(id);if(!g)return;
+  var cx=90,cy=90,r=65,total=0;
+  data.forEach(function(d){total+=d.pct});
+  var start=0;
+  data.forEach(function(d){
+    if(d.pct===0)return;
+    var pct=d.pct/total,angle=pct*360;
+    var s=(start-90)*Math.PI/180,e=(start+angle-90)*Math.PI/180;
+    var x1=cx+r*Math.cos(s),y1=cy+r*Math.sin(s),x2=cx+r*Math.cos(e),y2=cy+r*Math.sin(e);
+    var large=angle>180?1:0;
+    var path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d','M'+cx+' '+cy+' L'+x1+' '+y1+' A'+r+' '+r+' 0 '+large+' 1 '+x2+' '+y2+' Z');
+    path.setAttribute('fill',d.color);
+    path.setAttribute('opacity','0.7');
+    g.appendChild(path);
+    start+=angle;
+  });
+  // Inner circle
+  var circ=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  circ.setAttribute('cx',cx);circ.setAttribute('cy',cy);circ.setAttribute('r','35');
+  circ.setAttribute('fill','var(--bg1)');
+  g.appendChild(circ);
+}
+
+var s6F=[{label:'Roblox',value:120,color:'vd'},{label:'Minecraft',value:85,color:'vd'},{label:'Valorant',value:75,color:'vd'},{label:'LoL',value:70,color:'vd'},{label:'Fall Guys',value:60,color:'lj'},{label:'Rocket League',value:55,color:'lj'},{label:'CS2',value:45,color:'lj'},{label:'Fortnite',value:40,color:'lj'},{label:'GTA V',value:35,color:'vm'}];
+var s6D=[{label:'CPU',pct:31,color:'#06b6d4'},{label:'GPU',pct:0,color:'#8b5cf6'},{label:'RAM',pct:9,color:'#3b82f6'},{label:'SSD',pct:10,color:'#10b981'},{label:'Fonte',pct:14,color:'#f59e0b'},{label:'Gabinete',pct:9,color:'#64748b'},{label:'Placa-mãe',pct:22,color:'#8b5cf6'},{label:'Cooler',pct:5,color:'#06b6d4'}];
+var s9F=[{label:'Roblox',value:180,color:'vd'},{label:'Minecraft',value:140,color:'vd'},{label:'Valorant',value:160,color:'vd'},{label:'LoL',value:145,color:'vd'},{label:'Rocket League',value:120,color:'vd'},{label:'CS2',value:100,color:'vd'},{label:'Fortnite',value:75,color:'vd'},{label:'GTA V',value:65,color:'vd'},{label:'Fall Guys',value:120,color:'vd'}];
+var s9D=[{label:'CPU',pct:21,color:'#06b6d4'},{label:'Cooler',pct:0,color:'#06b6d4'},{label:'Placa-mãe',pct:19,color:'#8b5cf6'},{label:'RAM',pct:11,color:'#3b82f6'},{label:'SSD',pct:7,color:'#10b981'},{label:'GPU',pct:21,color:'#8b5cf6'},{label:'Fonte',pct:14,color:'#f59e0b'},{label:'Gabinete',pct:7,color:'#64748b'}];
+
+function is6(){renderBars('s6b',s6F);renderDonut('s6ds',s6D)}
+function is9(){renderBars('s9b',s9F);renderDonut('s9ds',s9D)}
+
+// SLIDE 10
+function is10(){
+  var c=document.getElementById('s10b');if(!c)return;
+  var games=['Roblox','Valorant','CS2','Fortnite','GTA V','Fall Guys'];
+  var fps1=[120,75,45,40,35,60],fps2=[180,160,100,75,65,120];
+  var h='<div class="s10ch" style="font-family:var(--fs);font-size:.6rem;color:var(--t3);text-transform:uppercase;margin-bottom:4px">FPS Comparison</div>';
+  games.forEach(function(g,i){
+    h+='<div class="s10br"><span class="s10bl">'+g+'</span><div style="display:flex;gap:2px;align-items:center"><div class="s10bt2" style="flex:1"><div class="s10bf cy" data-w="'+(fps1[i]/2)+'%"></div></div><div class="s10bt2" style="flex:1"><div class="s10bf vi" data-w="'+(fps2[i]/2)+'%"></div></div></div><span class="s10bv">'+fps1[i]+'/'+fps2[i]+'</span></div>';
+  });
+  c.innerHTML=h;
+  // Radar chart
+  var cv=document.getElementById('s10r');if(!cv||!cv.getContext)return;
+  var ctx=cv.getContext('2d'),W=240,H=240,cx=120,cy=120,r=80;
+  ctx.clearRect(0,0,W,H);
+  // Grid
+  for(var i=1;i<=5;i++){ctx.beginPath();ctx.arc(cx,cy,r*i/5,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=.5;ctx.stroke()}
+  // Axes
+  var labels=['Potência','Eficiência','Qualidade','Upgrade','Consumo','Custo-Benefício'];
+  var vals1=[3,4,3,3,4,5],vals2=[4,3,4,4,3,4];
+  for(var i=0;i<6;i++){var a=-Math.PI/2+i*Math.PI/3;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=.5;ctx.stroke()}
+  function drawPoly(vals,color,alpha){
+    ctx.beginPath();
+    for(var i=0;i<6;i++){var a=-Math.PI/2+i*Math.PI/3,v=vals[i]/5;ctx[i===0?'moveTo':'lineTo'](cx+v*r*Math.cos(a),cy+v*r*Math.sin(a))}
+    ctx.closePath();ctx.fillStyle=color;ctx.globalAlpha=alpha;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke()
+  }
+  drawPoly(vals1,'rgba(6,182,212,.2)');drawPoly(vals1,'rgba(6,182,212,1)',0);
+  drawPoly(vals2,'rgba(139,92,246,.2)');drawPoly(vals2,'rgba(139,92,246,1)',0);
+  ctx.font='8px JetBrains Mono';ctx.fillStyle='#64748b';ctx.textAlign='center';
+  for(var i=0;i<6;i++){var a=-Math.PI/2+i*Math.PI/3;ctx.fillText(labels[i],cx+(r+15)*Math.cos(a),cy+(r+15)*Math.sin(a)+3)}
+  // Legend
+  ctx.font='7px JetBrains Mono';
+  ctx.fillStyle='#06b6d4';ctx.fillRect(190,195,8,8);ctx.fillStyle='#cbd5e1';ctx.textAlign='left';ctx.fillText('R$1.5k',200,203);
+  ctx.fillStyle='#8b5cf6';ctx.fillRect(190,210,8,8);ctx.fillStyle='#cbd5e1';ctx.fillText('R$2k',200,218);
+}
+
+// KEYBOARD
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key==='d'||e.key==='D'){e.preventDefault();nx()}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp'||e.key==='a'||e.key==='A'){e.preventDefault();pv()}
+  else if(e.key==='Home'){e.preventDefault();gs(1)}
+  else if(e.key==='End'){e.preventDefault();gs(TS)}
+  else if(e.key>='1'&&e.key<='9'){e.preventDefault();gs(parseInt(e.key))}
+  else if(e.key==='f'||e.key==='F'){e.preventDefault();if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen()}
+  else if(e.key==='Escape'){if(document.fullscreenElement)document.exitFullscreen()}
+});
+
+// BUTTONS
+document.getElementById('pb').addEventListener('click',function(){pv();ripple(this)});
+document.getElementById('nb2').addEventListener('click',function(){nx();ripple(this)});
+function ripple(el){var r=document.createElement('span');r.className='rip';var s=el.getBoundingClientRect();r.style.width=r.style.height='20px';r.style.left='10px';r.style.top='10px';el.appendChild(r);setTimeout(function(){r.remove()},600)}
+
+// PROGRESS BAR
+document.getElementById('pt').addEventListener('click',function(e){
+  var r=this.getBoundingClientRect(),p=(e.clientX-r.left)/r.width;
+  var n=Math.round(p*(TS-1)+1);gs(n);
+});
+
+// TOUCH
+var tx=0;
+document.addEventListener('touchstart',function(e){tx=e.changedTouches[0].screenX});
+document.addEventListener('touchend',function(e){var d=e.changedTouches[0].screenX-tx;if(d<-50)nx();else if(d>50)pv()});
+
+// Progress dots
+var pdots=document.getElementById('pd');
+for(var i=0;i<TS;i++){var d=document.createElement('div');d.className='pd';pdots.appendChild(d)}
+
+// INIT
+PS.init();
+gs(1);
+ui();
+
+// Handle nav bar visibility
+setTimeout(function(){document.getElementById('nb').classList.add('show');document.getElementById('pb').classList.add('show');document.getElementById('nb2').classList.add('show')},1800);
+</script>
+</body>
+</html>

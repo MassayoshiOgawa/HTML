@@ -1,0 +1,958 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>O Sistema de Encantamentos do Minecraft</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;font-family:"Inter","Segoe UI",system-ui,sans-serif;background:#0F0720;color:#F5F3FF;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;cursor:none}
+::-webkit-scrollbar{display:none}
+a{color:#A855F7;text-decoration:none;transition:color .3s ease}
+a:hover{color:#C084FC}
+#cursor{position:fixed;pointer-events:none;z-index:99999;width:24px;height:24px;border-radius:50%;background:rgba(124,58,237,0.2);border:1px solid rgba(196,181,253,0.3);transform:translate(-50%,-50%);transition:width .3s,height .3s,background .3s,border .3s;mix-blend-mode:screen;backdrop-filter:blur(2px)}
+#cursor-dot{position:fixed;pointer-events:none;z-index:100000;width:6px;height:6px;border-radius:50%;background:#C4B5FD;transform:translate(-50%,-50%);box-shadow:0 0 10px rgba(196,181,253,0.6),0 0 20px rgba(124,58,237,0.4)}
+#cursor.hover{width:40px;height:40px;background:rgba(124,58,237,0.35);border-color:rgba(196,181,253,0.5)}
+#progress-bar{position:fixed;top:0;left:0;height:2px;z-index:1000;background:linear-gradient(90deg,#7C3AED,#A855F7,#06B6D4);transition:width .4s cubic-bezier(0.4,0,0.2,1);box-shadow:0 0 8px rgba(124,58,237,0.4)}
+#progress-glow{position:fixed;top:0;left:0;height:4px;z-index:999;background:linear-gradient(90deg,transparent,rgba(124,58,237,0.3),transparent);filter:blur(6px);transition:width .4s cubic-bezier(0.4,0,0.2,1);pointer-events:none}
+.nav-btn{position:fixed;top:50%;z-index:900;width:44px;height:44px;border-radius:50%;background:rgba(124,58,237,0.12);border:1px solid rgba(196,181,253,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s cubic-bezier(0.4,0,0.2,1);opacity:0.3;transform:translateY(-50%);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.nav-btn:hover{opacity:0.8;background:rgba(124,58,237,0.25);box-shadow:0 0 20px rgba(124,58,237,0.2),0 0 40px rgba(124,58,237,0.1)}
+.nav-btn:active{transform:translateY(-50%) scale(0.92)}
+.nav-btn svg{width:18px;height:18px;fill:none;stroke:#C4B5FD;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-btn:hover svg{stroke:#F5F3FF}
+#nav-prev{left:1.5vw}
+#nav-next{right:1.5vw}
+.nav-btn.hidden{opacity:0;pointer-events:none}
+#slide-indicator{position:fixed;bottom:2vh;right:2vw;z-index:900;font-family:"Inter","Segoe UI",system-ui,sans-serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#8B7EB5;background:rgba(15,7,32,0.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:6px 14px;border-radius:20px;border:1px solid rgba(196,181,253,0.1);letter-spacing:0.05em}
+#slides{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:clamp(40px,6vh,80px) clamp(40px,5vw,80px);opacity:0;visibility:hidden;transition:none;overflow:hidden}
+.slide.active{opacity:1;visibility:visible;z-index:10}
+.slide.exit{opacity:0;visibility:visible;z-index:11}
+.skew-block{position:relative;clip-path:polygon(0% 0%,100% 10%,100% 90%,0% 100%);padding:clamp(12px,1.5vh,20px) clamp(20px,2.5vw,32px);background:linear-gradient(135deg,rgba(124,58,237,0.18),rgba(6,182,212,0.08));border:1px solid rgba(196,181,253,0.12);margin-bottom:clamp(8px,1vh,14px)}
+.skew-block::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;clip-path:polygon(0% 0%,100% 10%,100% 90%,0% 100%);background:linear-gradient(135deg,rgba(255,255,255,0.03),transparent);pointer-events:none}
+.skew-block-mirror{clip-path:polygon(0% 10%,100% 0%,100% 100%,0% 90%)}
+.skew-block h2{font-family:"Georgia","Times New Roman",serif;font-weight:700;font-size:clamp(1.2rem,1.6vw,1.8rem);color:#C4B5FD;margin:0;letter-spacing:-0.02em}
+.skew-block-gold{background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,191,36,0.08));border-color:rgba(245,158,11,0.2)}
+.skew-block-gold h2{background:linear-gradient(135deg,#F59E0B,#FBBF24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.skew-block-red{background:linear-gradient(135deg,rgba(220,38,38,0.15),rgba(127,29,29,0.08));border-color:rgba(220,38,38,0.2)}
+.skew-block-red h2{color:#DC2626}
+.glass-card{background:linear-gradient(145deg,rgba(124,58,237,0.08),rgba(6,182,212,0.04));border:1px solid rgba(196,181,253,0.1);border-radius:12px;padding:clamp(10px,1.2vh,16px) clamp(12px,1.5vw,20px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .35s cubic-bezier(0.4,0,0.2,1);box-shadow:0 2px 8px rgba(15,7,32,0.3),0 8px 32px rgba(124,58,237,0.08),0 1px 2px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.05)}
+.glass-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 4px 12px rgba(15,7,32,0.4),0 12px 48px rgba(124,58,237,0.15),0 1px 2px rgba(0,0,0,0.2);border-color:rgba(124,58,237,0.3)}
+.btn-enchant{display:inline-flex;align-items:center;gap:6px;padding:clamp(6px,0.7vh,10px) clamp(12px,1.2vw,18px);background:#7C3AED;color:#FFF;border:none;border-radius:8px;font-family:"Inter","Segoe UI",system-ui,sans-serif;font-weight:500;font-size:clamp(0.7rem,0.75vw,0.85rem);cursor:pointer;transition:all .3s cubic-bezier(0.4,0,0.2,1);letter-spacing:0.02em}
+.btn-enchant:hover{background:#8B5CF6;transform:scale(1.05);box-shadow:0 0 20px rgba(124,58,237,0.3),0 0 40px rgba(124,58,237,0.15)}
+.btn-enchant:active{transform:scale(0.92)}
+.btn-enchant-secondary{background:rgba(124,58,237,0.15);color:#C4B5FD;border:1px solid rgba(196,181,253,0.15)}
+.btn-enchant-secondary:hover{background:rgba(124,58,237,0.25)}
+.tab-bar{display:flex;gap:clamp(2px,0.3vw,4px);flex-wrap:wrap}
+.tab-btn{padding:clamp(4px,0.6vh,8px) clamp(8px,0.8vw,14px);background:rgba(124,58,237,0.08);border:1px solid rgba(196,181,253,0.08);border-radius:6px;color:#8B7EB5;font-family:"Inter","Segoe UI",system-ui,sans-serif;font-size:clamp(0.6rem,0.65vw,0.72rem);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;transition:all .3s cubic-bezier(0.4,0,0.2,1)}
+.tab-btn:hover{background:rgba(124,58,237,0.15);color:#C4B5FD}
+.tab-btn.active{background:rgba(124,58,237,0.25);color:#C4B5FD;border-color:rgba(196,181,253,0.2);box-shadow:0 0 12px rgba(124,58,237,0.2)}
+.tab-content{display:none;margin-top:clamp(6px,0.8vh,12px)}
+.tab-content.active{display:block}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-family:"Inter","Segoe UI",system-ui,sans-serif;font-weight:500;font-size:clamp(0.6rem,0.6vw,0.7rem);text-transform:uppercase;letter-spacing:0.08em;color:#8B7EB5;background:rgba(124,58,237,0.12);border:1px solid rgba(196,181,253,0.08)}
+.badge-green{background:rgba(16,185,129,0.15);color:#10B981;border-color:rgba(16,185,129,0.2)}
+.badge-red{background:rgba(239,68,68,0.15);color:#EF4444;border-color:rgba(239,68,68,0.2)}
+.badge-gold{background:rgba(245,158,11,0.15);color:#F59E0B;border-color:rgba(245,158,11,0.2)}
+.badge-cyan{background:rgba(6,182,212,0.15);color:#06B6D4;border-color:rgba(6,182,212,0.2)}
+.badge-purple{background:rgba(124,58,237,0.2);color:#A855F7;border-color:rgba(124,58,237,0.25)}
+#particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#ambient-fog{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+.fog-layer{position:absolute;width:200%;height:200%;border-radius:50%;filter:blur(80px);opacity:0.08;animation:fogDrift 100s linear infinite}
+.fog-layer:nth-child(1){background:radial-gradient(ellipse at 20% 30%,#7C3AED,transparent 70%);top:-20%;left:-30%;animation-duration:120s;animation-direction:alternate}
+.fog-layer:nth-child(2){background:radial-gradient(ellipse at 80% 60%,#06B6D4,transparent 70%);top:-10%;left:-10%;animation-duration:90s;animation-direction:alternate-reverse;opacity:0.06}
+.fog-layer:nth-child(3){background:radial-gradient(ellipse at 50% 80%,#A855F7,transparent 70%);top:-30%;left:-20%;animation-duration:110s;animation-direction:alternate;opacity:0.1}
+@keyframes fogDrift{0%{transform:translate(0,0)}25%{transform:translate(2%,1%)}50%{transform:translate(-1%,2%)}75%{transform:translate(1%,-1%)}100%{transform:translate(0,0)}}
+#god-rays{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden;opacity:0.15}
+.god-ray{position:absolute;top:-40%;left:-10%;width:60%;height:180%;background:linear-gradient(135deg,rgba(196,181,253,0.04),transparent 80%);transform:rotate(30deg);transform-origin:top left;animation:rayPulse 4s ease-in-out infinite}
+.god-ray:nth-child(2){left:5%;width:40%;height:160%;opacity:0.5;animation-delay:2s;background:linear-gradient(135deg,rgba(6,182,212,0.03),transparent 80%)}
+@keyframes rayPulse{0%,100%{opacity:0.6}50%{opacity:1}}
+#vignette{position:fixed;top:0;left:0;width:100%;height:100%;z-index:97;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(15,7,32,0.6) 100%)}
+#noise-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:98;pointer-events:none;opacity:0.02;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px 256px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
+.slide-content{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;z-index:2;max-width:clamp(800px,85vw,1400px);margin:0 auto}
+.slide-content>*{opacity:0;transform:translateY(20px);transition:opacity .6s cubic-bezier(0.4,0,0.2,1),transform .6s cubic-bezier(0.4,0,0.2,1)}
+.slide.active .slide-content>*{opacity:1;transform:translateY(0)}
+.slide .anim-bg{transition-delay:0ms}
+.slide .anim-bg-200{transition-delay:200ms}
+.slide .anim-bg-300{transition-delay:300ms}
+.slide .anim-bg-400{transition-delay:400ms}
+.slide .anim-bg-500{transition-delay:500ms}
+.slide .anim-bg-600{transition-delay:600ms}
+.slide .anim-bg-700{transition-delay:700ms}
+.slide .anim-bg-800{transition-delay:800ms}
+.slide .anim-bg-900{transition-delay:900ms}
+.slide .anim-bg-1000{transition-delay:1000ms}
+.slide .anim-bg-1200{transition-delay:1200ms}
+.slide .anim-bg-1500{transition-delay:1500ms}
+[data-anim]{opacity:0}
+[data-anim].loaded{opacity:1;transform:translateY(0) scale(1)}
+[data-anim=fade]{transform:none}
+[data-anim=slide-up]{transform:translateY(30px)}
+[data-anim=slide-down]{transform:translateY(-30px)}
+[data-anim=slide-right]{transform:translateX(-40px)}
+[data-anim=slide-left]{transform:translateX(40px)}
+[data-anim=scale-in]{transform:scale(0.9)}
+[data-anim=scale-up]{transform:scale(0.8)}
+[data-anim=blur-in]{filter:blur(8px)}
+[data-anim=blur-up]{transform:translateY(20px);filter:blur(6px)}
+[data-anim=skew-right]{transform:translateX(-40px) skewX(2deg)}
+[data-anim=glow-in]{filter:blur(10px) brightness(0.5)}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+.t-serif{font-family:"Georgia","Times New Roman",serif}
+.t-sans{font-family:"Inter","Segoe UI",system-ui,sans-serif}
+.t-gradient{background:linear-gradient(135deg,#C4B5FD,#A855F7,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.t-gradient-gold{background:linear-gradient(135deg,#F59E0B,#FBBF24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.t-gold{color:#FBBF24}
+.t-green{color:#10B981}
+.t-red{color:#EF4444}
+.t-cyan{color:#06B6D4}
+.t-purple{color:#A855F7}
+.t-muted{color:#8B7EB5}
+.t-uppercase{text-transform:uppercase;letter-spacing:0.08em}
+.t-sm{font-size:clamp(0.6rem,0.65vw,0.75rem)}
+.t-xs{font-size:clamp(0.5rem,0.55vw,0.65rem)}
+.slide-cover .slide-title{font-family:"Georgia","Times New Roman",serif;font-weight:700;font-size:clamp(2.2rem,4.5vw,5rem);color:#F5F3FF;line-height:1.1;letter-spacing:-0.02em;text-align:center;margin-bottom:clamp(12px,1.5vh,20px);position:relative;z-index:0}
+.slide-cover .slide-subtitle{font-family:"Georgia","Times New Roman",serif;font-style:italic;font-size:clamp(0.85rem,1.3vw,1.4rem);color:#C4B5FD;text-align:center;margin-bottom:clamp(20px,3vh,40px)}
+.slide-cover .slide-epigraph{font-family:"Georgia","Times New Roman",serif;font-style:italic;font-size:clamp(0.8rem,1vw,1.1rem);color:#FBBF24;text-align:center}
+.slide-cover .slide-credit{font-family:"Inter","Segoe UI",system-ui,sans-serif;font-size:clamp(0.6rem,0.7vw,0.8rem);color:#8B7EB5;position:absolute;bottom:clamp(20px,3vh,40px);right:clamp(20px,3vw,40px)}
+.slide-2 .split-layout{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,2.5vw,32px);width:100%;align-items:center}
+.slide-2 .enchant-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(6px,0.6vh,10px)}
+.slide-2 .enchant-card{display:flex;align-items:center;gap:clamp(6px,0.6vw,10px)}
+.slide-2 .enchant-card svg{width:clamp(24px,2.2vw,32px);height:clamp(24px,2.2vw,32px);stroke:#C4B5FD;fill:none;flex-shrink:0}
+.slide-2 .comparison-area{display:flex;align-items:center;justify-content:center;gap:clamp(12px,2vw,24px);position:relative}
+.slide-2 .item-box{width:clamp(80px,10vw,120px);height:clamp(80px,10vw,120px);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:clamp(2rem,3vw,3.5rem)}
+.slide-2 .item-normal{background:linear-gradient(145deg,#2A1F3D,#1A1028);border:1px solid rgba(196,181,253,0.08);color:#8B7EB5}
+.slide-2 .item-enchanted{background:linear-gradient(145deg,#4C1D95,#7C3AED);border:1px solid rgba(124,58,237,0.4);color:#F5F3FF;box-shadow:0 0 30px rgba(124,58,237,0.3),0 0 60px rgba(124,58,237,0.15);animation:float 3s ease-in-out infinite}
+.slide-2 .vs-text{font-family:"Georgia","Times New Roman",serif;font-weight:700;font-size:clamp(1rem,1.3vw,1.5rem);color:#A855F7}
+.tool-toggle{display:flex;gap:clamp(3px,0.3vw,6px);margin-bottom:clamp(8px,1vh,14px);flex-wrap:wrap}
+.tool-btn{padding:clamp(4px,0.5vh,8px) clamp(8px,0.8vw,14px);background:rgba(124,58,237,0.1);border:1px solid rgba(196,181,253,0.08);border-radius:6px;color:#8B7EB5;font-family:"Inter","Segoe UI",system-ui,sans-serif;font-size:clamp(0.6rem,0.65vw,0.72rem);font-weight:500;cursor:pointer;transition:all .3s}
+.tool-btn:hover{background:rgba(124,58,237,0.18);color:#C4B5FD}
+.tool-btn.active{background:rgba(124,58,237,0.3);color:#F5F3FF;border-color:rgba(124,58,237,0.3)}
+.tool-content{display:none}
+.tool-content.active{display:grid;gap:clamp(6px,0.6vh,10px);grid-template-columns:1fr 1fr}
+.fortune-vs-silk{display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,1vw,16px)}
+.fortune-side,.silk-side{padding:clamp(8px,1vh,14px);border-radius:10px;text-align:center}
+.fortune-side{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15)}
+.silk-side{background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15)}
+.fortune-side h4,.silk-side h4{font-family:"Georgia","Times New Roman",serif;font-size:clamp(0.9rem,1vw,1.2rem);margin-bottom:4px}
+.fortune-side h4{color:#FBBF24}
+.silk-side h4{color:#06B6D4}
+.anvil-interface{display:flex;flex-direction:column;align-items:center;gap:clamp(6px,0.6vh,10px);padding:clamp(12px,1.5vh,20px);background:rgba(26,16,40,0.6);border:2px solid rgba(196,181,253,0.08);border-radius:12px;max-width:clamp(180px,22vw,260px);margin:0 auto}
+.anvil-slots{display:flex;gap:clamp(4px,0.4vw,8px)}
+.anvil-slot{width:clamp(50px,5vw,64px);height:clamp(50px,5vw,64px);border:2px solid rgba(196,181,253,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(15,7,32,0.5);font-size:clamp(1.2rem,1.8vw,2.2rem)}
+.anvil-slot:hover{border-color:rgba(124,58,237,0.4);box-shadow:0 0 12px rgba(124,58,237,0.2)}
+.anvil-arrow{color:#8B7EB5;font-size:clamp(1rem,1.2vw,1.4rem)}
+.anvil-result{width:clamp(50px,5vw,64px);height:clamp(50px,5vw,64px);border:2px solid rgba(16,185,129,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,0.08);font-size:clamp(1.2rem,1.8vw,2.2rem);color:#10B981;box-shadow:0 0 16px rgba(16,185,129,0.15)}
+.anvil-cost{font-family:"Georgia","Times New Roman",serif;font-size:clamp(1rem,1.2vw,1.4rem);font-weight:700;color:#10B981}
+.anvil-too-expensive{font-family:"Georgia","Times New Roman",serif;font-size:clamp(0.8rem,0.9vw,1rem);color:#EF4444;font-weight:700}
+.anvil-slot-label{font-size:clamp(0.55rem,0.55vw,0.65rem);color:#8B7EB5;text-align:center;margin-top:2px}
+.enchant-table-ui{display:flex;flex-direction:column;align-items:center;gap:clamp(6px,0.6vh,10px);padding:clamp(14px,1.8vh,22px);background:rgba(26,16,40,0.6);border:2px solid rgba(124,58,237,0.15);border-radius:12px;max-width:clamp(200px,24vw,300px);margin:0 auto;box-shadow:0 0 30px rgba(124,58,237,0.1)}
+.enchant-slots{display:flex;flex-direction:column;gap:clamp(4px,0.4vw,8px);width:100%}
+.enchant-slot{display:flex;justify-content:space-between;align-items:center;padding:clamp(5px,0.5vh,8px) clamp(8px,0.8vw,12px);background:rgba(15,7,32,0.5);border:1px solid rgba(196,181,253,0.08);border-radius:6px;font-size:clamp(0.65rem,0.65vw,0.75rem);color:#C4B5FD;cursor:pointer}
+.enchant-slot:hover{border-color:rgba(124,58,237,0.3);background:rgba(124,58,237,0.1)}
+.enchant-slot .slot-cost{color:#FBBF24;font-weight:600}
+.enchant-slot .slot-rune{font-family:"Georgia","Times New Roman",serif;color:#A855F7;font-size:clamp(0.8rem,0.9vw,1rem)}
+.enchant-grid-3x3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(4px,0.4vh,8px)}
+.enchant-grid-3x3 .glass-card h4{font-family:"Georgia","Times New Roman",serif;font-size:clamp(0.75rem,0.8vw,0.9rem);color:#C4B5FD;font-weight:700}
+.enchant-grid-3x3 .glass-card p{font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5}
+.enchant-grid-3x3 .glass-card .compat{font-size:clamp(0.5rem,0.5vw,0.6rem);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px}
+.enchant-grid-3x3 .glass-card .compat.good{color:#10B981}
+.enchant-grid-3x3 .glass-card .compat.bad{color:#EF4444}
+.armor-tabs{display:flex;gap:clamp(4px,0.4vw,8px);margin-bottom:clamp(6px,0.6vh,10px);flex-wrap:wrap}
+.armor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(120px,12vw,160px),1fr));gap:clamp(4px,0.4vh,8px)}
+.armor-grid .glass-card h4{font-family:"Georgia","Times New Roman",serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD}
+.armor-grid .glass-card p{font-size:clamp(0.55rem,0.55vw,0.65rem);color:#8B7EB5}
+.armor-grid .armor-piece{font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5;text-transform:uppercase;letter-spacing:0.06em}
+.weapon-3col{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1vw,16px);width:100%}
+.weapon-col{text-align:center}
+.weapon-col h3{font-family:"Georgia","Times New Roman",serif;font-size:clamp(0.95rem,1.1vw,1.3rem);color:#C4B5FD;margin-bottom:clamp(6px,0.6vh,10px)}
+.weapon-icon{font-size:clamp(2rem,2.8vw,3.5rem);margin-bottom:clamp(4px,0.5vh,8px);display:block;animation:float 3.5s ease-in-out infinite}
+.incompat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(6px,0.6vh,10px);width:100%}
+.incompat-pair{display:flex;align-items:center;justify-content:center;gap:clamp(6px,0.6vw,10px);padding:clamp(6px,0.6vh,10px);background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.08);border-radius:8px;text-align:center;flex-wrap:wrap}
+.incompat-pair .enc-name{font-family:"Georgia","Times New Roman",serif;font-size:clamp(0.65rem,0.7vw,0.8rem);font-weight:700;color:#C4B5FD}
+.incompat-pair .enc-x{font-family:"Georgia","Times New Roman",serif;font-size:clamp(1rem,1.2vw,1.5rem);font-weight:700;color:#EF4444;padding:0 2px}
+.bento-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(6px,0.6vh,10px);width:100%}
+.bento-card{background:linear-gradient(145deg,rgba(124,58,237,0.06),rgba(6,182,212,0.03));border:1px solid rgba(196,181,253,0.08);border-radius:10px;padding:clamp(8px,0.8vh,14px)}
+.bento-card:hover{background:linear-gradient(145deg,rgba(124,58,237,0.12),rgba(6,182,212,0.06));border-color:rgba(196,181,253,0.2);transform:translateY(-2px)}
+.bento-card h4{font-family:"Georgia","Times New Roman",serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD;margin-bottom:2px}
+.bento-card p{font-size:clamp(0.55rem,0.58vw,0.68rem);color:#8B7EB5}
+.bento-wide{grid-column:span 2;grid-row:span 1}
+.bento-tall{grid-column:span 1;grid-row:span 2}
+.bento-large{grid-column:span 2;grid-row:span 2}
+.best-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(6px,0.6vh,10px);width:100%}
+.best-item{text-align:center}
+.best-item .item-icon{font-size:clamp(1.6rem,2.2vw,2.8rem);margin-bottom:clamp(2px,0.3vh,6px)}
+.best-item h4{font-family:"Georgia","Times New Roman",serif;font-size:clamp(0.75rem,0.8vw,0.95rem);color:#FBBF24;margin-bottom:clamp(3px,0.3vh,6px)}
+.best-item .ench-badges{display:flex;flex-wrap:wrap;gap:2px;justify-content:center}
+.best-item .ench-badges .badge{font-size:clamp(0.45rem,0.45vw,0.55rem);padding:1px 5px}
+.strategy-compare{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.5vw,24px);width:100%}
+.strategy-side{padding:clamp(8px,1vh,14px);border-radius:10px}
+.strategy-wrong{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.12)}
+.strategy-right{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.12)}
+.strategy-side h3{font-family:"Georgia","Times New Roman",serif;font-size:clamp(1rem,1.1vw,1.3rem);margin-bottom:clamp(4px,0.4vh,8px)}
+.strategy-flow{display:flex;align-items:center;gap:clamp(3px,0.3vw,6px);flex-wrap:wrap;justify-content:center;font-size:clamp(0.65rem,0.65vw,0.75rem)}
+.strategy-flow .step{padding:clamp(3px,0.3vh,6px) clamp(6px,0.5vw,10px);background:rgba(15,7,32,0.4);border-radius:4px;border:1px solid rgba(196,181,253,0.06)}
+.strategy-flow .arrow{color:#8B7EB5;font-size:clamp(0.6rem,0.6vw,0.7rem)}
+.slide-final .final-message{font-family:"Georgia","Times New Roman",serif;font-size:clamp(1rem,1.3vw,1.5rem);font-weight:700;font-style:italic;color:#FBBF24;text-align:center;max-width:clamp(400px,55vw,800px);line-height:1.5;padding:clamp(16px,2vh,28px)}
+.slide-final .mini-resumo{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(6px,0.5vh,10px);width:100%}
+.slide-final .mini-resumo .glass-card{padding:clamp(6px,0.5vh,10px);text-align:center}
+.slide-final .mini-resumo .glass-card h4{font-family:"Georgia","Times New Roman",serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#C4B5FD}
+.slide-final .mini-resumo .glass-card p{font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5}
+.slide-final .thanks{font-family:"Georgia","Times New Roman",serif;font-style:italic;font-size:clamp(0.7rem,0.8vw,0.9rem);color:#8B7EB5;position:absolute;bottom:clamp(20px,3vh,40px);right:clamp(20px,3vw,40px)}
+.villager-flow{display:flex;align-items:center;gap:clamp(4px,0.4vw,8px);justify-content:center;flex-wrap:wrap}
+.flow-step{display:flex;flex-direction:column;align-items:center;gap:2px;padding:clamp(4px,0.4vh,8px) clamp(8px,0.8vw,14px);background:rgba(124,58,237,0.06);border:1px solid rgba(196,181,253,0.06);border-radius:8px;min-width:clamp(80px,8vw,110px)}
+.flow-step .icon{font-size:clamp(1.2rem,1.6vw,2rem)}
+.flow-step .label{font-size:clamp(0.55rem,0.55vw,0.65rem);color:#C4B5FD;font-weight:500}
+.flow-arrow{color:#7C3AED;font-size:clamp(0.8rem,1vw,1.2rem);animation:pulse 1.5s ease-in-out infinite}
+.bookshelf-diagram{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(2px,0.2vw,4px);max-width:clamp(160px,18vw,220px);margin:0 auto}
+.bs-cell{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:clamp(0.4rem,0.5vw,0.6rem);background:rgba(15,7,32,0.3);border:1px solid rgba(196,181,253,0.04)}
+.bs-cell.enchant-table{background:rgba(124,58,237,0.3);border-color:rgba(124,58,237,0.4);box-shadow:0 0 10px rgba(124,58,237,0.2)}
+.bs-cell.bookshelf{background:rgba(124,58,237,0.12);border-color:rgba(124,58,237,0.15);box-shadow:0 0 6px rgba(124,58,237,0.1)}
+.bs-cell.air{background:transparent}
+.xp-bar-wrap{width:100%;max-width:clamp(300px,45vw,500px);margin:0 auto}
+.xp-bar-bg{width:100%;height:clamp(14px,1.5vh,22px);background:rgba(26,16,40,0.6);border-radius:14px;overflow:hidden;border:1px solid rgba(16,185,129,0.15);position:relative}
+.xp-bar-fill{height:100%;background:linear-gradient(90deg,#065F46,#10B981);border-radius:14px;transition:width 1s cubic-bezier(0.4,0,0.2,1);width:0%}
+.xp-bar-markers{display:flex;justify-content:space-between;margin-top:clamp(2px,0.3vh,6px);padding:0 2px}
+.xp-bar-markers span{font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5}
+.xp-bar-marker{position:absolute;top:0;height:100%;width:2px;background:rgba(255,255,255,0.2)}
+.xp-bar-marker span{position:absolute;top:calc(100% + 2px);left:50%;transform:translateX(-50%);font-size:clamp(0.45rem,0.45vw,0.55rem);color:#8B7EB5;white-space:nowrap}
+.curse-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.5vw,24px);width:100%}
+.curse-card{padding:clamp(14px,1.5vh,22px);border-radius:12px;text-align:center}
+.curse-binding{background:linear-gradient(145deg,rgba(220,38,38,0.06),rgba(127,29,29,0.04));border:1px solid rgba(220,38,38,0.12)}
+.curse-vanishing{background:linear-gradient(145deg,rgba(147,51,234,0.06),rgba(88,28,135,0.04));border:1px solid rgba(147,51,234,0.12)}
+.curse-card:hover{transform:translateY(-3px)}
+.curse-binding:hover{box-shadow:0 0 20px rgba(220,38,38,0.15);border-color:rgba(220,38,38,0.25)}
+.curse-vanishing:hover{box-shadow:0 0 20px rgba(147,51,234,0.15);border-color:rgba(147,51,234,0.25)}
+.curse-card .curse-icon{font-size:clamp(2rem,3vw,3.5rem);margin-bottom:clamp(6px,0.6vh,10px)}
+.curse-card h3{font-family:"Georgia","Times New Roman",serif;font-size:clamp(1rem,1.2vw,1.4rem);margin-bottom:clamp(4px,0.4vh,8px)}
+.curse-binding h3{color:#FCA5A5}
+.curse-vanishing h3{color:#C4B5FD}
+.curse-card p{font-size:clamp(0.6rem,0.65vw,0.75rem);color:#E2E0F0;line-height:1.5}
+.fishing-layout{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,1.5vw,24px);width:100%}
+.fishing-pole-area{display:flex;flex-direction:column;align-items:center}
+.fishing-pole{font-size:clamp(2.5rem,4vw,5rem);animation:float 3s ease-in-out infinite}
+.fishing-line{width:2px;height:clamp(40px,5vh,70px);background:linear-gradient(180deg,rgba(196,181,253,0.3),rgba(6,182,212,0.1));margin:0 auto;border-radius:1px;animation:waveLine 2s ease-in-out infinite}
+@keyframes waveLine{0%,100%{transform:scaleY(1)}50%{transform:scaleY(0.85)}}
+.central-book{font-size:clamp(4rem,7vw,9rem);text-align:center;animation:float 4s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(124,58,237,0.3))}
+.slide-3-badges{display:flex;gap:clamp(4px,0.4vw,8px);justify-content:flex-end}
+.slide-3-content{min-height:clamp(50px,6vh,80px);font-size:clamp(0.75rem,0.8vw,0.9rem);color:#E2E0F0;line-height:1.6;padding:clamp(8px,1vh,14px);background:rgba(15,7,32,0.3);border-radius:8px;border:1px solid rgba(196,181,253,0.04)}
+.slide-4-layout{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,1.5vw,24px);width:100%;align-items:start}
+.slide-4-cards{display:flex;flex-direction:column;gap:clamp(4px,0.4vh,8px)}
+.slide-4-cards .glass-card h4{font-family:"Georgia","Times New Roman",serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD}
+.slide-4-cards .glass-card p{font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5}
+@media(max-width:768px){
+.slide-2 .split-layout,.slide-4-layout,.fishing-layout,.book-sections{grid-template-columns:1fr}
+.slide-content{padding:clamp(12px,2vh,20px)}
+.skew-block{margin-bottom:clamp(4px,0.5vh,8px)}
+.enchant-grid-3x3,.best-grid{grid-template-columns:repeat(2,1fr)}
+.incompat-grid{grid-template-columns:1fr}
+.weapon-3col{grid-template-columns:1fr}
+.curse-grid,.strategy-compare{grid-template-columns:1fr}
+.bento-grid{grid-template-columns:repeat(2,1fr)}
+.bento-wide,.bento-large{grid-column:span 2}
+.villager-flow{gap:2px}
+.flow-step{min-width:clamp(60px,25vw,80px);padding:3px 6px}
+.slide-cover .slide-title{font-size:clamp(1.6rem,6vw,2.6rem)}
+.fortune-vs-silk{grid-template-columns:1fr}
+#nav-prev{left:0.5vw}
+#nav-next{right:0.5vw}
+.nav-btn{width:32px;height:32px}
+.nav-btn svg{width:14px;height:14px}
+.slide-2 .enchant-grid{grid-template-columns:1fr}
+.tool-content.active{grid-template-columns:1fr}
+.armor-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:1024px) and (min-width:769px){
+.enchant-grid-3x3,.best-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-dot"></div>
+<div id="progress-bar"></div>
+<div id="progress-glow"></div>
+<button class="nav-btn hidden" id="nav-prev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
+<button class="nav-btn" id="nav-next" aria-label="Proximo"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+<div id="slide-indicator">01 / 20</div>
+<div id="ambient-fog"><div class="fog-layer"></div><div class="fog-layer"></div><div class="fog-layer"></div></div>
+<div id="god-rays"><div class="god-ray"></div><div class="god-ray"></div></div>
+<div id="vignette"></div>
+<div id="noise-overlay"></div>
+<canvas id="particle-canvas"></canvas>
+<div id="slides">
+
+<div class="slide slide-cover" data-slide="1">
+<div class="slide-content">
+<div class="skew-block anim-bg-400 skew-block-mirror" style="align-self:flex-start;max-width:60%;margin-bottom:clamp(8px,1vh,16px)"><h2 style="font-size:clamp(0.7rem,0.9vw,1rem);letter-spacing:0.15em;text-transform:uppercase;color:#8B7EB5;font-family:'Inter','Segoe UI',system-ui,sans-serif;font-weight:500">Minecraft 1.21</h2></div>
+<div class="slide-title anim-bg-600" data-text="O Sistema de Encantamentos do Minecraft">O Sistema de Encantamentos do Minecraft</div>
+<p class="slide-subtitle anim-bg-800">Como transformar equipamentos comuns em itens extremamente poderosos</p>
+<p class="slide-epigraph anim-bg-1200">"Conhecimento e poder — e no Minecraft, poder se mede em niveis de experiencia."</p>
+<p class="slide-credit anim-bg-1500">Apresentacao interativa — 2026</p>
+</div>
+</div>
+
+<div class="slide slide-2" data-slide="2">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>O QUE SAO ENCANTAMENTOS?</h2></div>
+<p class="anim-bg-400" style="font-size:clamp(0.85rem,0.9vw,1rem);color:#E2E0F0;line-height:1.6;align-self:flex-start;max-width:55%">Encantamentos sao modificadores especiais que adicionam habilidades unicas a equipamentos, armas, ferramentas e armaduras no Minecraft, permitindo que itens comuns se tornam extremamente poderosos.</p>
+<div class="split-layout">
+<div><div class="enchant-grid anim-bg-500">
+<div class="enchant-card glass-card" style="padding:clamp(6px,0.6vh,10px)">
+<svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7l-10-5z"/><path d="M2 7l10 5 10-5"/><path d="M12 22V12"/></svg>
+<div><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD">Armas</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Espadas, Arcos, Bestas e Tridentes</p></div></div>
+<div class="enchant-card glass-card" style="padding:clamp(6px,0.6vh,10px)">
+<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+<div><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD">Ferramentas</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Picaretas, Machados, Pas e Enxadas</p></div></div>
+<div class="enchant-card glass-card" style="padding:clamp(6px,0.6vh,10px)">
+<svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+<div><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD">Armaduras</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Capacete, Peitoral, Calculas e Botas</p></div></div>
+<div class="enchant-card glass-card" style="padding:clamp(6px,0.6vh,10px)">
+<svg viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11L12 2z"/><path d="M12 22l5.5-9h-11L12 22z"/></svg>
+<div><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD">Arcos</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Arcos e Bestas</p></div></div>
+</div></div>
+<div class="comparison-area anim-bg-600">
+<div class="item-box item-normal">U+2694</div>
+<span class="vs-text">VS</span>
+<div class="item-box item-enchanted">U+2694</div>
+</div></div></div></div>
+
+<div class="slide" data-slide="3">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>COMO O SISTEMA FUNCIONA</h2></div>
+<p class="anim-bg-300" style="font-size:clamp(0.75rem,0.8vw,0.9rem);color:#C4B5FD;align-self:flex-start;margin-bottom:clamp(4px,0.5vh,8px)">Seis formas de obter e aplicar encantamentos no Minecraft</p>
+<div class="slide-3-layout">
+<div class="tab-bar anim-bg-400">
+<button class="tab-btn active" data-tab="tab3-1">Mesa</button>
+<button class="tab-btn" data-tab="tab3-2">Bigorna</button>
+<button class="tab-btn" data-tab="tab3-3">Aldeoes</button>
+<button class="tab-btn" data-tab="tab3-4">Loot</button>
+<button class="tab-btn" data-tab="tab3-5">Pesca</button>
+<button class="tab-btn" data-tab="tab3-6">Baus</button>
+</div>
+<div class="tab-content active anim-bg-500" id="tab3-1"><div class="slide-3-content">Interface de 3 opcoes que consomem niveis de experiencia e lapis-lazuli. Os encantamentos sao sorteados aleatoriamente entre os disponiveis para o tipo de item e o nivel gasto.</div></div>
+<div class="tab-content" id="tab3-2"><div class="slide-3-content">Combina encantamentos de livros a itens, repara equipamentos ou renomeia. Permite montar combinacoes precisas, mas gasta niveis de XP.</div></div>
+<div class="tab-content" id="tab3-3"><div class="slide-3-content">Aldeoes bibliotecarios trocam livros encantados por esmeraldas. E possivel resetar as trocas quebrando e recolocando o pulpito.</div></div>
+<div class="tab-content" id="tab3-4"><div class="slide-3-content">Baus em templos, masmorras, minas abandonadas e cidades podem conter livros e itens encantados. Otima fonte no early game.</div></div>
+<div class="tab-content" id="tab3-5"><div class="slide-3-content">Pescar pode resultar em livros encantados e varas de pesca encantadas. Luck of the Sea aumenta as chances.</div></div>
+<div class="tab-content" id="tab3-6"><div class="slide-3-content">Baus de estruturas geradas naturalmente podem conter itens encantados. Forma passiva de colecionar encantamentos enquanto explora.</div></div>
+<div class="slide-3-badges anim-bg-600"><span class="badge">XP</span><span class="badge badge-cyan">Lapis-Lazuli</span><span class="badge badge-gold">Livros</span></div>
+</div></div></div>
+
+<div class="slide" data-slide="4">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>MESA DE ENCANTAMENTOS</h2></div>
+<div class="slide-4-layout">
+<div class="slide-4-cards">
+<div class="glass-card anim-bg-500"><h4>Craft</h4><p>4 Obsidianas + 2 Diamantes + 1 Livro. Essencial para qualquer base de encantamentos.</p></div>
+<div class="glass-card anim-bg-600"><h4>Aleatoriedade</h4><p>Os encantamentos sao sorteados com base no nivel gasto. A mesa mostra apenas 3 opcoes, mas o resultado e sempre imprevisivel.</p></div>
+<div class="glass-card anim-bg-700"><h4>Vantagens</h4><p>Baixo custo inicial. Ideal para encantamentos basicos e early game. Nao requer livros.</p></div>
+<div class="glass-card anim-bg-800"><h4>Limitacoes</h4><p>Nao permite escolher o encantamento exato. Depende de estantes para niveis altos. Apenas nivel maximo 30.</p></div>
+</div>
+<div class="enchant-table-ui anim-bg-400">
+<div class="enchant-slots">
+<div class="enchant-slot"><span>I</span><span class="slot-rune">\Sd\Sd\Sd</span><span class="slot-cost">1 LVL</span></div>
+<div class="enchant-slot"><span>II</span><span class="slot-rune">\Se\Se\Se</span><span class="slot-cost">15 LVL</span></div>
+<div class="enchant-slot"><span>III</span><span class="slot-rune">\Sf\Sf\Sf</span><span class="slot-cost">30 LVL</span></div>
+</div>
+<div style="margin-top:clamp(6px,0.6vh,10px);display:flex;gap:clamp(6px,0.6vw,10px);align-items:center"><span class="badge badge-purple">Livro</span><span class="badge badge-cyan">3 Lapis</span></div>
+</div></div></div></div>
+
+<div class="slide" data-slide="5">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>ESTANTES E NIVEL MAXIMO</h2></div>
+<div style="display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:clamp(10px,1.5vw,24px);width:100%;align-items:center">
+<div style="display:flex;flex-direction:column;gap:clamp(4px,0.4vh,8px)">
+<div class="glass-card anim-bg-500"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD">15 Estantes</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Quantidade necessaria para atingir o nivel maximo de 30.</p></div>
+<div class="glass-card anim-bg-600"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD">Posicionamento</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Blocos a 2 de distancia, formando uma ferradura ao redor da mesa.</p></div>
+<div class="glass-card anim-bg-700"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD">Erros Comuns</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Tochas ou blocos entre a mesa e as estantes bloqueiam o efeito.</p></div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:clamp(4px,0.4vh,8px)">
+<div class="bookshelf-diagram anim-bg-300">
+<div class="bs-cell bookshelf">B</div><div class="bs-cell bookshelf">B</div><div class="bs-cell bookshelf">B</div><div class="bs-cell bookshelf">B</div><div class="bs-cell bookshelf">B</div>
+<div class="bs-cell bookshelf">B</div><div class="bs-cell air"></div><div class="bs-cell air"></div><div class="bs-cell air"></div><div class="bs-cell bookshelf">B</div>
+<div class="bs-cell bookshelf">B</div><div class="bs-cell air"></div><div class="bs-cell enchant-table">M</div><div class="bs-cell air"></div><div class="bs-cell bookshelf">B</div>
+<div class="bs-cell bookshelf">B</div><div class="bs-cell air"></div><div class="bs-cell air"></div><div class="bs-cell air"></div><div class="bs-cell bookshelf">B</div>
+<div class="bs-cell bookshelf">B</div><div class="bs-cell bookshelf">B</div><div class="bs-cell bookshelf">B</div><div class="bs-cell bookshelf">B</div><div class="bs-cell bookshelf">B</div>
+</div>
+<p class="anim-bg-800" style="font-size:clamp(0.5rem,0.55vw,0.65rem);color:#8B7EB5;text-align:center">Disposicao em ferradura — vista superior</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:clamp(4px,0.4vh,8px)">
+<div class="glass-card anim-bg-600"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#10B981">Check</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Nivel 30 disponivel com 15 estantes em posicao correta.</p></div>
+<div class="glass-card anim-bg-700"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#EF4444">Erro</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Menos de 15 estantes ou mal posicionadas limitam o nivel maximo.</p></div>
+</div></div></div></div>
+
+<div class="slide" data-slide="6">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>EXPERIENCIA E CUSTO</h2></div>
+<p class="anim-bg-300" style="font-size:clamp(0.75rem,0.8vw,0.9rem);color:#C4B5FD;align-self:flex-start;margin-bottom:clamp(4px,0.5vh,8px)">XP e o recurso essencial para encantar — mas o custo sobe rapidamente.</p>
+<div class="xp-bar-wrap anim-bg-400"><div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-bar"></div><div class="xp-bar-marker" style="left:10%"><span>Nv 1</span></div><div class="xp-bar-marker" style="left:50%"><span>Nv 15</span></div><div class="xp-bar-marker" style="left:100%"><span>Nv 30</span></div></div>
+<div class="xp-bar-markers"><span>7 XP total</span><span>37 XP total</span><span>139 XP total</span></div></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(4px,0.4vh,8px);width:100%;margin-top:clamp(6px,0.6vh,10px)">
+<div class="glass-card anim-bg-500"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD">O que e XP</h4><p style="font-size:clamp(0.55rem,0.58vw,0.65rem);color:#8B7EB5">Obtido ao derrotar mobs, minerar, fundir itens, trocar com aldeoes e usar fornalhas.</p></div>
+<div class="glass-card anim-bg-600"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD">Nivel vs XP</h4><p style="font-size:clamp(0.55rem,0.58vw,0.65rem);color:#8B7EB5">Cada nivel exige mais XP. O custo cresce exponencialmente: nivel 30 precisa de 139 XP acumulados.</p></div>
+<div class="glass-card anim-bg-700"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD">Por que e caro</h4><p style="font-size:clamp(0.55rem,0.58vw,0.65rem);color:#8B7EB5">A bigorna cobra XP extra por cada reparo e combinacao. Quanto mais usada, mais cara fica.</p></div>
+<div class="glass-card anim-bg-800"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#FBBF24">Estrategias</h4><p style="font-size:clamp(0.55rem,0.58vw,0.65rem);color:#8B7EB5">Combinar livros antes de aplicar ao item reduz drasticamente o custo.</p></div>
+</div></div></div>
+
+<div class="slide" data-slide="7">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>A BIGORNA</h2></div>
+<div style="display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(12px,1.5vw,24px);width:100%;align-items:center">
+<div style="display:flex;flex-direction:column;gap:clamp(4px,0.4vh,8px)">
+<div class="glass-card anim-bg-400"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">O que e</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Bloco de trabalho usado para combinar encantamentos, reparar itens e renomear.</p></div>
+<div class="glass-card anim-bg-500"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Funcoes</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Combinar item + livro encantado, reparar com material, renomear itens.</p></div>
+<div class="glass-card anim-bg-600"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#FBBF24">Mesa vs Bigorna</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">A mesa e aleatoria e barata. A bigorna e precisa e cara — mas permite combinacoes exatas.</p></div>
+<div class="glass-card anim-bg-700"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Ordem Importa</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">A ordem em que combina os livros afeta diretamente o custo final.</p></div>
+</div>
+<div class="anvil-interface anim-bg-300">
+<div class="anvil-slots"><div class="anvil-slot">S</div><div class="anvil-slot">B</div></div>
+<div class="anvil-arrow">v</div>
+<div class="anvil-result">S</div>
+<div class="anvil-cost">7 niveis</div>
+<div class="anvil-slot-label">Slot 1: Item | Slot 2: Livro</div>
+</div></div></div></div>
+
+<div class="slide" data-slide="8">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>LIVROS ENCANTADOS</h2></div>
+<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(8px,1vw,16px);width:100%;align-items:start">
+<div style="display:flex;flex-direction:column;gap:clamp(3px,0.3vh,6px)">
+<div class="glass-card anim-bg-400"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#C4B5FD">Pesca</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Livros encantados sao tesouros de pesca com Luck of the Sea.</p></div>
+<div class="glass-card anim-bg-500"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#C4B5FD">Loot</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Baus de estruturas contem livros com encantamentos aleatorios.</p></div>
+<div class="glass-card anim-bg-600"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#C4B5FD">Aldeoes</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Bibliotecarios vendem livros encantados especificos por esmeraldas.</p></div>
+<div class="glass-card anim-bg-700"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#C4B5FD">Mesa</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">E possivel encantar livros diretamente na mesa de encantamentos.</p></div>
+</div>
+<div class="central-book anim-bg-300">B</div>
+<div style="display:flex;flex-direction:column;gap:clamp(3px,0.3vh,6px)">
+<div class="glass-card anim-bg-500" style="border-color:rgba(245,158,11,0.15)"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#FBBF24">Guardar</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Armazene encantamentos em livros ate precisar deles.</p></div>
+<div class="glass-card anim-bg-600" style="border-color:rgba(245,158,11,0.15)"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#FBBF24">Transferir</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Aplique o encantamento do livro a qualquer item compativel na bigorna.</p></div>
+<div class="glass-card anim-bg-700" style="border-color:rgba(245,158,11,0.15)"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#FBBF24">Combinar</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Combine livros para subir de nivel antes de aplicar ao item.</p></div>
+<div class="glass-card anim-bg-800" style="border-color:rgba(245,158,11,0.15)"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#FBBF24">Montar</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Monte combinacoes perfeitas de multiplos encantamentos.</p></div>
+</div></div></div></div>
+
+<div class="slide" data-slide="9">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>ALDEOES BIBLIOTECARIOS</h2></div>
+<p class="anim-bg-300" style="font-size:clamp(0.75rem,0.8vw,0.9rem);color:#C4B5FD;align-self:flex-start;margin-bottom:clamp(4px,0.5vh,8px)">A forma mais eficiente e confiavel de obter encantamentos especificos</p>
+<div class="villager-flow anim-bg-400">
+<div class="flow-step"><span class="icon">V</span><span class="label">Aldeao</span></div><span class="flow-arrow">-</span>
+<div class="flow-step"><span class="icon">B</span><span class="label">Pulpito</span></div><span class="flow-arrow">-</span>
+<div class="flow-step"><span class="icon">R</span><span class="label">Bibliotecario</span></div><span class="flow-arrow">-</span>
+<div class="flow-step"><span class="icon">E</span><span class="label">Trocas</span></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(4px,0.4vh,8px);width:100%">
+<div class="glass-card anim-bg-500"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Mending</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">O encantamento mais valioso.</p><span class="badge badge-green">*****</span></div>
+<div class="glass-card anim-bg-600"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Unbreaking III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Triplica a durabilidade.</p><span class="badge badge-green">****</span></div>
+<div class="glass-card anim-bg-700"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Efficiency IV</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Maximo de eficiencia.</p><span class="badge badge-gold">****</span></div>
+<div class="glass-card anim-bg-800"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Protection IV</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Protecao maxima.</p><span class="badge badge-gold">****</span></div>
+</div>
+<div class="anim-bg-900" style="margin-top:clamp(4px,0.4vh,8px);align-self:flex-start"><span class="badge badge-green">Esmeralda</span><span class="badge badge-purple">Resetar</span></div>
+</div></div>
+<div class="slide" data-slide="10">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>ENCANTAMENTOS DE ESPADA</h2></div>
+<p class="anim-bg-300" style="font-size:clamp(0.7rem,0.75vw,0.85rem);color:#C4B5FD;align-self:flex-start;margin-bottom:clamp(3px,0.3vh,6px)">Nove encantamentos disponiveis para sua espada — escolha com sabedoria</p>
+<div class="enchant-grid-3x3 anim-bg-400" style="width:100%">
+<div class="glass-card"><h4>Sharpness V</h4><p>Aumenta dano geral. +2 de dano por nivel.</p><span class="compat good">Max: V</span></div>
+<div class="glass-card"><h4>Smite V</h4><p>+2.5 de dano por nivel contra mortos-vivos.</p><span class="compat bad">Incomp. Sharpness</span></div>
+<div class="glass-card"><h4>Bane IV</h4><p>+2.5 de dano por nivel contra artropodes.</p><span class="compat bad">Incomp. Sharpness</span></div>
+<div class="glass-card"><h4>Looting III</h4><p>Aumenta drops de mobs. Ate +1 item por nivel.</p><span class="compat good">Max: III</span></div>
+<div class="glass-card"><h4>Fire Aspect II</h4><p>Incendeia alvos por 4s por nivel.</p><span class="compat good">Max: II</span></div>
+<div class="glass-card"><h4>Knockback II</h4><p>Empurra inimigos para tras.</p><span class="compat good">Max: II</span></div>
+<div class="glass-card"><h4>Sweeping Edge III</h4><p>+50% dano de varredura por nivel.</p><span class="compat good">Max: III</span></div>
+<div class="glass-card"><h4>Unbreaking III</h4><p>Chance de nao gastar durabilidade.</p><span class="compat good">Max: III</span></div>
+<div class="glass-card"><h4>Mending</h4><p>Repara com XP coletado.</p><span class="compat good">Tesouro</span></div>
+</div>
+<div style="display:flex;gap:clamp(6px,0.6vw,12px);margin-top:clamp(4px,0.4vh,8px);flex-wrap:wrap;justify-content:center">
+<div class="skew-block skew-block-mirror anim-bg-800" style="padding:clamp(4px,0.4vh,8px) clamp(10px,1vw,16px);margin:0"><span style="font-family:'Georgia','Times New Roman',serif;font-weight:700;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#FBBF24">PvE:</span><span style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5;margin-left:4px">Sharpness + Looting + Fire Aspect + Sweeping</span></div>
+<div class="skew-block skew-block-mirror anim-bg-900" style="padding:clamp(4px,0.4vh,8px) clamp(10px,1vw,16px);margin:0"><span style="font-family:'Georgia','Times New Roman',serif;font-weight:700;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#FBBF24">Farm:</span><span style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5;margin-left:4px">Looting + Sharpness + Unbreaking</span></div>
+<div class="skew-block skew-block-mirror anim-bg-1000" style="padding:clamp(4px,0.4vh,8px) clamp(10px,1vw,16px);margin:0"><span style="font-family:'Georgia','Times New Roman',serif;font-weight:700;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#FBBF24">Geral:</span><span style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5;margin-left:4px">Sharpness V + Looting III + Unbreaking III + Mending</span></div>
+</div></div></div>
+
+<div class="slide" data-slide="11">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>ENCANTAMENTOS DE FERRAMENTAS</h2></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,1vw,16px);width:100%">
+<div>
+<div class="tool-toggle anim-bg-300">
+<button class="tool-btn active" data-tool="pickaxe">Picareta</button>
+<button class="tool-btn" data-tool="axe">Machado</button>
+<button class="tool-btn" data-tool="shovel">Pa</button>
+<button class="tool-btn" data-tool="hoe">Enxada</button>
+</div>
+<div class="tool-content active anim-bg-400" id="tool-pickaxe">
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Efficiency V</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Quebra mais rapido</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Unbreaking III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Durabilidade extra</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Mending</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Auto-reparo</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#FBBF24">Fortune III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Mais drops</p></div>
+</div>
+<div class="tool-content anim-bg-400" id="tool-axe">
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Efficiency V</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Corta mais rapido</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Unbreaking III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Durabilidade extra</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Mending</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Auto-reparo</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#FBBF24">Fortune III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Mais drops</p></div>
+</div>
+<div class="tool-content anim-bg-400" id="tool-shovel">
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Efficiency V</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Cava mais rapido</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Unbreaking III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Durabilidade extra</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Mending</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Auto-reparo</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#06B6D4">Silk Touch</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Bloco intacto</p></div>
+</div>
+<div class="tool-content anim-bg-400" id="tool-hoe">
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Efficiency V</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Prepara mais rapido</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Unbreaking III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Durabilidade extra</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Mending</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Auto-reparo</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#FBBF24">Fortune III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Mais sementes</p></div>
+</div>
+</div>
+<div class="fortune-vs-silk anim-bg-500">
+<div class="fortune-side"><h4>Fortune III</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Multiplica os drops de minerios. Carvao, ferro, ouro, diamante, redstone, lapis-lazuli.</p><span class="badge badge-gold">Mais minerios</span></div>
+<div class="silk-side"><h4>Silk Touch</h4><p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Minerais sao coletados intactos. Permite mover blocos de minerio, livros, gelo, vidro.</p><span class="badge badge-cyan">Blocos intactos</span></div>
+</div>
+</div></div></div>
+
+<div class="slide" data-slide="12">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>ENCANTAMENTOS DE ARMADURA</h2></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,1vw,16px);width:100%">
+<div>
+<div class="armor-tabs anim-bg-300">
+<button class="tab-btn active" data-tab="armor1">Sobrevivencia</button>
+<button class="tab-btn" data-tab="armor2">Nether</button>
+<button class="tab-btn" data-tab="armor3">Subaquatica</button>
+</div>
+<div class="tab-content active armor-grid" id="armor1">
+<div class="glass-card"><h4>Protection IV</h4><p>Reduz dano geral</p><span class="armor-piece">Todas as pecas</span></div>
+<div class="glass-card"><h4>Unbreaking III</h4><p>Durabilidade extra</p><span class="armor-piece">Todas as pecas</span></div>
+<div class="glass-card"><h4>Mending</h4><p>Auto-reparo</p><span class="armor-piece">Todas as pecas</span></div>
+<div class="glass-card"><h4>Feather Falling IV</h4><p>Reduz dano de queda</p><span class="armor-piece">Botas</span></div>
+<div class="glass-card"><h4>Thorns III</h4><p>Dano em atacantes</p><span class="armor-piece">Peitoral (opcional)</span></div>
+</div>
+<div class="tab-content armor-grid" id="armor2">
+<div class="glass-card"><h4>Fire Protection IV</h4><p>Reduz dano de fogo</p><span class="armor-piece">Todas as pecas</span></div>
+<div class="glass-card"><h4>Unbreaking III</h4><p>Durabilidade extra</p><span class="armor-piece">Todas as pecas</span></div>
+<div class="glass-card"><h4>Mending</h4><p>Auto-reparo</p><span class="armor-piece">Todas as pecas</span></div>
+<div class="glass-card"><h4>Feather Falling IV</h4><p>Queda segura</p><span class="armor-piece">Botas</span></div>
+<div class="glass-card"><h4>Respiracao III</h4><p>Respiracao extra</p><span class="armor-piece">Capacete</span></div>
+</div>
+<div class="tab-content armor-grid" id="armor3">
+<div class="glass-card"><h4>Protection IV</h4><p>Reduz dano geral</p><span class="armor-piece">Todas as pecas</span></div>
+<div class="glass-card"><h4>Unbreaking III</h4><p>Durabilidade extra</p><span class="armor-piece">Todas as pecas</span></div>
+<div class="glass-card"><h4>Mending</h4><p>Auto-reparo</p><span class="armor-piece">Todas as pecas</span></div>
+<div class="glass-card"><h4>Respiracao III</h4><p>Respiracao aquatica</p><span class="armor-piece">Capacete</span></div>
+<div class="glass-card"><h4>Aqua Affinity</h4><p>Mineracao subaquatica</p><span class="armor-piece">Capacete</span></div>
+<div class="glass-card"><h4>Depth Strider III</h4><p>Movimento aquatico</p><span class="armor-piece">Botas</span></div>
+</div>
+</div>
+<div class="anim-bg-400" style="display:flex;flex-direction:column;gap:clamp(6px,0.6vh,10px)">
+<div style="text-align:center;font-size:clamp(2rem,3.5vw,4.5rem);animation:float 4s ease-in-out infinite">A</div>
+<div class="skew-block skew-block-mirror skew-block-gold" style="margin:0">
+<p style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.7rem,0.8vw,0.9rem);color:#FBBF24;font-weight:700">Combinacao Ideal</p>
+<p style="font-size:clamp(0.55rem,0.6vw,0.68rem);color:#8B7EB5">Protecao IV + Unbreaking III + Mending em todas as pecas. Feather Falling IV nas botas.</p>
+</div></div></div></div></div>
+
+<div class="slide" data-slide="13">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>ARCO, BESTA E TRIDENTE</h2></div>
+<div class="weapon-3col">
+<div class="weapon-col anim-bg-300">
+<span class="weapon-icon">B</span>
+<h3>Arco</h3>
+<div style="display:flex;flex-direction:column;gap:clamp(3px,0.3vh,6px)">
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Power V</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">+25% dano por nivel</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Punch II</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Empurra inimigos</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Flame</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Incendeia alvos</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#FBBF24">Infinity</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Flechas infinitas</p></div>
+</div></div>
+<div class="weapon-col anim-bg-400">
+<span class="weapon-icon">C</span>
+<h3>Besta</h3>
+<div style="display:flex;flex-direction:column;gap:clamp(3px,0.3vh,6px)">
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Quick Charge III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Recarga mais rapida</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Multishot</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">3 flechas de uma vez</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Piercing IV</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Atravessa entidades</p></div>
+</div></div>
+<div class="weapon-col anim-bg-500">
+<span class="weapon-icon">T</span>
+<h3>Tridente</h3>
+<div style="display:flex;flex-direction:column;gap:clamp(3px,0.3vh,6px)">
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Loyalty III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Retorna apos arremesso</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Channeling</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Raios em tempestades</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Riptide III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Propulsao aquatica</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#C4B5FD">Impaling V</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Dano aquatico extra</p></div>
+</div></div>
+</div></div></div>
+
+<div class="slide" data-slide="14">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>VARA DE PESCA E OUTROS ITENS</h2></div>
+<div class="fishing-layout">
+<div class="fishing-pole-area anim-bg-300">
+<div class="fishing-pole">F</div>
+<div class="fishing-line"></div>
+<div style="display:flex;flex-direction:column;gap:clamp(4px,0.4vh,8px);width:100%">
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#06B6D4">Luck of the Sea III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Aumenta chance de tesouros. Maximo III.</p></div>
+<div class="glass-card"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#06B6D4">Lure III</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Reduz tempo de espera. Maximo III.</p></div>
+</div></div>
+<div><div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(4px,0.4vh,8px)">
+<div class="glass-card anim-bg-400"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#8B7EB5">Tesoura</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Silk Touch (nativo)</p></div>
+<div class="glass-card anim-bg-500"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#8B7EB5">Escudo</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Sem encantamentos</p></div>
+<div class="glass-card anim-bg-600"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#8B7EB5">Cenoura c/ Vara</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Sem encantamentos</p></div>
+<div class="glass-card anim-bg-700"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.65rem,0.7vw,0.8rem);color:#8B7EB5">Elytra</h4><p style="font-size:clamp(0.5rem,0.55vw,0.62rem);color:#8B7EB5">Unbreaking + Mending</p></div>
+</div></div></div></div></div>
+
+<div class="slide" data-slide="15">
+<div class="slide-content">
+<div class="skew-block skew-block-red anim-bg-200" style="align-self:flex-start;width:auto"><h2 style="color:#DC2626">MALDICOES</h2></div>
+<p class="anim-bg-300" style="font-size:clamp(0.75rem,0.8vw,0.9rem);color:#C4B5FD;align-self:flex-start;margin-bottom:clamp(4px,0.5vh,8px)">Nem todo encantamento e um presente — alguns vem com um preco sombrio.</p>
+<div class="curse-grid">
+<div class="curse-card curse-binding anim-bg-400">
+<div class="curse-icon">C</div>
+<h3>Curse of Binding</h3>
+<p>Uma vez equipado, o item nao pode ser removido. So e possivel se livrar dele quando o item quebrar, ao morrer ou na bigorna.</p>
+<p style="margin-top:clamp(4px,0.4vh,8px);font-family:'Georgia','Times New Roman',serif;font-style:italic;color:#FBBF24;font-size:clamp(0.55rem,0.6vw,0.68rem)">Comum em armaduras de baus e trocas de aldeoes.</p></div>
+<div class="curse-card curse-vanishing anim-bg-500">
+<div class="curse-icon">G</div>
+<h3>Curse of Vanishing</h3>
+<p>O item desaparece completamente quando o jogador morre, nao podendo ser recuperado de nenhuma forma.</p>
+<p style="margin-top:clamp(4px,0.4vh,8px);font-family:'Georgia','Times New Roman',serif;font-style:italic;color:#FBBF24;font-size:clamp(0.55rem,0.6vw,0.68rem)">Popular em servidores anarquia e PvP hardcore.</p></div>
+</div>
+<div class="anim-bg-700" style="margin-top:clamp(6px,0.6vh,10px);padding:clamp(6px,0.6vh,10px);background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.08);border-radius:8px;width:100%;text-align:center">
+<p style="font-size:clamp(0.6rem,0.65vw,0.72rem);color:#FCA5A5"><strong>Curiosidade:</strong> Ambos os encantamentos sao considerados "Tesouro" — nao podem ser obtidos na mesa de encantamentos, apenas em loot, pesca e trocas.</p>
+</div></div></div>
+
+<div class="slide" data-slide="16">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>INCOMPATIBILIDADES</h2></div>
+<p class="anim-bg-300" style="font-size:clamp(0.75rem,0.8vw,0.9rem);color:#C4B5FD;align-self:flex-start;margin-bottom:clamp(4px,0.5vh,8px)">Alguns encantamentos simplesmente nao podem ser combinados. Conhecer estas regras evita desperdicio de XP.</p>
+<div class="incompat-grid">
+<div class="incompat-pair glass-card anim-bg-400"><span class="enc-name">Sharpness</span><span class="enc-x">X</span><span class="enc-name">Smite</span><br><span style="font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5">Ambos modificam dano base</span><br><span style="font-size:clamp(0.45rem,0.45vw,0.55rem);color:#FBBF24;font-style:italic">Dica: Escolha um ou outro</span></div>
+<div class="incompat-pair glass-card anim-bg-500"><span class="enc-name">Fortune</span><span class="enc-x">X</span><span class="enc-name">Silk Touch</span><br><span style="font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5">Efeitos opostos de mineracao</span><br><span style="font-size:clamp(0.45rem,0.45vw,0.55rem);color:#FBBF24;font-style:italic">Dica: Tenha duas picaretas</span></div>
+<div class="incompat-pair glass-card anim-bg-600"><span class="enc-name">Protection</span><span class="enc-x">X</span><span class="enc-name">Fire/Blast/Proj</span><br><span style="font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5">Protecao especifica vs geral</span><br><span style="font-size:clamp(0.45rem,0.45vw,0.55rem);color:#FBBF24;font-style:italic">Dica: Protection e melhor</span></div>
+<div class="incompat-pair glass-card anim-bg-700"><span class="enc-name">Infinity</span><span class="enc-x">X</span><span class="enc-name">Mending</span><br><span style="font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5">Flechas infinitas vs reparo</span><br><span style="font-size:clamp(0.45rem,0.45vw,0.55rem);color:#FBBF24;font-style:italic">Dica: Mending e mais util</span></div>
+<div class="incompat-pair glass-card anim-bg-800"><span class="enc-name">Multishot</span><span class="enc-x">X</span><span class="enc-name">Piercing</span><br><span style="font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5">Comportamento de projetil</span><br><span style="font-size:clamp(0.45rem,0.45vw,0.55rem);color:#FBBF24;font-style:italic">Dica: Multishot para multidoes</span></div>
+<div class="incompat-pair glass-card anim-bg-900"><span class="enc-name">Loyalty</span><span class="enc-x">X</span><span class="enc-name">Riptide</span><br><span style="font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5">Comportamento do tridente</span><br><span style="font-size:clamp(0.45rem,0.45vw,0.55rem);color:#FBBF24;font-style:italic">Dica: Loyalty para arremesso</span></div>
+</div></div></div>
+<div class="slide" data-slide="17">
+<div class="slide-content">
+<div class="skew-block skew-block-gold anim-bg-200" style="align-self:flex-start;width:auto"><h2 style="background:linear-gradient(135deg,#F59E0B,#FBBF24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">MELHORES ITENS DO JOGO</h2></div>
+<p class="anim-bg-300" style="font-size:clamp(0.75rem,0.8vw,0.9rem);color:#C4B5FD;align-self:flex-start;margin-bottom:clamp(3px,0.3vh,6px)">Combinacoes definitivas para cada equipamento — o apice do encantamento</p>
+<div class="best-grid">
+<div class="glass-card anim-bg-400"><div class="best-item"><div class="item-icon">S</div><h4>Espada</h4><div class="ench-badges"><span class="badge">Sharpness V</span><span class="badge">Looting III</span><span class="badge">Sweeping III</span><span class="badge">Fire Aspect II</span><span class="badge">Unbreaking III</span><span class="badge badge-gold">Mending</span></div></div></div>
+<div class="glass-card anim-bg-500"><div class="best-item"><div class="item-icon">P</div><h4>Picareta</h4><div class="ench-badges"><span class="badge">Efficiency V</span><span class="badge">Fortune III</span><span class="badge">Unbreaking III</span><span class="badge badge-gold">Mending</span></div></div></div>
+<div class="glass-card anim-bg-600"><div class="best-item"><div class="item-icon">H</div><h4>Capacete</h4><div class="ench-badges"><span class="badge">Protection IV</span><span class="badge">Respiration III</span><span class="badge">Aqua Affinity</span><span class="badge">Unbreaking III</span><span class="badge badge-gold">Mending</span></div></div></div>
+<div class="glass-card anim-bg-700"><div class="best-item"><div class="item-icon">C</div><h4>Peitoral</h4><div class="ench-badges"><span class="badge">Protection IV</span><span class="badge">Unbreaking III</span><span class="badge badge-gold">Mending</span><span class="badge badge-green">Thorns III</span></div></div></div>
+<div class="glass-card anim-bg-800"><div class="best-item"><div class="item-icon">B</div><h4>Arco</h4><div class="ench-badges"><span class="badge">Power V</span><span class="badge">Punch II</span><span class="badge">Flame</span><span class="badge">Unbreaking III</span><span class="badge badge-gold">Mending</span></div></div></div>
+<div class="glass-card anim-bg-900"><div class="best-item"><div class="item-icon">T</div><h4>Tridente</h4><div class="ench-badges"><span class="badge">Impaling V</span><span class="badge">Loyalty III</span><span class="badge">Unbreaking III</span><span class="badge badge-gold">Mending</span></div></div></div>
+</div></div></div>
+
+<div class="slide" data-slide="18">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>ESTRATEGIA NA BIGORNA</h2></div>
+<p class="anim-bg-300" style="font-size:clamp(0.75rem,0.8vw,0.9rem);color:#C4B5FD;align-self:flex-start;margin-bottom:clamp(4px,0.5vh,8px)">Combinar livros antes de aplicar ao item reduz drasticamente o custo em XP.</p>
+<div class="strategy-compare">
+<div class="strategy-side strategy-wrong anim-bg-400">
+<h3 style="color:#EF4444">ERRADO</h3>
+<div class="strategy-flow"><span class="step">Item</span><span class="arrow">+</span><span class="step">Livro 1</span><span class="arrow">= Alto XP</span></div>
+<div class="strategy-flow" style="margin-top:4px"><span class="step">Resultado</span><span class="arrow">+</span><span class="step">Livro 2</span><span class="arrow">= Mais caro</span></div>
+<div class="strategy-flow" style="margin-top:4px"><span class="step">Resultado</span><span class="arrow">+</span><span class="step">Livro 3</span><span class="arrow">= MUITO CARO</span></div>
+</div>
+<div class="strategy-side strategy-right anim-bg-500">
+<h3 style="color:#10B981">CERTO</h3>
+<div class="strategy-flow"><span class="step">Livro 1</span><span class="arrow">+</span><span class="step">Livro 2</span><span class="arrow">=</span><span class="step" style="border-color:rgba(16,185,129,0.3)">Combinado</span></div>
+<div class="strategy-flow" style="margin-top:4px"><span class="step">Combinado</span><span class="arrow">+</span><span class="step">Livro 3</span><span class="arrow">=</span><span class="step" style="border-color:rgba(16,185,129,0.3)">Super Livro</span></div>
+<div class="strategy-flow" style="margin-top:4px"><span class="step">Item</span><span class="arrow">+</span><span class="step">Super Livro</span><span class="arrow" style="color:#10B981;font-weight:700">= BARATO</span></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(4px,0.4vh,8px);width:100%;margin-top:clamp(4px,0.4vh,8px)">
+<div class="glass-card anim-bg-600"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#C4B5FD">1. Combine livros primeiro</h4><p style="font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5">Sempre junte livros antes de aplicar ao item final.</p></div>
+<div class="glass-card anim-bg-700"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#C4B5FD">2. Planeje a ordem</h4><p style="font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5">Coloque encantamentos caros primeiro na bigorna.</p></div>
+<div class="glass-card anim-bg-800"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#C4B5FD">3. Evite reparos</h4><p style="font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5">Reparar aumenta o custo de trabalhos anteriores.</p></div>
+<div class="glass-card anim-bg-900"><h4 style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.6rem,0.65vw,0.75rem);color:#C4B5FD">4. Use Mending</h4><p style="font-size:clamp(0.5rem,0.5vw,0.6rem);color:#8B7EB5">Elimina a necessidade de reparos na bigorna.</p></div>
+</div>
+<div class="skew-block skew-block-mirror anim-bg-1000" style="margin-top:clamp(4px,0.4vh,8px);align-self:center;padding:clamp(6px,0.6vh,10px) clamp(14px,1.5vw,24px)">
+<p style="font-family:'Georgia','Times New Roman',serif;font-style:italic;font-size:clamp(0.7rem,0.75vw,0.85rem);color:#FBBF24">"Too Expensive!" aparece quando o custo acumulado ultrapassa 39 niveis. Planeje suas combinacoes para nunca chegar la.</p>
+</div></div></div>
+
+<div class="slide" data-slide="19">
+<div class="slide-content">
+<div class="skew-block anim-bg-200" style="align-self:flex-start;width:auto"><h2>CURIOSIDADES</h2></div>
+<div class="bento-grid">
+<div class="bento-card bento-large anim-bg-300"><h4>Alfabeto Padrao Galactico (SGA)</h4><p>Os simbolos que aparecem na mesa de encantamentos sao do SGA (Standard Galactic Alphabet), uma cifra de substituicao simples. Cada letra do alfabeto latino corresponde a um simbolo. As palavras na mesa sao aleatorias e nao revelam o encantamento real.</p></div>
+<div class="bento-card anim-bg-400"><h4>Palavras nao revelam</h4><p>Na mesa, o texto em SGA muda a cada clique e nao tem relacao com o encantamento que sera aplicado.</p></div>
+<div class="bento-card anim-bg-500"><h4>Treasure Enchantments</h4><p>Mending, Frost Walker, Soul Speed e as maldicoes so podem ser obtidos por loot, pesca ou trocas — nunca na mesa.</p></div>
+<div class="bento-card anim-bg-600"><h4>Mending e o mais valioso</h4><p>Introduzido na 1.9, Mending revolucionou o jogo ao permitir reparo infinito com XP. E considerado o melhor encantamento do jogo.</p></div>
+<div class="bento-card anim-bg-700"><h4>Incompativeis em versoes</h4><p>Antes da 1.21, era possivel combinar Sharpness com Smite em edicoes antigas via bigorna. A Mojang removeu essa possibilidade.</p></div>
+<div class="bento-card anim-bg-800"><h4>Historia dos encantamentos</h4><p>Encantamentos foram introduzidos na Beta 1.9 em 2011. A mesa, bigorna e o sistema atual vieram em atualizacoes posteriores.</p></div>
+</div>
+<div class="skew-block skew-block-mirror skew-block-gold anim-bg-900" style="margin-top:clamp(6px,0.6vh,10px);align-self:center;padding:clamp(6px,0.6vh,10px) clamp(16px,2vw,28px)">
+<p style="font-family:'Georgia','Times New Roman',serif;font-style:italic;font-size:clamp(0.75rem,0.8vw,0.9rem);color:#FBBF24">"Cada runa na mesa de encantamentos conta uma historia — mesmo que nenhum jogador consiga le-la."</p>
+</div></div></div>
+
+<div class="slide slide-final" data-slide="20">
+<div class="slide-content">
+<div class="skew-block skew-block-gold anim-bg-400" style="align-self:center;width:auto;margin-bottom:clamp(10px,1.2vh,16px)"><h2 style="background:linear-gradient(135deg,#F59E0B,#FBBF24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">CONCLUSÃO</h2></div>
+<div class="mini-resumo">
+<div class="glass-card anim-bg-500"><h4>O que sao</h4><p>Modificadores de equipamentos</p></div>
+<div class="glass-card anim-bg-600"><h4>Como obter</h4><p>Mesa, Bigorna, Aldeoes, Loot, Pesca</p></div>
+<div class="glass-card anim-bg-700"><h4>XP e Custo</h4><p>Planejamento economiza niveis</p></div>
+<div class="glass-card anim-bg-800"><h4>Melhores Itens</h4><p>Sharpness, Efficiency, Protection</p></div>
+<div class="glass-card anim-bg-550"><h4>Ferramentas</h4><p>Efficiency + Fortune/Silk Touch</p></div>
+<div class="glass-card anim-bg-650"><h4>Armaduras</h4><p>Protection + Unbreaking + Mending</p></div>
+<div class="glass-card anim-bg-750"><h4>Maldicoes</h4><p>Binding e Vanishing - Cuidado!</p></div>
+<div class="glass-card anim-bg-850"><h4>Estrategia</h4><p>Combine livros primeiro na Bigorna</p></div>
+</div>
+<div class="skew-block skew-block-gold anim-bg-1000" style="max-width:clamp(400px,55vw,800px);padding:clamp(16px,2vh,28px);margin:clamp(8px,1vh,14px) auto">
+<p style="font-family:'Georgia','Times New Roman',serif;font-size:clamp(0.9rem,1.1vw,1.3rem);font-weight:700;font-style:italic;color:#FBBF24;text-align:center;line-height:1.5">"No Minecraft, entender encantamentos nao e apenas um detalhe tecnico; e o que separa um equipamento comum de um arsenal capaz de mudar completamente a forma como o jogo e explorado."</p>
+</div>
+<p class="thanks anim-bg-1500">Obrigado</p>
+</div></div>
+
+</div>
+
+<script>
+(function(){
+var currentSlide = 0;
+var totalSlides = 20;
+var isTransitioning = false;
+var slides = document.querySelectorAll('.slide');
+var progressBar = document.getElementById('progress-bar');
+var progressGlow = document.getElementById('progress-glow');
+var indicator = document.getElementById('slide-indicator');
+var navPrev = document.getElementById('nav-prev');
+var navNext = document.getElementById('nav-next');
+
+function updateNav(){
+navPrev.classList.toggle('hidden', currentSlide === 0);
+navNext.classList.toggle('hidden', currentSlide === totalSlides - 1);
+}
+
+function updateProgress(){
+var pct = ((currentSlide + 1) / totalSlides) * 100;
+progressBar.style.width = pct + '%';
+progressGlow.style.width = pct + '%';
+indicator.textContent = String(currentSlide + 1).padStart(2,'0') + ' / ' + String(totalSlides).padStart(2,'0');
+}
+
+function resetSlideAnimations(slide){
+var els = slide.querySelectorAll('.slide-content > *');
+els.forEach(function(el){
+el.style.opacity = '';
+el.style.transform = '';
+el.style.transition = 'none';
+});
+void slide.offsetHeight;
+els.forEach(function(el){
+el.style.transition = '';
+});
+}
+
+function animateSlideIn(slide){
+var els = slide.querySelectorAll('.slide-content > *');
+els.forEach(function(el){
+var delay = 0;
+for(var i = 0; i < el.classList.length; i++){
+var c = el.classList[i];
+if(c.indexOf('anim-bg-') === 0){
+delay = parseInt(c.replace('anim-bg-','')) || 0;
+}
+}
+el.style.transition = 'opacity ' + Math.min(600 + delay * 0.3, 900) + 'ms cubic-bezier(0.4,0,0.2,1), transform ' + Math.min(600 + delay * 0.3, 900) + 'ms cubic-bezier(0.4,0,0.2,1)';
+el.style.opacity = '0';
+el.style.transform = 'translateY(20px)';
+setTimeout(function(){
+el.style.opacity = '1';
+el.style.transform = 'translateY(0)';
+}, 50 + delay * 0.5);
+});
+updateXPBar();
+}
+
+function updateXPBar(){
+var bar = document.getElementById('xp-bar');
+if(bar) bar.style.width = '100%';
+}
+
+function goToSlide(index){
+if(isTransitioning) return;
+if(index < 0 || index >= totalSlides) return;
+if(index === currentSlide) return;
+isTransitioning = true;
+var oldSlide = slides[currentSlide];
+var newSlide = slides[index];
+if(oldSlide){
+oldSlide.classList.remove('active');
+oldSlide.classList.add('exit');
+setTimeout(function(){
+oldSlide.classList.remove('exit');
+oldSlide.style.opacity = '';
+oldSlide.style.visibility = '';
+}, 500);
+}
+newSlide.style.opacity = '';
+newSlide.style.visibility = '';
+newSlide.classList.add('active');
+resetSlideAnimations(newSlide);
+setTimeout(function(){
+animateSlideIn(newSlide);
+currentSlide = index;
+updateNav();
+updateProgress();
+isTransitioning = false;
+}, 150);
+}
+
+function nextSlide(){ if(currentSlide < totalSlides - 1) goToSlide(currentSlide + 1); }
+function prevSlide(){ if(currentSlide > 0) goToSlide(currentSlide - 1); }
+
+navPrev.addEventListener('click', prevSlide);
+navNext.addEventListener('click', nextSlide);
+
+document.addEventListener('keydown', function(e){
+if(e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextSlide(); }
+else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prevSlide(); }
+else if(e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+else if(e.key === 'End') { e.preventDefault(); goToSlide(totalSlides - 1); }
+else if(e.key >= '1' && e.key <= '9') { e.preventDefault(); goToSlide(parseInt(e.key) - 1); }
+});
+
+var touchStartX = 0;
+document.addEventListener('touchstart', function(e){ touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', function(e){
+var dx = e.changedTouches[0].screenX - touchStartX;
+if(Math.abs(dx) > 50){
+if(dx < 0) nextSlide();
+else prevSlide();
+}
+});
+
+function initCursor(){
+var cursor = document.getElementById('cursor');
+var dot = document.getElementById('cursor-dot');
+var mx = 0, my = 0, cx = 0, cy = 0;
+document.addEventListener('mousemove', function(e){
+mx = e.clientX;
+my = e.clientY;
+dot.style.left = mx + 'px';
+dot.style.top = my + 'px';
+});
+function frame(){
+cx += (mx - cx) * 0.15;
+cy += (my - cy) * 0.15;
+cursor.style.left = cx + 'px';
+cursor.style.top = cy + 'px';
+requestAnimationFrame(frame);
+}
+frame();
+var hoverEls = document.querySelectorAll('.glass-card, .nav-btn, .tab-btn, .tool-btn, .btn-enchant, .enchant-slot, .curse-card, .bento-card');
+hoverEls.forEach(function(el){
+el.addEventListener('mouseenter', function(){ cursor.classList.add('hover'); });
+el.addEventListener('mouseleave', function(){ cursor.classList.remove('hover'); });
+});
+}
+
+function initParticles(){
+var canvas = document.getElementById('particle-canvas');
+var ctx = canvas.getContext('2d');
+var W, H;
+function resize(){
+W = canvas.width = window.innerWidth;
+H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+var particles = [];
+var count = 80;
+var colors = ['#7C3AED','#A855F7','#06B6D4','#10B981','#C4B5FD'];
+for(var i = 0; i < count; i++){
+particles.push({
+x: Math.random() * W,
+y: Math.random() * H,
+vx: (Math.random() - 0.5) * 0.4,
+vy: (Math.random() - 0.5) * 0.4 - 0.1,
+r: Math.random() * 2 + 1.2,
+c: colors[Math.floor(Math.random() * colors.length)],
+o: Math.random() * 0.25 + 0.1
+});
+}
+function draw(){
+ctx.clearRect(0, 0, W, H);
+for(var i = 0; i < particles.length; i++){
+var p = particles[i];
+p.x += p.vx;
+p.y += p.vy;
+if(p.x < 0) p.x = W;
+if(p.x > W) p.x = 0;
+if(p.y < 0) p.y = H;
+if(p.y > H) p.y = 0;
+ctx.beginPath();
+ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+ctx.fillStyle = p.c;
+ctx.globalAlpha = p.o;
+ctx.fill();
+}
+ctx.globalAlpha = 1;
+requestAnimationFrame(draw);
+}
+draw();
+}
+
+function initTabs(){
+document.querySelectorAll('.tab-btn').forEach(function(btn){
+btn.addEventListener('click', function(){
+var parent = btn.closest('.slide-content') || document;
+var bar = btn.parentElement;
+bar.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+btn.classList.add('active');
+var tabId = btn.getAttribute('data-tab');
+var contents = (parent.querySelectorAll ? parent : document).querySelectorAll('.tab-content');
+contents.forEach(function(c){ c.classList.remove('active'); });
+var target = document.getElementById(tabId);
+if(target) target.classList.add('active');
+});
+});
+}
+
+function initToolToggles(){
+document.querySelectorAll('.tool-btn').forEach(function(btn){
+btn.addEventListener('click', function(){
+var parent = btn.closest('.slide-content');
+var bar = btn.parentElement;
+bar.querySelectorAll('.tool-btn').forEach(function(b){ b.classList.remove('active'); });
+btn.classList.add('active');
+var tool = btn.getAttribute('data-tool');
+var contents = parent.querySelectorAll('.tool-content');
+contents.forEach(function(c){ c.classList.remove('active'); });
+var target = document.getElementById('tool-' + tool);
+if(target) target.classList.add('active');
+});
+});
+}
+
+var title = document.querySelector('.slide-cover .slide-title');
+if(title){
+var shadow = '';
+var colors = ['#6D28D9','#5B21B6','#4C1D95','#3B0764','#2D1464','#1E0A3C'];
+for(var i = 0; i < 40; i++){
+var idx = Math.min(Math.floor(i / 7), colors.length - 1);
+shadow += (shadow ? ', ' : '') + (-i) + 'px ' + i + 'px 0 ' + colors[idx];
+}
+title.style.textShadow = shadow;
+}
+
+goToSlide(0);
+initCursor();
+initParticles();
+initTabs();
+initToolToggles();
+
+var style = document.createElement('style');
+style.textContent = '.slide-cover .slide-title::before { content: attr(data-text); position: absolute; top: 2px; left: -2px; color: transparent; -webkit-text-stroke: 1px rgba(124,58,237,0.15); filter: blur(4px); z-index: -1; }';
+document.head.appendChild(style);
+
+})();
+</script>
+</body>
+</html>

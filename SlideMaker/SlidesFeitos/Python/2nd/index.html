@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python — A Linguagem de Programação Versátil e Poderosa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', 'Segoe UI', sans-serif; background: #0A0E17; color: #E8EDF2; }
+body { cursor: none; }
+a, button, [tabindex] { cursor: none; }
+
+/* Custom Cursor */
+#cursor {
+  position: fixed; width: 24px; height: 24px; border: 1.5px solid #306998;
+  border-radius: 50%; pointer-events: none; z-index: 99999;
+  box-shadow: 0 0 10px rgba(48,105,152,0.2);
+  transition: width 200ms ease-out, height 200ms ease-out, background 200ms ease-out, box-shadow 200ms ease-out;
+  transform: translate(-50%, -50%);
+}
+#cursor.hover { width: 32px; height: 32px; background: rgba(255,212,59,0.3); box-shadow: 0 0 20px rgba(255,212,59,0.3); }
+
+/* Background Layers */
+#bg-layer {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+  background: linear-gradient(135deg, #0A0E17 0%, #0F1923 100%);
+  overflow: hidden;
+}
+#bg-radial {
+  position: absolute; top: 50%; left: 50%; width: 80%; height: 80%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, rgba(19,36,54,0.3) 0%, transparent 70%);
+}
+#bg-blob1 {
+  position: absolute; top: -10%; right: -10%; width: 60%; height: 60%;
+  background: radial-gradient(circle, rgba(48,105,152,0.05) 0%, transparent 70%);
+  animation: blobDrift1 30s ease-in-out infinite;
+}
+#bg-blob2 {
+  position: absolute; bottom: -10%; left: -10%; width: 50%; height: 50%;
+  background: radial-gradient(circle, rgba(255,212,59,0.03) 0%, transparent 70%);
+  animation: blobDrift2 30s ease-in-out infinite;
+}
+@keyframes blobDrift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-5%, 8%) scale(1.1); }
+  66% { transform: translate(5%, -3%) scale(0.95); }
+}
+@keyframes blobDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(4%, -5%) scale(1.05); }
+  66% { transform: translate(-3%, 4%) scale(0.9); }
+}
+#bg-dots {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background-image: radial-gradient(#306998 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.08;
+}
+#bg-scanner {
+  position: absolute; top: 0; left: -100%; width: 200%; height: 100%;
+  background: repeating-linear-gradient(90deg, transparent 0%, transparent 30%, rgba(45,62,80,0.2) 30.5%, transparent 31%);
+  animation: scanner 60s linear infinite;
+}
+@keyframes scanner {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(50%); }
+}
+#bg-vignette {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(ellipse, transparent 60%, rgba(10,14,23,0.4) 100%);
+  pointer-events: none;
+}
+#bg-noise {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  opacity: 0.03; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Particles */
+.particle {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  animation: particleFloat linear infinite;
+}
+@keyframes particleFloat {
+  0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+  10% { opacity: 0.3; }
+  90% { opacity: 0.15; }
+  100% { transform: translateY(-10vh) translateX(20px); opacity: 0; }
+}
+
+/* Slide System */
+.slide {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+  display: flex; flex-direction: column;
+  padding: 6% 5% 80px;
+  opacity: 0; pointer-events: none;
+  transition: none;
+}
+.slide.active {
+  opacity: 1; pointer-events: auto;
+  z-index: 2;
+}
+.slide.exit {
+  opacity: 0; pointer-events: none;
+  z-index: 3;
+}
+
+/* Slide 1 Cover */
+#slide-1 { justify-content: center; align-items: center; text-align: center; }
+#slide-1 .logo-python {
+  position: absolute; top: 5%; left: 5%; width: 48px; height: 48px; z-index: 1;
+  opacity: 0;
+}
+#slide-1 .logo-python.animate { animation: fadeSlideDown 600ms ease-out 100ms forwards; }
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#slide-1 .badge-python {
+  position: absolute; top: 5%; right: 5%; z-index: 1;
+  opacity: 0;
+}
+#slide-1 .badge-python.animate { animation: slideRightSkew 700ms ease-out 300ms forwards; }
+
+#slide-1 .hero-title {
+  font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: -1px; line-height: 1.1;
+  font-size: 4.2rem; color: #F5F8FC;
+  z-index: 0; position: relative;
+  opacity: 0;
+  text-shadow: none;
+}
+#slide-1 .hero-title.animate {
+  animation: heroReveal 1000ms ease-out 500ms forwards;
+}
+
+#slide-1 .hero-subtitle {
+  font-family: 'Inter', sans-serif; font-weight: 300; font-size: 1.3rem;
+  color: #A0B0C0; margin-top: 1.5rem; min-height: 2rem;
+  z-index: 0; position: relative;
+}
+
+#slide-1 .deco-line {
+  width: 200px; height: 1px;
+  background: linear-gradient(90deg, #306998, transparent);
+  margin: 1.5rem auto 0;
+  transform: scaleX(0); transform-origin: left;
+}
+#slide-1 .deco-line.animate { animation: lineGrow 600ms ease-out 2000ms forwards; }
+@keyframes lineGrow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+#slide-1 .badge-info {
+  margin-top: 2rem;
+  opacity: 0;
+}
+#slide-1 .badge-info.animate { animation: slideUp 700ms ease-out 2500ms forwards; }
+
+#slide-1 .presenter-info {
+  position: absolute; bottom: 80px; left: 5%;
+  font-family: 'Inter', sans-serif; font-weight: 300; font-size: 0.85rem;
+  color: #6B7D8D; text-align: left;
+  opacity: 0;
+}
+#slide-1 .presenter-info.animate { animation: fadeIn 500ms ease-out 3000ms forwards; }
+
+#slide-1 .scroll-arrow {
+  position: absolute; bottom: 80px; right: 5%;
+  opacity: 0;
+  animation: fadeIn 400ms ease-out 3500ms forwards, pulseArrow 2s ease-in-out 3.9s infinite;
+}
+@keyframes pulseArrow {
+  0%, 100% { opacity: 0.4; transform: translateY(0); }
+  50% { opacity: 0.8; transform: translateY(5px); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideRightSkew {
+  from { opacity: 0; transform: translateX(40px) skewX(-5deg); }
+  to { opacity: 1; transform: translateX(0) skewX(0); }
+}
+
+/* Skew Panel */
+.skew-panel {
+  display: inline-flex; align-items: center; justify-content: center;
+  clip-path: polygon(0% 0%, 100% 10%, 100% 90%, 0% 100%);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(48,105,152,0.1);
+  position: relative; overflow: hidden;
+}
+.skew-panel::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+.skew-panel-yellow {
+  background: linear-gradient(135deg, #FFD43B, #FFE873);
+  color: #0A0E17;
+}
+.skew-panel-blue {
+  background: linear-gradient(135deg, #306998, #3776AB);
+  color: #F5F8FC;
+}
+.skew-panel-dark {
+  background: linear-gradient(135deg, #1E2A3A, #2D3E50);
+  color: #E8EDF2; border: 1px solid rgba(48,105,152,0.3);
+}
+.skew-panel-green {
+  background: linear-gradient(135deg, #00D68F, #00B894);
+  color: #0A0E17;
+}
+.skew-panel-red {
+  background: linear-gradient(135deg, #FF6B6B, #E74C3C);
+  color: #fff;
+}
+
+/* Glass Card */
+.glass {
+  background: rgba(15,25,35,0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(48,105,152,0.2);
+  border-radius: 12px;
+}
+.glass-light {
+  background: rgba(15,25,35,0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(48,105,152,0.15);
+  border-radius: 8px;
+}
+
+/* Button */
+.btn-nav {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(30,42,58,0.6);
+  border: 1px solid rgba(48,105,152,0.3);
+  color: #A0B0C0; font-size: 1.2rem;
+  cursor: none; transition: all 250ms ease-out;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+.btn-nav:hover { background: rgba(48,105,152,0.3); color: #F5F8FC; box-shadow: 0 0 20px rgba(48,105,152,0.3); }
+.ripple {
+  position: absolute; border-radius: 50%;
+  background: rgba(255,212,59,0.4);
+  transform: scale(0);
+  animation: rippleAnim 500ms ease-out forwards;
+  pointer-events: none;
+}
+@keyframes rippleAnim {
+  to { transform: scale(2); opacity: 0; }
+}
+
+/* Navigation Bar */
+#nav-bar {
+  position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 100;
+  background: rgba(15,25,35,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(48,105,152,0.2);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5%;
+}
+#nav-left { display: flex; align-items: center; gap: 12px; }
+#nav-counter {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #6B7D8D;
+  min-width: 60px; text-align: center;
+}
+#nav-center { display: flex; align-items: center; gap: 8px; }
+#progress-bar {
+  width: 200px; height: 4px; background: #1E2A3A; border-radius: 2px; overflow: hidden;
+}
+#progress-fill {
+  height: 100%; width: 10%;
+  background: linear-gradient(90deg, #306998, #FFD43B);
+  border-radius: 2px; transition: width 500ms ease-out;
+  box-shadow: 0 0 8px rgba(48,105,152,0.4);
+}
+#nav-dots { display: flex; align-items: center; gap: 6px; }
+.nav-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #1E2A3A; border: none;
+  transition: all 300ms ease-out; cursor: none;
+}
+.nav-dot:hover { background: #306998; }
+.nav-dot.active { background: #FFD43B; box-shadow: 0 0 8px rgba(255,212,59,0.5); }
+
+/* Animations */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeSlideDown2 {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeSlideLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeSlideRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes heroReveal {
+  from { opacity: 0; filter: blur(8px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+.slide-el {
+  opacity: 0;
+  transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1), transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slide 2 - O que é Python */
+#slide-2 { padding: 6% 5% 80px; }
+#slide-2 .content-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; flex: 1;
+  align-content: center;
+}
+#slide-2 .deco-number {
+  font-family: 'JetBrains Mono', monospace; font-size: 6rem; opacity: 0.05;
+  position: absolute; top: 2%; left: 3%; pointer-events: none;
+}
+#slide-2 .def-card { padding: 1.5rem; }
+#slide-2 .badges-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 1.2rem;
+}
+#slide-2 .badge-pill {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem;
+  font-weight: 400; color: #E8EDF2;
+  background: rgba(15,25,35,0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(48,105,152,0.15);
+  transition: all 250ms ease-out;
+}
+#slide-2 .badge-pill:hover {
+  transform: scale(1.05); box-shadow: 0 0 15px rgba(255,212,59,0.2);
+  border-color: #FFD43B;
+}
+#slide-2 .badge-pill .icon { color: #FFD43B; flex-shrink: 0; }
+
+#slide-2 .right-card {
+  padding: 1.5rem; position: relative;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+#slide-2 .avatar-circle {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, #306998, #3776AB);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.3rem;
+  color: #F5F8FC; flex-shrink: 0;
+}
+#slide-2 .popularity-bar {
+  height: 8px; border-radius: 4px; background: #1E2A3A; overflow: hidden;
+}
+#slide-2 .popularity-fill {
+  height: 100%; width: 0%; border-radius: 4px;
+  background: #00D68F; transition: width 1s ease-out;
+  box-shadow: 0 0 10px rgba(0,214,143,0.3);
+}
+#slide-2 .area-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+#slide-2 .area-tag {
+  padding: 0.2rem 0.6rem; border-radius: 4px;
+  background: rgba(45,62,80,0.4);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #6B7D8D;
+  border: 1px solid rgba(48,105,152,0.1);
+}
+
+/* Slide 3 - História */
+#slide-3 { padding: 6% 5% 80px; }
+#slide-3 .top-area { display: flex; justify-content: space-between; align-items: flex-start; }
+#slide-3 .cards-area {
+  flex: 1; display: flex; align-items: center; gap: 0;
+  position: relative; padding: 1rem 0;
+  overflow-x: auto; overflow-y: hidden;
+  -ms-overflow-style: none; scrollbar-width: none;
+}
+#slide-3 .cards-area::-webkit-scrollbar { display: none; }
+#slide-3 .connector-line {
+  position: absolute; top: 50%; left: 5%; right: 5%; height: 1px;
+  background: rgba(48,105,152,0.3); transform: translateY(-50%) scaleX(0);
+  transform-origin: left; transition: transform 500ms ease-out;
+}
+#slide-3 .connector-line.animate {
+  transform: translateY(-50%) scaleX(1);
+}
+.history-card {
+  min-width: 160px; padding: 1rem 0.8rem;
+  clip-path: polygon(0% 0%, 100% 10%, 100% 90%, 0% 100%);
+  background: linear-gradient(135deg, #1E2A3A, #2D3E50);
+  text-align: center; cursor: none;
+  transition: all 300ms ease-out; flex-shrink: 0;
+  margin-right: 1rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(48,105,152,0.1);
+  position: relative; overflow: hidden;
+}
+.history-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+.history-card:hover { transform: scale(1.03); box-shadow: 0 0 30px rgba(48,105,152,0.3); }
+.history-card.selected { transform: scale(1.05); border: 1px solid rgba(255,212,59,0.4); box-shadow: 0 0 30px rgba(255,212,59,0.2); }
+.history-card .year { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: #FFD43B; font-weight: 700; }
+.history-card .title { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.85rem; color: #F5F8FC; margin-top: 0.3rem; }
+.history-card .desc { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 0.7rem; color: #A0B0C0; margin-top: 0.2rem; }
+
+/* Slide 4 - Como funciona */
+#slide-4 { padding: 6% 5% 80px; }
+#slide-4 .flow-area {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  flex: 1; padding: 1rem 0;
+}
+#slide-4 .flow-block {
+  width: 130px; height: 130px;
+  background: rgba(15,25,35,0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(48,105,152,0.2);
+  border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.5rem; text-align: center;
+  transition: all 300ms ease-out;
+}
+#slide-4 .flow-block:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(48,105,152,0.3); }
+#slide-4 .flow-block .icon { font-size: 2rem; }
+#slide-4 .flow-block .label { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.8rem; color: #F5F8FC; }
+#slide-4 .flow-arrow {
+  font-size: 1.5rem; color: #FFD43B;
+  animation: arrowPulse 1.5s ease-in-out infinite;
+}
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.5; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(3px); }
+}
+#slide-4 .info-panels {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; padding-bottom: 0.5rem;
+}
+#slide-4 .info-panel { padding: 1rem; }
+#slide-4 .info-panel h4 { font-size: 0.9rem; font-weight: 600; color: #F5F8FC; }
+#slide-4 .info-panel p { font-size: 0.8rem; font-weight: 300; color: #A0B0C0; margin-top: 0.3rem; }
+
+/* Slide 5 - Características */
+#slide-5 { padding: 6% 5% 80px; }
+#slide-5 .bento-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem;
+  flex: 1; align-content: center;
+}
+.bento-card {
+  background: rgba(15,25,35,0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(48,105,152,0.15);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 300ms ease-out;
+  cursor: none;
+}
+.bento-card:hover { transform: scale(1.03); box-shadow: 0 0 25px rgba(48,105,152,0.3); border-color: rgba(48,105,152,0.4); }
+.bento-card .b-icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
+.bento-card .b-title { font-size: 0.9rem; font-weight: 600; color: #F5F8FC; }
+.bento-card .b-desc { font-size: 0.75rem; font-weight: 300; color: #A0B0C0; margin-top: 0.2rem; }
+.bento-card.span-2x { grid-column: span 2; }
+.bento-card.span-2h { grid-row: span 2; }
+
+/* Slide 6 - Aplicações */
+#slide-6 { padding: 6% 5% 80px; }
+#slide-6 .apps-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem;
+  flex: 1; align-content: center;
+}
+.app-card {
+  background: rgba(15,25,35,0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(48,105,152,0.15);
+  border-radius: 12px;
+  padding: 1rem; text-align: center;
+  transition: all 300ms ease-out;
+  cursor: none;
+}
+.app-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(48,105,152,0.3); }
+.app-card:hover .app-icon { transform: rotate(5deg); }
+.app-card .app-icon { font-size: 2.2rem; transition: transform 300ms ease-out; }
+.app-card .app-name { font-size: 0.85rem; font-weight: 600; color: #F5F8FC; margin-top: 0.3rem; }
+.app-card .app-desc { font-size: 0.7rem; font-weight: 300; color: #A0B0C0; margin-top: 0.2rem; }
+
+/* Slide 7 - Bibliotecas */
+#slide-7 { padding: 6% 5% 80px; }
+#slide-7 .tabs-container { margin-top: 1rem; }
+#slide-7 .tabs {
+  display: flex; gap: 0.5rem; margin-bottom: 1rem;
+}
+#slide-7 .tab-btn {
+  padding: 0.5rem 1.2rem; border-radius: 20px;
+  font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.85rem;
+  background: #1E2A3A; color: #6B7D8D;
+  border: 1px solid rgba(48,105,152,0.15);
+  transition: all 300ms ease-out; cursor: none;
+}
+#slide-7 .tab-btn:hover { background: #2D3E50; color: #A0B0C0; }
+#slide-7 .tab-btn.active { background: #306998; color: #fff; box-shadow: 0 0 15px rgba(48,105,152,0.3); }
+#slide-7 .tab-content {
+  display: none; opacity: 0; transition: opacity 300ms ease-out;
+}
+#slide-7 .tab-content.active {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem;
+}
+.lib-card {
+  background: rgba(15,25,35,0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(48,105,152,0.15);
+  border-radius: 12px; padding: 1rem;
+  transition: all 300ms ease-out; cursor: none;
+}
+.lib-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(48,105,152,0.3); }
+.lib-card .lib-name { font-size: 0.95rem; font-weight: 600; color: #F5F8FC; }
+.lib-card .lib-desc { font-size: 0.75rem; font-weight: 300; color: #A0B0C0; margin-top: 0.3rem; }
+.lib-card .lib-badge {
+  display: inline-block; margin-top: 0.4rem;
+  padding: 0.15rem 0.5rem; border-radius: 4px;
+  background: rgba(48,105,152,0.3);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #6B7D8D;
+}
+.lib-card .lib-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+
+/* Slide 8 - Vantagens/Desvantagens */
+#slide-8 { padding: 6% 5% 80px; }
+#slide-8 .split-area {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem;
+  flex: 1; align-content: center;
+}
+#slide-8 .pros-area, #slide-8 .cons-area { padding: 1rem; border-radius: 12px; }
+#slide-8 .pros-area { background: rgba(0,214,143,0.03); }
+#slide-8 .cons-area { background: rgba(255,107,107,0.03); }
+#slide-8 .divider {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; width: 2px;
+}
+#slide-8 .divider-line {
+  flex: 1; width: 1px;
+  background: linear-gradient(#00D68F, #FF6B6B);
+  animation: dividerPulse 10s ease-in-out infinite;
+}
+@keyframes dividerPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+#slide-8 .divider-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(15,25,35,0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(48,105,152,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 700; color: #A0B0C0; margin: 0.5rem 0;
+}
+.pros-list, .cons-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+.pros-item, .cons-item {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0.8rem; border-radius: 8px;
+  font-size: 0.85rem; font-weight: 400; color: #E8EDF2;
+  background: rgba(15,25,35,0.3);
+  border: 1px solid rgba(48,105,152,0.1);
+  transition: all 250ms ease-out;
+}
+.pros-item:hover { border-color: #00D68F; box-shadow: 0 0 10px rgba(0,214,143,0.15); }
+.cons-item:hover { border-color: #FF6B6B; box-shadow: 0 0 10px rgba(255,107,107,0.15); }
+.pros-item .icon { color: #00D68F; flex-shrink: 0; }
+.cons-item .icon { color: #FF6B6B; flex-shrink: 0; }
+
+/* Slide 9 - Mercado */
+#slide-9 { padding: 6% 5% 80px; }
+#slide-9 .kpi-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+.kpi-panel {
+  padding: 1.2rem 1rem; text-align: center;
+  clip-path: polygon(0% 0%, 100% 10%, 100% 90%, 0% 100%);
+  background: rgba(15,25,35,0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(48,105,152,0.2);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(48,105,152,0.1);
+}
+.kpi-panel .kpi-number {
+  font-family: 'JetBrains Mono', monospace; font-size: 2.8rem; font-weight: 700;
+  color: #FFD43B;
+}
+.kpi-panel .kpi-label { font-size: 0.8rem; font-weight: 300; color: #A0B0C0; margin-top: 0.3rem; }
+
+#slide-9 .market-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  flex: 1;
+}
+#slide-9 .area-item {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.6rem 0.8rem; border-radius: 8px;
+  background: rgba(15,25,35,0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(48,105,152,0.1);
+  margin-bottom: 0.4rem;
+  transition: all 250ms ease-out;
+}
+#slide-9 .area-item:hover { transform: translateX(3px); border-color: #306998; }
+#slide-9 .area-item .area-icon { font-size: 1.2rem; }
+#slide-9 .area-item .area-name { flex: 1; font-size: 0.85rem; color: #E8EDF2; }
+#slide-9 .area-item .area-badge {
+  padding: 0.15rem 0.5rem; border-radius: 4px;
+  background: rgba(0,214,143,0.2);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #00D68F;
+}
+#slide-9 .company-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;
+}
+#slide-9 .company-item {
+  padding: 0.6rem; border-radius: 8px; text-align: center;
+  background: rgba(15,25,35,0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(48,105,152,0.1);
+  font-size: 0.85rem; font-weight: 500; color: #A0B0C0;
+  transition: all 300ms ease-out; cursor: none;
+}
+#slide-9 .company-item:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(48,105,152,0.3); color: #F5F8FC; }
+
+/* Slide 10 - Conclusão */
+#slide-10 { padding: 6% 5% 80px; justify-content: center; align-items: center; text-align: center; }
+#slide-10 .deco-number-10 {
+  font-family: 'JetBrains Mono', monospace; font-size: 8rem; opacity: 0.03;
+  position: absolute; top: 2%; left: 3%; pointer-events: none;
+}
+#slide-10 .bloom {
+  position: absolute; top: 50%; left: 50%; width: 60%; height: 60%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(48,105,152,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+#slide-10 .conclusion-title {
+  font-size: 3rem; font-weight: 700; color: #F5F8FC; letter-spacing: -0.5px;
+  text-shadow: 0 0 30px rgba(48,105,152,0.3);
+}
+#slide-10 .conclusion-line {
+  width: 300px; height: 1px;
+  background: linear-gradient(90deg, #306998, #FFD43B);
+  margin: 1rem auto;
+  transform: scaleX(0); transform-origin: center;
+}
+#slide-10 .conclusion-line.animate { animation: lineGrow 500ms ease-out 500ms forwards; }
+#slide-10 .summary-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  max-width: 700px; margin: 1.5rem auto;
+}
+#slide-10 .summary-card {
+  padding: 1.2rem; text-align: left;
+  background: rgba(15,25,35,0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(48,105,152,0.15);
+  border-radius: 12px;
+  transition: all 300ms ease-out; cursor: none;
+}
+#slide-10 .summary-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(48,105,152,0.3); }
+#slide-10 .summary-card .s-icon { font-size: 1.5rem; color: #FFD43B; }
+#slide-10 .summary-card .s-title { font-size: 0.9rem; font-weight: 600; color: #F5F8FC; margin-top: 0.3rem; }
+#slide-10 .summary-card .s-desc { font-size: 0.75rem; font-weight: 300; color: #A0B0C0; margin-top: 0.2rem; }
+#slide-10 .final-badge {
+  display: inline-flex; padding: 1rem 2.5rem;
+  font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1.2rem; color: #F5F8FC;
+  margin-top: 1rem;
+}
+#slide-10 .thankyou {
+  font-family: 'Inter', sans-serif; font-weight: 300; font-size: 1.5rem;
+  color: #FFD43B; margin-top: 1.5rem;
+  animation: thankyouPulse 3s ease-in-out infinite;
+}
+@keyframes thankyouPulse {
+  0%, 100% { opacity: 0.7; text-shadow: 0 0 10px rgba(255,212,59,0.2); }
+  50% { opacity: 1; text-shadow: 0 0 25px rgba(255,212,59,0.5); }
+}
+
+/* Tooltip */
+.tooltip {
+  position: fixed; z-index: 99998;
+  background: #1E2A3A;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(48,105,152,0.3);
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-family: 'Inter', sans-serif; font-size: 0.75rem; color: #E8EDF2;
+  pointer-events: none; opacity: 0;
+  transition: opacity 200ms ease-out;
+  white-space: nowrap;
+}
+.tooltip.visible { opacity: 1; }
+
+/* Common */
+.slide-title { font-size: 2.6rem; font-weight: 700; color: #F5F8FC; letter-spacing: -0.5px; }
+.slide-subtitle { font-size: 1rem; font-weight: 300; color: #A0B0C0; margin-top: 0.3rem; }
+.icon-check { color: #00D68F; }
+.icon-x { color: #FF6B6B; }
+
+/* Responsive */
+@media (max-width: 1200px) {
+  #slide-1 .hero-title { font-size: 3.2rem; }
+  #slide-2 .content-grid { gap: 1rem; }
+  #slide-5 .bento-grid { gap: 0.5rem; }
+  #slide-5 .bento-card { padding: 0.7rem; }
+  #slide-5 .bento-card .b-desc { font-size: 0.65rem; }
+  #slide-5 .bento-card .b-title { font-size: 0.8rem; }
+  #slide-6 .apps-grid { gap: 0.5rem; }
+  #slide-6 .app-card { padding: 0.7rem; }
+  #slide-6 .app-card .app-desc { font-size: 0.65rem; }
+  .slide-title { font-size: 2.2rem; }
+  #slide-4 .flow-block { width: 110px; height: 110px; }
+  #slide-10 .conclusion-title { font-size: 2.4rem; }
+  #slide-10 .summary-grid { max-width: 550px; }
+  .kpi-panel .kpi-number { font-size: 2.2rem; }
+  .history-card { min-width: 130px; }
+  #slide-7 .tab-content.active { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 900px) {
+  #slide-1 .hero-title { font-size: 2.4rem; }
+  #slide-1 .hero-subtitle { font-size: 1rem; }
+  .slide-title { font-size: 1.8rem; }
+  #slide-2 .content-grid { grid-template-columns: 1fr; }
+  #slide-4 .flow-area { flex-wrap: wrap; gap: 0.3rem; }
+  #slide-4 .flow-block { width: 90px; height: 90px; }
+  #slide-4 .flow-block .label { font-size: 0.65rem; }
+  #slide-4 .flow-arrow { font-size: 1rem; }
+  #slide-5 .bento-grid { grid-template-columns: 1fr 1fr; }
+  #slide-5 .bento-card.span-2x { grid-column: span 1; }
+  #slide-5 .bento-card.span-2h { grid-row: span 1; }
+  #slide-6 .apps-grid { grid-template-columns: 1fr 1fr; }
+  #slide-8 .split-area { grid-template-columns: 1fr; }
+  #slide-8 .divider { display: none; }
+  #slide-9 .kpi-row { grid-template-columns: 1fr; gap: 0.8rem; }
+  #slide-9 .market-grid { grid-template-columns: 1fr; }
+  .kpi-panel .kpi-number { font-size: 1.8rem; }
+  #slide-10 .summary-grid { grid-template-columns: 1fr; max-width: 400px; }
+  #slide-10 .conclusion-title { font-size: 1.8rem; }
+  #slide-10 .final-badge { font-size: 1rem; padding: 0.8rem 1.5rem; }
+  .history-card { min-width: 110px; }
+  .history-card .year { font-size: 1.1rem; }
+  #progress-bar { width: 100px; }
+  #slide-7 .tab-content.active { grid-template-columns: 1fr; }
+}
+
+/* Focus */
+*:focus-visible { outline: 2px solid #FFD43B; outline-offset: 2px; }
+input:focus-visible, button:focus-visible, [tabindex]:focus-visible { outline: 2px solid #FFD43B; outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<!-- Background Layers -->
+<div id="bg-layer">
+  <div id="bg-radial"></div>
+  <div id="bg-blob1"></div>
+  <div id="bg-blob2"></div>
+  <div id="bg-dots"></div>
+  <div id="bg-scanner"></div>
+  <div id="bg-vignette"></div>
+  <div id="bg-noise"></div>
+</div>
+
+<!-- Slide 1 - Capa -->
+<section class="slide active" id="slide-1" data-slide="0">
+  <div class="logo-python">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <path d="M24 4C16.268 4 12 7.5 12 13v4h12v2H12H8c-5 0-8 4.5-8 12s3 12 8 12h4v-6c0-4.5 3.5-8 8-8h8c4 0 6-3 6-6v-4c0-4 2.5-6 6-6h-6V13c0-5.5-4.5-9-12-9zM16 10a2 2 0 110-4 2 2 0 010 4z" fill="#3776AB"/>
+      <path d="M20 44c7.732 0 12-3.5 12-9v-4H32H24v-2h6h6c5 0 8-4.5 8-12s-3-12-8-12h-4v6c0 4.5-3.5 8-8 8h-8c-4 0-6 3-6 6v4c0 4-2.5 6-6 6h6v4c0 5.5 4.5 9 12 9zM30 38a2 2 0 110 4 2 2 0 010-4z" fill="#FFD43B"/>
+    </svg>
+  </div>
+
+  <div class="badge-python" data-tooltip="Versão estável mais recente">
+    <div class="skew-panel skew-panel-yellow" style="width:130px;height:40px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:500;">
+      Python 3.13
+    </div>
+  </div>
+
+  <div class="hero-title" id="hero-title">
+    Python:<br>A Linguagem de Programação<br>Versátil e Poderosa
+  </div>
+
+  <div class="hero-subtitle" id="hero-subtitle"></div>
+
+  <div class="deco-line" id="deco-line"></div>
+
+  <div class="badge-info" id="badge-info">
+    <div class="skew-panel skew-panel-dark" style="padding:0.6rem 1.5rem;font-size:0.85rem;font-family:'JetBrains Mono',monospace;">
+      1991 — Open Source — Multiplataforma
+    </div>
+  </div>
+
+  <div class="presenter-info" id="presenter-info">
+    Nome do Apresentador<br>
+    Disciplina de Programação<br>
+    Julho 2026
+  </div>
+
+  <div class="scroll-arrow" id="scroll-arrow">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A0B0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 13l5 5 5-5"/><path d="M7 6l5 5 5-5"/>
+    </svg>
+  </div>
+</section>
+
+<!-- Slide 2 - O que é Python -->
+<section class="slide" id="slide-2" data-slide="1">
+  <div class="deco-number">02</div>
+  <div class="slide-title slide-el">O que é Python?</div>
+  <div class="slide-subtitle slide-el" style="margin-bottom:1rem;">Uma linguagem que transformou a programação</div>
+
+  <div class="content-grid">
+    <div>
+      <div class="glass def-card slide-el">
+        <p style="font-size:0.9rem;font-weight:300;line-height:1.6;margin-bottom:0.5rem;">
+          Python é uma linguagem de programação de <strong style="color:#FFD43B;font-weight:500;">código aberto</strong>, de <strong style="color:#FFD43B;font-weight:500;">alto nível</strong> e <strong style="color:#FFD43B;font-weight:500;">interpretada</strong>, criada por Guido van Rossum em 1991.
+        </p>
+        <p style="font-size:0.85rem;font-weight:300;line-height:1.6;color:#A0B0C0;">
+          Sua sintaxe clara e legível torna o código fácil de entender e manter. É uma das linguagens mais amigáveis para iniciantes e ao mesmo tempo poderosa o suficiente para profissionais.
+        </p>
+      </div>
+
+      <div class="badges-grid slide-el" style="margin-top:1rem;">
+        <div class="badge-pill"><span class="icon">⧩</span> Código Aberto</div>
+        <div class="badge-pill"><span class="icon">⬡</span> Multiplataforma</div>
+        <div class="badge-pill"><span class="icon">▲</span> Alto Nível</div>
+        <div class="badge-pill"><span class="icon">▶</span> Interpretada</div>
+        <div class="badge-pill"><span class="icon">⌘</span> Sintaxe Simples</div>
+        <div class="badge-pill"><span class="icon">⇄</span> Tipagem Dinâmica</div>
+        <div class="badge-pill"><span class="icon">◈</span> Orientada a Objetos</div>
+        <div class="badge-pill"><span class="icon">⊕</span> Grande Comunidade</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="glass right-card slide-el" style="height:100%;">
+        <div style="display:flex;align-items:center;gap:0.8rem;">
+          <div class="avatar-circle">G</div>
+          <div>
+            <div style="font-size:0.9rem;font-weight:600;color:#F5F8FC;">Criada por Guido van Rossum</div>
+            <div style="font-size:0.75rem;font-weight:300;color:#A0B0C0;">Desenvolvedor holandês</div>
+          </div>
+        </div>
+
+        <div style="position:absolute;top:0.5rem;right:0.5rem;">
+          <div class="skew-panel skew-panel-blue" style="padding:0.3rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;">
+            1991
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#A0B0C0;margin-bottom:0.3rem;">
+            <span>Popularidade</span>
+            <span style="color:#00D68F;">#1 entre iniciantes</span>
+          </div>
+          <div class="popularity-bar">
+            <div class="popularity-fill" id="popularity-fill" style="width:0%;"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:auto;">
+          <div style="font-size:0.75rem;color:#6B7D8D;margin-bottom:0.3rem;">Áreas de atuação:</div>
+          <div class="area-tags">
+            <span class="area-tag">Web</span>
+            <span class="area-tag">IA</span>
+            <span class="area-tag">Dados</span>
+            <span class="area-tag">Automação</span>
+            <span class="area-tag">IoT</span>
+          </div>
+        </div>
+
+        <div style="position:absolute;bottom:0.5rem;right:0.5rem;opacity:0.15;">
+          <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+            <path d="M24 4C16.268 4 12 7.5 12 13v4h12v2H12H8c-5 0-8 4.5-8 12s3 12 8 12h4v-6c0-4.5 3.5-8 8-8h8c4 0 6-3 6-6v-4c0-4 2.5-6 6-6h-6V13c0-5.5-4.5-9-12-9z" fill="#3776AB"/>
+            <path d="M20 44c7.732 0 12-3.5 12-9v-4H32H24v-2h6h6c5 0 8-4.5 8-12s-3-12-8-12h-4v6c0 4.5-3.5 8-8 8h-8c-4 0-6 3-6 6v4c0 4-2.5 6-6 6h6v4c0 5.5 4.5 9 12 9z" fill="#FFD43B"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3 - História -->
+<section class="slide" id="slide-3" data-slide="2">
+  <div class="top-area">
+    <div>
+      <div class="slide-title slide-el">História do Python</div>
+      <div class="slide-subtitle slide-el">De 1991 até os dias atuais</div>
+    </div>
+    <div class="slide-el">
+      <div class="skew-panel skew-panel-blue" style="padding:0.5rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.85rem;">
+        +35 anos de evolução
+      </div>
+    </div>
+  </div>
+
+  <div class="cards-area" id="cards-area">
+    <div class="connector-line"></div>
+  </div>
+
+  <div class="glass slide-el" style="padding:1rem;margin-top:0.5rem;min-height:80px;" id="history-detail">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:2rem;color:#FFD43B;" id="hd-year">1991</div>
+      <div>
+        <div style="font-size:0.9rem;font-weight:600;color:#F5F8FC;" id="hd-title">Primeira versão (0.9.0)</div>
+        <div style="font-size:0.8rem;font-weight:300;color:#A0B0C0;margin-top:0.2rem;" id="hd-desc">
+          Criada por Guido van Rossum — desenvolvedor holandês. O nome Python foi inspirado no grupo de comédia britânico Monty Python's Flying Circus. O objetivo era criar uma linguagem intuitiva, poderosa e divertida de usar.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 4 - Como funciona -->
+<section class="slide" id="slide-4" data-slide="3">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <div class="slide-title slide-el">Como Python Funciona</div>
+      <div class="slide-subtitle slide-el">Da escrita do código à execução</div>
+    </div>
+    <div class="slide-el">
+      <div class="skew-panel skew-panel-yellow" style="padding:0.4rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.9rem;font-weight:700;">
+        .py
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-area" id="flow-area">
+    <div class="flow-block slide-el">
+      <div class="icon">📄</div>
+      <div class="label">Código Fonte<br>(.py)</div>
+    </div>
+    <div class="flow-arrow slide-el">→</div>
+    <div class="flow-block slide-el" style="border-color:rgba(48,105,152,0.4);">
+      <div class="icon">⚙</div>
+      <div class="label">Interpretador<br>Python</div>
+    </div>
+    <div class="flow-arrow slide-el">→</div>
+    <div class="flow-block slide-el">
+      <div class="icon">💠</div>
+      <div class="label">Bytecode<br>(.pyc)</div>
+    </div>
+    <div class="flow-arrow slide-el">→</div>
+    <div class="flow-block slide-el" style="border-color:rgba(48,105,152,0.4);">
+      <div class="icon">🔲</div>
+      <div class="label">Máquina<br>Virtual (PVM)</div>
+    </div>
+  </div>
+
+  <div class="info-panels">
+    <div class="glass info-panel slide-el">
+      <h4>Instalação</h4>
+      <p>Baixe o interpretador em python.org. Ambientes virtuais isolam projetos.</p>
+    </div>
+    <div class="glass info-panel slide-el">
+      <h4>Portabilidade</h4>
+      <p>Funciona em Windows, macOS e Linux sem modificações.</p>
+    </div>
+    <div class="glass info-panel slide-el">
+      <h4>Execução</h4>
+      <p>Linha por linha. Ideal para scripts, prototipagem e automação.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5 - Características -->
+<section class="slide" id="slide-5" data-slide="4">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <div class="slide-title slide-el">Principais Características</div>
+      <div class="slide-subtitle slide-el">O que torna Python especial</div>
+    </div>
+    <div class="slide-el">
+      <div class="skew-panel skew-panel-yellow" style="padding:0.4rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;">
+        12 características
+      </div>
+    </div>
+  </div>
+
+  <div class="bento-grid">
+    <div class="bento-card span-2x slide-el">
+      <div class="b-icon">⌨</div>
+      <div class="b-title">Sintaxe Simples e Legível</div>
+      <div class="b-desc">Código limpo que parece inglês. Curva de aprendizado baixíssima.</div>
+    </div>
+    <div class="bento-card slide-el">
+      <div class="b-icon">⇄</div>
+      <div class="b-title">Tipagem Dinâmica</div>
+      <div class="b-desc">Sem declarações de tipo. Flexibilidade total.</div>
+    </div>
+    <div class="bento-card slide-el">
+      <div class="b-icon">◈</div>
+      <div class="b-title">Orientação a Objetos</div>
+      <div class="b-desc">Classes, herança, polimorfismo.</div>
+    </div>
+    <div class="bento-card span-2h slide-el">
+      <div class="b-icon">📚</div>
+      <div class="b-title">Biblioteca Padrão Gigantesca</div>
+      <div class="b-desc">Milhares de módulos inclusos para todas as necessidades.</div>
+    </div>
+    <div class="bento-card slide-el">
+      <div class="b-icon">📱</div>
+      <div class="b-title">Multiplataforma</div>
+      <div class="b-desc">Funciona em qualquer sistema.</div>
+    </div>
+    <div class="bento-card slide-el">
+      <div class="b-icon">⚡</div>
+      <div class="b-title">Alta Produtividade</div>
+      <div class="b-desc">Menos código, mais resultado.</div>
+    </div>
+    <div class="bento-card slide-el">
+      <div class="b-icon">λ</div>
+      <div class="b-title">Programação Funcional</div>
+      <div class="b-desc">map, filter, reduce, list comprehension.</div>
+    </div>
+    <div class="bento-card slide-el">
+      <div class="b-icon">👥</div>
+      <div class="b-title">Comunidade Ativa</div>
+      <div class="b-desc">Milhares de contribuidores globais.</div>
+    </div>
+    <div class="bento-card slide-el">
+      <div class="b-icon">🔗</div>
+      <div class="b-title">Fácil Integração</div>
+      <div class="b-desc">Com C, C++, Java, .NET e mais.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 6 - Aplicações -->
+<section class="slide" id="slide-6" data-slide="5">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <div class="slide-title slide-el">Principais Aplicações</div>
+      <div class="slide-subtitle slide-el">Onde o Python é utilizado no mundo real</div>
+    </div>
+    <div class="slide-el">
+      <div class="skew-panel skew-panel-yellow" style="padding:0.4rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;">
+        12 áreas
+      </div>
+    </div>
+  </div>
+
+  <div class="apps-grid">
+    <div class="app-card slide-el"><div class="app-icon">🌐</div><div class="app-name">Desenvolvimento Web</div><div class="app-desc">Django, Flask, FastAPI</div></div>
+    <div class="app-card slide-el"><div class="app-icon">🧠</div><div class="app-name">Inteligência Artificial</div><div class="app-desc">TensorFlow, PyTorch</div></div>
+    <div class="app-card slide-el"><div class="app-icon">📊</div><div class="app-name">Machine Learning</div><div class="app-desc">Scikit-learn, algoritmos</div></div>
+    <div class="app-card slide-el"><div class="app-icon">📈</div><div class="app-name">Ciência de Dados</div><div class="app-desc">Pandas, NumPy</div></div>
+    <div class="app-card slide-el"><div class="app-icon">⚙</div><div class="app-name">Automação</div><div class="app-desc">Scripts, Selenium</div></div>
+    <div class="app-card slide-el"><div class="app-icon">🔌</div><div class="app-name">APIs</div><div class="app-desc">REST, GraphQL</div></div>
+    <div class="app-card slide-el"><div class="app-icon">⚛</div><div class="app-name">Computação Científica</div><div class="app-desc">Simulações</div></div>
+    <div class="app-card slide-el"><div class="app-icon">🤖</div><div class="app-name">Robótica</div><div class="app-desc">ROS, controle</div></div>
+    <div class="app-card slide-el"><div class="app-icon">🛡</div><div class="app-name">Segurança</div><div class="app-desc">Pentest, análise</div></div>
+    <div class="app-card slide-el"><div class="app-icon">🎮</div><div class="app-name">Jogos</div><div class="app-desc">Pygame</div></div>
+    <div class="app-card slide-el"><div class="app-icon">🔲</div><div class="app-name">IoT</div><div class="app-desc">Raspberry Pi, sensores</div></div>
+    <div class="app-card slide-el"><div class="app-icon">🥧</div><div class="app-name">Visualização de Dados</div><div class="app-desc">Matplotlib</div></div>
+  </div>
+
+  <div style="text-align:center;margin-top:0.5rem;font-style:italic;font-weight:300;color:#6B7D8D;font-size:0.85rem;" class="slide-el">E muitos outros...</div>
+</section>
+
+<!-- Slide 7 - Bibliotecas -->
+<section class="slide" id="slide-7" data-slide="6">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <div class="slide-title slide-el">Bibliotecas e Frameworks</div>
+      <div class="slide-subtitle slide-el">Um ecossistema rico e diversificado</div>
+    </div>
+    <div class="slide-el">
+      <div class="skew-panel skew-panel-blue" style="padding:0.4rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.8rem;">
+        +15 ferramentas
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs-container">
+    <div class="tabs slide-el" id="tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="dados">Dados</button>
+      <button class="tab-btn" data-tab="iaml">IA/ML</button>
+      <button class="tab-btn" data-tab="automacao">Automação</button>
+      <button class="tab-btn" data-tab="outros">Outros</button>
+    </div>
+
+    <div class="tab-content active" id="tab-web">
+      <div class="lib-card slide-el"><div class="lib-icon">🛡</div><div class="lib-name">Django</div><div class="lib-desc">Framework full-stack. Inclui ORM, admin, autenticação.</div><span class="lib-badge">Framework</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">🔥</div><div class="lib-name">Flask</div><div class="lib-desc">Microframework leve e flexível. Ideal para APIs.</div><span class="lib-badge">Framework</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">⚡</div><div class="lib-name">FastAPI</div><div class="lib-desc">Framework moderno e rápido para APIs. Validação automática.</div><span class="lib-badge">Framework</span></div>
+    </div>
+    <div class="tab-content" id="tab-dados">
+      <div class="lib-card slide-el"><div class="lib-icon">🔢</div><div class="lib-name">NumPy</div><div class="lib-desc">Computação numérica. Arrays multidimensionais.</div><span class="lib-badge">Biblioteca</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">📋</div><div class="lib-name">Pandas</div><div class="lib-desc">Manipulação de dados. DataFrames.</div><span class="lib-badge">Biblioteca</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">📉</div><div class="lib-name">Matplotlib</div><div class="lib-desc">Visualização de dados. Gráficos.</div><span class="lib-badge">Biblioteca</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">🎯</div><div class="lib-name">Scikit-learn</div><div class="lib-desc">Machine Learning. Algoritmos clássicos.</div><span class="lib-badge">Biblioteca</span></div>
+    </div>
+    <div class="tab-content" id="tab-iaml">
+      <div class="lib-card slide-el"><div class="lib-icon">🧠</div><div class="lib-name">TensorFlow</div><div class="lib-desc">Deep Learning. Google.</div><span class="lib-badge">Framework</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">🔦</div><div class="lib-name">PyTorch</div><div class="lib-desc">Deep Learning. Meta. Dinâmico.</div><span class="lib-badge">Framework</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">👁</div><div class="lib-name">OpenCV</div><div class="lib-desc">Visão computacional.</div><span class="lib-badge">Biblioteca</span></div>
+    </div>
+    <div class="tab-content" id="tab-automacao">
+      <div class="lib-card slide-el"><div class="lib-icon">🌐</div><div class="lib-name">Selenium</div><div class="lib-desc">Automação de navegadores.</div><span class="lib-badge">Framework</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">🍜</div><div class="lib-name">Beautiful Soup</div><div class="lib-desc">Web scraping.</div><span class="lib-badge">Biblioteca</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">📨</div><div class="lib-name">Requests</div><div class="lib-desc">Requisições HTTP.</div><span class="lib-badge">Biblioteca</span></div>
+    </div>
+    <div class="tab-content" id="tab-outros">
+      <div class="lib-card slide-el"><div class="lib-icon">🗄</div><div class="lib-name">SQLAlchemy</div><div class="lib-desc">ORM para bancos de dados.</div><span class="lib-badge">Biblioteca</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">🎮</div><div class="lib-name">Pygame</div><div class="lib-desc">Desenvolvimento de jogos.</div><span class="lib-badge">Biblioteca</span></div>
+      <div class="lib-card slide-el"><div class="lib-icon">✅</div><div class="lib-name">Pytest</div><div class="lib-desc">Testes automatizados.</div><span class="lib-badge">Framework</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 8 - Vantagens/Desvantagens -->
+<section class="slide" id="slide-8" data-slide="7">
+  <div style="text-align:center;margin-bottom:0.8rem;">
+    <div class="slide-title slide-el" style="font-size:2.2rem;">Vantagens e Desvantagens</div>
+    <div class="slide-subtitle slide-el">Uma visão honesta e equilibrada</div>
+  </div>
+
+  <div class="split-area">
+    <div class="pros-area">
+      <div class="slide-el" style="text-align:center;margin-bottom:0.5rem;">
+        <div class="skew-panel skew-panel-green" style="padding:0.3rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:700;">
+          Vantagens
+        </div>
+      </div>
+      <div class="pros-list">
+        <div class="pros-item slide-el"><span class="icon">✓</span> Fácil de aprender — curva baixíssima</div>
+        <div class="pros-item slide-el"><span class="icon">✓</span> Código curto e legível</div>
+        <div class="pros-item slide-el"><span class="icon">✓</span> Grandes bibliotecas</div>
+        <div class="pros-item slide-el"><span class="icon">✓</span> Comunidade enorme e ativa</div>
+        <div class="pros-item slide-el"><span class="icon">✓</span> Excelente documentação</div>
+        <div class="pros-item slide-el"><span class="icon">✓</span> Alta produtividade</div>
+        <div class="pros-item slide-el"><span class="icon">✓</span> Muito utilizada no mercado</div>
+        <div class="pros-item slide-el"><span class="icon">✓</span> Multiplataforma</div>
+      </div>
+    </div>
+
+    <div class="divider slide-el">
+      <div class="divider-line"></div>
+      <div class="divider-icon">±</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="cons-area">
+      <div class="slide-el" style="text-align:center;margin-bottom:0.5rem;">
+        <div class="skew-panel skew-panel-red" style="padding:0.3rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:700;">
+          Desvantagens
+        </div>
+      </div>
+      <div class="cons-list">
+        <div class="cons-item slide-el"><span class="icon">✗</span> Menor desempenho que compiladas</div>
+        <div class="cons-item slide-el"><span class="icon">✗</span> Maior consumo de memória</div>
+        <div class="cons-item slide-el"><span class="icon">✗</span> Não ideal para tempo real</div>
+        <div class="cons-item slide-el"><span class="icon">✗</span> Tipagem dinâmica (erros em execução)</div>
+        <div class="cons-item slide-el"><span class="icon">✗</span> Desempenho em apps pesadas</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 9 - Mercado -->
+<section class="slide" id="slide-9" data-slide="8">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <div class="slide-title slide-el">Mercado de Trabalho</div>
+      <div class="slide-subtitle slide-el">Por que aprender Python impulsiona sua carreira</div>
+    </div>
+    <div class="slide-el">
+      <div class="skew-panel skew-panel-green" style="padding:0.4rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;">
+        Alta Demanda
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-panel slide-el">
+      <div class="kpi-number" data-target="8500" data-prefix="R$ " data-suffix="+">0</div>
+      <div class="kpi-label">Salário médio mensal</div>
+    </div>
+    <div class="kpi-panel slide-el">
+      <div class="kpi-number" data-target="35" data-suffix="%">0</div>
+      <div class="kpi-label">Crescimento anual em vagas</div>
+    </div>
+    <div class="kpi-panel slide-el">
+      <div class="kpi-number" data-target="3" data-prefix="Top ">0</div>
+      <div class="kpi-label">Linguagem mais usada</div>
+    </div>
+  </div>
+
+  <div class="market-grid">
+    <div>
+      <div style="font-size:0.85rem;font-weight:600;color:#F5F8FC;margin-bottom:0.4rem;" class="slide-el">Áreas com maior procura</div>
+      <div class="area-item slide-el"><span class="area-icon">🧠</span><span class="area-name">Inteligência Artificial</span><span class="area-badge">+45% vagas</span></div>
+      <div class="area-item slide-el"><span class="area-icon">📊</span><span class="area-name">Ciência de Dados</span><span class="area-badge">+38% vagas</span></div>
+      <div class="area-item slide-el"><span class="area-icon">🌐</span><span class="area-name">Desenvolvimento Web</span><span class="area-badge">+25% vagas</span></div>
+      <div class="area-item slide-el"><span class="area-icon">⚙</span><span class="area-name">Automação</span><span class="area-badge">+30% vagas</span></div>
+      <div class="area-item slide-el"><span class="area-icon">☁</span><span class="area-name">Computação em Nuvem</span><span class="area-badge">+40% vagas</span></div>
+    </div>
+    <div>
+      <div style="font-size:0.85rem;font-weight:600;color:#F5F8FC;margin-bottom:0.4rem;" class="slide-el">Empresas que utilizam Python</div>
+      <div class="company-grid">
+        <div class="company-item slide-el">Google</div>
+        <div class="company-item slide-el">Netflix</div>
+        <div class="company-item slide-el">Spotify</div>
+        <div class="company-item slide-el">NASA</div>
+        <div class="company-item slide-el">Instagram</div>
+        <div class="company-item slide-el">Uber</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass slide-el" style="padding:0.8rem 1rem;margin-top:0.5rem;">
+    <p style="font-size:0.8rem;font-weight:300;color:#A0B0C0;">
+      <strong style="color:#FFD43B;">Tendências:</strong> Python domina IA, cresce em Cloud e expande em IoT. Demanda contínua.
+    </p>
+  </div>
+</section>
+
+<!-- Slide 10 - Conclusão -->
+<section class="slide" id="slide-10" data-slide="9">
+  <div class="deco-number-10">10</div>
+  <div class="bloom"></div>
+
+  <div class="conclusion-title slide-el">Conclusão</div>
+  <div class="conclusion-line" id="conclusion-line"></div>
+
+  <div class="summary-grid">
+    <div class="summary-card slide-el">
+      <div class="s-icon">🌿</div>
+      <div class="s-title">Simplicidade</div>
+      <div class="s-desc">Sintaxe intuitiva que qualquer pessoa pode aprender.</div>
+    </div>
+    <div class="summary-card slide-el">
+      <div class="s-icon">⚡</div>
+      <div class="s-title">Produtividade</div>
+      <div class="s-desc">Código enxuto. Resultados rápidos. Menos bugs.</div>
+    </div>
+    <div class="summary-card slide-el">
+      <div class="s-icon">🔧</div>
+      <div class="s-title">Versatilidade</div>
+      <div class="s-desc">Web, IA, Dados, Automação, IoT — tudo com Python.</div>
+    </div>
+    <div class="summary-card slide-el">
+      <div class="s-icon">👥</div>
+      <div class="s-title">Comunidade</div>
+      <div class="s-desc">Milhares de bibliotecas. Suporte global. Gratuito.</div>
+    </div>
+  </div>
+
+  <div class="slide-el" style="display:flex;justify-content:center;">
+    <div class="skew-panel final-badge skew-panel-blue">
+      Python: simples para aprender, poderoso para criar.
+    </div>
+  </div>
+
+  <div class="thankyou slide-el">Obrigado!</div>
+</section>
+
+<!-- Navigation Bar -->
+<div id="nav-bar">
+  <div id="nav-left">
+    <button class="btn-nav" id="btn-prev" aria-label="Slide anterior">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span id="nav-counter">01 / 10</span>
+    <div id="nav-dots"></div>
+  </div>
+  <div id="nav-center">
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button class="btn-nav" id="btn-next" aria-label="Próximo slide">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <button class="btn-nav" id="btn-fullscreen" aria-label="Alternar tela cheia">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ---- Configuration ----
+  const TOTAL_SLIDES = 10;
+  let currentSlide = 0;
+  let isAnimating = false;
+  let typingTimeout = null;
+  let animationTimeouts = [];
+
+  // ---- DOM references ----
+  const slides = document.querySelectorAll('.slide');
+  const progressFill = document.getElementById('progress-fill');
+  const navCounter = document.getElementById('nav-counter');
+  const navDots = document.getElementById('nav-dots');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const btnFullscreen = document.getElementById('btn-fullscreen');
+  const cursor = document.getElementById('cursor');
+  const tooltip = document.getElementById('tooltip');
+  const heroTitle = document.getElementById('hero-title');
+  const heroSubtitle = document.getElementById('hero-subtitle');
+  const cardsArea = document.getElementById('cards-area');
+
+  // ---- Custom Cursor ----
+  let cursorVisible = true;
+  document.addEventListener('mousemove', function(e) {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.addEventListener('mouseenter', function() { cursor.style.display = 'block'; });
+  document.addEventListener('mouseleave', function() { cursor.style.display = 'none'; });
+  document.querySelectorAll('a, button, [tabindex], .badge-pill, .bento-card, .app-card, .lib-card, .history-card, .pros-item, .cons-item, .area-item, .company-item, .summary-card, .tab-btn, .btn-nav, .nav-dot').forEach(function(el) {
+    el.addEventListener('mouseenter', function() { cursor.classList.add('hover'); });
+    el.addEventListener('mouseleave', function() { cursor.classList.remove('hover'); });
+  });
+
+  // ---- Tooltip ----
+  let tooltipTimeout = null;
+  document.querySelectorAll('[data-tooltip]').forEach(function(el) {
+    el.addEventListener('mouseenter', function(e) {
+      var text = el.getAttribute('data-tooltip');
+      if (!text) return;
+      tooltipTimeout = setTimeout(function() {
+        tooltip.textContent = text;
+        var rect = el.getBoundingClientRect();
+        tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+        tooltip.style.top = (rect.top - 8) + 'px';
+        tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+        tooltip.classList.add('visible');
+      }, 500);
+    });
+    el.addEventListener('mouseleave', function() {
+      clearTimeout(tooltipTimeout);
+      tooltip.classList.remove('visible');
+    });
+  });
+
+  // ---- Ripple Effect ----
+  document.querySelectorAll('.btn-nav, .tab-btn, .nav-dot').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      var rect = btn.getBoundingClientRect();
+      var ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      var size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      btn.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 500);
+    });
+  });
+
+  // ---- Particles ----
+  function createParticles() {
+    var bg = document.getElementById('bg-layer');
+    var colors = ['#306998', '#3776AB', '#FFD43B', '#00D68F'];
+    for (var i = 0; i < 30; i++) {
+      var p = document.createElement('div');
+      p.className = 'particle';
+      var size = 2 + Math.random() * 2;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      p.style.opacity = 0.1 + Math.random() * 0.2;
+      p.style.animationDuration = (3 + Math.random() * 2) + 's';
+      p.style.animationDelay = (Math.random() * 5) + 's';
+      bg.appendChild(p);
+    }
+  }
+  createParticles();
+
+  // ---- 3D Extruded Text (Slide 1) ----
+  function apply3DText() {
+    var shadow = '';
+    for (var i = 1; i <= 35; i++) {
+      shadow += (shadow ? ',' : '') + (-i) + 'px ' + i + 'px 0 hsl(210, ' + (40 + i) + '%, ' + (30 - i * 0.5) + '%)';
+    }
+    heroTitle.style.textShadow = shadow;
+  }
+  apply3DText();
+
+  // ---- Typing Effect (Slide 1) ----
+  function startTyping() {
+    var text = 'Uma linguagem simples para aprender e poderosa para criar.';
+    var index = 0;
+    heroSubtitle.textContent = '';
+    function type() {
+      if (index < text.length) {
+        heroSubtitle.textContent += text.charAt(index);
+        index++;
+        typingTimeout = setTimeout(type, 40);
+      }
+    }
+    setTimeout(type, 1500);
+  }
+
+  // ---- History cards data ----
+  var historyData = [
+    { year: '1991', title: 'Primeira versão (0.9.0)', desc: 'Criada por Guido van Rossum durante o Natal de 1989. O nome veio do grupo Monty Python\'s Flying Circus.' },
+    { year: '1994', title: 'Python 1.0', desc: 'Primeira versão oficial com lambda, map, filter e reduce. Já mostrava seu estilo funcional.' },
+    { year: '2000', title: 'Python 2.0', desc: 'Introduziu list comprehensions, garbage collection e suporte a Unicode. Marco de popularidade.' },
+    { year: '2008', title: 'Python 3.0', desc: 'Grande reforma da linguagem. Quebra de compatibilidade com Python 2. Print virou função.' },
+    { year: '2020', title: 'Fim do Python 2', desc: 'Python 2 oficialmente aposentado. A comunidade migrou completamente para o Python 3.' },
+    { year: '2025+', title: 'Era de Ouro', desc: 'Python domina Inteligência Artificial, Ciência de Dados e se consolida como linguagem mais versátil.' }
+  ];
+
+  // ---- Build History Cards ----
+  function buildHistory() {
+    historyData.forEach(function(data, idx) {
+      var card = document.createElement('div');
+      card.className = 'history-card slide-el' + (idx === 0 ? ' selected' : '');
+      card.setAttribute('data-index', idx);
+      card.innerHTML = '<div class="year">' + data.year + '</div><div class="title">' + data.title + '</div><div class="desc">' + data.desc.split('.')[0] + '.</div>';
+      card.addEventListener('click', function() { selectHistory(idx); });
+      cardsArea.appendChild(card);
+    });
+  }
+  buildHistory();
+
+  function selectHistory(idx) {
+    document.querySelectorAll('.history-card').forEach(function(c) { c.classList.remove('selected'); });
+    var cards = document.querySelectorAll('.history-card');
+    cards[idx].classList.add('selected');
+    var data = historyData[idx];
+    document.getElementById('hd-year').textContent = data.year;
+    document.getElementById('hd-title').textContent = data.title;
+    document.getElementById('hd-desc').textContent = data.desc;
+  }
+
+  // ---- Navigation Dots ----
+  function buildDots() {
+    for (var i = 0; i < TOTAL_SLIDES; i++) {
+      var dot = document.createElement('button');
+      dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('data-index', i);
+      dot.addEventListener('click', function() { goToSlide(parseInt(this.getAttribute('data-index'))); });
+      navDots.appendChild(dot);
+    }
+  }
+  buildDots();
+
+  function updateNav() {
+    progressFill.style.width = ((currentSlide + 1) / TOTAL_SLIDES * 100) + '%';
+    var numStr = (currentSlide + 1).toString().padStart(2, '0') + ' / ' + TOTAL_SLIDES.toString().padStart(2, '0');
+    navCounter.textContent = numStr;
+    document.querySelectorAll('.nav-dot').forEach(function(dot, i) {
+      dot.classList.toggle('active', i === currentSlide);
+    });
+  }
+
+  // ---- Slide Animation System ----
+  function animateSlideIn(slideIndex) {
+    var slide = slides[slideIndex];
+    var els = slide.querySelectorAll('.slide-el');
+    var baseDelay = 100;
+
+    els.forEach(function(el, i) {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'none';
+      void el.offsetHeight;
+    });
+
+    var delays = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500];
+
+    els.forEach(function(el, i) {
+      var delay = delays[i] || (baseDelay + i * 80);
+      var t = setTimeout(function() {
+        el.style.transition = 'opacity 600ms cubic-bezier(0.4, 0, 0.2, 1), transform 600ms cubic-bezier(0.4, 0, 0.2, 1)';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, delay);
+      animationTimeouts.push(t);
+    });
+
+    // Slide-specific animations
+    if (slideIndex === 0) {
+      setTimeout(function() {
+        document.querySelector('#slide-1 .logo-python').classList.add('animate');
+      }, 100);
+      setTimeout(function() {
+        document.querySelector('#slide-1 .badge-python').classList.add('animate');
+      }, 300);
+      setTimeout(function() {
+        document.querySelector('#slide-1 .hero-title').classList.add('animate');
+      }, 500);
+      setTimeout(function() {
+        document.querySelector('#slide-1 .deco-line').classList.add('animate');
+      }, 2000);
+      setTimeout(function() {
+        document.querySelector('#slide-1 .badge-info').classList.add('animate');
+      }, 2500);
+      setTimeout(function() {
+        document.querySelector('#slide-1 .presenter-info').classList.add('animate');
+      }, 3000);
+      setTimeout(function() {
+        document.querySelector('#slide-1 .scroll-arrow').classList.add('animate');
+      }, 3500);
+      startTyping();
+    }
+
+    if (slideIndex === 1) {
+      setTimeout(function() {
+        document.getElementById('popularity-fill').style.width = '92%';
+      }, 1200);
+    }
+
+    if (slideIndex === 2) {
+      setTimeout(function() {
+        var cl = document.querySelector('#slide-3 .connector-line');
+        if (cl) cl.classList.add('animate');
+      }, 600);
+      selectHistory(0);
+    }
+
+    if (slideIndex === 8) {
+      animateCounters();
+    }
+
+    if (slideIndex === 9) {
+      setTimeout(function() {
+        document.getElementById('conclusion-line').classList.add('animate');
+      }, 500);
+    }
+  }
+
+  function clearSlideAnimations() {
+    animationTimeouts.forEach(function(t) { clearTimeout(t); });
+    animationTimeouts = [];
+    if (typingTimeout) { clearTimeout(typingTimeout); typingTimeout = null; }
+
+    slides.forEach(function(slide) {
+      var els = slide.querySelectorAll('.slide-el');
+      els.forEach(function(el) {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'none';
+      });
+
+      // Reset slide-specific elements
+      slide.querySelectorAll('.animate').forEach(function(el) { el.classList.remove('animate'); });
+      slide.querySelectorAll('.logo-python, .badge-python, .hero-title, .deco-line, .badge-info, .presenter-info, .scroll-arrow').forEach(function(el) {
+        el.classList.remove('animate');
+        el.style.opacity = '0';
+        el.style.transform = '';
+      });
+      var cl = slide.querySelector('#conclusion-line');
+      if (cl) { cl.classList.remove('animate'); cl.style.transform = 'scaleX(0)'; }
+      var conn = slide.querySelector('.connector-line');
+      if (conn) { conn.classList.remove('animate'); conn.style.transform = 'translateY(-50%) scaleX(0)'; }
+      var pf = slide.querySelector('#popularity-fill');
+      if (pf) { pf.style.width = '0%'; }
+    });
+
+    if (heroSubtitle) heroSubtitle.textContent = '';
+  }
+
+  // ---- Counters ----
+  function animateCounters() {
+    document.querySelectorAll('.kpi-number').forEach(function(el) {
+      var target = parseInt(el.getAttribute('data-target'));
+      var prefix = el.getAttribute('data-prefix') || '';
+      var suffix = el.getAttribute('data-suffix') || '';
+      var current = 0;
+      var duration = 1500;
+      var step = Math.max(1, Math.floor(target / 60));
+      var interval = setInterval(function() {
+        current += step;
+        if (current >= target) {
+          current = target;
+          clearInterval(interval);
+        }
+        if (prefix === 'R$ ' && current >= 1000) {
+          el.textContent = prefix + current.toLocaleString() + suffix;
+        } else {
+          el.textContent = prefix + current + suffix;
+        }
+      }, duration / 60);
+    });
+  }
+
+  // ---- Tab System ----
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (btn.classList.contains('active')) return;
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      var activeContent = document.querySelector('.tab-content.active');
+      if (activeContent) {
+        activeContent.style.opacity = '0';
+        setTimeout(function() {
+          activeContent.classList.remove('active');
+          var target = document.getElementById('tab-' + btn.getAttribute('data-tab'));
+          if (target) {
+            target.classList.add('active');
+            setTimeout(function() { target.style.opacity = '1'; }, 50);
+          }
+        }, 300);
+      }
+    });
+  });
+
+  // ---- Slide Transition ----
+  function goToSlide(index, direction) {
+    if (isAnimating) return;
+    if (index === currentSlide) return;
+    if (index < 0) index = TOTAL_SLIDES - 1;
+    if (index >= TOTAL_SLIDES) index = 0;
+
+    isAnimating = true;
+
+    var currentEl = slides[currentSlide];
+    var nextEl = slides[index];
+
+    // Clear all animations
+    clearSlideAnimations();
+
+    // Exit current slide: fade out + translateY(-15px) + scale(0.98) over 400ms
+    currentEl.style.transition = 'opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), transform 400ms cubic-bezier(0.4, 0, 0.2, 1)';
+    currentEl.style.opacity = '0';
+    currentEl.style.transform = 'translateY(-15px) scale(0.98)';
+
+    // Pause 200ms, then enter new slide
+    setTimeout(function() {
+      currentEl.style.display = 'none';
+      currentEl.style.transform = '';
+
+      // Prepare next slide: start invisible with entry position
+      nextEl.style.display = 'flex';
+      nextEl.style.opacity = '0';
+      nextEl.style.transform = 'translateY(15px) scale(0.98)';
+      nextEl.classList.add('active');
+
+      // Force reflow
+      void nextEl.offsetHeight;
+
+      // Enter animation: fade in + translateY(15px→0) + scale(0.98→1) over 600ms
+      nextEl.style.transition = 'opacity 600ms cubic-bezier(0.4, 0, 0.2, 1), transform 600ms cubic-bezier(0.4, 0, 0.2, 1)';
+      nextEl.style.opacity = '1';
+      nextEl.style.transform = 'translateY(0) scale(1)';
+
+      currentSlide = index;
+      updateNav();
+
+      setTimeout(function() {
+        animateSlideIn(currentSlide);
+        isAnimating = false;
+      }, 700);
+    }, 200);
+  }
+
+  function nextSlide() { goToSlide(currentSlide + 1, 1); }
+  function prevSlide() { goToSlide(currentSlide - 1, -1); }
+
+  // ---- Prevent Scroll Wheel Navigation ----
+  document.addEventListener('wheel', function(e) {
+    e.preventDefault();
+  }, { passive: false });
+
+  // ---- Keyboard Navigation ----
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextSlide(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prevSlide(); }
+    else if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+    else if (e.key === 'End') { e.preventDefault(); goToSlide(TOTAL_SLIDES - 1); }
+    else if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); }
+  });
+
+  // ---- Touch/Swipe ----
+  var touchStartX = 0;
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+  document.addEventListener('touchend', function(e) {
+    var diff = touchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) nextSlide();
+      else prevSlide();
+    }
+  });
+
+  // ---- Buttons ----
+  btnPrev.addEventListener('click', prevSlide);
+  btnNext.addEventListener('click', nextSlide);
+
+  // ---- Fullscreen ----
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(function(){});
+    } else {
+      document.exitFullscreen().catch(function(){});
+    }
+  }
+  btnFullscreen.addEventListener('click', toggleFullscreen);
+
+  // ---- Initialize ----
+  function init() {
+    slides.forEach(function(s, i) {
+      if (i === 0) {
+        s.style.display = 'flex';
+        s.style.opacity = '1';
+        s.classList.add('active');
+      } else {
+        s.style.display = 'none';
+      }
+    });
+    updateNav();
+    animateSlideIn(0);
+  }
+
+  init();
+
+})();
+</script>
+</body>
+</html>
