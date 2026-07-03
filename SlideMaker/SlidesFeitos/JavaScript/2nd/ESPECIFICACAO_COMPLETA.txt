@@ -1,0 +1,1539 @@
+================================================================================
+ESPECIFICAÇÃO COMPLETA DE DIREÇÃO CRIATIVA — APRESENTAÇÃO HTML
+================================================================================
+TÍTULO: JavaScript: A Linguagem da Web Moderna
+AUTORIA: Direção Criativa / UI/UX / Motion Design
+ARQUIVO DE SAÍDA: apresentacao.html (único arquivo HTML)
+CODIFICAÇÃO: UTF-8 (OBRIGATÓRIO — nenhum caractere corrompido)
+MODO: Tela cheia (fullscreen) — apresentação exclusiva para computador, mas responsiva
+===============================================================================
+
+INSTRUÇÕES PARA A IA QUE IRÁ IMPLEMENTAR O HTML
+================================================================================
+
+1. Você deve criar UM ÚNICO arquivo HTML completo, auto-contido, sem dependências externas.
+2. NÃO acesse nenhum outro documento dentro da pasta de trabalho. Use apenas este documento de especificação.
+3. Todo o conteúdo deve estar em UTF-8. Declare <meta charset="UTF-8"> no head.
+4. Antes de finalizar, execute uma auditoria completa de codificação: verifique cada caractere acentuado, cada título, cada parágrafo, cada string JS, cada comentário CSS. NENHUM caractere corrompido é aceitável (sem "�", "Ã", "Ã©", etc.).
+5. Responsividade obrigatória: todos os slides devem caber integralmente no viewport (1920×1080, 1600×900, 1440×900, 1366×768, 1280×720, 1024×768, tablets e celulares). NENHUM scroll vertical ou horizontal. Se o conteúdo exceder, reorganize o layout, reduza espaçamentos ou utilize componentes interativos (toggles, accordions, abas). NUNCA use overflow:auto/scroll para slides inteiros.
+6. Scroll do mouse NÃO troca slides. Apenas setas do teclado e swipe em touch.
+7. Clique em cantos da tela NÃO troca slides.
+8. Navegação obrigatória: setas direita/esquerda do teclado, botões na tela, navigation dots, swipe em touch.
+9. Não crie tela de loading. A apresentação inicia imediatamente com o slide 1 visível e ativo, disparando sua animação de entrada automaticamente ao carregar a página.
+10. O z-index do título no slide 1 deve ser 0.
+11. Nenhum elemento pode aparecer antes de sua animação — proibido "flash" de conteúdo.
+12. Ao sair de um slide, todos os elementos devem resetar para o estado inicial. Ao retornar, as animações devem rodar novamente.
+13. Siga a ordem de animações especificada para cada slide. Use stagger para múltiplos elementos similares. Use curvas de easing naturais (ease-out-cubic, ease-in-out, spring). Evite animações lineares.
+14. Cada slide é uma tela cheia. Trate como frame de apresentação profissional (PowerPoint/Keynote/Figma). Nada ultrapassa os limites do viewport.
+15. O conteúdo NUNCA pode aparecer "pronto" antes das animações começarem.
+16. navigation dots são obrigatórios.
+17. Use o sistema de blocos inclinados em perspectiva (skew-panel) como componente visual recorrente.
+18. O título da capa (slide 1) deve usar extrusão 3D com text-shadow (múltiplas camadas) conforme especificado. O texto deve permanecer HORIZONTAL, sem rotate, skew ou transform 3D. A extrusão usa dezenas de text-shadow deslocados 1px cada. Use também ::before com blur para sombra ambiente. z-index: 0.
+19. O primeiro slide ao abrir o HTML deve já aparecer renderizado e visível, com animação de entrada disparada automaticamente no carregamento.
+
+================================================================================
+IDENTIDADE VISUAL GERAL
+================================================================================
+
+TEMA: JavaScript — tecnologia, programação, desenvolvimento web moderno.
+PÚBLICO-ALVO: Estudantes, iniciantes em programação, profissionais de tecnologia.
+OBJETIVO: Educar e inspirar, mostrando a versatilidade e importância do JavaScript.
+ATMOSFERA: Tecnológica, moderna, dinâmica, profissional com toque criativo.
+CONCEITO ARTÍSTICO: "Código que ganha vida" — elementos visuais que representam a fluidez e o poder do JavaScript. A apresentação mescla minimalismo corporativo com toques tecnológicos/futuristas. Cores escuras com destaque amarelo vibrante (identidade JS). Sensação de profundidade, camadas e movimento contínuo.
+
+================================================================================
+PALETA DE CORES
+================================================================================
+
+CORES PRINCIPAIS:
+  - Preto Profundo: #0a0a0a (fundos, áreas escuras)
+  - Branco Puro: #ffffff (textos, ícones claros)
+  - Amarelo JavaScript: #f7df1e (cor principal de destaque, identidade JS)
+
+CORES SECUNDÁRIAS:
+  - Cinza Escuro: #1a1a2e (cards, painéis)
+  - Cinza Médio: #2d2d44 (bordas, separadores)
+  - Cinza Claro: #8892b0 (textos secundários)
+
+CORES DE DESTAQUE:
+  - Laranja JS: #f0a500 (hover, variação do amarelo)
+  - Azul Tecnológico: #4dabf7 (links, elementos tech)
+  - Verde Suave: #69db7c (acertos, vantagens)
+  - Vermelho Suave: #ff6b6b (erros, desvantagens)
+
+CORES DE FUNDO:
+  - #0a0a0a (preto principal)
+  - Gradiente do slide: #0a0a0a → #0f0f1a (preto para azul escuro sutil)
+
+CORES DOS BOTÕES:
+  - Padrão: Amarelo #f7df1e com texto preto
+  - Hover: Laranja #f0a500
+  - Outline: Borda amarela, texto amarelo, hover preenche
+
+CORES DOS TÍTULOS:
+  - Título principal: Branco #ffffff
+  - Subtítulo: Amarelo #f7df1e
+  - Destaques: Amarelo #f7df1e
+
+CORES DOS TEXTOS:
+  - Texto principal: Branco #ffffff (opacidade 0.92)
+  - Texto secundário: Cinza #8892b0
+  - Links: Azul #4dabf7 (hover: amarelo #f7df1e)
+
+CORES DE HOVER:
+  - Amarelo → Laranja (#f7df1e → #f0a500)
+  - Branco → Amarelo claro (#ffffff → #fdf6a4)
+  - Links: Azul → Amarelo (#4dabf7 → #f7df1e)
+
+================================================================================
+TIPOGRAFIA
+================================================================================
+
+FONTE PRINCIPAL (TÍTULOS): "Inter", sans-serif (carregar do Google Fonts)
+  - Slide 1 (capa): Extrusão 3D com text-shadow, peso 800 (ExtraBold), tamanho 4.5rem
+  - Títulos de slide: Peso 700 (Bold), tamanho 2.8rem a 3.2rem
+  - Subtítulos: Peso 600 (SemiBold), tamanho 1.4rem
+
+FONTE DE CONTEÚDO: "Inter", sans-serif
+  - Parágrafos: Peso 400 (Regular), tamanho 1rem a 1.1rem
+  - Listas: Peso 400, tamanho 0.95rem a 1rem
+  - Código: "Fira Code" ou "JetBrains Mono", monospace (carregar do Google Fonts)
+  - Labels/badges: Peso 500, tamanho 0.8rem, uppercase
+
+HIERARQUIA VISUAL:
+  - Slide principal → Título (3rem) → Subtítulo (1.2rem) → Conteúdo (1rem)
+  - Números/destaques → 2.5rem a 4rem, bold, amarelo
+  - Espaçamento entre linhas: 1.5 (conteúdo), 1.2 (títulos)
+  - Letter-spacing: -0.02em (títulos), normal (texto)
+
+================================================================================
+ESTILO VISUAL GERAL
+================================================================================
+
+Minimalista tecnológico com elementos futuristas. Interface limpa, escura, com pontos de cor vibrante (amarelo). Profundidade através de camadas, glassmorphism sutil, iluminação coerente (luz vindo do canto superior esquerdo). Partículas sutis ao fundo. Elementos decorativos tecnológicos (linhas, grids, circuitos sutis, hexágonos). Blocos inclinados em perspectiva como assinatura visual recorrente. Cards com vidro fosco (backdrop-filter: blur). Microanimações em todos os elementos interativos.
+
+MATERIAIS PREDOMINANTES:
+  - Vidro fosco (glassmorphism) — cards, painéis, nav
+  - Metal escovado escuro — elementos decorativos
+  - Plástico fosco premium — botões, badges
+  - Papel digital — áreas de código
+
+TEXTURAS:
+  - Grain/noise sutil no background (overlay fixo com opacidade 0.03)
+  - Leve ruído em elementos sólidos
+  - Gradientes vivos (nunca chapados)
+
+================================================================================
+BACKGROUND GLOBAL
+================================================================================
+
+- Cor base: #0a0a0a com gradiente radial sutil (#0a0a0a no centro → #0f0f1a nas bordas)
+- Partículas: Canvas com 60-80 partículas (pequenos círculos de cor amarela e branca, opacidade 0.2-0.6, tamanhos variados 1-4px, movimento lentíssimo vertical e horizontal, velocidade 0.2px/s). Partículas mais próximas (foreground) se movem ligeiramente mais rápido que as distantes (background), criando micro-paralaxe.
+- Grid sutil: Linhas de grid muito tênues (opacidade 0.04), cor #f7df1e, espaçadas a cada 60px, com leve movimento de pulsação (opacidade varia 0.02-0.06 em loop de 8s)
+- Overlay de noise: Grain cinematográfico sobreposto ao fundo inteiro (opacidade 0.015), usando canvas ou SVG noise
+- Névoa sutil: 2-3 blobs grandes semi-transparentes (gradiente radial, cor amarelo muito escuro #f7df1e com opacidade 0.03-0.05) que se movem extremamente devagar (20s de loop), criando profundidade atmosférica
+
+DIREÇÃO DE ILUMINAÇÃO: Luz vindo do canto superior esquerdo. Sombras projetam para direita e baixo. Glow segue mesma orientação.
+
+================================================================================
+NAVEGAÇÃO
+================================================================================
+
+BARRA DE NAVEGAÇÃO INFERIOR:
+  - Barra horizontal fina (altura 4px) no centro inferior, cor amarela #f7df1e
+  - Preenchimento progressivo conforme avanço dos slides
+  - Animação suave de largura (ease-out, 600ms)
+
+BOTÕES DE NAVEGAÇÃO:
+  - Botão "Anterior" (←): Canto inferior esquerdo, ícone de seta, glassmorphism, opacidade 0.4 (hover: 0.8)
+  - Botão "Próximo" (→): Canto inferior direito, ícone de seta, glassmorphism, opacidade 0.4 (hover: 0.8)
+  - Ambos com hover glow amarelo e micro-escala (1.05)
+
+NAVIGATION DOTS:
+  - Fileira de dots no centro inferior, acima da barra de progresso
+  - 15 dots correspondentes a 15 slides
+  - Dot ativo: amarelo #f7df1e, escala 1.3
+  - Dot inativo: branco opacidade 0.25, escala 1.0
+  - Hover: brilho aumenta, escala 1.15
+  - Clique navega para o slide correspondente
+  - Animação: transições suaves de 300ms ease-out
+
+NAVEGAÇÃO POR TECLADO:
+  - Seta Direita / Seta para Baixo: Próximo slide
+  - Seta Esquerda / Seta para Cima: Slide anterior
+  - Tecla Home: Primeiro slide
+  - Tecla End: Último slide
+  - Number keys (1-9, 0): Navega direta para slide correspondente (1=slide1... 0=slide10, combinações para 11-15 via dois toques rápidos ou não implementado)
+
+TOUCH / SWIPE:
+  - Swipe para esquerda: Próximo slide
+  - Swipe para direita: Slide anterior
+  - Threshold: 50px
+
+CURSOR PERSONALIZADO:
+  - Cursor padrão substituído por um ponto amarelo (8px diâmetro) com glow
+  - Um círculo maior (40px diâmetro) segue atrás com atraso (follow cursor), opacidade 0.15, borda amarela fina
+  - Elementos interativos fazem o cursor crescer (12px) e glow aumentar
+  - Ocultar cursor em dispositivos touch
+
+================================================================================
+ANIMAÇÕES GLOBAIS
+================================================================================
+
+EASING PADRÃO: cubic-bezier(0.25, 0.46, 0.45, 0.94) — ease-out suave
+DURAÇÃO PADRÃO DE ENTRADA: 600ms a 1000ms
+DELAY PADRÃO ENTRE ELEMENTOS (STAGGER): 120ms a 200ms
+
+SEQUÊNCIA PADRÃO DE ENTRADA (cada slide):
+  1. Background já está visível (contínuo)
+  2. Elementos decorativos distantes (500ms após ativação)
+  3. Título principal (700ms) — fade + move up 30px + blur 6px→0
+  4. Subtítulo (900ms)
+  5. Cards / blocos de conteúdo (1100ms + stagger 150ms entre cards)
+  6. Listas / ícones (1300ms + stagger 100ms)
+  7. Botões / CTA (1600ms)
+  8. Efeitos finais / glow (1800ms)
+
+ANIMAÇÕES DE SAÍDA (troca de slide):
+  - Slide atual: fade out + scale 0.95 + blur 4px (400ms ease-in)
+  - Pequeno intervalo (100ms)
+  - Novo slide aparece com animação de entrada completa
+
+MICROANIMAÇÕES CONTÍNUAS:
+  - Partículas: movimento perpétuo lento
+  - Títulos: leve glow pulsando (opacidade varia 0.6-0.9 a cada 3s)
+  - Cards flutuantes: deslocamento vertical de 2-3px a cada 4s
+  - Botões: glow que respira
+  - Décor: rotação de 0.5° a 1° em elementos geométricos
+  - Gradientes: animação sutil de posição (20s loop)
+
+RESPONSIVIDADE DAS ANIMAÇÕES:
+  - Em dispositivos mais lentos ou telas menores, reduzir complexidade (partículas, blur, glow)
+  - Usar prefers-reduced-motion: reduzir ou desabilitar animações
+
+================================================================================
+COMPONENTE RECORRENTE: BLOCO INCLINADO EM PERSPECTIVA (SKEW-PANEL)
+================================================================================
+
+DEFINIÇÃO: Container visual com formato de quadrilátero inclinado em perspectiva, usando clip-path: polygon(). Este é um componente de identidade visual obrigatório que deve aparecer recorrentemente.
+
+GEOMETRIA BASE:
+  - clip-path: polygon(0% 0%, 100% 10%, 100% 90%, 0% 100%)
+  - Lado esquerdo inclinado, lado direito reto
+  - Topo e base levemente inclinados (perspectiva)
+
+IMPLEMENTAÇÃO:
+  - Criar classe CSS reutilizável .skew-panel
+  - Aceitar conteúdo interno (títulos, números, ícones, textos)
+  - Conteúdo interno deve acompanhar a perspectiva do container
+  - Aplicar ao conteúdo interno: transform: skewY(-0.5deg) ou similar SUTIL para integração
+  - Padding interno generoso (especialmente nos cantos inclinados)
+  - Profundidade: box-shadow múltipla + gradiente interno + glow sutil
+
+VARIAÇÕES DE TAMANHO:
+  - Large: 400px × 200px (para títulos de seção)
+  - Medium: 250px × 120px (para badges, destaques)
+  - Small: 150px × 60px (para tags, labels)
+
+FUNÇÕES NA APRESENTAÇÃO:
+  - Badge de número de slide atual
+  - Label de categoria (ex: "História", "Características")
+  - Container de destaque para porcentagens
+  - Faixa de título sobre background decorativo
+  - Indicador de timeline
+  - Card de KPI/estatística
+  - Botão premium em formato inclinado
+
+ANIMAÇÃO DOS BLOCOS:
+  - Entrada: deslizar da esquerda acompanhando inclinação + fade + blur 8px→0
+  - Conteúdo interno aparece 200ms após o bloco estabilizar
+  - Contínuo: leve glow pulsante na borda superior
+
+IMPLEMENTAÇÃO DE REFERÊNCIA:
+  .skew-panel {
+    clip-path: polygon(0% 0%, 100% 10%, 100% 90%, 0% 100%);
+    background: linear-gradient(135deg, #f7df1e, #f0a500);
+    padding: 24px 32px;
+    box-shadow:
+      0 4px 20px rgba(247, 223, 30, 0.2),
+      0 8px 40px rgba(0, 0, 0, 0.4);
+  }
+  .skew-panel .content {
+    transform: skewY(-0.3deg);
+  }
+
+================================================================================
+ESTADO INICIAL DO PRIMEIRO SLIDE (CARREGAMENTO DA PÁGINA)
+================================================================================
+
+- Ao abrir o HTML, slide 1 deve estar imediatamente visível e ativo
+- Disparar animação de entrada automaticamente no load
+- Rotina de inicialização:
+  1. Marcar slide 1 como ativo
+  2. Preparar elementos do slide 1 no estado inicial (opacity:0, transform: translateY(30px), filter: blur(6px))
+  3. Aguardar 300ms (estabilização)
+  4. Iniciar sequência de animação do slide 1
+- Conteúdo NUNCA deve aparecer vazio ou invisível aguardando navegação
+
+================================================================================
+EFEITO DE TEXTO 3D EXTRUDADO — SLIDE 1 (CAPA)
+================================================================================
+
+TÍTULO: "JavaScript: A Linguagem da Web Moderna"
+TEXTO: Horizontal, sem rotação, sem skew, sem perspectiva
+EFEITO: Extrusão 3D usando text-shadow
+
+IMPLEMENTAÇÃO:
+  - let shadow = "";
+    for (let i = 0; i < 35; i++) {
+        shadow += (shadow ? "," : "") + (-i) + "px " + i + "px 0 #cfcfcf";
+    }
+    titulo.style.textShadow = shadow;
+  - Segunda camada via ::before com deslocamento, escurecimento e filter: blur(8px)
+  - Cor do texto: #ffffff (branco)
+  - Sombra ambiente: uma sombra adicional grande e desfocada (blur(20px)) atrás do texto
+  - z-index: 0
+  - Animação do título: glow pulsante da extrusão (as cores das sombras podem variar lentamente de #cfcfcf para #f7df1e com 20% de opacidade)
+
+O QUE NÃO FAZER:
+  - ❌ Texto rotacionado
+  - ❌ Texto inclinado/diagonal
+  - ❌ transform: rotate()
+  - ❌ transform: skew()
+  - ❌ Modelos 3D reais
+  - ✅ Apenas text-shadow com dezenas de camadas
+
+================================================================================
+================================================================================
+ESPECIFICAÇÃO DETALHADA DE CADA SLIDE
+================================================================================
+================================================================================
+
+================================================================================
+SLIDE 1 — CAPA
+================================================================================
+
+NOME DO SLIDE: Capa / Título Principal
+
+OBJETIVO: Impacto inicial. Apresentar o tema e criar expectativa. Momento "UAU".
+
+EMOÇÃO: Inspiração, curiosidade, admiração tecnológica.
+
+LAYOUT: Hero layout assimétrico. Título no centro-esquerdo. Elementos decorativos à direita. Informações secundárias no terço inferior.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Background: fundo escuro com gradiente radial (#0a0a0a → #0f0f1a)
+  - Partículas: Canvas com 80 partículas amarelas e brancas, movimento lento (0.3px/s)
+  - Grid sutil animado (opacidade 0.04)
+  - Título principal: "JavaScript: A Linguagem da Web Moderna" — extrusão 3D text-shadow, posicionado a 25% do topo, alinhado à esquerda com margem de 8% à esquerda. z-index:0
+  - Subtítulo abaixo do título: "Uma jornada pela linguagem que transformou a web" — texto branco opacidade 0.7, tamanho 1.3rem, fade in com delay
+  - Nome do apresentador: "Apresentado por [Nome]" — canto inferior esquerdo, texto cinza 0.9rem
+  - Data: "[Data]" — ao lado do nome
+  - Disciplina (se houver): abaixo do nome, texto cinza 0.8rem
+  - Elemento decorativo à direita: Um grande hexágono ou forma geométrica girando lentamente (animação contínua 20s), wireframe amarelo opacidade 0.15, com linhas de código fluindo dentro dele (efeito de matrix typing)
+  - Bloco inclinado (skew-panel) médio: badge "JS" no canto superior direito, amarelo com texto preto bold
+
+BACKGROUND:
+  - Gradiente radial #0a0a0a centro → #0f0f1a bordas
+  - Partículas lentas (canvas)
+  - Grid sutil
+  - Blob de névoa amarelo muito escuro (opacidade 0.03) movendo-se lentamente em loop de 25s
+
+ELEMENTOS DECORATIVOS:
+  - Hexágono wireframe grande à direita (animado, rotação 20s, opacidade 0.15)
+  - Pequenos pontos de luz (glow dots) espalhados aleatoriamente (3-4 pontos, amarelo opacidade 0.1, pulsando)
+  - Grid de linhas finas
+
+ELEMENTOS INTERATIVOS:
+  - Navigation dots (inferior)
+  - Botões Próximo/Anterior (inferior)
+  - Barra de progresso
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Slide de capa
+  - Partículas (Estrelas/Poeira)
+  - Texto 3D (extrusão)
+  - Elementos decorativos: Hexágonos, formas abstratas
+  - Grid
+  - Futurista / HUD leve
+
+PARTÍCULAS:
+  - Tipo: Círculos minúsculos (estilo estrelas/poeira digital)
+  - Quantidade: 80
+  - Tamanho: 1px a 4px
+  - Cor: Amarelo #f7df1e (60%), Branco (40%)
+  - Movimento: Vertical e horizontal extremamente lento (0.3px/s)
+  - Variação: 30% têm movimento mais rápido (foreground), 70% mais lento (background)
+  - Opacidade: 0.1 a 0.5 (aleatória)
+
+ILUMINAÇÃO:
+  - Glow amarelo suave atrás do título
+  - Iluminação direcional do canto superior esquerdo sobre o hexágono decorativo
+
+EFEITOS:
+  - Texto 3D com extrusão (text-shadow)
+  - Blur no background (névoa)
+  - Glow no título
+  - Partículas com paralaxe sutil
+  - Grain/noise overlay
+
+ÍCONES:
+  - Símbolo "{}" (chaves) decorativo pequeno ao lado do subtítulo, amarelo, opacidade 0.5
+  - Ícone JS (letras JS) no bloco inclinado
+
+IMAGENS: Nenhuma imagem externa. Apenas elementos gerados por CSS/Canvas.
+
+TIPOGRAFIA:
+  - Título: "Inter" ExtraBold, 4.5rem, branco, extrusão 3D
+  - Subtítulo: "Inter" Regular, 1.3rem, branco opacidade 0.7
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+  1. Background e partículas (já ativos — contínuos)
+  2. Grid e névoa (0ms)
+  3. Hexágono decorativo direito (300ms, fade + scale 0.8→1)
+  4. Bloco inclinado "JS" superior direito (400ms, slide-in da direita)
+  5. Título principal (600ms, fade + move up 40px + extrusão aparece)
+  6. Subtítulo (900ms, fade + move up 20px)
+  7. Nome/data/disciplina (1200ms, fade + move up 10px)
+  8. Glow final do título (1400ms)
+
+INTERAÇÕES:
+  - Navegação: setas, dots, botões, teclado, swipe
+  - Cursor personalizado (amarelo com glow)
+
+TRANSIÇÃO PARA O PRÓXIMO SLIDE:
+  - Fade out + blur 4px + scale 0.97 (500ms)
+  - Slide 2 inicia com animação padrão
+
+================================================================================
+SLIDE 2 — O QUE É JAVASCRIPT?
+================================================================================
+
+NOME: O que é JavaScript?
+
+OBJETIVO: Definir JavaScript de forma clara e acessível. Estabelecer conceito fundamental.
+
+EMOÇÃO: Curiosidade intelectual, clareza.
+
+LAYOUT: Split screen. 40% esquerda (título + texto conceitual), 60% direita (cards com bullet points).
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Background: Mesmo fundo global (gradiente escuro + partículas + noise + grid)
+  - Título no topo esquerdo: "O que é JavaScript?" com bloco inclinado como background do título
+  - Subtítulo: Texto explicativo abaixo do título
+  - À direita: 4 cards em grid 2×2, cada um com ícone e texto
+    - Card 1: Ícone de calendário + "Criada em 1995"
+    - Card 2: Ícone de pessoa + "Brendan Eich"
+    - Card 3: Ícone de navegador + "Executada em navegadores"
+    - Card 4: Ícone de servidor + "Servidores e apps desktop/mobile"
+
+BACKGROUND:
+  - Fundo global com partículas
+  - Leve gradiente vertical esmaecendo para mais escuro na base
+
+ELEMENTOS DECORATIVOS:
+  - Linhas conectoras entre os cards (SVG, animadas)
+  - Pequeno orbe de luz flutuante no canto direito inferior (efeito decorativo)
+
+ELEMENTOS INTERATIVOS:
+  - Cards com hover: elevam (translateY -5px), glow amarelo na borda, sombra aumenta
+  - Cursor personalizado
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Slide de conteúdo
+  - Layout split screen
+  - Cards
+  - Ícones SVG animados
+  - Bloco inclinado (skew-panel) como fundo do título
+
+PARTÍCULAS: Menu global (30 partículas sutis, fundo).
+
+ILUMINAÇÃO: Luz superior esquerda. Cards têm sombra projetando para direita/baixo.
+
+EFEITOS:
+  - Cards com glassmorphism (background: rgba(255,255,255,0.05), backdrop-filter: blur(12px))
+  - Borda sutil nos cards (1px rgba(247,223,30,0.1))
+  - Hover: glow amarelo, escala 1.02
+
+ÍCONES:
+  - Card 1: Ícone de calendário SVG
+  - Card 2: Ícone de usuário SVG
+  - Card 3: Ícone de globo/navegador SVG
+  - Card 4: Ícone de servidor SVG
+  - Estilo: outline, 1.5px stroke, cor amarela
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: Inter Bold 2.8rem, branco, dentro de skew-panel amarelo (texto preto)
+  - Subtítulo: Inter Regular 1.1rem, branco opacidade 0.8
+  - Cards: Título 1.1rem bold, descrição 0.9rem regular
+
+ORDEM DE ENTRADA:
+  1. Background (contínuo)
+  2. Partículas e grid (0ms)
+  3. Skew-panel do título (400ms, slide-in esquerda com blur 6px→0)
+  4. Título dentro do painel (500ms, fade)
+  5. Subtítulo (700ms, fade + move up 15px)
+  6. Cards em grid: 2×2, stagger 200ms entre cada (900ms, 1100ms, 1300ms, 1500ms)
+  7. Cada card: fade + scale 0.9→1 + glow aumenta
+  8. Ícones dentro dos cards (200ms após cada card)
+  9. Linhas conectoras entre cards (desenhar SVG, 1600ms a 2000ms)
+
+INTERAÇÕES:
+  - Hover nos cards: elevam, glow, sombra
+  - Clique em card não tem ação especial (apenas visual)
+  - Navegação padrão
+
+TRANSIÇÃO: Cross-fade com leve scale (0.98→1). Saída com blur 3px.
+
+================================================================================
+SLIDE 3 — HISTÓRIA DO JAVASCRIPT
+================================================================================
+
+NOME: História do JavaScript
+
+OBJETIVO: Apresentar a evolução cronológica do JS de forma visual e impactante.
+
+EMOÇÃO: Respeito pela trajetória, admiração pela evolução.
+
+LAYOUT: Timeline vertical com 5 marcos. Título no topo.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título no topo com background de skew-panel
+  - Linha vertical central que atravessa o slide
+  - 5 marcos distribuídos ao longo da linha (alternando esquerda/direita)
+    - 1995: Criação (Netscape Navigator)
+    - 1997: ECMAScript (Padronização)
+    - 2009: ES5 (Evolução)
+    - 2015: ES6 (Modernização)
+    - Hoje: Estado atual (Onipresença)
+  - Cada marco: círculo na linha + bloco inclinado (skew-panel) com o ano e descrição
+
+BACKGROUND: Fundo global. Uma sutil linha de "circuito" ou "código binário" decorando a lateral.
+
+OBSERVAÇÃO: É proibido criar linha do tempo tradicional. Em vez disso, usar uma VERTICAL PROGRESSIVA com blocos inclinados. A linha vertical central funciona como "eixo de progresso" mas o formato visual é de marcos com painéis inclinados, não uma timeline tradicional reta.
+
+ELEMENTOS DECORATIVOS:
+  - Linha vertical central (fina, 2px, gradiente amarelo com opacidade variável)
+  - Círculos nos marcos (8px diâmetro, amarelo com glow)
+  - Partículas subindo ao longo da linha (pequenas faíscas amarelas)
+
+ELEMENTOS INTERATIVOS:
+  - Hover em cada marco: escala 1.05 do bloco, glow aumenta, texto de descrição expande
+  - Clique em marco: não tem ação especial (visual apenas)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Slide de cronograma (adaptado para não ser timeline tradicional)
+  - Blocos inclinados
+  - Elementos decorativos: Círculos, linhas
+  - Efeitos de luz: Glow nos marcos
+
+PARTÍCULAS:
+  - 15 partículas tipo "faísca" subindo pela linha vertical (amarelo, 2px, opacidade 0.3-0.6)
+
+ILUMINAÇÃO: Glow amarelo nos marcos ativos. Luz superior esquerda.
+
+EFEITOS:
+  - Blocos inclinados com gradiente (amarelo para laranja) para anos
+  - Glow pulsante no ano atual (marco "Hoje")
+  - Linha vertical com gradiente animado (fluindo para cima)
+
+ÍCONES:
+  - Ícone de ano (apenas o número, bold, grande)
+  - Ícone pequeno ao lado de cada descrição (código, engrenagem, foguete, etc.)
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: Inter Bold 2.8rem, branco, em skew-panel
+  - Ano: Inter ExtraBold 2.2rem, preto (dentro do skew-panel amarelo)
+  - Descrição: Inter Regular 0.9rem, branco
+
+ORDEM DE ENTRADA:
+  1. Background (contínuo)
+  2. Título com skew-panel (400ms)
+  3. Linha vertical central desenhando de cima para baixo (600ms)
+  4. Marco 1 (1995): 900ms
+  5. Marco 2 (1997): 1200ms
+  6. Marco 3 (2009): 1500ms
+  7. Marco 4 (2015): 1800ms
+  8. Marco 5 (Hoje): 2100ms
+  9. Cada marco: skew-panel desliza + fade + glow
+  10. Faíscas começam a subir (2400ms, contínuo)
+
+INTERAÇÕES:
+  - Hover em marcos: elevação, glow, tooltip com mais detalhes
+  - Tooltip rico com texto extra sobre cada período
+
+TRANSIÇÃO: Slide-out com blur 5px + fade. Slide-in com fade + scale.
+
+================================================================================
+SLIDE 4 — ONDE O JAVASCRIPT É UTILIZADO?
+================================================================================
+
+NOME: Onde o JavaScript é utilizado?
+
+OBJETIVO: Demonstrar a versatilidade do JS em diferentes plataformas.
+
+EMOÇÃO: Surpresa, admiração pela abrangência.
+
+LAYOUT: Bento grid — 7 cards em grid assimétrico (3+2+2 ou layout bento).
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título no topo: "Onde o JavaScript é utilizado?" com skew-panel
+  - 7 cards em layout bento grid (inspiração em layout de dashboard):
+    - Card 1 (grande): 🌐 Sites — ícone + descrição
+    - Card 2: 🎮 Jogos
+    - Card 3: 📱 Apps Mobile
+    - Card 4: 🖥️ Servidores
+    - Card 5: 🤖 IA
+    - Card 6: 💻 Desktop
+    - Card 7: 🔌 IoT
+  - Cada card com ícone grande no centro e label abaixo
+
+BACKGROUND: Fundo global. Um padrão de hexágonos/conexões sutis (opacidade 0.05) representando a interconexão entre plataformas.
+
+ELEMENTOS DECORATIVOS:
+  - Linhas de conexão entre os cards (SVG) representando que JS conecta todas essas áreas
+  - Pequenos pontos de luz pulsando nos cantos do bento grid
+
+ELEMENTOS INTERATIVOS:
+  - Hover nos cards: elevam, ícone cresce, glow amarelo
+  - Clique: expande card com mais informações (toggle accordion dentro do card)
+  - Ao expandir: mostra 2-3 exemplos de tecnologias (ex: Sites → React, Vue, Angular)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Bento Grid
+  - Cards com glassmorphism
+  - Elementos decorativos: Hexágonos, linhas de conexão
+  - Ícones SVG animados
+
+PARTÍCULAS: 20 partículas de conexão (pequenas linhas brilhantes entre cards).
+
+ILUMINAÇÃO: Cada card tem glow próprio na cor do ícone (amarelo, azul, verde, etc).
+
+EFEITOS:
+  - Cards com glassmorphism + borda sutil
+  - Hover: escala 1.03, glow, elevação
+  - Ícone dentro do card: leve rotação/flutuação contínua
+
+ÍCONES:
+  - 🌐 Globe (Sites)
+  - 🎮 Gamepad (Jogos)
+  - 📱 Smartphone (Mobile)
+  - 🖥️ Server (Servidores)
+  - 🤖 Brain/Chip (IA)
+  - 💻 Monitor (Desktop)
+  - 🔌 Plug/Node (IoT)
+  - Estilo: SVG outline, consistentes, amarelo ou branco
+
+IMAGENS: Nenhuma imagem externa.
+
+TIPOGRAFIA:
+  - Título: Inter Bold 2.8rem, branco, em skew-panel amarelo
+  - Labels nos cards: Inter SemiBold 1.2rem, branco
+  - Descrição expandida: Inter Regular 0.85rem, cinza claro
+
+ORDEM DE ENTRADA:
+  1. Background (contínuo)
+  2. Título (400ms)
+  3. Linhas de conexão desenhando (600ms)
+  4. Cards em sequência (stagger 150ms):
+     - Card 1 (grande): 900ms
+     - Card 2: 1050ms
+     - Card 3: 1200ms
+     - Card 4: 1350ms
+     - Card 5: 1500ms
+     - Card 6: 1650ms
+     - Card 7: 1800ms
+  5. Cada card: fade + scale 0.9→1 + ícone aparece com flutuação
+  6. Glow final (2000ms)
+
+INTERAÇÕES:
+  - Hover: elevação, glow, ícone anima
+  - Click: expande card com accordion mostrando exemplos
+  - Ao expandir um card, os outros reduzem opacidade ligeiramente
+
+TRANSIÇÃO: Push da direita para esquerda (slide da próxima seção).
+
+================================================================================
+SLIDE 5 — COMO FUNCIONA?
+================================================================================
+
+NOME: Como funciona?
+
+OBJETIVO: Explicar visualmente a interação entre HTML, CSS e JavaScript.
+
+EMOÇÃO: Clareza, entendimento, "aha moment".
+
+LAYOUT: Fluxograma vertical com 4 etapas conectadas. Layout centralizado.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título no topo: "Como funciona?" com skew-panel
+  - Subtítulo: "A trindade do desenvolvimento web"
+  - Fluxograma vertical com 4 caixas conectadas por setas:
+    1. 🧑 Usuário (ícone de pessoa, caixa azul)
+    2. 📄 HTML → Estrutura (caixa laranja)
+    3. 🎨 CSS → Aparência (caixa azul claro)
+    4. ⚡ JavaScript → Comportamento (caixa amarela)
+    ↓
+    🌟 Página Interativa
+  - Setas entre as caixas usando SVG ou caracteres
+  - À direita de cada caixa, pequenos exemplos em tooltips
+
+BACKGROUND: Fundo global, com padrão de linhas de código muito sutil no fundo (opacidade 0.03).
+
+ELEMENTOS DECORATIVOS:
+  - Linhas de fluxo animadas (SVG, pequenas partículas percorrendo as setas)
+  - Brilho nas conexões entre etapas
+
+ELEMENTOS INTERATIVOS:
+  - Hover em cada etapa: revela tooltip explicativo com exemplos
+  - Tooltip rico: mostra código snippet pequeno ao lado
+  - Clique em "JavaScript": destaca com glow
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Slide de conteúdo
+  - Fluxograma / Diagrama
+  - Tooltips
+  - Elementos decorativos: Setas, linhas
+
+PARTÍCULAS: Pequenas partículas percorrendo as setas de fluxo (energia fluindo).
+
+ILUMINAÇÃO: Glow na caixa ativa (hover). Luz superior esquerda.
+
+EFEITOS:
+  - Caixas com bordas arredondadas e glassmorphism
+  - Setas com gradiente animado (fluindo)
+  - Tooltips com glassmorphism
+
+ÍCONES:
+  - Pessoa (Usuário)
+  - Símbolo HTML5 (HTML)
+  - Símbolo CSS3 (CSS)
+  - Símbolo JS (JavaScript)
+  - Estrela (Página Interativa)
+  - Todos SVG, outline
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, dentro de skew-panel
+  - Labels das caixas: 1.3rem bold
+  - Descrições: 0.9rem regular
+
+ORDEM DE ENTRADA:
+  1. Background (contínuo)
+  2. Título (400ms)
+  3. Subtítulo (600ms)
+  4. Caixa "Usuário" (800ms)
+  5. Seta 1 (950ms)
+  6. Caixa "HTML" (1050ms)
+  7. Seta 2 (1150ms)
+  8. Caixa "CSS" (1250ms)
+  9. Seta 3 (1350ms)
+  10. Caixa "JavaScript" (1450ms, glow especial amarelo)
+  11. Seta 4 (1650ms)
+  12. "Página Interativa" (1800ms, com glow + escala)
+  13. Partículas nas setas (2000ms, contínuo)
+
+INTERAÇÕES:
+  - Hover em caixa: escala 1.05, tooltip com exemplos
+  - Tooltip: "HTML → Tags, atributos, estrutura" / "CSS → Cores, fontes, layout" / "JS → Botões, menus, animações, login, carrinho"
+
+TRANSIÇÃO: Cross-fade com morph (background morph suave).
+
+================================================================================
+SLIDE 6 — PRINCIPAIS CARACTERÍSTICAS
+================================================================================
+
+NOME: Principais características
+
+OBJETIVO: Listar as características que tornam o JavaScript especial.
+
+EMOÇÃO: Confiança, entusiasmo.
+
+LAYOUT: Grid 2×4 com 7 cards + 1 card de destaque.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título: "Principais Características" com skew-panel
+  - 8 cards em grid 4×2, cada um com:
+    - Ícone
+    - Título da característica
+    - Breve descrição (1 frase)
+  - Características:
+    1. Fácil de aprender (🚀)
+    2. Interpretada (⚡)
+    3. Multiparadigma (🔄)
+    4. Orientada a objetos (📦)
+    5. Assíncrona (⏱️)
+    6. Grande comunidade (👥)
+    7. Multiplataforma (🌍)
+    8. [Extra] Tipagem dinâmica (🎯)
+
+BACKGROUND: Fundo global.
+
+ELEMENTOS DECORATIVOS:
+  - Bloco inclinado grande como headline
+  - Pequenas estrelas/pontos decorativos
+
+ELEMENTOS INTERATIVOS:
+  - Hover: card eleva, ícone anima, glow
+  - Clique: não tem ação especial
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Grid de cards
+  - Ícones SVG animados
+
+PARTÍCULAS: Mínimas (apenas fundo).
+
+ILUMINAÇÃO: Glow sutil em cada card no hover.
+
+EFEITOS:
+  - Glassmorphism nos cards
+  - Gradiente sutil no background
+  - Ícones com leve flutuação contínua
+
+ÍCONES:
+  - 8 ícones SVG correspondentes a cada característica
+  - Estilo outline consistente, amarelo
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, skew-panel
+  - Card título: 1.1rem bold, branco
+  - Card descrição: 0.85rem, cinza claro
+
+ORDEM DE ENTRADA:
+  1. Background
+  2. Título (400ms)
+  3. Cards linha 1 (4 cards, stagger 150ms, iniciando 700ms)
+  4. Cards linha 2 (4 cards, stagger 150ms, iniciando 1400ms)
+  5. Cada card: fade + scale 0.92→1 + blur 4px→0
+  6. Ícones começam flutuação contínua (2000ms)
+
+INTERAÇÕES:
+  - Hover: translateY -5px, box-shadow aumenta, glow amarelo na borda, ícone escala 1.15
+
+TRANSIÇÃO: Fade + blur (saída e entrada).
+
+================================================================================
+SLIDE 7 — CONCEITOS BÁSICOS
+================================================================================
+
+NOME: Conceitos básicos
+
+OBJETIVO: Apresentar os fundamentos da programação em JavaScript.
+
+EMOÇÃO: Educação, clareza, estrutura.
+
+LAYOUT: Grid 3×3 com 8 cards + 1 card central destacado.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título: "Conceitos Básicos" com skew-panel
+  - 8 conceitos em grid 3×3 (centro vazio ou com ícone decorativo):
+    - Variáveis     | Tipos de dados | Operadores
+    - Funções       | [Ícone JS]     | Condições
+    - Laços         | Objetos        | Arrays
+  - Cada card: nome do conceito + mini descrição + ícone
+
+BACKGROUND: Fundo global com pattern sutil de código (opacidade 0.02).
+
+ELEMENTOS DECORATIVOS:
+  - Card central com logo JS grande (decorativo, não clicável)
+  - Linhas conectando conceitos ao centro (relação radial)
+
+ELEMENTOS INTERATIVOS:
+  - Hover: card eleva, glow, ícone anima
+  - Clique: tooltip com mini exemplo de código daquele conceito (popup)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Grid de cards
+  - Tooltips/Popups com código
+  - Elementos decorativos: Conexões, linhas
+
+PARTÍCULAS: Fundo global.
+
+ILUMINAÇÃO: Glow sutil.
+
+EFEITOS:
+  - Cards com glassmorphism
+  - Ícone central com rotação lenta (20s) e glow pulsante
+
+ÍCONES:
+  - 8 ícones SVG representando cada conceito
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, skew-panel
+  - Card título: 1.1rem bold
+  - Descrição: 0.8rem
+
+ORDEM DE ENTRADA:
+  1. Background
+  2. Título (400ms)
+  3. Logo JS central (600ms, fade + scale 0→1 + glow)
+  4. Cards periféricos em ordem radial (stagger 120ms):
+     - Superior: 800ms, 920ms, 1040ms
+     - Laterais: 1160ms, 1280ms
+     - Inferiores: 1400ms, 1520ms, 1640ms
+  5. Linhas de conexão (1800ms)
+
+INTERAÇÕES:
+  - Hover: eleva, glow, sombra
+  - Click: popup com mini código snippet do conceito
+  - Popup: glassmorphism, fade in, botão fechar (X), código em monospace com syntax highlight amarelo
+
+TRANSIÇÃO: Fade + scale (0.97→1).
+
+================================================================================
+SLIDE 8 — EXEMPLO DE CÓDIGO
+================================================================================
+
+NOME: Exemplo de código
+
+OBJETIVO: Mostrar código JavaScript real e explicar sua estrutura.
+
+EMOÇÃO: Compreensão, "é mais simples do que parece".
+
+LAYOUT: Split 50/50. Esquerda: título + explicação. Direita: editor de código.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título: "Exemplo de código" com skew-panel
+  - Lado esquerdo:
+    - Subtítulo: "Vamos ver como funciona na prática"
+    - 4 bullet points explicando o código:
+      - "function → declaração da função"
+      - "saudacao → nome da função"
+      - "nome → parâmetro"
+      - "return → valor de retorno"
+    - Console output: "→ Olá, Mundo!" (animado, como se estivesse sendo digitado)
+  - Lado direito:
+    - Bloco de código com aparência de editor (VS Code theme escuro)
+    - Destaque de sintaxe (amarelo para keywords, verde para strings, azul para funções)
+    - Efeito de digitação (typewriter) no código
+
+CÓDIGO A MOSTRAR:
+function saudacao(nome) {
+    return "Olá, " + nome + "!";
+}
+
+console.log(saudacao("Mundo"));
+
+BACKGROUND: Fundo global. Grid mais evidente atrás do editor de código.
+
+ELEMENTOS DECORATIVOS:
+  - Números de linha no editor (1, 2, 3, 4, 5) — cinza escuro
+  - Mini dots (fechar, minimizar, maximizar) no topo do editor estilo macOS
+  - Cursor piscando ao final da digitação
+
+ELEMENTOS INTERATIVOS:
+  - Hover no código: não tem ação especial
+  - Botão "Copiar código" (ícone de copy) no canto do editor, hover glow
+  - Clique em "Copiar": feedback visual (check + tooltip "Copiado!")
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Slide de conteúdo
+  - Editor de código com syntax highlight
+  - Typing effect
+  - Layout split screen
+
+PARTÍCULAS: Fundo global.
+
+ILUMINAÇÃO: Leve glow azulado no editor (como monitor).
+
+EFEITOS:
+  - Editor: glassmorphism escuro, borda sutil, glow
+  - Syntax highlight: amarelo (#f7df1e) para keywords, verde (#69db7c) para strings, azul (#4dabf7) para nomes de função
+  - Typing effect: letras aparecem em sequência com cursor piscando
+
+ÍCONES:
+  - Botão copiar (SVG clipboard)
+  - Console output com seta "→"
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, skew-panel
+  - Código: Fira Code ou JetBrains Mono, 1rem, monospace
+  - Bullet points: Inter 0.95rem
+  - Console output: Fira Code, 0.9rem, verde
+
+ORDEM DE ENTRADA:
+  1. Background
+  2. Título (400ms)
+  3. Subtítulo esquerdo (600ms)
+  4. Bullet points (stagger 150ms, 800ms cada)
+  5. Console output (1400ms, typing effect)
+  6. Editor de código direito (600ms, fade + slide-in da direita)
+  7. Código aparece com typing effect (1600ms, linha por linha)
+  8. Números de linha e dots do editor (junto com o editor)
+  9. Botão copiar (2200ms, fade + glow)
+
+INTERAÇÕES:
+  - Botão copiar: hover glow, click copia texto + feedback visual (tooltip "Copiado!" + check)
+  - Console: animação contínua de typing loop (opcional, pode ficar estático)
+
+TRANSIÇÃO: Fade + morph sutil (diferenciar dos anteriores).
+
+================================================================================
+SLIDE 9 — FRAMEWORKS E BIBLIOTECAS
+================================================================================
+
+NOME: Frameworks e bibliotecas
+
+OBJETIVO: Apresentar o ecossistema de ferramentas do JavaScript.
+
+EMOÇÃO: Abundância, oportunidade, organização.
+
+LAYOUT: Grid 2×4 com logos/ícones e descrições.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título: "Frameworks e bibliotecas" com skew-panel
+  - 7 cards em grid (4 na linha 1, 3 na linha 2, centralizados):
+    1. ⚛️ React — Biblioteca para interfaces
+    2. 🟢 Vue — Framework progressivo
+    3. 🔵 Angular — Framework completo
+    4. 🟢 Node.js — Runtime server-side
+    5. ⚡ Express — Framework para APIs
+    6. ▲ Next.js — Framework React full-stack
+    7. 🖥️ Electron — Aplicações desktop
+  - Cada card: logotipo/ícone + nome + descrição curta
+
+BACKGROUND: Fundo global. Padrão de "caixas de ferramentas" sutis (opacidade 0.03).
+
+ELEMENTOS DECORATIVOS:
+  - Bloco inclinado secundário com texto "Ecossistema JS" no canto
+  - Linhas decorativas separando as duas linhas
+
+ELEMENTOS INTERATIVOS:
+  - Hover: card eleva, ícone cresce, glow na cor característica do framework
+  - Click: popup com mais detalhes (ano de criação, criador, site)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Grid de cards
+  - Popups
+  - Ícones
+
+PARTÍCULAS: Fundo global.
+
+ILUMINAÇÃO: Glow colorido em cada card (React: azul, Vue: verde, Angular: vermelho, etc).
+
+EFEITOS:
+  - Glassmorphism nos cards
+  - Ícones com cores oficiais (representadas)
+
+ÍCONES:
+  - Logotipos dos frameworks representados como SVGs simplificados
+
+IMAGENS: Nenhuma imagem externa. Apenas SVG.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, skew-panel
+  - Card nome: 1.1rem bold
+  - Card descrição: 0.85rem
+
+ORDEM DE ENTRADA:
+  1. Background
+  2. Título (400ms)
+  3. Bloco inclinado secundário (500ms)
+  4. Linha 1 cards (4 cards, stagger 150ms, 700ms+)
+  5. Linha 2 cards (3 cards, stagger 150ms, 1400ms+)
+  6. Glow final em todos (2000ms)
+
+INTERAÇÕES:
+  - Hover: escala 1.03, glow, ícone 1.1x
+  - Click: popup com: nome completo, ano, criador, site (simulado)
+  - Popup: glassmorphism, animado, botão fechar
+
+TRANSIÇÃO: Fade + blur.
+
+================================================================================
+SLIDE 10 — VANTAGENS
+================================================================================
+
+NOME: Vantagens
+
+OBJETIVO: Mostrar os benefícios de aprender/utilizar JavaScript.
+
+EMOÇÃO: Entusiasmo, motivação, confiança.
+
+LAYOUT: Lista vertical com 6 itens + destaque visual.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título: "Vantagens" com skew-panel
+  - 6 vantagens em lista vertical, cada uma com:
+    - Ícone check ✅ verde
+    - Texto da vantagem
+    - Barra de progresso/highlight mostrando "nível" (ex: "⭐⭐⭐⭐⭐")
+  - Vantagens:
+    1. ✅ Muito utilizada — 5/5
+    2. ✅ Grande comunidade — 5/5
+    3. ✅ Fácil começar — 5/5
+    4. ✅ Muitas vagas — 5/5
+    5. ✅ Funciona em qualquer navegador — 5/5
+    6. ✅ Muito material gratuito — 5/5
+
+BACKGROUND: Fundo global. Luz verde sutil em um dos cantos (remetendo a "positivo").
+
+ELEMENTOS DECORATIVOS:
+  - Partículas verdes sutis (poucas, tipo confete leve)
+  - Bloco inclinado com "TOP 6" no canto
+
+ELEMENTOS INTERATIVOS:
+  - Hover em cada item: glow verde, barra expande, check cresce
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Slide de conteúdo
+  - Lista com ícones
+  - Contadores visuais (estrelas/barras)
+
+PARTÍCULAS: 10 partículas verdes flutuando.
+
+ILUMINAÇÃO: Glow verde sutil nos itens hover.
+
+EFEITOS:
+  - Itens com glassmorphism em linha
+  - Check ícone com animação de preenchimento
+  - Barras de avaliação com gradiente verde
+
+ÍCONES:
+  - Check SVG verde (#69db7c)
+  - Estrelas para avaliação
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, skew-panel
+  - Texto das vantagens: 1.1rem
+  - Avaliação: 0.9rem
+
+ORDEM DE ENTRADA:
+  1. Background
+  2. Título (400ms)
+  3. Bloco inclinado "TOP 6" (500ms)
+  4. Item 1 (700ms)
+  5. Item 2 (900ms)
+  6. Item 3 (1100ms)
+  7. Item 4 (1300ms)
+  8. Item 5 (1500ms)
+  9. Item 6 (1700ms)
+  10. Cada item: fade + slide-in esquerda + check escala + barra preenche da esquerda para direita
+
+INTERAÇÕES:
+  - Hover: glow, leve expansão, check gira 15°
+  - Click: não tem ação especial
+
+TRANSIÇÃO: Slide-out para a esquerda, slide-in da direita.
+
+================================================================================
+SLIDE 11 — DESVANTAGENS
+================================================================================
+
+NOME: Desvantagens
+
+OBJETIVO: Apresentar as limitações do JS de forma equilibrada.
+
+EMOÇÃO: Maturidade, realismo, equilíbrio.
+
+LAYOUT: Cards diagonais (5 cards em ziguezague descendente).
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título: "Desvantagens" com skew-panel (verso: fundo escuro, texto amarelo)
+  - 5 cards em ziguezague (alternando esquerda/direita):
+    1. ⚠️ Pode ser lenta em apps pesadas
+    2. ⚠️ Erros aparecem apenas na execução
+    3. ⚠️ Diferenças entre navegadores antigos
+    4. ⚠️ Muitas formas de fazer a mesma coisa
+    5. ⚠️ Ecossistema grande pode confundir
+
+BACKGROUND: Fundo global ligeiramente mais escuro que o normal. Sombras mais pronunciadas.
+
+ELEMENTOS DECORATIVOS:
+  - Bloco inclinado pequeno com "⚠️ Atenção" no canto superior direito
+  - Partículas vermelhas/laranja escuras (poucas, sutis)
+
+ELEMENTOS INTERATIVOS:
+  - Hover: card se inclina levemente, glow laranja, tooltip com sugestão de mitigação
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Cards inclinados (diagonal composition)
+  - Tooltips
+  - Elementos decorativos
+
+PARTÍCULAS: 8 partículas laranja escuras, movimento lento.
+
+ILUMINAÇÃO: Glow laranja/vermelho suave. Luz superior esquerda ainda, mas mais difusa.
+
+EFEITOS:
+  - Cards com fundo mais escuro, borda sutil laranja
+  - Ícone de alerta com leve pulsação
+
+ÍCONES:
+  - ⚠️ Warning SVG (laranja #ff922b)
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, skew-panel escuro
+  - Texto: 1rem, branco opacidade 0.85
+  - Dica na tooltip: 0.8rem, laranja claro
+
+ORDEM DE ENTRADA:
+  1. Background
+  2. Título (400ms)
+  3. Bloco "⚠️ Atenção" (500ms)
+  4. Card 1 (esquerda, 800ms)
+  5. Card 2 (direita, 1100ms)
+  6. Card 3 (esquerda, 1400ms)
+  7. Card 4 (direita, 1700ms)
+  8. Card 5 (esquerda, 2000ms)
+  9. Cada card: fade + slide-in (alternando direção) + glow
+
+INTERAÇÕES:
+  - Hover: leve inclinação, tooltip com dica de mitigação:
+    - "Use Web Workers para processamento pesado"
+    - "Use TypeScript para catching de erros"
+    - "Use polyfills para compatibilidade"
+    - "Siga padrões de projeto"
+    - "Comece com um roadmap guiado"
+
+TRANSIÇÃO: Fade com leve chromatic aberration (efeito sutil).
+
+================================================================================
+SLIDE 12 — EXEMPLOS REAIS
+================================================================================
+
+NOME: Exemplos reais
+
+OBJETIVO: Mostrar grandes empresas que usam JavaScript.
+
+EMOÇÃO: Credibilidade, inspiração, "é coisa séria".
+
+LAYOUT: Grid 4×2 com logos + nomes. Layout de "galeria de marcas".
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título: "Exemplos reais" com skew-panel
+  - 8 cards em grid 4×2 com:
+    - Logotipo da empresa (SVG simplificado ou representação visual)
+    - Nome da empresa
+    - Como usam JS (breve descrição)
+  - Empresas:
+    1. YouTube — Interface, player, recomendações
+    2. Netflix — Plataforma completa
+    3. Facebook — Interface inteira
+    4. Instagram — Web e mobile
+    5. Discord — App desktop
+    6. Gmail — Interface complexa
+    7. Spotify — Web player
+    8. Trello — Aplicação inteira
+
+BACKGROUND: Fundo global. Grid de "conexões" representando a internet.
+
+ELEMENTOS DECORATIVOS:
+  - Bloco inclinado com "Grandes empresas" no canto
+  - Linhas conectando empresas entre si (representando interconexão web)
+
+ELEMENTOS INTERATIVOS:
+  - Hover: card vira (flip 3D suave) revelando "Como usam JS" no verso
+  - Click/Flip: animação 3D do card girando
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Cards com flip 3D
+  - Grid de marcas
+  - Elementos decorativos: Conexões
+
+PARTÍCULAS: Fundo global.
+
+ILUMINAÇÃO: Glow amarelo sutil.
+
+EFEITOS:
+  - Cards: hover faz tilt 3D (inclinação seguindo cursor) + glow
+  - Flip animation no clique
+  - Linhas de conexão animadas
+
+ÍCONES:
+  - Logos representados como texto estilizado ou SVG simplificado
+
+IMAGENS: Nenhuma imagem externa. Representações visuais das marcas.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, skew-panel
+  - Nome empresa: 1.3rem bold
+  - Descrição: 0.9rem
+  - Verso (como usam): 1rem, amarelo
+
+ORDEM DE ENTRADA:
+  1. Background
+  2. Título (400ms)
+  3. Bloco "Grandes empresas" (500ms)
+  4. Linhas de conexão (600ms)
+  5. Galeria 4×2: stagger 180ms entre cards (800ms, 980ms, 1160ms, 1340ms, 1520ms, 1700ms, 1880ms, 2060ms)
+  6. Cada card: fade + scale 0.9→1 + tilt inicial sutil
+
+INTERAÇÕES:
+  - Hover: tilt 3D seguindo cursor (magnetic tilt)
+  - Click: flip animado do card (frente → verso)
+  - Verso do card: "Como usam JS" + descrição
+  - Click novamente: volta ao normal
+
+TRANSIÇÃO: Cross-fade com leve parallax entre slides.
+
+================================================================================
+SLIDE 13 — MERCADO DE TRABALHO
+================================================================================
+
+NOME: Mercado de trabalho
+
+OBJETIVO: Mostrar as oportunidades profissionais para quem aprende JS.
+
+EMOÇÃO: Motivação, ambição, possibilidade.
+
+LAYOUT: Dashboard com 5 áreas em layout de painéis. Layout de "caminhos profissionais".
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título: "Mercado de trabalho" com skew-panel
+  - 5 painéis em layout de estrela/radial:
+    - Centro: "Alta demanda" (grande, glow)
+    - Ao redor (5 caminhos):
+      - Front-end 🌐
+      - Back-end 🖥️
+      - Full Stack 🔄
+      - Mobile 📱
+      - Jogos 🎮
+  - Abaixo: "Salários competitivos" em destaque
+
+BACKGROUND: Fundo global com grid de "crescimento" (linhas ascendentes sutis).
+
+ELEMENTOS DECORATIVOS:
+  - Gráfico de barras animado pequeno no canto (crescimento)
+  - Bloco inclinado com "🔥 Em alta" no canto
+
+ELEMENTOS INTERATIVOS:
+  - Hover em cada caminho: expande com detalhes do mercado
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Dashboard layout
+  - Gráfico de barras
+  - Cards
+
+PARTÍCULAS: 15 partículas subindo (representando crescimento).
+
+ILUMINAÇÃO: Glow mais forte no centro.
+
+EFEITOS:
+  - Painéis com glassmorphism
+  - Centro pulsando (glow aumenta e diminui)
+  - Gráfico animado
+
+ÍCONES:
+  - 5 ícones representando cada área
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, skew-panel
+  - Centro: 2.5rem, bold, amarelo
+  - Caminhos: 1.2rem
+  - Descrição expandida: 0.85rem
+
+ORDEM DE ENTRADA:
+  1. Background
+  2. Título (400ms)
+  3. Bloco "🔥 Em alta" (500ms)
+  4. Centro "Alta demanda" (700ms, fade + scale 0→1 + glow)
+  5. Gráfico de barras (900ms, barras crescem)
+  6. 5 caminhos radiais (stagger 150ms, 1100ms+)
+  7. Cada caminho: fade + slide do centro para fora
+  8. "Salários competitivos" destaque (2000ms)
+  9. Partículas subindo (2200ms)
+
+INTERAÇÕES:
+  - Hover em caminho: escala 1.05, glow, detalhes aparecem (tooltip rico)
+  - Centro: glow pulsante contínuo
+
+TRANSIÇÃO: Fade + zoom out (saída), zoom in (entrada).
+
+================================================================================
+SLIDE 14 — CURIOSIDADES
+================================================================================
+
+NOME: Curiosidades
+
+OBJETIVO: Entreter e surpreender com fatos interessantes sobre JS.
+
+EMOÇÃO: Surpresa, diversão, "nossa!".
+
+LAYOUT: 4 cards grandes em grid 2×2 com ícones grandes e texto.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título: "Curiosidades" com skew-panel
+  - 4 cards grandes com número/fato em destaque:
+    1. ⏱️ "10 dias" — Criado em apenas 10 dias
+    2. ❌ "Java ≠ JavaScript" — São linguagens diferentes
+    3. 🌐 "Bilhões de páginas" — Presente em bilhões de sites
+    4. 🏆 "Top linguagem" — Mais popular há anos
+
+BACKGROUND: Fundo global com partículas mais vibrantes (mais cor).
+
+ELEMENTOS DECORATIVOS:
+  - Bloco inclinado com "💡 Sabia?" no canto
+  - Pequenas estrelas/faíscas douradas
+
+ELEMENTOS INTERATIVOS:
+  - Hover: card escala 1.05, brilho, ícone grande vibra levemente
+  - Clique: efeito de "explosão" de partículas (visual, decorativo)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Cards grandes
+  - Ícones grandes
+  - Efeito de partículas (faíscas)
+
+PARTÍCULAS:
+  - 20 partículas douradas, mais vibrantes que o normal
+  - Algumas faíscas ocasionais (tipo estrela cadente)
+
+ILUMINAÇÃO: Glow dourado. Mais luz que os outros slides.
+
+EFEITOS:
+  - Cards com glassmorphism mais transparente
+  - Números grandes (fato principal)
+  - Efeito de "brilho" no hover
+
+ÍCONES:
+  - 4 ícones grandes SVG (relógio, ≠, globo, troféu)
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, skew-panel
+  - Número/fato grande: 3rem, bold, amarelo
+  - Explicação: 1rem
+
+ORDEM DE ENTRADA:
+  1. Background + partículas mais vibrantes (0ms)
+  2. Título (400ms)
+  3. Bloco "💡 Sabia?" (500ms)
+  4. Card 1 (700ms)
+  5. Card 2 (950ms)
+  6. Card 3 (1200ms)
+  7. Card 4 (1450ms)
+  8. Cada card: fade + scale 0.92→1 + ícone aparece depois (200ms após card)
+
+INTERAÇÕES:
+  - Hover: card eleva, glow, ícone treme levemente (micro vibração engraçada)
+  - Clique: partículas douradas explodem do card (efeito decorativo com duração de 1s)
+
+TRANSIÇÃO: Fade + scale animado.
+
+================================================================================
+SLIDE 15 — CONCLUSÃO
+================================================================================
+
+NOME: Conclusão
+
+OBJETIVO: Resumir, inspirar e encerrar com impacto.
+
+EMOÇÃO: Inspiração, realização, encerramento poderoso.
+
+LAYOUT: Centralizado dramático. Título grande. Mensagem final em destaque.
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+  - Título: "Conclusão" com skew-panel grande
+  - 5 características em coluna central:
+    - Versátil ✅
+    - Moderna ✅
+    - Muito utilizada ✅
+    - Fácil para iniciantes ✅
+    - Essencial para web ✅
+  - Frase final em destaque (grande, glow, efeito especial):
+    "Se existe interação em um site, há grandes chances de que JavaScript esteja por trás dela."
+  - Abaixo: botão de agradecimento (não de perguntas — proibido)
+
+BACKGROUND: Fundo global com mais partículas (celebração). Partículas douradas e amarelas.
+
+ELEMENTOS DECORATIVOS:
+  - Bloco inclinado grande com a mensagem final
+  - Partículas de "celebração" (mais movimento, tipo confete leve)
+  - Grid decorativo mais evidente
+
+ELEMENTOS INTERATIVOS:
+  - Hover nos itens: glow
+  - Botão de finalização (navegação apenas)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Slide de conclusão
+  - Texto de destaque com glow
+  - Partículas
+
+PARTÍCULAS:
+  - 40 partículas (mais que o normal), movimento mais animado
+  - Tipo confete/estrelas, amarelo e dourado
+
+ILUMINAÇÃO: Glow dourado intenso na mensagem final. Spotlight do topo.
+
+EFEITOS:
+  - Mensagem final com gradiente animado (amarelo → laranja → amarelo, 4s loop)
+  - Glow pulsante na mensagem
+  - Partículas animadas
+
+ÍCONES:
+  - ✅ Checkmarks verdes nos itens
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  - Título: 2.8rem, skew-panel
+  - Itens: 1.3rem, com check
+  - Mensagem final: 2rem, italic, Inter Bold, com gradiente de cor e glow
+
+ORDEM DE ENTRADA:
+  1. Background + partículas de celebração (0ms)
+  2. Título (400ms)
+  3. 5 itens em sequência (stagger 200ms, 700ms+)
+  4. Mensagem final (2000ms) — efeito especial: fade + glow aumenta + gradiente anima
+  5. Partículas de celebração aumentam (2500ms, contínuo)
+
+INTERAÇÕES:
+  - Hover na mensagem final: glow intensifica
+  - Navegação padrão
+
+TRANSIÇÃO DE SAÍDA (se houver slide posterior, não há — é o último):
+  - Este slide não precisa de transição de saída para outro slide
+  - Se o usuário tentar avançar, permanece no slide 15
+  - O botão "Próximo" fica desabilitado (opacidade reduzida)
+
+OBSERVAÇÕES FINAIS:
+  - É PROIBIDO colocar "Perguntas?" ou qualquer coisa semelhante a dúvida no último slide
+  - O slide de conclusão encerra a apresentação
+  - Não criar slide de agradecimento separado — a conclusão já cumpre esse papel
+
+================================================================================
+FIM DA ESPECIFICAÇÃO
+================================================================================
+
+A IA responsável por implementar o HTML deve agora seguir TODAS as instruções acima.
+
+ANTES DE FINALIZAR O HTML, execute a auditoria completa de:
+1. Codificação UTF-8 (nenhum caractere corrompido)
+2. Layout (cada slide cabe no viewport sem scroll)
+3. Animações (nenhum flash, tudo sequenciado)
+4. Estados iniciais (slide 1 aparece no load com animação)
+5. Responsividade (1920×1080 até 1024×768 e mobile)
+6. Navegação (teclado, mouse, touch, dots, botões)
+7. Microdetalhes (hover, glow, sombras, profundidade)
+8. Sistema de blocos inclinados (skew-panel presente em múltiplos slides)
+9. Título da capa com extrusão 3D text-shadow (horizontal, sem rotate/skew)
+10. Navegação dots obrigatória
+
+O documento HTML deve ser UM ÚNICO ARQUIVO, completo, auto-contido, sem dependências externas além de Google Fonts (Inter, Fira Code/JetBrains Mono) via @import ou link.
+
+NÃO crie tela de loading.
+NÃO use scroll para navegação entre slides.
+NÃO troque slide com clique nos cantos.
+NÃO use overflow para esconder problemas de layout.
+
+O RESULTADO DEVE PARECER UM PRODUTO PREMIUM, NÃO UMA PÁGINA HTML COMUM.

@@ -2987,7 +2987,11 @@ Isso quebra a ilusão de profundidade e faz parecer que o conteúdo foi apenas �
 
 Regra obrigatória
 
-Se um bloco estiver inclinado, o conteúdo dentro dele também deve ser tratado para parecer integrado ao mesmo plano visual do bloco, respeitando sua direção, perspectiva e sensação de profundidade.
+Se um bloco estiver inclinado, o conteúdo dentro dele também deve ser tratado para parecer integrado ao mesmo plano visual do bloco, respeitando sua direção, perspectiva e sensação de profundidade. Nesse caso, o conteúdo seria o texto dentro desse bloco que possui o Skew, ou seja, o texto deve possuir Skew igual ao bloco no qual ele pertence.
+
+CHECKLIST OBRIGATÓRIA:
+
+□ Todos os textos dentros dos blocos que tem Skew também tem Skew?(Blocos que usam a mecanica do Skew deve ter seus textos dentro deles também com Skew para garantir qualidade.)
 
 Na prática, isso significa:
 aplicar no conteúdo interno um skew compatível com o do container, de forma controlada;
@@ -3004,3 +3008,7 @@ existe coerência entre shape, perspectiva e conteúdo;
 o elemento inteiro funciona como um único componente tridimensional/coeso, e não como uma forma inclinada com texto plano em cima.
 
 Se um elemento tiver skew e o texto interno não acompanhar visualmente essa perspectiva, a implementação deve ser considerada incorreta e precisa ser ajustada antes da entrega final.
+
+É obrigatório ter navigation dots.
+
+É obrigatório que a cor do título no primeiro slide não seja branca, a cor do shadow do texto pode ser branco, mas o texto principal não, o shadow do texto tem que ter um gradiente de uma cor mais clara para uma cor mais escura(quanto mais proximo do texto principal, mais claro, quanto mais longe, mais escuro), e o texto principal não pode ter gradiente.
