@@ -1,0 +1,692 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Python — Introdução à Linguagem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Inter','Segoe UI',sans-serif;background:#0A0E17;color:#E8EDF2}
+canvas#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#slides-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;opacity:0;visibility:hidden;overflow:hidden;padding:5vh 6vw}
+.slide.active{opacity:1;visibility:visible;z-index:10}
+.slide.exit{z-index:5}
+.progress-bar{position:fixed;top:0;left:0;height:2px;z-index:100;background:linear-gradient(90deg,#306998,#3776AB);transition:width 400ms cubic-bezier(0.25,0.1,0.25,1.0);width:0%}
+.nav-btn{position:fixed;bottom:3vh;z-index:100;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 250ms ease-out;border:none;font-size:1.1rem;color:#E8EDF2}
+.nav-btn.prev{left:3vw;background:#1E2A3A;border:1px solid #306998}
+.nav-btn.prev:hover:not(:disabled){transform:scale(1.05);box-shadow:0 0 20px rgba(48,105,152,0.4)}
+.nav-btn.next{right:3vw;background:linear-gradient(135deg,#306998,#3776AB);color:#FFF}
+.nav-btn.next:hover:not(:disabled){transform:scale(1.05);box-shadow:0 0 20px rgba(48,105,152,0.5)}
+.nav-btn:disabled{opacity:0.3;cursor:default;transform:none !important;box-shadow:none !important}
+.nav-btn:active:not(:disabled){transform:scale(0.95) !important}
+.dots-container{position:fixed;bottom:2vh;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:8px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:#2D3E50;opacity:0.5;cursor:pointer;transition:all 250ms ease-out;border:none;padding:0}
+.dot:hover{transform:scale(1.3)}
+.dot.active{background:#FFD43B;opacity:1;box-shadow:0 0 12px rgba(255,212,59,0.6)}
+.slide-indicator{position:fixed;bottom:3.5vh;right:3vw;z-index:100;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#6B7D8D}
+.custom-cursor{position:fixed;pointer-events:none;z-index:9999}
+.cursor-ring{width:24px;height:24px;border:1.5px solid #306998;border-radius:50%;position:absolute;top:-12px;left:-12px;opacity:0.6;transition:width 200ms,height 200ms,top 200ms,left 200ms}
+.cursor-dot{width:6px;height:6px;background:#FFD43B;border-radius:50%;position:absolute;top:-3px;left:-3px;box-shadow:0 0 8px rgba(255,212,59,0.6)}
+.custom-cursor.hover .cursor-ring{width:32px;height:32px;top:-16px;left:-16px}
+.slide-title{font-size:2.6rem;font-weight:700;color:#F5F8FC;letter-spacing:-0.5px;margin-bottom:0.5rem;position:relative;z-index:2}
+.slide-subtitle{font-size:1.3rem;font-weight:500;color:#A0B0C0;letter-spacing:0.5px;margin-bottom:1.5rem;position:relative;z-index:2}
+.glass-card{background:rgba(15,25,35,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid #1E2A3A;border-radius:12px;transition:all 250ms ease-out}
+.glass-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(48,105,152,0.2);border-color:#306998}
+.perspective-block{clip-path:polygon(0% 0%,100% 8%,100% 92%,0% 100%);position:relative;overflow:hidden}
+.perspective-block .perspective-content{transform:skewY(2deg)}
+.section-title{font-size:1.1rem;font-weight:600;color:#F5F8FC;margin-bottom:0.5rem}
+.body-text{font-size:0.95rem;font-weight:300;color:#E8EDF2;line-height:1.7}
+.code-font{font-family:'JetBrains Mono',monospace}
+.badge{font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:500;color:#FFD43B}
+.label-tech{font-size:0.7rem;font-weight:600;color:#6B7D8D;letter-spacing:1.5px;text-transform:uppercase}
+.vignette{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;background:radial-gradient(ellipse at center,transparent 60%,rgba(10,14,23,0.25) 100%)}
+.spotlight{position:fixed;pointer-events:none;z-index:2;border-radius:50%;opacity:0;transition:opacity 300ms}
+@keyframes pulse-glow{0%,100%{opacity:0.7}50%{opacity:1}}
+@keyframes float-slow{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes float-code{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-2px) rotate(-5deg)}}
+.syn-keyword{color:#FF79C6}
+.syn-function{color:#50FA7B}
+.syn-string{color:#F1FA8C}
+.syn-variable{color:#8BE9FD}
+.syn-comment{color:#6272A4}
+.syn-number{color:#BD93F9}
+.syn-operator{color:#FF79C6}
+.tooltip{position:fixed;pointer-events:none;z-index:10000;background:rgba(15,25,35,0.9);backdrop-filter:blur(12px);border:1px solid #306998;border-radius:6px;padding:6px 10px;font-size:0.75rem;color:#E8EDF2;opacity:0;transition:opacity 200ms;max-width:240px}
+.tooltip.visible{opacity:1}
+@media(max-width:1024px){.slide{padding:3vh 4vw}.slide-title{font-size:2rem}.slide-subtitle{font-size:1rem}}
+@media(max-width:768px){.slide-title{font-size:1.6rem}.slide-subtitle{font-size:0.9rem}.nav-btn{width:36px;height:36px;font-size:0.9rem}.dots-container{gap:6px}.dot{width:6px;height:6px}}
+</style>
+</head>
+<body><div class="progress-bar" id="progressBar"></div>
+<canvas id="bg-canvas"></canvas>
+<div class="vignette"></div>
+<div class="spotlight" id="spotlight"></div>
+<div class="custom-cursor" id="customCursor"><div class="cursor-ring"></div><div class="cursor-dot"></div></div>
+<div class="tooltip" id="tooltip"></div>
+<div id="slides-container"><div class="slide active" data-slide="1">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:0;">
+    <div id="slide1-python-logo" class="anim-fade-scale" style="opacity:0;margin-bottom:1rem;">
+      <svg width="60" height="60" viewBox="0 0 60 60">
+        <defs><linearGradient id="pyg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFD43B"/><stop offset="100%" stop-color="#FFE873"/></linearGradient></defs>
+        <path d="M28 6c-3 0-5.5.6-7.3 1.7-2.6 1.5-3.5 4.2-3.5 8.3v6H28v3H14c-4 0-7.5 2.4-8.7 7-1.4 5.2-1.5 8.5 0 14 1 3.8 3.5 7 7.5 7h4v-8c0-4.5 3.8-8.3 8.3-8.3h8.4c4 0 7-3.2 7-7V16c0-5.8-3.5-8-8.5-10C30.2 6.2 29 6 28 6z" fill="url(#pyg1)"/>
+        <path d="M44 15c-1.8 0-3 .7-4 2-1 1.2-1 3-1 4 0 4 0 8-1 11-1.5 4-5.5 7-9 7h-8c-5 0-8 4-8 8v8c0 3.5 3 6 6 7 4 1.3 7.5 2 11 2s8-.7 11-2c4-1.3 7-3.5 7-9V23c0-5-2-8-6-8z" fill="url(#pyg1)" opacity="0.8"/>
+        <circle cx="24" cy="14" r="2" fill="#0A0E17"/><circle cx="38" cy="46" r="2" fill="#0A0E17"/>
+      </svg>
+    </div>
+    <h1 id="slide1-title" class="anim-fade-in" style="font-size:clamp(2.8rem,5.5vw,5.5rem);font-weight:800;color:#306998;letter-spacing:-2px;z-index:0;text-align:center;line-height:1.1;opacity:0;">Python</h1>
+    <p id="slide1-subtitle" class="anim-fade-up" style="font-size:clamp(1rem,1.4vw,1.4rem);font-weight:300;color:#A0B0C0;letter-spacing:3px;margin-top:0.5rem;opacity:0;">INTRODUÇÃO À LINGUAGEM</p>
+    <div id="slide1-line" class="anim-scale-x" style="width:30%;height:1px;background:linear-gradient(90deg,transparent,#306998,transparent);margin:1.5rem 0;opacity:0;"></div>
+    <div id="slide1-btn" class="perspective-block anim-fade-scale" style="background:linear-gradient(135deg,#FFD43B,#FFE873);cursor:pointer;padding:0.8rem 2.5rem;opacity:0;margin-bottom:1.5rem;" onclick="goToSlide(2)">
+      <div class="perspective-content" style="color:#0A0E17;font-family:'Inter',sans-serif;font-size:1.1rem;font-weight:600;">Começar</div>
+    </div>
+    <p id="slide1-presenter" class="anim-fade-in" style="font-size:0.9rem;color:#6B7D8D;opacity:0;position:absolute;bottom:8vh;">Apresentador · 2026</p>
+    <div class="code-decor" style="position:absolute;top:8%;left:5%;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#3776AB;opacity:0.08;transform:rotate(-5deg);animation:float-code 6s ease-in-out infinite;">def main():<br>&nbsp;&nbsp;&nbsp;&nbsp;print('Hello')</div>
+    <div class="code-decor" style="position:absolute;top:6%;right:6%;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#3776AB;opacity:0.08;transform:rotate(-5deg);animation:float-code 6s ease-in-out infinite 1.5s;">import antigravity<br>@decorator</div>
+    <div class="code-decor" style="position:absolute;bottom:20%;left:4%;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#3776AB;opacity:0.08;transform:rotate(-5deg);animation:float-code 6s ease-in-out infinite 3s;">class Python:<br>&nbsp;&nbsp;&nbsp;&nbsp;pass</div>
+    <div class="code-decor" style="position:absolute;bottom:18%;right:5%;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#3776AB;opacity:0.08;transform:rotate(-5deg);animation:float-code 6s ease-in-out infinite 4.5s;">lambda x: x**2<br>map(func, it)</div>
+  </div>
+</div>
+<div class="slide" data-slide="2">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <h2 class="slide-title anim-fade-up" style="opacity:0;margin-bottom:0.3rem;">O que é Python?</h2>
+    <div style="display:flex;flex:1;gap:3vw;align-items:stretch;margin-top:1rem;">
+      <div class="perspective-block anim-fade-left" style="flex:0 0 38%;background:linear-gradient(135deg,#306998,#3776AB);padding:2rem;display:flex;flex-direction:column;justify-content:center;align-items:center;opacity:0;box-shadow:0 0 30px rgba(48,105,152,0.3);">
+        <div class="perspective-content" style="display:flex;flex-direction:column;align-items:center;gap:1rem;text-align:center;">
+          <svg width="48" height="48" viewBox="0 0 60 60"><path d="M28 6c-3 0-5.5.6-7.3 1.7-2.6 1.5-3.5 4.2-3.5 8.3v6H28v3H14c-4 0-7.5 2.4-8.7 7-1.4 5.2-1.5 8.5 0 14 1 3.8 3.5 7 7.5 7h4v-8c0-4.5 3.8-8.3 8.3-8.3h8.4c4 0 7-3.2 7-7V16c0-5.8-3.5-8-8.5-10C30.2 6.2 29 6 28 6z" fill="#FFFFFF"/><path d="M44 15c-1.8 0-3 .7-4 2-1 1.2-1 3-1 4 0 4 0 8-1 11-1.5 4-5.5 7-9 7h-8c-5 0-8 4-8 8v8c0 3.5 3 6 6 7 4 1.3 7.5 2 11 2s8-.7 11-2c4-1.3 7-3.5 7-9V23c0-5-2-8-6-8z" fill="#FFFFFF" opacity="0.8"/><circle cx="24" cy="14" r="2" fill="#0A0E17"/><circle cx="38" cy="46" r="2" fill="#0A0E17"/></svg>
+          <p style="font-size:1rem;font-weight:400;color:#FFFFFF;line-height:1.6;">Python é uma linguagem de programação de alto nível, interpretada e multiparadigma.</p>
+          <span class="badge" style="background:rgba(15,25,35,0.8);padding:4px 12px;border-radius:4px;font-size:0.65rem;" data-tooltip="Segundo pesquisas anuais do Stack Overflow 2023-2024">#1 Linguagem mais amada</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:1.5rem;">
+        <div class="glass-card anim-fade-up" style="padding:1.5rem;opacity:0;flex:1;display:flex;flex-direction:column;justify-content:center;">
+          <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="2" x2="9" y2="6"/><line x1="15" y1="2" x2="15" y2="6"/></svg>
+            <h3 class="section-title" style="margin:0;font-size:1rem;">Criada por Guido van Rossum (1991)</h3>
+          </div>
+          <p class="body-text" style="margin:0;">Desenvolvida nos Países Baixos como sucessora da linguagem ABC.</p>
+          <span class="label-tech" style="margin-top:0.3rem;">Há mais de 30 anos moldando o futuro da programação</span>
+        </div>
+        <div class="glass-card anim-fade-up" style="padding:1.5rem;opacity:0;flex:1;display:flex;flex-direction:column;justify-content:center;">
+          <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <h3 class="section-title" style="margin:0;font-size:1rem;">Foco em legibilidade e produtividade</h3>
+          </div>
+          <p class="body-text" style="margin:0;">Filosofia Zen do Python: "Simples é melhor que complexo".</p>
+          <span class="label-tech" style="margin-top:0.3rem;">Código limpo que qualquer pessoa pode entender</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="3">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <h2 class="slide-title anim-fade-up" style="opacity:0;margin-bottom:0.2rem;">Principais Caracter&iacute;sticas</h2>
+    <p class="slide-subtitle anim-fade-in" style="opacity:0;margin-bottom:1rem;font-size:1rem;">O que torna o Python especial</p>
+    <div style="display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:1rem;flex:1;">
+      <div class="glass-card anim-fade-scale" style="padding:1.2rem;opacity:0;grid-column:1/2;grid-row:1/2;display:flex;flex-direction:column;justify-content:center;border-color:#306998;">
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.4rem;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><path d="M4 4l16 16"/><path d="M4 20L20 4"/></svg><h3 class="section-title" style="margin:0;font-size:0.95rem;">Sintaxe simples e expressiva</h3></div>
+        <p class="body-text" style="font-size:0.85rem;margin:0;">Blocos definidos por indentação, sem chaves ou palavras-chave desnecessárias. O código Python se aproxima da língua inglesa.</p>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1.2rem;opacity:0;grid-column:2/3;grid-row:1/2;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.4rem;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg><h3 class="section-title" style="margin:0;font-size:0.85rem;">Tipagem dinâmica e forte</h3></div>
+        <p class="body-text" style="font-size:0.8rem;margin:0;">Variáveis sem declaração explícita de tipo, com segurança de tipos.</p>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1.2rem;opacity:0;grid-column:1/2;grid-row:2/3;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.4rem;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><path d="M3 3v18h18"/><path d="M9 16l3-7 3 4 3-5"/></svg><h3 class="section-title" style="margin:0;font-size:0.85rem;">Gerenciamento automático de memória</h3></div>
+        <p class="body-text" style="font-size:0.8rem;margin:0;">Garbage collector integrado que gerencia alocação e desalocação.</p>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1.2rem;opacity:0;grid-column:2/3;grid-row:2/4;display:flex;flex-direction:column;justify-content:center;border-color:#306998;">
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.4rem;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><h3 class="section-title" style="margin:0;font-size:0.95rem;">Grande biblioteca padrão</h3></div>
+        <p class="body-text" style="font-size:0.85rem;margin:0;">Mais de 200 módulos inclusos ("batteries included"). Desde manipulação de arquivos até servidores web.</p>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1.2rem;opacity:0;grid-column:1/2;grid-row:3/4;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.4rem;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg><h3 class="section-title" style="margin:0;font-size:0.85rem;">Suporte a multiparadigma</h3></div>
+        <p class="body-text" style="font-size:0.8rem;margin:0;">Multiparadigma: escreva do jeito que fizer sentido para o seu problema.</p>
+      </div>
+    </div>
+    <div class="perspective-block anim-fade-right" style="position:absolute;bottom:8vh;right:6vw;background:#FFD43B;padding:0.5rem 1.2rem;opacity:0;">
+      <div class="perspective-content" style="color:#0A0E17;font-size:0.8rem;font-weight:500;white-space:nowrap;">5+ Caracter&iacute;sticas</div>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="4">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <div class="perspective-block anim-fade-left" style="position:absolute;top:5vh;left:6vw;background:linear-gradient(135deg,#306998,#3776AB);padding:1rem 2rem;opacity:0;z-index:2;">
+      <div class="perspective-content" style="color:#FFF;font-size:1.6rem;font-weight:700;white-space:nowrap;">Ambiente e Ecossistema</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;flex:1;margin-top:12vh;">
+      <div class="glass-card anim-fade-up" style="padding:1.2rem;opacity:0;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.5rem;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00D68F" stroke-width="2"><polyline points="4 17 9 12 4 7"/><path d="M12 19h8"/></svg>
+          <h3 class="section-title" style="margin:0;">Interpretador CPython (padrão)</h3>
+        </div>
+        <p class="body-text" style="font-size:0.85rem;margin:0;">Implementação de referência da linguagem Python, escrita em C.</p>
+        <span class="badge" style="color:#00D68F;font-size:0.65rem;margin-top:0.3rem;">padrão</span>
+      </div>
+      <div class="glass-card anim-fade-up" style="padding:1.2rem;opacity:0;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.5rem;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3776AB" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <h3 class="section-title" style="margin:0;">Gerenciadores de Pacotes</h3>
+        </div>
+        <div class="tabs-container" style="margin-top:0.3rem;">
+          <div class="tabs-header" style="display:flex;gap:0;border-bottom:1px solid #1E2A3A;">
+            <button class="tab-btn active" data-tab="pip4" style="background:none;border:none;padding:0.3rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#FFD43B;cursor:pointer;border-bottom:2px solid #FFD43B;transition:all 200ms;">pip</button>
+            <button class="tab-btn" data-tab="conda4" style="background:none;border:none;padding:0.3rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#2D3E50;cursor:pointer;border-bottom:2px solid transparent;transition:all 200ms;">conda</button>
+          </div>
+          <div class="tab-content" id="pip4" style="padding:0.5rem 0 0;font-size:0.8rem;color:#E8EDF2;">pip — gerenciador padrão do Python.</div>
+          <div class="tab-content" id="conda4" style="padding:0.5rem 0 0;font-size:0.8rem;color:#E8EDF2;display:none;">conda — gerenciador multiplataforma.</div>
+        </div>
+      </div>
+      <div class="glass-card anim-fade-up" style="padding:1.2rem;opacity:0;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.5rem;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <h3 class="section-title" style="margin:0;">Ambientes Virtuais</h3>
+        </div>
+        <div class="tabs-container" style="margin-top:0.3rem;">
+          <div class="tabs-header" style="display:flex;gap:0;border-bottom:1px solid #1E2A3A;">
+            <button class="tab-btn active" data-tab="venv4" style="background:none;border:none;padding:0.3rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#FFD43B;cursor:pointer;border-bottom:2px solid #FFD43B;transition:all 200ms;">venv</button>
+            <button class="tab-btn" data-tab="virenv4" style="background:none;border:none;padding:0.3rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#2D3E50;cursor:pointer;border-bottom:2px solid transparent;transition:all 200ms;">virtualenv</button>
+          </div>
+          <div class="tab-content" id="venv4" style="padding:0.5rem 0 0;font-size:0.8rem;color:#E8EDF2;">Isolam dependências entre projetos.</div>
+          <div class="tab-content" id="virenv4" style="padding:0.5rem 0 0;font-size:0.8rem;color:#E8EDF2;display:none;">virtualenv tem mais recursos que venv.</div>
+        </div>
+      </div>
+      <div class="glass-card anim-fade-up" style="padding:1.2rem;opacity:0;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.5rem;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00B4D8" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+          <h3 class="section-title" style="margin:0;">IDEs e Editores</h3>
+        </div>
+        <div class="tabs-container" style="margin-top:0.3rem;">
+          <div class="tabs-header" style="display:flex;gap:0;border-bottom:1px solid #1E2A3A;">
+            <button class="tab-btn active" data-tab="pycharm4" style="background:none;border:none;padding:0.3rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#FFD43B;cursor:pointer;border-bottom:2px solid #FFD43B;transition:all 200ms;">PyCharm</button>
+            <button class="tab-btn" data-tab="vscode4" style="background:none;border:none;padding:0.3rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#2D3E50;cursor:pointer;border-bottom:2px solid transparent;transition:all 200ms;">VS Code</button>
+            <button class="tab-btn" data-tab="jupyter4" style="background:none;border:none;padding:0.3rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#2D3E50;cursor:pointer;border-bottom:2px solid transparent;transition:all 200ms;">Jupyter</button>
+          </div>
+          <div class="tab-content" id="pycharm4" style="padding:0.5rem 0 0;font-size:0.8rem;color:#E8EDF2;">IDE completa para Python.</div>
+          <div class="tab-content" id="vscode4" style="padding:0.5rem 0 0;font-size:0.8rem;color:#E8EDF2;display:none;">Editor versátil com extensões.</div>
+          <div class="tab-content" id="jupyter4" style="padding:0.5rem 0 0;font-size:0.8rem;color:#E8EDF2;display:none;">Notebooks interativos para dados.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="5">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <h2 class="slide-title anim-fade-up" style="opacity:0;margin-bottom:0.2rem;">Sintaxe Básica</h2>
+    <p class="slide-subtitle anim-fade-in" style="opacity:0;margin-bottom:1rem;font-size:1rem;">Código limpo que qualquer pessoa pode entender</p>
+    <div style="display:flex;gap:2vw;flex:1;">
+      <div class="glass-card anim-fade-left" style="padding:1.2rem;opacity:0;flex:0 0 38%;display:flex;flex-direction:column;justify-content:center;border-color:#306998;">
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.8rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h3 class="section-title" style="margin:0;">Características</h3></div>
+        <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:0.5rem;">
+          <li style="display:flex;align-items:flex-start;gap:0.5rem;opacity:0;" class="anim-fade-left"><span style="color:#FFD43B;font-size:0.7rem;">&#9650;</span><span class="body-text" style="font-size:0.85rem;">Blocos definidos por indentação (sem chaves)</span></li>
+          <li style="display:flex;align-items:flex-start;gap:0.5rem;opacity:0;" class="anim-fade-left"><span style="color:#FFD43B;font-size:0.7rem;">&#9650;</span><span class="body-text" style="font-size:0.85rem;">Variáveis sem declaração explícita de tipo</span></li>
+          <li style="display:flex;align-items:flex-start;gap:0.5rem;opacity:0;" class="anim-fade-left"><span style="color:#FFD43B;font-size:0.7rem;">&#9650;</span><span class="body-text" style="font-size:0.85rem;">Estruturas de controle: if, for, while</span></li>
+          <li style="display:flex;align-items:flex-start;gap:0.5rem;opacity:0;" class="anim-fade-left"><span style="color:#FFD43B;font-size:0.7rem;">&#9650;</span><span class="body-text" style="font-size:0.85rem;">Funções definidas com def</span></li>
+        </ul>
+      </div>
+      <div class="anim-fade-scale" style="opacity:0;flex:1;display:flex;flex-direction:column;">
+        <div style="background:#0A0E17;border:1px solid #1E2A3A;border-radius:8px;flex:1;display:flex;flex-direction:column;overflow:hidden;" id="code-block-5">
+          <div style="display:flex;align-items:center;padding:8px 12px;background:#0F1923;border-bottom:1px solid #1E2A3A;gap:6px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#FF6B6B;display:block;"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#FFD43B;display:block;"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#00D68F;display:block;"></span>
+            <span style="flex:1;"></span>
+            <button class="copy-btn" onclick="copyCode(this)" style="background:none;border:none;cursor:pointer;padding:2px;color:#6B7D8D;transition:color 200ms;" title="Copiar código"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+          </div>
+          <div style="padding:1rem;font-family:'JetBrains Mono',monospace;font-size:0.8rem;line-height:1.6;overflow:hidden;">
+            <div class="anim-code-line"><span class="syn-comment"># Exemplo de sintaxe Python</span></div>
+            <div class="anim-code-line"><span class="syn-keyword">def</span> <span class="syn-function">saudacao</span>(nome):</div>
+            <div class="anim-code-line">    <span class="syn-comment"># Bloco definido por indentação</span></div>
+            <div class="anim-code-line">    mensagem = <span class="syn-string">f"Olá, {nome}!"</span></div>
+            <div class="anim-code-line">    <span class="syn-keyword">return</span> mensagem</div>
+            <div class="anim-code-line">&nbsp;</div>
+            <div class="anim-code-line"><span class="syn-comment"># Estrutura condicional</span></div>
+            <div class="anim-code-line">idade = <span class="syn-number">25</span></div>
+            <div class="anim-code-line"><span class="syn-keyword">if</span> idade >= <span class="syn-number">18</span>:</div>
+            <div class="anim-code-line">    <span class="syn-function">print</span>(<span class="syn-string">"Maior de idade"</span>)</div>
+            <div class="anim-code-line"><span class="syn-keyword">else</span>:</div>
+            <div class="anim-code-line">    <span class="syn-function">print</span>(<span class="syn-string">"Menor de idade"</span>)</div>
+            <div class="anim-code-line">&nbsp;</div>
+            <div class="anim-code-line"><span class="syn-comment"># Laço de repetição</span></div>
+            <div class="anim-code-line"><span class="syn-keyword">for</span> i <span class="syn-keyword">in</span> <span class="syn-function">range</span>(<span class="syn-number">5</span>):</div>
+            <div class="anim-code-line">    <span class="syn-function">print</span>(<span class="syn-string">f"Contagem: {i}"</span>)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="perspective-block anim-fade-right" style="position:absolute;bottom:6vh;left:6vw;background:#FFD43B;padding:0.4rem 1rem;opacity:0;">
+      <div class="perspective-content" style="color:#0A0E17;font-size:0.75rem;font-weight:500;white-space:nowrap;">Sintaxe Limpa</div>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="6">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <div class="perspective-block anim-fade-left" style="position:absolute;top:5vh;left:6vw;background:linear-gradient(135deg,#306998,#3776AB);padding:0.8rem 1.8rem;opacity:0;z-index:2;">
+      <div class="perspective-content" style="color:#FFF;font-size:1.3rem;font-weight:700;white-space:nowrap;">Tipos de Dados Principais</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1.8fr;grid-template-rows:1fr 1fr 0.8fr;gap:1rem;flex:1;margin-top:10vh;">
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;border-color:#00D68F;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><path d="M4 4l16 16"/><path d="M4 20L20 4"/></svg><span class="code-font" style="font-size:1.1rem;color:#FFD43B;">Numéricos</span></div>
+        <span class="code-font" style="font-size:0.7rem;color:#A0B0C0;">int | float | complex</span>
+        <span class="code-font" style="font-size:0.65rem;color:#6B7D8D;margin-top:0.3rem;">x = 42 | y = 3.14 | z = 1+2j</span>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;border-color:#3776AB;display:flex;flex-direction:column;justify-content:center;grid-column:2/3;grid-row:1/2;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span class="code-font" style="font-size:1.1rem;color:#FFD43B;">Sequências</span></div>
+        <span class="code-font" style="font-size:0.7rem;color:#A0B0C0;">str | list | tuple | range</span>
+        <span class="code-font" style="font-size:0.65rem;color:#6B7D8D;margin-top:0.3rem;">"Python" | [1,2,3] | (4,5,6)</span>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;border-color:#FFD43B;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M3 16v5h5"/><path d="M16 21h5v-5"/></svg><span class="code-font" style="font-size:1.1rem;color:#FFD43B;">Conjuntos</span></div>
+        <span class="code-font" style="font-size:0.7rem;color:#A0B0C0;">set | frozenset</span>
+        <span class="code-font" style="font-size:0.65rem;color:#6B7D8D;margin-top:0.3rem;">{1, 2, 3}</span>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;border-color:#BD93F9;display:flex;flex-direction:column;justify-content:center;grid-column:2/3;grid-row:2/3;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="code-font" style="font-size:1.1rem;color:#FFD43B;">Mapeamentos</span></div>
+        <span class="code-font" style="font-size:0.7rem;color:#A0B0C0;">dict</span>
+        <span class="code-font" style="font-size:0.65rem;color:#6B7D8D;margin-top:0.3rem;">{"nome": "Ana", "idade": 30}</span>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;border-color:#00B4D8;display:flex;flex-direction:column;justify-content:center;grid-column:2/3;grid-row:3/4;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg><span class="code-font" style="font-size:1.1rem;color:#FFD43B;">Booleanos</span></div>
+        <span class="code-font" style="font-size:0.7rem;color:#A0B0C0;">bool</span>
+        <span class="code-font" style="font-size:0.65rem;color:#6B7D8D;margin-top:0.3rem;">True | False</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="7">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <h2 class="slide-title anim-fade-up" style="opacity:0;margin-bottom:1rem;">Estruturas de Controle</h2>
+    <div style="display:flex;gap:2vw;flex:1;">
+      <div class="glass-card anim-fade-left" style="opacity:0;flex:0 0 35%;display:flex;flex-direction:column;overflow:hidden;">
+        <button class="ctrl-tab active" data-ctrl="0" style="background:#306998;border:none;padding:0.8rem 1rem;text-align:left;color:#FFF;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:500;cursor:pointer;border-left:3px solid #FFD43B;transition:all 200ms;">Condicionais: if / elif / else</button>
+        <button class="ctrl-tab" data-ctrl="1" style="background:#1E2A3A;border:none;padding:0.8rem 1rem;text-align:left;color:#A0B0C0;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:400;cursor:pointer;border-left:3px solid transparent;transition:all 200ms;">La&ccedil;os: for e while</button>
+        <button class="ctrl-tab" data-ctrl="2" style="background:#1E2A3A;border:none;padding:0.8rem 1rem;text-align:left;color:#A0B0C0;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:400;cursor:pointer;border-left:3px solid transparent;transition:all 200ms;">List Comprehension</button>
+        <button class="ctrl-tab" data-ctrl="3" style="background:#1E2A3A;border:none;padding:0.8rem 1rem;text-align:left;color:#A0B0C0;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:400;cursor:pointer;border-left:3px solid transparent;transition:all 200ms;">Tratamento de exce&ccedil;&otilde;es</button>
+      </div>
+      <div class="anim-fade-scale" style="opacity:0;flex:1;display:flex;flex-direction:column;">
+        <div style="background:#0A0E17;border:1px solid #1E2A3A;border-radius:8px;flex:1;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="display:flex;align-items:center;padding:8px 12px;background:#0F1923;border-bottom:1px solid #1E2A3A;gap:6px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#FF6B6B;display:block;"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#FFD43B;display:block;"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#00D68F;display:block;"></span>
+          </div>
+          <div id="ctrl-code-display" style="padding:1rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;line-height:1.6;flex:1;">
+            <div class="syn-comment"># Condicional if/elif/else</div>
+            <div>idade = <span class="syn-number">18</span></div>
+            <div><span class="syn-keyword">if</span> idade &lt; <span class="syn-number">12</span>:</div>
+            <div>    <span class="syn-function">print</span>(<span class="syn-string">"Crian&ccedil;a"</span>)</div>
+            <div><span class="syn-keyword">elif</span> idade &lt; <span class="syn-number">18</span>:</div>
+            <div>    <span class="syn-function">print</span>(<span class="syn-string">"Adolescente"</span>)</div>
+            <div><span class="syn-keyword">else</span>:</div>
+            <div>    <span class="syn-function">print</span>(<span class="syn-string">"Adulto"</span>)</div>
+          </div>
+        </div>
+        <button id="run-btn" onclick="runCode()" style="margin-top:0.5rem;align-self:flex-start;background:none;border:1px solid #00D68F;color:#00D68F;padding:0.4rem 1.2rem;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;transition:all 200ms;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#00D68F"><polygon points="5 3 19 12 5 21 5 3"/></svg> Executar
+        </button>
+        <div id="code-output" style="margin-top:0.3rem;padding:0.5rem 1rem;background:#0A0E17;border:1px solid #1E2A3A;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#50FA7B;display:none;max-height:3rem;overflow-y:auto;"></div>
+      </div>
+    </div>
+    <div class="perspective-block anim-fade-right" style="position:absolute;bottom:6vh;left:6vw;background:#FFD43B;padding:0.4rem 1rem;opacity:0;">
+      <div class="perspective-content" style="color:#0A0E17;font-size:0.75rem;font-weight:500;white-space:nowrap;">Controle de Fluxo</div>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="8">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <h2 class="slide-title anim-fade-up" style="opacity:0;margin-bottom:1rem;">Fun&ccedil;&otilde;es e Modulariza&ccedil;&atilde;o</h2>
+    <div style="display:flex;gap:2vw;flex:1;">
+      <div style="flex:0 0 42%;display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="glass-card anim-fade-up" style="padding:0.8rem 1rem;opacity:0;">
+          <div class="accordion-header" onclick="toggleAccordion(this)" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+            <span><span class="badge" style="background:#FFD43B;color:#0A0E17;padding:0 6px;border-radius:3px;margin-right:0.5rem;">#1</span><span class="section-title" style="font-size:0.9rem;">def e par&acirc;metros</span></span>
+            <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" style="transition:transform 300ms;"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="accordion-content" style="max-height:0;overflow:hidden;transition:max-height 300ms ease-out;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;background:#0A0E17;border-radius:4px;padding:0.5rem;margin-top:0.3rem;">
+              <span class="syn-keyword">def</span> <span class="syn-function">saudacao</span>(nome, saudacao=<span class="syn-string">"Ol&aacute;"</span>):<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-keyword">return</span> <span class="syn-string">f"{saudacao}, {nome}!"</span>
+            </div>
+          </div>
+        </div>
+        <div class="glass-card anim-fade-up" style="padding:0.8rem 1rem;opacity:0;">
+          <div class="accordion-header" onclick="toggleAccordion(this)" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+            <span><span class="badge" style="background:#FFD43B;color:#0A0E17;padding:0 6px;border-radius:3px;margin-right:0.5rem;">#2</span><span class="section-title" style="font-size:0.9rem;">lambda</span></span>
+            <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" style="transition:transform 300ms;"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="accordion-content" style="max-height:0;overflow:hidden;transition:max-height 300ms ease-out;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;background:#0A0E17;border-radius:4px;padding:0.5rem;margin-top:0.3rem;">
+              quadrado = <span class="syn-keyword">lambda</span> x: x ** <span class="syn-number">2</span><br>
+              numeros_pares = <span class="syn-function">filter</span>(<span class="syn-keyword">lambda</span> n: n % <span class="syn-number">2</span> == <span class="syn-number">0</span>, lista)
+            </div>
+          </div>
+        </div>
+        <div class="glass-card anim-fade-up" style="padding:0.8rem 1rem;opacity:0;">
+          <div class="accordion-header" onclick="toggleAccordion(this)" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+            <span><span class="badge" style="background:#FFD43B;color:#0A0E17;padding:0 6px;border-radius:3px;margin-right:0.5rem;">#3</span><span class="section-title" style="font-size:0.9rem;">Escopo local x global</span></span>
+            <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" style="transition:transform 300ms;"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="accordion-content" style="max-height:0;overflow:hidden;transition:max-height 300ms ease-out;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;background:#0A0E17;border-radius:4px;padding:0.5rem;margin-top:0.3rem;">
+              x = <span class="syn-number">10</span>  <span class="syn-comment"># global</span><br>
+              <span class="syn-keyword">def</span> <span class="syn-function">funcao</span>():<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;x = <span class="syn-number">5</span>  <span class="syn-comment"># local</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-function">print</span>(x)  <span class="syn-comment"># 5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:1rem;">
+        <div class="perspective-block anim-fade-right" style="background:#FFD43B;padding:0.6rem 1.2rem;opacity:0;text-align:center;">
+          <div class="perspective-content" style="font-family:'JetBrains Mono',monospace;color:#0A0E17;font-size:1.1rem;font-weight:600;">main.py</div>
+        </div>
+        <div style="display:flex;justify-content:space-around;gap:0.5rem;">
+          <div class="perspective-block anim-fade-right" style="background:#306998;padding:0.5rem 1rem;opacity:0;flex:1;text-align:center;">
+            <div class="perspective-content" style="color:#FFF;font-family:'JetBrains Mono',monospace;font-size:0.8rem;">utils.py</div>
+          </div>
+          <div class="perspective-block anim-fade-right" style="background:#3776AB;padding:0.5rem 1rem;opacity:0;flex:1;text-align:center;">
+            <div class="perspective-content" style="color:#FFF;font-family:'JetBrains Mono',monospace;font-size:0.8rem;">models.py</div>
+          </div>
+        </div>
+        <div class="perspective-block anim-fade-right" style="background:#1E2A3A;padding:0.5rem 1rem;opacity:0;text-align:center;border:1px solid #3776AB;">
+          <div class="perspective-content" style="color:#E8EDF2;font-family:'JetBrains Mono',monospace;font-size:0.8rem;">database.py</div>
+        </div>
+        <div class="perspective-block anim-fade-right" style="background:#FFD43B;padding:0.3rem 0.8rem;opacity:0;text-align:center;align-self:center;">
+          <div class="perspective-content" style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#0A0E17;">import</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="9">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <h2 class="slide-title anim-fade-up" style="opacity:0;margin-bottom:0.5rem;text-align:center;">Programa&ccedil;&atilde;o Orientada a Objetos</h2>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
+      <div class="glass-card anim-fade-scale" style="padding:1.2rem;opacity:0;border:1.5px solid #FFD43B;background:linear-gradient(135deg,rgba(48,105,152,0.3),rgba(55,118,171,0.2));backdrop-filter:blur(12px);text-align:center;z-index:3;max-width:45%;box-shadow:0 0 40px rgba(48,105,152,0.4);" id="oop-central">
+        <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.5rem;">
+          <span style="width:36px;height:36px;border-radius:50%;border:2px solid #FFD43B;display:flex;align-items:center;justify-content:center;color:#FFD43B;font-weight:700;font-size:1.2rem;">C</span>
+        </div>
+        <div class="code-font" style="font-size:1.1rem;color:#FFF;margin-bottom:0.5rem;">class Pessoa:</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;text-align:left;color:#E8EDF2;line-height:1.4;">
+          <span class="syn-keyword">def</span> <span class="syn-function">__init__</span>(self, nome):<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;self.nome = nome<br>
+          <span class="syn-keyword">def</span> <span class="syn-function">saudar</span>(self):<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-keyword">return</span> <span class="syn-string">f"Ol&aacute;, sou {self.nome}"</span>
+        </div>
+      </div>
+      <div class="glass-card anim-fade-up oop-orbital" style="position:absolute;top:8%;left:10%;padding:0.8rem;opacity:0;width:20%;text-align:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3776AB" stroke-width="2" style="display:block;margin:0 auto 0.3rem;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        <span class="section-title" style="font-size:0.8rem;">Heran&ccedil;a</span>
+        <div class="code-font" style="font-size:0.6rem;color:#A0B0C0;">class Aluno(Pessoa):</div>
+      </div>
+      <div class="glass-card anim-fade-up oop-orbital" style="position:absolute;top:8%;right:10%;padding:0.8rem;opacity:0;width:20%;text-align:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" style="display:block;margin:0 auto 0.3rem;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span class="section-title" style="font-size:0.8rem;">Encapsulamento</span>
+        <div class="code-font" style="font-size:0.6rem;color:#A0B0C0;">_privado | __mangling</div>
+      </div>
+      <div class="glass-card anim-fade-up oop-orbital" style="position:absolute;bottom:8%;left:10%;padding:0.8rem;opacity:0;width:20%;text-align:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00B4D8" stroke-width="2" style="display:block;margin:0 auto 0.3rem;"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        <span class="section-title" style="font-size:0.8rem;">Polimorfismo</span>
+        <div class="code-font" style="font-size:0.6rem;color:#A0B0C0;">Mesmo m&eacute;todo, comportamento diferente</div>
+      </div>
+      <div class="glass-card anim-fade-up oop-orbital" style="position:absolute;bottom:8%;right:10%;padding:0.8rem;opacity:0;width:20%;text-align:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00D68F" stroke-width="2" style="display:block;margin:0 auto 0.3rem;"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        <span class="section-title" style="font-size:0.8rem;">M&eacute;todos Especiais</span>
+        <div class="code-font" style="font-size:0.6rem;color:#A0B0C0;">__init__, __str__, __repr__</div>
+      </div>
+      <div class="anim-fade-scale" style="position:absolute;bottom:2%;padding:0.3rem 1rem;background:#0F1923;border:1px solid #FFD43B;border-radius:20px;opacity:0;">
+        <span class="code-font" style="font-size:0.65rem;color:#FFD43B;">@staticmethod | @classmethod | @property</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="10">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <div class="perspective-block anim-fade-left" style="position:absolute;top:5vh;left:6vw;background:linear-gradient(135deg,#306998,#3776AB);padding:0.8rem 1.8rem;opacity:0;z-index:2;">
+      <div class="perspective-content" style="color:#FFF;font-size:1.3rem;font-weight:700;white-space:nowrap;">Bibliotecas da Biblioteca Padr&atilde;o</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;flex:1;margin-top:10vh;">
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="section-title" style="font-size:0.95rem;">Manipula&ccedil;&atilde;o</span>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <span class="mod-badge" onclick="showModInfo(event,'math')" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">math</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">datetime</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">os</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">sys</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">json</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">re</span>
+        </div>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3776AB" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          <span class="section-title" style="font-size:0.95rem;">Cole&ccedil;&otilde;es</span>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">collections</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">itertools</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">functools</span>
+        </div>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00D68F" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="section-title" style="font-size:0.95rem;">Concorr&ecirc;ncia</span>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">threading</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">multiprocessing</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">asyncio</span>
+        </div>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;display:flex;flex-direction:column;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span class="section-title" style="font-size:0.95rem;">Testes e Logging</span>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">unittest</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#A0B0C0;cursor:pointer;transition:all 200ms;">logging</span>
+        </div>
+      </div>
+    </div>
+    <div class="anim-fade-scale" style="position:absolute;bottom:6vh;right:6vw;opacity:0;">
+      <span style="background:#FFD43B;color:#0A0E17;padding:4px 14px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:500;">30+ m&oacute;dulos inclusos</span>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="11">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <h2 class="slide-title anim-fade-up" style="opacity:0;margin-bottom:0.5rem;font-size:2.2rem;">Bibliotecas Populares</h2>
+    <p class="slide-subtitle anim-fade-in" style="opacity:0;font-size:0.95rem;margin-bottom:1rem;">Para dados, web, scraping e machine learning</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;flex:1;">
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;border-color:#3776AB;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          <span class="section-title" style="font-size:1rem;">An&aacute;lise de Dados</span>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <span class="mod-badge" style="background:#00D68F;color:#0A0E17;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;cursor:pointer;">NumPy</span>
+          <span class="mod-badge" style="background:#306998;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">Pandas</span>
+          <span class="mod-badge" style="background:#FF6B6B;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">Matplotlib</span>
+        </div>
+        <span class="code-font" style="font-size:0.6rem;color:#6B7D8D;margin-top:0.3rem;display:block;">NumPy &mdash; arrays N-dimensionais</span>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;border-color:#00B4D8;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00B4D8" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span class="section-title" style="font-size:1rem;">Desenvolvimento Web</span>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <span class="mod-badge" style="background:#092E20;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">Django</span>
+          <span class="mod-badge" style="background:#000;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">Flask</span>
+          <span class="mod-badge" style="background:#009688;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">FastAPI</span>
+        </div>
+        <span class="code-font" style="font-size:0.6rem;color:#6B7D8D;margin-top:0.3rem;display:block;">Monolito vs Microframework vs Async</span>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;border-color:#FFD43B;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><circle cx="12" cy="12" r="4"/></svg>
+          <span class="section-title" style="font-size:1rem;">Web Scraping</span>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">Requests</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">BeautifulSoup</span>
+          <span class="mod-badge" style="background:#1E2A3A;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">Selenium</span>
+        </div>
+        <span class="code-font" style="font-size:0.6rem;color:#6B7D8D;margin-top:0.3rem;display:block;">Requests &mdash; HTTP feito de forma simples</span>
+      </div>
+      <div class="glass-card anim-fade-scale" style="padding:1rem;opacity:0;border-color:#FF79C6;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF79C6" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span class="section-title" style="font-size:1rem;">Machine Learning</span>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <span class="mod-badge" style="background:#FF6F00;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">TensorFlow</span>
+          <span class="mod-badge" style="background:#EE4C2C;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">PyTorch</span>
+          <span class="mod-badge" style="background:#3498DB;padding:2px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFF;cursor:pointer;">scikit-learn</span>
+        </div>
+        <span class="code-font" style="font-size:0.6rem;color:#6B7D8D;margin-top:0.3rem;display:block;">scikit-learn &mdash; ML cl&aacute;ssico</span>
+      </div>
+    </div>
+    <div class="perspective-block anim-fade-right" style="position:absolute;bottom:6vh;right:6vw;background:#FFD43B;padding:0.6rem 1.5rem;opacity:0;">
+      <div class="perspective-content" style="text-align:center;">
+        <div style="color:#0A0E17;font-size:1.5rem;font-weight:700;line-height:1;">Python</div>
+        <div style="color:#0F1923;font-size:0.85rem;">Para tudo.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="12">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;padding:5vh 6vw;">
+    <h2 class="slide-title anim-fade-up" style="opacity:0;margin-bottom:1rem;text-align:center;">Casos de Uso no Mundo Real</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;flex:1;align-content:center;">
+      <div class="perspective-block anim-fade-left" style="background:linear-gradient(135deg,#306998,#3776AB);padding:1.5rem;opacity:0;display:flex;flex-direction:column;justify-content:center;box-shadow:0 8px 32px rgba(48,105,152,0.3);">
+        <div class="perspective-content">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" style="margin-bottom:0.5rem;"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M3 9h18"/></svg>
+          <h3 class="section-title" style="color:#FFF;font-size:1.1rem;margin-bottom:0.2rem;">Automa&ccedil;&atilde;o de tarefas</h3>
+          <p style="color:rgba(255,255,255,0.8);font-size:0.8rem;margin-bottom:0.2rem;">Scripts para tarefas repetitivas</p>
+          <span style="color:rgba(255,255,255,0.5);font-size:0.7rem;">Organizar arquivos, enviar e-mails, agendar tarefas</span>
+        </div>
+      </div>
+      <div class="perspective-block anim-fade-right" style="background:linear-gradient(135deg,#FFD43B,#FFE873);padding:1.5rem;opacity:0;display:flex;flex-direction:column;justify-content:center;box-shadow:0 8px 32px rgba(255,212,59,0.2);">
+        <div class="perspective-content">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0A0E17" stroke-width="2" style="margin-bottom:0.5rem;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+          <h3 class="section-title" style="color:#0A0E17;font-size:1.1rem;margin-bottom:0.2rem;">Desenvolvimento web</h3>
+          <p style="color:rgba(10,14,23,0.7);font-size:0.8rem;margin-bottom:0.2rem;">#3 linguagem mais usada na web</p>
+          <span style="color:rgba(10,14,23,0.5);font-size:0.7rem;">Django, Flask, FastAPI, REST APIs</span>
+        </div>
+      </div>
+      <div class="perspective-block anim-fade-left" style="background:linear-gradient(135deg,#0F1923,#1E2A3A);padding:1.5rem;opacity:0;display:flex;flex-direction:column;justify-content:center;border:1px solid #00D68F;box-shadow:0 8px 32px rgba(0,214,143,0.15);">
+        <div class="perspective-content">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00D68F" stroke-width="2" style="margin-bottom:0.5rem;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <h3 class="section-title" style="color:#00D68F;font-size:1.1rem;margin-bottom:0.2rem;">Ci&ecirc;ncia de dados e IA</h3>
+          <p style="color:rgba(232,237,242,0.7);font-size:0.8rem;margin-bottom:0.2rem;">Linguagem l&iacute;der em ML</p>
+          <span style="color:rgba(232,237,242,0.4);font-size:0.7rem;">NumPy, Pandas, TensorFlow, PyTorch</span>
+        </div>
+      </div>
+      <div class="perspective-block anim-fade-right" style="background:linear-gradient(135deg,#0F1923,#1E2A3A);padding:1.5rem;opacity:0;display:flex;flex-direction:column;justify-content:center;border:1px solid #00B4D8;box-shadow:0 8px 32px rgba(0,180,216,0.15);">
+        <div class="perspective-content">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00B4D8" stroke-width="2" style="margin-bottom:0.5rem;"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+          <h3 class="section-title" style="color:#00B4D8;font-size:1.1rem;margin-bottom:0.2rem;">IoT e embarcados</h3>
+          <p style="color:rgba(232,237,242,0.7);font-size:0.8rem;margin-bottom:0.2rem;">MicroPython e CircuitPython</p>
+          <span style="color:rgba(232,237,242,0.4);font-size:0.7rem;">Raspberry Pi, ESP32, sensores</span>
+        </div>
+      </div>
+    </div>
+    <div class="anim-fade-scale" style="position:absolute;bottom:7vh;left:50%;transform:translateX(-50%);opacity:0;">
+      <div style="width:60px;height:60px;border-radius:50%;background:#FFD43B;display:flex;align-items:center;justify-content:center;text-align:center;box-shadow:0 0 30px rgba(255,212,59,0.4);animation:pulse-glow 3s ease-in-out infinite;">
+        <span style="color:#0A0E17;font-family:'Inter',sans-serif;font-weight:700;font-size:0.5rem;line-height:1.1;">Python<br>everywhere</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide" data-slide="13">
+  <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5vh 6vw;">
+    <div class="perspective-block anim-fade-scale" style="position:absolute;top:20%;left:20%;width:60%;height:35%;background:linear-gradient(135deg,#306998,#3776AB);opacity:0.08;z-index:0;animation:float-slow 8s ease-in-out infinite;"></div>
+    <div class="anim-fade-in" style="position:absolute;left:5%;top:30%;font-family:'JetBrains Mono',monospace;font-size:10rem;color:#306998;opacity:0.03;z-index:0;animation:float-slow 6s ease-in-out infinite;">[</div>
+    <div class="anim-fade-in" style="position:absolute;right:5%;top:30%;font-family:'JetBrains Mono',monospace;font-size:10rem;color:#306998;opacity:0.03;z-index:0;animation:float-slow 6s ease-in-out infinite 3s;">]</div>
+    <h1 id="final-title" class="anim-fade-scale" style="font-size:clamp(2.5rem,5rem,5rem);font-weight:700;color:#FFD43B;letter-spacing:-2px;text-shadow:0 0 40px rgba(255,212,59,0.3);opacity:0;z-index:1;animation:float-slow 4s ease-in-out infinite;">Obrigado!</h1>
+    <p class="anim-fade-up" style="font-size:1.3rem;font-weight:300;color:#A0B0C0;letter-spacing:1px;opacity:0;z-index:1;margin-top:0.5rem;">Python &eacute; uma ferramenta poderosa e vers&aacute;til</p>
+    <p class="anim-fade-in" style="font-size:1rem;font-weight:400;color:#E8EDF2;opacity:0;z-index:1;margin-top:0.3rem;">Explore, pratique e contribua com a comunidade</p>
+    <p class="anim-fade-in" style="font-size:0.9rem;font-weight:300;color:#6B7D8D;opacity:0;z-index:1;margin-top:0.2rem;">C&oacute;digo aberto e colaborativo para todos</p>
+    <div style="display:flex;gap:1rem;margin-top:2rem;z-index:1;">
+      <button onclick="goToSlide(1)" class="anim-fade-scale" style="width:44px;height:44px;border-radius:50%;background:#1E2A3A;border:1px solid #306998;color:#E8EDF2;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:all 200ms;" title="Recome&ccedil;ar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+      <button class="anim-fade-scale" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#306998,#3776AB);border:none;color:#FFF;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:all 200ms;" title="Ver C&oacute;digo Fonte" onclick="showTooltip(event,'Demonstrativo')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      </button>
+      <button onclick="toggleFullscreen()" class="anim-fade-scale" style="width:44px;height:44px;border-radius:50%;background:#1E2A3A;border:1px solid #306998;color:#E8EDF2;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:all 200ms;" title="Tela Cheia">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+<button class="nav-btn prev" id="prevBtn" onclick="prevSlide()" disabled>&#9664;</button>
+<button class="nav-btn next" id="nextBtn" onclick="nextSlide()">&#9654;</button>
+<div class="dots-container" id="dotsContainer"></div>
+<div class="slide-indicator" id="slideIndicator">01 / 13</div>
+<script>
+let currentSlide=1,totalSlides=13,isAnimating=false;
+const slides=document.querySelectorAll('.slide'),prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn'),progressBar=document.getElementById('progressBar'),indicator=document.getElementById('slideIndicator'),dotsContainer=document.getElementById('dotsContainer'),tooltipEl=document.getElementById('tooltip');
+for(let i=1;i<=totalSlides;i++){const d=document.createElement('button');d.className='dot'+(i===1?' active':'');d.dataset.slide=i;d.addEventListener('click',()=>goToSlide(i));dotsContainer.appendChild(d);}
+const dots=document.querySelectorAll('.dot');
+function updateNav(){prevBtn.disabled=currentSlide===1;nextBtn.disabled=currentSlide===totalSlides;progressBar.style.width=((currentSlide/totalSlides)*100)+'%';indicator.textContent=String(currentSlide).padStart(2,'0')+' / '+String(totalSlides).padStart(2,'0');dots.forEach((d,i)=>d.classList.toggle('active',i+1===currentSlide));}
+function goToSlide(n){if(isAnimating||n<1||n>totalSlides||n===currentSlide)return;isAnimating=true;const from=currentSlide,to=n;const currentEl=slides[from-1],nextEl=slides[to-1];nextEl.style.transition='none';nextEl.style.opacity='0';nextEl.style.visibility='visible';nextEl.style.transform='';nextEl.style.filter='';nextEl.classList.remove('active','exit');void nextEl.offsetHeight;currentEl.style.transition='opacity 400ms cubic-bezier(0.55,0,1,0.45)';currentEl.style.opacity='0';setTimeout(()=>{currentEl.classList.remove('active');currentEl.style.visibility='hidden';currentEl.style.transition='none';currentEl.style.opacity='0';nextEl.style.transition='opacity 600ms cubic-bezier(0.16,1,0.3,1)';nextEl.style.opacity='1';nextEl.classList.add('active');currentSlide=to;updateNav();animateSlideIn(to);setTimeout(()=>{isAnimating=false;},700);},450);}
+function nextSlide(){goToSlide(currentSlide+1);}
+function prevSlide(){goToSlide(currentSlide-1);}
+function animateSlideIn(n){const slide=slides[n-1];if(!slide)return;const animEls=slide.querySelectorAll('.anim-fade-up,.anim-fade-scale,.anim-fade-left,.anim-fade-right,.anim-fade-in,.anim-scale-x,.anim-blur-in,.anim-code-line');animEls.forEach(el=>{if(el.classList.contains('anim-code-line'))return;el.style.transition='none';el.style.opacity='0';if(el.classList.contains('anim-fade-up'))el.style.transform='translateY(30px)';else if(el.classList.contains('anim-fade-scale'))el.style.transform='scale(0.95)';else if(el.classList.contains('anim-fade-left'))el.style.transform='translateX(-40px)';else if(el.classList.contains('anim-fade-right'))el.style.transform='translateX(40px)';else if(el.classList.contains('anim-scale-x'))el.style.transform='scaleX(0)';else if(el.classList.contains('anim-blur-in'))el.style.filter='blur(8px)';else el.style.transform='none';});void slide.offsetHeight;
+let totalDelay=0;const allItems=slide.querySelectorAll('[class*=\"anim-\"]');allItems.forEach(el=>{if(el.classList.contains('perspective-block')||el.closest('.accordion-content'))return;const cls=el.className;if(cls.includes('anim-code-line'))return;totalDelay+=30;const delay=100+totalDelay;el.style.transition='all 700ms cubic-bezier(0.16,1,0.3,1) '+delay+'ms';el.style.opacity='1';if(cls.includes('anim-fade-up'))el.style.transform='translateY(0)';else if(cls.includes('anim-fade-scale'))el.style.transform='scale(1)';else if(cls.includes('anim-fade-left'))el.style.transform='translateX(0)';else if(cls.includes('anim-fade-right'))el.style.transform='translateX(0)';else if(cls.includes('anim-scale-x'))el.style.transform='scaleX(1)';else if(cls.includes('anim-blur-in')){el.style.filter='blur(0)';el.style.opacity='1';}});
+const perspBlocks=slide.querySelectorAll('.perspective-block');perspBlocks.forEach((el,i)=>{const delay=200+i*150;el.style.transition='all 900ms cubic-bezier(0.16,1,0.3,1) '+delay+'ms';el.style.opacity='1';el.style.transform='translateX(0)';});
+const codeLines=slide.querySelectorAll('.anim-code-line');if(codeLines.length>0){codeLines.forEach((line,i)=>{const delay=500+i*100;setTimeout(()=>{line.style.transition='opacity 300ms ease-out';line.style.opacity='1';},delay);});}
+const orbitals=slide.querySelectorAll('.oop-orbital');orbitals.forEach((el,i)=>{const delay=600+i*120;el.style.transition='all 800ms cubic-bezier(0.16,1,0.3,1) '+delay+'ms';el.style.opacity='1';el.style.transform='translateY(0)';});}
+let numBuffer='',numTimer=null;
+document.addEventListener('keydown',e=>{const k=e.key;if(k==='ArrowRight'||k==='ArrowDown'){e.preventDefault();nextSlide();}else if(k==='ArrowLeft'||k==='ArrowUp'){e.preventDefault();prevSlide();}else if(k==='Home'){e.preventDefault();goToSlide(1);}else if(k==='End'){e.preventDefault();goToSlide(totalSlides);}else if(k==='f'||k==='F'){toggleFullscreen();}else if(k==='Escape'){if(document.fullscreenElement)document.exitFullscreen();}else if(/^[0-9]$/.test(k)){numBuffer+=k;clearTimeout(numTimer);numTimer=setTimeout(()=>{numBuffer='';},1000);}else if(k==='Enter'&&numBuffer){const n=parseInt(numBuffer);if(n>=1&&n<=totalSlides)goToSlide(n);numBuffer='';}});
+let touchStartX=0,touchStartY=0;
+document.addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0].screenX;touchStartY=e.changedTouches[0].screenY;},{passive:true});
+document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-touchStartX,dy=e.changedTouches[0].screenY-touchStartY;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){if(dx<0)nextSlide();else prevSlide();}},{passive:true});
+function toggleFullscreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen();}
+document.addEventListener('click',function(e){var tabBtn=e.target.closest('.tab-btn');if(tabBtn){var c=tabBtn.closest('.tabs-container');c.querySelectorAll('.tab-btn').forEach(function(b){b.style.color='#2D3E50';b.style.borderBottomColor='transparent';});tabBtn.style.color='#FFD43B';tabBtn.style.borderBottomColor='#FFD43B';c.querySelectorAll('.tab-content').forEach(function(t){t.style.display='none';});var tg=document.getElementById(tabBtn.dataset.tab);if(tg)tg.style.display='block';}
+var ctrlTab=e.target.closest('.ctrl-tab');if(ctrlTab){var codes=['<div class=\"syn-comment\"># Condicional if/elif/else</div>\n<div>idade = <span class=\"syn-number\">18</span></div>\n<div><span class=\"syn-keyword\">if</span> idade &lt; <span class=\"syn-number\">12</span>:</div>\n<div>    <span class=\"syn-function\">print</span>(<span class=\"syn-string\">"Criança"</span>)</div>\n<div><span class=\"syn-keyword\">elif</span> idade &lt; <span class=\"syn-number\">18</span>:</div>\n<div>    <span class=\"syn-function\">print</span>(<span class=\"syn-string\">"Adolescente"</span>)</div>\n<div><span class=\"syn-keyword\">else</span>:</div>\n<div>    <span class=\"syn-function\">print</span>(<span class=\"syn-string\">"Adulto"</span>)</div>','<div class=\"syn-comment\"># for loop</div>\n<div><span class=\"syn-keyword\">for</span> i <span class=\"syn-keyword\">in</span> <span class=\"syn-function\">range</span>(<span class=\"syn-number\">5</span>):</div>\n<div>    <span class=\"syn-function\">print</span>(<span class=\"syn-string\">f"Item {i}"</span>)</div>\n<div></div>\n<div class=\"syn-comment\"># while loop</div>\n<div>contador = <span class=\"syn-number\">0</span></div>\n<div><span class=\"syn-keyword\">while</span> contador &lt; <span class=\"syn-number\">5</span>:</div>\n<div>    <span class=\"syn-function\">print</span>(<span class=\"syn-string\">f"Contagem: {contador}"</span>)</div>\n<div>    contador += <span class=\"syn-number\">1</span></div>','<div class=\"syn-comment\"># List comprehension</div>\n<div>numeros = [<span class=\"syn-number\">1</span>, <span class=\"syn-number\">2</span>, <span class=\"syn-number\">3</span>, <span class=\"syn-number\">4</span>, <span class=\"syn-number\">5</span>]</div>\n<div>quadrados = [n**<span class=\"syn-number\">2</span> <span class=\"syn-keyword\">for</span> n <span class=\"syn-keyword\">in</span> numeros]</div>\n<div class=\"syn-comment\"># Resultado: [1, 4, 9, 16, 25]</div>\n<div></div>\n<div class=\"syn-comment\"># Com condição</div>\n<div>pares = [n <span class=\"syn-keyword\">for</span> n <span class=\"syn-keyword\">in</span> numeros <span class=\"syn-keyword\">if</span> n % <span class=\"syn-number\">2</span> == <span class=\"syn-number\">0</span>]</div>','<div class=\"syn-comment\"># Tratamento de exceções</div>\n<div><span class=\"syn-keyword\">try</span>:</div>\n<div>    resultado = <span class=\"syn-number\">10</span> / <span class=\"syn-number\">0</span></div>\n<div><span class=\"syn-keyword\">except</span> <span class=\"syn-variable\">ZeroDivisionError</span>:</div>\n<div>    <span class=\"syn-function\">print</span>(<span class=\"syn-string\">"Erro: divisão por zero!"</span>)</div>\n<div><span class=\"syn-keyword\">except</span> <span class=\"syn-variable\">Exception</span> <span class=\"syn-keyword\">as</span> e:</div>\n<div>    <span class=\"syn-function\">print</span>(<span class=\"syn-string\">f"Erro inesperado: {e}"</span>)</div>\n<div><span class=\"syn-keyword\">finally</span>:</div>\n<div>    <span class=\"syn-function\">print</span>(<span class=\"syn-string\">"Sempre executado"</span>)</div>'];var idx=parseInt(ctrlTab.dataset.ctrl);var display=document.getElementById('ctrl-code-display');if(display){display.style.opacity='0';display.style.transition='opacity 200ms';setTimeout(function(){display.innerHTML=codes[idx]||'';display.style.opacity='1';},200);}ctrlTab.closest('.glass-card').querySelectorAll('.ctrl-tab').forEach(function(b){b.style.background='#1E2A3A';b.style.color='#A0B0C0';b.style.borderLeftColor='transparent';});ctrlTab.style.background='#306998';ctrlTab.style.color='#FFF';ctrlTab.style.borderLeftColor='#FFD43B';}});
+function toggleAccordion(header){const content=header.nextElementSibling;const icon=header.querySelector('.accordion-icon');if(content.style.maxHeight&&content.style.maxHeight!=='0px'){content.style.maxHeight='0';if(icon)icon.style.transform='rotate(0deg)';}else{content.style.maxHeight=content.scrollHeight+'px';if(icon)icon.style.transform='rotate(180deg)';}}
+function copyCode(btn){const block=btn.closest('[id^=\"code-block\"]');const codeEl=block?block.querySelector('div[style*=\"font-family\"]'):null;if(!codeEl)return;let text='';codeEl.querySelectorAll('div').forEach(d=>{text+=d.textContent.trim()+'\\n';});navigator.clipboard.writeText(text).catch(()=>{});const orig=btn.innerHTML;btn.innerHTML='<span style=\"color:#00D68F;font-size:0.65rem;\">Copiado!</span>';setTimeout(()=>{btn.innerHTML=orig;},1500);}
+let runCount=0;function runCode(){const output=document.getElementById('code-output');if(!output)return;output.style.display='block';const outputs=['Adulto','Item 0\\nItem 1\\nItem 2\\nItem 3\\nItem 4\\nContagem: 0\\nContagem: 1\\nContagem: 2\\nContagem: 3\\nContagem: 4','[1, 4, 9, 16, 25]\\n[2, 4]','Erro: divisão por zero!\\nSempre executado'];const activeTab=document.querySelector('.ctrl-tab.active');const idx=activeTab?parseInt(activeTab.dataset.ctrl):0;output.textContent=outputs[idx]||'Executado com sucesso!';}
+function showModInfo(e,name){const map={'math':'Funções matemáticas: sin(), cos(), sqrt(), pi...'};showTooltip(e,map[name]||name);}
+let tooltipTimer=null;function showTooltip(e,msg){tooltipEl.textContent=msg;const rect=e.target?e.target.getBoundingClientRect():{left:0,top:0};tooltipEl.style.left=(rect.left+20)+'px';tooltipEl.style.top=(rect.top-10)+'px';tooltipEl.classList.add('visible');clearTimeout(tooltipTimer);tooltipTimer=setTimeout(()=>tooltipEl.classList.remove('visible'),2000);}
+const cursor=document.getElementById('customCursor');let mouseX=0,mouseY=0,cursorX=0,cursorY=0;
+document.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;if(e.target.closest('button,a,.glass-card,.perspective-block,.mod-badge'))cursor.classList.add('hover');else cursor.classList.remove('hover');});
+function updateCursor(){cursorX+=(mouseX-cursorX)*0.15;cursorY+=(mouseY-cursorY)*0.15;cursor.style.transform='translate('+cursorX+'px,'+cursorY+'px)';requestAnimationFrame(updateCursor);}
+updateCursor();
+const spotlight=document.getElementById('spotlight');document.addEventListener('mousemove',e=>{if(currentSlide===1||currentSlide===totalSlides){spotlight.style.opacity='1';spotlight.style.background='radial-gradient(circle 300px at '+e.clientX+'px '+e.clientY+'px, rgba(255,212,59,0.04), transparent)';spotlight.style.width='100%';spotlight.style.height='100%';spotlight.style.top='0';spotlight.style.left='0';}else{spotlight.style.opacity='0';}});
+const canvas=document.getElementById('bg-canvas'),ctx=canvas.getContext('2d');let W,H;
+function resizeCanvas(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
+const stars=[];for(let i=0;i<20;i++){stars.push({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*1.5,speed:0.1+Math.random()*0.3,angle:Math.random()*Math.PI*2,opacity:0.1+Math.random()*0.2});}
+const gridPts=[];for(let i=0;i<30;i++){gridPts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.2,vy:(Math.random()-0.5)*0.2,phase:Math.random()*Math.PI*2});}
+const hexs=[];for(let i=0;i<7;i++){hexs.push({x:Math.random()*W,y:Math.random()*H,size:30+Math.random()*50,rotation:Math.random()*Math.PI*2,speed:0.01+Math.random()*0.02,floatPhase:Math.random()*Math.PI*2,floatSpeed:0.005+Math.random()*0.01,opacity:0.02+Math.random()*0.03});}
+const particles=[];for(let i=0;i<45;i++){particles.push({x:Math.random()*W,y:Math.random()*H,size:1+Math.random()*3,speedX:(Math.random()-0.5)*0.15,speedY:(Math.random()-0.5)*0.15,color:i<30?'rgba(255,212,59,0.06)':'rgba(55,118,171,0.04)',phase:Math.random()*Math.PI*2});}
+let time=0;
+function drawBg(){ctx.clearRect(0,0,W,H);time++;
+stars.forEach(s=>{s.x+=Math.cos(s.angle)*s.speed*0.1;s.y+=Math.sin(s.angle)*s.speed*0.1;s.angle+=0.001;if(s.x<0)s.x=W;if(s.x>W)s.x=0;if(s.y<0)s.y=H;if(s.y>H)s.y=0;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,'+s.opacity+')';ctx.fill();});
+gridPts.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;const pulse=0.06+0.04*Math.sin(time*0.02+p.phase);ctx.beginPath();ctx.arc(p.x,p.y,1.5,0,Math.PI*2);ctx.fillStyle='rgba(48,105,152,'+pulse+')';ctx.fill();for(let j=i+1;j<gridPts.length;j++){const dx=p.x-gridPts[j].x,dy=p.y-gridPts[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<150){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(gridPts[j].x,gridPts[j].y);ctx.strokeStyle='rgba(48,105,152,'+(0.06+0.04*Math.sin(time*0.01+p.phase))+')';ctx.lineWidth=0.5;ctx.stroke();}}});
+hexs.forEach(h=>{h.rotation+=h.speed;const floatY=Math.sin(time*h.floatSpeed+h.floatPhase)*5;ctx.save();ctx.translate(h.x,h.y+floatY);ctx.rotate(h.rotation);ctx.beginPath();for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;const x=Math.cos(a)*h.size,y=Math.sin(a)*h.size;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.closePath();ctx.strokeStyle='rgba(55,118,171,'+h.opacity+')';ctx.lineWidth=1;ctx.stroke();ctx.restore();});
+particles.forEach(p=>{p.x+=p.speedX+Math.sin(time*0.005+p.phase)*0.1;p.y+=p.speedY+Math.cos(time*0.005+p.phase)*0.1;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fillStyle=p.color;ctx.fill();});
+requestAnimationFrame(drawBg);}
+drawBg();
+function applyTextShadow(){const title=document.getElementById('slide1-title');if(!title)return;let shadow='';for(let i=0;i<35;i++){const t=i/34;const r=Math.round(55+(10-55)*t);const g=Math.round(118+(14-118)*t);const b=Math.round(171+(23-171)*t);shadow+=(-i)+'px '+i+'px 0 rgb('+r+','+g+','+b+')';if(i<34)shadow+=',';}title.style.textShadow=shadow;}
+applyTextShadow();
+function initSlide1(){setTimeout(()=>{const logo=document.getElementById('slide1-python-logo');if(logo){logo.style.transition='all 800ms cubic-bezier(0.16,1,0.3,1) 0ms';logo.style.opacity='1';logo.style.transform='scale(1)';}},200);setTimeout(()=>{const t=document.getElementById('slide1-title');if(t){t.style.transition='all 800ms cubic-bezier(0.16,1,0.3,1) 0ms';t.style.opacity='1';}},800);setTimeout(()=>{const s=document.getElementById('slide1-subtitle');if(s){s.style.transition='all 700ms cubic-bezier(0.16,1,0.3,1) 0ms';s.style.opacity='1';s.style.transform='translateY(0)';}},1200);setTimeout(()=>{const l=document.getElementById('slide1-line');if(l){l.style.transition='all 600ms cubic-bezier(0.16,1,0.3,1) 0ms';l.style.opacity='1';l.style.transform='scaleX(1)';}},1400);setTimeout(()=>{const b=document.getElementById('slide1-btn');if(b){b.style.transition='all 600ms cubic-bezier(0.16,1,0.3,1) 0ms';b.style.opacity='1';b.style.transform='scale(1)';}},1600);setTimeout(()=>{const p=document.getElementById('slide1-presenter');if(p){p.style.transition='all 600ms ease-out 0ms';p.style.opacity='1';}},1800);}
+initSlide1();
+updateNav();
+</script>
+</body>
+</html>
