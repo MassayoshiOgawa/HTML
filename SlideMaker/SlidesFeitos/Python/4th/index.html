@@ -1,0 +1,1402 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python: Uma Linguagem Versátil e Poderosa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --py-blue: #3776AB;
+  --py-yellow: #FFD43B;
+  --deep-navy: #0B1A30;
+  --white: #FFFFFF;
+  --py-blue-dark: #1A4C7A;
+  --py-blue-light: #5A9FD4;
+  --py-blue-pale: #E8F0FE;
+  --yellow-pale: #FFF8DC;
+  --slate-gray: #8892A0;
+  --light-gray: #CCD6E0;
+  --near-black: #060E1C;
+  --cyan: #00D4FF;
+  --green: #00E676;
+  --orange: #FF8A00;
+  --glass-bg: rgba(255,255,255,0.05);
+  --glass-border: rgba(255,255,255,0.10);
+  --text-body: #B0BEC5;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font-sans);background:var(--deep-navy);color:var(--text-body);}
+body{cursor:none;}
+::-webkit-scrollbar{display:none;}
+
+/* Progress Bar */
+#progress-bar{position:fixed;top:0;left:0;height:3px;z-index:9999;background:linear-gradient(90deg,var(--py-blue),var(--py-yellow));transition:width 0.5s ease;opacity:0.7;width:0%;}
+
+/* Background Layers */
+#bg-layers{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+#bg-base{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,#142B50 0%,#0B1A30 60%,#060E1C 100%);}
+.bg-blob{position:absolute;border-radius:50%;filter:blur(80px);}
+.bg-blob:nth-child(2){width:500px;height:500px;background:var(--py-blue);opacity:0.06;top:-10%;left:-5%;animation:blobFloat 30s ease-in-out infinite;}
+.bg-blob:nth-child(3){width:400px;height:400px;background:var(--py-yellow);opacity:0.04;top:50%;right:-10%;animation:blobFloat 30s ease-in-out infinite;animation-delay:-10s;}
+.bg-blob:nth-child(4){width:350px;height:350px;background:var(--cyan);opacity:0.03;bottom:10%;left:30%;animation:blobFloat 30s ease-in-out infinite;animation-delay:-20s;}
+@keyframes blobFloat{0%,100%{transform:translate(0,0) scale(1);}25%{transform:translate(30px,-40px) scale(1.1);}50%{transform:translate(-20px,20px) scale(0.95);}75%{transform:translate(40px,30px) scale(1.05);}}
+#bg-grid{position:absolute;inset:0;background-image:linear-gradient(var(--cyan) 1px,transparent 1px),linear-gradient(90deg,var(--cyan) 1px,transparent 1px);background-size:80px 80px;opacity:0.03;}
+#bg-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 60%,rgba(6,14,28,0.5) 100%);z-index:2;}
+#bg-noise{position:absolute;inset:0;z-index:1;opacity:0.015;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px 256px;}
+#particle-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;}
+
+/* Slides */
+.slides-container{position:fixed;inset:0;z-index:10;}
+.slide{position:absolute;inset:0;display:none;opacity:0;overflow:hidden;padding:6% 5% 4%;}
+.slide.active{display:flex;flex-direction:column;}
+.slide-content{position:relative;width:100%;height:100%;display:flex;flex-direction:column;z-index:2;}
+
+/* Navigation */
+#nav-arrows{position:fixed;bottom:3%;right:4%;z-index:100;display:flex;gap:10px;}
+.nav-arrow{width:44px;height:44px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.06);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s ease;color:var(--white);}
+.nav-arrow:hover{background:rgba(55,118,171,0.3);box-shadow:0 0 20px rgba(55,118,171,0.4);transform:scale(1.05);}
+.nav-arrow:active{transform:scale(0.95);}
+.nav-arrow.disabled{opacity:0.2;pointer-events:none;}
+.nav-arrow svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+#nav-dots{position:fixed;bottom:3%;left:50%;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:10px;}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;cursor:pointer;transition:all 0.3s ease;padding:0;}
+.nav-dot:hover{background:rgba(255,255,255,0.4);}
+.nav-dot.active{width:28px;border-radius:4px;background:var(--py-yellow);box-shadow:0 0 12px rgba(255,212,59,0.3);}
+
+/* Custom Cursor */
+#custom-cursor{position:fixed;width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.3);background:rgba(55,118,171,0.1);pointer-events:none;z-index:99999;transition:width 0.3s ease,height 0.3s ease,background 0.3s ease,border-color 0.3s ease,transform 0.3s ease;transform:translate(-50%,-50%);display:none;}
+#custom-cursor.hovering{width:40px;height:40px;background:rgba(0,212,255,0.15);border-color:var(--cyan);}
+#custom-cursor .cursor-dot{position:absolute;top:50%;left:50%;width:4px;height:4px;border-radius:50%;background:var(--cyan);transform:translate(-50%,-50%);opacity:0.8;}
+
+/* Keyframes */
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes slideLeft{from{opacity:0;transform:translateX(-30px);}to{opacity:1;transform:translateX(0);}}
+@keyframes slideRight{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
+@keyframes blurIn{from{opacity:0;filter:blur(8px);transform:scale(0.95);}to{opacity:1;filter:blur(0);transform:scale(1);}}
+@keyframes scaleXIn{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+@keyframes pulse{0%,100%{opacity:0.6;}50%{opacity:1;}}
+@keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+@keyframes shimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
+[data-anim]{opacity:0;}
+
+/* Inclined Block */
+.inclined-block{position:relative;clip-path:polygon(5% 0,100% 0,95% 100%,0 100%);background:linear-gradient(135deg,rgba(55,118,171,0.2),rgba(255,212,59,0.05));border:1px solid rgba(255,255,255,0.08);padding:1.5rem;}
+.inclined-block .block-content{transform:skewX(-2deg);}
+.inclined-block-small{clip-path:polygon(8% 0,100% 0,92% 100%,0 100%);padding:1rem 1.2rem;}
+
+/* Glass Card */
+.glass-card{background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-radius:16px;padding:1.5rem;transition:all 0.3s ease;}
+.glass-card:hover{transform:translateY(-8px);box-shadow:0 8px 40px rgba(55,118,171,0.25);border-color:rgba(55,118,171,0.3);}
+
+/* Slide Titles */
+.slide-title{font-size:clamp(1.8rem,3.5vw,3rem);font-weight:800;color:var(--white);letter-spacing:-0.02em;line-height:1.1;}
+.slide-subtitle{font-size:clamp(1rem,1.5vw,1.3rem);font-weight:400;color:var(--light-gray);margin-top:0.3rem;}
+.title-line{width:60px;height:3px;background:var(--py-yellow);margin:0.75rem 0;border-radius:2px;}
+.tag{display:inline-block;padding:0.2rem 0.6rem;font-size:clamp(0.65rem,0.8vw,0.75rem);border-radius:4px;font-weight:500;background:rgba(255,255,255,0.06);color:var(--light-gray);border:1px solid rgba(255,255,255,0.08);}
+.tag-yellow{background:rgba(255,212,59,0.15);color:var(--py-yellow);border-color:rgba(255,212,59,0.2);}
+.tag-blue{background:rgba(55,118,171,0.15);color:var(--py-blue-light);border-color:rgba(55,118,171,0.2);}
+.tag-cyan{background:rgba(0,212,255,0.15);color:var(--cyan);border-color:rgba(0,212,255,0.2);}
+.tag-green{background:rgba(0,230,118,0.15);color:var(--green);border-color:rgba(0,230,118,0.2);}
+.badge-pulse{animation:pulse 3s ease-in-out infinite;}
+
+/* Code Block */
+.code-block{background:#0A1628;border:1px solid #1A2A4A;border-radius:12px;overflow:hidden;font-family:var(--font-mono);}
+.code-header{display:flex;align-items:center;padding:0.6rem 1rem;background:rgba(255,255,255,0.03);border-bottom:1px solid #1A2A4A;gap:8px;}
+.code-dot{width:10px;height:10px;border-radius:50%;}
+.code-dot:nth-child(1){background:#FF5F57;}
+.code-dot:nth-child(2){background:#FEBC2E;}
+.code-dot:nth-child(3){background:#28C840;}
+.code-filename{font-size:clamp(0.7rem,0.85vw,0.8rem);color:var(--slate-gray);margin-left:8px;}
+.code-body{padding:1rem;font-size:clamp(0.75rem,1vw,0.9rem);line-height:1.6;overflow-x:auto;}
+.code-body .kw{color:var(--py-yellow);}
+.code-body .str{color:var(--green);}
+.code-body .var{color:var(--white);}
+.code-body .cm{color:#6A7A8A;font-style:italic;}
+.code-body .fn{color:var(--cyan);}
+.code-body .num{color:var(--orange);}
+.copy-btn{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:var(--slate-gray);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.25s ease;opacity:0;}
+.code-block:hover .copy-btn{opacity:1;}
+.copy-btn:hover{background:rgba(55,118,171,0.3);color:var(--white);}
+.copy-btn.copied{border-color:var(--green);color:var(--green);}
+.copy-feedback{position:absolute;top:-30px;right:0;background:rgba(0,230,118,0.9);color:var(--near-black);padding:2px 8px;border-radius:4px;font-size:0.7rem;font-family:var(--font-sans);white-space:nowrap;opacity:0;transition:opacity 0.3s ease;pointer-events:none;}
+.copy-btn.copied .copy-feedback{opacity:1;}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.2rem;border-radius:8px;font-family:var(--font-sans);font-weight:500;font-size:clamp(0.8rem,0.9vw,0.9rem);border:none;cursor:pointer;transition:all 0.25s ease;text-decoration:none;}
+.btn-primary{background:linear-gradient(135deg,var(--py-blue),var(--py-blue-dark));color:var(--white);}
+.btn-primary:hover{background:linear-gradient(135deg,#4291C7,var(--py-blue));transform:scale(1.04);box-shadow:0 4px 20px rgba(55,118,171,0.4);}
+.btn-secondary{background:rgba(255,255,255,0.08);color:var(--white);border:1px solid var(--glass-border);}
+.btn-secondary:hover{background:rgba(255,255,255,0.14);transform:scale(1.04);}
+.btn-accent{background:var(--py-yellow);color:var(--deep-navy);}
+.btn-accent:hover{background:#FFE069;transform:scale(1.04);box-shadow:0 4px 20px rgba(255,212,59,0.3);}
+.btn-glass{background:rgba(255,255,255,0.06);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--glass-border);color:var(--white);}
+.btn-glass:hover{background:rgba(55,118,171,0.3);box-shadow:0 0 20px rgba(55,118,171,0.3);transform:scale(1.05);}
+
+/* Slide 1 - Cover */
+.slide-cover{justify-content:center;align-items:center;text-align:center;}
+.slide-cover .title-3d{font-family:var(--font-sans);font-weight:900;font-size:clamp(2.8rem,5.5vw,5rem);line-height:1.1;letter-spacing:-0.03em;color:var(--white);position:relative;z-index:0;margin-bottom:1rem;}
+.slide-cover .title-3d::before{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;filter:blur(20px);opacity:0.5;color:transparent;text-shadow:none;transform:translate(-10px,15px);}
+.slide-cover .subtitle{font-size:clamp(1rem,1.8vw,1.4rem);color:var(--light-gray);font-weight:400;margin-top:0.5rem;}
+.slide-cover .meta-line{width:60px;height:2px;background:var(--py-yellow);margin:1.5rem auto;}
+.slide-cover .meta-info{font-size:clamp(0.85rem,1.1vw,1rem);color:var(--slate-gray);font-weight:400;}
+.slide-cover .meta-info span{color:var(--py-blue-light);}
+.cover-bg-shapes{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+.cover-shape{position:absolute;clip-path:polygon(0 0,100% 10%,90% 100%,0 90%);}
+.cover-shape:nth-child(1){width:400px;height:300px;background:var(--py-blue);opacity:0.08;top:20%;left:-5%;filter:blur(3px);}
+.cover-shape:nth-child(2){width:350px;height:250px;background:var(--py-yellow);opacity:0.05;top:15%;right:-5%;filter:blur(3px);}
+.cover-shape:nth-child(3){width:200px;height:400px;background:var(--cyan);opacity:0.03;top:50%;left:40%;filter:blur(3px);}
+.cover-symbol{position:absolute;font-size:40vw;font-weight:900;color:var(--py-blue);opacity:0.025;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--font-sans);pointer-events:none;z-index:0;user-select:none;}
+
+/* Slide 2 - What is Python */
+.slide-whatis{display:grid;grid-template-columns:55% 42%;gap:3%;align-items:start;flex:1;}
+.slide-whatis .left{display:flex;flex-direction:column;gap:1rem;}
+.slide-whatis .feature-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;margin-top:0.5rem;}
+.slide-whatis .feature-card{background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:12px;padding:1rem;transition:all 0.3s ease;}
+.slide-whatis .feature-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(55,118,171,0.2);}
+.slide-whatis .feature-card .fc-icon{font-size:1.5rem;margin-bottom:0.4rem;}
+.slide-whatis .feature-card .fc-title{font-size:clamp(0.85rem,1.1vw,1rem);color:var(--white);font-weight:600;}
+.slide-whatis .feature-card .fc-desc{font-size:clamp(0.7rem,0.85vw,0.8rem);color:var(--text-body);margin-top:0.2rem;}
+.whatis-right-block{height:100%;display:flex;flex-direction:column;justify-content:center;}
+.whatis-right-block .big-year{font-size:clamp(4rem,8vw,7rem);font-weight:900;color:var(--py-yellow);line-height:1;letter-spacing:-0.04em;}
+.whatis-right-block .creator{font-size:clamp(1rem,1.3vw,1.2rem);color:var(--white);font-weight:500;margin-top:0.3rem;}
+.whatis-right-block .philosophy{font-size:clamp(0.8rem,1vw,0.95rem);color:var(--text-body);margin-top:0.8rem;font-style:italic;}
+.whatis-right-block .badge-tag{margin-top:1rem;}
+
+/* Slide 3 - History */
+.slide-history .history-blocks{flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;padding:1rem 0;}
+.history-svg-lines{position:absolute;inset:0;pointer-events:none;z-index:0;}
+.history-svg-lines path{stroke:var(--py-blue);stroke-width:1;fill:none;opacity:0.15;stroke-dasharray:8,4;}
+.history-row{display:flex;align-items:center;gap:2rem;position:relative;padding:0.8rem 0;}
+.history-row .h-block{flex:0 0 auto;min-width:200px;}
+.history-row:nth-child(odd){margin-left:5%;}
+.history-row:nth-child(even){margin-right:5%;justify-content:flex-end;}
+.history-row .h-block .h-year{font-size:clamp(1.2rem,1.8vw,1.6rem);font-weight:700;color:var(--white);}
+.history-row .h-block .h-desc{font-size:clamp(0.75rem,0.9vw,0.85rem);color:var(--text-body);margin-top:0.2rem;}
+
+/* Slide 4 - Popular */
+.popular-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.2rem;margin-top:1rem;position:relative;}
+.popular-grid .glass-card{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:1.5rem 1rem;position:relative;overflow:hidden;}
+.popular-grid .glass-card::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.03),transparent);animation:shimmer 4s ease-in-out infinite;}
+.popular-grid .glass-card .pc-icon{font-size:2.2rem;margin-bottom:0.6rem;}
+.popular-grid .glass-card .pc-title{font-size:clamp(0.95rem,1.3vw,1.15rem);font-weight:600;color:var(--white);}
+.popular-grid .glass-card .pc-desc{font-size:clamp(0.75rem,0.9vw,0.85rem);color:var(--text-body);margin-top:0.3rem;}
+.popular-stats-badge{position:absolute;bottom:1rem;right:1rem;background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:12px;padding:0.6rem 1rem;font-size:clamp(0.7rem,0.85vw,0.8rem);color:var(--py-yellow);font-weight:500;}
+
+/* Slide 5 - Features */
+.slide-features{display:grid;grid-template-columns:220px 1fr;gap:2rem;flex:1;margin-top:1rem;}
+.features-sidebar{display:flex;flex-direction:column;gap:0.5rem;}
+.features-tab{display:flex;align-items:center;gap:0.8rem;padding:0.8rem 1rem;border-radius:10px;background:transparent;border:none;color:var(--slate-gray);font-family:var(--font-sans);font-size:clamp(0.8rem,1vw,0.9rem);text-align:left;cursor:pointer;transition:all 0.3s ease;position:relative;}
+.features-tab:hover{background:rgba(255,255,255,0.04);color:var(--light-gray);}
+.features-tab.active{color:var(--white);background:rgba(255,255,255,0.06);}
+.features-tab.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--py-yellow);border-radius:2px;}
+.features-tab .tab-num{font-size:0.7rem;color:var(--slate-gray);font-weight:500;}
+.features-panel{background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:16px;padding:1.5rem 2rem;display:flex;flex-direction:column;justify-content:center;min-height:300px;}
+.features-panel .fp-icon{font-size:2.5rem;margin-bottom:0.8rem;}
+.features-panel .fp-title{font-size:clamp(1.2rem,1.8vw,1.6rem);font-weight:600;color:var(--white);margin-bottom:0.4rem;}
+.features-panel .fp-desc{font-size:clamp(0.85rem,1.1vw,1rem);color:var(--text-body);line-height:1.6;}
+
+/* Slide 6 - Code */
+.code-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1rem;margin-top:1rem;}
+.code-grid .code-block{position:relative;}
+
+/* Slide 7 - Data Structures */
+.slide-ds{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1rem;margin-top:1rem;position:relative;}
+.ds-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100px;height:100px;background:linear-gradient(135deg,rgba(55,118,171,0.3),rgba(255,212,59,0.1));border:1px solid rgba(255,212,59,0.2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--py-yellow);text-align:center;line-height:1.2;z-index:3;}
+.ds-card{background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:14px;padding:1.2rem;display:flex;flex-direction:column;justify-content:center;transition:all 0.3s ease;position:relative;overflow:hidden;}
+.ds-card:hover{transform:translateY(-4px);}
+.ds-card .ds-icon{font-size:1.8rem;margin-bottom:0.4rem;}
+.ds-card .ds-title{font-size:clamp(0.95rem,1.2vw,1.1rem);font-weight:600;color:var(--white);}
+.ds-card .ds-desc{font-size:clamp(0.7rem,0.85vw,0.8rem);color:var(--text-body);margin-top:0.2rem;}
+.ds-card .ds-eg{font-family:var(--font-mono);font-size:clamp(0.65rem,0.8vw,0.75rem);color:var(--slate-gray);margin-top:0.4rem;}
+.ds-card.list{border-left:3px solid var(--py-blue);}
+.ds-card.tuple{border-left:3px solid var(--py-blue-light);}
+.ds-card.dict{border-left:3px solid var(--py-yellow);}
+.ds-card.set{border-left:3px solid var(--cyan);}
+
+/* Slide 8 - OOP */
+.slide-oop{flex:1;display:grid;grid-template-columns:1fr 300px;gap:1.5rem;margin-top:1rem;}
+.oop-diagram{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.oop-center{width:120px;height:120px;background:linear-gradient(135deg,var(--py-blue),var(--py-blue-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.75rem;color:var(--white);font-weight:500;box-shadow:0 0 40px rgba(55,118,171,0.3);position:relative;z-index:2;text-align:center;padding:0.5rem;}
+.oop-center-pulse{position:absolute;inset:-10px;border-radius:50%;border:2px solid rgba(55,118,171,0.2);animation:pulse 3s ease-in-out infinite;pointer-events:none;}
+.oop-items{display:flex;gap:1rem;margin-top:1.5rem;width:100%;justify-content:center;}
+.oop-item{flex:1;max-width:160px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:12px;padding:0.8rem;text-align:center;transition:all 0.3s ease;cursor:pointer;}
+.oop-item:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(55,118,171,0.2);}
+.oop-item .oi-icon{font-size:1.5rem;margin-bottom:0.3rem;}
+.oop-item .oi-title{font-size:clamp(0.8rem,1vw,0.9rem);font-weight:600;color:var(--white);}
+.oop-item .oi-desc{font-size:0.7rem;color:var(--text-body);margin-top:0.2rem;}
+.oop-code-panel{background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:14px;padding:1.2rem;display:flex;flex-direction:column;}
+.oop-code-panel .ocp-title{font-size:clamp(0.85rem,1vw,0.95rem);color:var(--white);font-weight:600;margin-bottom:0.6rem;}
+.oop-methods{margin-top:1.5rem;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:12px;padding:0.8rem 1rem;display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;}
+.oop-methods .om-title{font-size:clamp(0.75rem,0.9vw,0.85rem);color:var(--white);font-weight:500;}
+.oop-methods .om-desc{font-size:0.75rem;color:var(--text-body);}
+.oop-methods .om-desc code{font-family:var(--font-mono);color:var(--py-yellow);}
+.oop-badge{display:inline-block;padding:0.3rem 0.6rem;background:rgba(255,212,59,0.15);color:var(--py-yellow);border-radius:4px;font-size:0.75rem;font-weight:500;font-family:var(--font-mono);margin-top:0.5rem;}
+
+/* Slides 9-10 - Ecosystem */
+.eco-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;}
+.eco-block{clip-path:polygon(3% 0,100% 0,97% 100%,0 100%);background:linear-gradient(135deg,rgba(55,118,171,0.12),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.06);padding:1.5rem;display:flex;flex-direction:column;justify-content:center;transition:all 0.3s ease;}
+.eco-block:hover{transform:translateY(-6px);box-shadow:0 10px 40px rgba(55,118,171,0.2);border-color:rgba(55,118,171,0.2);}
+.eco-block .eb-icon{font-size:2rem;margin-bottom:0.5rem;}
+.eco-block .eb-name{font-size:clamp(1.3rem,2vw,1.8rem);font-weight:700;color:var(--white);letter-spacing:-0.02em;}
+.eco-block .eb-desc{font-size:clamp(0.75rem,0.9vw,0.85rem);color:var(--text-body);margin-top:0.3rem;}
+.eco-block .eb-tags{display:flex;gap:0.4rem;margin-top:0.6rem;flex-wrap:wrap;}
+.eco-block .eb-stars{color:var(--py-yellow);font-size:0.8rem;margin-top:0.3rem;letter-spacing:2px;}
+
+/* Slide 11 - Automation */
+.zigzag-container{flex:1;display:flex;flex-direction:column;justify-content:center;gap:0.8rem;margin-top:1rem;}
+.zigzag-item{display:flex;align-items:center;gap:1rem;padding:0.3rem 0;}
+.zigzag-item .zz-left{flex:1;text-align:right;}
+.zigzag-item .zz-right{flex:1;}
+.zigzag-item .zz-num{width:28px;height:28px;border-radius:50%;background:rgba(55,118,171,0.2);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:var(--py-blue-light);font-weight:600;flex-shrink:0;}
+.zigzag-item .zz-name{font-size:clamp(0.9rem,1.2vw,1.1rem);font-weight:600;color:var(--white);}
+.zigzag-item .zz-desc{font-size:clamp(0.7rem,0.85vw,0.8rem);color:var(--text-body);margin-top:0.1rem;}
+.zigzag-item .zz-block{clip-path:polygon(5% 0,100% 0,95% 100%,0 100%);background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);padding:0.6rem 1rem;}
+.zigzag-item:nth-child(even){flex-direction:row-reverse;}
+
+/* Slide 12 - Environments */
+.env-row{flex:1;display:flex;gap:1rem;align-items:center;margin-top:1rem;}
+.env-block{flex:1;clip-path:polygon(5% 0,100% 0,95% 100%,0 100%);background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);padding:1.2rem;text-align:center;transition:all 0.3s ease;}
+.env-block:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(55,118,171,0.2);}
+.env-block .env-icon{font-size:1.8rem;margin-bottom:0.4rem;}
+.env-block .env-name{font-size:clamp(1.1rem,1.5vw,1.4rem);font-weight:700;color:var(--white);}
+.env-block .env-desc{font-size:clamp(0.7rem,0.85vw,0.8rem);color:var(--text-body);margin-top:0.2rem;}
+.env-block .env-badge{margin-top:0.5rem;}
+
+/* Slide 13 - Market */
+.slide-market{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1rem;}
+.market-left{display:flex;flex-direction:column;justify-content:center;gap:1rem;}
+.market-stat .ms-number{font-size:clamp(3rem,5vw,4.5rem);font-weight:900;color:var(--white);letter-spacing:-0.03em;line-height:1;}
+.market-stat .ms-label{font-size:clamp(0.85rem,1.1vw,1rem);color:var(--text-body);margin-top:0.1rem;}
+.market-stat .ms-bar{width:80%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:0.4rem;overflow:hidden;}
+.market-stat .ms-bar-fill{height:100%;background:linear-gradient(90deg,var(--py-blue),var(--py-yellow));border-radius:3px;width:98%;}
+.market-right{background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:16px;padding:1.5rem;display:flex;flex-direction:column;justify-content:center;}
+.market-right .mr-title{font-size:clamp(1.1rem,1.5vw,1.4rem);font-weight:600;color:var(--white);margin-bottom:0.8rem;}
+.market-right .mr-companies{display:flex;flex-wrap:wrap;gap:0.6rem;}
+.market-right .mr-company{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:0.4rem 0.8rem;font-size:clamp(0.75rem,0.9vw,0.85rem);color:var(--light-gray);transition:all 0.2s ease;cursor:default;}
+.market-right .mr-company:hover{background:rgba(55,118,171,0.2);border-color:rgba(55,118,171,0.3);}
+.market-right .mr-badge{margin-top:1rem;}
+
+/* Slide 14 - Cases */
+.cases-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1rem;margin-top:1rem;}
+.case-card{background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:16px;padding:1.2rem;display:flex;flex-direction:column;justify-content:center;transition:all 0.3s ease;}
+.case-card:hover{transform:translateY(-6px);box-shadow:0 8px 30px rgba(55,118,171,0.2);}
+.case-card .cc-logo{font-size:1.5rem;margin-bottom:0.4rem;}
+.case-card .cc-name{font-size:clamp(1rem,1.3vw,1.2rem);font-weight:600;color:var(--white);}
+.case-card .cc-desc{font-size:clamp(0.7rem,0.85vw,0.8rem);color:var(--text-body);margin-top:0.2rem;}
+.case-card .cc-badge{margin-top:0.4rem;}
+
+/* Slide 15 - Practices */
+.slide-practices{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;margin-top:1rem;}
+.practices-block{width:90%;max-width:700px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:16px;padding:1.5rem;}
+.practice-item{border-bottom:1px solid rgba(255,255,255,0.04);}
+.practice-item:last-child{border-bottom:none;}
+.practice-header{display:flex;align-items:center;gap:0.8rem;padding:0.8rem 0;cursor:pointer;transition:all 0.3s ease;}
+.practice-header:hover{opacity:0.8;}
+.practice-header .p-icon{font-size:1.1rem;}
+.practice-header .p-title{flex:1;font-size:clamp(0.85rem,1.1vw,1rem);font-weight:500;color:var(--white);}
+.practice-header .p-arrow{transition:transform 0.3s ease;color:var(--slate-gray);font-size:0.8rem;}
+.practice-header .p-arrow.open{transform:rotate(180deg);}
+.practice-content{max-height:0;overflow:hidden;transition:max-height 0.4s ease,padding 0.4s ease;padding:0 0.8rem;}
+.practice-content.open{max-height:200px;padding:0 0.8rem 0.8rem;}
+.practice-content .pc-text{font-size:clamp(0.75rem,0.9vw,0.85rem);color:var(--text-body);line-height:1.5;}
+
+/* Slide 16 - Tools */
+.tools-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1rem;margin-top:1rem;}
+.tool-card{background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:16px;padding:1.2rem;display:flex;flex-direction:column;justify-content:center;transition:all 0.3s ease;}
+.tool-card:hover{transform:translateY(-6px);box-shadow:0 8px 30px rgba(55,118,171,0.2);}
+.tool-card .tc-icon{font-size:1.8rem;margin-bottom:0.4rem;}
+.tool-card .tc-name{font-size:clamp(1rem,1.3vw,1.2rem);font-weight:600;color:var(--white);}
+.tool-card .tc-desc{font-size:clamp(0.7rem,0.85vw,0.8rem);color:var(--text-body);margin-top:0.1rem;}
+.tool-card .tc-bottom{display:flex;gap:0.4rem;margin-top:0.5rem;flex-wrap:wrap;}
+
+/* Slide 17 - Steps */
+.steps-container{flex:1;display:flex;flex-direction:column;justify-content:center;gap:0.5rem;margin-top:0.5rem;}
+.steps-row{display:flex;align-items:center;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.step-block{flex:0 1 180px;clip-path:polygon(8% 0,100% 0,92% 100%,0 100%);background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);padding:1rem 1.2rem;text-align:center;transition:all 0.3s ease;position:relative;}
+.step-block:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(55,118,171,0.2);}
+.step-block .step-num{position:absolute;top:-10px;left:10px;width:24px;height:24px;border-radius:50%;background:var(--py-blue);color:var(--white);font-size:0.7rem;font-weight:600;display:flex;align-items:center;justify-content:center;}
+.step-block .step-name{font-size:clamp(0.9rem,1.2vw,1.1rem);font-weight:600;color:var(--white);}
+.step-block .step-desc{font-size:clamp(0.65rem,0.8vw,0.75rem);color:var(--text-body);margin-top:0.2rem;}
+.step-arrow{color:var(--cyan);font-size:1.5rem;opacity:0.3;animation:floatY 2s ease-in-out infinite;}
+
+/* Slide 18 - Final */
+.slide-final{justify-content:center;align-items:center;text-align:center;}
+.slide-final .final-quote{font-size:clamp(1.5rem,3vw,2.5rem);font-weight:700;color:var(--white);max-width:700px;margin:0 auto;line-height:1.3;}
+.slide-final .final-quote .hl{color:var(--py-yellow);}
+.slide-final .final-pillars{display:flex;gap:1rem;margin-top:2rem;justify-content:center;flex-wrap:wrap;}
+.slide-final .final-pillar{padding:1rem 1.5rem;text-align:center;min-width:120px;}
+.slide-final .final-pillar .fp-title{font-size:clamp(0.9rem,1.1vw,1rem);font-weight:600;color:var(--white);}
+.slide-final .final-pillar .fp-desc{font-size:clamp(0.65rem,0.8vw,0.75rem);color:var(--text-body);margin-top:0.1rem;}
+
+/* Slide 19 - Thanks */
+.slide-thanks{justify-content:center;align-items:center;text-align:center;}
+.slide-thanks .thanks-title{font-size:clamp(2.5rem,5vw,4rem);font-weight:800;color:var(--white);margin-bottom:0.5rem;text-shadow:0 0 40px rgba(255,212,59,0.3);}
+.slide-thanks .thanks-main{font-size:clamp(1.8rem,3.5vw,3rem);font-weight:700;color:var(--white);margin-bottom:0.8rem;}
+.slide-thanks .thanks-sub{font-size:clamp(0.9rem,1.2vw,1.1rem);color:var(--text-body);max-width:500px;margin:0 auto 1.5rem;}
+.slide-thanks .thanks-buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.slide-thanks .thanks-symbol{position:absolute;font-size:35vw;font-weight:900;color:var(--py-yellow);opacity:0.04;pointer-events:none;user-select:none;top:50%;left:50%;transform:translate(-50%,-50%);}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(6,14,28,0.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-content{background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-radius:16px;padding:2rem;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;position:relative;animation:scaleIn 0.3s ease-out;}
+.modal-close{position:absolute;top:1rem;right:1rem;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.06);color:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:all 0.2s ease;}
+.modal-close:hover{background:rgba(255,255,255,0.12);}
+.modal-content::-webkit-scrollbar{width:4px;}
+.modal-content::-webkit-scrollbar-track{background:transparent;}
+.modal-content::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px;}
+
+/* Tooltip */
+[data-tooltip]{position:relative;cursor:default;}
+[data-tooltip]::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);background:rgba(11,26,48,0.95);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-size:0.75rem;padding:4px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:all 0.2s ease;font-family:var(--font-sans);font-weight:400;}
+[data-tooltip]::before{content:'';position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:rgba(11,26,48,0.95);pointer-events:none;opacity:0;transition:all 0.2s ease;}
+[data-tooltip]:hover::after,[data-tooltip]:hover::before{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Responsive */
+@media(max-width:1024px){
+  .slide-whatis{grid-template-columns:1fr;gap:1.5rem;}
+  .slide-whatis .feature-cards{grid-template-columns:1fr 1fr;}
+  .slide-features{grid-template-columns:1fr;}
+  .features-sidebar{flex-direction:row;overflow-x:auto;}
+  .features-tab.active::before{width:60%;height:3px;top:auto;bottom:0;left:50%;transform:translateX(-50%);}
+  .slide-oop{grid-template-columns:1fr;}
+  .steps-row{flex-wrap:wrap;}
+  .env-row{flex-wrap:wrap;}
+  .env-block{min-width:45%;}
+}
+@media(max-width:768px){
+  .slide{padding:4% 4%;}
+  .slide-whatis .feature-cards{grid-template-columns:1fr;}
+  .popular-grid{grid-template-columns:1fr;}
+  .code-grid{grid-template-columns:1fr;}
+  .slide-ds{grid-template-columns:1fr;}
+  .ds-center{display:none;}
+  .eco-grid{grid-template-columns:1fr;}
+  .slide-market{grid-template-columns:1fr;}
+  .cases-grid{grid-template-columns:1fr;}
+  .tools-grid{grid-template-columns:1fr;}
+  #nav-dots{gap:6px;}
+  .history-row{flex-direction:column;align-items:flex-start;gap:0.5rem;}
+  .history-row:nth-child(even){justify-content:flex-start;margin-right:0;}
+  .history-row:nth-child(odd){margin-left:0;}
+  .slide-final .final-pillars{flex-direction:column;align-items:center;}
+  .zigzag-item{flex-direction:column!important;text-align:center;}
+  .zigzag-item .zz-left,.zigzag-item .zz-right{text-align:center;}
+}
+@media(max-width:480px){
+  .slide-title{font-size:clamp(1.4rem,6vw,1.8rem);}
+  .features-sidebar{gap:0.3rem;}
+  .features-tab{padding:0.5rem 0.8rem;font-size:0.8rem;}
+}
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<div id="bg-layers">
+  <div id="bg-base"></div>
+  <div class="bg-blob"></div>
+  <div class="bg-blob"></div>
+  <div class="bg-blob"></div>
+  <div id="bg-grid"></div>
+  <div id="bg-noise"></div>
+  <div id="bg-vignette"></div>
+</div>
+<canvas id="particle-canvas"></canvas>
+<div class="slides-container">
+
+<!-- SLIDE 1 - COVER -->
+<div class="slide slide-cover active" data-slide="1">
+  <div class="cover-bg-shapes">
+    <div class="cover-shape" data-anim="fade" data-delay="100"></div>
+    <div class="cover-shape" data-anim="fade" data-delay="100"></div>
+    <div class="cover-shape" data-anim="fade" data-delay="100"></div>
+  </div>
+  <div class="cover-symbol">&gt;&gt;</div>
+  <div class="slide-content" style="align-items:center;justify-content:center;text-align:center;">
+    <h1 class="title-3d" id="title-3d" data-text="Python: Uma Linguagem Versátil e Poderosa">Python: Uma Linguagem Versátil e Poderosa</h1>
+    <p class="subtitle" data-anim="slide-up" data-delay="900" data-dur="800" style="opacity:0;">Linguagem de alto nível, interpretada e de propósito geral</p>
+    <div class="meta-line" data-anim="scale-x" data-delay="800" data-dur="600" style="opacity:0;"></div>
+    <p class="meta-info" data-anim="slide-up" data-delay="1100" data-dur="700" style="opacity:0;">Apresentação por <span>Leandro Ogawa</span></p>
+    <p class="meta-info" data-anim="slide-up" data-delay="1250" data-dur="700" style="opacity:0;">Julho 2026</p>
+  </div>
+</div>
+
+<!-- SLIDE 2 - WHAT IS PYTHON -->
+<div class="slide" data-slide="2">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="slide-left" data-delay="300" data-dur="700" style="opacity:0;">O que é Python?</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="500" data-dur="500" style="opacity:0;"></div>
+    <div class="slide-whatis">
+      <div class="left">
+        <p class="slide-subtitle" data-anim="slide-up" data-delay="600" data-dur="600" style="opacity:0;">Python é uma linguagem de alto nível, interpretada e de propósito geral, criada para priorizar a legibilidade e produtividade do código.</p>
+        <div class="feature-cards">
+          <div class="feature-card" data-anim="scale" data-delay="800" data-dur="600" style="opacity:0;">
+            <div class="fc-icon">🧩</div>
+            <div class="fc-title">Multiparadigma</div>
+            <div class="fc-desc">Programação imperativa, orientada a objetos e funcional</div>
+          </div>
+          <div class="feature-card" data-anim="scale" data-delay="900" data-dur="600" style="opacity:0;">
+            <div class="fc-icon">📖</div>
+            <div class="fc-title">Legibilidade</div>
+            <div class="fc-desc">Sintaxe clara que favorece código limpo e compreensível</div>
+          </div>
+          <div class="feature-card" data-anim="scale" data-delay="1000" data-dur="600" style="opacity:0;">
+            <div class="fc-icon">🔧</div>
+            <div class="fc-title">Propósito Geral</div>
+            <div class="fc-desc">Web, dados, automação, IA, scripts e muito mais</div>
+          </div>
+        </div>
+      </div>
+      <div class="whatis-right-block inclined-block" data-anim="slide-right" data-delay="400" data-dur="800" style="opacity:0;">
+        <div class="block-content">
+          <div class="big-year" data-anim="fade" data-delay="900" data-dur="500" style="opacity:0;" data-tooltip="Python 1.0 foi lançado em 1994">1991</div>
+          <p class="creator" data-anim="slide-up" data-delay="900" data-dur="500" style="opacity:0;">Criada por Guido van Rossum</p>
+          <p class="philosophy" data-anim="fade" data-delay="900" data-dur="500" style="opacity:0;">"Filosofia: legibilidade, simplicidade e produtividade"</p>
+          <div class="badge-tag tag tag-yellow badge-pulse" data-anim="fade" data-delay="900" data-dur="500" style="opacity:0;">Tipagem dinâmica e forte</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3 - HISTORY -->
+<div class="slide" data-slide="3">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="slide-left" data-delay="300" data-dur="700" style="opacity:0;">Histórico e Versões</h2>
+    <p class="slide-subtitle" data-anim="fade" data-delay="500" data-dur="500" style="opacity:0;">A evolução de uma linguagem</p>
+    <div class="title-line" data-anim="scale-x" data-delay="550" data-dur="500" style="opacity:0;"></div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:0.5rem;">
+      <div style="display:flex;align-items:center;gap:2rem;margin-left:5%;" data-anim="slide-right" data-delay="600" data-dur="700" style="opacity:0;">
+        <div class="inclined-block-small" style="background:rgba(55,118,171,0.1);flex:0 0 auto;min-width:200px;">
+          <div class="block-content">
+            <div class="h-year" style="font-size:clamp(1.2rem,1.8vw,1.6rem);font-weight:700;color:var(--white);">Python 1.0</div>
+            <div style="font-size:clamp(0.75rem,0.9vw,0.85rem);color:var(--text-body);margin-top:0.2rem;">1994 — primeiros passos</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:2rem;margin-right:5%;justify-content:flex-end;" data-anim="slide-right" data-delay="750" data-dur="700" style="opacity:0;">
+        <div class="inclined-block-small" style="background:rgba(55,118,171,0.12);flex:0 0 auto;min-width:200px;">
+          <div class="block-content">
+            <div class="h-year" style="font-size:clamp(1.2rem,1.8vw,1.6rem);font-weight:700;color:var(--white);">Python 2.0</div>
+            <div style="font-size:clamp(0.75rem,0.9vw,0.85rem);color:var(--text-body);margin-top:0.2rem;">2000 — funcionalidades modernas</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:2rem;margin-left:5%;" data-anim="slide-right" data-delay="900" data-dur="700" style="opacity:0;">
+        <div class="inclined-block-small" style="background:rgba(55,118,171,0.14);flex:0 0 auto;min-width:200px;">
+          <div class="block-content">
+            <div class="h-year" style="font-size:clamp(1.2rem,1.8vw,1.6rem);font-weight:700;color:var(--white);">Python 3.0</div>
+            <div style="font-size:clamp(0.75rem,0.9vw,0.85rem);color:var(--text-body);margin-top:0.2rem;">2008 — quebra de compatibilidade e evolução</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:2rem;margin-right:5%;justify-content:flex-end;" data-anim="slide-right" data-delay="1050" data-dur="700" style="opacity:0;">
+        <div class="inclined-block-small" style="background:rgba(55,118,171,0.16);border-color:rgba(255,212,59,0.3);flex:0 0 auto;min-width:200px;">
+          <div class="block-content">
+            <div class="h-year" style="font-size:clamp(1.2rem,1.8vw,1.6rem);font-weight:700;color:var(--white);">Python 3.12+</div>
+            <div style="font-size:clamp(0.75rem,0.9vw,0.85rem);color:var(--text-body);margin-top:0.2rem;">atual — melhorias contínuas de performance</div>
+            <div class="tag tag-yellow badge-pulse" style="margin-top:0.3rem;font-size:0.65rem;display:inline-block;" data-anim="scale" data-delay="1200" data-dur="400" style="opacity:0;">Atual</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4 - POPULAR -->
+<div class="slide" data-slide="4">
+  <div class="slide-content">
+    <h2 class="slide-title" style="text-align:center;" data-anim="scale" data-delay="300" data-dur="700" style="opacity:0;">Por que Python é tão Popular?</h2>
+    <div class="title-line" style="margin:0.75rem auto;" data-anim="scale-x" data-delay="500" data-dur="500" style="opacity:0;"></div>
+    <div class="popular-grid">
+      <div class="glass-card" data-anim="slide-up" data-delay="620" data-dur="600" style="opacity:0;">
+        <div class="pc-icon">🧹</div>
+        <div class="pc-title">Sintaxe limpa e intuitiva</div>
+        <div class="pc-desc">curva de aprendizado baixa</div>
+      </div>
+      <div class="glass-card" data-anim="slide-up" data-delay="740" data-dur="600" style="opacity:0;">
+        <div class="pc-icon">🧰</div>
+        <div class="pc-title">Vasta biblioteca padrão</div>
+        <div class="pc-desc">"baterias inclusas"</div>
+      </div>
+      <div class="glass-card" data-anim="slide-up" data-delay="860" data-dur="600" style="opacity:0;">
+        <div class="pc-icon">👥</div>
+        <div class="pc-title">Comunidade gigante</div>
+        <div class="pc-desc">ecossistema rico</div>
+      </div>
+      <div class="glass-card" data-anim="slide-up" data-delay="980" data-dur="600" style="opacity:0;">
+        <div class="pc-icon">💻</div>
+        <div class="pc-title">Portabilidade</div>
+        <div class="pc-desc">Windows, Linux, macOS</div>
+      </div>
+      <div class="popular-stats-badge" data-anim="slide-right" data-delay="1400" data-dur="500" style="opacity:0;" data-tooltip="Fonte: Stack Overflow 2024">8.2M+ desenvolvedores</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5 - FEATURES -->
+<div class="slide" data-slide="5">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="slide-left" data-delay="300" data-dur="600" style="opacity:0;">Principais Características</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="450" data-dur="500" style="opacity:0;"></div>
+    <div class="slide-features">
+      <div class="features-sidebar" data-anim="slide-up" data-delay="500" data-dur="500" style="opacity:0;">
+        <button class="features-tab active" data-tab="0"><span class="tab-num">01</span> Identação</button>
+        <button class="features-tab" data-tab="1"><span class="tab-num">02</span> Tipagem Dinâmica</button>
+        <button class="features-tab" data-tab="2"><span class="tab-num">03</span> Gerenciamento de Memória</button>
+        <button class="features-tab" data-tab="3"><span class="tab-num">04</span> Múltiplos Paradigmas</button>
+      </div>
+      <div class="features-panel" data-anim="slide-right" data-delay="500" data-dur="600" style="opacity:0;">
+        <div id="fp-panel">
+          <div class="fp-icon">📝</div>
+          <div class="fp-title">Identação como sintaxe</div>
+          <div class="fp-desc">Python usa indentação para definir blocos de código, eliminando a necessidade de chaves ou palavras-chave. Isso força um código visualmente organizado e legível.</div>
+          <div class="fp-code"><div class="code-block" style="margin-top:0.8rem;"><div class="code-header"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-filename">exemplo.py</span></div><div class="code-body"><span class="kw">def</span> <span class="fn">saudacao</span>(<span class="var">nome</span>):<br>    <span class="kw">if</span> <span class="var">nome</span>:<br>        <span class="kw">print</span>(<span class="str">f"Olá, {nome}!"</span>)<br>    <span class="kw">else</span>:<br>        <span class="kw">print</span>(<span class="str">"Olá, mundo!"</span>)</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6 - CODE EXAMPLES -->
+<div class="slide" data-slide="6">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="scale" data-delay="300" data-dur="700" style="opacity:0;">Sintaxe Básica — Exemplos Práticos</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="500" data-dur="500" style="opacity:0;"></div>
+    <div class="code-grid">
+      <div class="code-block" data-anim="slide-up" data-delay="500" data-dur="600" style="opacity:0;">
+        <div class="code-header"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-filename">variaveis.py</span></div>
+        <div class="code-body"><span class="cm"># Variáveis</span><br><span class="var">nome</span> = <span class="str">"Python"</span><br><span class="var">versao</span> = <span class="num">3.12</span><br><span class="var">ativo</span> = <span class="kw">True</span><br><span class="kw">print</span>(<span class="var">nome</span>, <span class="var">versao</span>)</div>
+        <button class="copy-btn" data-copy='nome = "Python"\nversao = 3.12\nativo = True\nprint(nome, versao)'><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span class="copy-feedback">Copiado!</span></button>
+      </div>
+      <div class="code-block" data-anim="slide-up" data-delay="620" data-dur="600" style="opacity:0;">
+        <div class="code-header"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-filename">condicionais.py</span></div>
+        <div class="code-body"><span class="cm"># Condicionais</span><br><span class="var">idade</span> = <span class="num">18</span><br><span class="kw">if</span> <span class="var">idade</span> &gt;= <span class="num">18</span>:<br>    <span class="kw">print</span>(<span class="str">"Maior de idade"</span>)<br><span class="kw">else</span>:<br>    <span class="kw">print</span>(<span class="str">"Menor de idade"</span>)</div>
+        <button class="copy-btn" data-copy='idade = 18\nif idade >= 18:\n    print("Maior de idade")\nelse:\n    print("Menor de idade")'><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span class="copy-feedback">Copiado!</span></button>
+      </div>
+      <div class="code-block" data-anim="slide-up" data-delay="740" data-dur="600" style="opacity:0;">
+        <div class="code-header"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-filename">lacos.py</span></div>
+        <div class="code-body"><span class="cm"># Laços</span><br><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="kw">range</span>(<span class="num">5</span>):<br>    <span class="kw">print</span>(<span class="str">f"Contagem: {i}"</span>)<br><br><span class="var">total</span> = <span class="num">0</span><br><span class="kw">while</span> <span class="var">total</span> &lt; <span class="num">10</span>:<br>    <span class="var">total</span> += <span class="num">1</span></div>
+        <button class="copy-btn" data-copy='for i in range(5):\n    print(f"Contagem: {i}")\n\ntotal = 0\nwhile total < 10:\n    total += 1'><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span class="copy-feedback">Copiado!</span></button>
+      </div>
+      <div class="code-block" data-anim="slide-up" data-delay="860" data-dur="600" style="opacity:0;">
+        <div class="code-header"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-filename">funcoes.py</span></div>
+        <div class="code-body"><span class="cm"># Funções</span><br><span class="kw">def</span> <span class="fn">saudar</span>(<span class="var">nome</span>):<br>    <span class="kw">return</span> <span class="str">f"Olá, {nome}!"</span><br><br><span class="var">mensagem</span> = <span class="fn">saudar</span>(<span class="str">"Mundo"</span>)<br><span class="kw">print</span>(<span class="var">mensagem</span>)</div>
+        <button class="copy-btn" data-copy='def saudar(nome):\n    return f"Olá, {nome}!"\n\nmensagem = saudar("Mundo")\nprint(mensagem)'><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span class="copy-feedback">Copiado!</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7 - DATA STRUCTURES -->
+<div class="slide" data-slide="7">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="slide-down" data-delay="300" data-dur="600" style="opacity:0;">Estruturas de Dados Nativas</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="450" data-dur="500" style="opacity:0;"></div>
+    <div class="slide-ds">
+      <div class="ds-center" data-anim="scale" data-delay="400" data-dur="800" style="opacity:0;"><div>4<br>Estruturas</div></div>
+      <div class="ds-card list" data-anim="slide-up" data-delay="600" data-dur="600" style="opacity:0;">
+        <div class="ds-icon">📋</div>
+        <div class="ds-title">Listas</div>
+        <div class="ds-desc">ordenadas, mutáveis, heterogêneas</div>
+        <div class="ds-eg">[1, 2, 3, "Python"]</div>
+      </div>
+      <div class="ds-card tuple" data-anim="slide-up" data-delay="700" data-dur="600" style="opacity:0;">
+        <div class="ds-icon">📦</div>
+        <div class="ds-title">Tuplas</div>
+        <div class="ds-desc">ordenadas, imutáveis</div>
+        <div class="ds-eg">(1, 2, "fixo")</div>
+      </div>
+      <div class="ds-card dict" data-anim="slide-up" data-delay="800" data-dur="600" style="opacity:0;">
+        <div class="ds-icon">🔑</div>
+        <div class="ds-title">Dicionários</div>
+        <div class="ds-desc">chave-valor, alta performance</div>
+        <div class="ds-eg">{ "nome": "Python", "ano": 1991 }</div>
+      </div>
+      <div class="ds-card set" data-anim="slide-up" data-delay="900" data-dur="600" style="opacity:0;">
+        <div class="ds-icon">⭕</div>
+        <div class="ds-title">Conjuntos</div>
+        <div class="ds-desc">elementos únicos e operações lógicas</div>
+        <div class="ds-eg">{1, 2, 3} ∪ {3, 4}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8 - OOP -->
+<div class="slide" data-slide="8">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="slide-left" data-delay="300" data-dur="700" style="opacity:0;">Programação Orientada a Objetos em Python</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="500" data-dur="500" style="opacity:0;"></div>
+    <div class="slide-oop">
+      <div class="oop-diagram">
+        <div class="oop-center" data-anim="scale" data-delay="400" data-dur="800" style="opacity:0;"><div>class MinhaClasse:</div><div style="font-size:0.65rem;margin-top:4px;opacity:0.7;">objeto</div><div class="oop-center-pulse"></div></div>
+        <div class="oop-items">
+          <div class="oop-item" data-anim="slide-up" data-delay="600" data-dur="600" style="opacity:0;">
+            <div class="oi-icon">⬇️</div>
+            <div class="oi-title">Herança</div>
+            <div class="oi-desc">Reutilização de código entre classes</div>
+          </div>
+          <div class="oop-item" data-anim="slide-up" data-delay="700" data-dur="600" style="opacity:0;">
+            <div class="oi-icon">🛡️</div>
+            <div class="oi-title">Encapsulamento</div>
+            <div class="oi-desc">Proteção de dados internos</div>
+          </div>
+          <div class="oop-item" data-anim="slide-up" data-delay="800" data-dur="600" style="opacity:0;">
+            <div class="oi-icon">🎭</div>
+            <div class="oi-title">Polimorfismo</div>
+            <div class="oi-desc">Múltiplas formas para um método</div>
+          </div>
+        </div>
+        <div class="oop-methods" data-anim="slide-up" data-delay="900" data-dur="600" style="opacity:0;">
+          <span class="om-title">Métodos Especiais:</span>
+          <span class="om-desc"><code>__init__</code>, <code>__str__</code>, <code>__repr__</code></span>
+        </div>
+      </div>
+      <div class="oop-code-panel" data-anim="slide-right" data-delay="700" data-dur="600" style="opacity:0;">
+        <div class="ocp-title">Exemplo POO</div>
+        <div class="code-block" style="font-size:clamp(0.65rem,0.85vw,0.75rem);">
+          <div class="code-header"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-filename">pessoa.py</span></div>
+          <div class="code-body"><span class="kw">class</span> <span class="var">Pessoa</span>:<br>    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, <span class="var">nome</span>):<br>        <span class="var">self</span>.<span class="var">nome</span> = <span class="var">nome</span><br><br>    <span class="kw">def</span> <span class="fn">saudar</span>(<span class="var">self</span>):<br>        <span class="kw">return</span> <span class="str">f"Olá, sou {self.nome}"</span><br><br><span class="var">p</span> = <span class="fn">Pessoa</span>(<span class="str">"Python"</span>)<br><span class="kw">print</span>(<span class="var">p</span>.<span class="fn">saudar</span>())</div>
+        </div>
+        <div class="oop-badge" data-anim="scale" data-delay="1100" data-dur="400" style="opacity:0;">@property</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 9 - WEB ECOSYSTEM -->
+<div class="slide" data-slide="9">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="slide-down" data-delay="300" data-dur="600" style="opacity:0;">Ecossistema de Bibliotecas — Web</h2>
+    <p class="slide-subtitle" data-anim="fade" data-delay="500" data-dur="400" style="opacity:0;">Frameworks e ferramentas para desenvolvimento web</p>
+    <div class="title-line" data-anim="scale-x" data-delay="550" data-dur="500" style="opacity:0;"></div>
+    <div class="eco-grid">
+      <div class="eco-block" data-anim="slide-up" data-delay="600" data-dur="700" style="opacity:0;">
+        <div class="eb-icon">🌐</div>
+        <div class="eb-name">Django</div>
+        <div class="eb-desc">Framework full-stack robusto com baterias inclusas</div>
+        <div class="eb-tags"><span class="tag tag-yellow">Full-stack</span></div>
+      </div>
+      <div class="eco-block" data-anim="slide-up" data-delay="720" data-dur="700" style="opacity:0;">
+        <div class="eb-icon">🔬</div>
+        <div class="eb-name">Flask</div>
+        <div class="eb-desc">Microframework leve e flexível</div>
+        <div class="eb-tags"><span class="tag tag-blue">Micro</span></div>
+      </div>
+      <div class="eco-block" data-anim="slide-up" data-delay="840" data-dur="700" style="opacity:0;">
+        <div class="eb-icon">⚡</div>
+        <div class="eb-name">FastAPI</div>
+        <div class="eb-desc">Alta performance com tipagem moderna</div>
+        <div class="eb-tags"><span class="tag tag-cyan">Performance</span></div>
+      </div>
+      <div class="eco-block" data-anim="slide-up" data-delay="960" data-dur="700" style="opacity:0;">
+        <div class="eb-icon">📡</div>
+        <div class="eb-name">Requests</div>
+        <div class="eb-desc">Consumo de APIs HTTP simplificado</div>
+        <div class="eb-tags"><span class="tag tag-green">HTTP</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10 - DATA ECOSYSTEM -->
+<div class="slide" data-slide="10">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="slide-down" data-delay="300" data-dur="600" style="opacity:0;">Ecossistema de Bibliotecas — Dados e Ciência</h2>
+    <p class="slide-subtitle" data-anim="fade" data-delay="500" data-dur="400" style="opacity:0;">Ferramentas para análise, computação e visualização</p>
+    <div class="title-line" data-anim="scale-x" data-delay="550" data-dur="500" style="opacity:0;"></div>
+    <div class="eco-grid">
+      <div class="eco-block" data-anim="slide-up" data-delay="600" data-dur="700" style="opacity:0;">
+        <div class="eb-icon">🔢</div>
+        <div class="eb-name">NumPy</div>
+        <div class="eb-desc">Computação numérica e arrays multidimensionais</div>
+        <div class="eb-tags"><span class="tag tag-blue">Numérico</span></div><div class="eb-stars">★★★★★</div>
+      </div>
+      <div class="eco-block" data-anim="slide-up" data-delay="720" data-dur="700" style="opacity:0;">
+        <div class="eb-icon">📊</div>
+        <div class="eb-name">Pandas</div>
+        <div class="eb-desc">Manipulação e análise de dados tabulares</div>
+        <div class="eb-tags"><span class="tag tag-yellow">Tabular</span></div><div class="eb-stars">★★★★★</div>
+      </div>
+      <div class="eco-block" data-anim="slide-up" data-delay="840" data-dur="700" style="opacity:0;">
+        <div class="eb-icon">📈</div>
+        <div class="eb-name">Matplotlib / Seaborn</div>
+        <div class="eb-desc">Visualização de dados profissional</div>
+        <div class="eb-tags"><span class="tag tag-cyan">Visual</span></div><div class="eb-stars">★★★★☆</div>
+      </div>
+      <div class="eco-block" data-anim="slide-up" data-delay="960" data-dur="700" style="opacity:0;">
+        <div class="eb-icon">🧠</div>
+        <div class="eb-name">Scikit-learn</div>
+        <div class="eb-desc">Aprendizado de máquina acessível</div>
+        <div class="eb-tags"><span class="tag tag-green">ML</span></div><div class="eb-stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11 - AUTOMATION -->
+<div class="slide" data-slide="11">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="fade" data-delay="300" data-dur="600" style="opacity:0;">Ecossistema de Bibliotecas — Automação e Scripts</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="450" data-dur="500" style="opacity:0;"></div>
+    <div class="zigzag-container">
+      <div class="zigzag-item" data-anim="slide-right" data-delay="500" data-dur="700" style="opacity:0;">
+        <div class="zz-left"><div class="zz-name">Selenium / Playwright</div><div class="zz-desc">Automação de navegadores web</div></div>
+        <div class="zz-num">01</div>
+        <div class="zz-right zz-block"><div class="zz-name">Automação Web</div><div class="zz-desc">Testes e scraping em navegadores</div></div>
+      </div>
+      <div class="zigzag-item" data-anim="slide-left" data-delay="700" data-dur="700" style="opacity:0;">
+        <div class="zz-left zz-block"><div class="zz-name">Web Scraping</div><div class="zz-desc">Extração de dados de páginas web</div></div>
+        <div class="zz-num">02</div>
+        <div class="zz-right"><div class="zz-name">BeautifulSoup / Scrapy</div><div class="zz-desc">Parsing e extração estruturada</div></div>
+      </div>
+      <div class="zigzag-item" data-anim="slide-right" data-delay="900" data-dur="700" style="opacity:0;">
+        <div class="zz-left"><div class="zz-name">PyAutoGUI</div><div class="zz-desc">Automação de interface gráfica</div></div>
+        <div class="zz-num">03</div>
+        <div class="zz-right zz-block"><div class="zz-name">Automação GUI</div><div class="zz-desc">Controle de mouse e teclado</div></div>
+      </div>
+      <div class="zigzag-item" data-anim="slide-left" data-delay="1100" data-dur="700" style="opacity:0;">
+        <div class="zz-left zz-block"><div class="zz-name">Tarefas Agendadas</div><div class="zz-desc">Execução programada de scripts</div></div>
+        <div class="zz-num">04</div>
+        <div class="zz-right"><div class="zz-name">Schedule / Celery</div><div class="zz-desc">Filas e tarefas assíncronas</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12 - ENVIRONMENTS -->
+<div class="slide" data-slide="12">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="fade" data-delay="300" data-dur="600" style="opacity:0;">Ambientes e Gerenciamento de Pacotes</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="450" data-dur="500" style="opacity:0;"></div>
+    <div class="env-row">
+      <div class="env-block" data-anim="slide-left" data-delay="500" data-dur="600" style="opacity:0;">
+        <div class="env-icon">📦</div>
+        <div class="env-name">pip</div>
+        <div class="env-desc">Gerenciador oficial de pacotes</div>
+        <div class="env-badge tag tag-yellow badge-pulse">Recomendado</div>
+      </div>
+      <div class="env-block" data-anim="slide-left" data-delay="600" data-dur="600" style="opacity:0;">
+        <div class="env-icon">🔒</div>
+        <div class="env-name">venv</div>
+        <div class="env-desc">Ambientes virtuais nativos</div>
+        <div class="env-badge tag tag-yellow badge-pulse">Recomendado</div>
+      </div>
+      <div class="env-block" data-anim="slide-left" data-delay="700" data-dur="600" style="opacity:0;">
+        <div class="env-icon">📝</div>
+        <div class="env-name">Poetry / Pipenv</div>
+        <div class="env-desc">Alternativas modernas</div>
+      </div>
+      <div class="env-block" data-anim="slide-left" data-delay="800" data-dur="600" style="opacity:0;">
+        <div class="env-icon">🐍</div>
+        <div class="env-name">Anaconda</div>
+        <div class="env-desc">Distribuição para ciência de dados</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13 - MARKET -->
+<div class="slide" data-slide="13">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="fade" data-delay="300" data-dur="600" style="opacity:0;">Python no Mercado de Trabalho</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="450" data-dur="500" style="opacity:0;"></div>
+    <div class="slide-market">
+      <div class="market-left">
+        <div class="market-stat" data-anim="scale" data-delay="500" data-dur="1000" style="opacity:0;">
+          <div class="ms-number"><span style="font-size:0.8em;">🏆</span> #1</div>
+          <div class="ms-label">Linguagem mais popular (TIOBE 2024) <span class="tag tag-yellow">Top 1</span></div>
+        </div>
+        <div class="market-stat" data-anim="slide-up" data-delay="700" data-dur="700" style="opacity:0;">
+          <div class="ms-number" style="font-size:clamp(1.5rem,2.5vw,2rem);">Alta Demanda</div>
+          <div class="ms-label">Empresas buscam profissionais Python</div>
+          <div class="ms-bar"><div class="ms-bar-fill" style="width:98%;"></div></div>
+        </div>
+        <div class="market-stat" data-anim="slide-up" data-delay="850" data-dur="700" style="opacity:0;">
+          <div class="ms-number" style="font-size:clamp(1.5rem,2.5vw,2rem);">Salários Competitivos</div>
+          <div class="ms-label">Alta valorização no mercado global</div>
+        </div>
+      </div>
+      <div class="market-right" data-anim="slide-right" data-delay="600" data-dur="800" style="opacity:0;">
+        <div class="mr-title">Empresas que usam Python</div>
+        <div class="mr-companies">
+          <span class="mr-company" data-tooltip="Funciona com Python desde 2012">Google</span>
+          <span class="mr-company" data-tooltip="Funciona com Python desde 2008">Netflix</span>
+          <span class="mr-company" data-tooltip="Funciona com Python desde 2009">Spotify</span>
+          <span class="mr-company" data-tooltip="Funciona com Python desde 2011">Instagram</span>
+          <span class="mr-company" data-tooltip="Funciona com Python desde 1994">NASA</span>
+          <span class="mr-company" data-tooltip="Funciona com Python desde 2010">Dropbox</span>
+          <span class="mr-company" data-tooltip="Funciona com Python desde 2015">Uber</span>
+          <span class="mr-company" data-tooltip="Funciona com Python desde 2005">Red Hat</span>
+        </div>
+        <div class="mr-badge tag tag-yellow">Facilidade de entrada para iniciantes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14 - REAL CASES -->
+<div class="slide" data-slide="14">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="fade" data-delay="300" data-dur="600" style="opacity:0;">Casos de Uso Reais</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="450" data-dur="500" style="opacity:0;"></div>
+    <div class="cases-grid">
+      <div class="case-card" data-anim="scale" data-delay="500" data-dur="600" style="opacity:0;">
+        <div class="cc-logo" style="color:#E50914;">▶</div>
+        <div class="cc-name">Netflix</div>
+        <div class="cc-desc">Análise de dados e recomendação personalizada</div>
+        <div class="cc-badge tag tag-blue">Dados</div>
+      </div>
+      <div class="case-card" data-anim="scale" data-delay="620" data-dur="600" style="opacity:0;">
+        <div class="cc-logo" style="color:#1DB954;">🎵</div>
+        <div class="cc-name">Spotify</div>
+        <div class="cc-desc">Back-end de streaming e machine learning</div>
+        <div class="cc-badge tag tag-green">Back-end</div>
+      </div>
+      <div class="case-card" data-anim="scale" data-delay="740" data-dur="600" style="opacity:0;">
+        <div class="cc-logo" style="color:#E4405F;">📷</div>
+        <div class="cc-name">Instagram</div>
+        <div class="cc-desc">Servidor web inteiro em Django</div>
+        <div class="cc-badge tag tag-yellow">Web</div>
+      </div>
+      <div class="case-card" data-anim="scale" data-delay="860" data-dur="600" style="opacity:0;">
+        <div class="cc-logo" style="color:#0B3D91;">🚀</div>
+        <div class="cc-name">NASA</div>
+        <div class="cc-desc">Processamento de imagens e missões espaciais</div>
+        <div class="cc-badge tag tag-cyan">Ciência</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 15 - BEST PRACTICES -->
+<div class="slide" data-slide="15">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="fade" data-delay="300" data-dur="600" style="opacity:0;">Boas Práticas e Estilo</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="450" data-dur="500" style="opacity:0;"></div>
+    <div class="slide-practices">
+      <div class="practices-block" data-anim="scale" data-delay="400" data-dur="700" style="opacity:0;">
+        <div class="practice-item">
+          <div class="practice-header" data-practice="0">
+            <span class="p-icon">📐</span>
+            <span class="p-title">PEP 8 — guia de estilo oficial</span>
+            <span class="p-arrow">▼</span>
+          </div>
+          <div class="practice-content">
+            <div class="pc-text">PEP 8 define convenções de estilo para código Python: indentação de 4 espaços, linhas de até 79 caracteres, nomes em snake_case para variáveis e funções.</div>
+          </div>
+        </div>
+        <div class="practice-item">
+          <div class="practice-header" data-practice="1">
+            <span class="p-icon">✏️</span>
+            <span class="p-title">Nomes descritivos e código legível</span>
+            <span class="p-arrow">▼</span>
+          </div>
+          <div class="practice-content">
+            <div class="pc-text">Use nomes que expliquem a intenção: <code style="color:var(--py-yellow);font-family:var(--font-mono);">calcular_media()</code> em vez de <code style="color:var(--py-yellow);font-family:var(--font-mono);">calc()</code>. Código legível é mais importante que código curto.</div>
+          </div>
+        </div>
+        <div class="practice-item">
+          <div class="practice-header" data-practice="2">
+            <span class="p-icon">🧪</span>
+            <span class="p-title">Testes com unittest / pytest</span>
+            <span class="p-arrow">▼</span>
+          </div>
+          <div class="practice-content">
+            <div class="pc-text">Escreva testes automatizados. pytest é a ferramenta mais popular: simples, poderosa e com suporte a fixtures e parametrização.</div>
+          </div>
+        </div>
+        <div class="practice-item">
+          <div class="practice-header" data-practice="3">
+            <span class="p-icon">📖</span>
+            <span class="p-title">Documentação com docstrings</span>
+            <span class="p-arrow">▼</span>
+          </div>
+          <div class="practice-content">
+            <div class="pc-text">Documente funções e classes com docstrings (PEP 257). Use """triplas aspas""" para descrever parâmetros, retornos e exemplos de uso.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 16 - TOOLS -->
+<div class="slide" data-slide="16">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="fade" data-delay="300" data-dur="600" style="opacity:0;">Ferramentas de Desenvolvimento</h2>
+    <div class="title-line" data-anim="scale-x" data-delay="450" data-dur="500" style="opacity:0;"></div>
+    <div class="tools-grid">
+      <div class="tool-card" data-anim="slide-up" data-delay="500" data-dur="600" style="opacity:0;">
+        <div class="tc-icon">💻</div>
+        <div class="tc-name">VS Code</div>
+        <div class="tc-desc">Editor com extensão Python poderosa</div>
+        <div class="tc-bottom"><span class="tag tag-yellow">Mais popular</span><span class="tag tag-green">Grátis</span></div>
+      </div>
+      <div class="tool-card" data-anim="slide-up" data-delay="620" data-dur="600" style="opacity:0;">
+        <div class="tc-icon">🛠️</div>
+        <div class="tc-name">PyCharm</div>
+        <div class="tc-desc">IDE completa da JetBrains</div>
+        <div class="tc-bottom"><span class="tag tag-blue">Profissional</span><span class="tag tag-yellow">Pago</span></div>
+      </div>
+      <div class="tool-card" data-anim="slide-up" data-delay="740" data-dur="600" style="opacity:0;">
+        <div class="tc-icon">📓</div>
+        <div class="tc-name">Jupyter Notebook</div>
+        <div class="tc-desc">Ambiente interativo para análise de dados</div>
+        <div class="tc-bottom"><span class="tag tag-cyan">Dados</span><span class="tag tag-green">Grátis</span></div>
+      </div>
+      <div class="tool-card" data-anim="slide-up" data-delay="860" data-dur="600" style="opacity:0;">
+        <div class="tc-icon">🐛</div>
+        <div class="tc-name">Debugger (pdb) e profiling</div>
+        <div class="tc-desc">Ferramentas nativas de depuração</div>
+        <div class="tc-bottom"><span class="tag tag-green">Essencial</span><span class="tag tag-green">Nativo</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 17 - FIRST STEPS -->
+<div class="slide" data-slide="17">
+  <div class="slide-content">
+    <h2 class="slide-title" data-anim="fade" data-delay="300" data-dur="600" style="opacity:0;">Primeiros Passos para Aprender</h2>
+    <p class="slide-subtitle" data-anim="fade" data-delay="500" data-dur="400" style="opacity:0;">Seu caminho para dominar Python</p>
+    <div class="title-line" data-anim="scale-x" data-delay="550" data-dur="500" style="opacity:0;"></div>
+    <div class="steps-container">
+      <div class="steps-row">
+        <div class="step-block" data-anim="slide-left" data-delay="600" data-dur="600" style="opacity:0;">
+          <div class="step-num">1</div>
+          <div class="step-name">Instalação</div>
+          <div class="step-desc">python.org/downloads</div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-block" data-anim="slide-left" data-delay="800" data-dur="600" style="opacity:0;">
+          <div class="step-num">2</div>
+          <div class="step-name">Tutorial</div>
+          <div class="step-desc">python.org/doc</div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-block" data-anim="slide-left" data-delay="1000" data-dur="600" style="opacity:0;">
+          <div class="step-num">3</div>
+          <div class="step-name">Plataformas</div>
+          <div class="step-desc">Coursera, Udemy, Alura</div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-block" data-anim="slide-left" data-delay="1200" data-dur="600" style="opacity:0;">
+          <div class="step-num">4</div>
+          <div class="step-name">Prática</div>
+          <div class="step-desc">Projetos desde o início</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 18 - FINAL -->
+<div class="slide slide-final" data-slide="18">
+  <div class="slide-content" style="align-items:center;justify-content:center;text-align:center;">
+    <h2 class="slide-title" data-anim="fade" data-delay="300" data-dur="600" style="opacity:0;">Considerações Finais</h2>
+    <div class="title-line" style="margin:0.75rem auto;" data-anim="scale-x" data-delay="450" data-dur="500" style="opacity:0;"></div>
+    <div class="final-quote" data-anim="blur" data-delay="500" data-dur="1000" style="opacity:0;">"Python combina <span class="hl">simplicidade</span> com <span class="hl">poder</span>"</div>
+    <div class="final-pillars">
+      <div class="final-pillar inclined-block-small" style="background:rgba(55,118,171,0.12);" data-anim="slide-up" data-delay="800" data-dur="600" style="opacity:0;">
+        <div class="block-content"><div class="fp-title">🧩 Simplicidade</div><div class="fp-desc">Para iniciantes</div></div>
+      </div>
+      <div class="final-pillar inclined-block-small" style="background:rgba(55,118,171,0.14);" data-anim="slide-up" data-delay="900" data-dur="600" style="opacity:0;">
+        <div class="block-content"><div class="fp-title">⚡ Poder</div><div class="fp-desc">Para profissionais</div></div>
+      </div>
+      <div class="final-pillar inclined-block-small" style="background:rgba(255,212,59,0.08);" data-anim="slide-up" data-delay="1000" data-dur="600" style="opacity:0;">
+        <div class="block-content"><div class="fp-title">🌿 Ecossistema</div><div class="fp-desc">Maduro e em evolução</div></div>
+      </div>
+      <div class="final-pillar inclined-block-small" style="background:rgba(0,212,255,0.08);" data-anim="slide-up" data-delay="1100" data-dur="600" style="opacity:0;">
+        <div class="block-content"><div class="fp-title">💼 Essencial</div><div class="fp-desc">No mercado atual</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 19 - THANK YOU -->
+<div class="slide slide-thanks" data-slide="19">
+  <div class="thanks-symbol">&gt;&gt;</div>
+  <div class="slide-content" style="align-items:center;justify-content:center;text-align:center;">
+    <h2 class="thanks-title" data-anim="fade" data-delay="300" data-dur="1000" style="opacity:0;">Obrigado!</h2>
+    <div class="thanks-main" data-anim="blur" data-delay="500" data-dur="1200" style="opacity:0;">Vamos programar juntos?</div>
+    <p class="thanks-sub" data-anim="slide-up" data-delay="900" data-dur="700" style="opacity:0;">Código aberto e colaboração: a força do Python</p>
+    <div class="thanks-buttons">
+      <button class="btn btn-glass" data-anim="slide-up" data-delay="1200" data-dur="600" style="opacity:0;" onclick="alert('Acesse: python.org')">Python.org</button>
+      <button class="btn btn-glass" data-anim="slide-up" data-delay="1350" data-dur="600" style="opacity:0;" onclick="alert('Acesse: github.com/python')">GitHub</button>
+      <button class="btn btn-glass" data-anim="slide-up" data-delay="1500" data-dur="600" style="opacity:0;" onclick="alert('Acesse: python.org/community')">Comunidade</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end slides-container -->
+
+<!-- Navigation -->
+<div id="nav-arrows">
+  <button class="nav-arrow disabled" id="nav-prev" aria-label="Slide anterior">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="nav-arrow" id="nav-next" aria-label="Próximo slide">
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+<div id="nav-dots"></div>
+
+<!-- Custom Cursor -->
+<div id="custom-cursor"><div class="cursor-dot"></div></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-content" id="modal-content">
+    <button class="modal-close" id="modal-close">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const TOTAL_SLIDES = 19;
+  let currentSlide = 0;
+  let isAnimating = false;
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('nav-dots');
+  const prevBtn = document.getElementById('nav-prev');
+  const nextBtn = document.getElementById('nav-next');
+  const progressBar = document.getElementById('progress-bar');
+  const customCursor = document.getElementById('custom-cursor');
+  const particleCanvas = document.getElementById('particle-canvas');
+  const modalOverlay = document.getElementById('modal-overlay');
+  const modalBody = document.getElementById('modal-body');
+  const modalClose = document.getElementById('modal-close');
+
+  // ---- DOTS ----
+  for (let i = 0; i < TOTAL_SLIDES; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('data-index', i);
+    dot.addEventListener('click', function() { goToSlide(parseInt(this.getAttribute('data-index'))); });
+    dotsContainer.appendChild(dot);
+  }
+
+  // ---- 3D TEXT ----
+  (function() {
+    const title = document.getElementById('title-3d');
+    if (!title) return;
+    const steps = 40;
+    let shadow = '';
+    for (let i = 0; i < steps; i++) {
+      const p = i / steps;
+      const r = Math.round(90 + (55 - 90) * p);
+      const g = Math.round(159 + (118 - 159) * p);
+      const b = Math.round(212 + (74 - 212) * p);
+      shadow += (shadow ? ',' : '') + (-i) + 'px ' + i + 'px 0 rgb(' + r + ',' + g + ',' + b + ')';
+    }
+    title.style.textShadow = shadow;
+  })();
+
+  // ---- PARTICLES ----
+  (function() {
+    if (!particleCanvas) return;
+    const ctx = particleCanvas.getContext('2d');
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    particleCanvas.width = w;
+    particleCanvas.height = h;
+
+    const count = 50;
+    const particles = [];
+    const colors = ['#3776AB','#00D4FF','#FFD43B','#FFFFFF','#5A9FD4'];
+
+    for (let i = 0; i < count; i++) {
+      const layer = i < 25 ? 'far' : 'near';
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        size: layer === 'far' ? Math.random() * 2 + 1 : Math.random() * 2 + 2,
+        speedX: (Math.random() - 0.5) * (layer === 'far' ? 0.3 : 0.6),
+        speedY: (Math.random() - 0.5) * (layer === 'far' ? 0.3 : 0.6),
+        color: colors[Math.floor(Math.random() * colors.length)],
+        opacity: layer === 'far' ? Math.random() * 0.2 + 0.1 : Math.random() * 0.25 + 0.15,
+      });
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, w, h);
+      for (const p of particles) {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size * (p.size > 2 ? 0.6 : 1));
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    window.addEventListener('resize', function() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      particleCanvas.width = w;
+      particleCanvas.height = h;
+    });
+  })();
+
+  // ---- CURSOR ----
+  (function() {
+    let mouseX = 0, mouseY = 0;
+    let cursorX = 0, cursorY = 0;
+
+    document.addEventListener('mousemove', function(e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function updateCursor() {
+      cursorX += (mouseX - cursorX) * 0.15;
+      cursorY += (mouseY - cursorY) * 0.15;
+      customCursor.style.left = cursorX + 'px';
+      customCursor.style.top = cursorY + 'px';
+      requestAnimationFrame(updateCursor);
+    }
+    updateCursor();
+
+    document.querySelectorAll('a, button, .glass-card, .eco-block, .env-block, .tool-card, .case-card, .step-block, .oop-item, .ds-card, .nav-dot, .nav-arrow, .practice-header, .features-tab, [data-tooltip]').forEach(function(el) {
+      el.addEventListener('mouseenter', function() { customCursor.classList.add('hovering'); });
+      el.addEventListener('mouseleave', function() { customCursor.classList.remove('hovering'); });
+    });
+  })();
+
+  // ---- NAV ----
+  function updateNav() {
+    const dots = dotsContainer.querySelectorAll('.nav-dot');
+    dots.forEach(function(d, i) { d.classList.toggle('active', i === currentSlide); });
+    prevBtn.classList.toggle('disabled', currentSlide === 0);
+    nextBtn.classList.toggle('disabled', currentSlide === TOTAL_SLIDES - 1);
+    progressBar.style.width = ((currentSlide + 1) / TOTAL_SLIDES * 100) + '%';
+  }
+
+  function runSlideAnimation(slide) {
+    const items = slide.querySelectorAll('[data-anim]');
+    items.forEach(function(el) {
+      const anim = el.getAttribute('data-anim');
+      const delay = parseInt(el.getAttribute('data-delay')) || 0;
+      const dur = parseInt(el.getAttribute('data-dur')) || 600;
+
+      el.style.opacity = '0';
+      el.style.animation = 'none';
+
+      setTimeout(function() {
+        el.style.opacity = '1';
+        switch (anim) {
+          case 'fade': el.style.animation = 'fadeIn ' + dur + 'ms ease-out forwards'; break;
+          case 'slide-up': el.style.animation = 'slideUp ' + dur + 'ms ease-out forwards'; break;
+          case 'slide-down': el.style.animation = 'slideDown ' + dur + 'ms ease-out forwards'; break;
+          case 'slide-left': el.style.animation = 'slideLeft ' + dur + 'ms ease-out forwards'; break;
+          case 'slide-right': el.style.animation = 'slideRight ' + dur + 'ms ease-out forwards'; break;
+          case 'scale': el.style.animation = 'scaleIn ' + dur + 'ms ease-out forwards'; break;
+          case 'blur': el.style.animation = 'blurIn ' + dur + 'ms cubic-bezier(0.16,1,0.3,1) forwards'; break;
+          case 'scale-x': el.style.animation = 'scaleXIn ' + dur + 'ms ease-out forwards'; break;
+        }
+      }, delay);
+    });
+  }
+
+  function goToSlide(index) {
+    if (isAnimating || index < 0 || index >= TOTAL_SLIDES || index === currentSlide) return;
+    isAnimating = true;
+
+    const current = slides[currentSlide];
+    const next = slides[index];
+
+    current.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out, filter 0.4s ease-out';
+    current.style.transform = 'scale(0.97)';
+    current.style.filter = 'blur(6px)';
+    current.style.opacity = '0';
+
+    setTimeout(function() {
+      current.classList.remove('active');
+      current.style.transform = '';
+      current.style.filter = '';
+      current.style.opacity = '';
+      current.style.transition = '';
+
+      currentSlide = index;
+      next.style.display = 'flex';
+      next.style.opacity = '0';
+
+      void next.offsetHeight;
+
+      next.classList.add('active');
+      next.style.transition = 'opacity 0.3s ease';
+      next.style.opacity = '1';
+
+      setTimeout(function() {
+        next.style.transition = '';
+        runSlideAnimation(next);
+        updateNav();
+        isAnimating = false;
+      }, 100);
+    }, 400);
+  }
+
+  // ---- KEYBOARD ----
+  document.addEventListener('keydown', function(e) {
+    const key = e.key;
+    if (key === 'ArrowRight' || key === 'ArrowDown' || key === 'PageDown') {
+      e.preventDefault(); goToSlide(currentSlide + 1);
+    } else if (key === 'ArrowLeft' || key === 'ArrowUp' || key === 'PageUp') {
+      e.preventDefault(); goToSlide(currentSlide - 1);
+    } else if (key === 'Home') {
+      e.preventDefault(); goToSlide(0);
+    } else if (key === 'End') {
+      e.preventDefault(); goToSlide(TOTAL_SLIDES - 1);
+    } else if (key >= '1' && key <= '9') {
+      const idx = parseInt(key) - 1;
+      if (idx < TOTAL_SLIDES) { e.preventDefault(); goToSlide(idx); }
+    } else if (key === ' ') {
+      e.preventDefault(); goToSlide(currentSlide + 1);
+    } else if (key === 'Escape') {
+      modalOverlay.classList.remove('open');
+    }
+  });
+
+  // ---- ARROWS ----
+  prevBtn.addEventListener('click', function() { goToSlide(currentSlide - 1); });
+  nextBtn.addEventListener('click', function() { goToSlide(currentSlide + 1); });
+
+  // ---- SWIPE ----
+  (function() {
+    let startX = 0, startY = 0;
+    document.addEventListener('touchstart', function(e) {
+      startX = e.changedTouches[0].screenX;
+      startY = e.changedTouches[0].screenY;
+    });
+    document.addEventListener('touchend', function(e) {
+      const dx = e.changedTouches[0].screenX - startX;
+      const dy = e.changedTouches[0].screenY - startY;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0) goToSlide(currentSlide + 1);
+        else goToSlide(currentSlide - 1);
+      }
+    });
+  })();
+
+  // ---- TABS (Slide 5) ----
+  (function() {
+    const tabs = document.querySelectorAll('.features-tab');
+    const panel = document.getElementById('fp-panel');
+    if (!tabs.length || !panel) return;
+
+    const contents = [
+      { icon: '📝', title: 'Identação como sintaxe', desc: 'Python usa indentação para definir blocos de código, eliminando a necessidade de chaves ou palavras-chave. Isso força um código visualmente organizado e legível.', code: 'def saudacao(nome):\n    if nome:\n        print(f"Olá, {nome}!")\n    else:\n        print("Olá, mundo!")' },
+      { icon: '🔄', title: 'Tipagem Dinâmica e Forte', desc: 'Variáveis em Python não precisam de declaração de tipo (dinâmica), mas a linguagem não faz coerção automática entre tipos incompatíveis (forte).', code: 'x = 42        # int\nx = "Python"  # str - dinâmico\n# print(42 + "erro")  # TypeError - forte' },
+      { icon: '🧠', title: 'Gerenciamento Automático de Memória', desc: 'Python possui garbage collector que gerencia a memória automaticamente, liberando objetos não utilizados sem intervenção do programador.', code: '# Sem necessidade de malloc/free\n# Garbage collector integrado\nimport gc\nprint(gc.get_count())' },
+      { icon: '🎯', title: 'Suporte a Múltiplos Paradigmas', desc: 'Python suporta programação imperativa, orientada a objetos e funcional, permitindo escolher o melhor paradigma para cada problema.', code: '# POO\nclass Animal:\n    def som(self): pass\n\n# Funcional\nlist(map(str.upper, ["a","b"]))' }
+    ];
+
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        this.classList.add('active');
+        const idx = parseInt(this.getAttribute('data-tab'));
+        const c = contents[idx];
+        if (!c) return;
+
+        panel.style.opacity = '0';
+        panel.style.transform = 'translateX(10px)';
+
+        setTimeout(function() {
+          panel.innerHTML =
+            '<div class="fp-icon">' + c.icon + '</div>' +
+            '<div class="fp-title">' + c.title + '</div>' +
+            '<div class="fp-desc">' + c.desc + '</div>' +
+            '<div class="fp-code"><div class="code-block" style="margin-top:0.8rem;"><div class="code-header"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-filename">exemplo.py</span></div><div class="code-body">' +
+            c.code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') +
+            '</div></div></div>';
+
+          panel.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+          panel.style.opacity = '1';
+          panel.style.transform = 'translateX(0)';
+        }, 200);
+      });
+    });
+  })();
+
+  // ---- ACCORDION (Slide 15) ----
+  (function() {
+    document.querySelectorAll('.practice-header').forEach(function(header) {
+      header.addEventListener('click', function() {
+        const content = this.nextElementSibling;
+        const arrow = this.querySelector('.p-arrow');
+        if (arrow) arrow.classList.toggle('open');
+        content.classList.toggle('open');
+      });
+    });
+  })();
+
+  // ---- COPY BUTTONS ----
+  (function() {
+    document.querySelectorAll('.copy-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const code = this.getAttribute('data-copy');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(code).then(function() {
+            btn.classList.add('copied');
+            setTimeout(function() { btn.classList.remove('copied'); }, 1500);
+          });
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = code;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          btn.classList.add('copied');
+          setTimeout(function() { btn.classList.remove('copied'); }, 1500);
+        }
+      });
+    });
+  })();
+
+  // ---- MODAL ----
+  if (modalClose) {
+    modalClose.addEventListener('click', function() { modalOverlay.classList.remove('open'); });
+  }
+  if (modalOverlay) {
+    modalOverlay.addEventListener('click', function(e) {
+      if (e.target === this) modalOverlay.classList.remove('open');
+    });
+  }
+
+  // ---- INIT ----
+  updateNav();
+  // Start slide 1 animations
+  setTimeout(function() {
+    runSlideAnimation(slides[0]);
+  }, 200);
+
+  // ---- RESTART BUTTON (slide 18) ----
+  // No explicit restart button per spec, but keyboard Home works
+
+})();
+</script>
+</body>
+</html>
+

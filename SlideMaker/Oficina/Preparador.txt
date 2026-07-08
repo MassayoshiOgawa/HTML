@@ -1,4 +1,4 @@
-# PROMPT — GERADOR DE ESPECIFICAÇÃO VISUAL PARA UMA APRESENTAÇÃO HTML
+﻿# PROMPT — GERADOR DE ESPECIFICAÇÃO VISUAL PARA UMA APRESENTAÇÃO HTML
 
 Sua única função é preparar uma **especificação extremamente detalhada** que será utilizada por outra IA responsável por desenvolver um único documento HTML contendo toda a apresentação.
 
@@ -516,6 +516,18 @@ for utilizado transform: skew(...);
 a profundidade for criada utilizando modelos 3D reais.
 O que fazer
 O efeito deve ser produzido apenas utilizando dezenas de camadas de text-shadow, criando uma extrusão suave, uniforme e realista. O texto principal deve permanecer totalmente reto e horizontal, enquanto somente a espessura atrás das letras fornece a ilusão de profundidade tridimensional.
+
+PROIBIÇÃO ABSOLUTA — BLOQUEIOS DECORATIVOS NOS SLIDES
+É estritamente proibido criar elementos decorativos conhecidos como "cover shapes" nos slides
+Cover shapes são polígonos grandes posicionados atrás do título, geralmente implementados com clip-path, com opacidade reduzida e filter: blur(...), com o suposto propósito de criar profundidade ou atmosfera.
+Na prática, esses elementos ficam visualmente pobres, amadores e prejudicam a elegância da apresentação.
+Portanto:
+- NÃO crie divs ou elementos com clip-path decorativo atrás do título da capa.
+- NÃO coloque formas geométricas inclinadas, blocos com blur ou qualquer polígono decorativo com opacidade reduzida no fundo do primeiro slide.
+- NÃO tente replicar algo parecido com esse propósito, independentemente do nome ou da técnica utilizada.
+- O fundo do slide de capa deve conter apenas as camadas globais de background (gradiente, blobs animados, grid, partículas, vignette, noise) — nada mais.
+- Se houver necessidade de textura no slide de capa, utilize exclusivamente os elementos globais de background já definidos na especificação.
+Esta proibição é absoluta e não admite exceções. Qualquer tentativa de criar "cover shapes" ou elementos equivalentes será considerada um erro crítico de implementação.
 
 Esse documento será utilizado por outra IA para desenvolver toda a apresentação HTML em um único arquivo HTML contendo HTML, CSS e JavaScript.
 
@@ -2573,379 +2585,323 @@ Somente entregue o documento quando todas as respostas forem NÃO e todos os ite
 
 É estritamente proibido criar mais de um documento txt, não poderá ser feito "Parte1" ou "Parte2", só pode criar um único documento txt para a IA fazer em uma tacada só.
 
-SISTEMA OBRIGATÓRIO DE BLOCOS INCLINADOS EM PERSPECTIVA (USO RECORRENTE EM TODAS AS APRESENTAÇÕES)
+SISTEMA OBRIGATÓRIO DE BLOCOS COM PERSPECTIVA 3D REAL (USO RECORRENTE EM TODAS AS APRESENTAÇÕES)
 Diretriz obrigatória
 
-A apresentação HTML deve adotar como parte da sua identidade visual um sistema recorrente de blocos inclinados em perspectiva, isto é, painéis visuais que não sejam retângulos comuns, mas sim formas quadriláteras inclinadas, com aparência de superfície deformada em perspectiva.
+A apresentação HTML deve adotar como parte da sua identidade visual um sistema recorrente de blocos com perspectiva 3D real, utilizando exclusivamente o esquema Set Size 3D Transform do CSS. Este sistema substitui COMPLETAMENTE qualquer abordagem anterior baseada em clip-path, skew 2D ou deformações artificiais. A perspectiva deve ser verdadeira, aplicada via CSS 3D transforms, garantindo que cada bloco se comporte como um objeto tridimensional real dentro da cena.
 
-Esses blocos devem ser usados ao longo da apresentação como um recurso visual recorrente para transmitir:
+CONFIGURAÇÕES DE PERSPECTIVA POR POSIÇÃO NO SLIDE
 
-profundidade;
-dinamismo;
-direção;
-sofisticação;
-aparência moderna;
-linguagem futurista/tecnológica;
-sensação de interface premium;
-peso visual e personalidade gráfica.
+A configuração de perspectiva varia conforme a POSIÇÃO do bloco dentro do slide. Existem dois tipos:
 
-Esses blocos inclinados não devem ser tratados como enfeites genéricos.
-Eles devem ser entendidos como um componente visual oficial da apresentação, podendo funcionar como:
+1. BLOCO NA METADE SUPERIOR DO SLIDE (acima de 50% da altura)
 
-container de texto;
-faixa de título;
-label;
-badge;
-card de destaque;
-bloco estatístico;
-faixa de seção;
-painel de informação curta;
-bloco de comparação;
-botão visual premium;
-destaque sobre imagens ou gráficos.
-FORMATO OBRIGATÓRIO DO BLOCO
+   X rotation (rotateX): -10deg
+   Y rotation (rotateY): 25deg
+   Z rotation (rotateZ): 0deg
+   Perspective: 250px
+   Transform-origin X-axis: 50%
+   Transform-origin Y-axis: 50%
+   Transform-origin Z-axis: 0px
+   perspective-origin: 50% 50%
 
-O bloco deve ter o aspecto de um retângulo deformado em perspectiva, com as seguintes características:
+   Motivo: blocos na parte de cima devem inclinar levemente para trás (-10deg) para que o observador veja sua superfície de cima para baixo, criando a sensação de que o bloco está apoiado em um plano inclinado à frente do espectador.
 
-lado esquerdo inclinado;
-lado direito reto ou quase reto;
-topo levemente inclinado;
-base levemente inclinada;
-sensação de quadrilátero em perspectiva;
-aparência de peça gráfica empurrada ou projetada em diagonal;
-leitura visual de um painel que tem direção, profundidade e presença.
+   CSS:
+   .bloco-perspectiva-superior {
+       transform: perspective(250px) rotateX(-10deg) rotateY(25deg);
+       transform-origin: 50% 50% 0px;
+       perspective-origin: 50% 50%;
+   }
 
-Ele não pode parecer apenas um retângulo comum.
-Ele precisa ser claramente percebido como um shape especial, inclinado e com personalidade visual.
+2. BLOCO NA METADE INFERIOR DO SLIDE (abaixo de 50% da altura)
 
-EXEMPLO OBRIGATÓRIO DE IMPLEMENTAÇÃO DO SHAPE
+   X rotation (rotateX): 10deg
+   Y rotation (rotateY): 25deg
+   Z rotation (rotateZ): 0deg
+   Perspective: 250px
+   Transform-origin X-axis: 50%
+   Transform-origin Y-axis: 50%
+   Transform-origin Z-axis: 0px
+   perspective-origin: 50% 50%
 
-Abaixo está um exemplo de referência de implementação do shape inclinado.
-A IA deve usar esse exemplo como base para entender exatamente a geometria esperada do bloco.
+   Motivo: blocos na parte de baixo devem inclinar levemente para frente (10deg em vez de -10deg) para que o observador veja sua superfície de baixo para cima, mantendo a coerência visual com a posição do bloco no espaço do slide. Essa inversão evita que blocos inferiores pareçam "cair para trás" ou ficar em um ângulo visualmente estranho.
 
-O objetivo não é copiar literalmente um arquivo de teste, e sim absorver o formato do bloco e reutilizá-lo na apresentação como um componente recorrente.
+   CSS:
+   .bloco-perspectiva-inferior {
+       transform: perspective(250px) rotateX(10deg) rotateY(25deg);
+       transform-origin: 50% 50% 0px;
+       perspective-origin: 50% 50%;
+   }
 
-Exemplo de shape inclinado de referência
-<div class="skew-panel"></div>
-.skew-panel {
-  width: 150px;
-  height: 105px;
-  background: #ff8c1a;
+COMO DETERMINAR A POSIÇÃO
 
-  clip-path: polygon(
-    0% 0%,
-    100% 10%,
-    100% 90%,
-    0% 100%
-  );
-}
-COMO INTERPRETAR O EXEMPLO ACIMA
+- A metade do slide é definida pelos 50% centrais da altura do viewport.
+- Se o centro geométrico do bloco (seu ponto médio vertical) estiver acima de 50% da altura do slide, use rotateX(-10deg).
+- Se o centro geométrico do bloco estiver abaixo de 50% da altura do slide, use rotateX(10deg).
+- Se o bloco estiver exatamente na linha dos 50%, use rotateX(-10deg) (padrão da metade superior).
+- Em casos de dúvida, avalie visualmente: o bloco deve parecer naturalmente integrado ao espaço tridimensional do slide, como se estivesse apoiado em um plano inclinado.
 
-Esse exemplo define o tipo de shape que deve ser incorporado à apresentação.
+TODAS AS DEMAIS CONFIGURAÇÕES (rotateY 25deg, perspective 250px, transform-origin 50% 50% 0, perspective-origin 50% 50%) PERMANECEM IGUAIS PARA AMBOS OS TIPOS. A ÚNICA DIFERENÇA É O rotateX.
 
-A lógica visual desse bloco é:
+CONTEÚDO OBRIGATÓRIO — NÃO DECORAÇÃO VAZIA
 
-o topo sobe levemente em direção à direita;
-a base acompanha uma inclinação complementar;
-a lateral esquerda fica inclinada;
-a lateral direita permanece reta;
-o shape final se comporta como um painel inclinado em perspectiva.
+Cada bloco com perspectiva DEVE conter conteúdo real dentro dele. É estritamente proibido utilizar estes blocos como elementos puramente decorativos, shapes vazios ou polígonos de background. Eles devem SEMPRE conter um ou mais dos seguintes tipos de conteúdo:
 
-A apresentação deve reutilizar esse conceito formal em diversos pontos, adaptando:
+- títulos;
+- subtítulos;
+- números / estatísticas / percentuais;
+- ícones com texto descritivo;
+- datas ou palavras-chave;
+- frases de destaque ou citações;
+- chamadas visuais com informação relevante;
+- indicadores, labels ou tags informativas;
+- cards informativos com dados do slide;
+- painéis de comparação ou contraste.
 
-tamanho;
-cor;
-função;
-posição;
-conteúdo;
-sombra;
-brilho;
-transparência;
-animação.
+O bloco existe para destacar CONTEÚDO, não para ser um enfeite. Todo bloco com perspectiva deve ter um propósito funcional de comunicação visual.
 
-Mas a essência do formato deve permanecer recognoscível.
+O TEXTO DEVE ACOMPANHAR A PERSPECTIVA — 100% IDÊNTICO
 
-ESSE BLOCO DEVE SER USADO COMO CONTAINER REAL DE CONTEÚDO
+O texto e qualquer conteúdo interno do bloco DEVEM herdar e acompanhar a mesma perspectiva do container de forma 100% idêntica. Não é permitido que o texto fique completamente horizontal, reto ou plano enquanto o bloco está em perspectiva 3D.
 
-Este componente não deve existir apenas como decoração vazia.
+Isso acontece naturalmente porque o texto está DENTRO do elemento que possui a transformação 3D aplicada. O CSS 3D Transform já projeta o conteúdo interno na mesma perspectiva do container — não é necessário aplicar skew, rotação adicional ou qualquer transformação extra no texto.
 
-Ele deve ser usado frequentemente como container de conteúdo real.
+REGRAS DE IMPLEMENTAÇÃO DO CONTEÚDO INTERNO
 
-Isso significa que, em muitos momentos, o bloco inclinado deve conter dentro dele:
+- O texto herda automaticamente a perspectiva 3D do container — nenhuma transformação adicional deve ser aplicada ao texto.
+- Não use skewX(), skewY() ou rotações extras no conteúdo interno, pois isso criaria distorção dupla.
+- O conteúdo interno deve usar padding adequado para manter a legibilidade dentro do espaço perspectivado.
+- A área útil de leitura deve ser generosa — o bloco em perspectiva reduz visualmente o espaço interno disponível.
+- O alinhamento do texto deve ser ajustado para parecer integrado à superfície do bloco.
+- A fonte deve ter tamanho suficiente para permanecer legível mesmo com a deformação da perspectiva.
 
-títulos;
-subtítulos;
-números;
-percentuais;
-ícones;
-datas;
-pequenas descrições;
-nomes de categorias;
-frases de destaque;
-chamadas visuais;
-estatísticas;
-mini cards informativos;
-indicadores.
+PROPÓSITO E FUNÇÃO VISUAL
 
-A apresentação deve aproveitar esse bloco como uma peça funcional de layout, não apenas como detalhe ornamental.
+Esses blocos com perspectiva 3D real devem ser usados ao longo da apresentação como um recurso visual recorrente para transmitir:
 
-O CONTEÚDO INTERNO DEVE ACOMPANHAR A PERSPECTIVA DO BLOCO
+- profundidade verdadeira (não simulada);
+- dinamismo e direção visual;
+- sofisticação técnica;
+- aparência moderna e premium;
+- linguagem tecnológica e futurista;
+- peso visual e personalidade gráfica.
 
-Quando houver texto, ícones, números ou qualquer outro conteúdo dentro do bloco inclinado, esse conteúdo não deve parecer simplesmente reto e colado sobre uma forma torta.
+DIFERENÇA FUNDAMENTAL EM RELAÇÃO AO SISTEMA ANTERIOR
 
-O conteúdo interno precisa acompanhar visualmente a mesma lógica espacial do painel.
+O sistema antigo (AGORA SUBSTITUÍDO) usava clip-path e skew para simular inclinação, resultando em:
+- formas deformadas artificialmente;
+- texto plano sobre superfície torta;
+- necessidade de aplicar skewX no texto separadamente;
+- sensação de falsa perspectiva.
 
-Ou seja:
+O novo sistema usa transformação 3D real do CSS, resultando em:
+- perspectiva geometricamente correta;
+- texto naturalmente integrado à superfície 3D;
+- sem necessidade de transformações adicionais no texto;
+- profundidade real e verdadeira sensação tridimensional.
 
-o bloco está em perspectiva;
-o conteúdo também precisa parecer integrado a esse plano;
-a composição interna deve respeitar a inclinação do shape;
-o texto deve parecer pertencer à superfície do painel;
-os elementos internos devem reforçar a sensação de profundidade e não quebrá-la.
-
-A intenção é gerar um efeito visual em que o painel e seu conteúdo pareçam uma única peça.
-
-COMO TRATAR O TEXTO E OS ELEMENTOS INTERNOS
-
-Ao posicionar conteúdo dentro do bloco inclinado, aplicar tratamento visual coerente com a geometria do painel.
-
-Isso pode incluir, de forma controlada e sutil:
-
-leve skew no conteúdo interno;
-leve inclinação no wrapper do conteúdo;
-ajuste de alinhamento para acompanhar a direção do shape;
-compensação de padding;
-reposicionamento fino para manter o equilíbrio visual;
-organização interna pensada para o eixo diagonal do painel;
-distribuição do texto sem encostar em áreas inclinadas.
-
-O objetivo não é destruir a legibilidade.
-
-O objetivo é fazer o conteúdo parecer integrado à superfície inclinada.
-
-REGRA DE LEGIBILIDADE
-
-O bloco pode ser visualmente agressivo, mas o conteúdo interno não pode ficar ilegível.
-
-Portanto:
-
-não exagerar no skew do texto;
-não deformar letras a ponto de atrapalhar leitura;
-não comprimir demais a área útil do conteúdo;
-não encostar texto nas bordas inclinadas;
-não usar tamanhos que tornem a leitura desconfortável.
-
-A prioridade é:
-
-manter o shape inclinado;
-preservar a sensação de perspectiva;
-manter o texto perfeitamente legível.
-O BLOCO DEVE APARECER AO LONGO DE TODA A APRESENTAÇÃO, MAS NÃO NECESSARIAMENTE EM TODOS OS SLIDES
-
-A apresentação inteira deve incorporar esse componente em vários pontos, para que ele funcione como parte da identidade visual do documento.
-
-Porém, isso não significa que todos os slides devam obrigatoriamente conter um bloco desse tipo.
-
-A regra correta é:
-
-o bloco inclinado deve aparecer repetidamente ao longo da apresentação;
-ele deve ser distribuído em slides estratégicos;
-ele deve ser suficientemente recorrente para virar uma assinatura visual;
-ele não deve ser usado de forma mecânica em todos os slides sem necessidade.
-
-Ou seja:
-
-usar em diversos slides;
-variar função e escala;
-preservar consistência;
-evitar repetição preguiçosa.
 FUNÇÕES QUE O BLOCO PODE EXERCER
 
-Esse componente pode aparecer de várias formas ao longo da apresentação.
+Este componente pode aparecer de várias formas ao longo da apresentação, sempre contendo conteúdo:
 
-1. Faixa de título
+1. Faixa de título — placa em perspectiva contendo o título principal do slide ou seção.
 
-Uma placa inclinada contendo o título principal do slide ou de uma seção.
+2. Tag ou label — bloco menor em perspectiva exibindo categoria, data, palavra-chave ou status.
 
-2. Tag ou label
+3. Card de destaque — painel em perspectiva com número, ícone e texto curto.
 
-Um shape menor exibindo categoria, data, palavra-chave ou status.
+4. Painel estatístico — bloco em perspectiva contendo KPI, percentual, valor ou métrica importante.
 
-3. Card de destaque
+5. Chamada lateral — bloco em perspectiva na lateral do slide destacando uma observação.
 
-Um painel inclinado com número, ícone e texto curto.
+6. Elemento de timeline — cada marco temporal representado por um painel em perspectiva.
 
-4. Painel estatístico
+7. Botão premium — botões especiais podem herdar este formato.
 
-Um bloco contendo KPI, percentual, valor ou métrica importante.
+8. Destaque sobre imagem ou gráfico — o painel pode sobrepor parcialmente outros elementos.
 
-5. Chamada lateral
+9. Faixa de comparação — pode identificar categorias ou lados em um slide comparativo.
 
-Um bloco inclinado na lateral do slide destacando uma observação.
+10. Citação ou insight — frase importante dentro de um bloco em perspectiva de maior destaque.
 
-6. Elemento de timeline
+VARIAÇÕES PERMITIDAS (APENAS VISUAIS, NÃO GEOMÉTRICAS)
 
-Cada marco temporal pode ser representado por um painel inclinado.
+A configuração de perspectiva (rotateX, rotateY, perspective, transform-origin) é FIXA e não pode ser alterada. As únicas variações permitidas são:
 
-7. Botão premium
+- largura e altura do bloco;
+- cor de fundo, gradiente ou opacidade;
+- sombra, glow, brilho e borda iluminada;
+- textura e transparência;
+- posição no layout;
+- conteúdo interno.
 
-Botões especiais podem herdar esse formato.
-
-8. Destaque sobre imagem ou gráfico
-
-O painel pode sobrepor parcialmente outros elementos, criando visual editorial.
-
-9. Faixa de comparação
-
-Pode identificar categorias ou lados em um slide comparativo.
-
-10. Citação ou insight
-
-Uma frase importante pode aparecer dentro de um bloco inclinado de maior destaque.
-
-VARIAÇÕES PERMITIDAS
-
-O componente pode variar ao longo da apresentação, desde que preserve sua essência geométrica.
-
-Pode variar em:
-
-largura;
-altura;
-proporção;
-cor;
-gradiente;
-opacidade;
-sombra;
-glow;
-borda;
-textura;
-transparência;
-brilho;
-posição;
-intensidade da inclinação;
-função.
-
-Mas deve continuar reconhecível como o mesmo sistema de blocos inclinados em perspectiva.
+A GEOMETRIA DA PERSPECTIVA DEVE PERMANECER IDÊNTICA EM TODAS AS OCORRÊNCIAS.
 
 PROFUNDIDADE VISUAL OBRIGATÓRIA
 
 Sempre que possível, reforçar a sensação de profundidade do bloco usando recursos como:
 
-sombra coerente;
-gradiente sutil;
-highlight suave;
-micro brilho;
-borda de luz;
-contraste entre áreas;
-glow controlado;
-textura leve;
-sombra interna ou externa bem dosada;
-pequenas diferenças tonais que façam o bloco parecer menos plano.
+- sombra coerente com a direção da perspectiva (luz vindo do canto superior esquerdo);
+- gradiente sutil no fundo do bloco;
+- highlight e micro brilho na borda superior;
+- glow controlado;
+- textura leve;
+- sombra interna ou externa bem dosada;
+- pequenas diferenças tonais que façam o bloco parecer menos plano.
 
-O objetivo é evitar um shape “chapado” demais.
-
-Ele deve parecer uma peça visual rica, com presença, sem virar um excesso de efeitos.
+O bloco nunca deve parecer "chapado". Ele deve parecer uma peça visual rica, com presença tridimensional.
 
 INTEGRAÇÃO COM ANIMAÇÕES
 
-Os blocos inclinados devem participar das animações da apresentação.
+Os blocos com perspectiva devem participar das animações da apresentação. Eles não devem surgir de forma estática.
 
-Eles não devem simplesmente surgir de forma estática.
+A entrada deles pode:
 
-A entrada deles pode, por exemplo:
-
-deslizar acompanhando a direção da inclinação;
-entrar com fade + movimento;
-surgir com leve blur que reduz até estabilizar;
-aparecer por reveal de máscara;
-ganhar glow ao terminar a entrada;
-revelar o conteúdo interno logo em seguida;
-receber microparallax;
-estabilizar com suavidade.
+- deslizar acompanhando a direção da perspectiva;
+- entrar com fade + movimento;
+- surgir com leve blur que reduz até estabilizar;
+- aparecer por reveal de máscara;
+- ganhar glow ao terminar a entrada;
+- revelar o conteúdo interno logo em seguida;
+- receber microparallax;
+- estabilizar com suavidade.
 
 Se o painel entra primeiro e o conteúdo aparece depois, a sequência deve parecer intencional e elegante.
 
 REGRAS PRÁTICAS DE IMPLEMENTAÇÃO
-Regra 1
 
-Criar um componente reutilizável para esses blocos inclinados.
+Regra 1: Criar um componente CSS reutilizável para os blocos com perspectiva, com a configuração exata de transformação 3D.
 
-Regra 2
+Regra 2: Este componente deve aceitar conteúdo interno real (texto, ícones, números).
 
-Esse componente deve aceitar conteúdo interno real.
+Regra 3: A configuração de perspectiva (rotateY 25deg, perspective 250px, transform-origin 50% 50% 0, perspective-origin 50% 50%) é FIXA e obrigatória em todas as ocorrências. O rotateX varia conforme a posição: -10deg para blocos na metade superior, 10deg para blocos na metade inferior.
 
-Regra 3
+Regra 4: O bloco não deve parecer um retângulo comum — a perspectiva já garante isso.
 
-A geometria do shape deve seguir a lógica do exemplo com clip-path.
+Regra 5: O conteúdo interno herda naturalmente a perspectiva — nenhuma transformação extra no texto.
 
-Regra 4
+Regra 6: LARGURA HORIZONTAL MÁXIMA DE 350px — o bloco com perspectiva NUNCA pode ultrapassar 350px de largura. Esse limite é absoluto e obrigatório em todas as ocorrências.
 
-O bloco não deve parecer um retângulo comum.
+Regra 7: ALTURA VERTICAL MÁXIMA DE 420px — o bloco com perspectiva NUNCA pode ultrapassar 420px de altura. Esse limite é absoluto e obrigatório em todas as ocorrências.
 
-Regra 5
+REGRAS DE USO DOS TAMANHOS MÁXIMOS (350px x 420px)
 
-O conteúdo interno deve parecer integrado à perspectiva do shape.
+Os limites de 350px de largura e 420px de altura são TETOS ABSOLUTOS, não tamanhos padrão. O bloco só deve chegar próximo desses limites QUANDO O CONTEÚDO EXIGIR. Regras obrigatórias:
 
-Regra 6
+- O bloco deve ter o tamanho justo para acomodar seu conteúdo — nem maior, nem menor que o necessário.
+- É PROIBIDO usar width: 350px ou height: 420px apenas para "preencher espaço" ou porque "o limite permite". O bloco deve ter o tamanho que seu conteúdo demanda.
+- Se o conteúdo for pequeno (ex: um badge de 2 palavras ou um número curto), o bloco deve ser proporcionalmente pequeno. Nunca esticar um bloco pequeno até os limites máximos.
+- Se o conteúdo for grande a ponto de precisar se aproximar de 350px ou 420px, isso deve ter justificativa explícita.
+- TODO bloco com perspectiva deve ter um COMENTÁRIO NO CÓDIGO HTML explicando por que aquele bloco tem determinado tamanho. Exemplos:
+  - "Badge pequeno — largura ajustada ao conteúdo (120px)"
+  - "Card estatístico com 3 linhas de texto — altura 180px"
+  - "Painel de citação longa — próximo do limite horizontal (320px) e vertical (380px) devido ao conteúdo extenso"
+- Blocos sem justificativa de tamanho serão considerados erro de implementação.
+- O limite máximo só deve ser atingido quando o conteúdo realmente ocupar todo aquele espaço. Espaço vazio interno (padding exagerado, conteúdo esparso) dentro de um bloco grande é proibido.
+- Prefira sempre o menor tamanho possível que acomode confortavelmente o conteúdo, respeitando o padding mínimo de 20px e a legibilidade.
 
-A área útil de leitura deve ser protegida com padding suficiente.
+Regra 8: A área útil de leitura deve ser protegida com padding suficiente (mínimo 20px).
 
-Regra 7
+Regra 9: O componente deve poder funcionar como card, faixa, botão, label ou painel.
 
-O componente deve poder funcionar como card, faixa, botão, label ou painel.
+Regra 10: Deve se adaptar ao tema visual geral da apresentação (cores, tipografia, textura).
 
-Regra 8
+Regra 11: Deve participar das animações do slide.
 
-Ele deve se adaptar ao tema visual geral da apresentação.
+Regra 12: Deve aparecer ao longo da apresentação com frequência suficiente para se tornar parte da identidade visual.
 
-Regra 9
+RESPONSIVIDADE OBRIGATÓRIA DOS BLOCOS COM PERSPECTIVA
 
-Ele deve participar das animações do slide.
+Os blocos com perspectiva 3D devem ser responsivos em qualquer resolução de tela (desktop, tablet e celular). Regras obrigatórias:
 
-Regra 10
+- O limite máximo de 350px de largura DEVE ser respeitado em todas as resoluções, sem exceção.
+- O limite máximo de 420px de altura DEVE ser respeitado em todas as resoluções, sem exceção.
+- Em telas menores que 400px de largura (celulares), os blocos devem ocupar no máximo 85% da largura do viewport, mantendo o limite de 350px como teto absoluto.
+- Em tablets (768px ou menos), os blocos devem se reorganizar para caber confortavelmente sem ultrapassar os limites de 350px x 420px.
+- O bloco nunca pode ser comprimido a ponto de distorcer o texto ou o padding mínimo de 20px.
+- Se a tela for muito estreita para 350px + padding, use width: min(350px, 85vw) e ajuste o padding proporcionalmente (mínimo 12px em celulares muito pequenos).
+- A altura do bloco deve ser definida com max-height: 420px, permitindo que o bloco cresça conforme o conteúdo até esse limite. Se o conteúdo ultrapassar 420px, o layout deve ser reorganizado (reduzir fontes, espaçamentos ou dividir conteúdo).
+- Em celulares, a altura pode se ajustar automaticamente ao conteúdo (height: auto) desde que respeite o limite de 420px via max-height.
+- O conteúdo interno deve permanecer legível e bem espaçado em qualquer tamanho.
+- A transformação 3D (perspective + rotate) permanece IDÊNTICA em todas as resoluções — não remova ou altere a perspectiva em telas menores.
+- A variação do rotateX por posição (-10deg superior, 10deg inferior) deve ser MANTIDA em todas as resoluções, incluindo celulares e tablets.
 
-Ele deve aparecer ao longo da apresentação com frequência suficiente para virar parte da identidade visual.
+Implementação CSS recomendada:
+
+.bloco-perspectiva {
+    width: min(350px, 85vw);
+    max-width: 350px;
+    max-height: 420px;
+    padding: clamp(12px, 3vw, 24px) clamp(16px, 4vw, 32px);
+}
 
 O QUE EVITAR
 
-Evitar os seguintes erros:
+- Usar clip-path para criar a ilusão de perspectiva (sistema antigo e proibido).
+- Usar skew 2D para simular inclinação.
+- Usar perspective + rotações DIFERENTES das especificadas (rotateY 25deg fixo, rotateX -10deg ou 10deg conforme a posição).
+- Deixar o texto reto, horizontal e plano enquanto o bloco está em perspectiva.
+- Aplicar skew ou rotações extras no texto interno.
+- Usar rotateX(-10deg) em bloco na metade inferior do slide ou rotateX(10deg) em bloco na metade superior.
+- Usar o bloco sem conteúdo real (decoração vazia).
+- Distorcer tanto o bloco que ele deixe de parecer elegante.
+- Usar em excesso em absolutamente todos os slides.
+- Deixar o painel sem sombra, profundidade e presença visual.
+- ULTRAPASSAR 350px de largura horizontal em QUALQUER situação.
+- ULTRAPASSAR 420px de altura vertical em QUALQUER situação.
+- Usar 350px ou 420px apenas para preencher espaço vazio sem conteúdo que justifique.
+- Criar bloco grande com conteúdo esparso ou padding exagerado para atingir os limites.
+- Deixar bloco sem comentário justificando o tamanho utilizado.
+- Remover ou alterar a perspectiva 3D em telas menores (a transformação deve ser mantida).
+- Usar largura percentual sem limite máximo (ex: width: 100% sem max-width: 350px).
+- Usar height fixa sem max-height: 420px ou sem considerar o conteúdo interno.
 
-usar esse shape uma única vez e abandoná-lo;
-distorcer tanto o shape que ele deixe de parecer elegante;
-colocar texto reto e desalinhado dentro do painel;
-deixar o conteúdo encostar nas bordas inclinadas;
-exagerar no skew do texto;
-usar o bloco em excesso em absolutamente tudo;
-transformar o layout em um caos de formas inclinadas;
-deixar o painel sem sombra, sem profundidade e sem presença;
-fazer o bloco parecer um recorte aleatório sem função real.
-AUDITORIA OBRIGATÓRIA DO SISTEMA DE BLOCOS INCLINADOS
+AUDITORIA OBRIGATÓRIA DO SISTEMA DE BLOCOS COM PERSPECTIVA 3D
 
 Antes de finalizar a apresentação, validar:
 
-□ A apresentação usa blocos inclinados em perspectiva em vários pontos do documento?
+□ A apresentação usa blocos com perspectiva 3D real em vários pontos do documento?
 
-□ O formato desses blocos segue a lógica do shape de referência?
+□ Todos os blocos usam EXATAMENTE a configuração rotateY(25deg) perspective(250px) transform-origin(50% 50% 0) com rotateX correto para sua posição (-10deg superior / 10deg inferior)?
 
-□ O bloco não parece um retângulo comum?
+□ NENHUM bloco usa clip-path, skew 2D ou qualquer outra técnica de falsa perspectiva?
 
-□ O bloco é usado como container real de conteúdo em múltiplos momentos?
+□ O rotateX de cada bloco está correto para sua posição (-10deg na metade superior, 10deg na metade inferior)?
 
-□ O conteúdo interno acompanha visualmente a perspectiva do painel?
+□ O bloco contém conteúdo real (texto, ícone, número, label)?
 
-□ O texto dentro do bloco continua legível?
+□ O conteúdo interno herda naturalmente a perspectiva 3D do container?
 
-□ O padding interno foi ajustado corretamente?
+□ O texto NÃO recebeu transformações extras (skew, rotate) além da perspectiva herdada?
+
+□ O texto permanece legível dentro do espaço perspectivado?
+
+□ O padding interno está ajustado corretamente?
 
 □ O bloco está bem integrado ao layout do slide?
 
-□ O bloco possui profundidade visual suficiente?
+□ O bloco possui profundidade visual suficiente (sombra, glow, gradiente)?
 
 □ O componente aparece de forma recorrente, mas sem repetição preguiçosa?
 
 □ O bloco participa das animações da apresentação?
 
-□ O uso desse componente fortalece a identidade visual do documento?
+□ O uso deste componente fortalece a identidade visual do documento?
+
+□ NENHUM bloco ultrapassa 350px de largura horizontal em nenhuma resolução?
+
+□ NENHUM bloco ultrapassa 420px de altura vertical em nenhuma resolução?
+
+□ O tamanho de cada bloco é JUSTIFICADO pelo conteúdo (não há blocos grandes com conteúdo esparso)?
+
+□ TODO bloco possui comentário no código explicando por que tem aquele tamanho?
+
+□ A responsividade foi implementada corretamente (width: min(350px, 85vw) e max-height: 420px)?
+
+□ Em celulares e tablets, a perspectiva 3D foi MANTIDA (não removida nem alterada)?
+
+□ O padding mínimo foi respeitado mesmo em telas pequenas?
 
 Se qualquer resposta for NÃO, a implementação deve ser revista antes da entrega do HTML.
 
@@ -2978,39 +2934,35 @@ o conteúdo só surgir depois que o usuário muda de slide e retorna.
 
 Se isso acontecer, a implementação está errada e deve ser corrigida antes da entrega final.
 
-TEXTO INTERNO DE ELEMENTOS COM SKEW DEVE ACOMPANHAR A MESMA PERSPECTIVA DO CONTAINER
+TEXTO INTERNO DE BLOCOS COM PERSPECTIVA 3D — REGRA DEFINITIVA
 
-Sempre que um elemento visual da apresentação usar skew / inclinação / deformação em perspectiva — como blocos inclinados, painéis diagonais, cards skewados, faixas ou shapes com aparência 3D — o conteúdo interno desse elemento também deve acompanhar visualmente essa mesma perspectiva.
+Esta seção substitui e anula completamente qualquer orientação anterior sobre skew, clip-path ou deformação 2D de texto em blocos perspectivados. O sistema de perspectiva 3D real (Set Size 3D Transform) é a ÚNICA técnica permitida.
 
-É proibido deixar o container skewado enquanto o texto, ícones, números ou qualquer conteúdo interno continuam completamente retos, planos e desalinhados com o painel.
-Isso quebra a ilusão de profundidade e faz parecer que o conteúdo foi apenas “jogado por cima” da forma, em vez de fazer parte dela.
+REGRA ÚNICA E DEFINITIVA
 
-Regra obrigatória
+Todo bloco que utiliza o sistema de perspectiva 3D real (rotateX -10deg, rotateY 25deg, perspective 250px) já projeta naturalmente seu conteúdo interno na mesma perspectiva. O texto DENTRO do elemento com transformação 3D herda automaticamente a deformação correta. NÃO é necessário — e é PROIBIDO — aplicar qualquer transformação adicional como skewX(), skewY(), rotate() ou scale() no texto ou no wrapper interno.
 
-Se um bloco estiver inclinado, o conteúdo dentro dele também deve ser tratado para parecer integrado ao mesmo plano visual do bloco, respeitando sua direção, perspectiva e sensação de profundidade. Nesse caso, o conteúdo seria o texto dentro desse bloco que possui o Skew, ou seja, o texto deve possuir Skew igual ao bloco no qual ele pertence.
+O texto deve acompanhar a perspectiva do bloco de forma 100% idêntica e natural, simplesmente por estar contido no elemento com CSS 3D Transform aplicado.
 
-CHECKLIST OBRIGATÓRIA:
+É PROIBIDO que o texto fique completamente horizontal, reto e plano enquanto o bloco está em perspectiva. Isso quebraria a ilusão tridimensional e faria o conteúdo parecer "colado" sobre a superfície em vez de integrado a ela.
 
-□ Todos os textos dentros dos blocos que tem Skew também tem Skew?(Blocos que usam a mecanica do Skew deve ter seus textos dentro deles também com Skew para garantir qualidade.)
+CHECKLIST OBRIGATÓRIA
 
-□ A cor do texto principal na capa é branco e o shadow do texto não é branco.
+□ O texto interno acompanha visualmente a perspectiva 3D do container sem aplicar transformações extras?
 
-Na prática, isso significa:
-aplicar no conteúdo interno um skew compatível com o do container, de forma controlada;
-ajustar alinhamento, padding e posicionamento para que o texto acompanhe a geometria do shape;
-fazer com que títulos, números, ícones e labels pareçam estar “presos” à superfície inclinada do painel;
-preservar a legibilidade, mas sem deixar o conteúdo visualmente reto enquanto o bloco está torto.
-Objetivo visual
+□ NENHUMA técnica de clip-path, skew 2D ou deformação artificial foi utilizada no bloco ou no texto?
 
-O resultado final deve dar a sensação de que:
+□ O conteúdo interno parece naturalmente integrado à superfície perspectivada?
 
-o bloco inclinado e o conteúdo interno pertencem ao mesmo plano;
-o texto está integrado à peça visual;
-existe coerência entre shape, perspectiva e conteúdo;
-o elemento inteiro funciona como um único componente tridimensional/coeso, e não como uma forma inclinada com texto plano em cima.
+□ A legibilidade foi preservada com padding e tamanho de fonte adequados?
 
-Se um elemento tiver skew e o texto interno não acompanhar visualmente essa perspectiva, a implementação deve ser considerada incorreta e precisa ser ajustada antes da entrega final.
+□ O bloco com perspectiva contém conteúdo real e não é uma decoração vazia?
+
+Objetivo visual: o bloco e seu conteúdo devem parecer um único objeto tridimensional coeso, como se o texto estivesse intrinsecamente gravado na superfície perspectivada.
+
+Se um elemento tiver perspectiva 3D e o texto interno não acompanhar visualmente essa perspectiva, a implementação deve ser considerada incorreta e precisa ser ajustada antes da entrega final.
 
 É obrigatório ter navigation dots.
 
-É obrigatório que a cor do título no primeiro slide não seja branca, a cor do shadow do texto pode ser branco, mas o texto principal não, o shadow do texto tem que ter um gradiente de uma cor mais clara para uma cor mais escura(quanto mais proximo do texto principal, mais claro, quanto mais longe, mais escuro), e o texto principal não pode ter gradiente.
+É obrigatório que a cor do título no primeiro slide seja branca, a cor do shadow do texto NÃO pode ser branco e isso é estritamente proibido, o shadow do texto tem que ter um gradiente de uma cor mais clara para uma cor mais escura(quanto mais proximo do texto principal, mais claro, quanto mais longe, mais escuro, você já deve decidir as cores do titulo agora para que na próxima etapa a IA apenas faça o que foi pedido ao invés de ter q inventar algo visual.), e o texto principal não pode ter gradiente.
+
