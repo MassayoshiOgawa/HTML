@@ -1,0 +1,1714 @@
+ESPECIFICAÇÃO COMPLETA — APRESENTAÇÃO HTML: PYTHON — UMA INTRODUÇÃO À LINGUAGEM
+=====================================================================================
+
+ATENÇÃO: Este documento é uma especificação completa. A IA responsável por desenvolver o HTML deve SEGUIR EXATAMENTE todas as instruções aqui contidas sem tomar decisões criativas próprias. Não acesse nenhum outro arquivo na pasta. Crie o HTML completo em uma única tentativa.
+
+=====================================================================================
+1. IDENTIDADE VISUAL GERAL
+=====================================================================================
+
+Tema: Python — Linguagem de Programação
+Público-alvo: Iniciantes e intermediários em programação
+Atmosfera: Tecnológica, moderna, educacional, inspiradora, limpa
+Estilo: Minimalista tecnológico com acentos futuristas — dark mode premium
+Sensação: Uma apresentação de conferência profissional (semelhante a PyCon ou TED). O espectador deve sentir que está assistindo a uma palestra de alto nível sobre Python.
+
+Conceito artístico: "Luz azul sobre hardware escuro" — a apresentação simula uma interface de terminal/IDE futurista em um ambiente escuro, com faíscas douradas representando a energia criativa da programação. A cor azul domina como o "céu digital", enquanto o amarelo Python pontua momentos importantes como "insights iluminados".
+
+=====================================================================================
+2. PALETA DE CORES (ABSOLUTA — NÃO ALTERAR)
+=====================================================================================
+
+CORES PRINCIPAIS:
+  Azul Python Primário:    #306998  — azul médio Python, usado em elementos principais
+  Amarelo Python:          #FFD43B  — amarelo Python, usado em destaques pontuais
+
+CORES DE FUNDO:
+  Fundo mais escuro:       #070B14  — quase preto azulado, fundo geral
+  Fundo intermediário:     #0D1425  — painéis e superfícies
+  Fundo claro escuro:      #1A2338  — cards e containers
+
+CORES DE DESTAQUE:
+  Azul claro tech:         #4B8BBE  — links, bordas, glows
+  Ciano tech:              #00D4FF  — detalhes futuristas, scans
+  Verde código:            #4CAF50  — sucesso, código funcionando
+  Laranja warning:         #FF9800  — alertas, destaques secundários
+
+CORES DE TEXTO:
+  Texto primário:          #FFFFFF  (245, 245, 255)
+  Texto secundário:        #94A3B8  (slate 400)
+  Texto terciário:         #64748B  (slate 500)
+  Título capa:             #FFFFFF  (branco puro) — IMPORTANTE: sem gradiente no texto
+
+CORES DE SHADOW TÍTULO CAPA:
+  Do mais claro ao mais escuro (extrusão): #6B9CC4 → #4B8BBE → #306998 → #1E415E → #0F1A2E
+  Sombras do text-shadow: começam em #6B9CC4 nas camadas mais próximas, escurecendo gradativamente até #0F1A2E nas camadas mais distantes.
+
+CORES DE BOTÕES:
+  Padrão:      Gradiente #306998 → #4B8BBE
+  Hover:       Gradiente #4B8BBE → #5BA0D0
+  Destaque:    Gradiente #FFD43B → #FFB300 (texto escuro #1A2338)
+
+CORES DE GLOW:
+  Glow azul:  rgba(48, 105, 152, 0.6)
+  Glow amarelo: rgba(255, 212, 59, 0.5)
+  Glow ciano: rgba(0, 212, 255, 0.4)
+
+DIRECÃO DA LUZ: Superior esquerdo (canto superior esquerdo). Todas as sombras, glows e highlights devem respeitar esta direção. Sombras projetam para baixo e para a direita. Highlights ficam na borda superior e esquerda.
+
+=====================================================================================
+3. TIPOGRAFIA
+=====================================================================================
+
+FONTE TÍTULOS:      'Inter', sans-serif — pesos 700 a 900
+FONTE SUBTÍTULOS:   'Inter', sans-serif — pesos 500 a 600
+FONTE CONTEÚDO:     'Inter', sans-serif — peso 300 a 400
+FONTE CÓDIGO:       'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace — peso 400
+
+HIERARQUIA (tamanhos base para 1920x1080):
+  Título slide (H1):      clamp(2rem, 3vw, 3.5rem) — weight 800, letter-spacing -0.02em
+  Subtítulo (H2):         clamp(1.2rem, 1.5vw, 1.8rem) — weight 500, letter-spacing 0.01em
+  Corpo (p):              clamp(0.9rem, 1vw, 1.15rem) — weight 400, line-height 1.6
+  Código (code/pre):     clamp(0.8rem, 0.9vw, 1rem) — weight 400
+  Destaque numérico:     clamp(2.5rem, 4vw, 5rem) — weight 800
+  Pequeno (caption):     clamp(0.7rem, 0.8vw, 0.85rem) — weight 400
+
+ESPAÇAMENTO ENTRE TÍTULO E CONTEÚDO: clamp(24px, 3vh, 48px)
+ESPAÇAMENTO ENTRE PARÁGRAFOS: clamp(12px, 1.5vh, 24px)
+PADDING PADRÃO SLIDE: clamp(24px, 3vw, 48px) nas bordas
+
+=====================================================================================
+4. BACKGROUND GLOBAL
+=====================================================================================
+
+O background é composto por múltiplas camadas, da mais distante à mais próxima:
+
+CAMADA 1 — GRADIENTE DE FUNDO (CSS):
+  Radial gradient sutil do centro para as bordas:
+  center: #0F1A2E → middle: #0B1120 → edges: #070B14
+  Deve ocupar 100% do viewport, fixo (background-attachment: fixed)
+
+CAMADA 2 — GRID SUBTIL (SVG/CSS):
+  Grid de linhas muito finas (0.5px) com opacidade 0.03, espaçamento 60px
+  Cor: #4B8BBE
+  Apenas visível o suficiente para dar textura, não para competir
+
+CAMADA 3 — BLOBS ANIMADOS (CSS):
+  Dois grandes gradientes circulares que se movem lentamente:
+  Blob 1 (azul): gradiente radial #306998 com opacidade 0.08, tamanho 600px, posição flutuante
+  Blob 2 (ciano): gradiente radial #00D4FF com opacidade 0.04, tamanho 400px, posição flutuante oposta
+  Animação: movimento suave de 30 segundos, easing ease-in-out, alternando posições
+  Usar CSS @keyframes com translateX e translateY
+
+CAMADA 4 — PARTÍCULAS (Canvas ou CSS):
+  40-60 partículas (pequenos círculos de 1-3px) em movimento lento
+  Cores: #4B8BBE, #306998, #FFFFFF (com opacidades variando 0.1-0.4)
+  Velocidade: muito lenta (2-4px/s)
+  Tamanhos variados (1px, 2px, 3px)
+  Opacidade variável (0.1 a 0.4)
+  Movimento: flutuação suave com leve ondulação senoidal
+  Implementar via Canvas ou CSS com animação
+
+CAMADA 5 — VIGNETTE (CSS):
+  Box-shadow inset gigante nas quatro bordas
+  rgba(0,0,0,0.6) nas bordas, transparente no centro
+  box-shadow: inset 0 0 150px rgba(0,0,0,0.6)
+
+CAMADA 6 — NOISE/GRÃO (CSS):
+  Overlay de ruído com opacidade muito baixa (0.015-0.025)
+  Usar SVG base64 de noise ou CSS com pseudo-elemento
+  Misture com mix-blend-mode: overlay
+
+TODAS AS CAMADAS SÃO GLOBAIS — presentes em TODOS os slides. O background NUNCA compete com o conteúdo.
+
+=====================================================================================
+5. NAVEGAÇÃO GLOBAL
+=====================================================================================
+
+SISTEMA:
+  O scroll do mouse NÃO troca slides.
+  Clique em QUALQUER lugar da tela NÃO troca slides.
+  Apenas os seguintes métodos trocam slides:
+    - Teclas → (seta direita) e PageDown: avançar
+    - Teclas ← (seta esquerda) e PageUp: voltar
+    - Tecla Home: primeiro slide
+    - Tecla End: último slide
+    - Navigation Dots clicáveis na barra inferior
+    - Swipe horizontal em touch/mobile
+
+BARRA DE PROGRESSO INFERIOR:
+  Posição: fixa na parte inferior da tela, centralizada
+  Altura: 60px
+  Fundo: gradiente sutil de transparente para #0A0F1A com opacidade 0.8
+  Conteúdo da barra:
+    - Navigation Dots: 14 pontos (um por slide), centralizados
+    - Cada dot: 8px de diâmetro, borda arredondada, fundo #1A2338
+    - Dot ativo: fundo gradiente #306998 → #4B8BBE, escala 1.3x
+    - Hover no dot: glow azul sutil, cursor pointer
+    - Clique no dot: navega para aquele slide
+    - Ao lado dos dots: contador "01 / 14" em texto secundário, à esquerda
+    - À direita: indicador de slide atual vazio ou sutileza decorativa
+  Z-index: 100
+  Transparência: começa invisível (opacity 0) e fade in após 2s do carregamento
+
+SETAS LATERAIS (DESKTOP):
+  Duas setas semicirculares nas bordas esquerda e direita
+  Largura: 48px, Altura: 80px
+  Posição: centralizadas verticalmente (50% da altura)
+  Fundo: rgba(255,255,255,0.03) com borda sutil rgba(255,255,255,0.06)
+  Ícone: seta SVG simples, cor #94A3B8
+  Hover: fundo rgba(255,255,255,0.08), ícone branco
+  Opacidade: 0.3 → hover: 0.8
+  Transição: 0.3s ease
+  Visíveis apenas em desktop (>768px)
+  Seta esquerda: aparece apenas se não estiver no primeiro slide
+  Seta direita: aparece apenas se não estiver no último slide
+
+SWIPE (MOBILE/TOUCH):
+  Detectar touchstart e touchend
+  Diferença mínima de 50px para ativar
+  Direção: horizontal apenas
+
+CURSOR PERSONALIZADO (DESKTOP):
+  Substituir cursor padrão por um círculo sutil de 20px
+  Cor: rgba(75, 139, 190, 0.3) com borda rgba(255,255,255,0.1)
+  Transição suave seguindo o mouse com leve delay (50ms)
+  Em hover em itens clicáveis: expandir para 32px, opacidade 0.5
+  Em links: glow azul
+  Em dispositivos touch: cursor padrão (não personalizado)
+  Desabilitar cursor padrão com "cursor: none" no body quando o cursor personalizado estiver ativo
+
+=====================================================================================
+6. ANIMAÇÕES GLOBAIS — SISTEMA COMPLETO
+=====================================================================================
+
+PRINCÍPIO: Nenhum elemento aparece antes de sua animação. Estado inicial: opacity 0, transform aplicado. A transição entre slides segue: saída completa do anterior → estabilização → entrada do novo.
+
+DURAÇÕES PADRÃO:
+  Fade In/Out:          400-600ms
+  Slide In (direção):   500-700ms
+  Scale In:             400-600ms
+  Blur In:              500-700ms
+  Stagger entre itens:  80-120ms
+  Transição entre slides: 600-800ms (cross-fade)
+  Delay após troca de slide: 100ms (antes de iniciar animações de entrada)
+
+EASING PADRÃO (usar em todas as animações CSS):
+  Entrada: cubic-bezier(0.16, 1, 0.3, 1)  — "ease out quart" suave
+  Saída:   cubic-bezier(0.55, 0, 1, 0.45) — "ease in quart"
+  Geral:   cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+STAGGER: Múltiplos elementos do mesmo tipo entram em cascata com delay de 100ms entre cada um.
+
+COREOGRAFIA PADRÃO (ordem de entrada em cada slide):
+  1. Background (já está, não anima — é fixo)
+  2. Elementos decorativos de fundo (círculos, linhas, formas abstratas) — delay: 0ms
+  3. Título principal — delay: 150ms
+  4. Subtítulo — delay: 300ms
+  5. Cards/Blocos de conteúdo — delay: 400ms (com stagger)
+  6. Texto, listas, parágrafos — delay: 500ms (com stagger)
+  7. Código, gráficos — delay: 600ms
+  8. Ícones, badges — delay: 700ms (com stagger)
+  9. Botões, CTAs — delay: 800ms
+  10. Efeitos finais (glow, partículas especiais) — delay: 900ms
+
+TRANSIÇÃO ENTRE SLIDES:
+  Base: Cross-fade com zoom sutil (scale 1.02 → 1.00)
+  Quando o usuário avança: slide atual fade out (300ms), pausa de 80ms, novo slide fade in com zoom
+  Quando o usuário volta: mesma transição, sem diferença
+  Variações entre slides especificadas na seção de cada slide
+
+REINICIALIZAÇÃO: Ao sair de um slide, TODOS os elementos devem retornar ao estado inicial (opacity 0, transforms resetados). Ao retornar, a animação completa deve ser executada novamente.
+
+MICROANIMAÇÕES CONTÍNUAS (após entrada, em idle):
+  Títulos: leve respiração de glow (opacidade do text-shadow varia 0.8-1.0 em 3s loop)
+  Cards: flutuação vertical de 2-3px em 4s loop
+  Partículas: movimento contínuo (já fazem parte do background)
+  Botões: glow pulsante muito sutil
+  Ícones decorativos: rotação de 0.5 graus ou flutuação
+
+=====================================================================================
+7. ELEMENTOS INTERATIVOS GLOBAIS
+=====================================================================================
+
+BOTÕES:
+  Estado idle: gradiente #306998 → #4B8BBE, border-radius 8px, padding 12px 24px
+  Hover: gradiente invertido #4B8BBE → #5BA0D0, glow sutil, translateY(-1px)
+  Focus: outline 2px solid #00D4FF com offset 2px
+  Pressed: scale 0.97, brightness 0.95
+  Transição: 0.3s ease em todas as propriedades
+
+CARDS:
+  Estado idle: fundo rgba(26, 35, 56, 0.8), border-radius 12px, border 1px solid rgba(255,255,255,0.06)
+  Sombra: 0 8px 32px rgba(0,0,0,0.3)
+  Hover: border 1px solid rgba(75, 139, 190, 0.3), translateY(-4px), box-shadow intensificado
+  Transição: 0.3s ease
+
+LINKS:
+  Cor: #4B8BBE
+  Hover: #5BA0D0, text-decoration underline suave (via border-bottom)
+  Transição: 0.2s ease
+
+TOOLTIPS:
+  Ativados em badges, labels, e elementos informativos
+  Fundo: rgba(13, 20, 37, 0.95) com backdrop-filter blur(8px)
+  Borda: 1px solid rgba(75, 139, 190, 0.3)
+  Texto: 0.75rem, cor #94A3B8
+  Seta: pseudo-elemento apontando para o elemento
+  Delay: 200ms antes de aparecer
+
+TABS (Slide 5 — Tipos de Dados):
+  Abas horizontais com indicador deslizante animado
+  Aba ativa: cor #306998, texto branco, borda inferior 2px solid #FFD43B
+  Aba inativa: cor #64748B
+  Hover na aba: cor #94A3B8
+  Conteúdo troca com fade (200ms)
+
+ACCORDION (se necessário para conteúdo denso):
+  Header clicável com seta rotacionando (180deg quando aberto)
+  Conteúdo expande com max-height animado (300ms ease)
+  Fundo do header: rgba(26, 35, 56, 0.5)
+  Hover no header: rgba(75, 139, 190, 0.1)
+
+=====================================================================================
+8. SISTEMA DE BLOCOS COM PERSPECTIVA 3D REAL
+=====================================================================================
+
+IMPLEMENTAÇÃO: Usar CSS 3D Transforms conforme ExemploPerspectiva.html. Seguir EXATAMENTE as configurações abaixo. Não usar clip-path, skew 2D ou qualquer outra técnica de falsa perspectiva.
+
+CLASSE BASE (reutilizável):
+  .bloco-perspectiva {
+    padding: clamp(16px, 2vw, 24px) clamp(20px, 3vw, 28px);
+    border-radius: 4px;
+    color: #fff;
+    font-weight: 600;
+    line-height: 1.4;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    width: min(350px, 85vw);
+    max-width: 350px;
+    max-height: 420px;
+    box-shadow: 0 20px 40px -12px rgba(48, 105, 152, 0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+
+  .bloco-superior {
+    transform: perspective(250px) rotateX(-10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+  }
+
+  .bloco-inferior {
+    transform: perspective(250px) rotateX(10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+  }
+
+O conteúdo interno HERDA a perspectiva naturalmente. NÃO aplicar skew, rotate ou transform extra no texto. O texto DEVE acompanhar a perspectiva do bloco.
+
+TODO bloco deve ter comentário HTML justificando seu tamanho. Exemplo: <!-- Badge pequeno — largura 140px ajustada ao conteúdo de 2 palavras -->
+
+LIMITES: 350px largura máxima, 420px altura máxima. Tamanho justo para o conteúdo.
+
+Usar em 6-8 slides ao longo da apresentação, contendo conteúdo real.
+
+=====================================================================================
+9. ESPECIFICAÇÃO INDIVIDUAL DOS SLIDES
+=====================================================================================
+
+
+=====================================================================================
+SLIDE 1 — CAPA
+=====================================================================================
+
+NOME: Python: Uma Introdução à Linguagem
+
+OBJETIVO: Causar impacto visual imediato. Estabelecer o tom profissional e tecnológico da apresentação. Apresentar o tema e os apresentadores.
+
+EMOÇÃO: Inspiração, expectativa, admiração tecnológica.
+
+LAYOUT: Centralizado vertical e horizontalmente. Composição em Z invertido: título no topo, informações no centro-inferior.
+
+ORGANIZAÇÃO:
+  - Z-index do título: 0 (ZERO) — para não sobrepor outros elementos
+  - Título principal: 35% do topo, centralizado
+  - Linha decorativa fina abaixo do título: 55% do topo
+  - Nome dos apresentadores: 65% do topo, centralizado
+  - Data: 70% do topo, centralizado
+  - Badge "Python 3" pequeno no canto inferior direito: 90% topo, 85% esquerda
+
+BACKGROUND: Apenas as camadas globais de fundo. NENHUMA "cover shape", polígono decorativo com clip-path, forma com blur atrás do título. NADA disso. O fundo contém apenas gradiente global, grid, blobs, partículas, vignette e noise.
+
+ELEMENTOS DECORATIVOS:
+  - Símbolo do Python (duas cobras entrelaçadas) estilizado como SVG minimalista atrás do título, opacidade 0.04, tamanho 400px, centralizado (apenas como textura de fundo, não como "cover shape")
+  - Linha horizontal fina (1px, gradiente rgba(75,139,190,0) → rgba(75,139,190,0.5) → rgba(75,139,190,0)), 200px largura, centralizada abaixo do título
+  - Quatro cantos com pequenos marcadores técnicos (coordenadas "x: 0 y: 0" em fonte monospace, cor rgba(255,255,255,0.08), tamanho 9px) — um em cada canto do slide
+
+ELEMENTOS INTERATIVOS: Nenhum neste slide além dos dots de navegação inferiores.
+
+PARTÍCULAS: As partículas globais do background. Nenhuma partícula extra específica.
+
+ILUMINAÇÃO: Título com glow azul muito sutil (text-shadow com rgba(48,105,152,0.3), 0 0 40px). Iluminação geral do slide vindo do topo.
+
+EFEITOS:
+  - Título com EFEITO 3D EXTRUDADO conforme regra abaixo
+  - Glow sutil no título
+
+IMAGENS: Nenhuma.
+
+ÍCONES: Badge Python 3 no canto inferior direito (SVG pequeno, 24x24px, opacidade 0.3, com cobrinha Python simplificada).
+
+TIPOGRAFIA:
+  Título: "Python: Uma Introdução à Linguagem"
+    - Fonte 'Inter', weight 800, tamanho clamp(2.5rem, 4vw, 5rem)
+    - COR: #FFFFFF (BRANCO PURO — SEM GRADIENTE NO TEXTO)
+    - Letter-spacing: -0.02em
+    - EFEITO 3D EXTRUDADO:
+        text-shadow gerado por JavaScript com loop de 35 camadas:
+        for (let i = 0; i < 35; i++) {
+            shadow += (shadow ? "," : "") +
+                      (-i) + "px " +
+                      i + "px 0 " + corParaCamada(i);
+        }
+        Cores das camadas (gradiente do mais claro ao mais escuro, quanto mais longe mais escuro):
+        i=0: #6B9CC4 (mais claro, mais próximo)
+        i=1-5: #5B8DB4 → #4B8BBE
+        i=6-15: #306998 → #2A5A80
+        i=16-25: #1E415E → #163249
+        i=26-34: #0F1A2E → #070B14 (mais escuro, mais distante)
+        Usar interpolação linear entre esses valores para cada camada individual.
+        
+        SEGUNDA CAMADA (sombra ambiente via ::before):
+        O pseudo-elemento ::before do título deve conter o mesmo texto, posicionado 1px abaixo e 1px à esquerda, com filter: blur(4px), opacity 0.3, cor #0F1A2E.
+        
+    - O título permanece 100% HORIZONTAL, sem rotate, skew ou perspectiva. A profundidade vem APENAS do text-shadow.
+    - Z-index: 0 (zero)
+
+  Subtítulo (nome dos apresentadores):
+    - "Leandro Ogawa" (exemplo — usar o nome fornecido)
+    - Fonte 'Inter', weight 300, tamanho clamp(1rem, 1.2vw, 1.3rem)
+    - Cor: #94A3B8
+    - Letter-spacing: 0.08em
+    - Opacidade: 0.8
+
+  Data:
+    - "2025" ou a data fornecida
+    - Fonte 'Inter', weight 300, tamanho clamp(0.8rem, 0.9vw, 1rem)
+    - Cor: #64748B
+    - Letter-spacing: 0.05em
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background global — já presente
+  2. (200ms) Título: fade in + translateY(-10px), duração 900ms, blur 6px→0, escala 96%→100%, ao finalizar glow aumenta
+  3. (500ms) Linha decorativa abaixo do título: scaleX(0)→scaleX(1), 600ms
+  4. (700ms) Nome dos apresentadores: fade in + translateY(8px), 500ms
+  5. (900ms) Data: fade in + translateY(8px), 500ms
+  6. (1100ms) Badge Python 3: fade in, 400ms
+  7. (1300ms) Navigation dots: fade in, 600ms
+  8. (1500ms) Cantos decorativos: fade in com stagger de 100ms entre cada um
+
+INTERAÇÕES: Nenhuma específica no slide.
+
+TRANSIÇÃO PARA SLIDE 2: Cross-fade com zoom (scale 1.02 → 1.00), duração 700ms. Título perde glow gradualmente e fade out 300ms.
+
+OBSERVAÇÕES:
+  - Proibido terminantemente criar "cover shapes", polígonos decorativos com clip-path, blur shapes atrás do título
+  - Proibido texto com gradiente
+  - O título deve PARECER um objeto 3D extrudado, mas permanecer perfeitamente horizontal
+  - Ao abrir o HTML, o slide 1 DEVE estar ativo e com animação executando automaticamente
+
+
+=====================================================================================
+SLIDE 2 — O QUE É PYTHON?
+=====================================================================================
+
+NOME: O que é Python?
+
+OBJETIVO: Apresentar a definição de Python de forma clara e impactante. Estabelecer a credibilidade da linguagem.
+
+EMOÇÃO: Curiosidade, clareza, confiança.
+
+LAYOUT: Split vertical (60% conteúdo à esquerda, 40% à direita para bloco em perspectiva).
+
+ORGANIZAÇÃO:
+  - Lado esquerdo (60%):
+    - Título "O que é Python?" no topo esquerdo
+    - Abaixo: frase de definição em destaque
+    - Abaixo: 3 bullet points com ícones
+    - Abaixo: badge "1991" com estilo retrô futurista
+  - Lado direito (40%):
+    - Bloco com perspectiva (tipo superior, pois estará na metade superior do slide)
+    - Conteúdo do bloco: "Python" + "3.13" (versão mais recente) + ícone de velocidade
+
+BACKGROUND: Global.
+
+ELEMENTOS DECORATIVOS:
+  - Ícone grande do Python (estilizado, linhas finas, opacidade 0.04) atrás do conteúdo, 300px, lado direito
+  - Pequena decoração de código no canto inferior esquerdo (chaves/colchetes em opacidade 0.05)
+
+ELEMENTOS INTERATIVOS: Badge "1991" com tooltip: "Criado por Guido van Rossum" ao passar mouse.
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Ícone Python decorativo (SVG, linhas finas)
+  - Bloco com perspectiva 3D (sistema obrigatório)
+
+PARTÍCULAS: Apenas as globais.
+
+ILUMINAÇÃO: Python logo decorativo com glow azul sutil.
+
+EFEITOS:
+  - Bloco com perspectiva 3D no lado direito
+  - Badge "1991" com estilo retrô futurista (borda dupla, gradiente sutil)
+
+ÍCONES:
+  - Ícone de "code" (menor que maior / chevrons) para bullet 1
+  - Ícone de "user" (silhueta) para bullet 2
+  - Ícone de "star" para bullet 3
+  - Estilo: SVG outline, cor #4B8BBE, 20px
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "O que é Python?" — weight 700, cor branca
+  Definição destaque: "Linguagem de alto nível, interpretada e de propósito geral" — weight 500, cor #94A3B8, tamanho 1.2rem
+  Bullet points:
+    - "Criada por Guido van Rossum em 1991"
+    - "Filosofia: legibilidade, simplicidade e produtividade"
+    - "Tipagem dinâmica e forte"
+    Fonte 'Inter' weight 300, cor #CBD5E1, tamanho 1rem, com ícone SVG à esquerda de cada um
+  Bloco perspectiva: "Python 3.13" weight 700, "Rápido, confiável, moderno" weight 400 tamanho 0.8rem
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in + translateY(-8px), 600ms
+  3. (350ms) Definição destaque: fade in, 500ms
+  4. (500ms) Bullet 1: fade in + translateX(-8px), 400ms
+  5. (600ms) Bullet 2: fade in + translateX(-8px), 400ms
+  6. (700ms) Bullet 3: fade in + translateX(-8px), 400ms
+  7. (500ms) Bloco perspectiva (direita): fade in + translateZ(20px), 700ms, com blur 8px→0, escala 92%→100%
+  8. (900ms) Badge "1991": fade in + scale(0)→scale(1) com bounce sutil, 500ms
+
+INTERAÇÕES:
+  - Hover no badge "1991": glow amarelo, tooltip aparece "Criado por Guido van Rossum em 1991"
+  - Hover nos bullet points: ícone muda cor para #00D4FF
+
+TRANSIÇÃO PARA SLIDE 3: Fade (400ms) com leve blur.
+
+OBSERVAÇÕES:
+  - O bloco de perspectiva deve ter largura suficiente para "Python 3.13" — aproximadamente 200px, altura ~100px
+  - Comentário HTML no bloco: "Bloco de apresentação da versão — 200px x 100px para 2 linhas de texto"
+
+
+=====================================================================================
+SLIDE 3 — PRINCIPAIS CARACTERÍSTICAS
+=====================================================================================
+
+NOME: Principais Características
+
+OBJETIVO: Apresentar 4 características fundamentais do Python de forma visual e organizada.
+
+EMOÇÃO: Clareza, admiração técnica, organização.
+
+LAYOUT: Grade 2×2 de cards (Bento Grid adaptado). Título no topo centralizado.
+
+ORGANIZAÇÃO:
+  - Título centralizado no topo (15% da altura)
+  - 4 cards em grid 2×2, ocupando 70% da altura, centralizados
+  - Cada card: ícone + título + descrição curta
+
+CONTEÚDOS DOS CARDS:
+  Card 1 — Sintaxe: "Sintaxe limpa e intuitiva" — uso de indentação — ícone: code/braces
+  Card 2 — Memória: "Gerenciamento automático" — garbage collector — ícone: chip/memory
+  Card 3 — Paradigmas: "Múltiplos paradigmas" — OO, funcional, procedural — ícone: layers
+  Card 4 — Biblioteca: "Vasta biblioteca padrão" — "batteries included" — ícone: package/box
+
+BACKGROUND: Global.
+
+ELEMENTOS DECORATIVOS:
+  - Quatro pequenos círculos decorativos nos cantos do grid (opacidade 0.03, 80px)
+  - Linhas conectoras sutis entre os cards (opacidade 0.03)
+
+ELEMENTOS INTERATIVOS:
+  - Cards expansíveis ao hover (elevam 6px, glow nas bordas, ícone fica mais brilhante)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Cards com glassmorphism suave
+  - Ícones SVG animados (entram com rotação ou escala)
+
+PARTÍCULAS: Apenas as globais.
+
+ILUMINAÇÃO: Glow amarelo no canto superior direito do grid como acento.
+
+EFEITOS:
+  - Cards com fundo translúcido (rgba(26, 35, 56, 0.6), backdrop-filter blur(12px))
+  - Borda 1px rgba(255,255,255,0.06), hover borda #4B8BBE 0.3
+  - Sombras múltiplas nos cards
+
+ÍCONES:
+  Card 1: SVG code/indentation (linhas horizontais com espaços)
+  Card 2: SVG chip/memory
+  Card 3: SVG layers/cubes
+  Card 4: SVG package/archive
+  Tamanho: 32px, cor: gradiente #306998 → #4B8BBE
+  Animação de entrada: girar 360° + scale, 600ms com stagger
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Principais Características" — weight 700
+  Card título: weight 600, cor branca, tamanho 1.1rem
+  Card descrição: weight 300, cor #94A3B8, tamanho 0.9rem
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in + translateY(-8px), 600ms
+  3. (300ms) Card 1: escala 90%→100%, fade, blur 6px→0, 500ms, delay 0ms
+  4. (400ms) Card 2: mesma animação, delay 100ms
+  5. (500ms) Card 3: mesma animação, delay 200ms
+  6. (600ms) Card 4: mesma animação, delay 300ms
+  7. (400-700ms sincronizado) Ícones dentro dos cards: girar + aparecer
+
+INTERAÇÕES:
+  - Hover no card: translateY(-6px), box-shadow aumenta, borda glow #4B8BBE
+  - Hover no ícone: glow + scale(1.1), transição 0.3s
+
+TRANSIÇÃO PARA SLIDE 4: Slide left (deslizar para esquerda), 600ms.
+
+OBSERVAÇÕES:
+  - Usar backdrop-filter com cuidado para performance
+  - Cards com altura mínima de 120px, largura igual no grid
+
+
+=====================================================================================
+SLIDE 4 — POR QUE PYTHON É TÃO POPULAR?
+=====================================================================================
+
+NOME: Por que Python é tão Popular?
+
+OBJETIVO: Demonstrar visualmente os motivos da popularidade do Python com dados/argumentos visuais.
+
+EMOÇÃO: Surpresa, admiração, engajamento.
+
+LAYOUT: Centralizado com bloco de perspectiva grande à esquerda e lista de razões à direita.
+
+ORGANIZAÇÃO:
+  - Título no topo, alinhado à esquerda
+  - Bloco com perspectiva (superior, lado esquerdo) contendo: " #1 " + "Linguagem que mais cresce" + indicador de ranking
+  - À direita do bloco: 4 razões em lista vertical com ícones e descrições curtas
+  - Abaixo: pequena barra de "popularidade" visual
+
+ELEMENTOS DECORATIVOS:
+  - Gráfico de barras estilizado (barras finas crescentes, CSS, 4 barras representando crescimento)
+  - Pequeno indicador de tendência (seta verde para cima)
+
+ELEMENTOS INTERATIVOS:
+  - Bloco perspectiva com hover glow
+  - Cada item da lista: hover destaca a barra correspondente
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Bloco com perspectiva 3D (sistema obrigatório)
+  - Mini gráfico de barras animado
+  - Floating elements (pequenos números decorativos)
+
+PARTÍCULAS: Apenas as globais.
+
+ILUMINAÇÃO: Bloco com glow amarelo sutil (Python yellow) destacando a popularidade.
+
+EFEITOS:
+  - Bloco com perspectiva gradiente #FFD43B → #FFB300 (amarelo Python), texto escuro #1A2338
+  - Gráfico de barras animado (barras crescem da base para o topo)
+
+ÍCONES:
+  - Ícone de "chart-up" (gráfico subindo)
+  - Ícone de "community" (pessoas)
+  - Ícone de "app" (aplicações)
+  - Ícone de "devices" (computador/celular)
+  - SVG outline, 20px, cor #4B8BBE
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Por que Python é tão Popular?" — weight 700
+  Bloco perspectiva: "#1" weight 800, 3rem, "Linguagem que mais cresce" weight 500, 1rem
+  Lista razões:
+    - "Curva de aprendizado baixa"
+    - "Comunidade gigante e ativa"
+    - "Aplicações em diversas áreas (web, dados, automação, IA)"
+    - "Portabilidade (Windows, Linux, macOS)"
+    Fonte weight 300, cor #CBD5E1
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in
+  3. (300ms) Bloco perspectiva (esquerda): surge com profundidade, blur 10px→0, escala 90%→100%
+  4. (500ms) Razão 1: fade in + translateX(-10px)
+  5. (600ms) Razão 2: fade in + translateX(-10px)
+  6. (700ms) Razão 3: fade in + translateX(-10px)
+  7. (800ms) Razão 4: fade in + translateX(-10px)
+  8. (900ms) Gráfico barras: barras crescem de 0 a altura final
+
+INTERAÇÕES:
+  - Hover no bloco perspectiva: glow amarelo mais intenso, scale(1.02)
+  - Hover em cada razão: ícone fica amarelo (#FFD43B), texto fica mais claro
+
+TRANSIÇÃO PARA SLIDE 5: Cross-fade com blur sutil, 500ms.
+
+OBSERVAÇÕES:
+  - Bloco perspectiva com fundo amarelo (#FFD43B), texto escuro (#1A2338) — contraste proposital
+  - Comentário no bloco: "Bloco de destaque #1 — 280px x 160px para ranking + descrição"
+  - Gráfico de barras: CSS puro com 4 divs animadas
+
+
+=====================================================================================
+SLIDE 5 — TIPOS DE DADOS BÁSICOS
+=====================================================================================
+
+NOME: Tipos de Dados Básicos
+
+OBJETIVO: Apresentar os tipos de dados fundamentais do Python de forma organizada e interativa.
+
+EMOÇÃO: Clareza, aprendizado, organização.
+
+LAYOUT: Título no topo, sistema de TABS abaixo com 4 abas, área de conteúdo abaixo das abas.
+
+ORGANIZAÇÃO:
+  - Título no topo (12% altura)
+  - Barra de TABS horizontal (8% altura)
+    - Aba 1: "Números" (int, float, complex)
+    - Aba 2: "Texto" (str)
+    - Aba 3: "Booleanos" (bool)
+    - Aba 4: "Coleções" (list, tuple, dict, set)
+  - Área de conteúdo das abas (70% altura):
+    - Quando uma aba é selecionada, mostra:
+      - Nome do tipo em destaque
+      - Exemplo de código com syntax highlighting (estilo terminal/IDE escuro)
+      - Descrição curta
+      - Ícone representativo
+
+CONTEÚDO DE CADA ABA:
+  Números: "int, float, complex" + código "x = 42\ny = 3.14\nz = 1+2j" + ícone de números
+  Texto: "str (imutável)" + código 'nome = "Python"\nfrase = """Docstring"""' + ícone de texto
+  Booleanos: "True e False" + código "ativo = True\nif ativo:\n    print('ok')" + ícone toggle
+  Coleções: "list, tuple, dict, set" + código "nums = [1, 2, 3]\ndados = {'chave': 'valor'}" + ícone de lista
+
+BACKGROUND: Global.
+
+ELEMENTOS DECORATIVOS:
+  - Pequenos símbolos matemáticos e de código flutuando no fundo (opacidade 0.02)
+  - Linha decorativa abaixo das abas
+
+ELEMENTOS INTERATIVOS:
+  - TABS: sistema de abas com indicador animado (barra deslizante)
+  - Código com hover para revelar tooltip com explicação adicional
+  - Botão "Copiar código" em cada bloco de código (pequeno, canto superior direito)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Tabs com indicador deslizante
+  - Bloco de código com syntax highlight (terminal escuro)
+  - Ícones animados
+
+PARTÍCULAS: Apenas as globais.
+
+ILUMINAÇÃO:
+  - Bloco de código: glow sutil verde (#4CAF50 com opacidade 0.1) simulando monitor
+
+EFEITOS:
+  - Bloco de código: fundo #0D1117 (como GitHub dark), border-radius 8px, borda #1A2338
+  - Syntax highlight: palavras-chave azul (#4B8BBE), strings verde (#4CAF50), números laranja (#FF9800), comentários cinza (#64748B)
+  - Transição entre abas: fade 200ms + translateX sutil
+
+ÍCONES:
+  - Aba 1: ícone "hash/#" (números)
+  - Aba 2: ícone "Aa/type" (texto)
+  - Aba 3: ícone "toggle/switch" (booleanos)
+  - Aba 4: ícone "list/layers" (coleções)
+  - 16px, cor #94A3B8 no inativo, #FFFFFF no ativo
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Tipos de Dados Básicos" — weight 700
+  Abas: weight 500, tamanho 0.95rem
+  Nome do tipo em destaque: weight 700, tamanho 1.5rem
+  Código: 'JetBrains Mono', tamanho 0.9rem, line-height 1.8
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in
+  3. (300ms) Barra de TABS: fade in + translateY(-5px)
+  4. (500ms) Conteúdo da aba ativa (Números por padrão): fade in com stagger
+    - Nome do tipo
+    - Bloco de código
+    - Descrição
+
+INTERAÇÕES:
+  - Clique na aba: muda conteúdo com transição suave (200ms)
+  - Hover na aba inativa: cor muda para #CBD5E1
+  - Hover no bloco de código: glow verde sutil na borda
+  - Botão copiar: feedback visual "Copiado!" com tooltip por 1.5s
+
+TRANSIÇÃO PARA SLIDE 6: Slide left, 550ms.
+
+OBSERVAÇÕES:
+  - A aba ativa inicial: "Números" (primeira da esquerda)
+  - Indicador deslizante: barra de 2px, cor #FFD43B, anima com transition no left
+  - O conteúdo das abas deve ser inline no HTML (não carregar dinamicamente via JS)
+  - Mostrar/ocultar com opacity e display via JS
+
+
+=====================================================================================
+SLIDE 6 — ESTRUTURAS DE CONTROLE
+=====================================================================================
+
+NOME: Estruturas de Controle
+
+OBJETIVO: Explicar condicionais, laços, controle de fluxo e comprehensions com exemplos visuais.
+
+EMOÇÃO: Clareza, progressão, empoderamento.
+
+LAYOUT: Split horizontal com duas seções principais.
+
+ORGANIZAÇÃO:
+  - Título no topo esquerdo
+  - Duas colunas abaixo:
+    - Coluna esquerda (50%): Condicionais (if/elif/else) com diagrama visual de fluxo
+    - Coluna direita (50%): Laços (for/while) com exemplo de código
+  - Abaixo das colunas, ocupando largura total (30% inferior da área):
+    - Dois badges lado a lado: "break / continue / pass" e "Compreensão de listas e dicionários"
+    - Cada badge em estilo pill com ícone
+
+ELEMENTOS DECORATIVOS:
+  - Seta de fluxo entre os elementos condicionais (SVG, cor #4B8BBE, opacidade 0.3)
+  - Pequeno ícone de loop (seta circular) ao lado dos laços
+
+ELEMENTOS INTERATIVOS:
+  - Badges clicáveis que expandem com exemplo de código adicional (accordion simples)
+  - Hover no código: glow na borda
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Bloco de código syntax highlighted
+  - Badges/Pills
+  - Diagrama de fluxo visual (simplificado, CSS)
+
+PARTÍCULAS: Apenas as globais.
+
+ILUMINAÇÃO: Nada especial.
+
+EFEITOS:
+  - Bloco de código: mesmo estilo do slide 5
+  - Badges: fundo #1A2338, borda sutil, hover expande
+
+ÍCONES:
+  - Ícone de "fork/diamond" para condicionais
+  - Ícone de "loop/refresh" para laços
+  - Ícone de "plus/expand" nos badges expansíveis
+  - SVG outline, 18px
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Estruturas de Controle" — weight 700
+  Subtítulo coluna esquerda: "Condicionais" weight 600, 1.1rem
+  Subtítulo coluna direita: "Laços" weight 600, 1.1rem
+  Código: 'JetBrains Mono', 0.85rem
+
+CÓDIGOS A EXIBIR:
+  Coluna esquerda:
+    idade = 18
+    if idade >= 18:
+        print("Maior")
+    elif idade >= 12:
+        print("Adolescente")
+    else:
+        print("Criança")
+
+  Coluna direita:
+    for i in range(5):
+        print(i)
+    
+    while contador < 10:
+        contador += 1
+
+  Badge expansível "Controle":
+    break   # sai do loop
+    continue  # próxima iteração
+    pass    # placeholder
+
+  Badge expansível "Compreensão":
+    quadrados = [x**2 for x in range(10)]
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in
+  3. (300ms) Coluna esquerda (Condicionais): fade in + translateX(-10px), 600ms
+  4. (400ms) Código condicionais: fade in, 500ms
+  5. (350ms) Coluna direita (Laços): fade in + translateX(10px), 600ms
+  6. (450ms) Código laços: fade in, 500ms
+  7. (700ms) Badge 1: fade in + scale, 400ms
+  8. (800ms) Badge 2: fade in + scale, 400ms
+
+INTERAÇÕES:
+  - Clique no badge "break / continue / pass": expande mostrando código adicional
+  - Clique no badge "Compreensão": expande mostrando código adicional
+  - Hover no código: borda glow #4CAF50
+
+TRANSIÇÃO PARA SLIDE 7: Fade, 450ms.
+
+OBSERVAÇÕES:
+  - Badges expansíveis: usar max-height com transition para expandir suavemente
+  - Se o conteúdo expandido dos badges ultrapassar o espaço, reduzir fontes
+  - Manter um terço inferior do slide com margem para expansão
+
+
+=====================================================================================
+SLIDE 7 — FUNÇÕES E MODULARIDADE
+=====================================================================================
+
+NOME: Funções e Modularidade
+
+OBJETIVO: Explicar o conceito de funções, lambda, módulos e pacotes em Python.
+
+EMOÇÃO: Clareza, progressão, descoberta.
+
+LAYOUT: Três colunas para três tópicos.
+
+ORGANIZAÇÃO:
+  - Título centralizado no topo
+  - Três colunas iguais (33% cada):
+    - Coluna 1: "Funções" — ícone + "Definição com def e parâmetros" + "Retorno de múltiplos valores"
+    - Coluna 2: "Lambda" — ícone + "Funções anônimas" + código exemplo
+    - Coluna 3: "Módulos" — ícone + "Organização em módulos e pacotes" + código "import"
+  - Bloco com perspectiva (inferior, centralizado na base) com frase: "def é a palavra mágica"
+
+ELEMENTOS DECORATIVOS:
+  - Linha horizontal conectando as três colunas no topo (opacidade 0.05)
+
+ELEMENTOS INTERATIVOS:
+  - Bloco perspectiva com hover glow
+  - Código na coluna lambda com syntax highlight
+  - Tooltip no bloco perspectiva: "Toda função em Python começa com def"
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Bloco com perspectiva 3D (sistema obrigatório — tipo inferior)
+  - Três cards lado a lado
+  - Bloco de código
+
+PARTÍCULAS: Apenas as globais.
+
+ILUMINAÇÃO: Bloco perspectiva com glow gradiente azul-ciano.
+
+EFEITOS:
+  - Cards com glassmorphism leve
+  - Bloco perspectiva com gradiente #306998 → #00D4FF, texto branco
+
+ÍCONES:
+  - Coluna 1: ícone "function/f" (letra f estilizada)
+  - Coluna 2: ícone "lambda/λ" (lambda grego)
+  - Coluna 3: ícone "package/box" (módulos)
+  - SVG outline, 28px
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Funções e Modularidade" — weight 700
+  Subtítulo colunas: weight 600, 1rem
+  Texto colunas: weight 300, 0.9rem
+  Bloco perspectiva: weight 700, 1.2rem, "def é a palavra mágica"
+
+CÓDIGOS:
+  Coluna 2 (Lambda):
+    # Função tradicional
+    def quadrado(x):
+        return x ** 2
+    
+    # Lambda equivalente
+    quadrado = lambda x: x ** 2
+
+  Coluna 3 (Módulos):
+    from math import pi
+    import os
+    import requests
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in
+  3. (300ms) Coluna 1: fade in + translateY(-8px), 500ms
+  4. (400ms) Coluna 2: fade in + translateY(-8px), 500ms
+  5. (500ms) Coluna 3: fade in + translateY(-8px), 500ms
+  6. (700ms) Bloco perspectiva inferior: fade in + translateZ(10px), blur 6px→0, 600ms, escala 92%→100%
+  7. (800ms) Código dentro das colunas aparece com typing effect ou fade
+
+INTERAÇÕES:
+  - Hover no bloco perspectiva: glow mais intenso, leve elevação
+  - Hover nos cards: borda glow sutil
+
+TRANSIÇÃO PARA SLIDE 8: Cross-fade, 500ms.
+
+OBSERVAÇÕES:
+  - Bloco perspectiva tipo inferior (rotateX 10deg) por estar na metade inferior do slide
+  - Comentário HTML: "Bloco de citação inferior — 280px x 80px para frase curta"
+  - O bloco com perspectiva na base ancora visualmente o slide
+
+
+=====================================================================================
+SLIDE 8 — PROGRAMAÇÃO ORIENTADA A OBJETOS
+=====================================================================================
+
+NOME: Programação Orientada a Objetos
+
+OBJETIVO: Introduzir POO em Python de forma visual e conceitual.
+
+EMOÇÃO: Descoberta, estruturação, empoderamento.
+
+LAYOUT: Split vertical (50% diagrama conceitual à esquerda, 50% código à direita).
+
+ORGANIZAÇÃO:
+  - Título no topo, alinhado à esquerda
+  - Lado esquerdo (50%): Diagrama visual de classe
+    - Bloco representando uma "Classe" (retângulo com fundo gradiente)
+    - Dentro: nome da classe "Pessoa", atributos (_nome, _idade), métodos (__init__, get_nome)
+    - Setas conectando aos conceitos: Herança, Polimorfismo, Encapsulamento
+  - Lado direito (50%): Bloco de código com exemplo POO
+  - Bloco com perspectiva (superior, canto inferior direito ou flutuando) com destaque: "__init__, __str__, __repr__"
+
+ELEMENTOS DECORATIVOS:
+  - Diagrama de classe visual com linhas e conexões
+  - Pequeno ícone de "cubo 3D" representando abstração de objetos
+
+ELEMENTOS INTERATIVOS:
+  - Hover nos conceitos (Herança, Polimorfismo, Encapsulamento): destacam com glow e tooltip explicativo
+  - Bloco perspectiva com hover glow
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Diagrama visual com CSS
+  - Bloco de código syntax highlighted
+  - Bloco com perspectiva 3D
+  - Floating elements (conceitos)
+
+PARTÍCULAS: Apenas as globais.
+
+ILUMINAÇÃO: Diagrama com glow azul sutil.
+
+EFEITOS:
+  - Diagrama de classe: fundo gradiente #306998 → #4B8BBE com opacidade 0.15, borda 1px rgba(255,255,255,0.1)
+  - Setas SVG entre conceitos
+
+ÍCONES:
+  - Ícone de "cubo/layers" para POO
+  - SVG outline, 16px para tooltips
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Programação Orientada a Objetos" — weight 700
+  Diagrama - nome classe: "Pessoa" weight 700, 1.4rem, cor #FFD43B
+  Diagrama - atributos: weight 400, 0.85rem, cor #94A3B8
+  Diagrama - métodos: weight 400, 0.85rem, cor #4CAF50
+  Código: 'JetBrains Mono', 0.85rem
+
+CÓDIGO (lado direito):
+    class Pessoa:
+        def __init__(self, nome, idade):
+            self._nome = nome
+            self._idade = idade
+        
+        def __str__(self):
+            return f"{self._nome}, {self._idade} anos"
+        
+        @property
+        def nome(self):
+            return self._nome
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in
+  3. (300ms) Diagrama esquerdo: fade in + translateX(-10px), 600ms
+    - Caixa classe: aparece primeiro
+    - Atributos e métodos: fade in sequencial
+    - Setas e conceitos: aparecem depois com stagger
+  4. (400ms) Código direito: fade in + translateX(10px), 600ms
+  5. (800ms) Bloco perspectiva: fade in + blur→0, 500ms
+
+INTERAÇÕES:
+  - Hover em "Herança": glow roxo, tooltip "Classe filha herda atributos e métodos da classe pai"
+  - Hover em "Polimorfismo": glow verde, tooltip "Métodos podem ter comportamentos diferentes em classes diferentes"
+  - Hover em "Encapsulamento": glow azul, tooltip "Atributos privados com _ e __"
+  - Hover no bloco código: borda glow
+
+TRANSIÇÃO PARA SLIDE 9: Slide left, 550ms.
+
+OBSERVAÇÕES:
+  - Bloco perspectiva: "Métodos Especiais: __init__, __str__, __repr__" — 300px x 120px
+  - Comentário HTML: "Bloco métodos especiais — 300px x 120px para 2 linhas de código"
+  - Diagrama deve ser implementado com CSS puro (divs posicionadas, sem canvas)
+
+
+=====================================================================================
+SLIDE 9 — TRATAMENTO DE ERROS
+=====================================================================================
+
+NOME: Tratamento de Erros
+
+OBJETIVO: Explicar o sistema de exceções do Python e boas práticas.
+
+EMOÇÃO: Segurança, clareza, confiança.
+
+LAYOUT: Split horizontal com fluxo visual de try/except.
+
+ORGANIZAÇÃO:
+  - Título no topo esquerdo
+  - Área principal (70%): Fluxo visual de try/except/else/finally
+    - Representar como um "caminho" visual: 
+      Bloco try → bifurcação (certo: segue, errado: except) → else → finally
+    - Cada etapa em um card estilizado
+    - Setas conectando os cards
+  - Área inferior (20%): Dois badges lado a lado:
+    - "raise — Levantar exceções"
+    - "Boas práticas: capturar exceções específicas"
+  - Bloco com perspectiva (superior, canto direito) com: "try:" + "except:" em destaque
+
+ELEMENTOS DECORATIVOS:
+  - Flechas de fluxo SVG entre os blocos
+  - Pequeno ícone de "shield" (escudo) representando proteção contra erros
+  - Background: partículas globais
+
+ELEMENTOS INTERATIVOS:
+  - Bloco perspectiva com hover glow
+  - Badges inferiores: clicáveis para expandir dicas
+  - Hover nos cards de fluxo: glow de acordo com o tipo (try: verde, except: vermelho, else: azul, finally: roxo)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Cards de fluxo
+  - Bloco com perspectiva 3D
+  - Badges expansíveis
+  - Diagrama de fluxo
+
+PARTÍCULAS: Apenas as globais.
+
+ILUMINAÇÃO:
+  - Card "try": glow verde sutil (#4CAF50)
+  - Card "except": glow laranja sutil (#FF9800)
+  - Card "else": glow azul sutil (#4B8BBE)
+  - Card "finally": glow roxo sutil (#9C27B0)
+
+EFEITOS:
+  - Cada card do fluxo com cor de borda diferente (verde, laranja, azul, roxo)
+  - Setas animadas (pequena seta pulsando na direção do fluxo)
+
+ÍCONES:
+  - Ícone "shield/check" no try
+  - Ícone "alert/triangle" no except
+  - Ícone "check-circle" no else
+  - Ícone "box/square" no finally
+  - SVG outline, 18px
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Tratamento de Erros" — weight 700
+  Cards fluxo: weight 600, 1rem
+  Badges: weight 500, 0.85rem
+  Bloco perspectiva: weight 500, 0.9rem
+
+CORES DOS CARDS DE FLUXO:
+  try:    borda #4CAF50, fundo rgba(76,175,80,0.05)
+  except: borda #FF9800, fundo rgba(255,152,0,0.05)
+  else:   borda #4B8BBE, fundo rgba(75,139,190,0.05)
+  finally: borda #9C27B0, fundo rgba(156,39,176,0.05)
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in
+  3. (300ms) Card "try": fade in + translateY(-8px), 400ms
+  4. (450ms) Seta 1: fade in, 300ms
+  5. (500ms) Card "except": fade in + translateY(-8px), 400ms
+  6. (650ms) Seta 2: fade in, 300ms
+  7. (700ms) Card "else": fade in + translateY(-8px), 400ms
+  8. (850ms) Seta 3: fade in, 300ms
+  9. (900ms) Card "finally": fade in + translateY(-8px), 400ms
+  10. (700ms) Bloco perspectiva (direita): fade in + blur, 500ms
+  11. (1100ms) Badge 1: fade in + scale
+  12. (1200ms) Badge 2: fade in + scale
+
+INTERAÇÕES:
+  - Clique nos badges: expande dica de boas práticas
+    Badge "raise": "Use raise Exception('mensagem') para levantar exceções personalizadas"
+    Badge "Boas práticas": "Sempre capture exceções específicas, nunca except: genérico"
+  - Hover nos cards de fluxo: glow na borda, escala 1.02
+
+TRANSIÇÃO PARA SLIDE 10: Fade, 450ms.
+
+OBSERVAÇÕES:
+  - Fluxo visual: a disposição dos cards deve formar um caminho visual da esquerda para a direita
+  - Bloco perspectiva no canto superior direito com gradiente ciano tech
+  - Comentário HTML bloco: "Bloco try/except destaque — 200px x 100px"
+
+
+=====================================================================================
+SLIDE 10 — ECOSSISTEMA E BIBLIOTECAS POPULARES
+=====================================================================================
+
+NOME: Ecossistema e Bibliotecas Populares
+
+OBJETIVO: Apresentar as principais bibliotecas Python organizadas por categoria.
+
+EMOÇÃO: Abundância, possibilidades, organização.
+
+LAYOUT: Grid 2×2 de categorias com 2-3 bibliotecas cada.
+
+ORGANIZAÇÃO:
+  - Título no topo centralizado
+  - Grid 2×2:
+    - Card 1 — "Web": Django, Flask, FastAPI — ícone: globe
+    - Card 2 — "Dados": NumPy, Pandas, Matplotlib — ícone: chart
+    - Card 3 — "ML/AI": scikit-learn, TensorFlow, PyTorch — ícone: brain/network
+    - Card 4 — "Automação": Selenium, requests, BeautifulSoup — ícone: robot/gear
+  - Dentro de cada card: nome da categoria no topo, ícone, lista das bibliotecas como badges menores
+
+ELEMENTOS DECORATIVOS:
+  - Pequenos ícones de estrela/ranking ao lado de cada biblioteca (popularidade visual)
+  - Linhas conectoras sutis entre cards relacionados
+
+ELEMENTOS INTERATIVOS:
+  - Cards com hover (elevação + glow)
+  - Cada badge de biblioteca: hover mostra tooltip com descrição curta
+    Exemplo: "Django — Framework web full-stack"
+  - Clique no badge: expande pergunta "usar isso?" (brincadeira visual)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Cards com glassmorphism
+  - Badges/Pills
+  - Grid layout
+  - Tooltips
+
+PARTÍCULAS: Apenas as globais. Opcional: partículas extras douradas (5-10) representando "oportunidades" flutuando sobre os cards.
+
+ILUMINAÇÃO: Glow suave sobre cada card conforme categoria (web: azul, dados: verde, ML: roxo, automação: laranja).
+
+EFEITOS:
+  - Cards: backdrop-filter blur(12px), border-radius 16px
+  - Tooltips com backdrop-filter blur(8px)
+
+ÍCONES:
+  - Card 1: SVG globe/internet
+  - Card 2: SVG bar-chart
+  - Card 3: SVG network/brain
+  - Card 4: SVG gear/robot
+  - 24px, cor gradiente
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Ecossistema e Bibliotecas Populares" — weight 700
+  Categoria: weight 600, 1.1rem, cor branca
+  Biblioteca: weight 400, 0.85rem, cor #94A3B8
+  Badge biblioteca: weight 500, 0.8rem
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in
+  3. (300ms) Card 1 (Web): fade + translateY, 500ms
+  4. (400ms) Card 2 (Dados): fade + translateY, 500ms
+  5. (500ms) Card 3 (ML): fade + translateY, 500ms
+  6. (600ms) Card 4 (Automação): fade + translateY, 500ms
+  7. (400-700ms) Badges dentro dos cards: stagger com 80ms entre cada
+
+INTERAÇÕES:
+  - Hover no card: translateY(-6px), glow na cor da categoria
+  - Hover no badge biblioteca: tooltip aparece com descrição
+  - Tooltips: "Django — Framework web full-stack", "NumPy — Computação numérica", etc.
+
+TRANSIÇÃO PARA SLIDE 11: Cross-fade, 500ms.
+
+OBSERVAÇÕES:
+  - Nomes das bibliotecas devem estar em fonte monospace (estilo código)
+  - Cada badge deve ter uma cor sutil de fundo que combine com a categoria
+  - Se o slide ficar cheio, reduzir fonte dos badges para 0.75rem
+
+
+=====================================================================================
+SLIDE 11 — AMBIENTES VIRTUAIS E GERENCIAMENTO DE DEPENDÊNCIAS
+=====================================================================================
+
+NOME: Ambientes Virtuais e Gerenciamento de Dependências
+
+OBJETIVO: Explicar a importância e o funcionamento de ambientes virtuais e gerenciadores de pacotes.
+
+EMOÇÃO: Organização, profissionalismo, boas práticas.
+
+LAYOUT: Comparativo lado a lado com dois painéis.
+
+ORGANIZAÇÃO:
+  - Título no topo, alinhado à esquerda
+  - Dois painéis grandes lado a lado (dois Blocos com perspectiva):
+    - Painel esquerdo (tipo superior): "venv / virtualenv"
+      - Conteúdo: "pip install", "requirements.txt", "pyproject.toml"
+      - ícone de terminal
+    - Painel direito (tipo superior): "Conda"
+      - Conteúdo: "Gerenciamento de ambientes científicos"
+      - ícone de atom/flask
+  - Abaixo dos dois painéis: uma faixa horizontal (barra) com o fluxo de trabalho recomendado:
+    "Criar venv → Ativar → Instalar dependências → Congelar requirements.txt"
+
+ELEMENTOS DECORATIVOS:
+  - Terminal estilizado decorativo no fundo do painel esquerdo (opacidade 0.03)
+  - Símbolo do Conda decorativo no fundo do painel direito (opacidade 0.03)
+
+ELEMENTOS INTERATIVOS:
+  - Blocos perspectiva com hover glow
+  - Botão "Copiar" em cada bloco de comando (com feedback)
+  - Tooltips em "requirements.txt" e "pyproject.toml"
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Blocos com perspectiva 3D (sistema obrigatório) — DOIS blocos lado a lado
+  - Cards
+  - Botão copiar
+
+PARTÍCULAS: Apenas as globais.
+
+ILUMINAÇÃO: Glow azul no painel venv, glow verde no painel Conda.
+
+EFEITOS:
+  - Blocos perspectiva lado a lado com cores complementares
+
+ÍCONES:
+  - Painel venv: ícone "terminal/console"
+  - Painel Conda: ícone "flask/flask"
+  - Faixa inferior: ícone "arrow-right" entre cada etapa
+  - SVG outline, 20px
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Ambientes Virtuais e Gerenciamento de Dependências" — weight 700
+  Painel título: weight 700, 1.3rem
+  Painel conteúdo: weight 400, 0.9rem, 'JetBrains Mono' para comandos
+  Faixa inferior: weight 500, 0.9rem
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in
+  3. (300ms) Bloco perspectiva esquerdo (venv): fade in + blur+escala, 600ms
+  4. (450ms) Bloco perspectiva direito (Conda): fade in + blur+escala, 600ms
+  5. (700ms) Faixa inferior com fluxo: scaleX(0)→scaleX(1), 600ms + stagger nos itens
+
+INTERAÇÕES:
+  - Hover nos blocos perspectiva: glow na borda + leve elevação
+  - Hover na faixa inferior: cada etapa glow amarelo
+  - Tooltip em "requirements.txt": "Arquivo com lista de dependências do projeto"
+
+TRANSIÇÃO PARA SLIDE 12: Slide left, 550ms.
+
+OBSERVAÇÕES:
+  - Comentário HTML bloco esquerdo: "Bloco venv — 320px x 280px para conteúdo de terminal + comandos"
+  - Comentário HTML bloco direito: "Bloco Conda — 280px x 200px para conteúdo descritivo"
+  - Ambos blocos no mesmo nível horizontal (superior), mesmo rotateX(-10deg)
+
+
+=====================================================================================
+SLIDE 12 — EXEMPLO PRÁTICO: SCRIPT DO DIA A DIA
+=====================================================================================
+
+NOME: Exemplo Prático: Script do Dia a Dia
+
+OBJETIVO: Demonstrar aplicações reais do Python com exemplos de código funcionais e úteis.
+
+EMOÇÃO: Empolgação, utilidade, "eu posso fazer isso".
+
+LAYOUT: Três colunas com mini exemplos.
+
+ORGANIZAÇÃO:
+  - Título no topo centralizado
+  - Três colunas iguais (33%), cada uma com um exemplo prático:
+    - Coluna 1: "Renomear arquivos" — ícone: folder + código com os e shutil
+    - Coluna 2: "Web Scraping" — ícone: globe + código com requests e BeautifulSoup
+    - Coluna 3: "Automação Planilhas" — ícone: spreadsheet + código com openpyxl
+  - Abaixo das colunas: badge grande centralizado: "Código funcional em menos de 20 linhas"
+
+ELEMENTOS DECORATIVOS:
+  - Pequenos ícones de "check" verde em cada coluna indicando "exemplo funcional"
+  - Linhas separadoras verticais sutis entre as colunas
+
+ELEMENTOS INTERATIVOS:
+  - Botão "Copiar código" em cada coluna
+  - Hover no código: glow verde
+  - Badge "20 linhas": hover expande com tooltip "Sim, Python é muito expressivo!"
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Bloco de código syntax highlighted (três)
+  - Badge destaque
+  - Cards com ícone
+
+PARTÍCULAS: 10 partículas douradas extras representando "ideias/oportunidades" flutuando lentamente.
+
+ILUMINAÇÃO: Cada bloco de código com glow verde suave (#4CAF50 opacidade 0.08). Badge central com glow amarelo.
+
+EFEITOS:
+  - Blocos de código: mesmo estilo (fundo #0D1117, border-radius 8px)
+
+ÍCONES:
+  - Coluna 1: SVG folder/files
+  - Coluna 2: SVG globe/web
+  - Coluna 3: SVG table/spreadsheet
+  - 24px, cor #4B8BBE
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Exemplo Prático: Script do Dia a Dia" — weight 700
+  Subtítulo coluna: weight 600, 1rem
+  Código: 'JetBrains Mono', 0.75rem (reduzido para caber 3 exemplos)
+  Badge: weight 700, 1rem
+
+CÓDIGOS:
+  Coluna 1:
+    import os, shutil
+    for arquivo in os.listdir('.'):
+        if arquivo.endswith('.txt'):
+            novo = f"documento_{arquivo}"
+            shutil.move(arquivo, novo)
+
+  Coluna 2:
+    import requests
+    from bs4 import BeautifulSoup
+    res = requests.get('https://exemplo.com')
+    soup = BeautifulSoup(res.text, 'html.parser')
+    print(soup.title.text)
+
+  Coluna 3:
+    from openpyxl import Workbook
+    wb = Workbook()
+    ws = wb.active
+    ws['A1'] = 'Nome'
+    ws['B1'] = 'Nota'
+    wb.save('notas.xlsx')
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in
+  3. (300ms) Coluna 1: fade + translateX(-8px), 500ms
+  4. (400ms) Coluna 2: fade + translateY(-8px), 500ms
+  5. (500ms) Coluna 3: fade + translateX(8px), 500ms
+  6. (700ms) Badge "20 linhas": fade + scale, bounce suave, 500ms
+
+INTERAÇÕES:
+  - Botão "Copiar" em cada coluna: feedback "Copiado!" por 1.5s
+  - Hover no badge: tooltip "Python é muito expressivo — faz muito com poucas linhas"
+  - Hover no código: borda glow verde
+
+TRANSIÇÃO PARA SLIDE 13: Fade, 450ms.
+
+OBSERVAÇÕES:
+  - Código reduzido para caber 3 colunas (apenas trechos ilustrativos)
+  - Comentário do título: "Este slide demonstra que Python resolve problemas reais com pouco código"
+
+
+=====================================================================================
+SLIDE 13 — CONSIDERAÇÕES E PRÓXIMOS PASSOS
+=====================================================================================
+
+NOME: Considerações e Próximos Passos
+
+OBJETIVO: Fornecer direcionamento para continuidade dos estudos, com recursos e comunidades.
+
+EMOÇÃO: Motivação, pertencimento, entusiasmo.
+
+LAYOUT: Hierárquico com seções.
+
+ORGANIZAÇÃO:
+  - Título no topo, alinhado à esquerda
+  - Duas áreas principais:
+    - Lado esquerdo (55%): "Recursos"
+      - Bloco com perspectiva (tipo superior) com "docs.python.org" em destaque
+      - Abaixo, lista: "Documentação oficial", "Projetos pessoais", "Comunidades", "Certificações"
+      - Cada item com ícone e descrição curta
+    - Lado direito (40%): "Próximos Passos"
+      - Mini roadmap visual (NÃO é timeline — proibido) — usar cards empilhados com leve deslocamento
+      - Card 1: "Aprenda bibliotecas" (Django, Pandas)
+      - Card 2: "Construa projetos"
+      - Card 3: "Participe de comunidades"
+
+ELEMENTOS DECORATIVOS:
+  - Ícone de "map/pin" no canto inferior direito
+  - Pequenos círculos decorativos no fundo (opacidade 0.02)
+
+ELEMENTOS INTERATIVOS:
+  - Bloco perspectiva com hover glow
+  - Cards empilhados: hover faz cada card "subir" para frente (z-index + translateY)
+  - Links clicáveis nos recursos (abrem em nova aba)
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Bloco com perspectiva 3D (sistema obrigatório)
+  - Cards empilhados (stacked cards)
+  - Ícones com hover
+
+PARTÍCULAS: Apenas as globais.
+
+ILUMINAÇÃO: Bloco perspectiva com glow azul, cards com glow sutil.
+
+EFEITOS:
+  - Cards empilhados: cada card levemente deslocado, rotateY e translateZ no hover
+
+ÍCONES:
+  - Bloco docs: SVG book/documentation
+  - Lista: SVG check-circle para cada item
+  - Cards: SVG arrow-right, code, users
+  - 16-20px
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Considerações e Próximos Passos" — weight 700
+  Bloco docs: "docs.python.org" weight 700, 1.2rem, "Referência oficial" weight 400, 0.8rem
+  Lista itens: weight 400, 0.9rem, cor #CBD5E1
+  Cards próximos passos: weight 500, 0.9rem
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background
+  2. (150ms) Título: fade in
+  3. (300ms) Bloco perspectiva docs (esquerda): fade + blur + escala, 600ms
+  4. (500ms) Lista itens esquerda: stagger fade + translateX(-8px), 3 itens com 100ms entre cada
+  5. (500ms) Card 1 (empilhado direito): fade + translateY, 400ms
+  6. (600ms) Card 2: fade + translateY, 400ms
+  7. (700ms) Card 3: fade + translateY, 400ms
+
+INTERAÇÕES:
+  - Hover no bloco docs: glow mais intenso, tooltip "docs.python.org — Acesse a documentação oficial"
+  - Hover nos cards empilhados: o card "vem para frente" com translateZ(30px) + scale(1.05)
+  - Link clicável no bloco docs: abre docs.python.org em nova aba
+
+TRANSIÇÃO PARA SLIDE 14: Cross-fade com glow (impacto visual), 700ms.
+
+OBSERVAÇÕES:
+  - NÃO criar timeline — usar cards empilhados como alternativa
+  - Bloco docs: "Bloco documentação — 280px x 120px"
+  - "Certificações e roadmap de estudos" é o terceiro item da lista
+
+
+=====================================================================================
+SLIDE 14 — OBRIGADO! (ENCERRAMENTO)
+=====================================================================================
+
+NOME: Obrigado!
+
+OBJETIVO: Encerrar a apresentação com impacto emocional positivo, deixando uma mensagem inspiradora.
+
+EMOÇÃO: Gratidão, inspiração, motivação, energia positiva.
+
+LAYOUT: Centralizado, minimalista e dramático.
+
+ORGANIZAÇÃO:
+  - "Obrigado!" grande centralizado (35% do topo)
+  - "Mãos à obra e bons códigos!" abaixo (55% do topo)
+  - Python logo (SVG estilizado) no centro, entre as duas frases, opacidade 0.8
+  - Linha decorativa fina separando as frases
+  - Créditos pequenos no rodapé: "Apresentação criada com Python 3"
+
+PROIBIÇÃO ABSOLUTA: NÃO colocar "Perguntas?" ou "Dúvidas?" em hipótese alguma.
+
+BACKGROUND: Global, com intensificação do glow e das partículas (mais brilhantes no final).
+
+ELEMENTOS DECORATIVOS:
+  - Python logo (SVG, cobras entrelaçadas) no centro, 100px, com glow dourado pulsante
+  - Pequenas estrelas/faíscas douradas (CSS) em volta do logo, opacidade 0.3
+  - Duas linhas horizontais finas (uma acima, uma abaixo do conteúdo), gradiente rgba(75,139,190,0)→rgba(75,139,190,0.5)→rgba(75,139,190,0)
+
+ELEMENTOS INTERATIVOS: Nenhum específico além da navegação global.
+
+ELEMENTOS VISUAIS (Visual.txt):
+  - Efeito Glow intenso nos textos principais
+  - Sparkles/estrelas decorativas
+
+PARTÍCULAS:
+  - Partículas globais com intensidade aumentada (dobro da opacidade)
+  - 15 partículas douradas extras (#FFD43B) que flutuam suavemente, representando "faíscas de código"
+
+ILUMINAÇÃO:
+  - "Obrigado!" com glow dourado pulsante (text-shadow: 0 0 40px rgba(255,212,59,0.3), 0 0 80px rgba(255,212,59,0.1))
+  - Python logo com glow pulsante cíclico (3s ease-in-out infinite)
+
+EFEITOS:
+  - Glow pulsante no título principal (animação CSS)
+  - Partículas douradas extras
+  - Leve efeito de respiração no Python logo
+
+ÍCONES:
+  - Python logo no centro (SVG, duas cobras entrelaçadas)
+  - Cor #FFD43B (amarelo Python) com opacidade 0.8
+
+IMAGENS: Nenhuma.
+
+TIPOGRAFIA:
+  Título: "Obrigado!" — weight 800, clamp(3rem, 5vw, 6rem), cor #FFFFFF
+  Subtítulo: "Mãos à obra e bons códigos!" — weight 500, clamp(1rem, 1.5vw, 1.8rem), cor #FFD43B (amarelo Python)
+  Créditos: "Apresentação criada com Python 3" — weight 300, 0.8rem, cor #64748B
+
+EFEITO 3D EXTRUDADO NO "OBRIGADO!": SIM, usar o mesmo sistema de text-shadow com 35 camadas
+  Cores: mesmas cores do slide 1 (de #6B9CC4 a #070B14)
+  O texto deve permanecer 100% horizontal
+  Z-index: 0
+
+ORDEM DE ENTRADA:
+  1. (0ms) Background (com partículas mais brilhantes)
+  2. (200ms) Python logo: fade in + scale(0.8→1.0), 800ms, com glow
+  3. (400ms) "Obrigado!": extrude text-shadow animado (surgir camada por camada ou fade geral com blur), 900ms
+  4. (700ms) Linha decorativa: scaleX(0)→scaleX(1), 500ms
+  5. (800ms) "Mãos à obra e bons códigos!": fade + translateY(-8px), 600ms
+  6. (1200ms) Créditos: fade in, 500ms
+
+MICROANIMAÇÕES CONTÍNUAS:
+  - Python logo: glow pulsante (opacidade 0.4→0.8→0.4, 3s loop)
+  - "Obrigado!": glow text-shadow respira suavemente
+  - Partículas douradas: movimento contínuo
+
+TRANSIÇÃO DE ENTRADA (vinda do slide 13): Cross-fade com glow intenso, 700ms. O slide anterior escurece, glow dourado preenche a tela e o novo slide aparece.
+
+NÃO HÁ TRANSIÇÃO DE SAÍDA — É O ÚLTIMO SLIDE.
+
+OBSERVAÇÕES:
+  - Proibido terminantemente "Perguntas?", "Dúvidas?", "Q&A", "Questions?" ou qualquer variação
+  - Último slide deve deixar uma impressão duradoura e inspiradora
+  - A animação de glow pulsante no Python logo deve ser sutil, não exagerada
+  - Z-index do título: 0
+
+
+=====================================================================================
+10. REGRAS ADICIONAIS DE IMPLEMENTAÇÃO
+=====================================================================================
+
+NÃO CRIAR TELA DE LOADING: A apresentação deve iniciar imediatamente com o slide 1 visível e animando.
+
+NÃO USAR SCROLL EM HIPÓTESE ALGUMA: Cada slide ocupa 100vh e 100vw. Nenhum slide permite scroll. Overflow hidden no body.
+
+NÃO TROCAR SLIDE COM CLICK DO MOUSE NA TELA: Apenas setas do teclado, dots e swipe.
+
+BARRA DE PROGRESSO: Fica visível após 2 segundos com fade in. Deve ter navigation dots para todos os 14 slides.
+
+RESPONSIVIDADE COMPLETA: Usar clamp(), vw, vh, % e flexbox/grid para adaptar a todas as resoluções de 1920x1080 até 375x667. Manter perspectiva 3D mesmo em mobile. NUNCA remover a perspectiva em telas menores.
+
+CODIFICAÇÃO UTF-8: O documento HTML DEVE usar <meta charset="UTF-8">. Todos os caracteres acentuados, cedilhas, aspas e símbolos especiais DEVEM estar corretos. NENHUM caractere corrompido é aceitável. Antes de finalizar, fazer auditoria completa de caracteres.
+
+NÃO CRIAR LINHA DO TEMPO: Proibido. Usar alternativas como cards empilhados, badges, faixas.
+
+PROIBIDO COVER SHAPES: Nenhum polígono decorativo com clip-path e blur atrás de títulos.
+
+Z-INDEX DO TÍTULO NO PRIMEIRO SLIDE: ZERO (0).
+
+ESTADO INICIAL DO PRIMEIRO SLIDE: Ao abrir o HTML, o slide 1 já deve estar ativo, com todos os elementos preparados e a animação de entrada iniciando automaticamente. NÃO pode abrir vazio ou depender de navegação.
+
+BLOCO COM PERSPECTIVA — TEXTO ACOMPANHA PERSPECTIVA: O texto dentro do bloco com perspectiva 3DEVE herdar a transformação naturalmente. NÃO aplicar skew, rotate ou transform extra no texto. O texto NÃO pode ficar plano/horizontal enquanto o bloco está em perspectiva.
+
+BLOCOS COM PERSPECTIVA — COMENTÁRIOS: TODO bloco deve ter comentário HTML explicando seu tamanho e justificativa.
+
+BLOCOS COM PERSPECTIVA — LIMITES: 350px largura máxima, 420px altura máxima. Tamanho justo para o conteúdo. NUNCA usar os limites máximos como tamanho padrão.
+
+MARGEM DE SEGURANÇA: Manter mínimo de 5-8% de margem nas quatro bordas do viewport.
+
+LAYOUT BUDGET: Antes de cada slide, calcular mentalmente quanto espaço cada bloco ocupará. Se exceder, reorganizar ou dividir conteúdo.
+
+=====================================================================================
+11. MICROINTERAÇÕES E POLISH
+=====================================================================================
+
+Presentes em toda a apresentação:
+- TODOS os botões: hover, focus, active com transições de 0.3s
+- TODOS os cards: hover com elevação de 4px, borda glow
+- TODOS os links: cor #4B8BBE, hover #5BA0D0 com sublinhado animado
+- TODOS os ícones: hover com scale(1.1) e glow
+- Navigation dots: hover com glow, active com gradiente
+- Cursor personalizado (desktop): segue o mouse com delay suave, expande em hover
+- Setas laterais: hover opacidade aumenta de 0.3 para 0.8
+- Blocos com perspectiva: hover com glow intensificado na borda
+
+RESPIRAÇÃO CONTÍNUA (elementos nunca ficam completamente parados):
+  - Partículas de fundo: movimento contínuo
+  - Glow de títulos: oscilação de opacidade (0.8-1.0) em loop de 4s
+  - Python logo no slide 14: glow pulsante
+  - Blobs de fundo: movimento de 30s loop
+  - Grid de fundo: parado (não precisa animar)
+
+=====================================================================================
+12. ESTRUTURA DO DOCUMENTO HTML
+=====================================================================================
+
+A apresentação DEVE ser um único arquivo HTML contendo:
+  - <!DOCTYPE html> com lang="pt-BR"
+  - <meta charset="UTF-8"> obrigatório
+  - Todo CSS inline (na tag <style>)
+  - Todo JavaScript inline (na tag <script>)
+  - 14 divs de slide com classe .slide
+  - Sistema de navegação completo (dots, setas, teclado, swipe)
+  - Sistema de animações (CSS transitions/animations + JS para controle)
+  - Background global com todas as camadas
+  - Sistema de blocos com perspectiva 3D
+  - Tabs no slide 5
+  - Badges expansíveis nos slides 6 e 9
+  - Syntax highlight para blocos de código
+  - Cursor personalizado
+  - Barra de progresso inferior com navigation dots
+
+NENHUM ARQUIVO EXTERNO: Não usar CDN, não importar fontes externas se possível. Usar system-ui ou fontes embutidas via @import (apenas se necessário). Preferir usar as fontes padrão do sistema: 'Inter' via Google Fonts @import é aceitável.
+
+ESTRUTURA DE PASTAS: Tudo em um único arquivo HTML. Nenhum arquivo extra.
+
+=====================================================================================
+13. CHECKLIST DE VALIDAÇÃO PRÉ-ENTREGA
+=====================================================================================
+
+A IA desenvolvedora DEVE validar cada item antes de entregar:
+
+□ Todos os 14 slides estão presentes com conteúdo correto
+□ Slide 1 abre automaticamente com animação (sem depender de navegação)
+□ Nenhum caractere acentuado está corrompido
+□ UTF-8 declarado e funcional
+□ Nenhum scroll necessário em nenhum slide
+□ Nada ultrapassa os limites do viewport
+□ Perspectiva 3D mantida em mobile
+□ Nenhum cover shape no slide 1
+□ Título do slide 1 tem z-index 0
+□ Título do slide 1 é branco (#FFFFFF), sem gradiente, com text-shadow 3D extrudado
+□ Navigation dots funcionais para todos os 14 slides
+□ Setas do teclado funcionam (← →, PageUp, PageDown, Home, End)
+□ Swipe funciona em touch
+□ Navegação por dots funciona
+□ Scroll do mouse NÃO troca slides
+□ Click na tela NÃO troca slides
+□ Transições entre slides suaves (cross-fade)
+□ Animações de entrada com stagger coreografado
+□ Microanimações de hover em todos os elementos interativos
+□ Tabs no slide 5 funcionam com transição suave
+□ Badges expansíveis nos slides 6 e 9 funcionam
+□ Blocos com perspectiva têm conteúdo real e comentários de tamanho
+□ Blocos com perspectiva não ultrapassam 350x420px
+□ rotateX correto para posição de cada bloco
+□ Cursor personalizado ativo em desktop
+□ Barra de progresso inferior com dots e contador
+□ Responsivo em 1920x1080 até 375x667
+□ Identidade visual consistente azul escuro + amarelo Python
+□ Nenhum "Perguntas?" ou variação no último slide
+□ Nenhuma timeline foi criada
+□ Códigos com syntax highlighting funcionais
+□ Todos os textos em português correto
+□ O documento HTML é entregue como ÚNICO ARQUIVO
+
+=====================================================================================
+14. INSTRUÇÕES FINAIS PARA A IA DESENVOLVEDORA
+=====================================================================================
+
+1. Crie um ÚNICO arquivo HTML completo.
+2. NÃO crie nenhum outro arquivo.
+3. NÃO acesse nenhum outro documento na pasta de trabalho.
+4. NÃO use CDN para bibliotecas (apenas Google Fonts se necessário).
+5. Siga EXATAMENTE as cores, fontes, tamanhos e animações especificados.
+6. Mantenha a perspectiva 3D em todas as resoluções.
+7. Valide a codificação UTF-8 de TODO o documento antes de finalizar.
+8. Valide que todos os elementos cabem no viewport sem scroll.
+9. Teste a navegação por teclado, dots e swipe.
+10. Confira que o slide 1 abre automaticamente com animações.
+11. NÃO adicione "tela de loading".
+12. NÃO adicione "Perguntas?" ou "Dúvidas?" no slide final.
+13. Faça uma auditoria completa usando o checklist da seção 13.
+14. Corrija qualquer problema encontrado e repita a auditoria.
+15. Entregue APENAS quando TODOS os itens do checklist estiverem verdes.
+
+FIM DA ESPECIFICAÇÃO

@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python: Uma Introdução à Linguagem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: #070B14; color: #FFFFFF; }
+body { cursor: none; }
+
+/* GLOBAL BACKGROUND LAYERS */
+#bg-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse at center, #0F1A2E 0%, #0B1120 50%, #070B14 100%); background-attachment: fixed; }
+#bg-grid { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.03; background-image: linear-gradient(#4B8BBE 0.5px, transparent 0.5px), linear-gradient(90deg, #4B8BBE 0.5px, transparent 0.5px); background-size: 60px 60px; }
+#bg-blobs { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+#bg-blob1 { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(48,105,152,0.08), transparent 70%); top: -10%; left: -10%; animation: blobMove1 30s ease-in-out infinite; }
+#bg-blob2 { position: absolute; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(0,212,255,0.04), transparent 70%); bottom: -10%; right: -10%; animation: blobMove2 30s ease-in-out infinite; }
+@keyframes blobMove1 { 0%,100% { transform: translate(0,0); } 33% { transform: translate(120px,80px); } 66% { transform: translate(-60px,150px); } }
+@keyframes blobMove2 { 0%,100% { transform: translate(0,0); } 33% { transform: translate(-100px,-60px); } 66% { transform: translate(80px,-120px); } }
+#bg-vignette { position: fixed; inset: 0; z-index: 4; pointer-events: none; box-shadow: inset 0 0 150px rgba(0,0,0,0.6); }
+#bg-noise { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0.02; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat: repeat; background-size: 256px 256px; }
+#bg-particles { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+#bg-particles canvas { width: 100%; height: 100%; }
+
+/* SLIDES */
+.slide { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: clamp(24px, 3vw, 48px); opacity: 0; visibility: hidden; overflow: hidden; transition: opacity 0.35s ease, visibility 0s linear 0.35s; }
+.slide.active { opacity: 1; visibility: visible; z-index: 20; }
+
+/* ANIMATION STATES */
+.slide-anim { opacity: 0; }
+.slide-anim.visible { opacity: 1; }
+
+/* NAVIGATION */
+#nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; z-index: 100; background: linear-gradient(to top, rgba(10,15,26,0.8), transparent); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.6s ease; padding: 0 20px; }
+#nav-bar.visible { opacity: 1; }
+#nav-counter { position: absolute; left: 24px; font-size: 0.75rem; color: #64748B; font-weight: 400; letter-spacing: 0.05em; font-family: 'JetBrains Mono', monospace; }
+#nav-dots { display: flex; gap: 8px; align-items: center; }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; background: #1A2338; cursor: pointer; transition: all 0.3s ease; }
+.nav-dot:hover { box-shadow: 0 0 12px rgba(75,139,190,0.4); }
+.nav-dot.active { background: linear-gradient(135deg, #306998, #4B8BBE); transform: scale(1.3); }
+
+#arrow-left, #arrow-right { position: fixed; top: 50%; transform: translateY(-50%); z-index: 90; width: 48px; height: 80px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); cursor: pointer; opacity: 0.3; transition: all 0.3s ease; }
+#arrow-left:hover, #arrow-right:hover { background: rgba(255,255,255,0.08); opacity: 0.8; }
+#arrow-left svg, #arrow-right svg { width: 20px; height: 20px; stroke: #94A3B8; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#arrow-left { left: 0; border-radius: 0 8px 8px 0; }
+#arrow-right { right: 0; border-radius: 8px 0 0 8px; }
+#arrow-left.hidden, #arrow-right.hidden { display: none; }
+
+/* CUSTOM CURSOR */
+#custom-cursor { position: fixed; width: 20px; height: 20px; border-radius: 50%; pointer-events: none; z-index: 9999; border: 1px solid rgba(255,255,255,0.1); background: rgba(75,139,190,0.3); transition: width 0.3s ease, height 0.3s ease, background 0.3s ease, border-color 0.3s ease; transform: translate(-50%, -50%); }
+#custom-cursor.expanded { width: 32px; height: 32px; background: rgba(75,139,190,0.5); border-color: rgba(255,255,255,0.2); }
+#custom-cursor.link-hover { background: rgba(75,139,190,0.5); border-color: #4B8BBE; box-shadow: 0 0 20px rgba(75,139,190,0.4); }
+
+/* 3D PERSPECTIVE BLOCKS */
+.bloco-perspectiva { padding: clamp(16px, 2vw, 24px) clamp(20px, 3vw, 28px); border-radius: 4px; color: #fff; font-weight: 600; line-height: 1.4; will-change: transform; backface-visibility: hidden; -webkit-font-smoothing: antialiased; width: min(350px, 85vw); max-width: 350px; max-height: 420px; box-shadow: 0 20px 40px -12px rgba(48,105,152,0.4), inset 0 1px 0 rgba(255,255,255,0.15); transition: box-shadow 0.3s ease, transform 0.3s ease; }
+.bloco-superior { transform: perspective(250px) rotateX(-10deg) rotateY(25deg); transform-origin: 50% 50% 0px; perspective-origin: 50% 50%; }
+.bloco-inferior { transform: perspective(250px) rotateX(10deg) rotateY(25deg); transform-origin: 50% 50% 0px; perspective-origin: 50% 50%; }
+.bloco-perspectiva:hover { box-shadow: 0 25px 50px -12px rgba(48,105,152,0.6), inset 0 1px 0 rgba(255,255,255,0.2); }
+
+/* CARDS GLASSMORPHISM */
+.card-glass { background: rgba(26,35,56,0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: all 0.3s ease; }
+.card-glass:hover { border-color: rgba(75,139,190,0.3); transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+
+/* CODE BLOCKS */
+.code-block { background: #0D1117; border-radius: 8px; border: 1px solid #1A2338; padding: 16px; font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: clamp(0.75rem, 0.85vw, 0.9rem); line-height: 1.8; color: #CBD5E1; position: relative; overflow-x: auto; transition: border-color 0.3s ease; }
+.code-block:hover { border-color: rgba(76,175,80,0.3); }
+.code-block .kw { color: #4B8BBE; }
+.code-block .str { color: #4CAF50; }
+.code-block .num { color: #FF9800; }
+.code-block .cm { color: #64748B; font-style: italic; }
+.code-block .fn { color: #FFD43B; }
+.code-block .op { color: #94A3B8; }
+.code-block .bu { color: #00D4FF; }
+.code-copy-btn { position: absolute; top: 8px; right: 8px; background: rgba(26,35,56,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #94A3B8; font-size: 0.7rem; padding: 4px 8px; cursor: pointer; transition: all 0.3s ease; font-family: 'Inter', sans-serif; opacity: 0; }
+.code-block:hover .code-copy-btn { opacity: 1; }
+.code-copy-btn:hover { background: rgba(75,139,190,0.2); color: #fff; border-color: #4B8BBE; }
+.code-copy-btn.copied { background: rgba(76,175,80,0.2); color: #4CAF50; border-color: #4CAF50; }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.95rem; cursor: pointer; background: linear-gradient(135deg, #306998, #4B8BBE); color: #fff; transition: all 0.3s ease; }
+.btn:hover { background: linear-gradient(135deg, #4B8BBE, #5BA0D0); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(48,105,152,0.4); }
+.btn:focus { outline: 2px solid #00D4FF; outline-offset: 2px; }
+.btn:active { transform: scale(0.97); filter: brightness(0.95); }
+.btn-highlight { background: linear-gradient(135deg, #FFD43B, #FFB300); color: #1A2338; }
+.btn-highlight:hover { background: linear-gradient(135deg, #FFE44D, #FFC107); color: #1A2338; }
+
+/* BADGE */
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; background: #1A2338; border: 1px solid rgba(255,255,255,0.08); color: #94A3B8; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
+.badge:hover { border-color: rgba(75,139,190,0.3); color: #fff; }
+.badge-expand { cursor: pointer; }
+.badge-expand .badge-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.badge-expand.open .badge-content { max-height: 200px; }
+
+/* TOOLTIP */
+.tooltip { position: relative; }
+.tooltip::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(4px); background: rgba(13,20,37,0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(75,139,190,0.3); border-radius: 6px; padding: 6px 12px; font-size: 0.75rem; color: #94A3B8; white-space: nowrap; opacity: 0; visibility: hidden; transition: all 0.2s ease; pointer-events: none; }
+.tooltip:hover::after { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+.tooltip::before { content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: rgba(75,139,190,0.3); opacity: 0; visibility: hidden; transition: all 0.2s ease; }
+.tooltip:hover::before { opacity: 1; visibility: visible; }
+
+/* TABS (Slide 5) */
+.tab-bar { display: flex; gap: 0; position: relative; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.tab-btn { padding: 12px 24px; background: none; border: none; color: #64748B; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: color 0.3s ease; position: relative; }
+.tab-btn:hover { color: #94A3B8; }
+.tab-btn.active { color: #fff; }
+.tab-indicator { position: absolute; bottom: -1px; height: 2px; background: #FFD43B; transition: left 0.3s ease, width 0.3s ease; border-radius: 2px; }
+.tab-content { display: none; opacity: 0; }
+.tab-content.active { display: block; opacity: 1; animation: tabFade 0.25s ease; }
+@keyframes tabFade { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+
+/* LINKS */
+a { color: #4B8BBE; text-decoration: none; transition: color 0.2s ease; }
+a:hover { color: #5BA0D0; }
+
+/* ICON SVG */
+.icon-svg { width: 20px; height: 20px; display: inline-block; vertical-align: middle; transition: all 0.3s ease; }
+.icon-svg:hover { transform: scale(1.1); filter: brightness(1.2); }
+
+/* UTILITY */
+.text-gradient { background: linear-gradient(135deg, #306998, #4B8BBE); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.text-sec { color: #94A3B8; }
+.text-ter { color: #64748B; }
+.text-center { text-align: center; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.gap-24 { gap: 24px; }
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+
+/* SLIDE SPECIFIC LAYOUTS */
+.slide-content { width: 100%; max-width: 1400px; height: 100%; display: flex; flex-direction: column; position: relative; }
+
+/* SLIDE 1 - CAPA */
+#slide1 .title-3d { font-size: clamp(2.5rem, 4vw, 5rem); font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em; text-align: center; position: relative; z-index: 0; }
+#slide1 .title-3d::before { content: attr(data-text); position: absolute; top: 1px; left: -1px; z-index: -1; filter: blur(4px); opacity: 0.3; color: #0F1A2E; pointer-events: none; }
+#slide1 .decor-line { width: 200px; height: 1px; background: linear-gradient(90deg, rgba(75,139,190,0), rgba(75,139,190,0.5), rgba(75,139,190,0)); margin: 0 auto; }
+#slide1 .corner-mark { position: absolute; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.08); }
+#slide1 .python-bg-symbol { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; width: 400px; height: 400px; z-index: -1; pointer-events: none; }
+
+/* SLIDE 2 - Split */
+.split-layout { display: flex; width: 100%; height: 100%; gap: clamp(24px, 3vw, 48px); }
+.split-left { flex: 0 0 60%; display: flex; flex-direction: column; justify-content: center; }
+.split-right { flex: 0 0 40%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+/* SLIDE 3 - Grid 2x2 */
+.grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: clamp(16px, 2vw, 24px); width: 100%; flex: 1; max-height: 65vh; }
+
+/* SLIDE 4 - Popular */
+.popular-layout { display: flex; width: 100%; height: 100%; gap: clamp(24px, 3vw, 48px); align-items: center; }
+.popular-left { flex: 0 0 40%; display: flex; flex-direction: column; align-items: center; }
+.popular-right { flex: 0 0 55%; display: flex; flex-direction: column; gap: 12px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 60px; margin-top: 16px; }
+.bar-item { width: 40px; border-radius: 4px 4px 0 0; background: linear-gradient(to top, #306998, #4B8BBE); height: 0; transition: height 1s ease; min-height: 0; }
+.bar-item.animate { }
+.bar-item:nth-child(1) { height: 24px; }
+.bar-item:nth-child(2) { height: 40px; }
+.bar-item:nth-child(3) { height: 52px; }
+.bar-item:nth-child(4) { height: 60px; }
+.bar-label { font-size: 0.65rem; color: #64748B; font-family: 'JetBrains Mono', monospace; text-align: center; width: 40px; }
+
+/* SLIDE 5 - Tabs */
+.tabs-container { width: 100%; flex: 1; display: flex; flex-direction: column; }
+
+/* SLIDE 6 - Split controle */
+.controle-layout { display: flex; width: 100%; gap: clamp(16px, 2vw, 32px); flex: 1; }
+.controle-col { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+.controle-bottom { display: flex; gap: 16px; width: 100%; margin-top: auto; padding-top: 16px; }
+
+/* SLIDE 7 - Three columns */
+.three-col { display: flex; width: 100%; gap: clamp(16px, 2vw, 24px); flex: 1; align-items: flex-start; }
+.col-3 { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+/* SLIDE 8 - POO */
+.poo-layout { display: flex; width: 100%; gap: clamp(16px, 2vw, 32px); flex: 1; }
+.poo-diagram { flex: 0 0 45%; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+.poo-code { flex: 0 0 50%; display: flex; flex-direction: column; justify-content: center; }
+.class-box { background: rgba(48,105,152,0.15); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; }
+.class-name { color: #FFD43B; font-weight: 700; font-size: 1.4rem; }
+.class-attrs { color: #94A3B8; font-size: 0.85rem; font-weight: 400; margin-top: 8px; font-family: 'JetBrains Mono', monospace; }
+.class-methods { color: #4CAF50; font-size: 0.85rem; font-weight: 400; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+.poo-concept { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; cursor: default; transition: all 0.3s ease; }
+.poo-concept:hover { transform: translateY(-2px); }
+.poo-concept.heranca { background: rgba(156,39,176,0.1); border: 1px solid rgba(156,39,176,0.2); color: #CE93D8; }
+.poo-concept.heranca:hover { box-shadow: 0 0 20px rgba(156,39,176,0.3); }
+.poo-concept.polimorfismo { background: rgba(76,175,80,0.1); border: 1px solid rgba(76,175,80,0.2); color: #81C784; }
+.poo-concept.polimorfismo:hover { box-shadow: 0 0 20px rgba(76,175,80,0.3); }
+.poo-concept.encapsulamento { background: rgba(75,139,190,0.1); border: 1px solid rgba(75,139,190,0.2); color: #64B5F6; }
+.poo-concept.encapsulamento:hover { box-shadow: 0 0 20px rgba(75,139,190,0.3); }
+.poo-arrow { color: rgba(75,139,190,0.3); font-size: 1.2rem; margin: 0 4px; }
+
+/* SLIDE 9 - Fluxo */
+.fluxo-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.fluxo-card { padding: 12px 20px; border-radius: 8px; border: 2px solid; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease; }
+.fluxo-card:hover { transform: scale(1.02); }
+.fluxo-card.try { border-color: #4CAF50; background: rgba(76,175,80,0.05); color: #4CAF50; }
+.fluxo-card.try:hover { box-shadow: 0 0 20px rgba(76,175,80,0.3); }
+.fluxo-card.except { border-color: #FF9800; background: rgba(255,152,0,0.05); color: #FF9800; }
+.fluxo-card.except:hover { box-shadow: 0 0 20px rgba(255,152,0,0.3); }
+.fluxo-card.else { border-color: #4B8BBE; background: rgba(75,139,190,0.05); color: #4B8BBE; }
+.fluxo-card.else:hover { box-shadow: 0 0 20px rgba(75,139,190,0.3); }
+.fluxo-card.finally { border-color: #9C27B0; background: rgba(156,39,176,0.05); color: #9C27B0; }
+.fluxo-card.finally:hover { box-shadow: 0 0 20px rgba(156,39,176,0.3); }
+.fluxo-arrow-svg { width: 24px; height: 24px; stroke: rgba(75,139,190,0.3); fill: none; stroke-width: 2; }
+
+/* SLIDE 10 - Grid ecossistema */
+.eco-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: clamp(12px, 1.5vw, 20px); width: 100%; flex: 1; max-height: 65vh; }
+
+/* SLIDE 11 - Ambientes virtuais */
+.venv-layout { display: flex; width: 100%; gap: clamp(16px, 2vw, 32px); flex: 1; align-items: center; }
+.venv-panel { flex: 1; }
+.venv-flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; padding: 16px; background: rgba(26,35,56,0.3); border-radius: 8px; }
+.venv-step { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #94A3B8; }
+.venv-step-arrow { color: #4B8BBE; font-size: 1rem; }
+
+/* SLIDE 12 - Exemplos */
+.exemplo-grid { display: flex; width: 100%; gap: clamp(12px, 1.5vw, 20px); flex: 1; }
+
+/* SLIDE 13 - Considerações */
+.cons-layout { display: flex; width: 100%; gap: clamp(16px, 2vw, 32px); flex: 1; align-items: flex-start; }
+.cons-left { flex: 0 0 55%; display: flex; flex-direction: column; gap: 16px; }
+.cons-right { flex: 0 0 40%; display: flex; flex-direction: column; gap: 12px; }
+.stacked-card { background: rgba(26,35,56,0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px 18px; transition: all 0.3s ease; cursor: default; }
+.stacked-card:hover { transform: translateZ(30px) scale(1.05); box-shadow: 0 16px 40px rgba(0,0,0,0.4); border-color: rgba(75,139,190,0.3); z-index: 10; }
+
+/* SLIDE 14 - Obrigado */
+#slide14 .title-final { font-size: clamp(3rem, 5vw, 6rem); font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em; text-align: center; position: relative; z-index: 0; }
+#slide14 .title-final::before { content: attr(data-text); position: absolute; top: 1px; left: -1px; z-index: -1; filter: blur(4px); opacity: 0.3; color: #0F1A2E; pointer-events: none; }
+#slide14 .sub-final { font-size: clamp(1rem, 1.5vw, 1.8rem); font-weight: 500; color: #FFD43B; text-align: center; }
+#slide14 .python-logo-glow { animation: logoGlow 3s ease-in-out infinite; }
+@keyframes logoGlow { 0%,100% { opacity: 0.4; filter: drop-shadow(0 0 20px rgba(255,212,59,0.3)); } 50% { opacity: 0.8; filter: drop-shadow(0 0 40px rgba(255,212,59,0.5)); } }
+#slide14 .sparkle { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #FFD43B; opacity: 0.3; animation: sparkleFloat 4s ease-in-out infinite; }
+@keyframes sparkleFloat { 0%,100% { transform: translateY(0) scale(1); opacity: 0.3; } 25% { transform: translateY(-20px) scale(1.5); opacity: 0.6; } 50% { transform: translateY(-10px) scale(0.8); opacity: 0.4; } 75% { transform: translateY(-30px) scale(1.2); opacity: 0.5; } }
+
+/* ANIMATIONS */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInLeft { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeInRight { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes scaleInBounce { from { opacity: 0; transform: scale(0); } 70% { transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
+@keyframes blurIn { from { opacity: 0; filter: blur(8px); } to { opacity: 1; filter: blur(0); } }
+@keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes titleGlow { 0%,100% { text-shadow: 0 0 40px rgba(48,105,152,0.3); } 50% { text-shadow: 0 0 60px rgba(48,105,152,0.5); } }
+@keyframes cardFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes iconSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  #arrow-left, #arrow-right { display: none; }
+  .split-layout { flex-direction: column; }
+  .split-left { flex: 1; }
+  .split-right { flex: 1; }
+  .grid-2x2 { grid-template-columns: 1fr 1fr; }
+  .three-col { flex-direction: column; }
+  .col-3 { flex: none; }
+  .controle-layout { flex-direction: column; }
+  .popular-layout { flex-direction: column; }
+  .poo-layout { flex-direction: column; }
+  .cons-layout { flex-direction: column; }
+  .eco-grid { grid-template-columns: 1fr 1fr; }
+  .venv-layout { flex-direction: column; }
+  .exemplo-grid { flex-direction: column; }
+  .fluxo-row { flex-wrap: wrap; }
+  .bloco-superior { transform: perspective(250px) rotateX(-5deg) rotateY(15deg); }
+  .bloco-inferior { transform: perspective(250px) rotateX(5deg) rotateY(15deg); }
+}
+@media (max-width: 480px) {
+  .grid-2x2 { grid-template-columns: 1fr; grid-template-rows: auto; }
+  .eco-grid { grid-template-columns: 1fr; }
+  .bloco-superior { transform: perspective(250px) rotateX(-3deg) rotateY(10deg); }
+  .bloco-inferior { transform: perspective(250px) rotateX(3deg) rotateY(10deg); }
+}
+@media (pointer: coarse) {
+  body { cursor: auto; }
+  #custom-cursor { display: none; }
+}
+
+/* TRANSITION HELPERS */
+.anim-fade { opacity: 0; transition: opacity 0.5s ease; }
+.anim-fade.visible { opacity: 1; }
+.anim-up { opacity: 0; transform: translateY(15px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.anim-up.visible { opacity: 1; transform: translateY(0); }
+.anim-left { opacity: 0; transform: translateX(-15px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.anim-left.visible { opacity: 1; transform: translateX(0); }
+.anim-right { opacity: 0; transform: translateX(15px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.anim-right.visible { opacity: 1; transform: translateX(0); }
+.anim-scale { opacity: 0; transform: scale(0.9); transition: opacity 0.5s ease, transform 0.5s ease; }
+.anim-scale.visible { opacity: 1; transform: scale(1); }
+.anim-blur { opacity: 0; filter: blur(8px); transition: opacity 0.6s ease, filter 0.6s ease, transform 0.6s ease; }
+.anim-blur.visible { opacity: 1; filter: blur(0); }
+</style>
+</head>
+<body>
+
+<!-- CUSTOM CURSOR -->
+<div id="custom-cursor"></div>
+
+<!-- BACKGROUND LAYERS -->
+<div id="bg-layer"></div>
+<div id="bg-grid"></div>
+<div id="bg-blobs"><div id="bg-blob1"></div><div id="bg-blob2"></div></div>
+<div id="bg-particles"><canvas id="particles-canvas"></canvas></div>
+<div id="bg-vignette"></div>
+<div id="bg-noise"></div>
+
+<!-- NAVIGATION ARROWS -->
+<div id="arrow-left" class="hidden" onclick="prevSlide()"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke="currentColor"/></svg></div>
+<div id="arrow-right" onclick="nextSlide()"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor"/></svg></div>
+
+<!-- NAVIGATION BAR -->
+<div id="nav-bar">
+  <div id="nav-counter">01 / 14</div>
+  <div id="nav-dots"></div>
+</div>
+
+<!-- ========== SLIDE 1 — CAPA ========== -->
+<div id="slide1" class="slide active" data-slide="0">
+  <div class="slide-content" style="justify-content:center;align-items:center;">
+    <!-- Corner marks -->
+    <div class="corner-mark" style="top:clamp(24px,3vw,48px);left:clamp(24px,3vw,48px);">x: 0  y: 0</div>
+    <div class="corner-mark" style="top:clamp(24px,3vw,48px);right:clamp(24px,3vw,48px);">x: 1  y: 0</div>
+    <div class="corner-mark" style="bottom:clamp(60px,6vh,80px);left:clamp(24px,3vw,48px);">x: 0  y: 1</div>
+    <div class="corner-mark" style="bottom:clamp(60px,6vh,80px);right:clamp(24px,3vw,48px);">x: 1  y: 1</div>
+
+    <!-- Python bg symbol -->
+    <svg class="python-bg-symbol" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M200 50c-82 0-150 30-150 100s68 100 150 100c82 0 150 30 150 100S282 450 200 450" stroke="#4B8BBE" stroke-width="2" opacity="0.5"/>
+      <path d="M200 450c-82 0-150-30-150-100s68-100 150-100c82 0 150-30 150-100S282 50 200 50" stroke="#FFD43B" stroke-width="2" opacity="0.5"/>
+      <circle cx="200" cy="150" r="10" fill="#4B8BBE" opacity="0.3"/>
+      <circle cx="200" cy="350" r="10" fill="#FFD43B" opacity="0.3"/>
+    </svg>
+
+    <!-- Title with 3D extruded effect -->
+    <div class="slide-anim anim-blur" data-delay="200" style="text-align:center;">
+      <h1 class="title-3d" id="slide1-title" data-text="Python: Uma Introdução à Linguagem">Python: Uma Introdução à Linguagem</h1>
+    </div>
+
+    <!-- Decorator line -->
+    <div class="slide-anim" data-delay="500" style="margin-top:clamp(16px,2vh,32px);transform-origin:center;">
+      <div class="decor-line" style="transform:scaleX(0);transition:transform 0.6s ease;" id="slide1-line"></div>
+    </div>
+
+    <!-- Presenters -->
+    <div class="slide-anim anim-up" data-delay="700" style="margin-top:clamp(20px,3vh,40px);text-align:center;">
+      <p style="font-weight:300;font-size:clamp(1rem,1.2vw,1.3rem);color:#94A3B8;letter-spacing:0.08em;opacity:0.8;">Leandro Ogawa</p>
+    </div>
+
+    <!-- Date -->
+    <div class="slide-anim anim-up" data-delay="900" style="margin-top:clamp(8px,1vh,16px);text-align:center;">
+      <p style="font-weight:300;font-size:clamp(0.8rem,0.9vw,1rem);color:#64748B;letter-spacing:0.05em;">2025</p>
+    </div>
+
+    <!-- Badge Python 3 -->
+    <div class="slide-anim anim-fade" data-delay="1100" style="position:absolute;bottom:clamp(60px,6vh,80px);right:clamp(24px,3vw,48px);">
+      <div class="badge" style="opacity:0.3;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3c-4 0-7 1-7 5v8c0 4 3 5 7 5s7-1 7-5V8c0-4-3-5-7-5z" stroke="#4B8BBE" stroke-width="1.5" fill="none"/>
+          <path d="M9 16c0 1.5.5 2 3 2s3-.5 3-2" stroke="#FFD43B" stroke-width="1.5" fill="none"/>
+          <circle cx="9" cy="10" r="1" fill="#4B8BBE"/>
+          <circle cx="15" cy="10" r="1" fill="#4B8BBE"/>
+        </svg>
+        Python 3
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 2 — O QUE É PYTHON? ========== -->
+<div id="slide2" class="slide" data-slide="1">
+  <div class="slide-content">
+    <div class="split-layout">
+      <div class="split-left" style="gap:16px;">
+        <div class="slide-anim anim-fade" data-delay="150"><h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">O que é Python?</h2></div>
+        <div class="slide-anim anim-fade" data-delay="350"><p style="font-weight:500;font-size:1.2rem;color:#94A3B8;">Linguagem de alto nível, interpretada e de propósito geral</p></div>
+        <div class="slide-anim anim-left" data-delay="500" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4B8BBE" stroke-width="1.5"><path d="M6 4L2 10l4 6"/><path d="M14 4l4 6-4 6"/></svg>
+          <span style="color:#CBD5E1;font-weight:300;">Criada por Guido van Rossum em 1991</span>
+        </div>
+        <div class="slide-anim anim-left" data-delay="600" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4B8BBE" stroke-width="1.5"><path d="M10 13a3 3 0 100-6 3 3 0 000 6z"/><path d="M10 2v2m0 12v2M2 10h2m12 0h2M4.93 4.93l1.41 1.41m7.32 7.32l1.41 1.41M4.93 15.07l1.41-1.41m7.32-7.32l1.41-1.41"/></svg>
+          <span style="color:#CBD5E1;font-weight:300;">Filosofia: legibilidade, simplicidade e produtividade</span>
+        </div>
+        <div class="slide-anim anim-left" data-delay="700" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4B8BBE" stroke-width="1.5"><path d="M10 2l2.5 5L18 8l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-1L10 2z"/></svg>
+          <span style="color:#CBD5E1;font-weight:300;">Tipagem dinâmica e forte</span>
+        </div>
+        <div class="slide-anim anim-scale" data-delay="900">
+          <span class="badge tooltip" data-tooltip="Criado por Guido van Rossum em 1991" style="border-color:rgba(255,212,59,0.3);color:#FFD43B;">1991</span>
+        </div>
+      </div>
+      <div class="split-right">
+        <div class="slide-anim anim-blur" data-delay="500">
+          <!-- Bloco 3D perspectiva - SUPERIOR -->
+          <div class="bloco-perspectiva bloco-superior" style="background:linear-gradient(135deg,#306998,#4B8BBE);width:220px;max-width:220px;height:120px;max-height:120px;display:flex;flex-direction:column;justify-content:center;">
+            <!-- Bloco de apresentação da versão — 220px x 120px para 2 linhas de texto -->
+            <div style="font-weight:700;font-size:1.6rem;">Python 3.13</div>
+            <div style="font-weight:400;font-size:0.8rem;opacity:0.8;margin-top:4px;">Rápido, confiável, moderno</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 3 — PRINCIPAIS CARACTERÍSTICAS ========== -->
+<div id="slide3" class="slide" data-slide="2">
+  <div class="slide-content" style="gap:clamp(16px,2vh,32px);">
+    <div class="slide-anim anim-fade" data-delay="150" style="text-align:center;">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Principais Características</h2>
+    </div>
+    <div class="grid-2x2">
+      <!-- Card 1 -->
+      <div class="slide-anim anim-blur" data-delay="300">
+        <div class="card-glass" style="padding:clamp(16px,2vw,24px);height:100%;display:flex;flex-direction:column;gap:10px;">
+          <svg class="icon-svg" style="width:32px;height:32px;" viewBox="0 0 32 32" fill="none" stroke="#4B8BBE" stroke-width="1.5">
+            <rect x="4" y="8" width="24" height="3" rx="1"/><rect x="4" y="14" width="18" height="3" rx="1"/><rect x="4" y="20" width="24" height="3" rx="1"/>
+          </svg>
+          <div style="font-weight:600;font-size:1.1rem;">Sintaxe Limpa</div>
+          <div style="font-weight:300;font-size:0.9rem;color:#94A3B8;">Código legível com indentação obrigatória. Python foi projetado para ser lido como inglês.</div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="slide-anim anim-blur" data-delay="400">
+        <div class="card-glass" style="padding:clamp(16px,2vw,24px);height:100%;display:flex;flex-direction:column;gap:10px;">
+          <svg class="icon-svg" style="width:32px;height:32px;" viewBox="0 0 32 32" fill="none" stroke="#4B8BBE" stroke-width="1.5">
+            <rect x="6" y="4" width="20" height="24" rx="2"/><rect x="10" y="10" width="12" height="2"/><rect x="10" y="14" width="8" height="2"/>
+          </svg>
+          <div style="font-weight:600;font-size:1.1rem;">Gerenciamento de Memória</div>
+          <div style="font-weight:300;font-size:0.9rem;color:#94A3B8;">Garbage collector automático. Foco no problema, não na alocação de recursos.</div>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="slide-anim anim-blur" data-delay="500">
+        <div class="card-glass" style="padding:clamp(16px,2vw,24px);height:100%;display:flex;flex-direction:column;gap:10px;">
+          <svg class="icon-svg" style="width:32px;height:32px;" viewBox="0 0 32 32" fill="none" stroke="#4B8BBE" stroke-width="1.5">
+            <rect x="4" y="4" width="10" height="10" rx="1"/><rect x="18" y="4" width="10" height="10" rx="1"/><rect x="4" y="18" width="10" height="10" rx="1"/><rect x="18" y="18" width="10" height="10" rx="1"/>
+          </svg>
+          <div style="font-weight:600;font-size:1.1rem;">Múltiplos Paradigmas</div>
+          <div style="font-weight:300;font-size:0.9rem;color:#94A3B8;">Orientado a objetos, funcional e procedural. Um único jeito, mas várias abordagens.</div>
+        </div>
+      </div>
+      <!-- Card 4 -->
+      <div class="slide-anim anim-blur" data-delay="600">
+        <div class="card-glass" style="padding:clamp(16px,2vw,24px);height:100%;display:flex;flex-direction:column;gap:10px;">
+          <svg class="icon-svg" style="width:32px;height:32px;" viewBox="0 0 32 32" fill="none" stroke="#4B8BBE" stroke-width="1.5">
+            <path d="M8 12h16M8 16h12M8 20h14"/><rect x="4" y="6" width="24" height="20" rx="2"/><path d="M20 6v20"/>
+          </svg>
+          <div style="font-weight:600;font-size:1.1rem;">Biblioteca Padrão</div>
+          <div style="font-weight:300;font-size:0.9rem;color:#94A3B8;">"Batteries included" — centenas de módulos prontos para uso imediato.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 4 — POR QUE PYTHON É TÃO POPULAR? ========== -->
+<div id="slide4" class="slide" data-slide="3">
+  <div class="slide-content" style="gap:clamp(12px,1.5vh,24px);">
+    <div class="slide-anim anim-fade" data-delay="150">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Por que Python é tão Popular?</h2>
+    </div>
+    <div class="popular-layout" style="flex:1;">
+      <div class="popular-left">
+        <div class="slide-anim anim-blur" data-delay="300">
+          <!-- Bloco perspectiva #1 -->
+          <div class="bloco-perspectiva bloco-superior" style="background:linear-gradient(135deg,#FFD43B,#FFB300);width:280px;max-width:280px;height:160px;max-height:160px;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#1A2338;">
+            <!-- Bloco de destaque #1 — 280px x 160px para ranking + descrição -->
+            <div style="font-weight:800;font-size:3rem;line-height:1;">#1</div>
+            <div style="font-weight:500;font-size:1rem;text-align:center;margin-top:4px;">Linguagem que mais cresce</div>
+          </div>
+        </div>
+        <div class="slide-anim anim-fade" data-delay="900" style="width:100%;">
+          <div class="bar-chart" style="justify-content:center;">
+            <div style="text-align:center;">
+              <div class="bar-item" style="height:0;" id="bar1"></div>
+              <div class="bar-label">2018</div>
+            </div>
+            <div style="text-align:center;">
+              <div class="bar-item" style="height:0;" id="bar2"></div>
+              <div class="bar-label">2020</div>
+            </div>
+            <div style="text-align:center;">
+              <div class="bar-item" style="height:0;" id="bar3"></div>
+              <div class="bar-label">2022</div>
+            </div>
+            <div style="text-align:center;">
+              <div class="bar-item" style="height:0;" id="bar4"></div>
+              <div class="bar-label">2024</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="popular-right">
+        <div class="slide-anim anim-left" data-delay="500" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4B8BBE" stroke-width="1.5"><path d="M2 10l4-4 4 4 4-4 4 4"/><path d="M2 14l4-4 4 4 4-4 4 4"/></svg>
+          <span style="color:#CBD5E1;font-weight:300;">Curva de aprendizado baixa</span>
+        </div>
+        <div class="slide-anim anim-left" data-delay="600" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4B8BBE" stroke-width="1.5"><path d="M10 3l7 4v6l-7 4-7-4V7l7-4z"/><path d="M3 7l7 4 7-4M10 17V11"/></svg>
+          <span style="color:#CBD5E1;font-weight:300;">Comunidade gigante e ativa</span>
+        </div>
+        <div class="slide-anim anim-left" data-delay="700" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4B8BBE" stroke-width="1.5"><rect x="2" y="2" width="16" height="8" rx="1"/><rect x="4" y="6" width="12" height="12" rx="1"/></svg>
+          <span style="color:#CBD5E1;font-weight:300;">Aplicações em diversas áreas (web, dados, automação, IA)</span>
+        </div>
+        <div class="slide-anim anim-left" data-delay="800" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4B8BBE" stroke-width="1.5"><rect x="2" y="2" width="7" height="7" rx="1"/><rect x="11" y="2" width="7" height="7" rx="1"/><rect x="2" y="11" width="7" height="7" rx="1"/><rect x="11" y="11" width="7" height="7" rx="1"/></svg>
+          <span style="color:#CBD5E1;font-weight:300;">Portabilidade (Windows, Linux, macOS)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 5 — TIPOS DE DADOS BÁSICOS ========== -->
+<div id="slide5" class="slide" data-slide="4">
+  <div class="slide-content" style="gap:clamp(12px,1.5vh,24px);">
+    <div class="slide-anim anim-fade" data-delay="150">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Tipos de Dados Básicos</h2>
+    </div>
+    <div class="slide-anim anim-up" data-delay="300" style="flex:1;display:flex;flex-direction:column;">
+      <div class="tabs-container">
+        <div class="tab-bar" style="position:relative;">
+          <button class="tab-btn active" data-tab="0" onclick="switchTab(0)">Números</button>
+          <button class="tab-btn" data-tab="1" onclick="switchTab(1)">Texto</button>
+          <button class="tab-btn" data-tab="2" onclick="switchTab(2)">Booleanos</button>
+          <button class="tab-btn" data-tab="3" onclick="switchTab(3)">Coleções</button>
+          <div class="tab-indicator" id="tab-indicator" style="left:0;width:0;"></div>
+        </div>
+        <div style="flex:1;position:relative;margin-top:16px;">
+          <!-- Tab 0: Números -->
+          <div class="tab-content active" id="tab-content-0">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="font-weight:700;font-size:1.5rem;color:#FFFFFF;">int, float, complex</div>
+              <div class="code-block">
+                <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+                <span class="cm"># Números em Python</span><br>
+                x = <span class="num">42</span>        <span class="cm"># int</span><br>
+                y = <span class="num">3.14</span>      <span class="cm"># float</span><br>
+                z = <span class="num">1</span>+<span class="num">2</span>j    <span class="cm"># complex</span>
+              </div>
+              <div style="color:#94A3B8;font-size:0.9rem;">Python suporta inteiros de precisão arbitrária e números complexos nativamente.</div>
+            </div>
+          </div>
+          <!-- Tab 1: Texto -->
+          <div class="tab-content" id="tab-content-1">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="font-weight:700;font-size:1.5rem;color:#FFFFFF;">str (imutável)</div>
+              <div class="code-block">
+                <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+                nome = <span class="str">"Python"</span>       <span class="cm"># aspas duplas</span><br>
+                lingua = <span class="str">'Programação'</span> <span class="cm"># aspas simples</span><br>
+                texto = <span class="str">"""Docstring"""</span> <span class="cm"># multi-linha</span>
+              </div>
+              <div style="color:#94A3B8;font-size:0.9rem;">Strings são sequências imutáveis de caracteres Unicode. Suportam fatiamento e concatenação.</div>
+            </div>
+          </div>
+          <!-- Tab 2: Booleanos -->
+          <div class="tab-content" id="tab-content-2">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="font-weight:700;font-size:1.5rem;color:#FFFFFF;">True e False</div>
+              <div class="code-block">
+                <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+                ativo = <span class="kw">True</span><br>
+                <span class="kw">if</span> ativo:<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="bu">print</span>(<span class="str">'ok'</span>)  <span class="cm"># executa</span>
+              </div>
+              <div style="color:#94A3B8;font-size:0.9rem;">Booleanos são subclass de int. True == 1 e False == 0. Use para controle de fluxo.</div>
+            </div>
+          </div>
+          <!-- Tab 3: Coleções -->
+          <div class="tab-content" id="tab-content-3">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="font-weight:700;font-size:1.5rem;color:#FFFFFF;">list, tuple, dict, set</div>
+              <div class="code-block">
+                <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+                nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]          <span class="cm"># list</span><br>
+                dados = {<span class="str">'chave'</span>: <span class="str">'valor'</span>} <span class="cm"># dict</span><br>
+                unico = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>}           <span class="cm"># set</span>
+              </div>
+              <div style="color:#94A3B8;font-size:0.9rem;">Cada tipo de coleção tem propriedades específicas: mutável, ordenado, único, etc.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 6 — ESTRUTURAS DE CONTROLE ========== -->
+<div id="slide6" class="slide" data-slide="5">
+  <div class="slide-content" style="gap:clamp(12px,1.5vh,20px);">
+    <div class="slide-anim anim-fade" data-delay="150">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Estruturas de Controle</h2>
+    </div>
+    <div class="controle-layout">
+      <div class="controle-col">
+        <div class="slide-anim anim-left" data-delay="300">
+          <div style="font-weight:600;font-size:1.1rem;display:flex;align-items:center;gap:8px;">
+            <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4B8BBE" stroke-width="1.5"><path d="M10 2L2 10l8 8 8-8-8-8z"/></svg>
+            Condicionais
+          </div>
+        </div>
+        <div class="slide-anim anim-fade" data-delay="400" style="flex:1;">
+          <div class="code-block" style="height:100%;">
+            <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+            idade = <span class="num">18</span><br>
+            <span class="kw">if</span> idade &gt;= <span class="num">18</span>:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="bu">print</span>(<span class="str">"Maior"</span>)<br>
+            <span class="kw">elif</span> idade &gt;= <span class="num">12</span>:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="bu">print</span>(<span class="str">"Adolescente"</span>)<br>
+            <span class="kw">else</span>:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="bu">print</span>(<span class="str">"Criança"</span>)
+          </div>
+        </div>
+      </div>
+      <div class="controle-col">
+        <div class="slide-anim anim-right" data-delay="350">
+          <div style="font-weight:600;font-size:1.1rem;display:flex;align-items:center;gap:8px;">
+            <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4B8BBE" stroke-width="1.5"><path d="M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/><path d="M10 6v4l3 2"/></svg>
+            Laços
+          </div>
+        </div>
+        <div class="slide-anim anim-fade" data-delay="450" style="flex:1;">
+          <div class="code-block" style="height:100%;">
+            <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+            <span class="kw">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="num">5</span>):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="bu">print</span>(i)<br><br>
+            contador = <span class="num">0</span><br>
+            <span class="kw">while</span> contador &lt; <span class="num">10</span>:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;contador += <span class="num">1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="controle-bottom">
+      <div class="slide-anim anim-scale" data-delay="700" style="flex:1;">
+        <div class="badge badge-expand" onclick="toggleBadge(this)" style="width:100%;justify-content:space-between;">
+          <span>break / continue / pass</span>
+          <span style="font-size:0.7rem;color:#64748B;">▼</span>
+          <div class="badge-content" style="width:100%;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#CBD5E1;white-space:pre-wrap;">
+<span class="kw">break</span>      <span class="cm"># sai do loop</span>
+<span class="kw">continue</span>   <span class="cm"># próxima iteração</span>
+<span class="kw">pass</span>       <span class="cm"># placeholder</span>
+          </div>
+        </div>
+      </div>
+      <div class="slide-anim anim-scale" data-delay="800" style="flex:1;">
+        <div class="badge badge-expand" onclick="toggleBadge(this)" style="width:100%;justify-content:space-between;">
+          <span>Compreensão de listas</span>
+          <span style="font-size:0.7rem;color:#64748B;">▼</span>
+          <div class="badge-content" style="width:100%;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#CBD5E1;white-space:pre-wrap;">
+quadrados = [x**<span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="bu">range</span>(<span class="num">10</span>)]
+<span class="cm"># [0, 1, 4, 9, 16, ...]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 7 — FUNÇÕES E MODULARIDADE ========== -->
+<div id="slide7" class="slide" data-slide="6">
+  <div class="slide-content" style="gap:clamp(12px,1.5vh,24px);">
+    <div class="slide-anim anim-fade" data-delay="150" style="text-align:center;">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Funções e Modularidade</h2>
+    </div>
+    <div class="three-col">
+      <div class="col-3 slide-anim anim-up" data-delay="300">
+        <div class="card-glass" style="padding:16px;flex:1;display:flex;flex-direction:column;gap:10px;">
+          <svg class="icon-svg" style="width:28px;height:28px;" viewBox="0 0 28 28" fill="none" stroke="#4B8BBE" stroke-width="1.5">
+            <path d="M8 6l4 8-4 8"/><path d="M16 6l4 8-4 8"/>
+          </svg>
+          <div style="font-weight:600;font-size:1rem;">Funções</div>
+          <div style="font-weight:300;font-size:0.85rem;color:#94A3B8;">Definição com <span style="font-family:'JetBrains Mono',monospace;color:#4B8BBE;">def</span> e parâmetros</div>
+          <div style="font-weight:300;font-size:0.85rem;color:#94A3B8;">Retorno de múltiplos valores</div>
+        </div>
+      </div>
+      <div class="col-3 slide-anim anim-up" data-delay="400">
+        <div class="card-glass" style="padding:16px;flex:1;display:flex;flex-direction:column;gap:10px;">
+          <svg class="icon-svg" style="width:28px;height:28px;" viewBox="0 0 28 28" fill="none" stroke="#4B8BBE" stroke-width="1.5">
+            <path d="M14 4L4 24h20L14 4z"/><path d="M14 14v6"/><circle cx="14" cy="22" r="1"/>
+          </svg>
+          <div style="font-weight:600;font-size:1rem;">Lambda</div>
+          <div style="font-weight:300;font-size:0.85rem;color:#94A3B8;">Funções anônimas de uma linha</div>
+          <div class="code-block" style="font-size:0.75rem;padding:10px;overflow:hidden;">
+            <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+            <span class="cm"># Função tradicional</span><br>
+            <span class="kw">def</span> <span class="fn">quadrado</span>(x):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> x ** <span class="num">2</span><br><br>
+            <span class="cm"># Lambda equivalente</span><br>
+            quadrado = <span class="kw">lambda</span> x: x ** <span class="num">2</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-3 slide-anim anim-up" data-delay="500">
+        <div class="card-glass" style="padding:16px;flex:1;display:flex;flex-direction:column;gap:10px;">
+          <svg class="icon-svg" style="width:28px;height:28px;" viewBox="0 0 28 28" fill="none" stroke="#4B8BBE" stroke-width="1.5">
+            <path d="M4 14h8v8H4z"/><path d="M16 6h8v8h-8z"/><path d="M16 16h8v8h-8z"/>
+          </svg>
+          <div style="font-weight:600;font-size:1rem;">Módulos</div>
+          <div style="font-weight:300;font-size:0.85rem;color:#94A3B8;">Organização em módulos e pacotes</div>
+          <div class="code-block" style="font-size:0.75rem;padding:10px;overflow:hidden;">
+            <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+            <span class="kw">from</span> math <span class="kw">import</span> pi<br>
+            <span class="kw">import</span> os<br>
+            <span class="kw">import</span> requests
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-anim anim-blur" data-delay="700" style="display:flex;justify-content:center;margin-top:auto;">
+      <!-- Bloco perspectiva INFERIOR — citação -->
+      <div class="bloco-perspectiva bloco-inferior" style="background:linear-gradient(135deg,#306998,#00D4FF);width:280px;max-width:280px;height:80px;max-height:80px;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+        <!-- Bloco de citação inferior — 280px x 80px para frase curta -->
+        <div style="font-weight:700;font-size:1.2rem;text-align:center;">def é a palavra mágica</div>
+        <div style="font-size:0.7rem;opacity:0.7;font-family:'JetBrains Mono',monospace;">def resolve(x): return x.solucao()</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 8 — PROGRAMAÇÃO ORIENTADA A OBJETOS ========== -->
+<div id="slide8" class="slide" data-slide="7">
+  <div class="slide-content" style="gap:clamp(12px,1.5vh,24px);">
+    <div class="slide-anim anim-fade" data-delay="150">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Programação Orientada a Objetos</h2>
+    </div>
+    <div class="poo-layout">
+      <div class="poo-diagram">
+        <div class="slide-anim anim-left" data-delay="300">
+          <div class="class-box">
+            <div class="class-name">Pessoa</div>
+            <div class="class-attrs">- _nome: str<br>- _idade: int</div>
+            <div class="class-methods">+ __init__(self, nome, idade)<br>+ __str__(self) → str<br>+ get_nome(self) → str</div>
+          </div>
+        </div>
+        <div class="slide-anim anim-fade" data-delay="500" style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+          <span class="poo-concept heranca tooltip" data-tooltip="Classe filha herda atributos e métodos da classe pai">Herança</span>
+          <span class="poo-concept polimorfismo tooltip" data-tooltip="Métodos podem ter comportamentos diferentes em classes diferentes">Polimorfismo</span>
+          <span class="poo-concept encapsulamento tooltip" data-tooltip="Atributos privados com _ e __">Encapsulamento</span>
+        </div>
+      </div>
+      <div class="poo-code">
+        <div class="slide-anim anim-right" data-delay="400">
+          <div class="code-block">
+            <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+            <span class="kw">class</span> <span class="fn">Pessoa</span>:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, nome, idade):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">self</span>._nome = nome<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">self</span>._idade = idade<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">__str__</span>(<span class="kw">self</span>):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="str">f"{self._nome}, {self._idade} anos"</span><br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;@<span class="bu">property</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">nome</span>(<span class="kw">self</span>):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="kw">self</span>._nome
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-anim anim-blur" data-delay="800" style="position:absolute;bottom:clamp(60px,6vh,80px);right:clamp(24px,3vw,48px);">
+      <!-- Bloco métodos especiais — 300px x 100px para 2 linhas -->
+      <div class="bloco-perspectiva bloco-superior" style="background:linear-gradient(135deg,#306998,#4B8BBE);width:300px;max-width:300px;height:100px;max-height:100px;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-weight:700;font-size:0.9rem;">Métodos Especiais</div>
+        <div style="font-weight:400;font-size:0.8rem;opacity:0.9;font-family:'JetBrains Mono',monospace;">__init__, __str__, __repr__</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 9 — TRATAMENTO DE ERROS ========== -->
+<div id="slide9" class="slide" data-slide="8">
+  <div class="slide-content" style="gap:clamp(12px,1.5vh,20px);">
+    <div class="slide-anim anim-fade" data-delay="150">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Tratamento de Erros</h2>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;">
+      <div class="fluxo-row">
+        <div class="slide-anim anim-up" data-delay="300">
+          <div class="fluxo-card try"><svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> try</div>
+        </div>
+        <div class="slide-anim anim-fade" data-delay="450"><svg class="fluxo-arrow-svg" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+        <div class="slide-anim anim-up" data-delay="500" style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div class="fluxo-card except"><svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> except</div>
+          <div style="font-size:0.7rem;color:#FF9800;font-weight:400;">caminho do erro</div>
+        </div>
+        <div class="slide-anim anim-fade" data-delay="650"><svg class="fluxo-arrow-svg" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+        <div class="slide-anim anim-up" data-delay="700">
+          <div class="fluxo-card else"><svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> else</div>
+        </div>
+        <div class="slide-anim anim-fade" data-delay="850"><svg class="fluxo-arrow-svg" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+        <div class="slide-anim anim-up" data-delay="900">
+          <div class="fluxo-card finally"><svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> finally</div>
+        </div>
+      </div>
+      <div class="slide-anim anim-blur" data-delay="700" style="position:absolute;top:clamp(80px,8vh,120px);right:clamp(24px,3vw,48px);">
+        <!-- Bloco try/except destaque — 200px x 80px -->
+        <div class="bloco-perspectiva bloco-superior" style="background:linear-gradient(135deg,#00D4FF,#306998);width:200px;max-width:200px;height:80px;max-height:80px;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+          <div style="font-weight:500;font-size:0.9rem;font-family:'JetBrains Mono',monospace;">try:</div>
+          <div style="font-weight:500;font-size:0.9rem;font-family:'JetBrains Mono',monospace;">except:</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;justify-content:center;">
+      <div class="slide-anim anim-scale" data-delay="1100">
+        <div class="badge badge-expand" onclick="toggleBadgeErr(this)" style="padding:10px 20px;border-color:rgba(255,152,0,0.3);">
+          <span>raise — Levantar exceções</span>
+          <div class="badge-content" style="width:100%;margin-top:8px;font-size:0.8rem;color:#CBD5E1;">
+            Use <span style="font-family:'JetBrains Mono',monospace;color:#FF9800;">raise Exception('mensagem')</span> para levantar exceções personalizadas
+          </div>
+        </div>
+      </div>
+      <div class="slide-anim anim-scale" data-delay="1200">
+        <div class="badge badge-expand" onclick="toggleBadgeErr(this)" style="padding:10px 20px;border-color:rgba(76,175,80,0.3);">
+          <span>Boas práticas</span>
+          <div class="badge-content" style="width:100%;margin-top:8px;font-size:0.8rem;color:#CBD5E1;">
+            Sempre capture exceções específicas, nunca <span style="font-family:'JetBrains Mono',monospace;color:#FF9800;">except:</span> genérico
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 10 — ECOSSISTEMA E BIBLIOTECAS ========== -->
+<div id="slide10" class="slide" data-slide="9">
+  <div class="slide-content" style="gap:clamp(12px,1.5vh,24px);">
+    <div class="slide-anim anim-fade" data-delay="150" style="text-align:center;">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Ecossistema e Bibliotecas Populares</h2>
+    </div>
+    <div class="eco-grid">
+      <!-- Web -->
+      <div class="slide-anim anim-up" data-delay="300">
+        <div class="card-glass" style="padding:16px;height:100%;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <svg class="icon-svg" style="width:24px;height:24px;" viewBox="0 0 24 24" fill="none" stroke="#4B8BBE" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>
+            <span style="font-weight:600;font-size:1.1rem;">Web</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="badge tooltip" data-tooltip="Framework web full-stack" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">Django</span>
+            <span class="badge tooltip" data-tooltip="Microframework web leve" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">Flask</span>
+            <span class="badge tooltip" data-tooltip="Framework web moderno e rápido" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">FastAPI</span>
+          </div>
+        </div>
+      </div>
+      <!-- Dados -->
+      <div class="slide-anim anim-up" data-delay="400">
+        <div class="card-glass" style="padding:16px;height:100%;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <svg class="icon-svg" style="width:24px;height:24px;" viewBox="0 0 24 24" fill="none" stroke="#4B8BBE" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span style="font-weight:600;font-size:1.1rem;">Dados</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="badge tooltip" data-tooltip="Computação numérica" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">NumPy</span>
+            <span class="badge tooltip" data-tooltip="Análise e manipulação de dados" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">Pandas</span>
+            <span class="badge tooltip" data-tooltip="Visualização de dados" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">Matplotlib</span>
+          </div>
+        </div>
+      </div>
+      <!-- ML/AI -->
+      <div class="slide-anim anim-up" data-delay="500">
+        <div class="card-glass" style="padding:16px;height:100%;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <svg class="icon-svg" style="width:24px;height:24px;" viewBox="0 0 24 24" fill="none" stroke="#4B8BBE" stroke-width="1.5"><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+            <span style="font-weight:600;font-size:1.1rem;">ML / IA</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="badge tooltip" data-tooltip="Machine learning clássico" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">scikit-learn</span>
+            <span class="badge tooltip" data-tooltip="Deep learning do Google" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">TensorFlow</span>
+            <span class="badge tooltip" data-tooltip="Deep learning do Facebook" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">PyTorch</span>
+          </div>
+        </div>
+      </div>
+      <!-- Automação -->
+      <div class="slide-anim anim-up" data-delay="600">
+        <div class="card-glass" style="padding:16px;height:100%;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <svg class="icon-svg" style="width:24px;height:24px;" viewBox="0 0 24 24" fill="none" stroke="#4B8BBE" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            <span style="font-weight:600;font-size:1.1rem;">Automação</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="badge tooltip" data-tooltip="Automação de navegador" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">Selenium</span>
+            <span class="badge tooltip" data-tooltip="Requisições HTTP" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">requests</span>
+            <span class="badge tooltip" data-tooltip="Parsing de HTML" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">BeautifulSoup</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 11 — AMBIENTES VIRTUAIS ========== -->
+<div id="slide11" class="slide" data-slide="10">
+  <div class="slide-content" style="gap:clamp(12px,1.5vh,24px);">
+    <div class="slide-anim anim-fade" data-delay="150">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Ambientes Virtuais e Gerenciamento de Dependências</h2>
+    </div>
+    <div class="venv-layout">
+      <div class="venv-panel">
+        <div class="slide-anim anim-blur" data-delay="300">
+          <!-- Bloco venv — 320px x 260px para conteúdo de terminal + comandos -->
+          <div class="bloco-perspectiva bloco-superior" style="background:linear-gradient(135deg,#1A2338,#0D1425);border:1px solid rgba(75,139,190,0.3);width:320px;max-width:320px;height:260px;max-height:260px;display:flex;flex-direction:column;gap:8px;margin:0 auto;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="#4B8BBE" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 10l3 2-3 2"/></svg>
+              <span style="font-weight:700;font-size:1.3rem;">venv</span>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:#94A3B8;line-height:1.8;">
+              <span style="color:#4CAF50;">$</span> python -m venv .venv<br>
+              <span style="color:#4CAF50;">$</span> pip install django<br>
+              <span style="color:#4CAF50;">$</span> pip freeze &gt; requirements.txt
+            </div>
+            <div style="margin-top:auto;display:flex;flex-wrap:wrap;gap:6px;">
+              <span class="badge tooltip" data-tooltip="Arquivo com lista de dependências do projeto" style="font-size:0.7rem;">requirements.txt</span>
+              <span class="badge tooltip" data-tooltip="Configuração moderna de projetos Python" style="font-size:0.7rem;">pyproject.toml</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="venv-panel">
+        <div class="slide-anim anim-blur" data-delay="450">
+          <!-- Bloco Conda — 280px x 200px para conteúdo descritivo -->
+          <div class="bloco-perspectiva bloco-superior" style="background:linear-gradient(135deg,#1A2338,#0D1425);border:1px solid rgba(76,175,80,0.3);width:280px;max-width:280px;height:200px;max-height:200px;display:flex;flex-direction:column;gap:8px;margin:0 auto;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              <span style="font-weight:700;font-size:1.3rem;">Conda</span>
+            </div>
+            <div style="font-weight:400;font-size:0.85rem;color:#94A3B8;">
+              Gerenciamento de ambientes científicos e pacotes para Data Science e ML.
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:#94A3B8;line-height:1.8;margin-top:auto;">
+              <span style="color:#4CAF50;">$</span> conda create -n projeto<br>
+              <span style="color:#4CAF50;">$</span> conda activate projeto
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-anim anim-fade" data-delay="700">
+      <div class="venv-flow">
+        <span class="venv-step"><span class="badge" style="background:#306998;color:#fff;">Criar venv</span></span>
+        <span class="venv-step-arrow">→</span>
+        <span class="venv-step"><span class="badge" style="background:#4B8BBE;color:#fff;">Ativar</span></span>
+        <span class="venv-step-arrow">→</span>
+        <span class="venv-step"><span class="badge" style="background:#4CAF50;color:#fff;">Instalar dependências</span></span>
+        <span class="venv-step-arrow">→</span>
+        <span class="venv-step"><span class="badge" style="background:#FF9800;color:#fff;">Congelar requirements.txt</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 12 — EXEMPLO PRÁTICO ========== -->
+<div id="slide12" class="slide" data-slide="11">
+  <div class="slide-content" style="gap:clamp(12px,1.5vh,24px);">
+    <div class="slide-anim anim-fade" data-delay="150" style="text-align:center;">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Exemplo Prático: Script do Dia a Dia</h2>
+    </div>
+    <div class="exemplo-grid" style="flex:1;">
+      <!-- Coluna 1 -->
+      <div class="slide-anim anim-left" data-delay="300" style="flex:1;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg class="icon-svg" style="width:24px;height:24px;" viewBox="0 0 24 24" fill="none" stroke="#4B8BBE" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          <span style="font-weight:600;font-size:1rem;">Renomear arquivos</span>
+        </div>
+        <div class="code-block" style="flex:1;font-size:0.72rem;">
+          <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+          <span class="kw">import</span> os, shutil<br>
+          <span class="kw">for</span> arquivo <span class="kw">in</span> <span class="bu">os</span>.listdir(<span class="str">'.'</span>):<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> arquivo.endswith(<span class="str">'.txt'</span>):<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;novo = <span class="str">f"documento_{arquivo}"</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shutil.move(arquivo, novo)
+        </div>
+      </div>
+      <!-- Coluna 2 -->
+      <div class="slide-anim anim-up" data-delay="400" style="flex:1;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg class="icon-svg" style="width:24px;height:24px;" viewBox="0 0 24 24" fill="none" stroke="#4B8BBE" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>
+          <span style="font-weight:600;font-size:1rem;">Web Scraping</span>
+        </div>
+        <div class="code-block" style="flex:1;font-size:0.72rem;">
+          <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+          <span class="kw">import</span> requests<br>
+          <span class="kw">from</span> bs4 <span class="kw">import</span> BeautifulSoup<br>
+          res = requests.get(<span class="str">'https://exemplo.com'</span>)<br>
+          soup = BeautifulSoup(res.text, <span class="str">'html.parser'</span>)<br>
+          <span class="bu">print</span>(soup.title.text)
+        </div>
+      </div>
+      <!-- Coluna 3 -->
+      <div class="slide-anim anim-right" data-delay="500" style="flex:1;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg class="icon-svg" style="width:24px;height:24px;" viewBox="0 0 24 24" fill="none" stroke="#4B8BBE" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+          <span style="font-weight:600;font-size:1rem;">Automação Planilhas</span>
+        </div>
+        <div class="code-block" style="flex:1;font-size:0.72rem;">
+          <button class="code-copy-btn" onclick="copyCode(this)">Copiar</button>
+          <span class="kw">from</span> openpyxl <span class="kw">import</span> Workbook<br>
+          wb = Workbook()<br>
+          ws = wb.active<br>
+          ws[<span class="str">'A1'</span>] = <span class="str">'Nome'</span><br>
+          ws[<span class="str">'B1'</span>] = <span class="str">'Nota'</span><br>
+          wb.save(<span class="str">'notas.xlsx'</span>)
+        </div>
+      </div>
+    </div>
+    <div class="slide-anim anim-scale" data-delay="700" style="text-align:center;">
+      <div class="badge tooltip" data-tooltip="Python é muito expressivo — faz muito com poucas linhas" style="padding:12px 32px;border-color:#FFD43B;color:#FFD43B;font-weight:700;font-size:1rem;">Código funcional em menos de 20 linhas</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 13 — CONSIDERAÇÕES ========== -->
+<div id="slide13" class="slide" data-slide="12">
+  <div class="slide-content" style="gap:clamp(12px,1.5vh,24px);">
+    <div class="slide-anim anim-fade" data-delay="150">
+      <h2 style="font-weight:700;font-size:clamp(2rem,3vw,3.5rem);letter-spacing:-0.02em;">Considerações e Próximos Passos</h2>
+    </div>
+    <div class="cons-layout">
+      <div class="cons-left">
+        <div class="slide-anim anim-blur" data-delay="300">
+          <!-- Bloco documentação — 280px x 100px -->
+          <a href="https://docs.python.org" target="_blank" style="text-decoration:none;display:block;">
+            <div class="bloco-perspectiva bloco-superior" style="background:linear-gradient(135deg,#306998,#4B8BBE);width:280px;max-width:280px;height:100px;max-height:100px;display:flex;flex-direction:column;justify-content:center;padding:16px 24px;">
+              <div style="font-weight:700;font-size:1.2rem;">docs.python.org</div>
+              <div style="font-weight:400;font-size:0.8rem;opacity:0.8;">Referência oficial da linguagem</div>
+            </div>
+          </a>
+        </div>
+        <div class="slide-anim anim-left" data-delay="500" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4CAF50" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 2 2V4a2 2 0 00-2-2z"/></svg>
+          <span style="color:#CBD5E1;">Documentação oficial e tutoriais</span>
+        </div>
+        <div class="slide-anim anim-left" data-delay="600" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4CAF50" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 2 2V4a2 2 0 00-2-2z"/></svg>
+          <span style="color:#CBD5E1;">Projetos pessoais para fixar aprendizado</span>
+        </div>
+        <div class="slide-anim anim-left" data-delay="700" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4CAF50" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 2 2V4a2 2 0 00-2-2z"/></svg>
+          <span style="color:#CBD5E1;">Comunidades: Python Brasil, PyLadies, Discord</span>
+        </div>
+        <div class="slide-anim anim-left" data-delay="800" style="display:flex;align-items:center;gap:12px;">
+          <svg class="icon-svg" viewBox="0 0 20 20" fill="none" stroke="#4CAF50" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 2 2V4a2 2 0 00-2-2z"/></svg>
+          <span style="color:#CBD5E1;">Certificações e roadmap de estudos</span>
+        </div>
+      </div>
+      <div class="cons-right">
+        <div class="slide-anim anim-right" data-delay="500">
+          <div class="stacked-card" style="border-left:3px solid #4B8BBE;">
+            <div style="font-weight:500;font-size:0.9rem;">Aprenda bibliotecas</div>
+            <div style="font-size:0.75rem;color:#64748B;">Django, Pandas, FastAPI</div>
+          </div>
+        </div>
+        <div class="slide-anim anim-right" data-delay="600">
+          <div class="stacked-card" style="border-left:3px solid #4CAF50;">
+            <div style="font-weight:500;font-size:0.9rem;">Construa projetos</div>
+            <div style="font-size:0.75rem;color:#64748B;">Portfólio com aplicações reais</div>
+          </div>
+        </div>
+        <div class="slide-anim anim-right" data-delay="700">
+          <div class="stacked-card" style="border-left:3px solid #FFD43B;">
+            <div style="font-weight:500;font-size:0.9rem;">Participe de comunidades</div>
+            <div style="font-size:0.75rem;color:#64748B;">Python Brasil, eventos, open source</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 14 — OBRIGADO! ========== -->
+<div id="slide14" class="slide" data-slide="13">
+  <div class="slide-content" style="justify-content:center;align-items:center;">
+    <!-- Python logo central -->
+    <div class="slide-anim anim-scale" data-delay="200" style="margin-bottom:clamp(16px,2vh,32px);">
+      <svg class="python-logo-glow" width="100" height="100" viewBox="0 0 100 100" fill="none">
+        <path d="M50 15c-20 0-37 8-37 25s17 25 37 25c20 0 37 8 37 25S70 115 50 115" stroke="#FFD43B" stroke-width="3" opacity="0.8"/>
+        <path d="M50 115c-20 0-37-8-37-25s17-25 37-25c20 0 37-8 37-25S70 15 50 15" stroke="#4B8BBE" stroke-width="3" opacity="0.8"/>
+        <circle cx="50" cy="40" r="4" fill="#FFD43B" opacity="0.6"/>
+        <circle cx="50" cy="90" r="4" fill="#4B8BBE" opacity="0.6"/>
+      </svg>
+    </div>
+
+    <!-- Title with 3D extruded -->
+    <div class="slide-anim anim-blur" data-delay="400" style="text-align:center;">
+      <h1 class="title-final" id="slide14-title" data-text="Obrigado!">Obrigado!</h1>
+    </div>
+
+    <!-- Decorator line -->
+    <div class="slide-anim" data-delay="700" style="margin:clamp(16px,2vh,32px) 0;transform-origin:center;">
+      <div style="width:200px;height:1px;background:linear-gradient(90deg,rgba(75,139,190,0),rgba(75,139,190,0.5),rgba(75,139,190,0));transform:scaleX(0);transition:transform 0.5s ease;" id="slide14-line"></div>
+    </div>
+
+    <!-- Subtitle -->
+    <div class="slide-anim anim-up" data-delay="800" style="text-align:center;">
+      <p class="sub-final">Mãos à obra e bons códigos!</p>
+    </div>
+
+    <!-- Credits -->
+    <div class="slide-anim anim-fade" data-delay="1200" style="position:absolute;bottom:clamp(60px,6vh,80px);text-align:center;">
+      <p style="font-weight:300;font-size:0.8rem;color:#64748B;">Apresentação criada com Python 3</p>
+    </div>
+
+    <!-- Sparkles decorativas -->
+    <div class="sparkle" style="top:20%;left:15%;animation-delay:0s;"></div>
+    <div class="sparkle" style="top:30%;right:20%;animation-delay:1s;width:3px;height:3px;"></div>
+    <div class="sparkle" style="bottom:35%;left:25%;animation-delay:2s;"></div>
+    <div class="sparkle" style="top:45%;right:10%;animation-delay:0.5s;width:5px;height:5px;"></div>
+    <div class="sparkle" style="bottom:25%;right:30%;animation-delay:1.5s;"></div>
+    <div class="sparkle" style="top:15%;left:40%;animation-delay:2.5s;width:3px;height:3px;"></div>
+    <div class="sparkle" style="bottom:20%;left:50%;animation-delay:0.8s;"></div>
+    <div class="sparkle" style="top:60%;right:15%;animation-delay:1.8s;width:4px;height:4px;"></div>
+  </div>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let currentSlide = 0;
+let isAnimating = false;
+let touchStartX = 0;
+
+// Navigation dots
+const navDots = document.getElementById('nav-dots');
+for (let i = 0; i < totalSlides; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.dataset.index = i;
+  dot.addEventListener('click', () => goToSlide(i));
+  navDots.appendChild(dot);
+}
+
+// Nav bar appears after 2s
+setTimeout(() => {
+  document.getElementById('nav-bar').classList.add('visible');
+}, 2000);
+
+function updateNav() {
+  const dots = document.querySelectorAll('.nav-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+  document.getElementById('nav-counter').textContent =
+    String(currentSlide + 1).padStart(2, '0') + ' / ' + String(totalSlides).padStart(2, '0');
+  document.getElementById('arrow-left').classList.toggle('hidden', currentSlide === 0);
+  document.getElementById('arrow-right').classList.toggle('hidden', currentSlide === totalSlides - 1);
+}
+
+function goToSlide(index) {
+  if (isAnimating || index === currentSlide || index < 0 || index >= totalSlides) return;
+  isAnimating = true;
+
+  const current = slides[currentSlide];
+  const next = slides[index];
+
+  // Fade out current slide (CSS handles 350ms transition)
+  current.classList.remove('active');
+
+  setTimeout(() => {
+    // Prepare next slide: reset all content animations to initial hidden state
+    resetSlideAnims(next);
+    // Show the next slide container (CSS fades in via active class)
+    next.classList.add('active');
+
+    currentSlide = index;
+    updateNav();
+
+    // After container is partially visible, start content animations
+    setTimeout(() => {
+      animateSlide(next);
+      setTimeout(() => { isAnimating = false; }, 100);
+    }, 350);
+  }, 350);
+}
+
+function nextSlide() { if (!isAnimating) goToSlide(currentSlide + 1); }
+function prevSlide() { if (!isAnimating) goToSlide(currentSlide - 1); }
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prevSlide(); }
+  else if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+  else if (e.key === 'End') { e.preventDefault(); goToSlide(totalSlides - 1); }
+});
+
+// Touch/swipe
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) nextSlide();
+    else prevSlide();
+  }
+}, { passive: true });
+
+// Custom cursor
+const cursor = document.getElementById('custom-cursor');
+if (window.matchMedia('(pointer: fine)').matches) {
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+
+  document.querySelectorAll('a, button, .badge, .nav-dot, .tab-btn, .fluxo-card, .poo-concept, .stacked-card, .code-copy-btn, .btn').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
+  });
+}
+
+// Slide animation system
+function resetSlideAnims(slide) {
+  const anims = slide.querySelectorAll('.slide-anim');
+  anims.forEach(el => {
+    el.classList.remove('visible');
+    el.style.transition = 'none';
+    if (el.classList.contains('anim-fade')) el.style.opacity = '0';
+    if (el.classList.contains('anim-up')) { el.style.opacity = '0'; el.style.transform = 'translateY(15px)'; }
+    if (el.classList.contains('anim-left')) { el.style.opacity = '0'; el.style.transform = 'translateX(-15px)'; }
+    if (el.classList.contains('anim-right')) { el.style.opacity = '0'; el.style.transform = 'translateX(15px)'; }
+    if (el.classList.contains('anim-scale')) { el.style.opacity = '0'; el.style.transform = 'scale(0.9)'; }
+    if (el.classList.contains('anim-blur')) { el.style.opacity = '0'; el.style.filter = 'blur(8px)'; el.style.transform = 'translateY(-10px) scale(0.96)'; }
+  });
+  // Force reflow
+  void anims[0]?.offsetWidth;
+  anims.forEach(el => { el.style.transition = ''; });
+}
+
+function animateSlide(slide) {
+  resetSlideAnims(slide);
+  const anims = slide.querySelectorAll('.slide-anim');
+
+  anims.forEach((el, i) => {
+    const delay = parseInt(el.dataset.delay) || 0;
+    setTimeout(() => {
+      el.classList.add('visible');
+      if (el.classList.contains('anim-fade')) el.style.opacity = '1';
+      if (el.classList.contains('anim-up')) { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }
+      if (el.classList.contains('anim-left')) { el.style.opacity = '1'; el.style.transform = 'translateX(0)'; }
+      if (el.classList.contains('anim-right')) { el.style.opacity = '1'; el.style.transform = 'translateX(0)'; }
+      if (el.classList.contains('anim-scale')) { el.style.opacity = '1'; el.style.transform = 'scale(1)'; }
+      if (el.classList.contains('anim-blur')) { el.style.opacity = '1'; el.style.filter = 'blur(0)'; el.style.transform = 'translateY(0) scale(1)'; }
+    }, delay);
+  });
+
+  const slideId = slide.id;
+
+  if (slideId === 'slide1') {
+    const title = document.getElementById('slide1-title');
+    applyExtrude3D(title);
+    setTimeout(() => {
+      const line = document.getElementById('slide1-line');
+      if (line) line.style.transform = 'scaleX(1)';
+    }, 500);
+  }
+
+  if (slideId === 'slide4') {
+    setTimeout(() => {
+      const b1 = document.getElementById('bar1');
+      const b2 = document.getElementById('bar2');
+      const b3 = document.getElementById('bar3');
+      const b4 = document.getElementById('bar4');
+      if (b1) b1.style.height = '24px';
+      if (b2) b2.style.height = '40px';
+      if (b3) b3.style.height = '52px';
+      if (b4) b4.style.height = '60px';
+    }, 900);
+  }
+
+  if (slideId === 'slide14') {
+    const title = document.getElementById('slide14-title');
+    applyExtrude3D(title);
+    setTimeout(() => {
+      const line = document.getElementById('slide14-line');
+      if (line) line.style.transform = 'scaleX(1)';
+    }, 700);
+  }
+}
+
+// 3D Extruded Text Shadow
+function applyExtrude3D(element) {
+  const colors = [
+    '#6B9CC4', '#5B8DB4', '#4B8BBE', '#4B8BBE', '#4B8BBE',
+    '#306998', '#306998', '#306998', '#2A5A80', '#2A5A80',
+    '#2A5A80', '#2A5A80', '#1E415E', '#1E415E', '#1E415E',
+    '#1E415E', '#1E415E', '#163249', '#163249', '#163249',
+    '#163249', '#163249', '#0F1A2E', '#0F1A2E', '#0F1A2E',
+    '#0F1A2E', '#0F1A2E', '#0F1A2E', '#0F1A2E', '#0F1A2E',
+    '#070B14', '#070B14', '#070B14', '#070B14', '#070B14'
+  ];
+  let shadows = [];
+  for (let i = 0; i < 35; i++) {
+    shadows.push('-' + (i + 1) + 'px ' + (i + 1) + 'px 0 ' + (colors[i] || '#070B14'));
+  }
+  element.style.textShadow = shadows.join(',');
+}
+
+// Tab system (Slide 5)
+function switchTab(index) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector('.tab-btn[data-tab="' + index + '"]').classList.add('active');
+  document.getElementById('tab-content-' + index).classList.add('active');
+
+  // Move indicator
+  const btn = document.querySelector('.tab-btn[data-tab="' + index + '"]');
+  const indicator = document.getElementById('tab-indicator');
+  indicator.style.left = btn.offsetLeft + 'px';
+  indicator.style.width = btn.offsetWidth + 'px';
+}
+
+// Expandable badges (Slide 6, 9)
+function toggleBadge(el) {
+  el.classList.toggle('open');
+}
+
+function toggleBadgeErr(el) {
+  el.classList.toggle('open');
+}
+
+// Copy code
+function copyCode(btn) {
+  const codeBlock = btn.closest('.code-block');
+  const text = codeBlock.textContent.replace('Copiar', '').trim();
+  function done() {
+    btn.textContent = 'Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copiar';
+      btn.classList.remove('copied');
+    }, 1500);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => {
+      fallbackCopy(text, done);
+    });
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+// Particles system
+function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  const particles = [];
+  const particleCount = 50;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < particleCount; i++) {
+    particles.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: Math.random() * 2 + 1,
+      speedX: (Math.random() - 0.5) * 0.5,
+      speedY: (Math.random() - 0.5) * 0.5,
+      opacity: Math.random() * 0.3 + 0.1,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    const colors = ['#4B8BBE', '#306998', '#FFFFFF'];
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)] || '#4B8BBE';
+      ctx.globalAlpha = p.opacity;
+      ctx.fill();
+
+      p.x += p.speedX + Math.sin(Date.now() * 0.001 + p.phase) * 0.2;
+      p.y += p.speedY + Math.cos(Date.now() * 0.001 + p.phase) * 0.2;
+
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+initParticles();
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  // Tab indicator
+  const firstTab = document.querySelector('.tab-btn.active');
+  if (firstTab) {
+    const indicator = document.getElementById('tab-indicator');
+    indicator.style.left = firstTab.offsetLeft + 'px';
+    indicator.style.width = firstTab.offsetWidth + 'px';
+  }
+
+  // Only slide 1 is active initially
+  slides.forEach((s, i) => {
+    if (i === 0) s.classList.add('active');
+    else s.classList.remove('active');
+  });
+
+  // Animate first slide after a micro-delay for layout
+  const firstSlide = slides[0];
+  resetSlideAnims(firstSlide);
+  setTimeout(() => {
+    animateSlide(firstSlide);
+  }, 120);
+});
+
+// Handle window resize for tab indicator
+window.addEventListener('resize', () => {
+  const activeTab = document.querySelector('.tab-btn.active');
+  if (activeTab) {
+    const indicator = document.getElementById('tab-indicator');
+    indicator.style.left = activeTab.offsetLeft + 'px';
+    indicator.style.width = activeTab.offsetWidth + 'px';
+  }
+});
+</script>
+</body>
+</html>
