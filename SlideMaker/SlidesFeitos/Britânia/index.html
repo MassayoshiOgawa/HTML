@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Britânia de Pirabeiraba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#0A0A0F;font-family:'Inter',sans-serif}
+body{position:relative}
+
+/* === BACKGROUND LAYERS === */
+#bg-base{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 30% 40%,#1A1208 0%,#0A0A0F 70%)}
+#bg-mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+#bg-mesh .blob{position:absolute;border-radius:50%;filter:blur(100px)}
+#bg-mesh .blob-1{width:500px;height:500px;background:rgba(45,90,39,0.12);top:10%;left:20%;animation:blobMove1 75s ease-in-out infinite}
+#bg-mesh .blob-2{width:400px;height:400px;background:rgba(122,92,58,0.08);top:50%;right:15%;animation:blobMove2 85s ease-in-out infinite}
+#bg-mesh .blob-3{width:450px;height:450px;background:rgba(201,151,78,0.06);bottom:10%;left:40%;animation:blobMove3 90s ease-in-out infinite}
+@keyframes blobMove1{0%,100%{transform:translate(0,0)}25%{transform:translate(60px,-30px)}50%{transform:translate(-20px,50px)}75%{transform:translate(40px,20px)}}
+@keyframes blobMove2{0%,100%{transform:translate(0,0)}25%{transform:translate(-40px,40px)}50%{transform:translate(30px,-20px)}75%{transform:translate(-50px,10px)}}
+@keyframes blobMove3{0%,100%{transform:translate(0,0)}25%{transform:translate(30px,50px)}50%{transform:translate(-50px,-30px)}75%{transform:translate(20px,-40px)}}
+
+#bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.025;background-image:linear-gradient(rgba(245,239,230,1) 1px,transparent 1px),linear-gradient(90deg,rgba(245,239,230,1) 1px,transparent 1px);background-size:calc(100%/6) calc(100%/6)}
+
+#bg-vignette{position:fixed;inset:0;z-index:0;pointer-events:none;box-shadow:inset 0 0 150px rgba(0,0,0,0.6)}
+
+#bg-noise{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.02;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px 200px}
+
+#particles-canvas{position:fixed;inset:0;z-index:1;pointer-events:none}
+
+/* === CUSTOM CURSOR === */
+#custom-cursor{position:fixed;z-index:9999;width:8px;height:8px;border-radius:50%;background:rgba(201,151,78,0.6);box-shadow:0 0 12px rgba(201,151,78,0.3);pointer-events:none;transition:width 0.3s,height 0.3s,background 0.3s,box-shadow 0.3s;top:0;left:0;transform:translate(-50%,-50%)}
+body:hover #custom-cursor{opacity:1}
+.cursor-hover{width:14px!important;height:14px!important;background:rgba(201,151,78,0.9)!important;box-shadow:0 0 18px rgba(201,151,78,0.5)!important}
+
+/* === SLIDES === */
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;display:none;z-index:2;overflow:hidden;padding:60px;opacity:0}
+.slide.active{display:flex;opacity:1}
+.slide.exiting,.slide.entering{pointer-events:none}
+
+/* Transition classes */
+.slide.fade-scale-out{animation:fadeOutScale 500ms ease-out forwards}
+.slide.fade-scale-in{animation:fadeInScale 600ms ease-out forwards}
+.slide.push-right-out{animation:pushRightOut 550ms ease-in-out forwards}
+.slide.push-right-in{animation:pushRightIn 550ms ease-in-out forwards}
+.slide.crossfade-out{animation:crossFadeOut 700ms ease forwards}
+.slide.crossfade-in{animation:crossFadeIn 700ms ease forwards}
+.slide.slide-up-out{animation:slideUpOut 550ms ease-in-out forwards}
+.slide.slide-up-in{animation:slideUpIn 550ms ease-in-out forwards}
+.slide.fade-blur-out{animation:fadeBlurOut 650ms ease forwards}
+.slide.fade-blur-in{animation:fadeBlurIn 650ms ease forwards}
+.slide.push-left-out{animation:pushLeftOut 550ms ease-in-out forwards}
+.slide.push-left-in{animation:pushLeftIn 550ms ease-in-out forwards}
+.slide.fade-scale2-out{animation:fadeOutScale2 600ms ease-out forwards}
+.slide.fade-scale2-in{animation:fadeInScale2 600ms ease-out forwards}
+.slide.crossfade-slow-out{animation:crossFadeOut 800ms ease forwards}
+.slide.crossfade-slow-in{animation:crossFadeIn 800ms ease forwards}
+
+@keyframes fadeOutScale{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0.95)}}
+@keyframes fadeInScale{0%{opacity:0;transform:scale(0.95)}100%{opacity:1;transform:scale(1)}}
+@keyframes pushRightOut{0%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(-100%)}}
+@keyframes pushRightIn{0%{opacity:0;transform:translateX(100%)}100%{opacity:1;transform:translateX(0)}}
+@keyframes crossFadeOut{0%{opacity:1}100%{opacity:0}}
+@keyframes crossFadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes slideUpOut{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-100%)}}
+@keyframes slideUpIn{0%{opacity:0;transform:translateY(100%)}100%{opacity:1;transform:translateY(0)}}
+@keyframes fadeBlurOut{0%{opacity:1;filter:blur(0)}100%{opacity:0;filter:blur(4px)}}
+@keyframes fadeBlurIn{0%{opacity:0;filter:blur(4px)}100%{opacity:1;filter:blur(0)}}
+@keyframes pushLeftOut{0%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(100%)}}
+@keyframes pushLeftIn{0%{opacity:0;transform:translateX(-100%)}100%{opacity:1;transform:translateX(0)}}
+@keyframes fadeOutScale2{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.05)}}
+@keyframes fadeInScale2{0%{opacity:0;transform:scale(0.95)}100%{opacity:1;transform:scale(1)}}
+
+/* === ELEMENT ANIMATIONS === */
+.anim-el{opacity:0;transform:translateY(20px);filter:blur(4px);transition:opacity 0.8s cubic-bezier(0.25,0.46,0.45,0.94),transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94),filter 0.8s cubic-bezier(0.25,0.46,0.45,0.94)}
+.anim-el.show{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+
+.anim-subtitle{opacity:0;transform:translateY(15px);filter:blur(3px);transition:opacity 0.7s ease-out,transform 0.7s ease-out,filter 0.7s ease-out}
+.anim-subtitle.show{opacity:1;transform:translateY(0);filter:blur(0)}
+
+.anim-card{opacity:0;transform:translateY(30px) scale(0.95);box-shadow:0 0 0 rgba(0,0,0,0);transition:opacity 0.7s cubic-bezier(0.25,0.46,0.45,0.94),transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94),box-shadow 0.7s cubic-bezier(0.25,0.46,0.45,0.94)}
+.anim-card.show{opacity:1;transform:translateY(0) scale(1)}
+
+.anim-text{opacity:0;transform:translateY(12px);transition:opacity 0.6s ease-out,transform 0.6s ease-out}
+.anim-text.show{opacity:1;transform:translateY(0)}
+
+.anim-btn{opacity:0;transform:scale(0.9);transition:opacity 0.4s ease-out,transform 0.4s ease-out}
+.anim-btn.show{opacity:1;transform:scale(1)}
+
+.anim-icon{opacity:0;transform:scale(0.8) rotate(-10deg);transition:opacity 0.5s ease-out,transform 0.5s ease-out}
+.anim-icon.show{opacity:1;transform:scale(1) rotate(0)}
+
+/* === BLOCO 3D === */
+.bloco-perspectiva{width:min(350px,85vw);max-width:350px;max-height:420px;padding:20px 28px;border-radius:4px;color:#F5EFE6;font-size:16px;font-weight:600;line-height:1.4;will-change:transform;backface-visibility:hidden;-webkit-font-smoothing:antialiased;position:relative;opacity:0;transform:translateY(40px) perspective(250px) rotateX(0deg) rotateY(35deg) scale(0.9);filter:blur(8px);transition:opacity 0.9s cubic-bezier(0.34,1.56,0.64,1),transform 0.9s cubic-bezier(0.34,1.56,0.64,1),filter 0.9s cubic-bezier(0.34,1.56,0.64,1)}
+.bloco-perspectiva.show{opacity:1;transform:translateY(0) perspective(250px) rotateX(var(--rx)) rotateY(25deg) scale(1);filter:blur(0)}
+
+.bloco-perspectiva-superior{background:linear-gradient(135deg,#7A5C3A,#4A3420);box-shadow:0 20px 40px -12px rgba(122,92,58,0.4),inset 0 1px 0 rgba(245,239,230,0.1);--rx:-10deg}
+.bloco-perspectiva-inferior{background:linear-gradient(135deg,#8BA87A,#5A7A4A);box-shadow:0 20px 40px -12px rgba(139,168,122,0.4),inset 0 1px 0 rgba(245,239,230,0.1);--rx:10deg}
+
+.bloco-perspectiva .bloco-titulo{font-family:'Inter',sans-serif;font-weight:600;font-size:clamp(0.9rem,1.5vw,1.1rem);color:#F5EFE6}
+.bloco-perspectiva .bloco-sub{font-family:'Inter',sans-serif;font-weight:400;font-size:clamp(0.7rem,1.2vw,0.8rem);color:#D4C9B8;opacity:0.7;margin-top:4px}
+
+/* === NAVIGATION === */
+#nav-controls{position:fixed;bottom:0;left:0;right:0;z-index:100;pointer-events:none}
+#nav-btns{display:flex;justify-content:space-between;padding:0 30px;position:absolute;bottom:30px;left:0;right:0}
+.nav-btn{width:44px;height:44px;border-radius:50%;background:rgba(201,151,78,0.12);border:1px solid rgba(201,151,78,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all;transition:all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);z-index:100}
+.nav-btn:hover{background:rgba(201,151,78,0.25);border-color:rgba(201,151,78,0.4);box-shadow:0 0 20px rgba(201,151,78,0.15)}
+.nav-btn:active{transform:scale(0.95);background:rgba(201,151,78,0.3)}
+.nav-btn svg{width:18px;height:18px;fill:none;stroke:#C9974E;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.3s}
+.nav-btn:hover svg{stroke:#E8A83E}
+.nav-btn.disabled{opacity:0.3;pointer-events:none}
+
+#nav-dots{display:flex;align-items:center;justify-content:center;gap:12px;position:absolute;bottom:90px;left:50%;transform:translateX(-50%);z-index:90;pointer-events:all}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(245,239,230,0.15);cursor:pointer;transition:all 0.4s;pointer-events:all}
+.nav-dot:hover{background:rgba(201,151,78,0.4);transform:scale(1.3)}
+.nav-dot.active{background:#C9974E;box-shadow:0 0 8px rgba(201,151,78,0.5);transform:scale(1.3)}
+
+#progress-bar{position:absolute;bottom:110px;left:50%;transform:translateX(-50%);width:180px;height:2px;background:rgba(245,239,230,0.08);border-radius:1px;z-index:91;pointer-events:none}
+#progress-fill{height:100%;background:linear-gradient(90deg,#2D5A27,#C9974E,#E8A83E);border-radius:1px;width:0%;transition:width 0.6s cubic-bezier(0.25,0.46,0.45,0.94)}
+
+/* === SLIDE 1 === */
+#slide-1{flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(ellipse at 50% 45%,#1A1208 0%,#0A0A0F 70%)}
+#slide-1 .deco-line-top{width:60px;height:1px;background:rgba(201,151,78,0.3);margin-bottom:20px;transform:scaleX(0);transition:transform 0.6s ease-out}
+#slide-1 .deco-line-top.show{transform:scaleX(1)}
+#slide-1 .deco-line{width:80px;height:1px;background:rgba(201,151,78,0.5);margin:20px auto;transform:scaleX(0);transition:transform 0.6s ease-out}
+#slide-1 .deco-line.show{transform:scaleX(1)}
+
+#slide-1 h1{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(2.8rem,6vw,6rem);color:#FFFFFF;line-height:1.1;letter-spacing:-0.02em;position:relative;z-index:0}
+#slide-1 h1::before{content:attr(data-text);position:absolute;top:2px;left:2px;color:rgba(20,40,20,0.5);filter:blur(6px);z-index:-1;pointer-events:none}
+@keyframes titleGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.08)}}
+#slide-1 h1.glowing{animation:titleGlow 4s ease-in-out infinite}
+
+#slide-1 .subtitle{font-family:'Cormorant Garamond',serif;font-weight:400;font-style:italic;font-size:clamp(1.2rem,2.5vw,2rem);color:#D4C9B8;opacity:0}
+#slide-1 .subtitle.show{opacity:0.8}
+#slide-1 .label-apt{font-family:'Inter',sans-serif;font-weight:300;font-size:0.85rem;color:#C8BFA8}
+#slide-1 .apresentador{font-family:'Inter',sans-serif;font-weight:300;font-size:0.9rem;color:#C8BFA8}
+#slide-1 .data{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:0.7rem;color:#8BA87A;letter-spacing:0.05em;text-transform:uppercase}
+#slide-1 .credits{position:absolute;bottom:60px;left:60px;text-align:left;line-height:1.6}
+#slide-1 .deco-dots{display:flex;gap:300px;position:absolute;top:40%;pointer-events:none}
+#slide-1 .deco-dot{width:3px;height:3px;border-radius:50%;background:#C9974E;opacity:0.2}
+
+/* === SLIDE 2 === */
+#slide-2{flex-direction:row;align-items:center;gap:60px}
+#slide-2 .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center}
+#slide-2 .slide-side{flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+#slide-2 .slide-num{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:0.8rem;color:rgba(245,239,230,0.15);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px}
+#slide-2 h2{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(1.8rem,3.5vw,2.8rem);color:#F5EFE6;line-height:1.1;letter-spacing:-0.02em}
+#slide-2 .line-deco{width:60px;height:1px;background:rgba(201,151,78,0.3);margin:16px 0 24px}
+#slide-2 .info-item{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;cursor:default;transition:transform 0.3s,opacity 0.3s;opacity:0;transform:translateY(12px)}
+#slide-2 .info-item.show{opacity:1;transform:translateY(0)}
+#slide-2 .info-item:hover{transform:translateX(3px)!important}
+#slide-2 .info-icon{flex:0 0 24px;width:24px;height:24px;color:#C9974E}
+#slide-2 .info-text{font-family:'Inter',sans-serif;font-weight:400;font-size:clamp(0.9rem,1.6vw,1.1rem);color:#C8BFA8;line-height:1.6}
+#slide-2 .info-text strong{color:#F5EFE6;font-weight:500}
+
+/* === SLIDE 3 === */
+#slide-3{flex-direction:column;align-items:center;justify-content:center}
+#slide-3 .slide-header{text-align:center;margin-bottom:30px}
+#slide-3 .slide-num{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:0.8rem;color:rgba(245,239,230,0.15);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px}
+#slide-3 h2{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(1.8rem,3vw,2.5rem);color:#F5EFE6;line-height:1.1}
+#slide-3 .subtitle{font-family:'Cormorant Garamond',serif;font-weight:400;font-style:italic;font-size:1.1rem;color:#D4C9B8;margin-top:10px}
+#slide-3 .columns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:30px;margin-bottom:30px;width:100%}
+#slide-3 .col{background:rgba(245,239,230,0.03);border:1px solid rgba(245,239,230,0.06);border-radius:8px;padding:24px;transition:all 0.3s;opacity:0;transform:translateY(12px)}
+#slide-3 .col.show{opacity:1;transform:translateY(0)}
+#slide-3 .col:hover{transform:translateY(-4px);border-color:rgba(201,151,78,0.3);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+#slide-3 .col h3{font-family:'Inter',sans-serif;font-weight:600;font-size:0.95rem;color:#F5EFE6;margin-bottom:10px}
+#slide-3 .col p{font-family:'Inter',sans-serif;font-weight:400;font-size:0.85rem;color:#C8BFA8;line-height:1.6}
+#slide-3 .blocks-row{display:flex;gap:20px;justify-content:center}
+
+/* === SLIDE 4 === */
+#slide-4{flex-direction:row;align-items:center;gap:50px;background:radial-gradient(ellipse at 40% 30%,#0D1F0D,#070F08)}
+#slide-4 .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center}
+#slide-4 .slide-side{flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+#slide-4 .slide-num{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:0.8rem;color:rgba(245,239,230,0.15);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px}
+#slide-4 h2{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(1.8rem,3vw,2.5rem);color:#F5EFE6;line-height:1.1}
+#slide-4 .subtitle{font-family:'Cormorant Garamond',serif;font-weight:400;font-style:italic;font-size:1.1rem;color:#D4C9B8;margin:10px 0 24px}
+#slide-4 .cards{display:flex;flex-direction:column;gap:16px}
+#slide-4 .card{background:rgba(245,239,230,0.04);backdrop-filter:blur(10px);border:1px solid rgba(245,239,230,0.06);border-radius:8px;padding:20px;transition:all 0.3s;opacity:0;transform:translateY(12px)}
+#slide-4 .card.show{opacity:1;transform:translateY(0)}
+#slide-4 .card:hover{transform:translateY(-5px);border-color:rgba(139,168,122,0.3);box-shadow:0 10px 30px rgba(45,90,39,0.2)}
+#slide-4 .card-icon{width:22px;height:22px;color:#8BA87A;margin-bottom:10px}
+#slide-4 .card h3{font-family:'Inter',sans-serif;font-weight:600;font-size:1rem;color:#F5EFE6;margin-bottom:8px}
+#slide-4 .card p{font-family:'Inter',sans-serif;font-weight:400;font-size:0.85rem;color:#C8BFA8;line-height:1.6}
+
+/* === SLIDE 5 === */
+#slide-5{flex-direction:column;align-items:center;justify-content:center}
+#slide-5 .slide-header{text-align:center;margin-bottom:30px}
+#slide-5 .slide-num{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:0.8rem;color:rgba(245,239,230,0.15);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px}
+#slide-5 h2{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(1.8rem,3vw,2.5rem);color:#F5EFE6;line-height:1.1}
+#slide-5 .columns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:30px;width:100%}
+#slide-5 .col{position:relative;background:rgba(245,239,230,0.03);border:1px solid rgba(245,239,230,0.06);border-radius:8px;padding:24px;transition:all 0.3s;overflow:hidden;opacity:0;transform:translateY(12px)}
+#slide-5 .col.show{opacity:1;transform:translateY(0)}
+#slide-5 .col:hover{transform:translateY(-3px);border-color:rgba(201,151,78,0.3);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+#slide-5 .col-num{position:absolute;top:-10px;right:10px;font-family:'JetBrains Mono',monospace;font-weight:300;font-size:8rem;color:rgba(245,239,230,0.04);pointer-events:none;line-height:1}
+#slide-5 .col-icon{width:24px;height:24px;color:#C9974E;margin-bottom:12px}
+#slide-5 .col h3{font-family:'Inter',sans-serif;font-weight:600;font-size:0.95rem;color:#F5EFE6;margin-bottom:8px}
+#slide-5 .col p{font-family:'Inter',sans-serif;font-weight:400;font-size:0.85rem;color:#C8BFA8;line-height:1.6}
+#slide-5 .blocks-row{display:flex;gap:20px;justify-content:center}
+
+/* === SLIDE 6 === */
+#slide-6{flex-direction:row;align-items:center;gap:50px}
+#slide-6 .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center}
+#slide-6 .slide-side{flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+#slide-6 .slide-num{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:0.8rem;color:rgba(245,239,230,0.15);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px}
+#slide-6 h2{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(1.8rem,3vw,2.5rem);color:#F5EFE6;line-height:1.1}
+#slide-6 .subtitle{font-family:'Cormorant Garamond',serif;font-weight:400;font-style:italic;font-size:1.1rem;color:#D4C9B8;margin:10px 0 24px}
+#slide-6 .cards{display:flex;flex-direction:column;gap:16px}
+#slide-6 .card{background:rgba(201,151,78,0.06);backdrop-filter:blur(8px);border:1px solid rgba(201,151,78,0.15);border-radius:8px;padding:20px;transition:all 0.3s;opacity:0;transform:translateY(12px)}
+#slide-6 .card.show{opacity:1;transform:translateY(0)}
+#slide-6 .card:hover{transform:translateY(-5px);border-color:rgba(232,168,62,0.4);box-shadow:0 10px 30px rgba(201,151,78,0.15)}
+#slide-6 .card-icon{width:22px;height:22px;color:#E8A83E;margin-bottom:10px}
+#slide-6 .card h3{font-family:'Inter',sans-serif;font-weight:600;font-size:1rem;color:#F5EFE6;margin-bottom:8px}
+#slide-6 .card p{font-family:'Inter',sans-serif;font-weight:400;font-size:0.85rem;color:#C8BFA8;line-height:1.6}
+
+/* === SLIDE 7 === */
+#slide-7{flex-direction:row;align-items:center;gap:50px;background:radial-gradient(ellipse at 30% 40%,#0F1210,#0C0C10)}
+#slide-7 .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center}
+#slide-7 .slide-side{flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+#slide-7 .slide-num{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:0.8rem;color:rgba(245,239,230,0.15);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px}
+#slide-7 h2{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(1.8rem,3vw,2.5rem);color:#F5EFE6;line-height:1.1}
+#slide-7 .subtitle{font-family:'Cormorant Garamond',serif;font-weight:400;font-style:italic;font-size:1rem;color:#D4C9B8;margin:10px 0 24px}
+#slide-7 .cards{display:flex;flex-direction:column;gap:16px}
+#slide-7 .card{background:rgba(245,239,230,0.03);border:1px solid rgba(245,239,230,0.06);border-radius:8px;padding:20px;transition:all 0.3s;opacity:0;transform:translateY(12px)}
+#slide-7 .card.show{opacity:1;transform:translateY(0)}
+#slide-7 .card:hover{transform:translateY(-3px);border-color:rgba(245,239,230,0.12)}
+#slide-7 .card-icon{width:22px;height:22px;color:#8BA87A;margin-bottom:10px}
+#slide-7 .card h3{font-family:'Inter',sans-serif;font-weight:600;font-size:1rem;color:#F5EFE6;margin-bottom:8px}
+#slide-7 .card p{font-family:'Inter',sans-serif;font-weight:400;font-size:0.85rem;color:#C8BFA8;line-height:1.6}
+
+/* === SLIDE 8 === */
+#slide-8{flex-direction:row;align-items:center;gap:50px}
+#slide-8 .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center}
+#slide-8 .slide-side{flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+#slide-8 .slide-num{font-family:'JetBrains Mono',monospace;font-weight:300;font-size:0.8rem;color:rgba(245,239,230,0.15);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px}
+#slide-8 h2{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(2rem,4vw,3.2rem);color:#F5EFE6;line-height:1.1;letter-spacing:-0.02em}
+#slide-8 .line-deco{width:120px;height:2px;background:linear-gradient(90deg,#C9974E,#E8A83E);margin:16px 0 24px}
+#slide-8 .phrases{display:flex;flex-direction:column;gap:18px}
+#slide-8 .phrase{display:flex;align-items:flex-start;gap:14px;opacity:0;transform:translateY(12px);transition:opacity 0.6s ease-out,transform 0.6s ease-out;cursor:default}
+#slide-8 .phrase.show{opacity:1;transform:translateY(0)}
+#slide-8 .phrase-icon{flex:0 0 20px;width:20px;height:20px;color:#C9974E;transition:opacity 0.3s}
+#slide-8 .phrase:hover .phrase-icon{opacity:1}
+#slide-8 .phrase p{font-family:'Cormorant Garamond',serif;font-weight:600;font-style:italic;font-size:clamp(1rem,1.8vw,1.3rem);color:#D4C9B8;line-height:1.4}
+
+/* === SLIDE 9 === */
+#slide-9{flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#slide-9 .glow-circle{width:200px;height:200px;border-radius:50%;background:rgba(201,151,78,0.04);filter:blur(40px);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0;transition:opacity 1s ease}
+#slide-9 .glow-circle.show{opacity:1}
+#slide-9 h2{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(2.5rem,5vw,4.5rem);color:#F5EFE6;text-shadow:0 2px 4px rgba(0,0,0,0.3),0 0 20px rgba(201,151,78,0.2);position:relative}
+#slide-9 .line-deco{width:80px;height:1px;background:rgba(201,151,78,0.3);margin:20px auto;transform:scaleX(0);transition:transform 0.6s ease-out}
+#slide-9 .line-deco.show{transform:scaleX(1)}
+#slide-9 .sub1{font-family:'Cormorant Garamond',serif;font-weight:400;font-style:italic;font-size:1.3rem;color:#D4C9B8}
+#slide-9 .sub2{font-family:'Inter',sans-serif;font-weight:300;font-size:0.9rem;color:#8BA87A;opacity:0}
+
+/* === RESPONSIVE === */
+@media(max-width:1024px){
+  .slide{padding:40px}
+  #slide-2,#slide-4,#slide-6,#slide-7,#slide-8{flex-direction:column;gap:30px}
+  #slide-2 .slide-side,#slide-4 .slide-side,#slide-6 .slide-side,#slide-7 .slide-side,#slide-8 .slide-side{order:-1}
+  #slide-3 .columns,#slide-5 .columns{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .slide{padding:24px}
+  #slide-1 .credits{bottom:80px;left:24px}
+  .bloco-perspectiva{width:min(280px,90vw)}
+  #nav-btns{padding:0 16px}
+  #slide-3 .blocks-row,#slide-5 .blocks-row{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<div id="bg-base"></div>
+<div id="bg-mesh"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+<div id="bg-grid"></div>
+<div id="bg-vignette"></div>
+<div id="bg-noise"></div>
+<canvas id="particles-canvas"></canvas>
+<div id="custom-cursor"></div>
+
+<!-- ======================== SLIDE 1 ======================== -->
+<div class="slide" id="slide-1">
+  <div class="deco-dots"><div class="deco-dot"></div><div class="deco-dot"></div></div>
+  <div class="deco-line-top anim-el" data-delay="300"></div>
+  <h1 data-text="Britânia de Pirabeiraba" class="anim-el" data-delay="500">Britânia de Pirabeiraba</h1>
+  <div class="deco-line anim-el" data-delay="900"></div>
+  <p class="subtitle anim-subtitle" data-delay="1100">História, natureza e cultura de uma localidade</p>
+  <p class="label-apt anim-text" data-delay="1300">Apresentação</p>
+  <div class="credits">
+    <span class="apresentador anim-text" data-delay="1400">[Nome do Apresentador]</span><br>
+    <span class="data anim-text" data-delay="1500">[Data]</span>
+  </div>
+</div>
+
+<!-- ======================== SLIDE 2 ======================== -->
+<div class="slide" id="slide-2">
+  <div class="slide-content">
+    <div class="slide-num anim-text" data-delay="200">02</div>
+    <h2 class="anim-el" data-delay="600">O que é Britânia de Pirabeiraba?</h2>
+    <div class="line-deco anim-el" data-delay="800"></div>
+    <div class="info-item anim-text" data-delay="950">
+      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <div class="info-text"><strong>Localização geográfica:</strong> Pirabeiraba, Joinville/SC — região norte de Santa Catarina, Brasil</div>
+    </div>
+    <div class="info-item anim-text" data-delay="1100">
+      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      <div class="info-text"><strong>Contexto histórico:</strong> Uma localidade forjada pela imigração europeia e pelo trabalho árduo dos pioneiros que desbravaram a mata</div>
+    </div>
+    <div class="info-item anim-text" data-delay="1250">
+      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <div class="info-text"><strong>Importância comunitária:</strong> Berço de tradições vivas e de uma comunidade que preserva suas raízes com orgulho</div>
+    </div>
+  </div>
+  <div class="slide-side">
+    <div class="bloco-perspectiva bloco-perspectiva-superior" data-delay="400" style="--rx:-10deg">
+      <div class="bloco-titulo">Pirabeiraba, Joinville/SC</div>
+      <div class="bloco-sub">Santa Catarina • Brasil</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SLIDE 3 ======================== -->
+<div class="slide" id="slide-3">
+  <div class="slide-header">
+    <div class="slide-num anim-text" data-delay="200">03</div>
+    <h2 class="anim-el" data-delay="400">Origem Histórica</h2>
+    <p class="subtitle anim-subtitle" data-delay="600">As raízes que fundamentam uma identidade</p>
+  </div>
+  <div class="columns">
+    <div class="col anim-card" data-delay="850">
+      <h3>Primeiros Povoadores</h3>
+      <p>Os primeiros habitantes da região de Pirabeiraba chegaram ainda no século XIX, atraídos pelas terras férteis e pela promessa de uma nova vida. A colonização foi marcada pela coragem de famílias inteiras que se estabeleceram na mata virgem.</p>
+    </div>
+    <div class="col anim-card" data-delay="1000">
+      <h3>Influência Europeia</h3>
+      <p>A região recebeu imigrantes alemães, suíços e noruegueses, que trouxeram consigo técnicas agrícolas, arquitetura típica, língua e tradições que até hoje marcam a identidade local. Cada grupo contribuiu com sua cultura única.</p>
+    </div>
+    <div class="col anim-card" data-delay="1150">
+      <h3>Desenvolvimento</h3>
+      <p>Ao longo do século XX, Britânia de Pirabeiraba evoluiu de pequeno núcleo colonial para uma comunidade organizada, com infraestrutura, comércio e uma forte identidade comunitária que atravessa gerações.</p>
+    </div>
+  </div>
+  <div class="blocks-row">
+    <div class="bloco-perspectiva bloco-perspectiva-inferior" data-delay="1350" style="--rx:10deg">
+      <div class="bloco-titulo">Século XIX</div>
+      <div class="bloco-sub">Primeiros povoadores</div>
+    </div>
+    <div class="bloco-perspectiva bloco-perspectiva-inferior" data-delay="1550" style="--rx:10deg">
+      <div class="bloco-titulo">Imigração</div>
+      <div class="bloco-sub">Europeia</div>
+    </div>
+    <div class="bloco-perspectiva bloco-perspectiva-inferior" data-delay="1750" style="--rx:10deg">
+      <div class="bloco-titulo">Século XX</div>
+      <div class="bloco-sub">Desenvolvimento</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SLIDE 4 ======================== -->
+<div class="slide" id="slide-4">
+  <div class="slide-content">
+    <div class="slide-num anim-text" data-delay="200">04</div>
+    <h2 class="anim-el" data-delay="500">Aspectos Geográficos e Naturais</h2>
+    <p class="subtitle anim-subtitle" data-delay="700">A riqueza da terra que sustenta a vida</p>
+    <div class="cards">
+      <div class="card anim-card" data-delay="900">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 21l4-10 4 10"/><path d="M3 14l5-5 3 3 5-7 5 6"/></svg>
+        <h3>Relevo e Vegetação</h3>
+        <p>A região apresenta relevo ondulado típico da Mata Atlântica, com morros suaves cobertos por vegetação densa. A biodiversidade local é rica, com espécies nativas da floresta ombrófila densa.</p>
+      </div>
+      <div class="card anim-card" data-delay="1070">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+        <h3>Recursos Hídricos</h3>
+        <p>Cortada por rios e córregos de águas cristalinas, a região possui abundância de recursos hídricos. As nascentes preservadas garantem água de qualidade para a comunidade e para a fauna local.</p>
+      </div>
+      <div class="card anim-card" data-delay="1240">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <h3>Clima e Paisagens</h3>
+        <p>O clima subtropical úmido proporciona verões amenos e invernos com geadas ocasionais. As paisagens variam entre vales verdejantes e morros cobertos pela névoa matinal, criando cenários de rara beleza.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-side">
+    <div class="bloco-perspectiva bloco-perspectiva-superior" data-delay="350" style="--rx:-10deg;background:linear-gradient(135deg,#2D5A27,#1A3A1A);box-shadow:0 20px 40px -12px rgba(45,90,39,0.4),inset 0 1px 0 rgba(245,239,230,0.1)">
+      <div class="bloco-titulo">Mata Atlântica</div>
+      <div class="bloco-sub">Bioma preservado</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SLIDE 5 ======================== -->
+<div class="slide" id="slide-5">
+  <div class="slide-header">
+    <div class="slide-num anim-text" data-delay="200">05</div>
+    <h2 class="anim-el" data-delay="400">Economia e Atividades Locais</h2>
+  </div>
+  <div class="columns">
+    <div class="col anim-card" data-delay="650">
+      <span class="col-num">1</span>
+      <svg class="col-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+      <h3>Agricultura e Produção Rural</h3>
+      <p>A agricultura familiar é a base da economia local, com destaque para o cultivo de hortaliças, frutas e a produção de alimentos artesanais. A tradição rural é passada de geração em geração.</p>
+    </div>
+    <div class="col anim-card" data-delay="800">
+      <span class="col-num">2</span>
+      <svg class="col-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      <h3>Comércio e Pequenos Negócios</h3>
+      <p>O comércio local atende às necessidades da comunidade com pequenos mercados, padarias, oficinas e prestadores de serviços que movimentam a economia e geram emprego na região.</p>
+    </div>
+    <div class="col anim-card" data-delay="950">
+      <span class="col-num">3</span>
+      <svg class="col-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21l9-9 9 9"/><path d="M12 2V12"/></svg>
+      <h3>Turismo Rural e Potencial Local</h3>
+      <p>O turismo rural vem crescendo, atraindo visitantes em busca de contato com a natureza, tranquilidade e experiências autênticas. Britânia de Pirabeiraba possui grande potencial para o ecoturismo.</p>
+    </div>
+  </div>
+  <div class="blocks-row">
+    <div class="bloco-perspectiva bloco-perspectiva-inferior" data-delay="1150" style="--rx:10deg;background:linear-gradient(135deg,#C9974E,#8B6A2E);box-shadow:0 20px 40px -12px rgba(201,151,78,0.4),inset 0 1px 0 rgba(245,239,230,0.1)">
+      <div class="bloco-titulo">Agricultura</div>
+      <div class="bloco-sub">Produção rural</div>
+    </div>
+    <div class="bloco-perspectiva bloco-perspectiva-inferior" data-delay="1350" style="--rx:10deg;background:linear-gradient(135deg,#C9974E,#8B6A2E);box-shadow:0 20px 40px -12px rgba(201,151,78,0.4),inset 0 1px 0 rgba(245,239,230,0.1)">
+      <div class="bloco-titulo">Comércio</div>
+      <div class="bloco-sub">Pequenos negócios</div>
+    </div>
+    <div class="bloco-perspectiva bloco-perspectiva-inferior" data-delay="1550" style="--rx:10deg;background:linear-gradient(135deg,#C9974E,#8B6A2E);box-shadow:0 20px 40px -12px rgba(201,151,78,0.4),inset 0 1px 0 rgba(245,239,230,0.1)">
+      <div class="bloco-titulo">Turismo</div>
+      <div class="bloco-sub">Potencial local</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SLIDE 6 ======================== -->
+<div class="slide" id="slide-6">
+  <div class="slide-content">
+    <div class="slide-num anim-text" data-delay="200">06</div>
+    <h2 class="anim-el" data-delay="500">Cultura e Tradições</h2>
+    <p class="subtitle anim-subtitle" data-delay="700">O coração da comunidade bate nas tradições</p>
+    <div class="cards">
+      <div class="card anim-card" data-delay="900">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        <h3>Festas Típicas</h3>
+        <p>As festas comunitárias são o ponto alto do calendário local. Com danças típicas, música ao vivo e a participação de toda a comunidade, esses eventos preservam as tradições trazidas pelos imigrantes europeus.</p>
+      </div>
+      <div class="card anim-card" data-delay="1050">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        <h3>Gastronomia Local</h3>
+        <p>A culinária local reflete a herança dos imigrantes com pratos típicos alemães, suíços e noruegueses, adaptados aos ingredientes da região. Os produtos coloniais como queijos, embutidos e pães caseiros são destaque.</p>
+      </div>
+      <div class="card anim-card" data-delay="1200">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        <h3>Preservação Cultural</h3>
+        <p>A comunidade mantém vivas as tradições através de grupos de dança, corais, oficinas de artesanato e eventos que celebram a língua, a música e os costumes herdados dos antepassados.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-side">
+    <div class="bloco-perspectiva bloco-perspectiva-superior" data-delay="350" style="--rx:-10deg;background:linear-gradient(135deg,#C9974E,#8B6A2E);box-shadow:0 20px 40px -12px rgba(201,151,78,0.4),inset 0 1px 0 rgba(245,239,230,0.1)">
+      <div class="bloco-titulo">Tradições Vivas</div>
+      <div class="bloco-sub">Cultura que pulsa</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SLIDE 7 ======================== -->
+<div class="slide" id="slide-7">
+  <div class="slide-content">
+    <div class="slide-num anim-text" data-delay="200">07</div>
+    <h2 class="anim-el" data-delay="500">Infraestrutura e Desenvolvimento</h2>
+    <p class="subtitle anim-subtitle" data-delay="650">Construindo o futuro com bases sólidas</p>
+    <div class="cards">
+      <div class="card anim-card" data-delay="850">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18"/><path d="M6 6l12 12"/><circle cx="12" cy="12" r="10"/></svg>
+        <h3>Acesso e Transporte</h3>
+        <p>A região é servida por estradas que conectam Pirabeiraba ao centro de Joinville. O transporte público e as vias rurais passam por melhorias constantes para garantir o escoamento da produção e a mobilidade dos moradores.</p>
+      </div>
+      <div class="card anim-card" data-delay="1000">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        <h3>Educação e Saúde</h3>
+        <p>A comunidade conta com escolas e unidades básicas de saúde que atendem a população local. Investimentos em educação e saúde são prioridades para o desenvolvimento sustentável da região.</p>
+      </div>
+      <div class="card anim-card" data-delay="1150">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+        <h3>Projetos de Melhoria</h3>
+        <p>Diversos projetos estão em andamento para melhorar a infraestrutura local, incluindo pavimentação de estradas rurais, ampliação da rede de água e saneamento, e incentivos ao turismo sustentável.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-side">
+    <div class="bloco-perspectiva bloco-perspectiva-superior" data-delay="350" style="--rx:-10deg;background:linear-gradient(135deg,#7A5C3A,#4A3420);box-shadow:0 20px 40px -12px rgba(122,92,58,0.4),inset 0 1px 0 rgba(245,239,230,0.1)">
+      <div class="bloco-titulo">Em Desenvolvimento</div>
+      <div class="bloco-sub">Crescimento sustentável</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SLIDE 8 ======================== -->
+<div class="slide" id="slide-8">
+  <div class="slide-content">
+    <div class="slide-num anim-text" data-delay="200">08</div>
+    <h2 class="anim-el" data-delay="500">Britânia de Pirabeiraba</h2>
+    <div class="line-deco anim-el" data-delay="700"></div>
+    <div class="phrases">
+      <div class="phrase anim-text" data-delay="900">
+        <svg class="phrase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <p>Um patrimônio histórico e cultural que atravessa gerações</p>
+      </div>
+      <div class="phrase anim-text" data-delay="1080">
+        <svg class="phrase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        <p>Perspectivas futuras para uma comunidade em crescimento</p>
+      </div>
+      <div class="phrase anim-text" data-delay="1260">
+        <svg class="phrase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        <p>A valorização da identidade local como caminho para o futuro</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-side">
+    <div class="bloco-perspectiva bloco-perspectiva-superior" data-delay="350" style="--rx:-10deg;background:linear-gradient(135deg,#C9974E,#8B6A2E);box-shadow:0 20px 40px -12px rgba(201,151,78,0.4),inset 0 1px 0 rgba(245,239,230,0.1)">
+      <div class="bloco-titulo">Patrimônio Cultural</div>
+      <div class="bloco-sub">Herança que inspira</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SLIDE 9 ======================== -->
+<div class="slide" id="slide-9">
+  <div class="glow-circle anim-el" data-delay="200"></div>
+  <h2 class="anim-el" data-delay="500">Muito Obrigado</h2>
+  <div class="line-deco anim-el" data-delay="800"></div>
+  <p class="sub1 anim-subtitle" data-delay="1000">Britânia de Pirabeiraba</p>
+  <p class="sub2 anim-text" data-delay="1200">História, natureza e cultura</p>
+</div>
+
+<!-- ======================== NAVIGATION ======================== -->
+<div id="nav-controls">
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+  <div id="nav-dots"></div>
+  <div id="nav-btns">
+    <button class="nav-btn disabled" id="btn-prev" aria-label="Slide anterior">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="nav-btn" id="btn-next" aria-label="Próximo slide">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+const TOTAL=9;
+let current=0,isAnimating=false;
+
+/* === PARTICLES === */
+const canvas=document.getElementById('particles-canvas');
+const ctx=canvas.getContext('2d');
+let particles=[];
+const slideParticles=[
+  {count:60,colors:['rgba(201,151,78,','rgba(201,151,78,'],speed:0.3},
+  {count:50,colors:['rgba(201,151,78,','rgba(245,239,230,'],speed:0.25},
+  {count:45,colors:['rgba(201,151,78,','rgba(122,92,58,'],speed:0.2},
+  {count:70,colors:['rgba(139,168,122,','rgba(201,151,78,'],speed:0.4},
+  {count:55,colors:['rgba(201,151,78,','rgba(232,168,62,'],speed:0.3},
+  {count:65,colors:['rgba(201,151,78,','rgba(232,168,62,'],speed:0.5},
+  {count:40,colors:['rgba(245,239,230,','rgba(139,168,122,'],speed:0.15},
+  {count:50,colors:['rgba(201,151,78,','rgba(201,151,78,'],speed:0.6},
+  {count:45,colors:['rgba(201,151,78,','rgba(201,151,78,'],speed:0.15}
+];
+
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+window.addEventListener('resize',resizeCanvas);
+resizeCanvas();
+
+function initParticles(){
+  particles=[];
+  const cfg=slideParticles[current];
+  for(let i=0;i<cfg.count;i++){
+    const c=cfg.colors[Math.floor(Math.random()*cfg.colors.length)];
+    particles.push({
+      x:Math.random()*canvas.width,
+      y:Math.random()*canvas.height,
+      vx:(Math.random()-0.5)*cfg.speed,
+      vy:-(Math.random()*cfg.speed*0.5+0.05),
+      size:Math.random()*2.5+0.5,
+      opacity:Math.random()*0.4+0.2,
+      color:c
+    });
+  }
+}
+
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.x+=p.vx;
+    p.y+=p.vy;
+    if(p.y<-10){p.y=canvas.height+10;p.x=Math.random()*canvas.width}
+    if(p.x<-10)p.x=canvas.width+10;
+    if(p.x>canvas.width+10)p.x=-10;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fillStyle=p.color+(p.opacity)+')';
+    ctx.fill();
+  });
+  requestAnimationFrame(animateParticles);
+}
+initParticles();
+animateParticles();
+
+/* === CURSOR === */
+const cursor=document.getElementById('custom-cursor');
+let cx=0,cy=0,tx=0,ty=0;
+document.addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY});
+function updateCursor(){
+  cx+=(tx-cx)*0.1;cy+=(ty-cy)*0.1;
+  cursor.style.left=cx+'px';cursor.style.top=cy+'px';
+  requestAnimationFrame(updateCursor);
+}
+updateCursor();
+document.querySelectorAll('button,a,.nav-dot,.card,.col,.info-item,.phrase').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cursor.classList.add('cursor-hover'));
+  el.addEventListener('mouseleave',()=>cursor.classList.remove('cursor-hover'));
+});
+
+/* === NAV DOTS === */
+const dotsContainer=document.getElementById('nav-dots');
+for(let i=0;i<TOTAL;i++){
+  const d=document.createElement('div');
+  d.className='nav-dot'+(i===0?' active':'');
+  d.addEventListener('click',()=>goToSlide(i));
+  dotsContainer.appendChild(d);
+}
+const dots=dotsContainer.querySelectorAll('.nav-dot');
+
+/* === TRANSITIONS === */
+const transitions={
+  0:{out:'fade-scale-out',in:'fade-scale-in'},
+  1:{out:'push-right-out',in:'push-right-in'},
+  2:{out:'crossfade-out',in:'crossfade-in'},
+  3:{out:'slide-up-out',in:'slide-up-in'},
+  4:{out:'fade-blur-out',in:'fade-blur-in'},
+  5:{out:'push-left-out',in:'push-left-in'},
+  6:{out:'fade-scale2-out',in:'fade-scale2-in'},
+  7:{out:'crossfade-slow-out',in:'crossfade-slow-in'}
+};
+
+function getTransition(from,to){
+  if(to>from){
+    const t=transitions[from];
+    return t?t:{out:'crossfade-out',in:'crossfade-in'};
+  }else{
+    const rev={
+      'fade-scale-out':'fade-scale-in','fade-scale-in':'fade-scale-out',
+      'push-right-out':'push-right-in','push-right-in':'push-right-out',
+      'crossfade-out':'crossfade-in','crossfade-in':'crossfade-out',
+      'slide-up-out':'slide-up-in','slide-up-in':'slide-up-out',
+      'fade-blur-out':'fade-blur-in','fade-blur-in':'fade-blur-out',
+      'push-left-out':'push-left-in','push-left-in':'push-left-out',
+      'fade-scale2-out':'fade-scale2-in','fade-scale2-in':'fade-scale2-out'
+    };
+    const fwd=transitions[to===0?0:to-1];
+    if(fwd&&rev[fwd.out])return{out:rev[fwd.out],in:rev[fwd.in]};
+    return{out:'crossfade-out',in:'crossfade-in'};
+  }
+}
+
+function getDuration(from,to){
+  if(to>from){
+    switch(from){
+      case 0:return{out:500,in:600};
+      case 1:return{out:550,in:550};
+      case 2:return{out:700,in:700};
+      case 3:return{out:550,in:550};
+      case 4:return{out:650,in:650};
+      case 5:return{out:550,in:550};
+      case 6:return{out:600,in:600};
+      case 7:return{out:800,in:800};
+    }
+  }
+  return{out:550,in:600};
+}
+
+function animateSlideIn(slide){
+  slide.querySelectorAll('.anim-el,.anim-subtitle,.anim-card,.anim-text,.anim-btn,.anim-icon,.bloco-perspectiva').forEach(el=>{
+    el.classList.remove('show');
+  });
+  slide.querySelectorAll('[data-delay]').forEach(el=>{
+    const d=parseInt(el.getAttribute('data-delay'))||0;
+    setTimeout(()=>el.classList.add('show'),d);
+  });
+}
+
+function resetSlide(slide){
+  slide.querySelectorAll('.anim-el,.anim-subtitle,.anim-card,.anim-text,.anim-btn,.anim-icon,.bloco-perspectiva').forEach(el=>{
+    el.classList.remove('show');
+  });
+}
+
+function updateUI(){
+  dots.forEach((d,i)=>d.classList.toggle('active',i===current));
+  document.getElementById('progress-fill').style.width=(current/(TOTAL-1)*100)+'%';
+  document.getElementById('btn-prev').classList.toggle('disabled',current===0);
+  document.getElementById('btn-next').classList.toggle('disabled',current===TOTAL-1);
+  initParticles();
+}
+
+function goToSlide(to){
+  if(isAnimating||to===current||to<0||to>=TOTAL)return;
+  isAnimating=true;
+  const from=current;
+  const tr=getTransition(from,to);
+  const dur=getDuration(from,to);
+  const oldSlide=document.getElementById('slide-'+(from+1));
+  const newSlide=document.getElementById('slide-'+(to+1));
+
+  resetSlide(newSlide);
+  newSlide.style.display='flex';
+  newSlide.style.opacity='0';
+
+  oldSlide.classList.add('exiting',tr.out);
+  oldSlide.style.animationDuration=dur.out+'ms';
+
+  newSlide.classList.add('entering',tr.in);
+  newSlide.style.animationDuration=dur.in+'ms';
+
+  setTimeout(()=>{
+    newSlide.classList.add('active');
+    newSlide.style.opacity='';
+    oldSlide.classList.remove('active','exiting',tr.out);
+    oldSlide.style.display='';
+    oldSlide.style.animationDuration='';
+    newSlide.classList.remove('entering',tr.in);
+    newSlide.style.animationDuration='';
+    current=to;
+    updateUI();
+    animateSlideIn(newSlide);
+    isAnimating=false;
+  },dur.in);
+}
+
+/* === NAV BUTTONS === */
+document.getElementById('btn-prev').addEventListener('click',()=>goToSlide(current-1));
+document.getElementById('btn-next').addEventListener('click',()=>goToSlide(current+1));
+
+/* === KEYBOARD === */
+document.addEventListener('keydown',e=>{
+  if(isAnimating)return;
+  switch(e.key){
+    case'ArrowRight':case'ArrowDown':goToSlide(current+1);break;
+    case'ArrowLeft':case'ArrowUp':goToSlide(current-1);break;
+    case'Home':goToSlide(0);break;
+    case'End':goToSlide(TOTAL-1);break;
+    case'1':case'2':case'3':case'4':case'5':case'6':case'7':case'8':case'9':
+      goToSlide(parseInt(e.key)-1);break;
+  }
+});
+
+/* === TOUCH === */
+let touchX=0,touchY=0;
+document.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX;touchY=e.touches[0].clientY},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-touchX;
+  const dy=e.changedTouches[0].clientY-touchY;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50){
+    if(dx<0)goToSlide(current+1);
+    else goToSlide(current-1);
+  }
+},{passive:true});
+
+/* === MOUSE SCROLL BLOCKED === */
+document.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
+
+/* === INITIAL STATE === */
+document.querySelectorAll('.slide').forEach((s,i)=>{
+  if(i===0){s.classList.add('active');s.style.display='flex';s.style.opacity='1'}
+  else{s.style.display='none';s.style.opacity='0'}
+});
+updateUI();
+
+/* === TITLE SHADOW === */
+const titleEl=document.querySelector('#slide-1 h1');
+if(titleEl){
+  const startColor={r:201,g:151,b:78};
+  const endColor={r:25,g:50,b:25};
+  let shadow='';
+  for(let i=0;i<35;i++){
+    const t=i/34;
+    const r=Math.round(startColor.r+(endColor.r-startColor.r)*t);
+    const g=Math.round(startColor.g+(endColor.g-startColor.g)*t);
+    const b=Math.round(startColor.b+(endColor.b-startColor.b)*t);
+    const a=0.9-t*0.6;
+    shadow+=(shadow?',':'')+`${(-i)}px ${i}px 0 rgba(${r},${g},${b},${a})`;
+  }
+  titleEl.style.textShadow=shadow;
+  titleEl.classList.add('glowing');
+}
+
+/* === TRIGGER FIRST SLIDE ANIMATIONS === */
+setTimeout(()=>animateSlideIn(document.getElementById('slide-1')),100);
+})();
+</script>
+</body>
+</html>

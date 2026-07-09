@@ -1,0 +1,1737 @@
+================================================================================
+ESPECIFICAÇÃO COMPLETA — APRESENTAÇÃO HTML
+BRITÂNIA DE PIRABEIRABA
+================================================================================
+
+ATENÇÃO: A IA responsável por desenvolver o documento HTML NÃO deve acessar
+nenhum outro arquivo dentro da pasta de trabalho. Todo o contexto necessário
+já está contido neste documento. Crie o HTML completo de uma só vez, sem
+consultar outros arquivos do diretório.
+
+================================================================================
+1. IDENTIDADE VISUAL GERAL
+================================================================================
+
+Tema: Britânia de Pirabeiraba — história, natureza e cultura de uma localidade
+rural com forte herança de imigração europeia.
+
+Atmosfera geral: Elegância naturalista com toque histórico. A apresentação deve
+transmitir aconchego, autenticidade, profundidade histórica e valorização das
+raízes. A estética mescla o rústico e o refinado — como uma descoberta
+cuidadosa de um patrimônio escondido.
+
+Sensação: O observador deve sentir que está conhecendo um lugar especial,
+envolvido por uma luz dourada de fim de tarde, com a tranquilidade do campo e
+o peso da história. Deve haver aconchego, nostalgia suave e orgulho local.
+
+Estilo visual: Naturalista premium. Fundo escuro aveludado com iluminação
+dourada e quente, texturas sutis de papel e grão, elementos orgânicos e
+geométricos equilibrados. A apresentação alterna entre o minimalismo e a
+riqueza de detalhes.
+
+Direção de luz: Luz vindo do canto superior esquerdo, como um sol de final de
+tarde. Todas as sombras, glows e reflexos devem respeitar essa direção.
+
+================================================================================
+2. PALETA DE CORES
+================================================================================
+
+CORES PRINCIPAIS (OBRIGATÓRIAS EM TODA APRESENTAÇÃO):
+- Preto absoluto: #000000 (usado apenas em elementos específicos)
+- Preto fundo: #0A0A0F (base principal dos backgrounds)
+- Branco texto: #F5EFE6 (texto sobre fundo escuro — tom quente para não ser frio)
+- Branco puro: #FFFFFF (apenas para o título do slide 1)
+
+CORES DE MARCA (TEMÁTICAS — NATUREZA/HISTÓRIA):
+- Dourado Quente: #C9974E (cor de destaque principal — luz, ouro, valorização)
+- Verde Floresta: #2D5A27 (natureza, profundidade, herança rural)
+- Terra: #7A5C3A (chão, história, estabilidade, madeira)
+- Verde Sálvia: #8BA87A (secundário natural, suave)
+- Âmbar: #E8A83E (destaque, energia, luz forte)
+
+CORES DE FUNDO:
+- Base sólida: #0A0A0F
+- Variação quente: #0F0A06 (para slides históricos)
+- Variação verde: #070F08 (para slides de natureza)
+- Variação neutra: #0C0C10 (para slides de infraestrutura)
+- Gradiente base: radial-gradient(ellipse at 30% 40%, #1A1208 0%, #0A0A0F 70%)
+
+CORES DE TEXTO:
+- Títulos sobre fundo escuro: #F5EFE6
+- Subtítulos sobre fundo escuro: #D4C9B8
+- Conteúdo sobre fundo escuro: #C8BFA8
+- Título slide 1 (capa): #FFFFFF (branco puro)
+- Links: #C9974E (dourado)
+- Links hover: #E8A83E (âmbar)
+
+CORES DOS BOTÕES DE NAVEGAÇÃO:
+- Fundo: rgba(201, 151, 78, 0.15)
+- Hover: rgba(201, 151, 78, 0.3)
+- Ícone: #C9974E
+- Ícone hover: #E8A83E
+
+CORES DAS BORDAS E DIVISÓRIAS:
+- Linhas sutis: rgba(245, 239, 230, 0.06)
+- Bordas de cards: rgba(201, 151, 78, 0.2)
+- Bordas de glassmorphism: rgba(245, 239, 230, 0.08)
+
+CORES DOS NAVIGATION DOTS:
+- Inativo: rgba(245, 239, 230, 0.2)
+- Ativo: #C9974E
+- Hover: rgba(201, 151, 78, 0.5)
+
+CORES BARRA DE PROGRESSO:
+- Gradiente: linear-gradient(90deg, #2D5A27, #C9974E, #E8A83E)
+
+CORES DO TEXTO DO TÍTULO DO SLIDE 1:
+- Cor do texto: #FFFFFF (branco puro)
+- Gradiente do text-shadow: de mais claro (dourado #C9974E com opacidade 0.9)
+  para mais escuro (verde escuro #1A3A1A com opacidade 0.3), com 35 camadas
+- ::before da sombra ambiente: rgba(20, 40, 20, 0.6), blur(6px),
+  deslocamento 2px para baixo
+
+================================================================================
+3. TIPOGRAFIA
+================================================================================
+
+FONTE PRINCIPAL DOS TÍTULOS:
+- Playfair Display (Google Fonts)
+- Pesos: 700 (bold) para títulos principais, 600 para subtítulos
+- Espacejamento: letter-spacing: -0.02em para títulos grandes
+- Altura da linha: 1.1
+
+FONTE DE SUBTÍTULOS E DESTAQUES:
+- Cormorant Garamond (Google Fonts)
+- Pesos: 600 (semibold) para subtítulos, 400 para textos destacados em itálico
+- letter-spacing: 0.02em
+- Altura da linha: 1.3
+
+FONTE DO CONTEÚDO (CORPO):
+- Inter (Google Fonts)
+- Pesos: 300 (light) para textos longos, 400 (regular) para conteúdo padrão,
+  500 (medium) para destaques, 600 (semibold) para labels
+- Altura da linha: 1.6
+
+FONTE MONOESPADA (PARA DETALHES TÉCNICOS/DECORATIVOS):
+- JetBrains Mono (Google Fonts)
+- Peso: 300
+- Usada para: coordenadas, labels técnicas, números decorativos, categorias
+- letter-spacing: 0.05em
+- text-transform: uppercase
+- Opacidade: 0.3 a 0.5
+
+HIERARQUIA VISUAL:
+- Nível 1 (Slide 1 título): Playfair Display 700, 4.5rem a 6rem (clamp)
+- Nível 2 (Títulos de slide): Playfair Display 700, 2.2rem a 3rem (clamp)
+- Nível 3 (Subtítulos): Cormorant Garamond 600, 1.4rem a 1.8rem (clamp)
+- Nível 4 (Corpo): Inter 400, 0.95rem a 1.15rem (clamp)
+- Nível 5 (Labels/notas): JetBrains Mono 300, 0.6rem a 0.75rem (clamp)
+
+Todas as fontes devem usar clamping com clamp() para responsividade.
+
+================================================================================
+4. ESTILO VISUAL
+================================================================================
+
+Naturalista Premium com elementos de Heritage Design.
+
+- Elegante, não rústico demais
+- Toque de sofisticação editorial (como revistas de viagem/luxo)
+- Uso moderado de glassmorphism (em cards e painéis de conteúdo)
+- Profundidade com múltiplas camadas
+- Grid sutil como elemento decorativo
+- Iluminação dourada como elemento unificador
+- Texturas: grão fino, vignette, noise sutil
+- Borda iluminada sutil em elementos de destaque
+- Sombras longas e suaves na direção da luz (canto superior esquerdo)
+- Elementos com glow dourado controlado
+
+O que NÃO usar:
+- Cyberpunk, neon exagerado, glitch
+- Cores fluorescentes ou muito saturadas
+- Elementos tecnológicos frios (circuitos, HUD, scanner)
+- Excesso de glassmorphism a ponto de parecer genérico
+- Cores chapadas sem textura
+- Sombras escuras pretas (preferir sombras coloridas com o tom do fundo)
+
+================================================================================
+5. CONCEITO ARTÍSTICO
+================================================================================
+
+"Luz Dourada sobre a História"
+
+A apresentação é conduzida como um documentário visual. O espectador é
+convidado a percorrer Britânia de Pirabeiraba como se estivesse caminhando
+por suas terras no final da tarde, quando a luz dourada do sol realça as
+cores da vegetação, das construções históricas e dos rostos da comunidade.
+
+O fundo escuro e aveludado representa a terra fértil. A luz dourada que
+emerge do canto superior esquerdo é o sol poente que ilumina cada aspecto
+da localidade. As partículas são como pólen e poeira dourada suspensos no ar.
+
+Cada slide é uma "janela" para um aspecto diferente desse lugar. A transição
+entre slides é como virar as páginas de um livro de memórias ricamente
+ilustrado.
+
+================================================================================
+6. BACKGROUND GLOBAL
+================================================================================
+
+CAMADA 1 — BASE (presente em TODOS os slides):
+- Cor sólida: #0A0A0F
+- Gradiente radial: radial-gradient(ellipse at 30% 40%, #1A1208 0%, #0A0A0F 70%)
+- O centro do gradiente (30% 40%) é onde a "luz" principal incide
+
+CAMADA 2 — MESH GRADIENT ANIMADO (presente em TODOS os slides):
+- Um gradiente mesh com 3 pontos de cor que se movem lentamente
+- Cores: #2D5A27 (opacidade 0.15), #7A5C3A (opacidade 0.1), #C9974E
+  (opacidade 0.08)
+- Implementar como 3 blobs (divs com border-radius: 50%, filter: blur(80px)
+  a 120px) que se movem em loop suave com keyframes
+- Movimento: circular muito lento (60s a 90s de duração), deslocamento máximo
+  de 60px em cada eixo
+- Devem ficar SEMPRE atrás do conteúdo (z-index baixo)
+
+CAMADA 3 — GRID SUTIL (presente em TODOS os slides):
+- Grid de linhas finas
+- Cor: rgba(245, 239, 230, 0.025)
+- grid-template: 1fr 1fr 1fr 1fr 1fr 1fr / 1fr 1fr 1fr 1fr 1fr 1fr
+- Ou implementar como background-image com SVG inline de linhas
+- Opacidade muito baixa, quase imperceptível — apenas para criar textura
+  visual e profundidade
+
+CAMADA 4 — VIGNETTE (presente em TODOS os slides):
+- box-shadow inset gigante: 0 0 150px rgba(0,0,0,0.6)
+- Escurece as bordas, concentrando a atenção no centro
+- Leve variação por slide (alguns slides podem ter vignette mais forte)
+
+CAMADA 5 — NOISE/GRAIN (presente em TODOS os slides):
+- Overlay com ruído SVG ou CSS
+- Opacidade: 0.015 a 0.025 (muito sutil)
+- mix-blend-mode: overlay ou soft-light
+- Adiciona textura de grão fotográfico analógico
+
+CAMADA 6 — PARTÍCULAS (presentes em TODOS os slides, variando tipo):
+- Sistema de partículas via Canvas API
+- Quantidade: entre 40 e 80 partículas (varia por slide)
+- Tamanho: 0.5px a 3px
+- Cor base: rgba(201, 151, 78, 0.6) (dourado)
+- Movimento: flutuação suave, ascendente muito lento
+- Velocidade: 0.2 a 0.6 px/s em movimento aleatório browniano
+- Em slides específicos, as partículas podem mudar de cor ou quantidade
+- As partículas NUNCA devem competir com o conteúdo
+
+VARIAÇÕES POR SLIDE:
+- Slide 1: Partículas douradas como pólen, 60 partículas
+- Slide 2: Partículas douradas e brancas, 50 partículas
+- Slide 3: Partículas com tom sépia/quente, 45 partículas
+- Slide 4: Partículas verdes e douradas (como pólen de mata), 70 partículas
+- Slide 5: Partículas douradas (como grãos), 55 partículas
+- Slide 6: Partículas douradas e âmbar (festa/calor), 65 partículas
+- Slide 7: Partículas brancas e azuladas muito sutis, 40 partículas
+- Slide 8: Partículas douradas subindo (otimismo), 50 partículas
+- Slide 9: Partículas douradas em movimento ascendente lento, 45 partículas
+
+IMPLEMENTAÇÃO DAS PARTÍCULAS:
+- Canvas em tela cheia, posicionado como fixed
+- z-index: 1
+- pointer-events: none
+- Cada partícula: { x, y, vx, vy, size, opacity, color }
+- Atualizar em requestAnimationFrame
+- Partículas nascem em posições aleatórias e se movem suavemente
+- Ao sair da tela, reaparecem no lado oposto com nova posição Y
+
+================================================================================
+7. NAVEGAÇÃO
+================================================================================
+
+7.1 Navegação por Teclado (OBRIGATÓRIO):
+- Seta para DIREITA: próximo slide
+- Seta para ESQUERDA: slide anterior
+- Seta para CIMA: slide anterior
+- Seta para BAIXO: próximo slide
+- Home: primeiro slide
+- End: último slide
+- Número 1-9: vai para o slide correspondente
+- ESC: não faz nada (proibido trocar de slide com ESC)
+
+7.2 Scroll do Mouse:
+- É ESTRITAMENTE PROIBIDO que o scroll do mouse troque de slides
+- O scroll não deve ter nenhum efeito na navegação
+
+7.3 Clique do Mouse:
+- É PROIBIDO trocar de slide ao clicar em qualquer área vazia da tela
+- Apenas botões explícitos de navegação devem trocar de slide
+
+7.4 Botões de Navegação (OBRIGATÓRIO):
+- Canto inferior ESQUERDO: botão "Anterior" (seta para esquerda)
+- Canto inferior DIREITO: botão "Próximo" (seta para direita)
+- Estilo dos botões:
+  - Botão circular: 44px x 44px
+  - Fundo: rgba(201, 151, 78, 0.12)
+  - Borda: 1px solid rgba(201, 151, 78, 0.2)
+  - Ícone: SVG de seta, #C9974E, 18px
+  - Hover: fundo rgba(201, 151, 78, 0.25), borda rgba(201, 151, 78, 0.4),
+    glow sutil (box-shadow: 0 0 20px rgba(201, 151, 78, 0.15))
+  - Active/Click: escala 0.95, fundo rgba(201, 151, 78, 0.3)
+  - Transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+  - z-index: 100
+
+7.5 Navigation Dots (OBRIGATÓRIO):
+- Localização: Centralizado horizontalmente, parte inferior (acima dos botões)
+- Distância da base: 80px a 100px do fundo
+- 9 dots (um por slide)
+- Cada dot: 8px de diâmetro, border-radius: 50%
+- Inativo: rgba(245, 239, 230, 0.15)
+- Ativo: #C9974E com glow (box-shadow: 0 0 8px rgba(201, 151, 78, 0.5))
+- Hover: rgba(201, 151, 78, 0.4), escala 1.3
+- Espaçamento: 12px entre dots
+- Animação de ativação: escala 1 para 1.3, cor muda com transição de 0.4s
+- Clicáveis: ao clicar em um dot, navega para o slide correspondente
+- z-index: 90
+
+7.6 Barra de Progresso (OBRIGATÓRIO):
+- Localização: Imediatamente acima dos navigation dots
+- Altura: 2px
+- Largura: 180px (centralizada, mesma largura total dos dots)
+- Gradiente: linear-gradient(90deg, #2D5A27, #C9974E, #E8A83E)
+- A barra começa em 0% e vai até 100% conforme o slide atual
+- Animação: transição suave de largura com 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+- Debaixo da barra, um fundo sólido rgba(245, 239, 230, 0.08) para visibilidade
+- z-index: 91
+
+7.7 Navegação Touch (Mobile/Tablet):
+- Swipe horizontal para ESQUERDA: próximo slide
+- Swipe horizontal para DIREITA: slide anterior
+- Swipe vertical: NÃO deve trocar slides
+- Tap em área segura: não troca slide (apenas botões)
+
+================================================================================
+8. ANIMAÇÕES GLOBAIS
+================================================================================
+
+8.1 Transições entre Slides:
+Cada transição deve ser diferente. Seguir a tabela abaixo:
+
+Slide 1 → 2: Fade + Scale
+  - Slide 1 fade out com escala 1→0.95, duração 500ms, ease-out
+  - Slide 2 fade in com escala 0.95→1, duração 600ms, ease-out
+  - Pequeno intervalo de 100ms entre saída e entrada
+
+Slide 2 → 3: Push da direita
+  - Slide 2 desliza para esquerda (translateX -100%)
+  - Slide 3 desliza da direita (translateX de 100% para 0%)
+  - Duração: 550ms, ease-in-out
+
+Slide 3 → 4: Cross Fade
+  - Slide 3 fade out, Slide 4 fade in simultaneamente
+  - Duração: 700ms, ease
+
+Slide 4 → 5: Slide up (slide 4 sobe, slide 5 vem de baixo)
+  - Duração: 550ms, ease-in-out
+
+Slide 5 → 6: Fade + Blur
+  - Slide 5 blur de 0→4px + fade out
+  - Slide 6 blur de 4px→0 + fade in
+  - Duração: 650ms, ease
+
+Slide 6 → 7: Push da esquerda (direção inversa para variar)
+  - Duração: 550ms, ease-in-out
+
+Slide 7 → 8: Fade + Scale (scale 1→1.05 saindo, 0.95→1 entrando)
+  - Duração: 600ms, ease-out
+
+Slide 8 → 9: Cross Fade lento
+  - Duração: 800ms, ease
+
+Para VOLTAR (próximo → anterior), a transição deve ser exatamente a inversa:
+  - Push da direita ao avançar → Push da esquerda ao voltar
+  - Slide up → Slide down
+  - Fade + Blur funciona igual nos dois sentidos
+  - Cross fade funciona igual nos dois sentidos
+  - Fade + Scale funciona igual nos dois sentidos
+
+IMPLEMENTAÇÃO DAS TRANSIÇÕES:
+- Usar JavaScript para controlar classes nos slides
+- Cada slide é um elemento .slide com position: absolute, top: 0, left: 0,
+  width: 100%, height: 100%
+- O slide ativo tem classe .active
+- O slide saindo recebe classe .exiting com a animação de saída
+- O slide entrando recebe classe .active + .entering com animação de entrada
+- Após a animação terminar, remover .exiting e .entering
+
+8.2 Estado Inicial Obrigatório:
+- NENHUM elemento pode aparecer antes da animação
+- Todos os elementos iniciam com opacidade 0
+- Posições, escalas, blurs iniciais definidos individualmente
+- NENHUM flash de conteúdo permitido
+- O slide 1 deve ser exibido automaticamente ao carregar a página
+
+8.3 Sequência de Animação por Slide:
+Cada elemento dentro de um slide segue uma ordem coreográfica:
+
+1. Background (já está lá, não anima)
+2. Elementos decorativos de fundo (blobs, gradientes)
+3. Grid/linhas de fundo
+4. Blocos com perspectiva 3D
+5. Cards e painéis
+6. Título principal
+7. Subtítulo
+8. Conteúdo (textos, listas)
+9. Ícones e badges
+10. Botões e elementos de ação
+11. Efeitos finais (glows, destaques)
+
+Delay base entre elementos: 120ms a 200ms
+Duração padrão de cada animação: 600ms a 900ms
+Easing padrão: cubic-bezier(0.25, 0.46, 0.45, 0.94) — ease-out suave
+Easing para entradas dramáticas: cubic-bezier(0.34, 1.56, 0.64, 1) — spring
+
+8.4 Animação de Elementos Individuais (Catálogo):
+
+TÍTULO (entrada):
+- Opacidade: 0 → 1
+- TranslateY: 20px → 0px
+- Escala: 0.97 → 1
+- Filter: blur(4px) → blur(0px)
+- Duração: 800ms
+- Delay: conforme ordem
+- Easing: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+SUBTÍTULO (entrada):
+- Opacidade: 0 → 1
+- TranslateY: 15px → 0px
+- Filter: blur(3px) → blur(0px)
+- Duração: 700ms
+- Delay: 200ms após o título
+- Easing: ease-out
+
+CARDS/PAINÉIS (entrada):
+- Opacidade: 0 → 1
+- TranslateY: 30px → 0px
+- Escala: 0.95 → 1
+- Box-shadow: 0 0 0 rgba(0,0,0,0) → sombra final
+- Duração: 700ms
+- Stagger entre cards: 150ms
+- Easing: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+TEXTOS (entrada, parágrafo ou lista):
+- Opacidade: 0 → 1
+- TranslateY: 12px → 0px
+- Duração: 600ms
+- Stagger entre itens: 100ms
+- Easing: ease-out
+
+BLOCOS 3D PERSPECTIVA (entrada):
+- Opacidade: 0 → 1
+- TranslateY: 40px → 0px
+- RotateY começa em 35deg e vai para 25deg (animar o rotateY)
+- Escala: 0.9 → 1
+- Filter: blur(6px) → blur(0px)
+- Duração: 900ms
+- Easing: cubic-bezier(0.34, 1.56, 0.64, 1) (spring leve)
+- A transformação final deve manter o rotateY: 25deg original
+
+BOTÕES (entrada):
+- Opacidade: 0 → 1
+- Escala: 0.9 → 1
+- Duração: 400ms
+- Delay: calculado para aparecer após o conteúdo
+- Easing: ease-out
+
+ÍCONES (entrada):
+- Opacidade: 0 → 1
+- Rotate: -10deg → 0deg (em elementos decorativos)
+- Escala: 0.8 → 1
+- Duração: 500ms
+- Stagger: 80ms
+
+8.5 Estado de Saída dos Slides:
+- Opacidade: 1 → 0 (para fade)
+- TranslateY/Y: posição original → deslocamento conforme transição
+- Escala: conforme transição
+- Duração: 400ms a 550ms
+- Todos os elementos saem JUNTOS (não em sequência)
+- Ao finalizar, todos os elementos do slide devem resetar para estado inicial
+
+8.6 Reset de Animação ao Retornar:
+- Quando o usuário volta para um slide já visitado, TODAS as animações
+  devem ser executadas novamente do início
+- Todos os elementos devem retornar ao estado inicial (opacidade 0, etc.)
+- Após o slide se tornar ativo novamente, a sequência de entrada deve
+  disparar imediatamente
+
+================================================================================
+9. ELEMENTOS INTERATIVOS GLOBAIS
+================================================================================
+
+9.1 Cursor Personalizado:
+- Um pequeno círculo que segue o mouse com suavidade (delay de 0.1s)
+- Tamanho: 8px de diâmetro
+- Cor: rgba(201, 151, 78, 0.6)
+- Glow externo: box-shadow 0 0 12px rgba(201, 151, 78, 0.3)
+- pointer-events: none
+- z-index: 9999
+- Em hover de elementos clicáveis: aumentar para 14px, opacidade 0.9
+- Não precisa substituir o cursor padrão, apenas adicionar como camada extra
+
+9.2 Hover em Botões de Navegação:
+- Transição suave de 0.3s
+- Fundo aumenta opacidade de 0.12 para 0.25
+- Seta muda de #C9974E para #E8A83E
+- Glow externo aparece
+
+9.3 Hover em Navigation Dots:
+- Escala aumenta para 1.3
+- Opacidade aumenta
+- Transição de 0.2s
+
+9.4 Hover em Cards/Painéis (se houver):
+- Pequeno deslocamento para cima: translateY(-4px)
+- Sombra se intensifica
+- Borda iluminada (se aplicável)
+- Duração: 0.3s
+
+9.5 Glow Contínuo em Elementos de Destaque:
+- Alguns elementos (como o título do slide 1) podem ter um glow pulsante
+  muito sutil
+- keyframes: 0% { text-shadow: ...; } 50% { text-shadow: ... com glow
+  ligeiramente maior; } 100% { volta ao normal }
+- Duração: 4s, infinite, ease-in-out
+
+================================================================================
+10. COMPONENTE RECORRENTE — BLOCO COM PERSPECTIVA 3D REAL
+================================================================================
+
+Este componente é parte da identidade visual da apresentação e deve aparecer
+em MÚLTIPLOS slides com conteúdo real.
+
+ATENÇÃO: Esta seção substitui completamente qualquer abordagem anterior
+baseada em clip-path, skew 2D ou deformações artificiais.
+
+10.1 Configuração CSS do Bloco (OBRIGATÓRIO — NÃO ALTERAR):
+
+Para blocos na METADE SUPERIOR do slide (centro geométrico acima de 50%):
+.bloco-perspectiva-superior {
+    transform: perspective(250px) rotateX(-10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+    padding: 20px 28px;
+    border-radius: 4px;
+    color: #F5EFE6;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    background: linear-gradient(135deg, #2D5A27, #1A3A1A);
+    box-shadow:
+        0 20px 40px -12px rgba(45, 90, 39, 0.4),
+        inset 0 1px 0 rgba(245, 239, 230, 0.1);
+    width: min(350px, 85vw);
+    max-width: 350px;
+    max-height: 420px;
+}
+
+Para blocos na METADE INFERIOR do slide (centro geométrico abaixo de 50%):
+.bloco-perspectiva-inferior {
+    transform: perspective(250px) rotateX(10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+    padding: 20px 28px;
+    border-radius: 4px;
+    color: #F5EFE6;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    background: linear-gradient(135deg, #7A5C3A, #4A3420);
+    box-shadow:
+        0 20px 40px -12px rgba(122, 92, 58, 0.4),
+        inset 0 1px 0 rgba(245, 239, 230, 0.1);
+    width: min(350px, 85vw);
+    max-width: 350px;
+    max-height: 420px;
+}
+
+A ÚNICA diferença entre os dois é o rotateX:
+- Superior: rotateX(-10deg)
+- Inferior: rotateX(10deg)
+
+Todas as demais configurações (rotateY 25deg, perspective 250px,
+transform-origin 50% 50% 0, perspective-origin 50% 50%) permanecem IGUAIS.
+
+10.2 Variações Visuais Permitidas (apenas cores/material):
+- O gradiente de fundo pode variar conforme o conteúdo do bloco:
+  - Dourado: linear-gradient(135deg, #C9974E, #8B6A2E)
+  - Verde floresta: linear-gradient(135deg, #2D5A27, #1A3A1A)
+  - Terra: linear-gradient(135deg, #7A5C3A, #4A3420)
+  - Sálvia: linear-gradient(135deg, #8BA87A, #5A7A4A)
+- A sombra (box-shadow) deve sempre combinar com a cor dominante do gradiente
+- O inset 1px 0 highlight deve sempre existir (simula luz no topo)
+- A borda arredondada é sempre 4px
+- O padding mínimo é sempre 20px
+
+10.3 Conteúdo Interno:
+- O texto herda automaticamente a perspectiva 3D — NÃO aplicar skew, rotate
+  ou transform extra no texto
+- O conteúdo interno pode conter: título, subtítulo, número grande, ícone,
+  label, data, tag, frase curta
+- O texto deve usar a cor #F5EFE6
+- O texto pode ter opacidade reduzida (0.7) para elementos secundários
+- A altura do bloco deve ser justa para o conteúdo (height: auto ou
+  min-content), respeitando max-height: 420px
+
+10.4 Limites de Tamanho (OBRIGATÓRIO — NÃO ULTRAPASSAR):
+- Largura máxima: 350px
+- Altura máxima: 420px
+- Largura em telas pequenas: min(350px, 85vw)
+- Altura: max-height: 420px (auto conforme conteúdo)
+
+10.5 O que NÃO fazer com blocos 3D:
+- NÃO usar clip-path para simular perspectiva
+- NÃO usar skew 2D
+- NÃO usar rotateX diferente do especificado
+- NÃO usar rotateY diferente de 25deg
+- NÃO colocar bloco vazio (deve sempre ter conteúdo real)
+- NÃO ultrapassar 350px de largura nem 420px de altura
+- NÃO remover a perspectiva em telas menores
+- NÃO colocar conteúdo com padding menor que 20px
+
+10.6 Onde usar blocos 3D nesta apresentação (definição exata):
+
+SLIDE 2:
+- Um bloco na posição SUPERIOR (canto direito)
+- Gradiente: Terra (linear-gradient(135deg, #7A5C3A, #4A3420))
+- Conteúdo: "Pirabeiraba, Joinville/SC" + "Santa Catarina • Brasil"
+  como subtítulo menor
+- Tamanho: 260px largura, 100px altura (conteúdo justo)
+- Justificativa: Tag de localização geográfica com duas linhas de texto
+
+SLIDE 3:
+- Três blocos na posição INFERIOR (distribuídos horizontalmente)
+- Gradiente: Sálvia (linear-gradient(135deg, #8BA87A, #5A7A4A))
+- Conteúdo de cada um:
+  Bloco 1: "Século XIX" + "Primeiros povoadores"
+  Bloco 2: "Imigração" + "Europeia"
+  Bloco 3: "Século XX" + "Desenvolvimento"
+- Tamanho: 200px largura, 100px altura cada
+- Justificativa: Tags de período histórico com label e subtítulo
+
+SLIDE 4:
+- Um bloco na posição SUPERIOR (lado direito)
+- Gradiente: Verde floresta (linear-gradient(135deg, #2D5A27, #1A3A1A))
+- Conteúdo: "Mata Atlântica" + "Bioma preservado"
+- Tamanho: 240px largura, 90px altura
+- Justificativa: Tag de bioma com descrição curta
+
+SLIDE 5:
+- Três blocos na posição INFERIOR (distribuídos horizontalmente)
+- Gradiente: Dourado (linear-gradient(135deg, #C9974E, #8B6A2E))
+- Conteúdo de cada um:
+  Bloco 1: "Agricultura" + "Produção rural" (ícone opcional)
+  Bloco 2: "Comércio" + "Pequenos negócios" (ícone opcional)
+  Bloco 3: "Turismo" + "Potencial local" (ícone opcional)
+- Tamanho: 220px largura, 110px altura cada
+- Justificativa: Cards de atividades econômicas com ícone e label
+
+SLIDE 6:
+- Um bloco na posição SUPERIOR (canto direito)
+- Gradiente: Dourado (linear-gradient(135deg, #C9974E, #8B6A2E))
+- Conteúdo: "Tradições Vivas" + "Cultura que pulsa"
+- Tamanho: 240px largura, 100px altura
+- Justificativa: Tag de destaque cultural com título evocativo
+
+SLIDE 7:
+- Um bloco na posição SUPERIOR (lado direito)
+- Gradiente: Terra (linear-gradient(135deg, #7A5C3A, #4A3420))
+- Conteúdo: "Em Desenvolvimento" + "Crescimento sustentável"
+- Tamanho: 280px largura, 100px altura
+- Justificativa: Tag de estágio de desenvolvimento com descrição
+
+SLIDE 8:
+- Um bloco na posição SUPERIOR (canto direito)
+- Gradiente: Dourado (linear-gradient(135deg, #C9974E, #8B6A2E))
+- Conteúdo: "Patrimônio Cultural" + "Herança que inspira"
+- Tamanho: 280px largura, 100px altura
+- Justificativa: Tag de classificação com frase de impacto
+
+SLIDE 1: NENHUM bloco 3D (título 3D extrudado já é o elemento principal)
+SLIDE 9: NENHUM bloco 3D (slide de encerramento minimalista)
+
+10.7 Animação de Entrada dos Blocos 3D:
+- Opacidade: 0 → 1
+- TranslateY: 40px → 0px
+- RotateY animado de 35deg → 25deg (apenas na entrada)
+- Filter: blur(8px) → blur(0px)
+- Escala: 0.9 → 1
+- Duração: 900ms
+- Easing: cubic-bezier(0.34, 1.56, 0.64, 1)
+- Stagger entre blocos (quando múltiplos): 200ms
+
+================================================================================
+11. ESPECIFICAÇÃO DE CADA SLIDE
+================================================================================
+
+================================================================================
+SLIDE 1 — CAPA: BRITÂNIA DE PIRABEIRABA
+================================================================================
+
+OBJETIVO:
+Causar impacto visual imediato com o título em 3D extrudado, estabelecendo o
+tom visual da apresentação. Apresentar o tema e preparar o espectador para
+uma experiência visual de alto nível.
+
+EMOÇÃO:
+Impacto, admiração, expectativa. O espectador deve sentir que está prestes a
+descobrir algo valioso.
+
+LAYOUT:
+Centralizado vertical e horizontalmente. Composição simétrica e dramática.
+- Título principal no centro
+- Subtítulo logo abaixo
+- Nome do apresentador e data no canto inferior esquerdo (com leve
+  deslocamento da borda: 60px left, 60px bottom)
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título "Britânia de Pirabeiraba" — centralizado, ocupando cerca de 60% da
+   largura
+2. Abaixo do título: linha decorativa fina (1px, #C9974E, opacidade 0.5,
+   largura 80px, centralizada)
+3. Abaixo da linha: subtítulo em Cormorant Garamond itálico:
+   "História, natureza e cultura de uma localidade"
+4. Abaixo do subtítulo: "Apresentação" em Inter light, opacidade 0.5
+5. Canto inferior esquerdo: "Nome do Apresentador" em Inter light 0.9rem,
+   opacidade 0.4
+6. Abaixo do nome: "Data" em JetBrains Mono 0.7rem, opacidade 0.3
+
+BACKGROUND (Slide 1 específico):
+- Base global (#0A0A0F)
+- Gradiente radial com centro levemente deslocado para o centro:
+  radial-gradient(ellipse at 50% 45%, #1A1208 0%, #0A0A0F 70%)
+- Mesh blobs com cores douradas mais fortes neste slide (opacidade 0.12)
+- Vignette mais acentuada (0 0 200px rgba(0,0,0,0.7))
+- Grid sutil presente
+- Noise presente
+
+ELEMENTOS DECORATIVOS:
+- Linha horizontal fina (acima do título, a 40% do topo, largura 60px,
+  centralizada, rgba(201, 151, 78, 0.3))
+- Pequenos pontos decorativos nas laterais (2 pontos de 3px cada, #C9974E
+  opacidade 0.2, posicionados simetricamente)
+
+ELEMENTOS VISUAIS (do Visual.txt):
+- Partículas douradas (60 partículas, 0.5px a 2.5px, flutuando)
+- Vignette
+- Noise
+- Grid sutil
+- Mesh gradiente animado
+- Efeito de luz ambiente dourada
+
+PARTÍCULAS:
+- 60 partículas douradas
+- Tamanho: 0.5px a 2.5px
+- Opacidade: 0.2 a 0.6
+- Movimento browniano lento
+- Velocidade base: 0.3 px/s
+- Algumas partículas maiores (3px) em número reduzido (5) com opacidade 0.15
+
+ILUMINAÇÃO:
+- Glow central dourado suave atrás do título (um blob dourado desfocado)
+- A luz principal vem do canto superior esquerdo
+- O título recebe iluminação frontal (sem sombras no texto, apenas a extrusão)
+
+EFEITOS:
+- Título 3D extrudado com text-shadow (ver especificação detalhada abaixo)
+- Glow sutil pulsante no título (4s ciclo)
+- ::before com blur para sombra ambiente
+
+TÍTULO 3D EXTRUDADO — ESPECIFICAÇÃO DETALHADA:
+
+ATENÇÃO: Esta é a implementação OBRIGATÓRIA do título no slide 1.
+
+O título "Britânia de Pirabeiraba" deve usar:
+- Fonte: Playfair Display 700
+- Tamanho: clamp(2.8rem, 6vw, 6rem)
+- Cor: #FFFFFF (branco puro) — SEM gradiente no texto
+- text-align: center
+- line-height: 1.1
+- letter-spacing: -0.02em
+- z-index: 0 (ZERO — para evitar sobreposição indesejada)
+- NENHUMA rotação (rotate: 0deg)
+- NENHUM skew
+- NENHUMA transformação 3D no elemento de texto
+- O texto deve estar perfeitamente horizontal, paralelo ao topo da tela
+
+EXTRUSÃO COM TEXT-SHADOW (35 camadas):
+Implementar com JavaScript:
+
+const startColor = { r: 201, g: 151, b: 78 };   // dourado
+const endColor   = { r: 25,  g: 50,  b: 25 };    // verde escuro
+let shadow = '';
+for (let i = 0; i < 35; i++) {
+    const t = i / 34;
+    const r = Math.round(startColor.r + (endColor.r - startColor.r) * t);
+    const g = Math.round(startColor.g + (endColor.g - startColor.g) * t);
+    const b = Math.round(startColor.b + (endColor.b - startColor.b) * t);
+    const a = 0.9 - t * 0.6; // de 0.9 até 0.3
+    shadow += (shadow ? ',' : '') + `${(-i)}px ${i}px 0 rgba(${r},${g},${b},${a})`;
+}
+titulo.style.textShadow = shadow;
+
+A sombra deve ir para cima e para a esquerda (x negativo, y positivo),
+criando a ilusão de que a luz vem do canto superior esquerdo e o texto
+projeta espessura para baixo e para a direita.
+
+SOMBRA AMBIENTE (::before):
+O título deve ter um pseudo-elemento ::before com:
+- content: attr(data-text) (repetir o texto)
+- position: absolute
+- top: 2px
+- left: 2px
+- color: rgba(20, 40, 20, 0.5)
+- filter: blur(6px)
+- z-index: -1
+- pointer-events: none
+- O texto deve estar escondido (visível apenas a sombra)
+
+Para implementar o ::before com o mesmo texto, usar data attribute:
+<h1 data-text="Britânia de Pirabeiraba">Britânia de Pirabeiraba</h1>
+
+TIPOGRAFIA:
+- Título: Playfair Display 700, clamp(2.8rem, 6vw, 6rem), #FFFFFF
+- Subtítulo: Cormorant Garamond 400 itálico, clamp(1.2rem, 2.5vw, 2rem),
+  #D4C9B8, opacidade 0.8
+- Linha decorativa: hr ou div, 1px, #C9974E, opacidade 0.5, largura 80px
+- Label "Apresentação": Inter 300, 0.85rem, opacidade 0.4
+- Nome do apresentador: Inter 300, 0.9rem, opacidade 0.4, #C8BFA8
+- Data: JetBrains Mono 300, 0.7rem, opacidade 0.3, #8BA87A
+
+OBS: Substituir "Nome do Apresentador" e "Data" por placeholders editáveis
+no HTML, usando spans com classe para que o usuário possa editar diretamente
+no código. Exemplo:
+<span class="apresentador" contenteditable="false">[Nome do Apresentador]</span>
+<span class="data" contenteditable="false">[Data]</span>
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Background (já visível)
+2. Partículas (iniciar imediatamente)
+3. Linha decorativa superior (delay: 300ms, fade in + scaleX)
+4. Título principal (delay: 500ms, animação completa de entrada + extrusão)
+   O text-shadow já deve estar presente desde o início (calculado via JS
+   antes da animação)
+   O título fade in com opacidade 0→1 e translateY 20px→0
+5. Linha decorativa inferior (delay: 900ms)
+6. Subtítulo (delay: 1100ms, fade in + translateY 15px→0)
+7. Label "Apresentação" (delay: 1300ms)
+8. Nome do apresentador (delay: 1400ms)
+9. Data (delay: 1500ms)
+
+INTERAÇÕES:
+- Nenhuma interação específica no slide 1 além das globais (cursor, dots)
+- O título não precisa ser clicável
+
+TRANSIÇÃO PARA SLIDE 2:
+- Fade + Scale (ver seção 8.1)
+- Duração: 500ms saída + 100ms intervalo + 600ms entrada
+
+OBSERVAÇÕES:
+- É PROIBIDO criar "cover shapes" (polígonos decorativos com clip-path) atrás
+  do título
+- O fundo deve conter apenas as camadas globais de background
+- z-index do título: 0 (zero)
+- O title text-shadow é gerado por JS, mas pode ser gerado também no CSS
+  como fallback (mesmo que apenas as primeiras 10 camadas)
+
+================================================================================
+SLIDE 2 — INTRODUÇÃO: O QUE É BRITÂNIA DE PIRABEIRABA?
+================================================================================
+
+OBJETIVO:
+Apresentar o conceito básico da localidade: onde fica, seu contexto histórico
+e sua importância para a comunidade.
+
+EMOÇÃO:
+Curiosidade, descoberta. O espectador deve sentir vontade de conhecer mais.
+
+LAYOUT:
+Layout assimétrico em duas zonas:
+- Zona esquerda (60% da largura): título e conteúdo textual
+- Zona direita (40%): bloco 3D com localização
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Canto superior esquerdo: número do slide "02" decorativo em JetBrains Mono
+   (opacidade 0.15, 0.8rem)
+2. Título: "O que é Britânia de Pirabeiraba?" (Playfair Display 700)
+3. Abaixo do título: três parágrafos ou cards de informação
+   - Cada um com um ícone decorativo à esquerda
+   - Parágrafo 1: "Localização geográfica: Pirabeiraba, Joinville/SC"
+   - Parágrafo 2: "Contexto histórico da região"
+   - Parágrafo 3: "Importância para a comunidade local"
+4. Lado direito: bloco 3D perspectiva superior com "Pirabeiraba, Joinville/SC"
+
+BACKGROUND (Slide 2):
+- Base global mais neutra (#0C0C10)
+- Mesh blobs com tom levemente azulado-dourado para transmitir amplitude
+- Partículas: 50 partículas, algumas maiores (1px a 3px), douradas e brancas
+
+ELEMENTOS DECORATIVOS:
+- Pequeno número "02" no canto superior esquerdo (label decorativa)
+- Linha horizontal fina abaixo do título (60px, #C9974E 0.3)
+- Três ícones SVG minimalistas ao lado de cada parágrafo:
+  Ícone 1: mapa/pin (localização)
+  Ícone 2: livro/história
+  Ícone 3: comunidade/pessoas
+
+ELEMENTOS INTERATIVOS (do Interativos.txt):
+- Dots de navegação
+- Botões de navegação
+- Hover nos parágrafos (leve mudança de opacidade ao passar o mouse)
+- Os parágrafos podem ter um efeito de "reveal" sutil ao entrar
+
+ELEMENTOS VISUAIS (do Visual.txt):
+- Partículas
+- Grid sutil
+- Bloco 3D perspectiva
+- Ícones SVG minimalistas
+- Vignette
+
+PARTÍCULAS:
+- 50 partículas
+- Cores: dourado (60%) e branco suave (40%)
+- Movimento lento, algumas partículas maiores (3px)
+
+ILUMINAÇÃO:
+- Luz principal do canto superior esquerdo
+- Bloco 3D com iluminação própria (highlight na borda superior via
+  box-shadow inset)
+
+EFEITOS:
+- Os parágrafos entram com leve blur que reduz
+- Ícones aparecem com escala de 0.8→1 e opacidade
+
+ÍCONES:
+- 3 ícones SVG personalizados, estilo outline fino
+- Cor: #C9974E
+- Tamanho: 24px
+- Posição: à esquerda de cada parágrafo, alinhados verticalmente
+
+TIPOGRAFIA:
+- Título: Playfair Display 700, clamp(1.8rem, 3.5vw, 2.8rem), #F5EFE6
+- Subtítulo/número "02": JetBrains Mono 300, 0.8rem, opacidade 0.15
+- Parágrafos: Inter 400, clamp(0.9rem, 1.6vw, 1.1rem), #C8BFA8
+- Destaques (nomes próprios): Inter 500, #F5EFE6
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Background
+2. Partículas
+3. Número "02" (delay: 200ms)
+4. Bloco 3D lateral direito (delay: 400ms)
+5. Título (delay: 600ms)
+6. Linha decorativa (delay: 800ms)
+7. Parágrafo 1 + ícone (delay: 950ms)
+8. Parágrafo 2 + ícone (delay: 1100ms)
+9. Parágrafo 3 + ícone (delay: 1250ms)
+
+INTERAÇÕES:
+- Hover nos parágrafos: leve aumento de opacidade (1.0) e translateX(3px)
+- Dots clicáveis inferiores
+
+TRANSIÇÃO PARA SLIDE 3:
+- Push da direita (550ms ease-in-out)
+
+================================================================================
+SLIDE 3 — ORIGEM HISTÓRICA
+================================================================================
+
+OBJETIVO:
+Contar a história da ocupação da região, destacando os imigrantes e o
+desenvolvimento ao longo do tempo.
+
+EMOÇÃO:
+Respeito, admiração histórica. O espectador deve sentir a profundidade do
+tempo e a coragem dos pioneiros.
+
+LAYOUT:
+Layout de bento grid assimétrico:
+- Topo: título e subtítulo
+- Centro: três blocos de conteúdo (grid de 3 colunas)
+- Inferior: três blocos 3D de período histórico
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título no topo: "Origem Histórica"
+2. Subtítulo: texto curto sobre a formação
+3. Três colunas de conteúdo (35% 30% 35%):
+   Coluna 1: "Primeiros povoadores e colonização" — com breve texto descritivo
+   Coluna 2: "Influência dos imigrantes europeus" — destacando alemães,
+             suíços e noruegueses
+   Coluna 3: "Desenvolvimento ao longo do século XX"
+4. Na parte inferior: três blocos 3D (inferior) com períodos históricos
+
+BACKGROUND (Slide 3):
+- Variação quente: #0F0A06
+- Mesh blobs com tons sépia/marrons (0.12 opacidade)
+- Partículas com tom sépia/quente, 45 partículas
+
+ELEMENTOS DECORATIVOS:
+- Número "03" canto superior esquerdo
+- Small linhas conectoras entre as colunas (svg ou div, rgba dourado 0.15)
+- Três pequenos círculos decorativos abaixo do subtítulo
+- Os países de origem podem ter mini bandeiras ou marcadores
+
+ELEMENTOS INTERATIVOS:
+- Hover nas colunas: leve elevação (translateY -3px) e glow na borda
+- Os blocos 3D na parte inferior têm hover sutil
+
+ELEMENTOS VISUAIS (do Visual.txt):
+- Blocos 3D perspectiva (três blocos inferiores)
+- Linhas decorativas
+- Círculos decorativos
+- Ícones de bandeira/pin (se desejar)
+
+PARTÍCULAS:
+- 45 partículas com tom sépia/quente
+- Cores: #C9974E (50%), #7A5C3A (30%), #D4C9B8 (20%)
+- Movimento muito lento, como poeira ao vento
+
+ILUMINAÇÃO:
+- Luz quente amarelada (como fotografia antiga)
+- Blocos 3D com iluminação própria
+
+EFEITOS:
+- As colunas podem ter uma borda sutil no hover
+- O fundo pode ter um leve efeito de vinheta mais forte
+
+ÍCONES:
+- Ícones representando: pessoa (pioneiro), mapa (imigração), relógio (século)
+- Estilo outline, #C9974E, 20px
+
+TIPOGRAFIA:
+- Título: Playfair Display 700, clamp(1.8rem, 3vw, 2.5rem), #F5EFE6
+- Subtítulo: Cormorant Garamond 400 itálico, 1.2rem, #D4C9B8
+- Texto das colunas: Inter 400, 0.9rem, #C8BFA8
+- Destaques (nomes de imigrantes): Inter 500, #F5EFE6
+- Labels dos blocos 3D: Inter 600, 0.9rem
+
+CONTEÚDO DAS COLUNAS (texto):
+
+Coluna 1 — "Primeiros Povoadores":
+"Os primeiros habitantes da região de Pirabeiraba chegaram ainda no século
+XIX, atraídos pelas terras férteis e pela promessa de uma nova vida. A
+colonização foi marcada pela coragem de famílias inteiras que se
+estabeleceram na mata virgem."
+
+Coluna 2 — "Influência Europeia":
+"A região recebeu imigrantes alemães, suíços e noruegueses, que trouxeram
+consigo técnicas agrícolas, arquitetura típica, língua e tradições que até
+hoje marcam a identidade local. Cada grupo contribuiu com sua cultura única."
+
+Coluna 3 — "Desenvolvimento":
+"Ao longo do século XX, Britânia de Pirabeiraba evoluiu de pequeno núcleo
+colonial para uma comunidade organizada, com infraestrutura, comércio e uma
+forte identidade comunitária que atravessa gerações."
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Background + partículas
+2. Número "03" (delay: 200ms)
+3. Título (delay: 400ms)
+4. Subtítulo (delay: 600ms)
+5. Linha decorativa (delay: 700ms)
+6. Coluna 1 (delay: 850ms)
+7. Coluna 2 (delay: 1000ms)
+8. Coluna 3 (delay: 1150ms)
+9. Bloco 3D 1 (delay: 1350ms)
+10. Bloco 3D 2 (delay: 1550ms)
+11. Bloco 3D 3 (delay: 1750ms)
+
+INTERAÇÕES:
+- Hover nas colunas: translateY(-4px), box-shadow intensifica, borda
+  rgba(201, 151, 78, 0.3)
+- Blocos 3D: hover leve (não mexer na perspectiva, apenas glow)
+
+TRANSIÇÃO PARA SLIDE 4:
+- Cross Fade (700ms)
+
+================================================================================
+SLIDE 4 — ASPECTOS GEOGRÁFICOS E NATURAIS
+================================================================================
+
+OBJETIVO:
+Mostrar a riqueza natural da região: relevo, vegetação, águas, clima e
+paisagens.
+
+EMOÇÃO:
+Conexão com a natureza, admiração pela beleza natural, tranquilidade.
+
+LAYOUT:
+Layout paisagem/imersivo com três zonas:
+- Topo: título e subtítulo
+- Centro: grid de 3 cards com os aspectos geográficos
+- Lado direito: bloco 3D com "Mata Atlântica"
+- Fundo com gradiente que remete a paisagem (verde escuro para azul
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Canto superior esquerdo: número "04"
+2. Título: "Aspectos Geográficos e Naturais"
+3. Subtítulo: descrição breve
+4. Três cards (grid de 3 colunas ou 1 fileira):
+   Card 1: "Relevo e Vegetação" — texto, ícone de montanha/árvore
+   Card 2: "Recursos Hídricos e Áreas Verdes" — texto, ícone de água
+   Card 3: "Clima e Paisagens" — texto, ícone de sol/nuvem
+5. Lado direito: bloco 3D superior com "Mata Atlântica"
+
+BACKGROUND (Slide 4):
+- Base: #070F08 (verde escuro)
+- Mesh blobs com tons de verde floresta (#2D5A27) e verde claro (#8BA87A)
+- Gradiente radial: radial-gradient(ellipse at 40% 30%, #0D1F0D, #070F08)
+- Partículas: 70 partículas, verdes e douradas
+
+ELEMENTOS DECORATIVOS:
+- Número "04" decorativo
+- Linha fina abaixo do título
+- Folhas ou formas orgânicas sutis como decoração (SVG simples, opacidade
+  0.06, posicionadas nos cantos)
+- Grid sutil com tom levemente mais visível (0.04)
+
+ELEMENTOS VISUAIS (do Visual.txt):
+- Bloco 3D perspectiva superior
+- Cards com glassmorphism sutil
+- Ícones de natureza (outline)
+- Partículas verdes/douradas
+- Mesh gradiente
+
+PARTÍCULAS:
+- 70 partículas
+- Cores: #8BA87A (40%, verde claro), #2D5A27 (30%, verde escuro),
+  #C9974E (30%, dourado-pólen)
+- Tamanho: 0.5px a 2px
+- Movimento: mais ativo que em outros slides (0.4 px/s), como pólen na brisa
+
+ILUMINAÇÃO:
+- Luz dourada filtrando através de uma copa de árvores imaginária
+- Glow verde-dourado sutil nos cards
+
+EFEITOS:
+- Cards com glassmorphism: background rgba(245, 239, 230, 0.04),
+  backdrop-filter: blur(10px), border: 1px solid rgba(245, 239, 230, 0.06)
+- Borda iluminada verde-dourada nos cards
+
+ÍCONES:
+- 3 ícones: montanha/árvore (relevo), gota/onda (água), sol (clima)
+- Estilo outline, #8BA87A (verde sálvia), 22px
+- Posição: topo de cada card
+
+TIPOGRAFIA:
+- Título: Playfair Display 700, clamp(1.8rem, 3vw, 2.5rem), #F5EFE6
+- Subtítulo: Cormorant Garamond 400 itálico, 1.1rem, #D4C9B8
+- Título dos cards: Inter 600, 1rem, #F5EFE6
+- Texto dos cards: Inter 400, 0.85rem, #C8BFA8
+- Bloco 3D: Inter 600, 0.9rem, #F5EFE6; label: Inter 400 0.75rem
+
+CONTEÚDO DOS CARDS:
+
+Card 1 — "Relevo e Vegetação":
+"A região apresenta relevo ondulado típico da Mata Atlântica, com morros
+suaves cobertos por vegetação densa. A biodiversidade local é rica, com
+espécies nativas da floresta ombrófila densa."
+
+Card 2 — "Recursos Hídricos":
+"Cortada por rios e córregos de águas cristalinas, a região possui
+abundância de recursos hídricos. As nascentes preservadas garantem água de
+qualidade para a comunidade e para a fauna local."
+
+Card 3 — "Clima e Paisagens":
+"O clima subtropical úmido proporciona verões amenos e invernos com geadas
+ocasionais. As paisagens variam entre vales verdejantes e morros cobertos
+pela névoa matinal, criando cenários de rara beleza."
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Background + partículas (iniciar imediatamente)
+2. Número "04" (delay: 200ms)
+3. Bloco 3D "Mata Atlântica" (delay: 350ms)
+4. Título (delay: 500ms)
+5. Subtítulo (delay: 700ms)
+6. Card 1 (delay: 900ms)
+7. Card 2 (delay: 1070ms)
+8. Card 3 (delay: 1240ms)
+
+INTERAÇÕES:
+- Hover nos cards: translateY(-5px), intensificar glow da borda,
+  backdrop-filter aumenta ligeiramente
+
+TRANSIÇÃO PARA SLIDE 5:
+- Slide up (slide 4 sobe, slide 5 vem de baixo)
+- Duração: 550ms ease-in-out
+
+================================================================================
+SLIDE 5 — ECONOMIA E ATIVIDADES LOCAIS
+================================================================================
+
+OBJETIVO:
+Apresentar as atividades econômicas da região: agricultura, comércio e
+turismo rural.
+
+EMOÇÃO:
+Orgulho, vitalidade, potencial. Mostrar que a comunidade é ativa e produtiva.
+
+LAYOUT:
+Layout de três colunas com cards e blocos 3D na base:
+- Topo: título
+- Centro: três colunas com descrições econômicas
+- Base: três blocos 3D com labels das atividades
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Número "05" canto superior esquerdo
+2. Título: "Economia e Atividades Locais"
+3. Três colunas de conteúdo (cada uma com ícone + texto)
+4. Abaixo de cada coluna: bloco 3D (inferior) com label da atividade
+
+BACKGROUND (Slide 5):
+- Base: #0A0A0F
+- Mesh blobs com tons dourados e terrosos
+- Partículas: 55 partículas, douradas como grãos
+
+ELEMENTOS DECORATIVOS:
+- Número "05"
+- Linhas finas conectando título às colunas (linhas verticais sutis)
+- Pequenos círculos decorativos dourados
+
+ELEMENTOS INTERATIVOS:
+- Hover nas colunas com elevação
+- Hover nos blocos 3D com glow
+
+ELEMENTOS VISUAIS (do Visual.txt):
+- Blocos 3D perspectiva inferior (três blocos)
+- Cards com glassmorphism
+- Ícones de economia (outline)
+
+PARTÍCULAS:
+- 55 partículas douradas
+- Tamanho: 0.5px a 3px
+- Movimento ascendente lento (como grãos sendo levados pelo vento)
+
+ILUMINAÇÃO:
+- Luz dourada quente (sol do fim da tarde iluminando plantações)
+- Blocos 3D com highlight dourado
+
+EFEITOS:
+- Cada coluna como um card sutil com glassmorphism
+- Números decorativos (1, 2, 3) em grande escala atrás de cada coluna
+  (opacidade 0.04, posição absoluta, fonte JetBrains Mono, tamanho 8rem)
+
+ÍCONES:
+- 3 ícones: planta/trator (agricultura), loja/carrinho (comércio),
+  montanha/mala (turismo)
+- Estilo outline, #C9974E, 24px
+
+TIPOGRAFIA:
+- Título: Playfair Display 700, clamp(1.8rem, 3vw, 2.5rem), #F5EFE6
+- Números decorativos ao fundo: JetBrains Mono 300, 8rem, opacidade 0.04
+- Título economias nos blocos 3D: Inter 600, 0.9rem, #F5EFE6
+- Label dos blocos: Inter 400, 0.75rem, opacidade 0.7
+
+CONTEÚDO DAS COLUNAS:
+
+Coluna 1 — "Agricultura e Produção Rural":
+"A agricultura familiar é a base da economia local, com destaque para o
+cultivo de hortaliças, frutas e a produção de alimentos artesanais. A
+tradição rural é passada de geração em geração."
+
+Coluna 2 — "Comércio e Pequenos Negócios":
+"O comércio local atende às necessidades da comunidade com pequenos mercados,
+padarias, oficinas e prestadores de serviços que movimentam a economia e
+geram emprego na região."
+
+Coluna 3 — "Turismo Rural e Potencial Local":
+"O turismo rural vem crescendo, atraindo visitantes em busca de contato com
+a natureza, tranquilidade e experiências autênticas. Britânia de Pirabeiraba
+possui grande potencial para o ecoturismo."
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Background + partículas
+2. Número "05" (delay: 200ms)
+3. Título (delay: 400ms)
+4. Coluna 1 com ícone (delay: 650ms)
+5. Coluna 2 com ícone (delay: 800ms)
+6. Coluna 3 com ícone (delay: 950ms)
+7. Bloco 3D 1 (delay: 1150ms)
+8. Bloco 3D 2 (delay: 1350ms)
+9. Bloco 3D 3 (delay: 1550ms)
+
+INTERAÇÕES:
+- Hover colunas: translateY(-3px), fundo clareia sutilmente, glow na borda
+- Hover blocos 3D: glow intensifica
+
+TRANSIÇÃO PARA SLIDE 6:
+- Fade + Blur (650ms ease)
+
+================================================================================
+SLIDE 6 — CULTURA E TRADIÇÕES
+================================================================================
+
+OBJETIVO:
+Celebrar as tradições locais: festas, gastronomia e preservação cultural.
+
+EMOÇÃO:
+Alegria, calor humano, celebração. O espectador deve sentir a energia das
+festas e o aconchego das tradições.
+
+LAYOUT:
+Layout caloroso e envolvente:
+- Topo: título e subtítulo
+- Centro: três cards com ícones e descrições
+- Lado direito: bloco 3D superior "Tradições Vivas"
+- Fundo com gradiente mais quente e dourado
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Número "06" canto superior esquerdo
+2. Título: "Cultura e Tradições"
+3. Subtítulo: texto evocativo
+4. Três cards horizontais ou em grid:
+   Card 1: "Festas Típicas e Eventos Comunitários"
+   Card 2: "Gastronomia Local"
+   Card 3: "Preservação da Cultura dos Imigrantes"
+5. Bloco 3D "Tradições Vivas" no canto direito
+
+BACKGROUND (Slide 6):
+- Base: #0A0A0F com gradiente mais quente
+- Mesh blobs âmbar e dourado mais intensos (0.15 opacidade)
+- Partículas: 65 partículas, douradas e âmbar, movimento festivo (mais ativo)
+- Vignette suave
+
+ELEMENTOS DECORATIVOS:
+- Número "06"
+- Formas circulares decorativas simulando bandeirinhas de festa (SVG simples,
+  opacidade 0.05, posicionadas na parte superior)
+- Linhas onduladas sutis (0.04 opacidade) na base
+
+ELEMENTOS INTERATIVOS:
+- Cards com hover expansivo (translateY -5px, glow intenso)
+- Bloco 3D com hover glow
+
+ELEMENTOS VISUAIS (do Visual.txt):
+- Bloco 3D perspectiva superior
+- Cards com glassmorphism e tom quente
+- Ícones de cultura (outline)
+- Partículas festivas
+
+PARTÍCULAS:
+- 65 partículas
+- Cores: #C9974E (40%), #E8A83E (30%), #F5EFE6 (20%), #2D5A27 (10%)
+- Movimento: mais ativo que slides anteriores (0.5 px/s)
+- Algumas partículas maiores (3px) que sobem mais rápido
+
+ILUMINAÇÃO:
+- Luz quente e festiva (como fogueira ou luz de festa)
+- Glow dourado nos cards
+- Bloco 3D com iluminação dourada
+
+EFEITOS:
+- Cards com glassmorphism quente: background rgba(201, 151, 78, 0.06),
+  backdrop-filter: blur(8px), border: 1px solid rgba(201, 151, 78, 0.15)
+- Glow pulsante sutil nos cards (4s ciclo)
+
+ÍCONES:
+- 3 ícones: bandeira/música (festas), talher/prato (gastronomia),
+  mãos/coração (preservação)
+- Estilo outline, #E8A83E (âmbar), 22px
+
+TIPOGRAFIA:
+- Título: Playfair Display 700, clamp(1.8rem, 3vw, 2.5rem), #F5EFE6
+- Subtítulo: Cormorant Garamond 400 itálico, 1.1rem, #D4C9B8
+  Texto do subtítulo: "O coração da comunidade bate nas tradições"
+- Título dos cards: Inter 600, 1rem, #F5EFE6
+- Texto dos cards: Inter 400, 0.85rem, #C8BFA8
+
+CONTEÚDO DOS CARDS:
+
+Card 1 — "Festas Típicas":
+"As festas comunitárias são o ponto alto do calendário local. Com danças
+típicas, música ao vivo e a participação de toda a comunidade, esses eventos
+preservam as tradições trazidas pelos imigrantes europeus."
+
+Card 2 — "Gastronomia Local":
+"A culinária local reflete a herança dos imigrantes com pratos típicos
+alemães, suíços e noruegueses, adaptados aos ingredientes da região. Os
+produtos coloniais como queijos, embutidos e pães caseiros são destaque."
+
+Card 3 — "Preservação Cultural":
+"A comunidade mantém vivas as tradições através de grupos de dança, corais,
+oficinas de artesanato e eventos que celebram a língua, a música e os
+costumes herdados dos antepassados."
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Background + partículas
+2. Número "06" (delay: 200ms)
+3. Bloco 3D "Tradições Vivas" (delay: 350ms)
+4. Título (delay: 500ms)
+5. Subtítulo (delay: 700ms)
+6. Card 1 (delay: 900ms)
+7. Card 2 (delay: 1050ms)
+8. Card 3 (delay: 1200ms)
+
+INTERAÇÕES:
+- Hover nos cards: translateY(-5px), bg mais claro, glow na borda
+- Bloco 3D: glow pulsante sutil
+
+TRANSIÇÃO PARA SLIDE 7:
+- Push da esquerda (550ms ease-in-out)
+
+================================================================================
+SLIDE 7 — INFRAESTRUTURA E DESENVOLVIMENTO
+================================================================================
+
+OBJETIVO:
+Mostrar a infraestrutura disponível e os projetos de desenvolvimento.
+
+EMOÇÃO:
+Confiança, progresso, solidez. O espectador deve sentir que a comunidade
+está crescendo de forma organizada.
+
+LAYOUT:
+Layout estruturado e limpo:
+- Topo: título e subtítulo
+- Três colunas com ícones e informações
+- Lado direito: bloco 3D "Em Desenvolvimento"
+- Tom mais neutro e organizado
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Número "07" canto superior esquerdo
+2. Título: "Infraestrutura e Desenvolvimento"
+3. Três colunas em grid:
+   Coluna 1: "Acesso e Transporte" — texto
+   Coluna 2: "Educação e Saúde" — texto
+   Coluna 3: "Projetos de Melhoria" — texto
+4. Bloco 3D "Em Desenvolvimento" no canto direito superior
+
+BACKGROUND (Slide 7):
+- Base: #0C0C10 (neutro com toque azulado)
+- Mesh blobs sutis em tons de cinza-quente e verde escuro
+- Partículas: 40 partículas, brancas e azuladas muito sutis
+
+ELEMENTOS DECORATIVOS:
+- Número "07"
+- Linhas retas e ângulos (elementos estruturados) como decoração
+- Pequenos traços horizontais e verticais (opacidade 0.04)
+- Grid mais aparente (estrutura)
+
+ELEMENTOS INTERATIVOS:
+- Colunas com hover sóbrio
+- Bloco 3D com glow
+
+ELEMENTOS VISUAIS (do Visual.txt):
+- Bloco 3D perspectiva superior
+- Cards minimalistas (sem glassmorphism pesado, mais sóbrios)
+- Ícones de infraestrutura
+
+PARTÍCULAS:
+- 40 partículas
+- Cores: rgba(245, 239, 230, 0.4) (60%), rgba(139, 168, 122, 0.3) (40%)
+- Movimento muito lento, quase parado (0.15 px/s)
+- Tamanho: 0.5px a 1.5px (pequenas)
+
+ILUMINAÇÃO:
+- Luz mais neutra e funcional
+- Cards com sombras definidas (mais "técnicos")
+
+EFEITOS:
+- Cards com borda sutil (rgba(245, 239, 230, 0.06)), sem glass pesado
+- Fundo levemente mais "limpo" que slides anteriores
+
+ÍCONES:
+- 3 ícones: estrada/carro (transporte), livro/hospital (educação/saúde),
+  construção/engrenagem (projetos)
+- Estilo outline, #8BA87A, 22px
+
+TIPOGRAFIA:
+- Título: Playfair Display 700, clamp(1.8rem, 3vw, 2.5rem), #F5EFE6
+- Subtítulo: Cormorant Garamond 400 itálico, 1rem, #D4C9B8
+- Título dos cards: Inter 600, 1rem, #F5EFE6
+- Conteúdo: Inter 400, 0.85rem, #C8BFA8
+
+CONTEÚDO DOS CARDS:
+
+Card 1 — "Acesso e Transporte":
+"A região é servida por estradas que conectam Pirabeiraba ao centro de
+Joinville. O transporte público e as vias rurais passam por melhorias
+constantes para garantir o escoamento da produção e a mobilidade dos
+moradores."
+
+Card 2 — "Educação e Saúde":
+"A comunidade conta com escolas e unidades básicas de saúde que atendem a
+população local. Investimentos em educação e saúde são prioridades para o
+desenvolvimento sustentável da região."
+
+Card 3 — "Projetos de Melhoria":
+"Diversos projetos estão em andamento para melhorar a infraestrutura local,
+incluindo pavimentação de estradas rurais, ampliação da rede de água e
+saneamento, e incentivos ao turismo sustentável."
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Background + partículas (iniciar imediatamente)
+2. Número "07" (delay: 200ms)
+3. Bloco 3D "Em Desenvolvimento" (delay: 350ms)
+4. Título (delay: 500ms)
+5. Subtítulo (delay: 650ms)
+6. Coluna 1 (delay: 850ms)
+7. Coluna 2 (delay: 1000ms)
+8. Coluna 3 (delay: 1150ms)
+
+INTERAÇÕES:
+- Hover cards: translateY(-3px), borda mais clara sutilmente
+
+TRANSIÇÃO PARA SLIDE 8:
+- Fade + Scale (600ms ease-out)
+
+================================================================================
+SLIDE 8 — CONCLUSÃO
+================================================================================
+
+OBJETIVO:
+Sintetizar a importância de Britânia de Pirabeiraba como patrimônio cultural
+e apontar perspectivas para o futuro.
+
+EMOÇÃO:
+Inspiração, orgulho, esperança. O espectador deve sentir que vale a pena
+conhecer e valorizar este lugar.
+
+LAYOUT:
+Layout impactante com:
+- Título grande e centralizado
+- Três frases de impacto (frases-síntese)
+- Bloco 3D "Patrimônio Cultural" no canto direito
+- Iluminação dourada ascendente
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Número "08" canto superior esquerdo
+2. Título: "Britânia de Pirabeiraba" (Playfair Display, maior que nos outros)
+3. Três frases-síntese, cada uma com ícone:
+   Frase 1: "Um patrimônio histórico e cultural que atravessa gerações"
+   Frase 2: "Perspectivas futuras para uma comunidade em crescimento"
+   Frase 3: "A valorização da identidade local como caminho para o futuro"
+4. Bloco 3D "Patrimônio Cultural" no lado direito
+
+BACKGROUND (Slide 8):
+- Base: #0A0A0F
+- Mesh blobs com glow dourado ascendente (movimento de baixo para cima,
+  simulando o sol nascendo)
+- Partículas: 50 partículas douradas subindo (movimento ascendente mais
+  pronunciado: -0.6 px/s)
+- Vignette: 0 0 200px rgba(0,0,0,0.5)
+
+ELEMENTOS DECORATIVOS:
+- Número "08"
+- Linha dourada espessa (2px, 120px largura) abaixo do título
+- Pequenos pontos dourados formando um arco decorativo sutil acima das frases
+- O arco pode ser implementado com 5 pontos de 2px cada, espaçados em arco
+
+ELEMENTOS INTERATIVOS:
+- Frases com hover que realça o ícone
+- Bloco 3D com glow pulsante
+
+ELEMENTOS VISUAIS (do Visual.txt):
+- Bloco 3D perspectiva superior
+- Ícones de conclusão
+- Partículas ascendentes
+
+PARTÍCULAS:
+- 50 partículas douradas
+- Movimento ascendente mais rápido (-0.6 px/s)
+- Tamanho: 0.5px a 2.5px
+- Opacidade: 0.2 a 0.5
+
+ILUMINAÇÃO:
+- Luz dourada ascendente (como o nascer do sol)
+- Glow mais intenso no centro do slide
+
+EFEITOS:
+- Glow pulsante no título
+- Partículas ascendentes criando sensação de elevação
+
+ÍCONES:
+- 3 ícones: estrela/brilho (patrimônio), seta para cima (futuro),
+  coração/mão (identidade)
+- Estilo outline, #C9974E, 20px, alinhados à esquerda de cada frase
+
+TIPOGRAFIA:
+- Título: Playfair Display 700, clamp(2rem, 4vw, 3.2rem), #F5EFE6
+  (maior que títulos comuns de slide interno)
+- Subtítulo/número: JetBrains Mono 300, 0.8rem, opacidade 0.15
+- Frases: Cormorant Garamond 600, clamp(1rem, 1.8vw, 1.3rem), #D4C9B8
+  (usar itálico para transmitir sentimento)
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Background + partículas (iniciar imediatamente)
+2. Número "08" (delay: 200ms)
+3. Bloco 3D "Patrimônio Cultural" (delay: 350ms)
+4. Título (delay: 500ms)
+5. Linha dourada (delay: 700ms)
+6. Frase 1 + ícone (delay: 900ms)
+7. Frase 2 + ícone (delay: 1080ms)
+8. Frase 3 + ícone (delay: 1260ms)
+
+INTERAÇÕES:
+- Hover nas frases: ícone muda opacidade/intensidade
+- Bloco 3D: glow pulsante suave
+
+TRANSIÇÃO PARA SLIDE 9:
+- Cross Fade lento (800ms ease)
+
+================================================================================
+SLIDE 9 — ENCERRAMENTO: MUITO OBRIGADO
+================================================================================
+
+OBJETIVO:
+Agradecer ao espectador e encerrar a apresentação de forma elegante e
+memorável.
+
+EMOÇÃO:
+Gratidão, encerramento sereno, satisfação.
+
+LAYOUT:
+Minimalista e centralizado:
+- Título de agradecimento no centro
+- Subtítulo com mensagem de encerramento
+- Elemento decorativo sutil
+- Sem blocos 3D, sem elementos complexos
+
+ORGANIZAÇÃO DOS ELEMENTOS:
+1. Título grande centralizado: "Muito Obrigado"
+2. Abaixo: linha decorativa fina
+3. Abaixo: "Britânia de Pirabeiraba" em Cormorant Garamond itálico
+4. Abaixo: "História, natureza e cultura" em Inter light
+
+BACKGROUND (Slide 9):
+- Base: #0A0A0F
+- Mesh blobs com glow central dourado suave, como o sol se pondo
+  lentamente
+- Gradiente: radial-gradient(ellipse at 50% 50%, #1A1408 0%, #0A0A0F 70%)
+- Partículas: 45 partículas douradas, movimento ascendente muito lento,
+  diminuindo gradualmente (simular o fim do dia)
+
+ELEMENTOS DECORATIVOS:
+- Círculo dourado decorativo grande atrás do título (opacidade 0.04,
+  border-radius: 50%, filter: blur(40px), 200x200px, centralizado)
+- Linha fina abaixo do título (80px, #C9974E, opacidade 0.3)
+
+ELEMENTOS VISUAIS (do Visual.txt):
+- Partículas douradas ascendentes lentas
+- Vignette suave
+- Glow central
+
+PARTÍCULAS:
+- 45 partículas douradas
+- Movimento ascendente muito lento (0.15 px/s)
+- Opacidade diminuindo gradualmente (simular o fim do dia)
+
+ILUMINAÇÃO:
+- Glow central suave, como o último raio de sol do dia
+- Iluminação diminuindo nas bordas
+
+EFEITOS:
+- Título com glow pulsante suave e um leve text-shadow dourado
+  (NÃO usar o efeito 3D extrudado, apenas 2-3 camadas de shadow)
+
+TIPOGRAFIA:
+- Título: Playfair Display 700, clamp(2.5rem, 5vw, 4.5rem), #F5EFE6
+  com text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 20px rgba(201, 151, 78, 0.2)
+- Subtítulo 1: Cormorant Garamond 400 itálico, 1.3rem, #D4C9B8
+- Subtítulo 2: Inter 300, 0.9rem, #8BA87A, opacidade 0.6
+
+ORDEM DE ENTRADA DOS ELEMENTOS:
+1. Background + partículas (iniciar imediatamente)
+2. Glow central atrás do título (delay: 200ms, fade in)
+3. Título "Muito Obrigado" (delay: 500ms)
+4. Linha decorativa (delay: 800ms)
+5. "Britânia de Pirabeiraba" (delay: 1000ms)
+6. "História, natureza e cultura" (delay: 1200ms)
+
+INTERAÇÕES:
+- Nenhuma interação específica além das globais
+- A navegação ainda está disponível para voltar a slides anteriores
+
+TRANSIÇÃO (não há próximo slide — é o último):
+- O slide não precisa ter transição de saída
+- Se o usuário tentar avançar, deve permanecer no slide 9
+
+OBSERVAÇÕES:
+- É PROIBIDO colocar "Perguntas?" ou qualquer variação de "dúvida" neste
+  slide. O encerramento é apenas "Muito Obrigado".
+- Este slide deve transmitir serenidade e encerramento elegante.
+
+================================================================================
+12. INSTRUÇÕES ADICIONAIS PARA A IA DESENVOLVEDORA
+================================================================================
+
+12.1 Estrutura do Documento HTML:
+- Único arquivo HTML contendo HTML, CSS e JavaScript
+- Codificação UTF-8 com <meta charset="UTF-8">
+- SEM tela de loading
+- O primeiro slide já deve estar ativo ao carregar a página
+- Todos os slides são divs com classe .slide, posicionados com
+  position: absolute, top: 0, left: 0, width: 100%, height: 100%
+- O slide ativo tem classe .active (display: block ou visibility: visible)
+- Os slides inativos têm display: none (ou visibility: hidden)
+
+12.2 Estrutura de Pastas:
+- NÃO existe estrutura de pastas. Único arquivo HTML.
+
+12.3 Responsividade (OBRIGATÓRIO):
+- Usar clamp() para fontes, unidades relativas (vw, vh, %, rem, em)
+- container queries ou media queries para breakpoints
+- Breakpoints: 1920px, 1600px, 1440px, 1366px, 1280px, 1024px, 768px, 480px
+- Em telas menores, reorganizar layout (grid para uma coluna, reduzir gaps)
+- NENHUM scroll em nenhum slide
+- Viewport: width=device-width, initial-scale=1.0
+
+12.4 Performance (OBRIGATÓRIO):
+- Animações CSS优先 (preferir CSS animations/transitions a JS)
+- Canvas para partículas (não DOM)
+- will-change em elementos animados
+- backface-visibility: hidden em elementos 3D
+- Use transform e opacity para animações (são propriedades que o GPU acelera)
+
+12.5 Acessibilidade:
+- Navegação por teclado funcional
+- Contraste adequado (texto claro sobre fundo escuro)
+- role="presentation" ou role="document" na apresentação
+- aria-label nos botões de navegação
+
+12.6 Código Organizado:
+- CSS no <style> no <head>
+- JavaScript no final do <body>
+- Comentários no código explicando seções
+- Nomes de classes consistentes (prefixo slide- para cada slide)
+
+12.7 Verificações Finais OBRIGATÓRIAS antes de considerar o HTML pronto:
+
+□ O título do slide 1 tem #FFFFFF e o text-shadow usa gradiente de dourado
+  para verde escuro (NUNCA branco)?
+□ O título do slide 1 está perfeitamente horizontal (sem rotate/skew)?
+□ Não existem cover shapes (polígonos decorativos com clip-path) no slide 1?
+□ O primeiro slide aparece automaticamente ao carregar a página?
+□ A animação de entrada do slide 1 dispara automaticamente no load?
+□ NENHUM elemento aparece antes da animação começar?
+□ NENHUM flash/conteúdo visível antes da animação?
+□ Todos os slides funcionam sem scroll?
+□ A navegação por teclado funciona (setas, home, end)?
+□ O scroll do mouse NÃO troca slides?
+□ O clique em área vazia NÃO troca slides?
+□ As transições entre slides estão conforme especificado?
+□ As animações de entrada seguem a ordem especificada?
+□ Os delays e staggers estão implementados?
+□ Os blocos 3D usam EXATAMENTE a configuração especificada?
+□ Os blocos 3D NÃO ultrapassam 350px x 420px?
+□ Os blocos 3D contêm conteúdo real?
+□ A barra de progresso e navigation dots existem?
+□ A codificação UTF-8 está correta (sem caracteres corrompidos)?
+□ A apresentação está responsiva?
+□ Não existem elementos sobrepostos ou cortados?
+□ O arquivo é um único HTML?
+
+================================================================================
+FIM DA ESPECIFICAÇÃO
+================================================================================
