@@ -1,0 +1,1185 @@
+# ESPECIFICAÇÃO VISUAL COMPLETA — APRESENTAÇÃO "BARONY: UM RPG DESAFIADOR"
+
+---
+
+## INSTRUÇÕES ABSOLUTAS PARA A IA DE DESENVOLVIMENTO
+
+Você, IA responsável por desenvolver o documento HTML, deve seguir rigorosamente todas as instruções abaixo.
+
+Você NÃO deve consultar nenhum outro arquivo dentro da pasta de trabalho. Ignore completamente qualquer outro documento presente no diretório. Crie o HTML completo de uma única vez, sem depender de arquivos externos.
+
+Você deve gerar um ÚNICO arquivo HTML contendo toda a apresentação embutida (HTML + CSS + JavaScript em um único arquivo). O arquivo deve utilizar exclusivamente codificação UTF-8, com a tag <meta charset="UTF-8"> no <head>. Todos os caracteres especiais, acentos, cedilhas e pontuação devem estar perfeitamente codificados. A integridade dos caracteres é obrigação absoluta — não pode existir nenhum caractere corrompido (como �, Ã©, Ã§, etc.) em nenhuma parte do documento. Antes de finalizar, realize uma auditoria completa de todos os textos do HTML para garantir que não há nenhum carácter corrompido.
+
+NÃO crie tela de Loading. O primeiro slide deve aparecer imediatamente ao abrir o HTML, com sua animação de entrada já disparando automaticamente no carregamento inicial da página.
+
+O documento HTML será exibido em tela cheia em um computador, mas deve ser responsivo para funcionar corretamente em qualquer resolução.
+
+---
+
+## 1. IDENTIDADE VISUAL GERAL
+
+**Tema:** Barony — RPG de dungeon crawl medieval com elementos roguelike, visual voxel retrô, atmosfera sombria de masmorra.
+
+**Direção artística:** Fusão entre o estilo voxel retrô do jogo (lembrando jogos dos anos 90) com uma interface moderna, premium e cinematográfica. A apresentação deve evocar a sensação de estar adentrando uma masmorra antiga, com iluminação de tochas, paredes de pedra e um perigo iminente. O design mescla nostalgia pixelada com acabamento de estúdio de design contemporâneo.
+
+**Atmosfera:** Sombria, medieval, misteriosa, perigosa, épica. Sensação de exploração em masmorras ancestrais com tesouros escondidos e monstros à espreita. O espectador deve sentir o peso do "permadeath" e a emoção da descoberta.
+
+**Público-alvo:** Jogadores de PC, fãs de RPG, roguelike enthusiasts, comunidade Steam, jogadores que apreciam desafios, nostálgicos por dungeon crawlers clássicos.
+
+**Objetivo:** Apresentar Barony de forma convincente, destacando suas mecânicas únicas, atmosfera, profundidade e rejogabilidade, incentivando o espectador a comprar o jogo na Steam.
+
+**Identidade visual única:** Uma apresentação que parece um grimório/ Livro de feitiços digital, onde cada slide é uma página iluminada por tochas, com elementos que parecem gravados em pedra, metal e pergaminho digital.
+
+---
+
+## 2. PALETA DE CORES
+
+Todas as cores foram escolhidas para evocar o ambiente de masmorra medieval com tochas, pedras e elementos arcanos. A luz quente das tochas contrasta com a escuridão fria da pedra.
+
+### Cores Principais (Foundation)
+- **Preto absoluto (fundo principal):** #030305 — tom mais profundo para as áreas sem luz direta
+- **Branco puro (títulos principais, destaques máximos):** #FFFFFF
+
+### Cores de Fundo (Dark Dungeon)
+- **Preto azulado (paredes distantes):** #07070D
+- **Cinza muito escuro (paredes de pedra):** #0D0D14
+- **Cinza escuro com quente (profundidade média):** #1A1512
+- **Preto com quente (sombras de tocha):** #0A0806
+
+### Cores de Iluminação / Luz de Tocha (Warm Ember)
+- **Âmbar dourado (glow principal, luz de tocha):** #D4A84B
+- **Laranja queimado (luz média, brasas):** #C27A2B
+- **Laranja vivo (destaques de fogo):** #E8631A
+- **Amarelo suave (glow de luz indireta):** #E8C87A
+
+### Cores de Destaque (Accent Medieval)
+- **Vermelho sangue (destaques de perigo, death, HP):** #7F1D1D
+- **Vermelho escuro (sangue seco, runas):** #4A0E0E
+- **Ouro envelhecido (tesouro, conquistas, itens lendários):** #B8860B
+- **Bronze (metais antigos, bordas):** #8B6F47
+
+### Cores de Texto
+- **Títulos principais:** #FFFFFF (branco puro)
+- **Subtítulos:** #E8C87A (amarelo suave, como luz refletida)
+- **Corpo de texto:** #B0A898 (cinza quente, como pedra clara)
+- **Texto secundário / metadados:** #6B5E50 (cinza médio quente)
+- **Links / destaques interativos:** #D4A84B (âmbar)
+- **Texto sobre fundo escuro:** #E0D8CC (quase branco quente)
+
+### Cores de Botões
+- **Botão primário (idle):** gradiente de #7F1D1D para #4A0E0E com glow âmbar
+- **Botão primário (hover):** gradiente de #A32626 para #7F1D1D com glow laranja
+- **Botão primário (active/pressed):** gradiente inverso, mais escuro
+- **Botão secundário (idle):** borda #D4A84B, fundo transparente
+- **Botão secundário (hover):** fundo rgba(212, 168, 75, 0.1), borda mais brilhante
+- **Botão de navegação (setas):** fundo rgba(255,255,255,0.04), borda rgba(212,168,75,0.3), hover rgba(212,168,75,0.15)
+- **Navigation dots (inactive):** rgba(255,255,255,0.2)
+- **Navigation dots (active):** #D4A84B com glow
+- **Barra de progresso:** gradiente horizontal de #7F1D1D → #D4A84B → #E8631A
+
+### Cores de Shadow para Título 3D (Slide 1)
+- **text-shadow (mais próximo):** #8B7355 (bronze claro)
+- **text-shadow (meio):** #5C4A32 (marrom médio)
+- **text-shadow (mais distante):** #1A1510 (quase preto)
+- O gradiente deve ir de claro (próximo ao texto) para escuro (distante), criando profundidade.
+
+### Microtexturas Globais
+- **Noise/grain overlay:** rgba(0,0,0,0.03) com opacity variável
+- **Vignette:** gradiente radial do centro transparente para bordas pretas (rgba(0,0,0,0.6))
+- **Textura de pedra sutil:** pseudo-elemento com ruído CSS
+
+---
+
+## 3. TIPOGRAFIA
+
+### Fonte de Títulos
+- **Fonte:** "Cinzel Decorative" (Google Fonts) — para títulos principais e slide de capa. Esta fonte possui aparência medieval, com serifa ornamental que evoca manuscritos antigos e grimórios.
+- **Fallback:** Georgia, "Times New Roman", serif
+- **Pesos:** 700 (bold) para títulos principais, 400 (regular) para subtítulos decorativos
+- **Letter-spacing:** 0.04em (títulos), 0.08em (subtítulos decorativos)
+
+### Fonte de Subtítulos e Destaques
+- **Fonte:** "Cinzel" (Google Fonts) — versão mais limpa da Cinzel, para subtítulos, labels, tags e metadados
+- **Fallback:** Georgia, serif
+- **Pesos:** 600 (semi-bold), 400 (regular)
+- **Letter-spacing:** 0.06em
+
+### Fonte de Conteúdo e Corpo
+- **Fonte:** "Inter" (Google Fonts) — fonte sans-serif moderna, altamente legível, que contrasta com a fonte medieval dos títulos, criando uma tensão visual interessante entre o antigo e o moderno
+- **Fallback:** "Segoe UI", system-ui, sans-serif
+- **Pesos:** 300 (light, para corpo), 400 (regular, para ênfase), 600 (semi-bold, para destaques), 700 (bold, para labels importantes)
+- **Line-height:** 1.5 (corpo), 1.3 (cards)
+
+### Hierarquia Visual (Tamanhos)
+- **Título do slide de capa (h1):** clamp(2.8rem, 6vw, 5rem)
+- **Título de slide interno (h2):** clamp(1.6rem, 3.5vw, 2.8rem)
+- **Subtítulo de slide (h3):** clamp(1rem, 1.8vw, 1.4rem)
+- **Corpo de texto (p, li):** clamp(0.85rem, 1.2vw, 1.05rem)
+- **Texto secundário / metadados:** clamp(0.7rem, 0.9vw, 0.85rem)
+- **Labels / badges:** clamp(0.6rem, 0.7vw, 0.75rem)
+- **Números / estatísticas (destaque):** clamp(2.2rem, 4vw, 3.5rem)
+
+### Regras Tipográficas
+- Títulos com Cinzel Decorative devem usar uppercase com letter-spacing aumentado
+- Subtítulos com Cinzel podem usar title case ou uppercase dependendo do contexto
+- Corpo com Inter deve usar sentence case
+- Nunca usar font-size menor que 12px em desktop ou 11px em mobile
+- O contraste mínimo de todas as fontes deve ser WCAG AA (4.5:1 para texto normal)
+- Parágrafos devem ter max-width de 65ch para legibilidade ideal
+
+---
+
+## 4. ESTILO VISUAL
+
+**Estilo primário:** Medieval futurista / Dungeon Premium
+
+**Descrição:** Fusão entre a estética de uma masmorra medieval (pedra, metal, tochas, runas, pergaminho) com uma interface de produto digital moderno (glassmorphism, gradientes sutis, animações fluidas, tipografia limpa). O resultado é uma apresentação que parece um "grimório digital" — antigo e místico, mas com acabamento de software premium.
+
+**Elementos de estilo obrigatórios:**
+- **Dark mode permanente** — nunca usar modo claro
+- **Iluminação de tocha** — luz quente vindo do canto superior direito (ângulo de 45°), criando sombras coerentes em todos os elementos
+- **Texturas de pedra** — ruído sutil, grain cinematográfico, microtexturas que lembram superfícies de pedra ou metal envelhecido
+- **Glow âmbar** — elementos importantes recebem um brilho quente dourado/laranja
+- **Bordas duplas** — muitos elementos possuem uma borda externa fina (rgba(212,168,75,0.15)) e uma borda interna de highlight (rgba(255,255,255,0.05))
+- **Cantos ligeiramente retos** — border-radius: 4px para blocos com perspectiva, 8px para cards, 12px para painéis glass
+- **Sobreposição de vignette** — escurecimento nas bordas da tela para focar a atenção no centro
+- **Runas e símbolos** — pequenos elementos decorativos que parecem runas medievais (usando caracteres Unicode como ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ e símbolos como ⚔ 🛡 🔥 💀)
+
+**O que NÃO usar:**
+- Cores frias excessivas (azul, ciano, roxo) — a não ser em contexto de "magia"
+- Estilo cyberpunk ou sci-fi (sem neon azul/rosa)
+- Estilo cartoon ou infantil
+- Gradientes arco-íris
+- Emojis em excesso (apenas símbolos específicos como ⚔ 🛡 🔥 💀)
+
+---
+
+## 5. CONCEITO ARTÍSTICO
+
+A apresentação deve transmitir a sensação de estar folheando as páginas de um **grimório antigo** que contém o conhecimento de todas as masmorras de Barony. Cada slide é uma "página" iluminada pela chama trêmula de uma tocha, onde textos e ilustrações foram gravados por monges-eremitas que sobreviveram às profundezas.
+
+O espectador é um **aventureiro** prestes a adentrar a masmorra. A apresentação alterna entre:
+- Momentos de **reverência** (slides de conceito, atmosfera, lore)
+- Momentos de **tensão** (jogabilidade, permadeath, perigo)
+- Momentos de **descoberta** (classes, progressão, itens lendários)
+- Momentos de **camaradagem** (multijogador)
+- Momento final de **chamada à ação** (disponível na Steam)
+
+A sensação de **profundidade** é constante — o fundo escuro recua em camadas, partículas de poeira e faíscas flutuam no ar, e blocos de informação parecem placas de pedra inclinadas em perspectiva tridimensional real.
+
+---
+
+## 6. BACKGROUND GLOBAL
+
+### Camadas do Background
+
+A apresentação inteira utiliza um sistema de múltiplas camadas sobrepostas para criar profundidade cinematográfica.
+
+**Camada 1 — Fundo sólido (mais distante)**
+- Cor: #030305 (preto absoluto)
+- Leve gradiente radial sutil com centro em #0A0806
+
+**Camada 2 — Grid de pedra (paredes distantes)**
+- Grid de linhas finas simulando blocos de pedra
+- Opacidade: 0.03
+- Cor das linhas: rgba(212, 168, 75, 0.08)
+- Tamanho do grid: 60px x 40px
+- Leve movimento parallax (1/5 da velocidade do mouse)
+- Transformação perspective sutil para dar sensação de profundidade
+
+**Camada 3 — Blobs animados (luz de tocha refletida)**
+- 3 a 4 manchas de luz grandes e difusas que se movem lentamente
+- Cores: rgba(212, 168, 75, 0.04), rgba(200, 120, 40, 0.03), rgba(232, 97, 26, 0.02)
+- Filter: blur(80px) a blur(120px)
+- Movimento: flutuação suave com animação CSS de 20-30 segundos
+- Posicionadas em áreas estratégicas (não aleatório)
+
+**Camada 4 — Partículas de poeira/ember (fireflies)**
+- Canvas de partículas com 40-60 partículas
+- Tipos: poeira dourada (pequena, lenta) e faíscas (médias, mais rápidas, com glow)
+- Movimento: flutuação aleatória Browniana, muito lenta
+- Tamanho: 1px a 3px (poeira), 2px a 4px (faíscas com glow sutíl)
+- Cor: rgba(212, 168, 75, 0.3 a 0.6) para poeira, rgba(232, 97, 26, 0.4 a 0.8) para faíscas
+- Velocidade: muito lenta (0.3 a 0.8 px/frame)
+- Parallax: acompanham levemente o movimento do mouse
+- As partículas persistem em todos os slides, mas alguns slides podem ter partículas extras específicas
+
+**Camada 5 — Vignette**
+- Gradiente radial do centro (transparente) para as bordas (preto com opacidade 0.6)
+- Cria foco natural no centro do slide
+- Leve animação de "respiração" — opacidade oscila ±2% a cada 8 segundos
+- Pointer-events: none
+
+**Camada 6 — Noise/Grain**
+- Pseudo-elemento com ruído CSS (SVG filter noise ou base64 noise image)
+- Opacidade: 0.015
+- Mix-blend-mode: overlay
+- Leve animação de deslocamento para simular grão cinematográfico
+- Pointer-events: none
+- Este noise deve estar presente em TODOS os slides, incluindo o slide de capa
+
+---
+
+## 7. NAVEGAÇÃO GLOBAL
+
+### Sistema de Navegação (Obrigatório)
+
+A apresentação possui 11 slides numerados de 1 a 11.
+
+**Navegação por teclado (obrigatório):**
+- Seta para DIREITA / Seta para BAIXO: próximo slide
+- Seta para ESQUERDA / Seta para CIMA: slide anterior
+- Home: primeiro slide
+- End: último slide
+- Números 1 a 9: pula para o slide correspondente (1-9). Para slides 10-11, usar atalho adicional (ex: 0 para slide 10, Shift+1 para slide 11, ou permitir digitar número de 2 dígitos)
+- **PROIBIDO:** a tecla Espaço não deve trocar de slide. A roda do mouse (scroll) não deve trocar de slide. Clique em qualquer região vazia da tela não deve trocar de slide.
+
+**Navegação por botões:**
+- Botão "Anterior" (seta esquerda): canto inferior esquerdo
+- Botão "Próximo" (seta direita): canto inferior direito
+- Ambos os botões são visíveis em todos os slides (exceto slide 1 onde o anterior pode ficar oculto, e slide 11 onde o próximo fica oculto)
+- Estilo: fundo semi-transparente, borda com cor de destaque, glow no hover, microanimação de pulso
+- Tamanho: 44x44px (facilmente clicável)
+- Ícones: setas SVG simples e elegantes
+
+**Navigation Dots:**
+- 11 dots na parte inferior central
+- Alinhados horizontalmente, espaçamento de 16px entre eles
+- Dot inativo: círculo de 6px com rgba(255,255,255,0.2)
+- Dot ativo: círculo de 8px com #D4A84B e box-shadow glow
+- Hover no dot: escala 1.3, cor mais clara
+- Clicar em um dot navega diretamente para aquele slide
+- Microanimação de "pulso" no dot atual: animação contínua sutil (opacidade oscila 0.8-1.0)
+
+**Barra de Progresso:**
+- Localizada IMEDIATAMENTE ACIMA dos navigation dots (entre os dots e o conteúdo do slide)
+- Altura: 3px
+- Largura: corresponde à largura total da área de dots
+- Gradiente horizontal: #7F1D1D → #D4A84B → #E8631A
+- A barra preenche progressivamente conforme o slide avança (slide 1 = 0%, slide 11 = 100%)
+- Animação suave de transição (ease-out, 600ms) quando muda de slide
+- Leve glow (box-shadow: 0 0 8px rgba(212,168,75,0.4)) na barra
+
+**Navegação Touch / Swipe:**
+- Swipe para a esquerda: próximo slide
+- Swipe para a direita: slide anterior
+- Swipe vertical não faz nada
+- Resistência mínima: 50px de deslocamento
+- Funciona em toda a área do slide
+
+**Altura dos Elementos de Navegação:**
+- Toda a navegação inferior (botões + dots + barra de progresso) deve ficar na parte inferior do slide, com padding de 24px da borda inferior
+- Os dots ficam centralizados, as setas nos cantos
+- A barra de progresso fica 8px acima dos dots
+- Altura total da navegação: aproximadamente 60px
+- Z-index da navegação: 100 (acima de todos os outros elementos)
+
+---
+
+## 8. ANIMAÇÕES GLOBAIS
+
+### Linguagem de Animação
+
+Todas as animações devem seguir uma linguagem coerente:
+- **Elegância** — movimentos suaves, sem acelerações bruscas
+- **Propósito** — cada animação existe para guiar o olhar, não para enfeitar
+- **Natureza física** — easing baseado em movimento real (cubic-bezier customizados)
+- **Ritmo** — sequenciamento claro com delays e stagger
+- **Não-linearidade** — evitar movimentos puramente lineares
+
+### Curvas de Easing (Globais)
+- **Entrada padrão:** cubic-bezier(0.16, 1, 0.3, 1) — entrada suave com leve overshoot no final
+- **Saída padrão:** cubic-bezier(0.4, 0, 0.2, 1) — desaceleração natural
+- **Movimento contínuo:** cubic-bezier(0.4, 0, 0.6, 1) — para animações perpétuas
+- **Microinteração:** cubic-bezier(0.34, 1.56, 0.64, 1) — spring suave para hovers
+- **Fade padrão:** opacity + transition com 400ms ease
+
+### Durações Base
+- Microinteração (hover, focus): 200ms a 300ms
+- Animação de elemento individual: 500ms a 1200ms
+- Sequência de stagger entre elementos: 80ms a 150ms de delay entre cada
+- Transição entre slides: 600ms a 900ms (dependendo do slide)
+- Delay antes da animação do slide começar: 100ms após o slide se tornar ativo
+
+### Animação de Poeira/Ember Contínua
+- As partículas de fundo (fireflies/ember) estão sempre ativas, mesmo sem interação
+- Velocidade extremamente lenta
+- Movimento browniano (direção aleatória que muda suavemente)
+- Algumas partículas "piscam" (opacidade varia 0.2-0.8) ocasionalmente
+
+### Animação de "Respiração" do Background
+- Toda a apresentação possui uma leve pulsação muito sutil no vignette (±2% de opacidade em 8 segundos)
+- Os blobs de luz movem-se lentamente em loop infinito
+- O grid de pedra desloca-se infinitesimalmente
+
+---
+
+## 9. ELEMENTOS INTERATIVOS GLOBAIS
+
+### Cursor Personalizado
+- Cursor padrão substituído por um cursor customizado
+- **Forma:** um pequeno círculo de 8px com glow âmbar (#D4A84B) que segue o mouse
+- **Atrás do círculo:** um segundo círculo maior (32px) com opacidade 0.15 e blur(4px) que segue com pequeno atraso (inércia)
+- **Em hover de botões:** o círculo maior escala para 48px e opacidade 0.25
+- **Em links:** glow aumenta
+- **Pointer-events:** none em ambos os círculos
+- **Em dispositivos touch:** cursor customizado é completamente desabilitado
+
+### Hover em Botões
+- Botões de navegação (setas): glow aumenta, escala sutil 1.05, borda mais brilhante
+- Botões de interação adicional: mesma lógica
+- Navigation dots: escala 1.3 no hover, cor #D4A84B
+
+### Hover em Blocos com Perspectiva
+- Leve elevação (translateY de -2px) + sombra mais intensa
+- Glow aumenta sutilmente na borda superior
+- Transição de 300ms com ease spring
+
+### Hover em Cards / Painéis
+- Elevação de 3px com sombra mais pronunciada
+- Leve glow adicional
+- Borda iluminada
+
+### Microanimações de Foco
+- Todos os elementos focáveis devem ter outline customizado (não o padrão do navegador)
+- Outline: 2px solid rgba(212, 168, 75, 0.6) com border-radius compatível
+- Apenas visível para navegação por teclado
+
+---
+
+## 10. SISTEMA DE BLOCOS COM PERSPECTIVA 3D REAL
+
+### Especificação Técnica (OBRIGATÓRIO — SEGUIR FIELMENTE)
+
+A apresentação DEVE utilizar blocos com perspectiva 3D real como parte central da identidade visual. A implementação deve seguir EXATAMENTE as configurações do arquivo de referência, sem alterações nos ângulos.
+
+### Classe para Bloco na Metade Superior do Slide
+
+```css
+.bloco-perspectiva-superior {
+    transform: perspective(250px) rotateX(-10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+    padding: 20px 28px;
+    border-radius: 4px;
+    width: min(350px, 85vw);
+    max-width: 350px;
+    max-height: 420px;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    background: linear-gradient(135deg, #7F1D1D, #4A0E0E);
+    box-shadow: 0 20px 40px -12px rgba(127, 29, 29, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.1),
+                inset 0 -1px 0 rgba(0,0,0,0.3);
+    border: 1px solid rgba(212, 168, 75, 0.12);
+}
+```
+
+### Classe para Bloco na Metade Inferior do Slide
+
+```css
+.bloco-perspectiva-inferior {
+    transform: perspective(250px) rotateX(10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+    padding: 20px 28px;
+    border-radius: 4px;
+    width: min(350px, 85vw);
+    max-width: 350px;
+    max-height: 420px;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    background: linear-gradient(135deg, #4A0E0E, #2A0508);
+    box-shadow: 0 20px 40px -12px rgba(127, 29, 29, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.1),
+                inset 0 -1px 0 rgba(0,0,0,0.3);
+    border: 1px solid rgba(212, 168, 75, 0.12);
+}
+```
+
+### Regras Obrigatórias dos Blocos
+
+1. **Geometria FIXA:** rotateY(25deg) e perspective(250px) são imutáveis. Apenas o rotateX varia (-10deg para metade superior, 10deg para metade inferior).
+
+2. **Conteúdo Obrigatório:** TODO bloco deve conter conteúdo real (título, número, label, ícone, citação). Blocos puramente decorativos são PROIBIDOS.
+
+3. **Tamanho Máximo:** Largura máxima de 350px. Altura máxima de 420px. Usar width: min(350px, 85vw).
+
+4. **Tamanho Justo:** O bloco deve ter o tamanho JUSTO para seu conteúdo, não os limites máximos. Adicionar comentário no HTML justificando o tamanho de cada bloco.
+
+5. **Padding Mínimo:** 20px nas laterais, ajustável via clamp para telas menores (mínimo 12px).
+
+6. **Texto Acompanha Perspectiva:** O texto dentro do bloco HERDA automaticamente a perspectiva 3D do container. NÃO aplicar skew, rotate ou qualquer transformação extra no texto.
+
+7. **Profundidade Visual:** O bloco deve ter sombra coerente com a iluminação (luz do canto superior direito), highlight na borda superior (inset), e glow sutil.
+
+8. **Responsividade:** Em telas menores, a perspectiva 3D é MANTIDA (nunca removida). Usar width: min(350px, 85vw) e max-height: 420px.
+
+9. **Participação em Animações:** Os blocos devem entrar com animação própria (fade + translate + blur reduzindo).
+
+10. **Variações Visuais:** A cor de fundo, gradiente e glow do bloco podem variar conforme o slide e o conteúdo, desde que a GEOMETRIA da perspectiva permaneça IDÊNTICA.
+
+---
+
+## 11. ESPECIFICAÇÃO POR SLIDE
+
+---
+
+### SLIDE 1 — CAPA: BARONY
+
+**Objetivo:** Causar a primeira impressão impactante. O espectador deve sentir que está diante de algo épico e misterioso. Estabelecer o tom medieval sombrio da apresentação.
+
+**Emoção:** Impacto, curiosidade, grandiosidade, mistério.
+
+**Layout:** Centralizado vertical e horizontalmente. Composição simétrica dramática. O título domina o centro, com subtítulo abaixo e data no canto inferior esquerdo.
+
+**Organização:**
+- Centro vertical: título "BARONY" (h1)
+- Abaixo do título: subtítulo "Um RPG de Dungeon Crawl na Steam" (h3)
+- Canto inferior esquerdo: data/ano (pequeno, estilo label)
+- Navegação padrão inferior (dots + setas + barra de progresso)
+- Z-index do título: ZERO (para não sobrepor outros elementos)
+
+**Background:**
+- Todas as camadas globais de fundo (gradiente, grid, blobs, partículas, vignette, noise)
+- NENHUM elemento decorativo extra atrás do título (proibição absoluta de "cover shapes")
+- A luz ambiente deve ser mais intensa no centro (simulando um foco de luz vindo de cima)
+
+**Elementos Decorativos:**
+- NENHUM — o slide de capa é limpo, sem polígonos decorativos, clip-paths ou shapes
+- Apenas as partículas globais de ember/poeira
+
+**Efeitos de Iluminação:**
+- Glow âmbar sutil atrás do título (radial gradient com opacidade 0.06)
+- Luz vinda do topo central, iluminando o título
+- Vignette mais escuro nas bordas para focar no centro
+
+**Tipografia — Título 3D Extrudado:**
+
+O título "BARONY" deve utilizar o seguinte sistema de extrusão 3D:
+
+- **Cor do texto:** #FFFFFF (branco puro, SEM gradiente no texto principal)
+- **Efeito:** Múltiplas camadas de text-shadow criando extrusão 3D
+- **Sem rotação:** O texto deve permanecer 100% HORIZONTAL (sem rotate, skew, ou perspective transform no elemento do texto)
+
+**Implementação da extrusão:**
+
+```javascript
+// Aplicar ao elemento do título no slide 1
+const titulo = document.getElementById('titulo-capa');
+if (titulo) {
+    const steps = 40;
+    let shadow = '';
+    for (let i = 0; i < steps; i++) {
+        const ratio = i / steps;
+        const r = Math.round(139 - ratio * 80);     // 8B7355 → 1A1510
+        const g = Math.round(115 - ratio * 70);
+        const b = Math.round(85 - ratio * 60);
+        shadow += (shadow ? ',' : '') +
+                  (-i * 1.2) + 'px ' +
+                  (i * 1.0) + 'px 0 ' +
+                  `rgb(${r},${g},${b})`;
+    }
+    titulo.style.textShadow = shadow;
+}
+```
+
+- O deslocamento gradativo das sombras ( -1.2px no eixo X, +1.0px no eixo Y por camada) cria uma extrusão que se projeta para a esquerda e para baixo, simulando luz vindo do canto superior direito.
+- A cor das sombras transiciona de #8B7355 (bronze claro, próximo ao texto) para #1A1510 (marrom quase preto, nas camadas mais distantes).
+
+**Segunda camada de profundidade (sombra ambiente):**
+- Usar pseudo-elemento ::before com o mesmo texto "BARONY"
+- Deslocado +4px X, +3px Y em relação ao original
+- Filter: blur(6px)
+- Opacidade: 0.3
+- Cor: #1A1510
+- Z-index: -1
+
+**Ordem de entrada:**
+1. Título "BARONY" — fade in + blur reduzindo (blur 12px → 0px) + leve scale (0.95 → 1.0), duração 1200ms, delay 200ms, ease-out-expo
+2. Subtítulo "Um RPG de Dungeon Crawl na Steam" — fade in + translateY (15px → 0px), duração 800ms, delay 900ms
+3. Data — fade in, duração 500ms, delay 1400ms
+4. Navegação inferior — fade in, duração 400ms, delay 1600ms
+
+**Transição para Slide 2:**
+- Crossfade com duração de 600ms
+- Título atual desaparece (opacity → 0, blur aumenta 4px) em 400ms
+- Background do slide 1 dissolve para o background do slide 2
+
+**Observações:**
+- O z-index do elemento h1 deve ser 0
+- O título 3D NÃO deve ser implementado com CSS 3D transforms (rotate/skew/perspective no texto), apenas com text-shadow
+- A extrusão deve parecer ESPESSA — 40 camadas criam uma profundidade de aproximadamente 48px no eixo X e 40px no eixo Y
+
+---
+
+### SLIDE 2 — O QUE É BARONY?
+
+**Objetivo:** Explicar rapidamente o conceito do jogo. Apresentar o gênero, inspirações, desenvolvedor e histórico.
+
+**Emoção:** Esclarecimento, credibilidade, nostalgia (pelas referências a clássicos).
+
+**Layout:** Split screen horizontal assimétrico. Lado esquerdo (55%) com bloco de texto informativo. Lado direito (45%) com um bloco em perspectiva destacando informações-chave.
+
+**Organização:**
+- Lado esquerdo (55% da largura):
+  - Título "O que é Barony?" (h2, canto superior esquerdo)
+  - Abaixo: parágrafo descritivo (Inter, 300, cor #B0A898)
+  - Duas linhas finas de separação decorativas (runa ⚔ entre elas)
+- Lado direito (45% da largura):
+  - Bloco com perspectiva 3D (metade inferior = rotateX 10deg, pois fica na área inferior do slide)
+  - Conteúdo do bloco: bullet points com as informações principais
+
+**Background:** Background global padrão + partículas de ember mais concentradas no lado esquerdo
+
+**Elementos Decorativos:**
+- Linha vertical fina separando os dois lados (opacidade 0.1, cor #D4A84B)
+- Pequena runa decorativa no alto da linha (caractere Unicode: ᚱ)
+
+**Elementos Interativos:**
+- O bloco com perspectiva possui hover: elevação + glow
+
+**Bloco com Perspectiva (metade inferior):**
+- Posição: lado direito, alinhado verticalmente ao centro
+- Tamanho: largura 300px, altura 280px (justificado: contém 4 bullets de texto)
+- Conteúdo interno:
+  - Título interno (Cinzel, 600, 14px, uppercase, #E8C87A): "FICHA TÉCNICA"
+  - Lista de 4 itens (Inter, 300, 13px, #D0C8B8):
+    - "Roguelike em primeira pessoa com elementos de RPG"
+    - "Inspirado por clássicos como Ultima Underworld e Eye of the Beholder"
+    - "Desenvolvido pela Turning Wheel LLC"
+    - "Lançado em 2015, com atualizações frequentes até hoje"
+  - Cada item com um small bullet decorativo (•) em #D4A84B antes do texto
+  - Icone decorativo no topo: ⚔ (espadas cruzadas)
+
+**Ordem de entrada:**
+1. Título "O que é Barony?" — fade in + translateX(-20px → 0px), 700ms, delay 100ms
+2. Parágrafo descritivo — fade in, 600ms, delay 300ms
+3. Linhas decorativas — fade in, 400ms, delay 500ms
+4. Bloco com perspectiva — fade in + translateY(20px → 0px) + blur(6px → 0px), 900ms, delay 400ms
+5. Conteúdo interno do bloco (itens da lista) — fade in com stagger de 100ms cada, começando após o bloco aparecer (delay 1100ms)
+
+**Transição para Slide 3:** Push horizontal (de direita para esquerda), 700ms, o conteúdo do slide 2 desliza para fora enquanto o slide 3 entra.
+
+---
+
+### SLIDE 3 — JOGABILIDADE PRINCIPAL
+
+**Objetivo:** Destacar as mecânicas centrais que definem Barony: combate em primeira pessoa, dungeons proceduralmente geradas, permadeath e o ciclo de exploração.
+
+**Emoção:** Tensão, desafio, emoção, perigo.
+
+**Layout:** Grade 2x2 de blocos com perspectiva 3D. Quatro blocos representando os quatro pilares da jogabilidade.
+
+**Organização:**
+- Título "Jogabilidade Principal" no topo (h2)
+- Abaixo: grid de 4 blocos com perspectiva, dispostos em 2 colunas x 2 linhas
+- Os blocos superiores usam rotateX(-10deg), os inferiores usam rotateX(10deg)
+
+**Background:** Background global + partículas de faísca aumentadas (simulando combate)
+
+**Os 4 Blocos com Perspectiva:**
+
+**Bloco 1 (Superior Esquerdo)** — rotateX(-10deg)
+- Conteúdo: Ícone ⚔ + "Combate em Tempo Real"
+- Texto secundário: "Perspectiva em primeira pessoa com ataques corpo a corpo e à distância"
+- Tamanho: 270px x 160px (justificado: ícone + título + uma linha de texto)
+
+**Bloco 2 (Superior Direito)** — rotateX(-10deg)
+- Conteúdo: Ícone 🏰 + "Dungeons Procedurais"
+- Texto secundário: "Mapas diferentes a cada partida — nenhuma run é igual à anterior"
+- Tamanho: 270px x 160px
+
+**Bloco 3 (Inferior Esquerdo)** — rotateX(10deg)
+- Conteúdo: Ícone 💀 + "Morte Permanente"
+- Texto secundário: "Permadeath como mecânica central — cada decisão pode ser a última"
+- Tamanho: 270px x 160px
+
+**Bloco 4 (Inferior Direito)** — rotateX(10deg)
+- Conteúdo: Ícone 🔥 + "Sobrevivência"
+- Texto secundário: "Explore, combata, saqueie e sobreviva às profundezas da masmorra"
+- Tamanho: 270px x 160px
+
+**Detalhamento de cada bloco:**
+- Ícone grande no topo: 32px, cor #D4A84B com text-shadow glow
+- Título interno: Cinzel, 600, 14px, uppercase, letter-spacing 0.05em, cor #E8C87A
+- Texto descritivo: Inter, 300, 12px, cor #B0A898, margin-top 8px
+- Fundo do bloco: linear-gradient(135deg, #1A1512, #0D0D14)
+- Borda: 1px solid rgba(212,168,75,0.1)
+- Ícone no canto superior direito do bloco (pequeno, decorativo): ⚔ 🏰 💀 🔥
+
+**Elementos Adicionais:**
+- Leve glow pulsando no background atrás dos blocos (simulando fogo de combate)
+- Partículas de faísca extras do lado direito (simulando impacto de espadas)
+
+**Ordem de entrada:**
+1. Título "Jogabilidade Principal" — fade in + translateY(-15px → 0px), 700ms, delay 100ms
+2. Bloco 1 (esquerdo superior) — fade in + translateZ(30px → 0px) + blur(8px → 0px), 800ms, delay 400ms
+3. Bloco 2 (direito superior) — fade in + translateZ(30px → 0px), 800ms, delay 520ms
+4. Bloco 3 (esquerdo inferior) — fade in + translateZ(30px → 0px), 800ms, delay 640ms
+5. Bloco 4 (direito inferior) — fade in + translateZ(30px → 0px), 800ms, delay 760ms
+6. Conteúdo interno de cada bloco aparece 100ms após o respectivo bloco
+7. Partículas de faísca — ativadas gradualmente
+
+**Transição para Slide 4:** Cube 3D rotation (eixo X), 800ms — o slide 3 parece girar para cima revelando o slide 4.
+
+---
+
+### SLIDE 4 — CLASSES E RAÇAS
+
+**Objetivo:** Mostrar a profundidade de customização do jogo através da variedade de classes e raças.
+
+**Emoção:** Escolha, estratégia, possibilidade, identidade.
+
+**Layout:** Título no topo, duas seções lado a lado (Classes à esquerda, Raças à direita), cada uma com accordion/tabs interativos.
+
+**Organização:**
+- Título "Classes e Raças" (h2) no topo
+- Abaixo: duas colunas (50% cada)
+  - Coluna esquerda: label "CLASSES" com bloco de perspectiva + accordion de classes
+  - Coluna direita: label "RAÇAS" com bloco de perspectiva + accordion de raças
+
+**Background:** Background global com partículas de cor mais "mágica" — pequenos pontos de luz azulada/púrpura (simulando magia) misturados com as partículas âmbar padrão
+
+**Bloco com Perspectiva Superior (lado esquerdo):**
+- rotateX(-10deg) — metade superior
+- Conteúdo: "15+" (número grande) + "classes jogáveis"
+- Tamanho: 200px x 120px (justificado: número grande + label curta)
+- Número: clamp(2.5rem, 4vw, 3.5rem), Cinzel, 700, #D4A84B com glow
+- Label: Inter, 300, 11px, uppercase, #B0A898
+
+**Bloco com Perspectiva Superior (lado direito):**
+- rotateX(-10deg) — metade superior
+- Conteúdo: "8+" (número grande) + "raças variadas"
+- Tamanho: 200px x 120px
+- Número: clamp(2.5rem, 4vw, 3.5rem), Cinzel, 700, #D4A84B com glow
+- Label: Inter, 300, 11px, uppercase, #B0A898
+
+**Abaixo dos blocos: Accordion de Classes (esquerda) e Accordion de Raças (direita)**
+
+**Accordion de Classes:**
+- 5 itens: Guerreiro, Mago, Ladino, Ferreiro, + "e mais 10+ classes"
+- Cada item expansível mostra descrição curta ao clicar
+- Estado collapsed: nome da classe (Cinzel, 500, 13px, #E8C87A) + seta animada
+- Estado expanded: descrição (Inter, 300, 12px, #B0A898) + reveal suave com altura animada
+- Ícone decorativo antes do nome: ⚔ 🔮 🗡 🔨 ✨
+- Fundo do item: rgba(255,255,255,0.02) com borda inferior rgba(212,168,75,0.06)
+- Hover no item: fundo rgba(212,168,75,0.04)
+
+**Accordion de Raças:**
+- 5 itens: Humano, Elfo, Anão, Goblin, + "e mais 4+ raças"
+- Mesmo estilo do accordion de classes
+- Ícones: 👤 🧝 ⚒ 👺 🧛
+
+**Elementos Interativos:**
+- Accordions com toggle (clique no item expande/recolhe)
+- Microanimação de rotação da seta (180°) ao expandir
+- Altura animada com transition: max-height + opacity
+
+**Ordem de entrada:**
+1. Título "Classes e Raças" — fade in + translateY(-15px), 700ms, delay 100ms
+2. Labels "CLASSES" e "RAÇAS" (acima de cada coluna) — fade in, 400ms, delay 300ms
+3. Bloco esquerdo (classes) — fade in + perspectiva, 800ms, delay 400ms
+4. Bloco direito (raças) — fade in + perspectiva, 800ms, delay 500ms
+5. Accordion de classes — itens aparecem com stagger de 80ms, delay 700ms
+6. Accordion de raças — itens aparecem com stagger de 80ms, delay 900ms
+
+**Transição para Slide 5:** Fade cross com duração de 700ms. O slide atual escurece levemente antes do próximo aparecer.
+
+---
+
+### SLIDE 5 — SISTEMA DE PROGRESSÃO
+
+**Objetivo:** Explicar como o personagem evolui: níveis, atributos, habilidades e equipamentos lendários.
+
+**Emoção:** Crescimento, conquista, descoberta, poder.
+
+**Layout:** Três colunas verticais, cada uma com um card ou bloco com perspectiva representando um pilar da progressão.
+
+**Organização:**
+- Título "Sistema de Progressão" (h2) no topo
+- Abaixo: três colunas iguais (33% cada)
+- Cada coluna contém um bloco com perspectiva + descrição
+
+**Background:** Background global com partículas douradas aumentadas (simulando ganho de XP/ouro)
+
+**Bloco 1 (Coluna Esquerda, Inferior)** — rotateX(10deg)
+- Ícone: ⬆ (seta para cima, 28px, #D4A84B)
+- Título interno: "Níveis e XP"
+- Texto: "Subir de nível ao ganhar XP derrotando inimigos"
+- Detalhe extra: "Atributos melhoram a cada level up"
+- Tamanho: 250px x 180px
+
+**Bloco 2 (Coluna Central, Superior)** — rotateX(-10deg)
+- Ícone: 💪 (28px, #D4A84B)
+- Título interno: "Atributos Clássicos"
+- Texto: "Força, Destreza, Inteligência, Carisma e mais"
+- Detalhe extra: "Distribuição estratégica de pontos"
+- Tamanho: 250px x 180px
+
+**Bloco 3 (Coluna Direita, Inferior)** — rotateX(10deg)
+- Ícone: 👑 (28px, #D4A84B)
+- Título interno: "Artefatos Lendários"
+- Texto: "Equipamentos únicos espalhados pelas masmorras"
+- Detalhe extra: "Habilidades que melhoram com o uso (subir escadas, nadar)"
+- Tamanho: 250px x 180px
+
+**Elementos Decorativos:**
+- Linhas finas conectando os três blocos (simulando caminho de progressão)
+- Setas decorativas entre as colunas (→) com opacidade 0.15
+- Pequenos pontos brilhantes (como estrelas/ouro) caindo lentamente (partículas extras)
+
+**Ordem de entrada:**
+1. Título — fade in + translateY(-15px), 700ms, delay 100ms
+2. Bloco Central (superior, destaque) — fade in + blur(10px → 0px) + scale(0.95 → 1.0), 900ms, delay 400ms
+3. Bloco Esquerdo — fade in + translateX(-30px → 0px), 800ms, delay 600ms
+4. Bloco Direito — fade in + translateX(30px → 0px), 800ms, delay 600ms
+5. Linhas de conexão — draw SVG animado (ou fade), 600ms, delay 1000ms
+6. Partículas de ouro — ativadas gradualmente
+
+**Transição para Slide 6:** Blur crossfade — slide 5 desfoca (blur 8px) enquanto slide 6 aparece com blur reduzindo.
+
+---
+
+### SLIDE 6 — MUNDO E ATMOSFERA
+
+**Objetivo:** Transmitir a atmosfera imersiva do jogo — ambientes variados, visual voxel, iluminação dinâmica, trilha sonora.
+
+**Emoção:** Imersão, descoberta, admiração, tensão atmosférica.
+
+**Layout:** Composição assimétrica cinematográfica. Lado direito com imagem/ilustração (grid de pixels simulando voxel), lado esquerdo com informações sobre os ambientes.
+
+**Organização:**
+- Título "Mundo e Atmosfera" (h2) no canto superior esquerdo
+- Lado esquerdo (50%): cards/painéis com informações sobre os ambientes
+- Lado direito (50%): grid decorativo de quadrados simulando arte voxel (padrão de quadrados coloridos em estilo pixel art, representando os biomas do jogo)
+
+**Background:** Background global + neblina/ névoa animada (camada extra com blur(40px) em gradientes lentos)
+- Camada de névoa com cor rgba(127, 29, 29, 0.03) — vermelho sangue muito sutil
+- A névoa deve ter animação de deriva lenta (20s loop)
+
+**Elemento Visual — Grid Voxel (lado direito):**
+- Grid de 8x8 quadrados pequenos (simulando pixel/voxel art)
+- Cores variando entre os ambientes: #7F1D1D (inferno), #1A1512 (masmorra), #2A1A0A (minas), #0D1420 (templos)
+- Cada quadrado: 20px x 20px com gap de 2px
+- Leve animação: alguns quadrados "piscam" com opacidade variando 0.7-1.0 (simulando iluminação dinâmica)
+- Hover: ao passar o mouse sobre um quadrado, ele acende com glow âmbar
+
+**Cards de Ambiente (lado esquerdo):**
+- 4 cards pequenos empilhados verticalmente (ou grid 2x2 dependendo do espaço)
+- Cada card: fundo rgba(255,255,255,0.03), borda rgba(212,168,75,0.08), padding 12px 16px, border-radius 8px
+- Card 1: "Masmorras" + descrição curta + ícone 🏚
+- Card 2: "Minas" + descrição curta + ícone ⛏
+- Card 3: "Templos" + descrição curta + ícone 🏛
+- Card 4: "Inferno" + descrição curta + ícone 🔥
+
+**Informações Textuais (abaixo dos cards):**
+- "Estilo visual voxel retrô com iluminação dinâmica"
+- "Trilha sonora imersiva e efeitos sonoros atmosféricos"
+- "Sensação de perigo constante e descoberta"
+
+**Ordem de entrada:**
+1. Título — fade in, 700ms, delay 100ms
+2. Camada de névoa — fade in com opacidade gradual, 2000ms, delay 0ms (começa junto com o slide)
+3. Cards de ambiente — aparecem com stagger de 100ms, cada um com fade + translateY(10px → 0px)
+   - Card 1: delay 400ms
+   - Card 2: delay 520ms
+   - Card 3: delay 640ms
+   - Card 4: delay 760ms
+4. Grid voxel — fade in + scale(0.9 → 1.0), 1000ms, delay 500ms
+5. Textos informativos — fade in, 500ms, delay 1000ms
+
+**Transição para Slide 7:** Zoom out — slide 6 parece recuar (scale 0.95) enquanto slide 7 surge de baixo.
+
+---
+
+### SLIDE 7 — MULTIJOGADOR
+
+**Objetivo:** Mostrar que Barony tem suporte cooperativo, destacando a diversão em grupo e a comunidade ativa.
+
+**Emoção:** Camaradagem, diversão compartilhada, estratégia em equipe, comunidade.
+
+**Layout:** Split horizontal. Parte superior com título + descrição. Parte inferior com um bloco com perspectiva grande (centralizado) destacando os modos multiplayer.
+
+**Organização:**
+- Título "Multijogador" (h2) no topo
+- Subtítulo/descrição curta abaixo: "Aventure-se com amigos — ou faça novos aliados"
+- Bloco com perspectiva GRANDE no centro inferior (rotateX(10deg) — metade inferior)
+- Dentro do bloco: informações sobre coop local, online, escalonamento
+
+**Background:** Background global + partículas extras douradas/celebratórias
+- Leve tom mais quente no fundo
+
+**Bloco com Perspectiva Inferior (grande):**
+- Posição: centro, terço inferior do slide
+- Tamanho: 320px x 240px (justificado: contém 3 seções de informação)
+- Conteúdo interno:
+  - Ícone decorativo no topo: 👥 (32px, #D4A84B)
+  - Título interno (Cinzel, 600, 15px, uppercase, #E8C87A): "Modos de Jogo"
+  - Três itens com ícones e descrições:
+    - "🖥  Cooperativo Local" — "Para até 4 jogadores na mesma máquina"
+    - "🌐  Cooperativo Online" — "Jogue com amigos pela internet"
+    - "📈  Escalonamento" — "Dificuldade adaptada ao número de jogadores"
+  - Dica extra no final: "Comunidade ativa com servidores dedicados" (Inter, 300, 11px, #8B7355, itálico)
+
+**Elementos Visuais:**
+- 4 pequenos círculos com iniciais (A, B, C, D) no canto superior direito do slide, representando 4 jogadores
+- Cada círculo: 28px, borda #D4A84B, fundo rgba(0,0,0,0.5), texto branco
+- Animação: os círculos pulsam levemente em sequência (wave de 1s)
+
+**Ordem de entrada:**
+1. Título — fade in + translateY(-15px), 700ms, delay 100ms
+2. Subtítulo — fade in, 600ms, delay 300ms
+3. Círculos dos jogadores — aparecem com stagger de 100ms, delay 400ms
+4. Bloco com perspectiva — fade in + translateY(30px → 0px) + blur(8px → 0px), 1000ms, delay 600ms
+5. Conteúdo interno do bloco — itens com stagger de 120ms, começando 100ms após o bloco
+
+**Transição para Slide 8:** Fold com efeito de "página virando" (3D CSS), 900ms.
+
+---
+
+### SLIDE 8 — MODIFICAÇÕES E CONTEÚDO ADICIONAL
+
+**Objetivo:** Destacar o suporte a mods, expansões oficiais, atualizações gratuitas e editor de níveis — mostrando a longevidade do jogo.
+
+**Emoção:** Valor, comunidade criativa, conteúdo infinito, generosidade dos desenvolvedores.
+
+**Layout:** Grid 2x2 de blocos (cards estilizados, sem perspectiva para variedade visual). Cada quadrante representa um tipo de conteúdo adicional.
+
+**Organização:**
+- Título "Modificações e Conteúdo Adicional" (h2) no topo
+- Abaixo: grid 2x2 de cards retangulares com glassmorphism suave
+- Cada card com ícone, título e descrição
+
+**Background:** Background global + elementos decorativos de "engrenagens" sutis no fundo (simbolizando modding/criação)
+
+**Cards (Grid 2x2, sem perspectiva para evitar repetição):**
+
+**Card 1 (Superior Esquerdo):**
+- Ícone: 🔧 (28px, #D4A84B)
+- Título: "Suporte a Mods"
+- Texto: "Workshop da Steam com milhares de mods criados pela comunidade"
+- Fundo: glassmorphism (rgba(255,255,255,0.03), backdrop-filter: blur(12px), borda rgba(212,168,75,0.08))
+
+**Card 2 (Superior Direito):**
+- Ícone: 📦 (28px, #D4A84B)
+- Título: "Expansão Oficial"
+- Texto: "Barony: Myths & Outcasts — novas raças, chefes e biomas"
+- Mesmo estilo glass
+
+**Card 3 (Inferior Esquerdo):**
+- Ícone: 🔄 (28px, #D4A84B)
+- Título: "Atualizações Gratuitas"
+- Texto: "Novo conteúdo ao longo dos anos sem custo adicional"
+- Mesmo estilo glass
+
+**Card 4 (Inferior Direito):**
+- Ícone: 🏗 (28px, #D4A84B)
+- Título: "Editor de Níveis"
+- Texto: "Crie masmorras personalizadas e compartilhe com a comunidade"
+- Mesmo estilo glass
+
+**Efeitos nos Cards:**
+- Hover: elevação de 5px, sombra aumenta, borda mais brilhante (#D4A84B com opacidade 0.25)
+- Glow âmbar sutil na borda superior em hover
+- Transição de 300ms com ease-out
+- Fundo no hover: rgba(212,168,75,0.05)
+
+**Ordem de entrada:**
+1. Título — fade in + translateY(-15px), 700ms, delay 100ms
+2. Card 1 — fade in + translateY(20px → 0px), 600ms, delay 300ms
+3. Card 2 — fade in + translateY(20px → 0px), 600ms, delay 400ms
+4. Card 3 — fade in + translateY(20px → 0px), 600ms, delay 500ms
+5. Card 4 — fade in + translateY(20px → 0px), 600ms, delay 600ms
+
+**Transição para Slide 9:** Slide horizontal (da direita para esquerda), 700ms, com parallax entre as camadas de fundo e conteúdo.
+
+---
+
+### SLIDE 9 — DICAS PARA INICIANTES
+
+**Objetivo:** Ajudar novos jogadores a começar com o pé direito. Oferecer conselhos práticos que aumentam a diversão e reduzem a frustração.
+
+**Emoção:** Acolhimento, aprendizado, preparação, confiança.
+
+**Layout:** Duas colunas. Esquerda com 4 dicas em cards pequenos. Direita com um bloco com perspectiva destacando o conceito "a morte é professoral".
+
+**Organização:**
+- Título "Dicas para Iniciantes" (h2) no topo
+- Coluna esquerda (60%): grid 2x2 de cards de dica
+- Coluna direita (40%): bloco com perspectiva (metade superior = rotateX -10deg)
+
+**Background:** Background global com tom ligeiramente mais claro (como se o jogador estivesse na entrada da masmorra, ainda seguro)
+
+**Cards de Dica (grid 2x2):**
+
+**Dica 1 (Superior Esquerdo):**
+- Ícone: 🛡 (24px)
+- Título: "Escolha Classes Simples"
+- Texto: "Guerreiro ou Bárbaro são ideais para primeiras runs"
+- Fundo: rgba(255,255,255,0.03), borda rgba(212,168,75,0.08)
+
+**Dica 2 (Superior Direito):**
+- Ícone: 🔍 (24px)
+- Título: "Explore com Cuidado"
+- Texto: "Examine cada cômodo e feche portas atrás de você"
+- Mesmo estilo
+
+**Dica 3 (Inferior Esquerdo):**
+- Ícone: 🎒 (24px)
+- Título: "Gerencie Recursos"
+- Texto: "Comida, poções e flechas são limitados — use com sabedoria"
+- Mesmo estilo
+
+**Dica 4 (Inferior Direito):**
+- Ícone: 📖 (24px)
+- Título: "A Morte Ensina"
+- Texto: "Cada run fracassada é uma lição para a próxima tentativa"
+- Mesmo estilo
+
+**Bloco com Perspectiva Superior (direita):**
+- rotateX(-10deg) — metade superior
+- Tamanho: 280px x 320px (justificado: conteúdo com citação + texto)
+- Conteúdo:
+  - Ícone: 💀 (32px, #D4A84B)
+  - Citação em destaque (Cinzel, 600, 16px, #E8C87A): "A morte é professoral"
+  - Texto explicativo (Inter, 300, 12px, #B0A898): "Cada run ensina algo novo. Não desista — a masmorra recompensa a persistência."
+  - Fundo: linear-gradient(135deg, #4A0E0E, #1A0505) — mais escuro, mais dramático
+  - Borda: rgba(212,168,75,0.15)
+
+**Ordem de entrada:**
+1. Título — fade in + translateY(-15px), 700ms, delay 100ms
+2. Cards de dica (grid 2x2) — aparecem com stagger de 100ms:
+   - Card 1: delay 300ms
+   - Card 2: delay 400ms
+   - Card 3: delay 500ms
+   - Card 4: delay 600ms
+3. Bloco com perspectiva — fade in + translateX(30px → 0px) + blur(8px → 0px), 900ms, delay 500ms
+4. Conteúdo do bloco — fade in com stagger, 100ms após o bloco
+
+**Transição para Slide 10:** Dissolve com partículas (os elementos se desfazem em partículas que revelam o próximo slide), 1000ms.
+
+---
+
+### SLIDE 10 — POR QUE JOGAR BARONY?
+
+**Objetivo:** Convencer o espectador a comprar o jogo. Apresentar os argumentos finais de venda: desafio, rejogabilidade, nostalgia + moderno, preço acessível.
+
+**Emoção:** Convencimento, entusiasmo, desejo, urgência positiva.
+
+**Layout:** Seção centralizada com 4 argumentos em um layout de "cardápio" visual. Bloco central grande com perspectiva destacando o apelo principal.
+
+**Organização:**
+- Título "Por que Jogar Barony?" (h2) no topo
+- Abaixo: 3 colunas
+  - Coluna esquerda e direita: cards verticais com argumentos
+  - Coluna central (destaque): bloco com perspectiva grande
+
+**Background:** Background global com partículas douradas intensas (clímax da apresentação). Leve gradiente radial dourado ao centro.
+
+**Coluna Esquerda (cards verticais empilhados):**
+
+**Card 1:**
+- Ícone: 🎯 (24px, #D4A84B)
+- Título: "Desafio Recompensador"
+- Texto: "Para fãs de roguelikes e RPGs que buscam superação"
+
+**Card 2:**
+- Ícone: ♾ (24px, #D4A84B)
+- Título: "Rejogabilidade Infinita"
+- Texto: "Geração procedural garante uma experiência única a cada partida"
+
+**Bloco Central com Perspectiva (metade inferior — rotateX 10deg):**
+- Posição: centro, destaque máximo
+- Tamanho: 320px x 340px (justificado: contém o argumento principal com bastante texto)
+- Fundo: linear-gradient(135deg, #7F1D1D, #2A0508) — gradiente vermelho sangue mais intenso
+- Glow: box-shadow intensificado com rgba(127, 29, 29, 0.5)
+- Conteúdo interno:
+  - Ícone: 👑 (40px, #D4A84B, glow intenso)
+  - Título (Cinzel, 700, 18px, #E8C87A, uppercase): "A Experiência Definitiva"
+  - Três bullets (Inter, 300, 12px, #D0C8B8):
+    - "Combinação única de nostalgia e mecânicas modernas"
+    - "Preço acessível e conteúdo abundante"
+    - "Centenas de horas de jogabilidade"
+
+**Coluna Direita (cards verticais empilhados):**
+
+**Card 3:**
+- Ícone: 🔥 (24px, #D4A84B)
+- Título: "Nostalgia + Moderno"
+- Texto: "Visual voxel retrô encontra mecânicas e design contemporâneos"
+
+**Card 4:**
+- Ícone: 💰 (24px, #D4A84B)
+- Título: "Custo-Benefício"
+- Texto: "Preço acessível por dezenas de horas de conteúdo de qualidade"
+
+**Ordem de entrada:**
+1. Título — fade in + translateY(-15px), 700ms, delay 100ms
+2. Bloco central (destaque) — fade in + scale(0.92 → 1.0) + blur(10px → 0px), 1000ms, delay 300ms (DEVE ser o primeiro elemento a chamar atenção)
+3. Conteúdo do bloco central — stagger de 100ms
+4. Card 1 (esquerda) — fade in + translateX(-30px), 600ms, delay 600ms
+5. Card 2 (esquerda) — fade in + translateX(-30px), 600ms, delay 720ms
+6. Card 3 (direita) — fade in + translateX(30px), 600ms, delay 600ms
+7. Card 4 (direita) — fade in + translateX(30px), 600ms, delay 720ms
+
+**Transição para Slide 11:** Crossfade dramático com glow dourado aumentando e diminuindo (como um flash de luz de tesouro), 1000ms.
+
+---
+
+### SLIDE 11 — ENCERRAMENTO
+
+**Objetivo:** Finalizar a apresentação de forma marcante. Agradecer ao espectador e mostrar onde comprar o jogo.
+
+**Emoção:** Gratidão, satisfação, chamada à ação, encerramento épico.
+
+**Layout:** Centralizado vertical e horizontalmente. Composto por duas seções: texto de agradecimento + chamada para ação (Steam).
+
+**Organização:**
+- Título de encerramento (h2) central: "Obrigado pela Atenção"
+- Abaixo: bloco com perspectiva grande (metade superior, rotateX -10deg) com informações da Steam
+- Abaixo do bloco: link/botão "Disponível na Steam"
+
+**Background:** Background global com partículas douradas em "chuva" (celebrando a conclusão). Luz central mais intensa. Vignette mais escuro para foco.
+
+**Bloco com Perspectiva Superior (central):**
+- rotateX(-10deg) — metade superior
+- Tamanho: 300px x 180px (justificado: contém logo Steam + texto + preço)
+- Fundo: linear-gradient(135deg, #1A1512, #0D0D14)
+- Borda: 1px solid rgba(212,168,75,0.2) — mais destacada
+- Conteúdo interno:
+  - Ícone 🎮 (28px, #D4A84B) com glow
+  - Texto (Cinzel, 600, 14px, #E8C87A): "Já disponível na Steam"
+  - Texto secundário (Inter, 300, 12px, #B0A898): "Garanta sua cópia e comece sua jornada"
+  - Preço decorativo (Inter, 300, 11px, #8B7355): "Preço acessível — compre uma vez e jogue para sempre"
+
+**Botão Steam (abaixo do bloco):**
+- Botão estilizado com link para Steam (não precisa ser funcional, apenas visual)
+- Fundo: linear-gradient(135deg, #2A475E, #1B2838) — azul escuro Steam
+- Texto: "Disponível na Steam" em Inter, 600, 14px, #FFFFFF
+- Borda: 1px solid rgba(255,255,255,0.1)
+- Hover: glow azul, escala 1.03
+- Ícone Steam (SVG da Steam ou texto "Steam" com logo)
+- Padding: 14px 32px, border-radius: 6px
+- Cursor: pointer
+
+**Elementos Decorativos:**
+- Partículas douradas caindo (simulando confete/ouro de tesouro)
+- **É PROIBIDO colocar "Perguntas?" ou "Dúvidas?"** — o slide final é de encerramento, não de perguntas
+
+**Ordem de entrada:**
+1. Título "Obrigado pela Atenção" — fade in + translateY(-15px) + glow aumentando, 800ms, delay 100ms
+2. Bloco com perspectiva — fade in + translateY(20px → 0px) + blur(6px → 0px), 900ms, delay 500ms
+3. Conteúdo do bloco — stagger de 100ms após bloco
+4. Botão Steam — fade in + scale(0.95 → 1.0), 600ms, delay 900ms
+5. Partículas douradas — ativadas gradualmente a partir do início
+
+**Não há transição para próximo slide.** Este é o último slide. Os botões de navegação para "próximo" ficam ocultos/desabilitados. Apenas o botão "anterior" e os dots permanecem ativos.
+
+---
+
+## 12. INSTRUÇÕES GLOBAIS DE IMPLEMENTAÇÃO
+
+### Estrutura do HTML
+
+1. **DOCTYPE:** HTML5 com lang="pt-BR"
+2. **Meta charset:** UTF-8 (OBRIGATÓRIO)
+3. **Viewport:** Responsivo com initial-scale=1.0
+4. **Title:** "Barony — Um RPG Desafiador"
+5. **Fontes:** Carregar Cinzel Decorative, Cinzel e Inter do Google Fonts via @import ou link
+6. **Favicon:** Inline SVG de um escudo ou espada (não requer arquivo externo)
+
+### CSS
+
+1. **Reset:** margin: 0, padding: 0, box-sizing: border-box em todos os elementos
+2. **Root:** definir variáveis CSS para todas as cores principais
+3. **Body/HTML:** width: 100vw, height: 100vh, overflow: hidden (PROIBIDO scroll)
+4. **Slides:** cada slide é uma div com position: absolute, width: 100%, height: 100%, top: 0, left: 0. Apenas o slide ativo tem opacity: 1 e visibility: visible. Os demais têm opacity: 0 e pointer-events: none.
+5. **Z-index:** Slide ativo: 10. Navegação: 100. Cursor customizado: 9999. Overlays: 50.
+6. **Responsividade:** Usar clamp() para fontes, dimensões flexíveis e media queries para breakpoints.
+
+### JavaScript
+
+1. **Gerenciamento de slides:** Array com todos os slides. Funções nextSlide(), prevSlide(), goToSlide(index).
+2. **Controle de animações:** Ao ativar um slide, disparar a sequência de animações com setTimeout encadeados.
+3. **Controle de estado:** Ao desativar um slide, resetar todos os elementos para o estado inicial (opacity: 0, transform: initial, etc.).
+4. **Navegação:** Event listeners para teclado (keydown), clique nos botões, clique nos dots, swipe (touch events).
+5. **Carregamento inicial:** No DOMContentLoaded, marcar slide 1 como ativo e disparar sua animação de entrada automaticamente.
+6. **Progress bar:** Atualizar width da barra baseado no índice do slide atual (slide 1 = 0%, slide 11 = 100%).
+7. **Título 3D (slide 1):** Gerar text-shadow via JavaScript com loop de 40 iterações.
+8. **Partículas:** Implementar via requestAnimationFrame em um canvas posicionado atrás do conteúdo (z-index: 1).
+
+### PROIBIÇÕES ABSOLUTAS
+
+1. NENHUM slide pode ter scroll (overflow: hidden no body/html).
+2. A roda do mouse NÃO pode trocar de slides.
+3. Clique em qualquer área vazia NÃO pode trocar de slides.
+4. NÃO criar "cover shapes" (polígonos decorativos com clip-path atrás do título).
+5. NÃO criar tela de Loading — o slide 1 deve aparecer imediatamente.
+6. NÃO colocar "Perguntas?" ou "Dúvidas?" no slide final.
+7. NÃO usar timelines (linhas do tempo visuais) em nenhum slide.
+8. NÃO usar rotação (rotate), skew ou perspective transform no título do slide 1 — usar apenas text-shadow.
+9. NÃO usar emojis excessivos — apenas os símbolos especificados.
+10. NÃO alterar os ângulos de perspectiva dos blocos 3D (rotateY 25deg, rotateX conforme posição).
+11. NÃO remover a perspectiva 3D em telas menores.
+
+### RESPONSIVIDADE
+
+- Usar clamp() para tamanhos de fonte.
+- Usar min(350px, 85vw) para largura dos blocos com perspectiva.
+- Usar max-height: 420px para altura dos blocos.
+- Em telas menores que 768px, reorganizar grids para coluna única.
+- Em telas menores que 480px, reduzir padding dos blocos para 12px.
+- A perspectiva 3D dos blocos é MANTIDA em TODAS as resoluções.
+- A navegação inferior (dots + setas + barra) deve se adaptar proporcionalmente.
+
+### AUDITORIA PRÉ-ENTREGA
+
+Antes de considerar o HTML concluído, você DEVE:
+
+1. Verificar se NÃO há nenhum caractere corrompido (�, Ã©, etc.) em nenhuma parte do documento.
+2. Verificar se o slide 1 aparece imediatamente ao abrir o arquivo (sem loading, sem atraso).
+3. Verificar se todas as animações de entrada do slide 1 disparam automaticamente.
+4. Verificar se NENHUM slide precisa de scroll para ser visualizado.
+5. Verificar se a navegação por teclado funciona (setas, home, end).
+6. Verificar se a navegação por clique nos dots funciona.
+7. Verificar se os botões anterior/próximo funcionam.
+8. Verificar se a barra de progresso está atualizando corretamente.
+9. Verificar se os blocos com perspectiva 3D estão com os ângulos corretos.
+10. Verificar se o título do slide 1 está com z-index 0.
+11. Verificar se o título do slide 1 está com text-shadow extrudado (sem rotate/skew).
+12. Verificar se o texto dentro dos blocos com perspectiva herda a perspectiva 3D.
+13. Verificar se o cursor customizado está funcionando (em desktop).
+14. Verificar se as partículas de fundo estão visíveis e animando.
+15. Verificar se a responsividade não quebra nenhum layout.
+16. Verificar se não existe "Perguntas?" ou "Dúvidas?" no slide 11.
+17. Verificar se todas as cores, fontes e estilos estão consistentes.
+18. Verificar se não há erro de digitação, texto truncado ou informação incorreta.
+
+---
+
+## CHECKLIST FINAL — VALIDAÇÃO ABSOLUTA
+
+- ☑ Todos os 11 slides foram especificados com objetivo, emoção, layout, background, elementos, animações e transições.
+- ☑ Paleta de cores completa com cores principais, secundárias, destaque, fundo, texto, botões, hover e shadow do título.
+- ☑ Tipografia definida (Cinzel Decorative, Cinzel, Inter) com pesos, tamanhos e hierarquia.
+- ☑ Background global com múltiplas camadas (fundo, grid, blobs, partículas, vignette, noise).
+- ☑ Navegação completa (teclado, botões, dots, swipe, barra de progresso).
+- ☑ Sistema de blocos com perspectiva 3D real (baseado no ExemploPerspectiva.html).
+- ☑ Título 3D extrudado (slide 1) com text-shadow, z-index 0, sem rotação.
+- ☑ PROIBIÇÃO de cover shapes no slide de capa.
+- ☑ PROIBIÇÃO de scroll nos slides.
+- ☑ PROIBIÇÃO de scroll do mouse trocar slides.
+- ☑ PROIBIÇÃO de clique em área vazia trocar slides.
+- ☑ PROIBIÇÃO de "Perguntas?" no slide final.
+- ☑ PROIBIÇÃO de timelines.
+- ☑ Responsividade (clamp, viewport units, media queries, perspectiva mantida).
+- ☑ UTF-8 obrigatório com auditoria de caracteres.
+- ☑ Sem tela de Loading.
+- ☑ Primeiro slide aparece e anima automaticamente no carregamento.
+- ☑ Cursor customizado com glow âmbar.
+- ☑ Partículas globais de ember/poeira.
+- ☑ Instruções para a IA não consultar outros arquivos da pasta.
+- ☑ Instruções para a IA criar um único HTML de uma só vez.

@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barony — Um RPG Desafiador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --black-deep: #030305;
+    --black-blue: #07070D;
+    --dark-stone: #0D0D14;
+    --dark-warm: #1A1512;
+    --shadow-torch: #0A0806;
+    --amber: #D4A84B;
+    --orange-burnt: #C27A2B;
+    --orange-fire: #E8631A;
+    --yellow-soft: #E8C87A;
+    --blood-red: #7F1D1D;
+    --blood-dark: #4A0E0E;
+    --gold-old: #B8860B;
+    --bronze: #8B6F47;
+    --text-body: #B0A898;
+    --text-secondary: #6B5E50;
+    --text-light: #E0D8CC;
+    --text-title: #FFFFFF;
+    --text-subtitle: #E8C87A;
+    --btn-primary-idle: linear-gradient(135deg, #7F1D1D, #4A0E0E);
+    --btn-primary-hover: linear-gradient(135deg, #A32626, #7F1D1D);
+    --btn-secondary-border: #D4A84B;
+    --dot-inactive: rgba(255,255,255,0.2);
+    --dot-active: #D4A84B;
+    --progress-gradient: linear-gradient(90deg, #7F1D1D, #D4A84B, #E8631A);
+    --font-display: 'Cinzel Decorative', Georgia, 'Times New Roman', serif;
+    --font-heading: 'Cinzel', Georgia, serif;
+    --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--black-deep); font-family: var(--font-body); color: var(--text-body); -webkit-font-smoothing: antialiased; }
+body { position: relative; }
+.noise-overlay { position: fixed; inset: 0; z-index: 50; pointer-events: none; opacity: 0.015; mix-blend-mode: overlay; }
+.noise-overlay::before { content: ''; position: absolute; inset: -50%; width: 200%; height: 200%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat: repeat; animation: noiseAnim 0.5s steps(4) infinite; }
+@keyframes noiseAnim { 0% { transform: translate(0,0); } 25% { transform: translate(-5%,-5%); } 50% { transform: translate(-10%,5%); } 75% { transform: translate(5%,-2%); } 100% { transform: translate(0,0); } }
+.vignette { position: fixed; inset: 0; z-index: 40; pointer-events: none; background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%); animation: breathe 8s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.98; } }
+#particles-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+.bg-grid { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03; background-image: linear-gradient(rgba(212,168,75,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(212,168,75,0.08) 1px, transparent 1px); background-size: 60px 40px; }
+.bg-blob { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; }
+.bg-blob-1 { width: 500px; height: 500px; background: rgba(212,168,75,0.04); top: -10%; right: -5%; animation: blobFloat1 25s ease-in-out infinite; }
+.bg-blob-2 { width: 400px; height: 400px; background: rgba(200,120,40,0.03); bottom: -5%; left: -5%; animation: blobFloat2 30s ease-in-out infinite; }
+.bg-blob-3 { width: 300px; height: 300px; background: rgba(232,97,26,0.02); top: 50%; left: 50%; animation: blobFloat3 20s ease-in-out infinite; }
+@keyframes blobFloat1 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(30px,-20px) scale(1.05); } 66% { transform: translate(-20px,30px) scale(0.95); } }
+@keyframes blobFloat2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-30px,20px) scale(1.08); } }
+@keyframes blobFloat3 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(20px,20px) scale(1.03); } 66% { transform: translate(-20px,-10px) scale(0.97); } }
+
+.slide { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 5; opacity: 0; pointer-events: none; display: flex; flex-direction: column; padding: 60px 48px 80px; transition: opacity 0.6s ease; }
+.slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+
+.slide-content { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 2; max-width: 1400px; width: 100%; margin: 0 auto; }
+
+.bloco-perspectiva-superior { transform: perspective(250px) rotateX(-10deg) rotateY(25deg); transform-origin: 50% 50% 0px; perspective-origin: 50% 50%; padding: 20px 28px; border-radius: 4px; width: min(350px, 85vw); max-width: 350px; max-height: 420px; will-change: transform; backface-visibility: hidden; -webkit-font-smoothing: antialiased; background: linear-gradient(135deg, #7F1D1D, #4A0E0E); box-shadow: 0 20px 40px -12px rgba(127, 29, 29, 0.4), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3); border: 1px solid rgba(212, 168, 75, 0.12); transition: box-shadow 0.3s ease, transform 0.3s ease; }
+.bloco-perspectiva-superior:hover { box-shadow: 0 25px 50px -12px rgba(127, 29, 29, 0.6), inset 0 1px 0 rgba(255,255,255,0.15); }
+
+.bloco-perspectiva-inferior { transform: perspective(250px) rotateX(10deg) rotateY(25deg); transform-origin: 50% 50% 0px; perspective-origin: 50% 50%; padding: 20px 28px; border-radius: 4px; width: min(350px, 85vw); max-width: 350px; max-height: 420px; will-change: transform; backface-visibility: hidden; -webkit-font-smoothing: antialiased; background: linear-gradient(135deg, #4A0E0E, #2A0508); box-shadow: 0 20px 40px -12px rgba(127, 29, 29, 0.4), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3); border: 1px solid rgba(212, 168, 75, 0.12); transition: box-shadow 0.3s ease, transform 0.3s ease; }
+.bloco-perspectiva-inferior:hover { box-shadow: 0 25px 50px -12px rgba(127, 29, 29, 0.6), inset 0 1px 0 rgba(255,255,255,0.15); }
+
+.bloco-perspectiva-inferior p, .bloco-perspectiva-superior p, .bloco-perspectiva-inferior h3, .bloco-perspectiva-superior h3, .bloco-perspectiva-inferior h4, .bloco-perspectiva-superior h4, .bloco-perspectiva-inferior li, .bloco-perspectiva-superior li { transform: none; }
+
+h1, h2, h3, h4 { font-family: var(--font-heading); color: var(--text-title); letter-spacing: 0.04em; }
+h1 { font-family: var(--font-display); }
+h2 { font-size: clamp(1.6rem, 3.5vw, 2.8rem); text-transform: uppercase; letter-spacing: 0.06em; }
+h3 { font-size: clamp(1rem, 1.8vw, 1.4rem); color: var(--text-subtitle); }
+p { font-size: clamp(0.85rem, 1.2vw, 1.05rem); line-height: 1.5; max-width: 65ch; color: var(--text-body); }
+.label { font-size: clamp(0.6rem, 0.7vw, 0.75rem); text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-heading); color: var(--text-secondary); }
+
+.nav-container { position: absolute; bottom: 0; left: 0; right: 0; z-index: 100; padding: 0 48px 24px; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.progress-bar-wrap { width: 100%; max-width: 600px; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; margin-bottom: 12px; overflow: hidden; pointer-events: auto; }
+.progress-bar { height: 100%; width: 0%; background: var(--progress-gradient); border-radius: 2px; transition: width 0.6s ease-out; box-shadow: 0 0 8px rgba(212,168,75,0.4); }
+.nav-row { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 700px; gap: 8px; pointer-events: auto; }
+.nav-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.04); border: 1px solid rgba(212,168,75,0.3); color: var(--amber); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); flex-shrink: 0; pointer-events: auto; }
+.nav-btn:hover { background: rgba(212,168,75,0.15); border-color: var(--amber); transform: scale(1.05); box-shadow: 0 0 20px rgba(212,168,75,0.15); }
+.nav-btn:active { transform: scale(0.95); }
+.nav-btn.hidden { opacity: 0; pointer-events: none; }
+.nav-dots { display: flex; align-items: center; gap: 12px; flex: 1; justify-content: center; }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dot-inactive); border: none; cursor: pointer; transition: all 0.3s ease; pointer-events: auto; padding: 0; flex-shrink: 0; }
+.nav-dot:hover { transform: scale(1.3); background: var(--amber); }
+.nav-dot.active { width: 8px; height: 8px; background: var(--dot-active); box-shadow: 0 0 12px rgba(212,168,75,0.5); animation: dotPulse 2s ease-in-out infinite; }
+@keyframes dotPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+
+.custom-cursor { position: fixed; pointer-events: none; z-index: 9999; border-radius: 50%; will-change: transform; }
+.cursor-dot { width: 8px; height: 8px; background: var(--amber); box-shadow: 0 0 6px rgba(212,168,75,0.6); transform: translate(-50%,-50%); }
+.cursor-ring { width: 32px; height: 32px; border: 1px solid rgba(212,168,75,0.2); background: rgba(212,168,75,0.08); transform: translate(-50%,-50%); transition: width 0.3s ease, height 0.3s ease, background 0.3s ease; }
+.cursor-ring.hover { width: 48px; height: 48px; background: rgba(212,168,75,0.15); }
+
+.anim-init { opacity: 0; }
+.anim-fade-in { animation: fadeIn var(--anim-dur, 600ms) var(--anim-delay, 0ms) ease-out both; }
+.anim-fade-up { animation: fadeUp var(--anim-dur, 600ms) var(--anim-delay, 0ms) ease-out both; }
+.anim-fade-left { animation: fadeLeft var(--anim-dur, 600ms) var(--anim-delay, 0ms) ease-out both; }
+.anim-fade-right { animation: fadeRight var(--anim-dur, 600ms) var(--anim-delay, 0ms) ease-out both; }
+.anim-fade-scale { animation: fadeScale var(--anim-dur, 600ms) var(--anim-delay, 0ms) ease-out both; }
+.anim-blur-in { animation: blurIn var(--anim-dur, 800ms) var(--anim-delay, 0ms) cubic-bezier(0.16,1,0.3,1) both; }
+.anim-perspective { animation: perspectiveIn var(--anim-dur, 900ms) var(--anim-delay, 0ms) cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes blurIn { from { opacity: 0; filter: blur(12px); } to { opacity: 1; filter: blur(0); } }
+.anim-title-in { animation: titleIn var(--anim-dur, 1200ms) var(--anim-delay, 200ms) cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes titleIn { from { opacity: 0; filter: blur(12px); transform: scale(0.95); } to { opacity: 1; filter: blur(0); transform: scale(1); } }
+@keyframes perspectiveIn { from { opacity: 0; filter: blur(8px); transform: perspective(250px) rotateX(var(--rx, 0deg)) rotateY(25deg) translateY(20px); } to { opacity: 1; filter: blur(0); transform: perspective(250px) rotateX(var(--rx, 0deg)) rotateY(25deg) translateY(0); } }
+
+.slide-enter h2 { --anim-dur: 700ms; --anim-delay: 100ms; }
+.slide-enter .stagger-1 { --anim-dur: 600ms; --anim-delay: 300ms; }
+.slide-enter .stagger-2 { --anim-dur: 600ms; --anim-delay: 400ms; }
+.slide-enter .stagger-3 { --anim-dur: 600ms; --anim-delay: 500ms; }
+.slide-enter .stagger-4 { --anim-dur: 600ms; --anim-delay: 600ms; }
+.slide-enter .stagger-5 { --anim-dur: 600ms; --anim-delay: 700ms; }
+.slide-enter .stagger-6 { --anim-dur: 600ms; --anim-delay: 800ms; }
+.slide-enter .stagger-7 { --anim-dur: 600ms; --anim-delay: 900ms; }
+.slide-enter .stagger-8 { --anim-dur: 500ms; --anim-delay: 1000ms; }
+
+#slide1 { padding: 0; justify-content: center; align-items: center; text-align: center; }
+#slide1 .slide-content { align-items: center; justify-content: center; }
+#titulo-capa { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.8rem, 6vw, 5rem); color: #FFFFFF; letter-spacing: 0.06em; text-transform: uppercase; position: relative; z-index: 0; }
+#subtitulo-capa { font-family: var(--font-heading); font-weight: 400; font-size: clamp(0.9rem, 1.8vw, 1.3rem); color: var(--text-subtitle); letter-spacing: 0.08em; margin-top: 16px; text-transform: uppercase; }
+#data-capa { position: absolute; bottom: 90px; left: 48px; font-size: clamp(0.6rem, 0.7vw, 0.75rem); text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-heading); color: var(--text-secondary); }
+.capa-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 300px; height: 300px; background: radial-gradient(circle, rgba(212,168,75,0.06) 0%, transparent 70%); pointer-events: none; z-index: -1; }
+
+#slide2 .slide-content { flex-direction: row; align-items: center; gap: 40px; }
+#slide2 .left-col { flex: 0 0 55%; }
+#slide2 .right-col { flex: 0 0 45%; display: flex; justify-content: center; }
+.separator-line { width: 100%; height: 1px; background: rgba(212,168,75,0.15); margin: 16px 0; }
+.separator-rune { text-align: center; color: var(--amber); font-size: 20px; margin: 8px 0; opacity: 0.5; }
+
+#slide3 .slide-content { }
+#slide3 .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1; align-items: center; justify-items: center; padding-top: 20px; }
+.bloco-gameplay { transform: perspective(250px) rotateX(var(--rx, -10deg)) rotateY(25deg); transform-origin: 50% 50% 0px; perspective-origin: 50% 50%; padding: 20px 24px; border-radius: 4px; width: min(270px, 40vw); max-width: 270px; max-height: 180px; will-change: transform; backface-visibility: hidden; background: linear-gradient(135deg, #1A1512, #0D0D14); box-shadow: 0 15px 30px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08); border: 1px solid rgba(212,168,75,0.1); position: relative; overflow: hidden; }
+.bloco-gameplay .gp-icon { font-size: 28px; color: var(--amber); text-shadow: 0 0 10px rgba(212,168,75,0.4); margin-bottom: 6px; }
+.bloco-gameplay .gp-title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(0.8rem, 1.1vw, 0.9rem); color: var(--text-subtitle); text-transform: uppercase; letter-spacing: 0.05em; }
+.bloco-gameplay .gp-desc { font-family: var(--font-body); font-weight: 300; font-size: clamp(0.7rem, 0.9vw, 0.8rem); color: var(--text-body); margin-top: 4px; line-height: 1.4; }
+.bloco-gameplay .gp-corner-icon { position: absolute; top: 8px; right: 10px; font-size: 14px; opacity: 0.25; color: var(--amber); }
+.bloco-gameplay:hover { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12); border-color: rgba(212,168,75,0.2); }
+
+#slide4 .slide-content { }
+#slide4 .two-col { display: flex; gap: 40px; flex: 1; padding-top: 16px; }
+#slide4 .col { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+#slide4 .col-label { font-family: var(--font-heading); font-weight: 600; font-size: clamp(0.7rem, 0.9vw, 0.8rem); color: var(--text-subtitle); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.accordion-item { border-bottom: 1px solid rgba(212,168,75,0.06); cursor: pointer; transition: background 0.3s ease; padding: 10px 0; }
+.accordion-item:hover { background: rgba(212,168,75,0.04); }
+.accordion-header { display: flex; align-items: center; justify-content: space-between; font-family: var(--font-heading); font-weight: 500; font-size: clamp(0.75rem, 0.95vw, 0.85rem); color: var(--text-subtitle); }
+.accordion-header .ac-icon { margin-right: 10px; font-size: 16px; }
+.accordion-arrow { transition: transform 0.3s ease; font-size: 12px; color: var(--amber); }
+.accordion-item.open .accordion-arrow { transform: rotate(180deg); }
+.accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0; }
+.accordion-item.open .accordion-body { max-height: 120px; opacity: 1; }
+.accordion-body p { font-family: var(--font-body); font-weight: 300; font-size: clamp(0.7rem, 0.85vw, 0.8rem); color: var(--text-body); padding: 8px 0 4px 26px; line-height: 1.4; }
+
+#slide5 .slide-content { }
+#slide5 .three-col { display: flex; gap: 24px; flex: 1; align-items: center; justify-content: center; padding-top: 16px; position: relative; }
+#slide5 .three-col .col { flex: 1; display: flex; justify-content: center; }
+.progress-card { width: min(250px, 28vw); max-width: 250px; max-height: 200px; padding: 20px 24px; border-radius: 4px; will-change: transform; backface-visibility: hidden; }
+.progress-card .pc-icon { font-size: 26px; color: var(--amber); margin-bottom: 6px; }
+.progress-card .pc-title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(0.8rem, 1vw, 0.9rem); color: var(--text-subtitle); text-transform: uppercase; letter-spacing: 0.04em; }
+.progress-card .pc-desc { font-family: var(--font-body); font-weight: 300; font-size: clamp(0.7rem, 0.85vw, 0.8rem); color: var(--text-body); margin-top: 6px; line-height: 1.4; }
+.progress-card .pc-extra { font-family: var(--font-body); font-weight: 300; font-size: clamp(0.6rem, 0.75vw, 0.7rem); color: var(--text-secondary); margin-top: 4px; font-style: italic; }
+.progress-connector { position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(212,168,75,0.1); z-index: -1; }
+.progress-arrow { position: absolute; top: 50%; color: rgba(212,168,75,0.12); font-size: 20px; transform: translateY(-50%); z-index: -1; }
+.progress-arrow.a1 { left: 30%; }
+.progress-arrow.a2 { left: 65%; }
+
+#slide6 .slide-content { flex-direction: row; gap: 40px; }
+#slide6 .left-col { flex: 1; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+#slide6 .right-col { flex: 1; display: flex; align-items: center; justify-content: center; }
+.voxel-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; width: min(240px, 40vw); }
+.voxel-cell { aspect-ratio: 1; border-radius: 2px; transition: opacity 0.5s ease, box-shadow 0.3s ease; cursor: pointer; }
+.voxel-cell:hover { box-shadow: 0 0 12px rgba(212,168,75,0.5); opacity: 1 !important; }
+.env-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,168,75,0.08); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; transition: all 0.3s ease; }
+.env-card:hover { background: rgba(212,168,75,0.05); border-color: rgba(212,168,75,0.15); transform: translateY(-2px); }
+.env-card .ec-icon { font-size: 22px; flex-shrink: 0; }
+.env-card .ec-text { }
+.env-card .ec-title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(0.7rem, 0.85vw, 0.8rem); color: var(--text-subtitle); text-transform: uppercase; letter-spacing: 0.04em; }
+.env-card .ec-desc { font-family: var(--font-body); font-weight: 300; font-size: clamp(0.65rem, 0.75vw, 0.75rem); color: var(--text-body); }
+.env-info-text { font-family: var(--font-body); font-weight: 300; font-size: clamp(0.7rem, 0.85vw, 0.8rem); color: var(--text-body); line-height: 1.6; padding-left: 4px; }
+.env-info-text span { display: block; }
+.env-info-text span::before { content: '— '; color: var(--amber); }
+
+#slide7 .slide-content { align-items: center; text-align: center; }
+#slide7 .subtitle { font-family: var(--font-heading); font-weight: 400; font-size: clamp(0.85rem, 1.2vw, 1.05rem); color: var(--text-secondary); margin-top: 8px; letter-spacing: 0.03em; }
+#slide7 .center-block { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+.player-avatars { display: flex; gap: 12px; justify-content: center; }
+.player-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--amber); background: rgba(0,0,0,0.5); color: #FFFFFF; font-family: var(--font-body); font-weight: 600; font-size: 12px; display: flex; align-items: center; justify-content: center; animation: avatarWave 1s ease-in-out infinite; }
+.player-avatar:nth-child(1) { animation-delay: 0s; }
+.player-avatar:nth-child(2) { animation-delay: 0.15s; }
+.player-avatar:nth-child(3) { animation-delay: 0.3s; }
+.player-avatar:nth-child(4) { animation-delay: 0.45s; }
+@keyframes avatarWave { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.15); opacity: 1; } }
+
+#slide8 .slide-content { }
+#slide8 .grid-2x2-glass { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; align-items: center; padding-top: 16px; }
+.glass-card { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(212,168,75,0.08); border-radius: 8px; padding: 24px; transition: all 0.3s ease-out; cursor: default; }
+.glass-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.6); border-color: rgba(212,168,75,0.25); background: rgba(212,168,75,0.05); }
+.glass-card .gc-icon { font-size: 26px; color: var(--amber); margin-bottom: 8px; }
+.glass-card .gc-title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(0.8rem, 1vw, 0.9rem); color: var(--text-subtitle); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+.glass-card .gc-desc { font-family: var(--font-body); font-weight: 300; font-size: clamp(0.7rem, 0.85vw, 0.8rem); color: var(--text-body); line-height: 1.4; }
+
+#slide9 .slide-content { flex-direction: row; gap: 32px; }
+#slide9 .left-col { flex: 0 0 60%; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+#slide9 .right-col { flex: 0 0 40%; display: flex; align-items: center; justify-content: center; }
+#slide9 .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tip-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,168,75,0.08); border-radius: 8px; padding: 14px 16px; transition: all 0.3s ease; }
+.tip-card:hover { background: rgba(212,168,75,0.05); border-color: rgba(212,168,75,0.15); transform: translateY(-2px); }
+.tip-card .tc-icon { font-size: 20px; color: var(--amber); margin-bottom: 4px; }
+.tip-card .tc-title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(0.7rem, 0.85vw, 0.8rem); color: var(--text-subtitle); text-transform: uppercase; letter-spacing: 0.04em; }
+.tip-card .tc-desc { font-family: var(--font-body); font-weight: 300; font-size: clamp(0.65rem, 0.75vw, 0.75rem); color: var(--text-body); margin-top: 2px; line-height: 1.4; }
+
+#slide10 .slide-content { }
+#slide10 .three-col-feature { display: flex; gap: 24px; flex: 1; align-items: center; padding-top: 16px; }
+#slide10 .three-col-feature .side-col { flex: 0 0 22%; display: flex; flex-direction: column; gap: 16px; justify-content: center; }
+#slide10 .three-col-feature .center-col { flex: 0 0 50%; display: flex; justify-content: center; }
+.feature-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,168,75,0.08); border-radius: 8px; padding: 16px; transition: all 0.3s ease; }
+.feature-card:hover { background: rgba(212,168,75,0.05); border-color: rgba(212,168,75,0.15); transform: translateY(-2px); }
+.feature-card .fc-icon { font-size: 22px; color: var(--amber); margin-bottom: 4px; }
+.feature-card .fc-title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(0.7rem, 0.85vw, 0.8rem); color: var(--text-subtitle); text-transform: uppercase; letter-spacing: 0.04em; }
+.feature-card .fc-desc { font-family: var(--font-body); font-weight: 300; font-size: clamp(0.65rem, 0.75vw, 0.75rem); color: var(--text-body); margin-top: 2px; line-height: 1.4; }
+
+.bloco-central-destaque { transform: perspective(250px) rotateX(10deg) rotateY(25deg); transform-origin: 50% 50% 0px; perspective-origin: 50% 50%; padding: 28px 32px; border-radius: 4px; width: min(320px, 80vw); max-width: 320px; max-height: 380px; will-change: transform; backface-visibility: hidden; background: linear-gradient(135deg, #7F1D1D, #2A0508); box-shadow: 0 25px 50px -12px rgba(127,29,29,0.5), inset 0 1px 0 rgba(255,255,255,0.1); border: 1px solid rgba(212,168,75,0.15); transition: box-shadow 0.3s ease; }
+.bloco-central-destaque:hover { box-shadow: 0 30px 60px -12px rgba(127,29,29,0.7), inset 0 1px 0 rgba(255,255,255,0.15); }
+.bloco-central-destaque .bcd-icon { font-size: 36px; color: var(--amber); text-shadow: 0 0 20px rgba(212,168,75,0.4); margin-bottom: 10px; }
+.bloco-central-destaque .bcd-title { font-family: var(--font-heading); font-weight: 700; font-size: clamp(1rem, 1.5vw, 1.2rem); color: var(--text-subtitle); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.bloco-central-destaque .bcd-bullet { font-family: var(--font-body); font-weight: 300; font-size: clamp(0.7rem, 0.85vw, 0.8rem); color: var(--text-light); padding: 4px 0; line-height: 1.4; }
+.bloco-central-destaque .bcd-bullet::before { content: '— '; color: var(--amber); }
+
+#slide11 .slide-content { align-items: center; justify-content: center; text-align: center; gap: 24px; }
+#slide11 .closing-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.8rem, 4vw, 3rem); color: var(--text-title); letter-spacing: 0.04em; }
+.steam-btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 32px; border-radius: 6px; background: linear-gradient(135deg, #2A475E, #1B2838); border: 1px solid rgba(255,255,255,0.1); color: #FFFFFF; font-family: var(--font-body); font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; text-decoration: none; }
+.steam-btn:hover { transform: scale(1.03); box-shadow: 0 0 25px rgba(42,71,94,0.4); border-color: rgba(255,255,255,0.2); }
+.steam-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+@media (max-width: 768px) {
+    .slide { padding: 40px 20px 80px; }
+    .nav-container { padding: 0 16px 16px; }
+    #slide2 .slide-content { flex-direction: column; gap: 20px; }
+    #slide2 .left-col { flex: none; }
+    #slide2 .right-col { flex: none; }
+    #slide3 .grid-2x2 { grid-template-columns: 1fr; gap: 12px; }
+    .bloco-gameplay { width: min(270px, 80vw); }
+    #slide4 .two-col { flex-direction: column; gap: 20px; }
+    #slide5 .three-col { flex-direction: column; gap: 16px; }
+    .progress-card { width: min(250px, 80vw); }
+    .progress-arrow, .progress-connector { display: none; }
+    #slide6 .slide-content { flex-direction: column; gap: 20px; }
+    #slide6 .right-col { order: -1; }
+    .voxel-grid { width: min(180px, 60vw); }
+    #slide9 .slide-content { flex-direction: column; gap: 20px; }
+    #slide9 .left-col { flex: none; }
+    #slide9 .right-col { flex: none; }
+    #slide9 .tips-grid { grid-template-columns: 1fr; }
+    #slide10 .three-col-feature { flex-direction: column; gap: 16px; }
+    #slide10 .three-col-feature .side-col { flex: none; flex-direction: row; flex-wrap: wrap; justify-content: center; }
+    #slide10 .three-col-feature .center-col { flex: none; }
+    .bloco-central-destaque { width: min(320px, 90vw); }
+    #data-capa { left: 20px; bottom: 80px; }
+    .nav-dots { gap: 8px; }
+}
+@media (max-width: 480px) {
+    .slide { padding: 24px 12px 70px; }
+    .bloco-perspectiva-superior, .bloco-perspectiva-inferior { padding: 12px 16px; width: min(300px, 92vw); }
+    .bloco-gameplay { padding: 14px 16px; }
+    #slide1 .slide-content { padding: 0 16px; }
+}
+@media (max-width: 900px) and (orientation: landscape) {
+    .slide { padding: 20px 32px 70px; }
+    #slide3 .grid-2x2 { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .bloco-gameplay { width: min(240px, 45vw); max-height: 140px; padding: 12px 16px; }
+    #slide5 .three-col { flex-direction: row; gap: 12px; }
+    .progress-card { width: min(200px, 28vw); padding: 14px 16px; }
+    #slide9 .left-col { flex: 0 0 55%; }
+    #slide9 .right-col { flex: 0 0 45%; }
+}
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+<div class="vignette"></div>
+<div class="bg-grid"></div>
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+<div class="bg-blob bg-blob-3"></div>
+<canvas id="particles-canvas"></canvas>
+
+<div class="custom-cursor cursor-dot" id="cursorDot"></div>
+<div class="custom-cursor cursor-ring" id="cursorRing"></div>
+
+<div class="slide active" id="slide1">
+    <div class="slide-content">
+        <div class="capa-glow"></div>
+        <h1 id="titulo-capa" class="anim-init">BARONY</h1>
+        <h3 id="subtitulo-capa" class="anim-init">Um RPG de Dungeon Crawl na Steam</h3>
+        <div id="data-capa" class="label anim-init">Desde 2015 — Em constante evolução</div>
+    </div>
+</div>
+
+<div class="slide" id="slide2">
+    <div class="slide-content">
+        <div class="left-col">
+            <h2 class="anim-init">O que é Barony?</h2>
+            <p class="anim-init" style="margin-top:16px;">Barony é um roguelike em primeira pessoa que combina a profundidade dos clássicos dungeon crawlers com mecânicas modernas de RPG. Cada partida é única — masmorras geradas proceduralmente, monstros imprevisíveis e a ameaça constante da morte permanente testam sua coragem a cada esquina.</p>
+            <div class="separator-line anim-init"></div>
+            <div class="separator-rune anim-init">&#x26A0;</div>
+            <div class="separator-line anim-init"></div>
+            <p class="anim-init" style="margin-top:8px;">Inspirado por clássicos como <em>Ultima Underworld</em> e <em>Eye of the Beholder</em>, Barony oferece uma experiência que recompensa a persistência e castiga o descuido.</p>
+        </div>
+        <div class="right-col">
+            <div class="bloco-perspectiva-inferior anim-init" style="width:min(300px,40vw);max-height:320px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <span style="font-size:22px;color:var(--amber);">&#x2694;</span>
+                    <span style="font-family:var(--font-heading);font-weight:600;font-size:clamp(0.7rem,0.85vw,0.85rem);color:var(--text-subtitle);text-transform:uppercase;letter-spacing:0.06em;">Ficha Técnica</span>
+                </div>
+                <ul style="list-style:none;padding:0;">
+                    <li style="padding:6px 0;font-family:var(--font-body);font-weight:300;font-size:clamp(0.68rem,0.85vw,0.8rem);color:var(--text-light);"><span style="color:var(--amber);margin-right:8px;">&bull;</span>Roguelike em primeira pessoa com elementos de RPG</li>
+                    <li style="padding:6px 0;font-family:var(--font-body);font-weight:300;font-size:clamp(0.68rem,0.85vw,0.8rem);color:var(--text-light);"><span style="color:var(--amber);margin-right:8px;">&bull;</span>Inspirado por clássicos como Ultima Underworld e Eye of the Beholder</li>
+                    <li style="padding:6px 0;font-family:var(--font-body);font-weight:300;font-size:clamp(0.68rem,0.85vw,0.8rem);color:var(--text-light);"><span style="color:var(--amber);margin-right:8px;">&bull;</span>Desenvolvido pela Turning Wheel LLC</li>
+                    <li style="padding:6px 0;font-family:var(--font-body);font-weight:300;font-size:clamp(0.68rem,0.85vw,0.8rem);color:var(--text-light);"><span style="color:var(--amber);margin-right:8px;">&bull;</span>Lançado em 2015, com atualizações frequentes até hoje</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="slide3">
+    <div class="slide-content">
+        <h2 class="anim-init">Jogabilidade Principal</h2>
+        <div class="grid-2x2">
+            <div class="bloco-gameplay anim-init" style="--rx:-10deg;">
+                <div class="gp-corner-icon">&#x2694;</div>
+                <div class="gp-icon">&#x2694;</div>
+                <div class="gp-title">Combate em Tempo Real</div>
+                <div class="gp-desc">Perspectiva em primeira pessoa com ataques corpo a corpo e à distância</div>
+            </div>
+            <div class="bloco-gameplay anim-init" style="--rx:-10deg;">
+                <div class="gp-corner-icon">&#x1F3F0;</div>
+                <div class="gp-icon">&#x1F3F0;</div>
+                <div class="gp-title">Dungeons Procedurais</div>
+                <div class="gp-desc">Mapas diferentes a cada partida — nenhuma run é igual à anterior</div>
+            </div>
+            <div class="bloco-gameplay anim-init" style="--rx:10deg;">
+                <div class="gp-corner-icon">&#x1F480;</div>
+                <div class="gp-icon">&#x1F480;</div>
+                <div class="gp-title">Morte Permanente</div>
+                <div class="gp-desc">Permadeath como mecânica central — cada decisão pode ser a última</div>
+            </div>
+            <div class="bloco-gameplay anim-init" style="--rx:10deg;">
+                <div class="gp-corner-icon">&#x1F525;</div>
+                <div class="gp-icon">&#x1F525;</div>
+                <div class="gp-title">Sobrevivência</div>
+                <div class="gp-desc">Explore, combata, saqueie e sobreviva às profundezas da masmorra</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="slide4">
+    <div class="slide-content">
+        <h2 class="anim-init">Classes e Raças</h2>
+        <div class="two-col">
+            <div class="col">
+                <div class="col-label anim-init">Classes</div>
+                <div class="bloco-perspectiva-superior anim-init" style="width:min(200px,40vw);max-height:140px;padding:16px 20px;text-align:center;">
+                    <div style="font-family:var(--font-heading);font-weight:700;font-size:clamp(2.5rem,4vw,3.5rem);color:var(--amber);text-shadow:0 0 15px rgba(212,168,75,0.3);line-height:1;">15+</div>
+                    <div style="font-family:var(--font-body);font-weight:300;font-size:clamp(0.6rem,0.7vw,0.7rem);text-transform:uppercase;color:var(--text-body);letter-spacing:0.06em;">classes jogáveis</div>
+                </div>
+                <div class="accordion" style="margin-top:8px;">
+                    <div class="accordion-item anim-init">
+                        <div class="accordion-header"><span><span class="ac-icon">&#x2694;</span>Guerreiro</span><span class="accordion-arrow">&#x25BC;</span></div>
+                        <div class="accordion-body"><p>Mestre no combate corpo a corpo, com alta resistência e dano físico. Ideal para iniciantes.</p></div>
+                    </div>
+                    <div class="accordion-item anim-init">
+                        <div class="accordion-header"><span><span class="ac-icon">&#x1F52E;</span>Mago</span><span class="accordion-arrow">&#x25BC;</span></div>
+                        <div class="accordion-body"><p>Usa feitiços poderosos à distância. Frágil, mas devastador quando bem utilizado.</p></div>
+                    </div>
+                    <div class="accordion-item anim-init">
+                        <div class="accordion-header"><span><span class="ac-icon">&#x1F5E1;</span>Ladino</span><span class="accordion-arrow">&#x25BC;</span></div>
+                        <div class="accordion-body"><p>Especialista em furtividade, armadilhas e ataques furtivos. Agilidade acima de tudo.</p></div>
+                    </div>
+                    <div class="accordion-item anim-init">
+                        <div class="accordion-header"><span><span class="ac-icon">&#x1F528;</span>Ferreiro</span><span class="accordion-arrow">&#x25BC;</span></div>
+                        <div class="accordion-body"><p>Capaz de forjar armas e armaduras poderosas. Essencial para equipar o grupo.</p></div>
+                    </div>
+                    <div class="accordion-item anim-init">
+                        <div class="accordion-header"><span><span class="ac-icon">&#x2728;</span>e mais 10+ classes</span><span class="accordion-arrow">&#x25BC;</span></div>
+                        <div class="accordion-body"><p>Classes como Bárbaro, Caçador, Clérigo, Druida e muitas outras para dominar.</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="col-label anim-init">Raças</div>
+                <div class="bloco-perspectiva-superior anim-init" style="width:min(200px,40vw);max-height:140px;padding:16px 20px;text-align:center;">
+                    <div style="font-family:var(--font-heading);font-weight:700;font-size:clamp(2.5rem,4vw,3.5rem);color:var(--amber);text-shadow:0 0 15px rgba(212,168,75,0.3);line-height:1;">8+</div>
+                    <div style="font-family:var(--font-body);font-weight:300;font-size:clamp(0.6rem,0.7vw,0.7rem);text-transform:uppercase;color:var(--text-body);letter-spacing:0.06em;">raças variadas</div>
+                </div>
+                <div class="accordion" style="margin-top:8px;">
+                    <div class="accordion-item anim-init">
+                        <div class="accordion-header"><span><span class="ac-icon">&#x1F464;</span>Humano</span><span class="accordion-arrow">&#x25BC;</span></div>
+                        <div class="accordion-body"><p>Versátil e adaptável, sem bônus ou penalidades significativas. Escolha equilibrada.</p></div>
+                    </div>
+                    <div class="accordion-item anim-init">
+                        <div class="accordion-header"><span><span class="ac-icon">&#x1F9DD;</span>Elfo</span><span class="accordion-arrow">&#x25BC;</span></div>
+                        <div class="accordion-body"><p>Ágil e gracioso, com afinidade natural para magia e arcos. Frágil no combate direto.</p></div>
+                    </div>
+                    <div class="accordion-item anim-init">
+                        <div class="accordion-header"><span><span class="ac-icon">&#x2692;</span>Anão</span><span class="accordion-arrow">&#x25BC;</span></div>
+                        <div class="accordion-body"><p>Resistente e tenaz, com bônus em forja e resistência a venenos. Lento, porém robusto.</p></div>
+                    </div>
+                    <div class="accordion-item anim-init">
+                        <div class="accordion-header"><span><span class="ac-icon">&#x1F47A;</span>Goblin</span><span class="accordion-arrow">&#x25BC;</span></div>
+                        <div class="accordion-body"><p>Pequeno e rápido, com habilidade para se esconder e atacar pelas sombras.</p></div>
+                    </div>
+                    <div class="accordion-item anim-init">
+                        <div class="accordion-header"><span><span class="ac-icon">&#x1F9DB;</span>e mais 4+ raças</span><span class="accordion-arrow">&#x25BC;</span></div>
+                        <div class="accordion-body"><p>Raças como Vampiro, Esqueleto, Succubus e Licantropo oferecem estilos únicos.</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="slide5">
+    <div class="slide-content">
+        <h2 class="anim-init">Sistema de Progressão</h2>
+        <div class="progress-connector anim-init"></div>
+        <span class="progress-arrow a1 anim-init">&#x2192;</span>
+        <span class="progress-arrow a2 anim-init">&#x2192;</span>
+        <div class="three-col">
+            <div class="col">
+                <div class="progress-card bloco-perspectiva-inferior anim-init" style="width:min(250px,28vw);max-height:200px;">
+                    <div class="pc-icon">&#x2B06;</div>
+                    <div class="pc-title">Níveis e XP</div>
+                    <div class="pc-desc">Subir de nível ao ganhar XP derrotando inimigos</div>
+                    <div class="pc-extra">Atributos melhoram a cada level up</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="progress-card bloco-perspectiva-superior anim-init" style="width:min(250px,28vw);max-height:200px;background:linear-gradient(135deg,#0D0D14,#1A1512);">
+                    <div class="pc-icon">&#x1F4AA;</div>
+                    <div class="pc-title">Atributos Clássicos</div>
+                    <div class="pc-desc">Força, Destreza, Inteligência, Carisma e mais</div>
+                    <div class="pc-extra">Distribuição estratégica de pontos</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="progress-card bloco-perspectiva-inferior anim-init" style="width:min(250px,28vw);max-height:200px;">
+                    <div class="pc-icon">&#x1F451;</div>
+                    <div class="pc-title">Artefatos Lendários</div>
+                    <div class="pc-desc">Equipamentos únicos espalhados pelas masmorras</div>
+                    <div class="pc-extra">Habilidades que melhoram com o uso (subir escadas, nadar)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="slide6">
+    <div class="slide-content">
+        <div class="left-col">
+            <h2 class="anim-init">Mundo e Atmosfera</h2>
+            <div class="env-card anim-init"><div class="ec-icon">&#x1F3DA;</div><div class="ec-text"><div class="ec-title">Masmorras</div><div class="ec-desc">Corredores escuros e salões ancestrais repletos de armadilhas</div></div></div>
+            <div class="env-card anim-init"><div class="ec-icon">&#x26CF;</div><div class="ec-text"><div class="ec-title">Minas</div><div class="ec-desc">Túneis subterrâneos com recursos valiosos e criaturas das profundezas</div></div></div>
+            <div class="env-card anim-init"><div class="ec-icon">&#x1F3DB;</div><div class="ec-text"><div class="ec-title">Templos</div><div class="ec-desc">Ruínas sagradas guardadas por monstros imortais e enigmas divinos</div></div></div>
+            <div class="env-card anim-init"><div class="ec-icon">&#x1F525;</div><div class="ec-text"><div class="ec-title">Inferno</div><div class="ec-desc">Camadas mais profundas, onde o calor e o perigo são absolutos</div></div></div>
+            <div class="env-info-text anim-init"><span>Estilo visual voxel retrô com iluminação dinâmica</span><span>Trilha sonora imersiva e efeitos sonoros atmosféricos</span><span>Sensação de perigo constante e descoberta</span></div>
+        </div>
+        <div class="right-col">
+            <div class="voxel-grid anim-init" id="voxelGrid"></div>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="slide7">
+    <div class="slide-content">
+        <h2 class="anim-init">Multijogador</h2>
+        <div class="subtitle anim-init">Aventure-se com amigos — ou faça novos aliados</div>
+        <div class="center-block">
+            <div class="player-avatars anim-init">
+                <div class="player-avatar">A</div>
+                <div class="player-avatar">B</div>
+                <div class="player-avatar">C</div>
+                <div class="player-avatar">D</div>
+            </div>
+            <div class="bloco-perspectiva-inferior anim-init" style="width:min(320px,80vw);max-height:280px;text-align:left;">
+                <div style="text-align:center;margin-bottom:10px;"><span style="font-size:28px;color:var(--amber);">&#x1F465;</span></div>
+                <div style="font-family:var(--font-heading);font-weight:600;font-size:clamp(0.75rem,0.95vw,0.95rem);color:var(--text-subtitle);text-transform:uppercase;letter-spacing:0.06em;text-align:center;margin-bottom:12px;">Modos de Jogo</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-body);font-weight:300;font-size:clamp(0.68rem,0.85vw,0.8rem);color:var(--text-light);"><span style="font-size:16px;">&#x1F5A5;</span> Cooperativo Local — Para até 4 jogadores na mesma máquina</div>
+                    <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-body);font-weight:300;font-size:clamp(0.68rem,0.85vw,0.8rem);color:var(--text-light);"><span style="font-size:16px;">&#x1F310;</span> Cooperativo Online — Jogue com amigos pela internet</div>
+                    <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-body);font-weight:300;font-size:clamp(0.68rem,0.85vw,0.8rem);color:var(--text-light);"><span style="font-size:16px;">&#x1F4C8;</span> Escalonamento — Dificuldade adaptada ao número de jogadores</div>
+                </div>
+                <div style="font-family:var(--font-body);font-weight:300;font-size:clamp(0.55rem,0.7vw,0.65rem);color:var(--bronze);font-style:italic;text-align:center;margin-top:10px;">Comunidade ativa com servidores dedicados</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="slide8">
+    <div class="slide-content">
+        <h2 class="anim-init">Modificações e Conteúdo Adicional</h2>
+        <div class="grid-2x2-glass">
+            <div class="glass-card anim-init">
+                <div class="gc-icon">&#x1F527;</div>
+                <div class="gc-title">Suporte a Mods</div>
+                <div class="gc-desc">Workshop da Steam com milhares de mods criados pela comunidade</div>
+            </div>
+            <div class="glass-card anim-init">
+                <div class="gc-icon">&#x1F4E6;</div>
+                <div class="gc-title">Expansão Oficial</div>
+                <div class="gc-desc">Barony: Myths &amp; Outcasts — novas raças, chefes e biomas</div>
+            </div>
+            <div class="glass-card anim-init">
+                <div class="gc-icon">&#x1F504;</div>
+                <div class="gc-title">Atualizações Gratuitas</div>
+                <div class="gc-desc">Novo conteúdo ao longo dos anos sem custo adicional</div>
+            </div>
+            <div class="glass-card anim-init">
+                <div class="gc-icon">&#x1F3D7;</div>
+                <div class="gc-title">Editor de Níveis</div>
+                <div class="gc-desc">Crie masmorras personalizadas e compartilhe com a comunidade</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="slide9">
+    <div class="slide-content">
+        <div class="left-col">
+            <h2 class="anim-init">Dicas para Iniciantes</h2>
+            <div class="tips-grid">
+                <div class="tip-card anim-init">
+                    <div class="tc-icon">&#x1F6E1;</div>
+                    <div class="tc-title">Escolha Classes Simples</div>
+                    <div class="tc-desc">Guerreiro ou Bárbaro são ideais para primeiras runs</div>
+                </div>
+                <div class="tip-card anim-init">
+                    <div class="tc-icon">&#x1F50D;</div>
+                    <div class="tc-title">Explore com Cuidado</div>
+                    <div class="tc-desc">Examine cada cômodo e feche portas atrás de você</div>
+                </div>
+                <div class="tip-card anim-init">
+                    <div class="tc-icon">&#x1F392;</div>
+                    <div class="tc-title">Gerencie Recursos</div>
+                    <div class="tc-desc">Comida, poções e flechas são limitados — use com sabedoria</div>
+                </div>
+                <div class="tip-card anim-init">
+                    <div class="tc-icon">&#x1F4D6;</div>
+                    <div class="tc-title">A Morte Ensina</div>
+                    <div class="tc-desc">Cada run fracassada é uma lição para a próxima tentativa</div>
+                </div>
+            </div>
+        </div>
+        <div class="right-col">
+            <div class="bloco-perspectiva-superior anim-init" style="width:min(280px,35vw);max-height:340px;background:linear-gradient(135deg,#4A0E0E,#1A0505);text-align:center;">
+                <div style="font-size:28px;color:var(--amber);margin-bottom:8px;">&#x1F480;</div>
+                <div style="font-family:var(--font-heading);font-weight:600;font-size:clamp(0.9rem,1.2vw,1.1rem);color:var(--text-subtitle);letter-spacing:0.04em;margin-bottom:10px;">"A morte é professoral"</div>
+                <p style="font-family:var(--font-body);font-weight:300;font-size:clamp(0.7rem,0.85vw,0.8rem);color:var(--text-body);line-height:1.5;">Cada run ensina algo novo. Não desista — a masmorra recompensa a persistência.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="slide10">
+    <div class="slide-content">
+        <h2 class="anim-init">Por que Jogar Barony?</h2>
+        <div class="three-col-feature">
+            <div class="side-col">
+                <div class="feature-card anim-init">
+                    <div class="fc-icon">&#x1F3AF;</div>
+                    <div class="fc-title">Desafio Recompensador</div>
+                    <div class="fc-desc">Para fãs de roguelikes e RPGs que buscam superação</div>
+                </div>
+                <div class="feature-card anim-init">
+                    <div class="fc-icon">&#x267E;</div>
+                    <div class="fc-title">Rejogabilidade Infinita</div>
+                    <div class="fc-desc">Geração procedural garante uma experiência única a cada partida</div>
+                </div>
+            </div>
+            <div class="center-col">
+                <div class="bloco-central-destaque anim-init" style="text-align:center;">
+                    <div class="bcd-icon">&#x1F451;</div>
+                    <div class="bcd-title">A Experiência Definitiva</div>
+                    <div class="bcd-bullet">Combinação única de nostalgia e mecânicas modernas</div>
+                    <div class="bcd-bullet">Preço acessível e conteúdo abundante</div>
+                    <div class="bcd-bullet">Centenas de horas de jogabilidade</div>
+                </div>
+            </div>
+            <div class="side-col">
+                <div class="feature-card anim-init">
+                    <div class="fc-icon">&#x1F525;</div>
+                    <div class="fc-title">Nostalgia + Moderno</div>
+                    <div class="fc-desc">Visual voxel retrô encontra mecânicas e design contemporâneos</div>
+                </div>
+                <div class="feature-card anim-init">
+                    <div class="fc-icon">&#x1F4B0;</div>
+                    <div class="fc-title">Custo-Benefício</div>
+                    <div class="fc-desc">Preço acessível por dezenas de horas de conteúdo de qualidade</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="slide11">
+    <div class="slide-content">
+        <h2 class="closing-title anim-init">Obrigado pela Atenção</h2>
+        <div class="bloco-perspectiva-superior anim-init" style="width:min(320px,80vw);max-height:220px;background:linear-gradient(135deg,#1A1512,#0D0D14);border-color:rgba(212,168,75,0.2);text-align:center;">
+            <div style="font-size:26px;color:var(--amber);text-shadow:0 0 15px rgba(212,168,75,0.3);margin-bottom:8px;">&#x1F3AE;</div>
+            <div style="font-family:var(--font-heading);font-weight:600;font-size:clamp(0.75rem,0.95vw,0.9rem);color:var(--text-subtitle);text-transform:uppercase;letter-spacing:0.06em;">Já disponível na Steam</div>
+            <p style="font-family:var(--font-body);font-weight:300;font-size:clamp(0.7rem,0.85vw,0.8rem);color:var(--text-body);margin-top:6px;">Garanta sua cópia e comece sua jornada</p>
+            <p style="font-family:var(--font-body);font-weight:300;font-size:clamp(0.55rem,0.7vw,0.65rem);color:var(--bronze);font-style:italic;margin-top:4px;">Preço acessível — compre uma vez e jogue para sempre</p>
+        </div>
+        <div class="anim-init">
+            <button class="steam-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10s10-4.48 10-10c0-5.52-4.48-10-10-10zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13.5h2v5h-2zm0 6h2v2h-2z"/></svg>
+                Disponível na Steam
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="nav-container">
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="nav-row">
+        <button class="nav-btn" id="prevBtn" aria-label="Anterior">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn" id="nextBtn" aria-label="Próximo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+    </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const TOTAL_SLIDES = 11;
+let currentSlide = 1;
+let isAnimating = false;
+let touchStartX = 0;
+let touchStartY = 0;
+
+const slides = document.querySelectorAll('.slide');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const navDots = document.getElementById('navDots');
+const progressBar = document.getElementById('progressBar');
+const cursorDot = document.getElementById('cursorDot');
+const cursorRing = document.getElementById('cursorRing');
+
+for (let i = 1; i <= TOTAL_SLIDES; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 1 ? ' active' : '');
+    dot.dataset.index = i;
+    dot.setAttribute('aria-label', 'Slide ' + i);
+    dot.addEventListener('click', function() { goToSlide(parseInt(this.dataset.index)); });
+    navDots.appendChild(dot);
+}
+
+function updateNav() {
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+        d.classList.toggle('active', i + 1 === currentSlide);
+    });
+    prevBtn.classList.toggle('hidden', currentSlide === 1);
+    nextBtn.classList.toggle('hidden', currentSlide === TOTAL_SLIDES);
+    const pct = ((currentSlide - 1) / (TOTAL_SLIDES - 1)) * 100;
+    progressBar.style.width = pct + '%';
+}
+
+var slideAnimConfig = {
+    1: {
+        title: { sel: '#titulo-capa', anim: 'anim-title-in', dur: 1200, delay: 200 },
+        subtitle: { sel: '#subtitulo-capa', anim: 'anim-fade-up', dur: 800, delay: 900 },
+        data: { sel: '#data-capa', anim: 'anim-fade-in', dur: 500, delay: 1400 },
+        nav: { sel: '.nav-container', anim: 'anim-fade-in', dur: 400, delay: 1600 }
+    },
+    2: {
+        title: { sel: 'h2', anim: 'anim-fade-left', dur: 700, delay: 100 },
+        p1: { sel: '#slide2 .left-col > p:nth-of-type(1)', anim: 'anim-fade-in', dur: 600, delay: 300 },
+        lines: { sel: '.separator-line', anim: 'anim-fade-in', dur: 400, delay: 500 },
+        rune: { sel: '.separator-rune', anim: 'anim-fade-in', dur: 400, delay: 500 },
+        p2: { sel: '#slide2 .left-col > p:nth-of-type(2)', anim: 'anim-fade-in', dur: 600, delay: 700 },
+        bloco: { sel: '#slide2 .bloco-perspectiva-inferior', anim: 'anim-perspective', dur: 900, delay: 400 },
+        bullet1: { sel: '#slide2 ul li:nth-child(1)', anim: 'anim-fade-in', dur: 500, delay: 1100 },
+        bullet2: { sel: '#slide2 ul li:nth-child(2)', anim: 'anim-fade-in', dur: 500, delay: 1200 },
+        bullet3: { sel: '#slide2 ul li:nth-child(3)', anim: 'anim-fade-in', dur: 500, delay: 1300 },
+        bullet4: { sel: '#slide2 ul li:nth-child(4)', anim: 'anim-fade-in', dur: 500, delay: 1400 }
+    },
+    3: {
+        title: { sel: 'h2', anim: 'anim-fade-up', dur: 700, delay: 100 },
+        b1: { sel: '#slide3 .bloco-gameplay:nth-child(1)', anim: 'anim-perspective', dur: 800, delay: 400 },
+        b2: { sel: '#slide3 .bloco-gameplay:nth-child(2)', anim: 'anim-perspective', dur: 800, delay: 520 },
+        b3: { sel: '#slide3 .bloco-gameplay:nth-child(3)', anim: 'anim-perspective', dur: 800, delay: 640 },
+        b4: { sel: '#slide3 .bloco-gameplay:nth-child(4)', anim: 'anim-perspective', dur: 800, delay: 760 },
+        b1c: { sel: '#slide3 .bloco-gameplay:nth-child(1) .gp-icon', anim: 'anim-fade-in', dur: 400, delay: 900 },
+        b2c: { sel: '#slide3 .bloco-gameplay:nth-child(2) .gp-icon', anim: 'anim-fade-in', dur: 400, delay: 920 },
+        b3c: { sel: '#slide3 .bloco-gameplay:nth-child(3) .gp-icon', anim: 'anim-fade-in', dur: 400, delay: 940 },
+        b4c: { sel: '#slide3 .bloco-gameplay:nth-child(4) .gp-icon', anim: 'anim-fade-in', dur: 400, delay: 960 }
+    },
+    4: {
+        title: { sel: 'h2', anim: 'anim-fade-up', dur: 700, delay: 100 },
+        l1: { sel: '#slide4 .col:nth-child(1) .col-label', anim: 'anim-fade-in', dur: 400, delay: 300 },
+        l2: { sel: '#slide4 .col:nth-child(2) .col-label', anim: 'anim-fade-in', dur: 400, delay: 400 },
+        bleft: { sel: '#slide4 .col:nth-child(1) .bloco-perspectiva-superior', anim: 'anim-perspective', dur: 800, delay: 400 },
+        bright: { sel: '#slide4 .col:nth-child(2) .bloco-perspectiva-superior', anim: 'anim-perspective', dur: 800, delay: 500 },
+        acc1: { sel: '#slide4 .col:nth-child(1) .accordion-item', anim: 'anim-fade-up', dur: 500, delay: 700 },
+        acc2: { sel: '#slide4 .col:nth-child(2) .accordion-item', anim: 'anim-fade-up', dur: 500, delay: 900 }
+    },
+    5: {
+        title: { sel: 'h2', anim: 'anim-fade-up', dur: 700, delay: 100 },
+        center: { sel: '#slide5 .three-col .col:nth-child(2) .progress-card', anim: 'anim-blur-in', dur: 900, delay: 400 },
+        left: { sel: '#slide5 .three-col .col:nth-child(1) .progress-card', anim: 'anim-fade-left', dur: 800, delay: 600 },
+        right: { sel: '#slide5 .three-col .col:nth-child(3) .progress-card', anim: 'anim-fade-right', dur: 800, delay: 600 },
+        conn: { sel: '.progress-connector', anim: 'anim-fade-in', dur: 600, delay: 1000 },
+        arrow: { sel: '.progress-arrow', anim: 'anim-fade-in', dur: 600, delay: 1000 }
+    },
+    6: {
+        title: { sel: 'h2', anim: 'anim-fade-in', dur: 700, delay: 100 },
+        e1: { sel: '#slide6 .env-card:nth-child(2)', anim: 'anim-fade-up', dur: 500, delay: 400 },
+        e2: { sel: '#slide6 .env-card:nth-child(3)', anim: 'anim-fade-up', dur: 500, delay: 520 },
+        e3: { sel: '#slide6 .env-card:nth-child(4)', anim: 'anim-fade-up', dur: 500, delay: 640 },
+        e4: { sel: '#slide6 .env-card:nth-child(5)', anim: 'anim-fade-up', dur: 500, delay: 760 },
+        voxel: { sel: '#voxelGrid', anim: 'anim-fade-scale', dur: 1000, delay: 500 },
+        info: { sel: '.env-info-text', anim: 'anim-fade-in', dur: 500, delay: 1000 }
+    },
+    7: {
+        title: { sel: 'h2', anim: 'anim-fade-up', dur: 700, delay: 100 },
+        sub: { sel: '.subtitle', anim: 'anim-fade-in', dur: 600, delay: 300 },
+        a1: { sel: '.player-avatar:nth-child(1)', anim: 'anim-fade-in', dur: 400, delay: 400 },
+        a2: { sel: '.player-avatar:nth-child(2)', anim: 'anim-fade-in', dur: 400, delay: 500 },
+        a3: { sel: '.player-avatar:nth-child(3)', anim: 'anim-fade-in', dur: 400, delay: 600 },
+        a4: { sel: '.player-avatar:nth-child(4)', anim: 'anim-fade-in', dur: 400, delay: 700 },
+        bloco: { sel: '#slide7 .bloco-perspectiva-inferior', anim: 'anim-perspective', dur: 1000, delay: 600 },
+        bcont: { sel: '#slide7 .bloco-perspectiva-inferior > div', anim: 'anim-fade-in', dur: 500, delay: 1100 }
+    },
+    8: {
+        title: { sel: 'h2', anim: 'anim-fade-up', dur: 700, delay: 100 },
+        c1: { sel: '#slide8 .glass-card:nth-child(1)', anim: 'anim-fade-up', dur: 600, delay: 300 },
+        c2: { sel: '#slide8 .glass-card:nth-child(2)', anim: 'anim-fade-up', dur: 600, delay: 400 },
+        c3: { sel: '#slide8 .glass-card:nth-child(3)', anim: 'anim-fade-up', dur: 600, delay: 500 },
+        c4: { sel: '#slide8 .glass-card:nth-child(4)', anim: 'anim-fade-up', dur: 600, delay: 600 }
+    },
+    9: {
+        title: { sel: 'h2', anim: 'anim-fade-up', dur: 700, delay: 100 },
+        t1: { sel: '#slide9 .tip-card:nth-child(1)', anim: 'anim-fade-up', dur: 500, delay: 300 },
+        t2: { sel: '#slide9 .tip-card:nth-child(2)', anim: 'anim-fade-up', dur: 500, delay: 400 },
+        t3: { sel: '#slide9 .tip-card:nth-child(3)', anim: 'anim-fade-up', dur: 500, delay: 500 },
+        t4: { sel: '#slide9 .tip-card:nth-child(4)', anim: 'anim-fade-up', dur: 500, delay: 600 },
+        bloco: { sel: '#slide9 .bloco-perspectiva-superior', anim: 'anim-perspective', dur: 900, delay: 500 },
+        bcont: { sel: '#slide9 .bloco-perspectiva-superior div', anim: 'anim-fade-in', dur: 400, delay: 1100 }
+    },
+    10: {
+        title: { sel: 'h2', anim: 'anim-fade-up', dur: 700, delay: 100 },
+        center: { sel: '.bloco-central-destaque', anim: 'anim-blur-in', dur: 1000, delay: 300 },
+        ccont: { sel: '.bloco-central-destaque .bcd-icon', anim: 'anim-fade-in', dur: 400, delay: 700 },
+        f1: { sel: '#slide10 .side-col:nth-child(1) .feature-card:nth-child(1)', anim: 'anim-fade-left', dur: 600, delay: 600 },
+        f2: { sel: '#slide10 .side-col:nth-child(1) .feature-card:nth-child(2)', anim: 'anim-fade-left', dur: 600, delay: 720 },
+        f3: { sel: '#slide10 .side-col:nth-child(3) .feature-card:nth-child(1)', anim: 'anim-fade-right', dur: 600, delay: 600 },
+        f4: { sel: '#slide10 .side-col:nth-child(3) .feature-card:nth-child(2)', anim: 'anim-fade-right', dur: 600, delay: 720 }
+    },
+    11: {
+        title: { sel: '.closing-title', anim: 'anim-fade-up', dur: 800, delay: 100 },
+        bloco: { sel: '#slide11 .bloco-perspectiva-superior', anim: 'anim-perspective', dur: 900, delay: 500 },
+        bcont: { sel: '#slide11 .bloco-perspectiva-superior div, #slide11 .bloco-perspectiva-superior p', anim: 'anim-fade-in', dur: 400, delay: 1100 },
+        btn: { sel: '#slide11 .steam-btn', anim: 'anim-fade-scale', dur: 600, delay: 900 }
+    }
+};
+
+function getAnimConfig(slideIdx) {
+    return slideAnimConfig[slideIdx] || {};
+}
+
+function goToSlide(idx) {
+    if (isAnimating || idx === currentSlide || idx < 1 || idx > TOTAL_SLIDES) return;
+    isAnimating = true;
+    const oldSlide = currentSlide;
+    currentSlide = idx;
+    
+    var oldEl = document.getElementById('slide' + oldSlide);
+    var newEl = document.getElementById('slide' + idx);
+    
+    if (oldEl && oldEl !== newEl) {
+        applyTransition(oldEl, newEl, oldSlide, idx);
+    }
+    
+    slides.forEach(function(s, i) {
+        if (i + 1 === idx) {
+            s.classList.add('active');
+            s.classList.add('slide-enter');
+            playSlideAnim(s, idx);
+        } else {
+            s.classList.remove('active');
+            s.classList.remove('slide-enter');
+            resetSlideAnim(s);
+        }
+    });
+    updateNav();
+    setTimeout(function() { isAnimating = false; }, 800);
+}
+
+function applyTransition(oldEl, newEl, fromIdx, toIdx) {
+    oldEl.style.transition = 'opacity 0.6s ease';
+    oldEl.style.opacity = '0';
+    newEl.style.opacity = '';
+    setTimeout(function() {
+        oldEl.style.transition = '';
+        oldEl.style.opacity = '';
+    }, 600);
+}
+
+function nextSlide() { if (currentSlide < TOTAL_SLIDES) goToSlide(currentSlide + 1); }
+function prevSlide() { if (currentSlide > 1) goToSlide(currentSlide - 1); }
+
+function resetSlideAnim(slide) {
+    slide.querySelectorAll('.anim-init').forEach(function(el) {
+        el.classList.remove('anim-fade-in', 'anim-fade-up', 'anim-fade-left', 'anim-fade-right', 'anim-fade-scale', 'anim-blur-in', 'anim-perspective', 'anim-title-in');
+        el.style.opacity = '0';
+        el.style.removeProperty('--anim-delay');
+        el.style.removeProperty('--anim-dur');
+    });
+}
+
+function playSlideAnim(slide, idx) {
+    slide.querySelectorAll('.anim-init').forEach(function(el) {
+        el.style.opacity = '0';
+        el.classList.remove('anim-fade-in', 'anim-fade-up', 'anim-fade-left', 'anim-fade-right', 'anim-fade-scale', 'anim-blur-in', 'anim-perspective', 'anim-title-in');
+        el.style.removeProperty('--anim-delay');
+        el.style.removeProperty('--anim-dur');
+    });
+    var config = getAnimConfig(idx);
+    for (var key in config) {
+        if (config.hasOwnProperty(key)) {
+            var c = config[key];
+            var els = slide.querySelectorAll(c.sel);
+            if (els.length === 0) { continue; }
+            els.forEach(function(el) {
+                el.style.setProperty('--anim-dur', c.dur + 'ms');
+                el.style.setProperty('--anim-delay', c.delay + 'ms');
+                el.classList.add(c.anim);
+            });
+        }
+    }
+}
+
+prevBtn.addEventListener('click', prevSlide);
+nextBtn.addEventListener('click', nextSlide);
+
+document.addEventListener('keydown', function(e) {
+    var key = e.key;
+    if (key === 'ArrowRight' || key === 'ArrowDown') { e.preventDefault(); nextSlide(); }
+    else if (key === 'ArrowLeft' || key === 'ArrowUp') { e.preventDefault(); prevSlide(); }
+    else if (key === 'Home') { e.preventDefault(); goToSlide(1); }
+    else if (key === 'End') { e.preventDefault(); goToSlide(TOTAL_SLIDES); }
+    else if (key >= '1' && key <= '9') { e.preventDefault(); goToSlide(parseInt(key)); }
+    else if (key === '0') { e.preventDefault(); goToSlide(10); }
+    else if (key === '!' && e.shiftKey) { e.preventDefault(); goToSlide(11); }
+    else if (key === ' ' || key === 'Spacebar') { e.preventDefault(); }
+});
+
+document.addEventListener('wheel', function(e) { e.preventDefault(); }, { passive: false });
+
+document.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }
+}, { passive: true });
+
+document.addEventListener('touchend', function(e) {
+    if (!touchStartX) return;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+        if (dx < 0) nextSlide();
+        else prevSlide();
+    }
+    touchStartX = 0;
+    touchStartY = 0;
+}, { passive: true });
+
+function initCursor() {
+    var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouch) { cursorDot.style.display = 'none'; cursorRing.style.display = 'none'; return; }
+    var mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', function(e) {
+        mx = e.clientX; my = e.clientY;
+        cursorDot.style.left = mx + 'px'; cursorDot.style.top = my + 'px';
+    });
+    function ringFollow() {
+        rx += (mx - rx) * 0.15;
+        ry += (my - ry) * 0.15;
+        cursorRing.style.left = rx + 'px'; cursorRing.style.top = ry + 'px';
+        requestAnimationFrame(ringFollow);
+    }
+    ringFollow();
+    document.querySelectorAll('button, a, .nav-dot, .glass-card, .tip-card, .feature-card, .env-card, .accordion-item, .bloco-perspectiva-superior, .bloco-perspectiva-inferior, .bloco-gameplay').forEach(function(el) {
+        el.addEventListener('mouseenter', function() { cursorRing.classList.add('hover'); });
+        el.addEventListener('mouseleave', function() { cursorRing.classList.remove('hover'); });
+    });
+}
+
+function initTitle3D() {
+    var titulo = document.getElementById('titulo-capa');
+    if (!titulo) return;
+    var steps = 40;
+    var shadows = [];
+    for (var i = 0; i < steps; i++) {
+        var ratio = i / steps;
+        var r = Math.round(139 - ratio * 80);
+        var g = Math.round(115 - ratio * 70);
+        var b = Math.round(85 - ratio * 60);
+        shadows.push((-i * 1.2) + 'px ' + (i * 1.0) + 'px 0 rgb(' + r + ',' + g + ',' + b + ')');
+    }
+    titulo.style.textShadow = shadows.join(',');
+}
+
+function initParticles() {
+    var canvas = document.getElementById('particles-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W, H;
+    function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    var particles = [];
+    var count = 50;
+    for (var i = 0; i < count; i++) {
+        particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4 - 0.1,
+            size: Math.random() * 2.5 + 1,
+            alpha: Math.random() * 0.4 + 0.2,
+            type: Math.random() > 0.6 ? 'ember' : 'dust',
+            flicker: Math.random() * 2 * Math.PI,
+            flickerSpeed: Math.random() * 0.02 + 0.01
+        });
+    }
+    var mouseX = W/2, mouseY = H/2;
+    document.addEventListener('mousemove', function(e) {
+        mouseX = e.clientX; mouseY = e.clientY;
+    });
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        for (var i = 0; i < particles.length; i++) {
+            var p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.flicker += p.flickerSpeed;
+            var parallaxX = (mouseX - W/2) * 0.005;
+            var parallaxY = (mouseY - H/2) * 0.005;
+            var dx = p.x + parallaxX;
+            var dy = p.y + parallaxY;
+            var alpha = p.alpha * (0.6 + 0.4 * Math.sin(p.flicker));
+            if (p.type === 'ember') {
+                ctx.beginPath();
+                ctx.arc(dx, dy, p.size * 1.2, 0, Math.PI * 2);
+                var grad = ctx.createRadialGradient(dx, dy, 0, dx, dy, p.size * 2);
+                grad.addColorStop(0, 'rgba(232,97,26,' + alpha * 0.8 + ')');
+                grad.addColorStop(0.5, 'rgba(212,168,75,' + alpha * 0.4 + ')');
+                grad.addColorStop(1, 'rgba(212,168,75,0)');
+                ctx.fillStyle = grad;
+                ctx.fill();
+            } else {
+                ctx.beginPath();
+                ctx.arc(dx, dy, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(212,168,75,' + alpha * 0.5 + ')';
+                ctx.fill();
+            }
+            if (p.x < -50) p.x = W + 50;
+            if (p.x > W + 50) p.x = -50;
+            if (p.y < -50) p.y = H + 50;
+            if (p.y > H + 50) p.y = -50;
+        }
+        requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+function initVoxelGrid() {
+    var grid = document.getElementById('voxelGrid');
+    if (!grid) return;
+    var colors = ['#7F1D1D','#1A1512','#2A1A0A','#0D1420','#3D1A0A','#1D2A14','#2A1420','#0A1A2A'];
+    for (var i = 0; i < 64; i++) {
+        var cell = document.createElement('div');
+        cell.className = 'voxel-cell';
+        var col = colors[Math.floor(Math.random() * colors.length)];
+        cell.style.background = col;
+        cell.style.opacity = 0.4 + Math.random() * 0.5;
+        cell.dataset.baseOpacity = cell.style.opacity;
+        grid.appendChild(cell);
+        setInterval(function(c) {
+            return function() { if (Math.random() > 0.7) { var o = parseFloat(c.dataset.baseOpacity); c.style.opacity = (0.5 + Math.random() * 0.5); setTimeout(function() { c.style.opacity = o; }, 200); } };
+        }(cell), 2000 + Math.random() * 3000);
+    }
+}
+
+function initAccordions() {
+    document.querySelectorAll('.accordion-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            this.classList.toggle('open');
+        });
+    });
+}
+
+function initApp() {
+    initTitle3D();
+    initParticles();
+    initVoxelGrid();
+    initAccordions();
+    initCursor();
+    updateNav();
+    var firstSlide = document.getElementById('slide1');
+    if (firstSlide) {
+        firstSlide.classList.add('active');
+        firstSlide.classList.add('slide-enter');
+        playSlideAnim(firstSlide, 1);
+        firstSlide.querySelectorAll('.anim-init').forEach(function(el) {
+            el.style.removeProperty('opacity');
+        });
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
+
+})();
+</script>
+</body>
+</html>

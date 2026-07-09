@@ -1,0 +1,24 @@
+Erros comuns no documento HTML que acontecem e como resolve-los e evitar que aconteçam:
+
+---
+
+1. SyntaxError: Unexpected token '.' (ou outro caractere) no meio do JavaScript
+
+   Exemplo: barony-presentation.html:682 Uncaught SyntaxError: Unexpected token '.'
+
+   Causa: Uma regra CSS foi inserida acidentalmente dentro de um bloco <script>, no meio do
+   código JavaScript. O interpretador JS encontra um caractere inesperado (como um ponto de
+   classe CSS, ou chaves de @keyframes) e lança erro de sintaxe.
+
+   Como resolver:
+   - Leia o número da linha indicada no erro (ex: linha 682).
+   - Verifique o que está naquela linha. Se for CSS (.classe { ... }, @keyframes, etc.)
+     dentro do <script>, mova essa regra para o bloco <style> no <head>.
+   - Se necessário, mova o bloco CSS inteiro para o local correto e re-teste.
+
+   Como evitar:
+   - Nunca escreva CSS dentro de <script>. Todo CSS deve ficar dentro de <style>.
+   - Ao fazer edições no HTML, sempre verifique se não há "vazamento" de CSS para o JS.
+   - Use um validador de HTML/JS ou o console do navegador para detectar esses erros
+     precocemente.
+
