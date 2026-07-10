@@ -16,9 +16,44 @@ Erros comuns no documento HTML que acontecem e como resolve-los e evitar que aco
      dentro do <script>, mova essa regra para o bloco <style> no <head>.
    - Se necessário, mova o bloco CSS inteiro para o local correto e re-teste.
 
-   Como evitar:
-   - Nunca escreva CSS dentro de <script>. Todo CSS deve ficar dentro de <style>.
-   - Ao fazer edições no HTML, sempre verifique se não há "vazamento" de CSS para o JS.
-   - Use um validador de HTML/JS ou o console do navegador para detectar esses erros
-     precocemente.
+    Como evitar:
+    - Nunca escreva CSS dentro de <script>. Todo CSS deve ficar dentro de <style>.
+    - Ao fazer edições no HTML, sempre verifique se não há "vazamento" de CSS para o JS.
+    - Use um validador de HTML/JS ou o console do navegador para detectar esses erros
+      precocemente.
+
+---
+
+2. Conteúdo dos slides não aparece (todos os elementos ficam invisíveis com opacity: 0)
+
+   Exemplo: Todos os .anim permanecem opacity:0, slide de capa mostra apenas o fundo.
+
+   Causa: Na função triggerAnims, o código montava a string de animation concatenando
+   o valor de type.anim (que JÁ continha o shorthand completo: nome + duração + easing +
+   fill-mode) com duração e easing novamente. Resultado:
+   "animTitle 900ms var(--ease-enter) forwards 900ms var(--ease-enter) forwards"
+   O navegador rejeita a sintaxe inválida, a animação nunca roda, e o elemento fica
+   preso com opacity: 0 (definido pela classe .anim).
+
+   Correção:
+   // ANTES (inválido — duração e easing duplicados):
+   a.style.animation = type.anim + ' ' + dur + 'ms var(--ease-enter) forwards';
+
+   // DEPOIS (correto — type.anim já contém o shorthand completo):
+   a.style.animation = type.anim;
+
+   Como resolver:
+    - Verifique no console do navegador se há erros de CSS/JS.
+    - Ao programar animações via JavaScript, nunca duplique partes do shorthand de animation.
+    - O shorthand CSS de animation segue a ordem: name duration timing-function delay
+      iteration-count direction fill-mode play-state. Se já está completo, não adicione nada.
+
+    Como evitar:
+    - Quando uma função retorna um shorthand de animation completo, não concatene
+      duração e easing novamente no momento da aplicação.
+    - Prefira retornar apenas os dados necessários (nome, duração, stagger) e montar
+      o shorthand uma única vez.
+    - Sempre teste as animações no navegador após criar funções de animação programática.
+    - Use o painel de Computado do DevTools (na aba Elements) para verificar se o
+      property "animation" está com valor válido no elemento.
 
