@@ -1,0 +1,1557 @@
+# ESPECIFICAÇÃO VISUAL — APRESENTAÇÃO: JAVASCRIPT: A LINGUAGEM DA WEB
+
+**IMPORTANTE PARA A IA DESENVOLVEDORA:** Este é o ÚNICO documento que você deve consultar. É estritamente proibido acessar qualquer outro arquivo na pasta. Crie o documento HTML de uma só vez, sem consultar arquivos adicionais. Todo o necessário está aqui.
+
+---
+
+# 1. IDENTIDADE VISUAL
+
+A apresentação se chama "JavaScript: A Linguagem da Web". Seu tema é o ecossistema completo da linguagem JavaScript, desde fundamentos até boas práticas e próximos passos.
+
+A identidade visual é **tecnológica, moderna e imersiva**, inspirada em ambientes de desenvolvimento (IDEs, terminais, editores de código). A apresentação deve transmitir a sensação de estar dentro de um ambiente de programação sofisticado, com referências visuais ao universo do código — mas sem parecer um tutorial genérico. Deve parecer uma experiência premium, como um keynote de lançamento de tecnologia de uma grande empresa.
+
+A atmosfera é **escura (dark mode)**, com brilhos neon amarelos que remetem à cor oficial do JavaScript. A paleta é dominada por tons escuros profundos com destaque em amarelo vibrante, criando alto contraste e elegância. A linguagem visual combina minimalismo com riqueza de detalhes — poucos elementos, mas cada um extremamente polido.
+
+A apresentação deve parecer um produto premium de estúdio de design, não uma página HTML comum. Cada pixel deve parecer intencional.
+
+---
+
+# 2. PALETA DE CORES
+
+## Cores Principais
+- **Amarelo JavaScript**: #F7DF1E (cor oficial do logo JS — cor de destaque principal)
+- **Amarelo escuro/dourado**: #D4A814 (para variações, sombras, gradientes mais profundos)
+- **Branco**: #FFFFFF (textos principais, títulos, elementos de alto contraste)
+- **Preto**: #0A0A0F (background base mais escuro)
+- **Cinza muito escuro**: #12121A (background secundário dos slides)
+- **Cinza escuro**: #1A1A2E (background de cards e painéis)
+
+## Cores Secundárias
+- **Cinza médio**: #2A2A3E (bordas, separadores, backgrounds de cards secundários)
+- **Cinza claro**: #888899 (textos secundários, legendas, labels)
+- **Cinza très claro**: #AAAABB (textos de apoio)
+
+## Cores de Destaque
+- **Amarelo vibrante**: #F7DF1E (botões principais, ícones ativos, highlights)
+- **Amarelo suave**: #FFE066 (hover states, glows suaves)
+- **Amarelo quente**: #FFC107 (gradientes, acentos)
+- **Azul escuro teknik**: #1E3A5F (para contrastar com amarelo em alguns slides)
+
+## Cores de Fundo
+- **Background base**: #0A0A0F
+- **Background slide**: #12121A com gradiente radial sutil para #0A0A0F
+- **Background de cards**: rgba(26, 26, 46, 0.7) com backdrop-filter blur
+- **Background de código**: #1E1E2E (estilo VS Code dark)
+
+## Cores de Botões
+- **Botão primário**: gradiente de #F7DF1E para #D4A814
+- **Botão primário hover**: gradiente de #FFE066 para #F7DF1E
+- **Botão secundário**: transparente com borda #F7DF1E
+- **Botão secundário hover**: rgba(247, 223, 30, 0.1)
+- **Botão de navegação (setas)**: rgba(255, 255, 255, 0.15) com borda rgba(255, 255, 255, 0.1)
+- **Botão de navegação hover**: rgba(247, 223, 30, 0.2) com borda rgba(247, 223, 30, 0.3)
+
+## Cores de Texto
+- **Títulos**: #FFFFFF (branco puro)
+- **Subtítulos**: rgba(255, 255, 255, 0.85)
+- **Textos de conteúdo**: rgba(255, 255, 255, 0.75)
+- **Textos secundários**: rgba(255, 255, 255, 0.55)
+- **Texto de código**: #F7DF1E (amarelo JS) ou #E8E8E8 (em blocos de código)
+
+## Cores de Links
+- **Links normais**: #F7DF1E
+- **Links hover**: #FFE066
+
+## Cores de Hover
+- **Hover em cards**: leve brilho amarelo com rgba(247, 223, 30, 0.05)
+- **Hover em botões**: amarelo mais claro com sombra glow
+- **Hover em textos interativos**: transição para #F7DF1E
+
+---
+
+# 3. TIPOGRAFIA
+
+## Fontes
+- **Títulos**: 'Inter', 'Segoe UI', system-ui, sans-serif — peso 800 (ExtraBold)
+- **Subtítulos**: 'Inter', 'Segoe UI', system-ui, sans-serif — peso 600 (SemiBold)
+- **Conteúdo**: 'Inter', 'Segoe UI', system-ui, sans-serif — peso 400 (Regular)
+- **Código**: 'Fira Code', 'Cascadia Code', 'Consolas', monospace — peso 400
+- **Labels e badges**: 'Inter', system-ui, sans-serif — peso 500 (Medium), letter-spacing 0.05em
+
+## Hierarquia Visual
+- **Título principal (slide capa)**: clamp(3.2rem, 6.4vw, 5.76rem) — peso 800 — cor #FFFFFF — line-height 1.1
+- **Título de slide**: clamp(2rem, 4vw, 3.5rem) — peso 700 — cor #FFFFFF — line-height 1.2
+- **Subtítulo**: clamp(1.2rem, 2.4vw, 1.8rem) — peso 500 — cor rgba(255,255,255,0.7) — line-height 1.3
+- **Texto de conteúdo**: clamp(0.95rem, 1.6vw, 1.15rem) — peso 400 — cor rgba(255,255,255,0.75) — line-height 1.6
+- **Texto de código**: clamp(0.85rem, 1.4vw, 1rem) — peso 400 — font-family monospace
+- **Labels/badges**: 0.75rem — peso 500 — letter-spacing 0.08em — text-transform uppercase
+
+## Espaçamentos
+- Espaçamento entre título e subtítulo: 0.8rem
+- Espaçamento entre subtítulo e conteúdo: 1.5rem
+- Espaçamento entre blocos de conteúdo: 1rem
+- Espaçamento entre cards: clamp(12px, 2vw, 20px)
+- Padding interno dos cards: clamp(16px, 3vw, 28px)
+
+---
+
+# 4. ESTILO VISUAL
+
+O estilo é **tecnológico dark-mode com elementos de código**, mesclando:
+- Minimalismo (poucos elementos, cada um com propósito)
+- Estética de IDE/editor de código (fundos escuros, syntax highlighting)
+- Toques futuristas (glow amarelo, partículas sutis, blocos com perspectiva 3D)
+- Profissionalismo corporativo (limpeza, hierarquia, consistência)
+
+NÃO é cyberpunk, NÃO é neumorphism, NÃO é retrô. É moderno, limpo, escuro e sofisticado — como uma keynote da Apple ou Google I/O, mas com a identidade amarela do JavaScript.
+
+---
+
+# 5. CONCEITO ARTÍSTICO
+
+A apresentação deve transmitir a sensação de **mergulhar no universo JavaScript**. O público deve sentir que está entrando em um ambiente de desenvolvimento profissional e sofisticado. Cada slide deve parecer uma "tela" de um software de alta qualidade — não uma página web comum.
+
+A experiência deve ser fluida como navegar por um aplicativo premium. As transições devem ser cinematográficas. Os elementos devem surgir com elegância. O código exibido deve parecer vivo — como se estivesse sendo digitado ou compilado em tempo real.
+
+A emoção geral é: **"JavaScript é poderosa, elegante e fascinante."**
+
+---
+
+# 6. BACKGROUND GLOBAL
+
+## Estrutura do Background (Camadas — de trás para frente)
+
+### Camada 1 — Background base
+- Cor: #0A0A0F
+- Gradiente radial sutil partindo do centro: de rgba(26, 26, 46, 0.4) para transparente
+- Sem animação nesta camada
+
+### Camada 2 — Grid sutil de código
+- Grid muito sutil (1px) com rgba(255, 255, 255, 0.02)
+- Simula a grade de um editor de código
+- Estático, sem animação
+
+### Camada 3 — Blobs animados
+- 2 a 3 blobs difusos e grandes (300-500px de diâmetro)
+- Cores: rgba(247, 223, 30, 0.03) e rgba(212, 168, 20, 0.02)
+- Movimento lento e contínuo (drift de 20-30 segundos por ciclo)
+- Gaussian blur pesado (filtro blur de 80-120px)
+- Nunca competem com o conteúdo
+
+### Camada 4 — Partículas distantes
+- Partículas pequenas (1-2px) em rgba(247, 223, 30, 0.15)
+- Quantidade: 30-50 partículas
+- Movimento: flutuação lenta e aleatória (speed: 0.2-0.5px por frame)
+- Direção: predominantemente ascendente, com leve deriva horizontal
+- Nunca se concentram em um ponto
+- Profundidade: parecem estar longe (pequenas e pouco opacas)
+
+### Camada 5 — Névoa sutil
+- Gradiente radial no terço inferior do slide
+- rgba(247, 223, 30, 0.02) com blur grande
+- Respiração极其 suave (opacidade alterna entre 0.01 e 0.03 em ciclo de 8 segundos)
+
+### Camada 6 — Vignette
+- Vignette escuro nas bordas do viewport
+- Intensidade: moderada (não escurece demais o centro)
+- Reforça a sensação de profundidade e foco
+
+### Camada 7 — Noise/Grain
+- Overlay de grain muito fino e sutil
+- Opacidade: 0.03-0.05
+- Adiciona textura orgânica ao fundo digital
+- Estático (não animado)
+
+---
+
+# 7. NAVEGAÇÃO
+
+## Troca de Slides
+- **Teclado**: Setas esquerda/direita para navegar. Home para primeiro slide, End para último.
+- **Mouse**: Clique nas setas de navegação nos cantos inferiores. NÃO troca slide com clique em qualquer canto da tela.
+- **Touch/Swipe**: Arrastar para esquerda (próximo) ou direita (anterior) em dispositivos móveis.
+- **Scroll do mouse**: NÃO troca de slides. O scroll é desabilitado para navegação.
+
+## Botões de Navegação
+- **Seta esquerda (anterior)**: Canto inferior esquerdo, 30px das bordas
+- **Seta direita (próximo)**: Canto inferior direito, 30px das bordas
+- Estilo: circulares, 48px diâmetro, background rgba(255,255,255,0.06), borda 1px solid rgba(255,255,255,0.08)
+- Hover: background rgba(247,223,30,0.15), borda rgba(247,223,30,0.3), glow suave
+- Ícones: setas SVG simples, stroke 2px, cor rgba(255,255,255,0.6)
+- Hover do ícone: cor #F7DF1E
+- Transição: 300ms ease
+- Opacity 0 no primeiro slide (seta anterior) e no último slide (seta próxima)
+- Animação de entrada: fade in com 400ms de delay
+
+## Navigation Dots
+- Posição: canto inferior central, mesma altura dos botões de seta (alinhados horizontalmente)
+- Quantidade: 10 dots (um por slide)
+- Dot inativo: 8px diâmetro, background rgba(255,255,255,0.15), borda nenhuma
+- Dot ativo: 24px de largura (expandido horizontalmente), height 8px, border-radius 4px
+- Gradiente do dot ativo: linear-gradient(90deg, #F7DF1E, #D4A814)
+- Transição do dot: 400ms cubic-bezier(0.4, 0, 0.2, 1)
+- Hover: leve aumento de opacidade
+- Click: navega para o slide correspondente
+- Total de dots: 10 (posições 0 a 9)
+
+## Barra de Progresso
+- Posição: acima dos navigation dots, canto inferior中央
+- Largura: 200px (ou largura total dos dots + 40px)
+- Altura: 3px
+- Background: rgba(255,255,255,0.08)
+- Preenchimento: gradiente linear da esquerda para a direita
+- Gradiente: linear-gradient(90deg, #F7DF1E, #FFC107, #F7DF1E)
+- Animação do preenchimento: transição suave de 500ms cubic-bezier(0.4, 0, 0.2, 1)
+- Largura do preenchimento: (slide atual / total de slides) * 100%
+- Glow sutil no ponto mais avançado: box-shadow com rgba(247,223,30,0.4)
+
+---
+
+# 8. ANIMAÇÕES GLOBAIS
+
+## Transição entre Slides
+- Tipo: **Cross Fade com leve Zoom**
+- Duração da saída: 500ms
+- Duração da entrada: 600ms
+- Easing: cubic-bezier(0.4, 0, 0.2, 1)
+- Slide atual: opacidade 1→0, scale 1→0.98, leve blur 0→4px
+- Novo slide: opacidade 0→1, scale 1.02→1, blur 4px→0
+- Não existe intervalo visível entre a saída e entrada — elas se sobrepõem levemente (crossfade)
+
+## Animações de Entrada de Elementos
+- **Easing padrão**: cubic-bezier(0.16, 1, 0.3, 1) (ease-out exponencial)
+- **Duração base dos títulos**: 800ms
+- **Duração base dos subtítulos**: 700ms
+- **Duração base dos textos**: 600ms
+- **Duração base dos cards**: 900ms
+- **Duração base dos ícones**: 600ms
+- **Duração base dos elementos de código**: 800ms
+
+## Stagger
+- Atraso entre itens semelhantes (cards, listas, ícones): 100ms
+- Atraso entre elementos de hierarquia diferente: 200-300ms
+- Sequência típica: background → elementos decorativos → títulos → subtítulos → conteúdo → cards → elementos interativos
+
+## Animações Contínuas (após entrada)
+- Partículas: flutuação constante
+- Blobs de background: drift lento
+- Glow de elementos destacados: respiração sutil (opacidade alterna 0.6↔1 em 4 segundos)
+- Elementos decorativos: micro-oscilação de 1-2px em Y
+
+## Proibição
+- Nenhum elemento pode aparecer instantaneamente antes de sua animação
+- Nenhum conteúdo pode "piscar" durante transição de slides
+- Todas as animações devem ser reiniciadas ao retornar a um slide
+
+---
+
+# 9. ELEMENTOS INTERATIVOS GLOBAIS
+
+## Cards com Glassmorphism
+- Background: rgba(26, 26, 46, 0.6)
+- Backdrop-filter: blur(16px)
+- Bordas: 1px solid rgba(255, 255, 255, 0.06)
+- Border-radius: 12px
+- Sombra: 0 8px 32px rgba(0, 0, 0, 0.3)
+- Hover: borda muda para rgba(247, 223, 30, 0.15), sombra intensifica, leve translateY(-2px)
+- Transição: 350ms cubic-bezier(0.4, 0, 0.2, 1)
+
+## Botões
+- Botão primário: background gradiente #F7DF1E→#D4A814, texto preto (#0A0A0F), padding 12px 28px, border-radius 8px, font-weight 600
+- Hover primário: escala 1.02, sombra glow rgba(247,223,30,0.3)
+- Pressed: escala 0.98
+- Botão secundário: background transparente, borda 1px solid #F7DF1E, texto #F7DF1E
+- Hover secundário: background rgba(247,223,30,0.1)
+- Transições: 250ms ease
+
+## Tooltips
+- Background: rgba(10, 10, 15, 0.95)
+- Borda: 1px solid rgba(247, 223, 30, 0.2)
+- Texto: #FFFFFF, font-size 0.8rem
+- Border-radius: 6px
+- Padding: 8px 12px
+- Sombra: 0 4px 12px rgba(0,0,0,0.5)
+- Aparecimento: fade + translate de 4px, 200ms
+
+## Accordion/Toggle (para conteúdo extenso)
+- Header: clique para expandir/recolher
+- Ícone: seta para baixo que gira 180° ao expandir
+- Animação: height automático com transição 400ms cubic-bezier(0.4, 0, 0.2, 1)
+- Ícone de seta: SVG ou caractere Unicode, cor #F7DF1E
+- Padding do conteúdo expandido: 0 20px 16px 20px
+- Borda inferior sutil no header
+
+## Code Blocks (blocos de código)
+- Background: #1E1E2E (estilo VS Code)
+- Borda: 1px solid rgba(255,255,255,0.05)
+- Border-radius: 8px
+- Padding: 16px 20px
+- Font-family: 'Fira Code', monospace
+- Scroll horizontal se necessário (NÃO scroll no slide inteiro)
+- Syntax highlighting manual com cores:
+  - Palavras-chave (let, const, function, return, if, else): #F7DF1E (amarelo)
+  - Strings: #98C379 (verde)
+  - Números: #D19A66 (laranja)
+  - Comentários: #5C6370 (cinza)
+  - Funções: #61AFEF (azul)
+  - Operadores: #C678DD (roxo)
+  - Texto normal: #ABB2BF (cinza claro)
+
+---
+
+# 10. REGRAS DE BLOCOS COM PERSPECTIVA 3D
+
+Os blocos com perspectiva 3D devem ser usados recorrentemente na apresentação como parte da identidade visual. Eles transmitem profundidade, sofisticação e linguagem tecnológica.
+
+## Configuração Superior (acima de 50% da altura do slide)
+```css
+.bloco-perspectiva-superior {
+    transform: perspective(250px) rotateX(-10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+}
+```
+
+## Configuração Inferior (abaixo de 50% da altura do slide)
+```css
+.bloco-perspectiva-inferior {
+    transform: perspective(250px) rotateX(10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+}
+```
+
+## Limites
+- Largura máxima: 350px (absoluto, nunca ultrapassar)
+- Altura máxima: 420px (absoluto, nunca ultrapassar)
+- Largura deve ser ajustada ao conteúdo — nunca usar 350px sem justificativa
+- Padding mínimo interno: 20px
+- Responsivo: width: min(350px, 85vw)
+
+## Regras
+- Todo bloco DEVE conter conteúdo real (texto, número, ícone)
+- É proibido usar como decoração vazia
+- O texto interno herda naturalmente a perspectiva — NÃO aplicar skew ou rotação extra no texto
+- Se há apenas 1 bloco no slide, NÃO pode ficar centralizado — deve ter posicionamento lateral
+- 3 ou mais blocos no mesmo slide podem ficar centralizados
+- Cada bloco deve ter comentário no código justificando seu tamanho
+- A perspectiva 3D NUNCA é removida em telas menores
+- Sombras devem respeitar a direção da perspectiva (luz do canto superior esquerdo)
+- Gradiente sutil no fundo do bloco para reforçar profundidade
+- Highlight/borda iluminada na borda superior
+
+---
+
+# 11. REGRAS DE RESPONSIVIDADE
+
+- Tudo deve caber em qualquer resolução (1920x1080 até celulares 320px)
+- Nenhum elemento pode sair da tela
+- Nenhum slide pode ser scrollável (horizontal ou vertical)
+- Conteúdo que não cabe deve ser reorganizado em toggle/accordion/abas
+- Fontes devem usar clamp() para dimensionamento responsivo
+- Cards e grids devem se reorganizar (2 colunas → 1 coluna em telas pequenas)
+- Blocos com perspectiva usam width: min(350px, 85vw)
+- Margem de segurança de 5-8% em todas as bordas
+- Em celulares (<400px): padding reduzido para 12-16px
+
+---
+
+# 12. REGRAS DE CODIFICAÇÃO
+
+- Documento HTML com `<meta charset="UTF-8">`
+- Todo conteúdo em UTF-8 sem caracteres corrompidos
+- Sem caracteres em chinês
+- Sem tela de loading
+- Título da capa com efeito 3D extrudado (text-shadow em dezenas de camadas)
+- A extrusão é feita apenas com text-shadow, sem rotate/skew/perspective no elemento de texto
+- O texto principal do título é BRANCO (#FFFFFF)
+- O shadow do título NÃO pode ser branco, cinza ou preto — deve ser gradiente de amarelo claro (próximo do texto) para amarelo escuro/dourado (longe do texto)
+- O texto principal não pode ter gradiente
+- z-index do título no slide 1 deve ser ZERO
+- Proibição absoluta de "cover shapes" (polígonos decorativos com clip-path atrás do título)
+- O background do slide de capa contém apenas as camadas globais
+
+## Implementação da Extrusão do Título (Capa)
+```javascript
+let shadow = "";
+for (let i = 0; i < 35; i++) {
+    shadow += (shadow ? "," : "") +
+              (-i) + "px " +
+              i + "px 0 #cfcfcf"; // Este é apenas exemplo — usar cores amarelas
+}
+// Cores corretas: gradiente de #FFF8DC (amarelo bem claro) até #8B6914 (amarelo escuro/dourado)
+// Camada 1 (próxima ao texto): #FFF8DC
+// Camada 35 (mais distante): #8B6914
+// Interpolar linearmente entre essas duas cores ao longo das 35 camadas
+```
+
+## Segunda Camada (Sombra Ambiente via ::before)
+- Deslocada levemente
+- Escurecida
+- Com filter: blur(3-5px)
+- Opacidade reduzida (0.3-0.5)
+- Simula sombra ambiente para aumentar percepção de profundidade
+
+---
+
+# 13. ESTADO INICIAL DO PRIMEIRO SLIDE
+
+Ao abrir o HTML, o slide 1 deve estar imediatamente visível e correto:
+- Slide 1 marcado como ativo no carregamento
+- Animação de entrada disparada automaticamente no load
+- Conteúdo do slide 1 NÃO depende de navegação para aparecer
+- Proibido: slide abrindo vazio ou sem conteúdo
+
+---
+
+# 14. PROIBIÇÕES GERAIS
+
+- NÃO criar "cover shapes" ou polígonos clip-path decorativos
+- NÃO usar scroll para trocar slides
+- NÃO trocar slide com clique em qualquer canto da tela
+- NÃO usar caracteres corrompidos ou em chinês
+- NÃO criar linhas do tempo (timeline) independentemente do que for pedido
+- NÃO colocar "Perguntas?" ou similar no slide final
+- NÃO perguntar se há dúvidas no documento TXT
+- NÃO acessar outros arquivos da pasta
+- NÃO criar mais de um documento TXT
+- NÃO usar overflow como solução de layout
+- NÃO usar fontes pequenas para fazer conteúdo caber
+- NÃO criar conteúdo que ultrapasse o viewport
+- NÃO usar animações lineares sem necessidade
+- NÃO criar elementos apenas por existir — todo elemento deve ter propósito
+- NÃO usar cores chapadas em materiais — sempre variar com texturas/gradientes
+
+---
+
+<!-- FIM_ETAPA_1 -->
+
+---
+
+## SLIDE 1 — JavaScript: A Linguagem da Web (CAPA)
+
+### Objetivo
+Impressionar imediatamente. Estabelecer a identidade visual da apresentação. Criar um momento "wow" que prenda a atenção do usuário desde o primeiro segundo. Este slide é a porta de entrada — ele define se o usuário将继续 assistindo ou não.
+
+### Emoção que deve transmitir
+Poder, elegância, modernidade. O usuário deve pensar: "Isso vai ser incrível." Deve sentir que está prestes a entrar em uma experiência visual imersiva sobre uma das linguagens mais importantes do mundo.
+
+### Layout
+- Layout centralizado e dramático
+- O título ocupa a região central do slide, levemente acima do centro vertical (região dos 40-55% da altura)
+- Abaixo do título, um subtítulo/descrição curta
+- Na parte inferior, navigation dots e barra de progresso
+- Setas de navegação nos cantos inferiores
+- Background com todas as camadas globais (grid, blobs, partículas, névoa, vignette, noise)
+
+### Organização dos Elementos
+1. **Background global** (todas as 7 camadas — já descritas na seção 6)
+2. **Partículas distantes** — flutuando suavemente
+3. **Blobs amarelos** — drift lento, très difusos
+4. **Grid sutil** — estático
+5. **Título principal** — "JavaScript" — centro do slide, com efeito 3D extrudado
+6. **Subtítulo** — "A Linguagem da Web" — abaixo do título, com animação de fade
+7. **Tagline/ano** — "2024" ou badge pequeno abaixo do subtítulo
+8. **Navigation dots** — canto inferior中央
+9. **Barra de progresso** — acima dos dots
+10. **Setas de navegação** — cantos inferiores
+
+### Background
+- Todas as 7 camadas globais ativas
+- Blobs amarelos mais intensos neste slide (opacidade levemente maior) para criar impacto visual inicial
+- Partículas em quantidade moderada (40-50)
+- Vignette mais pronunciado para focar no centro
+
+### Elementos Decorativos
+- **Código flutuando ao fundo**: trechos de código JavaScript (ex: `const`, `=>`, `{}`, `function`, `[]`) posicionados aleatoriamente no background, com opacidade muito baixa (0.03-0.06), font-size pequena (12-14px), cor rgba(247,223,30,0.04). Eles criam textura temática sem competir com o conteúdo. Movimento: deriva lenta vertical ascendente.
+- **Linhas de conexão sutis**: 2-3 linhas diagonais muito finas (1px) com rgba(247,223,30,0.05), conectando pontos distantes do slide. Criam sensação de rede/tecnologia.
+
+### Elementos Interativos
+- Navigation dots clicáveis
+- Setas de navegação com hover
+- Nenhum outro elemento interativo neste slide (é a capa, foco visual puro)
+
+### Elementos Visuais
+- **Título "JavaScript"**: efeito 3D extrudado com dezenas de text-shadow (35 camadas). Texto branco (#FFFFFF). Shadow gradiente de amarelo claro (#FFF8DC) até amarelo escuro/dourado (#8B6914). O texto fica horizontal e reto — a profundidade vem apenas do text-shadow.
+- **::before do título**: segunda camada de sombra, deslocada 2-3px, com filter: blur(4px), opacidade 0.35, cor #8B6914. Reforça a percepção de profundidade.
+- **Subtítulo "A Linguagem da Web"**: fonte menor, peso 400, cor rgba(255,255,255,0.6), animação de fade+slide de baixo
+
+### Partículas
+- Tipo: poeira/dust dourada
+- Quantidade: 40-50
+- Movimento: flutuação ascendente com leve deriva horizontal
+- Velocidade: 0.3-0.5px/frame
+- Tamanho: 1-2px
+- Opacidade: 0.1-0.2
+
+### Iluminação
+- Glow central difuso atrás do título: radial-gradient de rgba(247,223,30,0.08) para transparente
+- Glow nos blobs: suave, difuso
+- Nenhuma iluminação direcional forte — luz ambiente suave
+
+### Efeitos
+- **Noise/grain**: overlay muito sutil (opacidade 0.04)
+- **Vignette**: escurecimento nas bordas para foco central
+- **Blur nos blobs**: 80-120px
+- **Parallax suave**: partículas distantes vs. conteúdo → leve movimento diferenciado ao trocar de slide
+
+### Ícones
+- Nenhum ícone explícito neste slide
+
+### Imagens
+- Nenhuma imagem neste slide
+
+### Tipografia e Animação de Entrada
+1. **Background** (camadas 1-7): já visíveis desde o carregamento
+2. **Código flutuante**: já visível, opacidade baixa, sem animação de entrada
+3. **Glow central**: fade in de 1200ms, delay 200ms
+4. **Título "JavaScript"**: 
+   - Animação: Fade in + Move 30px para cima + Blur 12px→0 + Scale 95%→100%
+   - Duração: 1000ms
+   - Delay: 400ms
+   - Easing: cubic-bezier(0.16, 1, 0.3, 1)
+   - text-shadow da extrusão surge gradualmente (as camadas vão aparecendo de dentro para fora)
+5. **Subtítulo "A Linguagem da Web"**:
+   - Animação: Fade in + Move 20px para cima
+   - Duração: 700ms
+   - Delay: 900ms (após o título estabilizar)
+   - Easing: cubic-bezier(0.16, 1, 0.3, 1)
+6. **Tagline/badge**:
+   - Animação: Fade in + Scale 90%→100%
+   - Duração: 500ms
+   - Delay: 1200ms
+7. **Navigation dots e setas**: fade in, delay 1500ms
+
+### Interações
+- Usuário pode navegar com setas do teclado
+- Usuário pode clicar nas setas de navegação
+- Usuário pode clicar nos dots
+- Swipe em mobile
+
+### Transição para o Slide 2
+- Slide atual: fade out + scale 0.98 + blur 4px (500ms)
+- Slide 2: fade in + scale 1.02→1 + blur 4px→0 (600ms)
+- Crossfade com leve sobreposição
+
+### Observações
+- O título "JavaScript" NÃO pode ter gradiente — é branco puro
+- O text-shadow NÃO pode ser branco, cinza ou preto — é gradiente amarelo
+- z-index do título deve ser 0
+- NÃO criar cover shapes (polígonos clip-path)
+- O efeito extrudado deve parecer texto esculpido/extrudado com espessura
+- A extrusão deve ter 35 camadas de text-shadow, cada uma deslocada 1px
+- Este é o slide mais impactante — ele define a qualidade de toda a apresentação
+
+---
+
+## SLIDE 2 — Fundamentos da Linguagem
+
+### Objetivo
+Apresentar os pilares básicos do JavaScript: variáveis, tipos de dados, operadores e estruturas de controle. Estabelecer a base para todo o restante da apresentação. O usuário deve sair deste slide sabendo que JavaScript possui tipos fundamentais e estruturas que controlam o fluxo do programa.
+
+### Emoção que deve transmitir
+Clareza e acessibilidade. O conteúdo é introdutório, então a sensação deve ser de acolhimento — "isso é mais simples do que parece". Mas mantendo a sofisticação visual para não parecer tutorial genérico.
+
+### Layout
+- Layout em duas colunas principais
+- **Coluna esquerda (~55%)**: título do slide + subtítulo + cards de variáveis/tipos
+- **Coluna direita (~45%)**: bloco de código exemplificativo + estruturas de controle
+- Distribuição vertical equilibrada
+- Padding de segurança: 6% em todas as bordas
+
+### Organização dos Elementos
+1. **Título do slide** — "Fundamentos da Linguagem" — topo esquerda
+2. **Subtítulo** — "Variáveis, tipos e controle de fluxo" — abaixo do título
+3. **Cards de tipos de dados** — grid 2x2 ou 3x1 na coluna esquerda:
+   - Card "let" — com ícone e descrição curta
+   - Card "const" — com ícone e descrição curta
+   - Tipos: string, number, boolean — em um card agrupado ou badges
+4. **Bloco de código** — na coluna direita, exemplo de declaração de variáveis
+5. **Seção de operadores** — inferior, com 3 badges/pills: Aritméticos, Lógicos, Comparação
+6. **Seção de estruturas de controle** — inferior direita, cards compactos: if/else, switch, loops
+
+### Background
+- Todas as camadas globais (reduzidas em intensidade para não competir com conteúdo)
+- Sem blobs extras neste slide
+- Grid sutil visível
+
+### Elementos Decorativos
+- **Ícone de código** `{ }` flutuando sutil no canto superior direito, opacidade 0.05
+- **Linha decorativa** vertical separando as duas colunas, rgba(247,223,30,0.1), 1px
+
+### Elementos Interativos
+- **Cards de tipos de dados**: hover com leve elevação (translateY -2px) e borda amarela sutil
+- **Badges de operadores**: hover com background rgba(247,223,30,0.1)
+- **Bloco de código**: statico, mas com syntax highlighting que surge com animação de typing sutil
+
+### Elementos Visuais
+- **Título**: clamp(2rem, 4vw, 3.5rem), peso 700, cor #FFFFFF, animação de entrada
+- **Subtítulo**: clamp(1rem, 2vw, 1.4rem), peso 400, cor rgba(255,255,255,0.6)
+- **Cards de tipos**: glassmorphism (background rgba(26,26,46,0.6), backdrop-filter blur(16px), borda rgba(255,255,255,0.06), border-radius 12px)
+- **Bloco de código**: background #1E1E2E, borda 1px solid rgba(255,255,255,0.05), border-radius 8px, padding 16px 20px
+- **Badges de operadores**: pills com background rgba(247,223,30,0.08), borda 1px solid rgba(247,223,30,0.2), border-radius 20px, padding 6px 16px
+
+### Partículas
+- Nenhuma partícula adicional (apenas as globais)
+
+### Iluminação
+- Glow sutil nos cards quando em hover: box-shadow com rgba(247,223,30,0.15)
+- Bloco de código com borda iluminada sutil na lateral esquerda (3px de gradiente amarelo)
+
+### Efeitos
+- **Glassmorphism** nos cards de tipos
+- **Syntax highlighting** no bloco de código
+- **Micro-sombras** em todos os elementos elevados
+
+### Ícones
+- Ícones de código (chaves `{}`, parênteses `()`, ponto e vírgula `;`) — estilo outline, stroke 1.5px, cor #F7DF1E, tamanho 20-24px
+- Posicionados dentro dos cards, à esquerda do texto
+
+### Imagens
+- Nenhuma imagem neste slide
+
+### Tipografia e Animação de Entrada
+1. **Título**: Fade in + Move 25px para cima, duração 700ms, delay 150ms
+2. **Subtítulo**: Fade in + Move 15px para cima, duração 600ms, delay 350ms
+3. **Cards de tipos** (stagger): Fade in + Scale 94%→100% + Blur 6px→0, duração 700ms, delay 500ms + 100ms por card
+4. **Bloco de código**: Fade in + Move 20px da direita, duração 800ms, delay 600ms
+5. **Conteúdo do código**: efeito de typing sutil (cada linha aparece com 100ms de delay), duração total 1200ms
+6. **Badges de operadores** (stagger): Fade in + Scale 90%→100%, duração 500ms, delay 900ms + 80ms por badge
+7. **Cards de estruturas de controle** (stagger): Fade in + Move 15px de baixo, duração 600ms, delay 1100ms + 100ms por card
+
+### Interações
+- Hover nos cards de tipos: elevação + borda amarela
+- Hover nos badges: background amarelo sutil
+- Setas de navegação funcionais
+- Navegação por teclado
+
+### Transição para o Slide 3
+- Cross fade com leve blur
+- Duração: saída 500ms, entrada 600ms
+
+### Observações
+- O conteúdo deve caber sem scroll — se necessário, usar grid responsivo
+- Cards de tipos podem ser toggles se houver muito conteúdo (mas neste slide NÃO é necessário toggle — o conteúdo é moderado)
+- O bloco de código deve ter no máximo 8-10 linhas para manter legibilidade
+- Usar fonte monospace para todo código
+- Destacar palavras-chave JavaScript com cor amarela (#F7DF1E)
+
+---
+
+<!-- FIM_ETAPA_2 -->
+
+---
+
+## SLIDE 3 — Funções e Escopo
+
+### Objetivo
+Ensinar os três tipos de declaração de funções, explicar escopo e introduzir closures. O usuário deve compreender que funções são blocos reutilizáveis e que o escopo determina onde variáveis estão acessíveis.
+
+### Emoção que deve transmitir
+Organização e lógica. O slide deve passar a sensação de que funções são ferramentas poderosas e elegantes. A visualização do código deve parecer limpa e profissional — como um bom IDE.
+
+### Layout
+- Layout em **três colunas na parte superior** para os tipos de função
+- **Parte inferior**: seção de escopo e closures em cards expansíveis (toggle)
+- Grid: 3 colunas iguais na parte superior, 2 cards largos na parte inferior
+- Padding: 6% nas bordas
+
+### Organização dos Elementos
+1. **Título** — "Funções e Escopo" — topo, centralizado ou alinhado à esquerda
+2. **Subtítulo** — "Declaração, escopo e closures" — abaixo do título
+3. **Três blocos com perspectiva 3D** (um para cada tipo de função):
+   - Bloco 1: "Function Declaration" — `function nome() {}`
+   - Bloco 2: "Function Expression" — `const nome = function() {}`
+   - Bloco 3: "Arrow Function" — `const nome = () => {}`
+   - Cada bloco contém: título do tipo, breve descrição, mini bloco de código
+4. **Seção de Escopo** — dois cards lado a lado:
+   - Card "Escopo Global" — descrição + ícone
+   - Card "Escopo de Bloco" — descrição + ícone (destacando `let` e `const`)
+5. **Seção de Closures** — card larga na parte inferior com toggle:
+   - Header: "Closures — O que são e por que importam"
+   - Conteúdo expansível: explicação + exemplo de código
+
+### Background
+- Camadas globais padrão
+- Sem blobs extras
+
+### Elementos Decorativos
+- **Ícone de engrenagem** sutil ao fundo, opacidade 0.04
+- **Linha horizontal** sutil separando a parte superior (funções) da inferior (escopo), rgba(255,255,255,0.05)
+
+### Elementos Interativos
+- **Blocos com perspectiva 3D**: hover com leve intensificação do glow
+- **Toggle de Closures**: accordion que expande/recolhe o conteúdo com animação suave (height 0→auto com transição 400ms)
+- **Cards de escopo**: hover com elevação leve
+
+### Elementos Visuais
+- **Título**: clamp(2rem, 4vw, 3.5rem), peso 700, #FFFFFF
+- **Subtítulo**: clamp(1rem, 2vw, 1.4rem), peso 400, rgba(255,255,255,0.6)
+- **Blocos com perspectiva 3D**:
+  - Posição: todos na metade superior do slide → rotateX(-10deg), rotateY(25deg)
+  - Largura: ~280px cada (3 blocos lado a lado precisam de ~840px total — em telas grandes; em telas menores, reorganizar para 1 coluna)
+  - Altura: ~180px cada
+  - Background: gradiente sutil de rgba(26,26,46,0.8) para rgba(30,30,50,0.6)
+  - Borda superior: 2px solid rgba(247,223,30,0.3)
+  - Sombra: 0 15px 30px rgba(0,0,0,0.4)
+  - Conteúdo: título do tipo (font-weight 600, cor #F7DF1E), mini código (monospace, cor #ABB2BF)
+- **Cards de escopo**: glassmorphism padrão
+- **Accordion de closures**: header com background rgba(26,26,46,0.5), borda 1px solid rgba(255,255,255,0.06), border-radius 8px
+
+### Partículas
+- Nenhuma adicional
+
+### Iluminação
+- Glow amarelo sutil nos blocos com perspectiva (box-shadow com rgba(247,223,30,0.1))
+
+### Efeitos
+- **Perspectiva 3D** nos blocos de tipo de função
+- **Glassmorphism** nos cards de escopo
+- **Accordion** para closures
+
+### Ícones
+- Ícone de função `f()` ou `{}` — outline, cor #F7DF1E, 20px
+- Ícone de escopo (círculos concêntricos) — outline, cor rgba(255,255,255,0.4), 18px
+
+### Imagens
+- Nenhuma
+
+### Tipografia e Animação de Entrada
+1. **Título**: Fade in + Move 20px cima, 700ms, delay 150ms
+2. **Subtítulo**: Fade in + Move 15px cima, 600ms, delay 300ms
+3. **Blocos com perspectiva** (stagger): Fade in + deslize acompanhando perspectiva + Blur 8px→0, 800ms, delay 500ms + 120ms por bloco
+4. **Conteúdo dos blocos**: Fade in interno, 500ms, delay 800ms + 120ms por bloco
+5. **Cards de escopo** (stagger): Fade in + Scale 95%→100%, 700ms, delay 900ms + 100ms
+6. **Accordion de closures**: Fade in + Move 15px cima, 600ms, delay 1200ms
+
+### Interações
+- Hover nos blocos com perspectiva: glow intensifica
+- Click no accordion de closures: expande/recolhe com animação
+- Hover nos cards de escopo: elevação
+- Navegação padrão
+
+### Transição para o Slide 4
+- Cross fade com leve blur
+
+### Observações
+- Os três blocos com perspectiva devem estar na metade superior → rotateX(-10deg)
+- Se a tela não comportar 3 blocos lado a lado, usar grid responsivo (1 coluna em mobile)
+- O accordion de closures é necessário porque o conteúdo é denso — toggle permite manter o slide limpo
+- Código nos blocos: máximo 2-3 linhas cada
+
+---
+
+## SLIDE 4 — Objetos e Arrays
+
+### Objetivo
+Apresentar a criação e manipulação de objetos e arrays, destacando métodos importantes (map, filter, reduce, forEach), desestruturação e spread operator. O usuário deve ver que JavaScript oferece ferramentas poderosas para trabalhar com dados.
+
+### Emoção que deve transmitir
+Poder e flexibilidade. Os métodos de array são como "magia" — transformam dados de forma elegante. O slide deve transmitir essa sensação de transformação e manipulação inteligente.
+
+### Layout
+- Layout em **duas seções verticais**
+- **Seção superior (60%)**: grid 2x2 com cards de métodos de array (map, filter, reduce, forEach)
+- **Seção inferior (40%)**: dois cards lado a lado — Desestruturação e Spread Operator, cada um com código de exemplo
+- Padding: 6% nas bordas
+
+### Organização dos Elementos
+1. **Título** — "Objetos e Arrays" — topo
+2. **Subtítulo** — "Métodos poderosos para manipulação de dados" — abaixo do título
+3. **Grid 2x2 de cards de métodos**:
+   - Card "map": ícone + nome + descrição curta + mini código
+   - Card "filter": ícone + nome + descrição + mini código
+   - Card "reduce": ícone + nome + descrição + mini código
+   - Card "forEach": ícone + nome + descrição + mini código
+4. **Seção inferior**:
+   - Card "Desestruturação": código de exemplo `const { nome, idade } = pessoa;`
+   - Card "Spread Operator": código `const novoArray = [...array1, ...array2];`
+
+### Background
+- Camadas globais padrão
+
+### Elementos Decorativos
+- **Símbolo de array `[ ]`** flutuando sutil, opacidade 0.04
+- **Símbolo de objeto `{ }`** flutuando sutil, opacidade 0.04
+
+### Elementos Interativos
+- **Cards de métodos**: hover com elevação + borda amarela sutil + ícone pulsa levemente
+- **Cards de código**: hover com borda iluminada
+- Todos os cards possuem microanimação de hover
+
+### Elementos Visuais
+- **Título**: padrão global
+- **Cards de métodos**: glassmorphism, border-radius 12px, padding 20px
+  - Ícone do método: 32px, cor #F7DF1E, estilo outline
+  - Nome do método: font-weight 600, cor #F7DF1E, font-family monospace
+  - Descrição: font-size 0.9rem, cor rgba(255,255,255,0.65)
+  - Mini código: font-family monospace, font-size 0.8rem, background rgba(30,30,46,0.8), padding 8px 12px, border-radius 6px
+- **Cards de código inferiores**: glassmorphism com borda amarela sutil (1px solid rgba(247,223,30,0.15))
+
+### Partículas
+- Nenhuma adicional
+
+### Iluminação
+- Glow nos cards em hover
+- Borda iluminada nos cards de código
+
+### Efeitos
+- **Glassmorphism** em todos os cards
+- **Syntax highlighting** nos mini-códigos
+
+### Ícones
+- Ícone de transformação (setas circulares) para map
+- Ícone de filtro (funil) para filter
+- Ícone de soma (sigma) para reduce
+- Ícone de lista (três linhas) para forEach
+- Estilo outline, stroke 1.5px, cor #F7DF1E
+
+### Imagens
+- Nenhuma
+
+### Tipografia e Animação de Entrada
+1. **Título**: Fade in + Move 20px cima, 700ms, delay 150ms
+2. **Subtítulo**: Fade in, 600ms, delay 300ms
+3. **Cards de métodos** (stagger em grid — primeiro os dois de cima, depois os dois de baixo):
+   - Fade in + Scale 94%→100% + Blur 5px→0
+   - Duração: 700ms
+   - Delay: 500ms + 100ms por card (ordem: map→filter→reduce→forEach)
+4. **Cards de código inferiores** (stagger): Fade in + Move 15px cima, 600ms, delay 900ms + 100ms
+
+### Interações
+- Hover nos cards: elevação + borda amarela
+- Hover nos ícones: pulse suave
+- Navegação padrão
+
+### Transição para o Slide 5
+- Cross fade com leve blur
+
+### Observações
+- O grid 2x2 deve ser responsivo — em telas pequenas, virar 1 coluna
+- Mini-códigos devem ter no máximo 2 linhas
+- Se o conteúdo não caber, os cards inferiores (desestruturação e spread) podem usar toggle/accordion
+- Evitar textos longos nas descrições — máximo 2 frases por card
+
+---
+
+<!-- FIM_ETAPA_3 -->
+
+---
+
+## SLIDE 5 — Manipulação do DOM
+
+### Objetivo
+Explicar como JavaScript interage com a página HTML: seleção de elementos, criação dinâmica e manipulação de eventos. O usuário deve entender que o DOM é a ponte entre o JavaScript e o que o usuário vê na tela.
+
+### Emoção que deve transmitir
+Controle e interatividade. O slide deve passar a sensação de que o desenvolvedor tem poder total sobre a página — pode criar, modificar e destruir elementos. A visualização deve lembrar um painel de controle.
+
+### Layout
+- Layout em **três seções empilhadas verticalmente**
+- **Seção 1 (topo, 30%)**: título + subtítulo + dois badges: "Seleção" e "Criação"
+- **Seção 2 (meio, 40%)**: dois cards grandes lado a lado — um de seleção de elementos (com código), outro de criação/inserção (com código)
+- **Seção 3 (base, 30%)**: seção de eventos com cards compactos: addEventListener, delegação de eventos
+- Padding: 5-6% nas bordas
+
+### Organização dos Elementos
+1. **Título** — "Manipulação do DOM" — topo
+2. **Subtítulo** — "Seleção, criação e eventos" — abaixo do título
+3. **Badge "Seleção"**: pill com ícone de lupa, cor #F7DF1E
+4. **Badge "Criação"**: pill com ícone de mais, cor #F7DF1E
+5. **Card de Seleção** (esquerda): glassmorphism, contendo:
+   - Título: "Selecionar Elementos"
+   - Código: `getElementById()`, `querySelector()`, `querySelectorAll()`
+   - Mini exemplos de uso
+6. **Card de Criação** (direita): glassmorphism, contendo:
+   - Título: "Criar e Inserir"
+   - Código: `createElement()`, `appendChild()`, `innerHTML`
+7. **Seção de Eventos** (inferior):
+   - Card "addEventListener": descrição + exemplo
+   - Card "Delegação de Eventos": descrição + explicação
+
+### Background
+- Camadas globais padrão
+
+### Elementos Decorativos
+- **Ícone de DOM tree** (nós conectados) flutuando sutil, opacidade 0.04
+- **Linhas de conexão** entre os cards superiores e a seção de eventos, simbolizando o fluxo de eventos
+
+### Elementos Interativos
+- **Cards de código**: hover com borda iluminada + sombra glow
+- **Badges**: clicáveis (toggle para mostrar/ocultar detalhes extras, se necessário)
+- **Cards de eventos**: hover com elevação
+
+### Elementos Visuais
+- **Título**: padrão global
+- **Badges**: pills com background rgba(247,223,30,0.08), borda 1px solid rgba(247,223,30,0.2), border-radius 20px, padding 6px 16px
+- **Cards de código**: glassmorphism, com bloco de código interno (background #1E1E2E, padding 12px 16px, border-radius 6px)
+- **Cards de eventos**: glassmorphism compactos, height ajustada ao conteúdo
+
+### Partículas
+- Nenhuma adicional
+
+### Iluminação
+- Glow sutil nos cards de código em hover
+- Borda iluminada amarela lateral nos blocos de código
+
+### Efeitos
+- **Glassmorphism** em todos os cards
+- **Syntax highlighting** nos códigos
+- **Linhas de conexão** decorativas entre seções
+
+### Ícones
+- Lupa (seleção), Mais (criação), Z闪电 (eventos) — outline, cor #F7DF1E, 18-20px
+
+### Imagens
+- Nenhuma
+
+### Tipografia e Animação de Entrada
+1. **Título**: Fade in + Move 20px cima, 700ms, delay 150ms
+2. **Subtítulo**: Fade in, 600ms, delay 300ms
+3. **Badges**: Fade in + Scale 90%→100%, 500ms, delay 400ms
+4. **Cards de código** (stagger horizontal): Fade in + Move 20px da direita (card direita) / Move 20px da esquerda (card esquerda), 800ms, delay 550ms + 150ms
+5. **Conteúdo dos cards de código**: typing sutil, 1000ms, delay 800ms
+6. **Cards de eventos** (stagger): Fade in + Move 15px cima, 600ms, delay 1100ms + 100ms
+
+### Interações
+- Hover nos cards: elevação + borda amarela
+- Navegação padrão
+
+### Transição para o Slide 6
+- Cross fade com leve blur
+
+### Observações
+- O código deve ser conciso — máximo 4-5 linhas por bloco
+- Se houver muito conteúdo, usar toggle na seção de eventos
+- A seção de eventos pode ser accordion se necessário
+- Manter legibilidade do código — font-size monospace não pode ser menor que 0.8rem
+
+---
+
+## SLIDE 6 — Programação Assíncrona
+
+### Objetivo
+Explicar a evolução da programação assíncrona: de callbacks a async/await. O usuário deve entender o problema do callback hell, como promises resolveram isso, e como async/await simplificou tudo. Este é um dos slides mais importantes — programação assíncrona é essencial em JavaScript.
+
+### Emoção que deve transmitir
+Evolução e simplificação. O slide deve mostrar uma jornada: do caos (callbacks) para a ordem (async/await). A sensação deve ser de progresso e elegância crescente.
+
+### Layout
+- Layout em **três colunas verticais** representando a evolução:
+  - **Coluna 1 (esquerda)**: Callbacks — vermelho/laranja (problema)
+  - **Coluna 2 (centro)**: Promises — amarelo (transição)
+  - **Coluna 3 (direita)**: Async/Await — amarelo vibrante/verde (solução)
+- Cada coluna contém: título + código de exemplo + nota explicativa
+- Padding: 5% nas bordas
+- **Importante**: Este slide pode ter conteúdo denso. Se necessário, usar toggles para cada seção
+
+### Organização dos Elementos
+1. **Título** — "Programação Assíncrona" — topo
+2. **Subtítulo** — "De Callbacks a Async/Await" — abaixo do título
+3. **Três colunas**:
+   - **Callbacks**: bloco de código com callback hell (indentação crescente), nota "Difícil de ler"
+   - **Promises**: bloco de código com .then().catch(), nota "Mais organizado"
+   - **Async/Await**: bloco de código com async/await, nota "Elegante e limpo"
+4. **Barra visual de evolução**: linha horizontal conectando as três colunas com setas, mostrando progressão
+5. **Badge "Essencial"**: pill destacando a importância deste tópico
+
+### Background
+- Camadas globais padrão
+- **Variação sutil**: na coluna de callbacks, leve tonalidade avermelhada (rgba(255,80,50,0.02)) para reforçar visualmente o "problema"
+
+### Elementos Decorativos
+- **Setas de progressão** conectando as três colunas
+- **Ícone de relógio** sutil ao fundo (referência a "tempo" assíncrono)
+- **Badge "Essencial"**: pill com background rgba(247,223,30,0.15), borda 1px solid rgba(247,223,30,0.3), posicionado próximo ao título
+
+### Elementos Interativos
+- **Colunas**: cada uma pode ser um accordion/toggle que expande para mostrar mais detalhes (se o conteúdo ficar grande demais)
+- **Códigos**: hover com borda iluminada
+- **Barra de evolução**: estática, apenas visual
+
+### Elementos Visuais
+- **Título**: padrão global
+- **Três colunas**: glassmorphism, cada uma com borda lateral colorida:
+  - Callbacks: borda esquerda rgba(255,80,50,0.4)
+  - Promises: borda esquerda rgba(247,223,30,0.4)
+  - Async/Await: borda esquerda rgba(100,220,100,0.4)
+- **Códigos**: background #1E1E2E, syntax highlighting
+- **Barra de evolução**: linha horizontal com gradiente de vermelho→amarelo→verde, 3px de espessura, com setas SVG
+
+### Partículas
+- Nenhuma adicional
+
+### Iluminação
+- Glow diferenciado por coluna: sutil avermelhado nos callbacks, amarelo nas promises, esverdeado no async/await
+
+### Efeitos
+- **Glassmorphism** nas colunas
+- **Syntax highlighting** nos códigos
+- **Gradiente visual** na barra de evolução
+
+### Ícones
+- Sino (callback/promise), relógio (tempo), check (async/await) — outline, 18px
+
+### Imagens
+- Nenhuma
+
+### Tipografia e Animação de Entrada
+1. **Título**: Fade in + Move 20px cima, 700ms, delay 150ms
+2. **Subtítulo**: Fade in, 600ms, delay 300ms
+3. **Badge "Essencial"**: Fade in + Scale 80%→100%, 500ms, delay 400ms
+4. **Barra de evolução**: desenho da linha da esquerda para a direita (draw SVG ou clip-path reveal), 1000ms, delay 500ms
+5. **Colunas** (stagger da esquerda para a direita): Fade in + Move 30px da esquerda + Blur 8px→0, 800ms, delay 700ms + 200ms por coluna
+6. **Conteúdo dos códigos**: typing sutil, 1200ms, delay 1000ms + 200ms por coluna
+
+### Interações
+- Hover nas colunas: elevação + borda iluminada da cor correspondente
+- Se houver toggle: accordion expande/recolhe com animação
+- Navegação padrão
+
+### Transição para o Slide 7
+- Cross fade com leve blur
+
+### Observações
+- **Este slide é denso** — se o conteúdo não couber, usar toggle/accordion para cada coluna
+- Callback hell deve ter indentação visual clara (cada nível mais indentado)
+- O código de async/await deve ser o mais limpo e elegante — é o "herói" do slide
+- A barra de evolução é apenas visual — não interativa
+- Se o conteúdo ficar muito grande, dividir: primeira visualização mostra os três conceitos resumidos, toggle expande para detalhes
+
+---
+
+<!-- FIM_ETAPA_4 -->
+
+---
+
+## SLIDE 7 — Módulos e Organização
+
+### Objetivo
+Ensinar a importância de organizar código JavaScript em módulos. Explicar import/export (ES Modules) vs CommonJS, e boas práticas de organização. O usuário deve entender que código bem organizado é código maintível.
+
+### Emoção que deve transmitir
+Ordem e profissionalismo. O slide deve transmitir que programadores profissionais organizam seu código. A sensação é de "isso é o que faz a diferença entre amador e profissional".
+
+### Layout
+- Layout em **duas seções horizontais**
+- **Seção superior (50%)**: dois cards grandes lado a lado — ES Modules (esquerda) e CommonJS (direita), cada um com código de exemplo
+- **Seção inferior (50%)**: grid 2x2 ou 1x4 com cards de boas práticas
+- Padding: 5-6% nas bordas
+
+### Organização dos Elementos
+1. **Título** — "Módulos e Organização" — topo
+2. **Subtítulo** — "ES Modules, CommonJS e boas práticas" — abaixo do título
+3. **Card "ES Modules"** (esquerda):
+   - Badge "Moderno" no canto superior
+   - Código: `import { nome } from './modulo.js';` e `export const nome = "JS";`
+   - Nota: "Padrão nativo do navegador"
+4. **Card "CommonJS"** (direita):
+   - Badge "Node.js" no canto superior
+   - Código: `const { nome } = require('./modulo');` e `module.exports = { nome };`
+   - Nota: "Usado no Node.js"
+5. **Cards de boas práticas** (inferior):
+   - "Um módulo, uma responsabilidade"
+   - "Evite variáveis globais"
+   - "Use nomes descritivos"
+   - "Comente o código complexo"
+
+### Background
+- Camadas globais padrão
+
+### Elementos Decorativos
+- **Ícone de pastas/arquivos** sutil ao fundo, opacidade 0.04
+- **Linha divisória** horizontal entre as seções
+
+### Elementos Interativos
+- **Cards de módulos**: hover com elevação + borda amarela
+- **Cards de boas práticas**: hover com ícone de check que pulsa
+- **Badges "Moderno" e "Node.js"**: pills estáticos
+
+### Elementos Visuais
+- **Título**: padrão global
+- **Cards de módulos**: glassmorphism, largura ~45% cada, padding 24px, border-radius 12px
+  - Badge "Moderno": background rgba(100,220,100,0.15), borda 1px solid rgba(100,220,100,0.3), cor texto #64DC64
+  - Badge "Node.js": background rgba(100,220,100,0.15), borda 1px solid rgba(100,220,100,0.3), cor texto #64DC64
+  - Código: monospace, syntax highlighting
+- **Cards de boas práticas**: glassmorphism compactos, ícone de check à esquerda
+
+### Partículas
+- Nenhuma adicional
+
+### Iluminação
+- Glow sutil nos cards em hover
+
+### Efeitos
+- **Glassmorphism** em todos os cards
+- **Syntax highlighting** nos códigos
+
+### Ícones
+- Ícone de check (✓) nas boas práticas — cor #64DC64, 16px
+- Ícone de arquivo/módulo — cor #F7DF1E, 20px
+
+### Imagens
+- Nenhuma
+
+### Tipografia e Animação de Entrada
+1. **Título**: Fade in + Move 20px cima, 700ms, delay 150ms
+2. **Subtítulo**: Fade in, 600ms, delay 300ms
+3. **Cards de módulos** (stagger): Fade in + Move 20px da esquerda (card esquerda) / Move 20px da direita (card direita), 800ms, delay 500ms + 150ms
+4. **Conteúdo dos códigos**: typing sutil, 1000ms, delay 800ms
+5. **Cards de boas práticas** (stagger): Fade in + Scale 95%→100%, 600ms, delay 1000ms + 80ms por card
+
+### Interações
+- Hover nos cards: elevação + borda amarela
+- Navegação padrão
+
+### Transição para o Slide 8
+- Cross fade com leve blur
+
+### Observações
+- Cada código de exemplo deve ter no máximo 3 linhas
+- Se o conteúdo não couber, usar toggle na seção de boas práticas
+- Os badges "Moderno" e "Node.js" ajudam a diferenciar visualmente os dois conceitos
+- Manter equivalência visual entre os dois cards de módulos
+
+---
+
+## SLIDE 8 — APIs do Navegador
+
+### Objetivo
+Apresentar as principais APIs do navegador que o JavaScript pode acessar: Fetch API, LocalStorage/SessionStorage, Geolocation, Notifications e Canvas. O usuário deve entender que JavaScript vai além da lógica — ele interage com o navegador e o dispositivo.
+
+### Emoção que deve transmitir
+Poder e possibilidades. O slide deve mostrar que JavaScript é uma linguagem que conversa com o mundo real — pode buscar dados, armazenar informações, saber a localização e muito mais. A sensação é de "as possibilidades são infinitas".
+
+### Layout
+- Layout em **grid 2x3** (2 linhas, 3 colunas) para os 5 cards de APIs + 1 badge
+- **Linha superior**: Fetch API, LocalStorage, Geolocation
+- **Linha inferior**: Notifications, Canvas, + badge/ícone decorativo
+- Padding: 5% nas bordas
+
+### Organização dos Elementos
+1. **Título** — "APIs do Navegador" — topo
+2. **Subtítulo** — "JavaScript interagindo com o mundo real" — abaixo do título
+3. **Card "Fetch API"**: ícone de nuvem/seta + código de exemplo + descrição curta
+4. **Card "LocalStorage"**: ícone de banco/disk + código + descrição
+5. **Card "Geolocation"**: ícone de pin/mapa + código + descrição
+6. **Card "Notifications"**: ícone de sino + código + descrição
+7. **Card "Canvas"**: ícone de tela/pincel + descrição (pode ter mini ilustração)
+8. **Badge decorativo** no sexto slot: "e muito mais..." com ícone de points
+
+### Background
+- Camadas globais padrão
+
+### Elementos Decorativos
+- **Ícone de API/conexão** sutil ao fundo
+- **Linha de conexão** entre os cards, simbolizando rede
+
+### Elementos Interativos
+- **Cards**: hover com elevação + borda iluminada + ícone pulsa
+- **Cards de código**: hover com glow
+
+### Elementos Visuais
+- **Título**: padrão global
+- **Cards**: glassmorphism, border-radius 12px, padding 20px
+  - Ícone: 28px, cor #F7DF1E, estilo outline
+  - Nome da API: font-weight 600, cor #FFFFFF, 1rem
+  - Descrição: font-size 0.85rem, cor rgba(255,255,255,0.6)
+  - Código: font-family monospace, font-size 0.8rem, background rgba(30,30,46,0.8), padding 8px 12px, border-radius 6px
+- **Badge "e muito mais..."**: pill com background rgba(247,223,30,0.08), borda 1px solid rgba(247,223,30,0.15)
+
+### Partículas
+- Nenhuma adicional
+
+### Iluminação
+- Glow nos cards em hover
+
+### Efeitos
+- **Glassmorphism** em todos os cards
+- **Syntax highlighting** nos códigos
+
+### Ícones
+- Nuvem (Fetch), Disco (Storage), Pin (Geolocation), Sino (Notifications), Tela (Canvas) — outline, cor #F7DF1E, 24-28px
+
+### Imagens
+- Nenhuma
+
+### Tipografia e Animação de Entrada
+1. **Título**: Fade in + Move 20px cima, 700ms, delay 150ms
+2. **Subtítulo**: Fade in, 600ms, delay 300ms
+3. **Cards** (stagger em grid — primeiro a linha de cima, depois a de baixo):
+   - Fade in + Scale 94%→100% + Blur 5px→0
+   - Duração: 700ms
+   - Delay: 500ms + 100ms por card (ordem: Fetch→LocalStorage→Geolocation→Notifications→Canvas→Badge)
+4. **Conteúdo dos códigos**: typing sutil, 800ms, delay 800ms + 100ms por card
+
+### Interações
+- Hover nos cards: elevação + borda amarela + ícone pulsa
+- Navegação padrão
+
+### Transição para o Slide 9
+- Cross fade com leve blur
+
+### Observações
+- O grid 2x3 deve ser responsivo — em telas pequenas, virar 1 coluna (6 cards empilhados)
+- Cada código deve ter no máximo 2-3 linhas
+- O badge "e muito mais..." pode ser substituído por um sexto card real se houver espaço
+- Manter tamanho uniforme entre todos os cards
+
+---
+
+<!-- FIM_ETAPA_5 -->
+
+---
+
+## SLIDE 9 — Ecossistema e Ferramentas
+
+### Objetivo
+Mostrar que JavaScript não é apenas uma linguagem — é um ecossistema completo. Apresentar Node.js, frameworks (React, Vue, Angular) e gerenciadores de pacotes (npm, yarn). O usuário deve perceber que dominar JavaScript é a porta de entrada para um universo enorme de ferramentas.
+
+### Emoção que deve transmitir
+Expansão e oportunidade. O slide deve dar a sensação de que o usuário está apenas começo — há um mundo enorme pela frente. A visualização deve parecer um mapa de possibilidades.
+
+### Layout
+- Layout em **três seções empilhadas**
+- **Seção 1 (topo, 30%)**: título + subtítulo + bloco com perspectiva 3D com "Node.js"
+- **Seção 2 (meio, 40%)**: grid 1x3 com cards de frameworks (React, Vue, Angular)
+- **Seção 3 (base, 30%)**: dois cards lado a lado — npm e yarn
+- Padding: 5% nas bordas
+
+### Organização dos Elementos
+1. **Título** — "Ecossistema e Ferramentas" — topo
+2. **Subtítulo** — "Node.js, frameworks e gerenciadores de pacotes" — abaixo do título
+3. **Bloco com perspectiva 3D "Node.js"**:
+   - Posição: lado direito do slide, metade superior → rotateX(-10deg)
+   - Conteúdo: nome "Node.js", descrição curta "JavaScript no servidor", ícone
+   - Largura: ~250px, altura: ~140px
+4. **Cards de frameworks** (meio):
+   - Card "React": ícone + nome + descrição + badge "Meta"
+   - Card "Vue": ícone + nome + descrição + badge "Evan You"
+   - Card "Angular": ícone + nome + descrição + badge "Google"
+5. **Cards de gerenciadores** (base):
+   - Card "npm": ícone + nome + descrição
+   - Card "yarn": ícone + nome + descrição
+
+### Background
+- Camadas globais padrão
+
+### Elementos Decorativos
+- **Ícone de engrenagem/ecossistema** sutil ao fundo
+- **Linhas de conexão** entre o bloco Node.js e os frameworks, simbolizando que Node.js é a base
+
+### Elementos Interativos
+- **Bloco com perspectiva**: hover com intensificação de glow
+- **Cards de frameworks**: hover com elevação + borda da cor do framework
+  - React: borda rgba(97,218,251,0.3) (azul React)
+  - Vue: borda rgba(66,184,131,0.3) (verde Vue)
+  - Angular: borda rgba(221,0,49,0.3) (vermelho Angular)
+- **Cards de gerenciadores**: hover com elevação
+
+### Elementos Visuais
+- **Título**: padrão global
+- **Bloco com perspectiva "Node.js"**:
+  - rotateX(-10deg) — está na metade superior
+  - rotateY(25deg), perspective(250px)
+  - Background: gradiente de rgba(104,159,56,0.3) para rgba(26,26,46,0.8) (verde Node.js sutil)
+  - Borda superior: 2px solid rgba(104,159,56,0.4)
+  - Sombra: 0 15px 30px rgba(0,0,0,0.4)
+  - Conteúdo: "Node.js" em font-weight 700, descrição em rgba(255,255,255,0.7)
+  - Largura: ~250px, altura: ~140px
+- **Cards de frameworks**: glassmorphism, border-radius 12px
+  - Cada um com cor de borda temática
+  - Ícone do framework (SVG simples): 32px
+  - Badge do criador: pill pequeno
+- **Cards de gerenciadores**: glassmorphism compactos
+
+### Partículas
+- Nenhuma adicional
+
+### Iluminação
+- Glow verde sutil no bloco Node.js
+- Glow nas cores dos frameworks em hover
+
+### Efeitos
+- **Perspectiva 3D** no bloco Node.js
+- **Glassmorphism** nos cards
+- **Cor temática** por framework
+
+### Ícones
+- React (ângulo), Vue (V), Angular (A) — SVG ou Unicode, 28-32px
+- npm (letras), yarn (esticar) — 24px
+- Node.js (hexágono verde) — 28px
+
+### Imagens
+- Nenhuma
+
+### Tipografia e Animação de Entrada
+1. **Título**: Fade in + Move 20px cima, 700ms, delay 150ms
+2. **Subtítulo**: Fade in, 600ms, delay 300ms
+3. **Bloco com perspectiva Node.js**: Fade in + deslize acompanhando perspectiva + Blur 8px→0, 800ms, delay 500ms
+4. **Conteúdo do bloco Node.js**: Fade in interno, 500ms, delay 800ms
+5. **Cards de frameworks** (stagger): Fade in + Scale 94%→100% + Blur 5px→0, 700ms, delay 900ms + 120ms por card
+6. **Cards de gerenciadores** (stagger): Fade in + Move 15px cima, 600ms, delay 1300ms + 100ms
+
+### Interações
+- Hover no bloco Node.js: glow intensifica
+- Hover nos cards: elevação + borda temática
+- Navegação padrão
+
+### Transição para o Slide 10
+- Cross fade com leve blur
+
+### Observações
+- O bloco com perspectiva Node.js está na metade superior → rotateX(-10deg)
+- Os cards de frameworks devem ter tamanhos uniformes
+- Se o conteúdo não couber, usar toggle na seção de gerenciadores
+- As cores dos frameworks são importantes — reforçam o reconhecimento visual
+
+---
+
+## SLIDE 10 — Boas Práticas e Próximos Passos
+
+### Objetivo
+Concluir a apresentação com dicas práticas: ESLint/Prettier, TypeScript como evolução, e recursos para continuidade. O usuário deve sair deste slide motivado para continuar aprendendo e sabendo exatamente para onde ir.
+
+### Emoção que deve transmitir
+Motivação e clareza. O slide final deve dar a sensação de que o usuário tem um caminho claro pela frente. É o momento de encerrar com chave de ouro — impressionar e motivar.
+
+### Layout
+- Layout em **duas seções**
+- **Seção superior (55%)**: grid 1x3 com cards de ferramentas (ESLint, Prettier, TypeScript)
+- **Seção inferior (45%)**: seção de recursos com cards de links/recomendações + mensagem de encerramento
+- Padding: 5% nas bordas
+- **Este é o último slide** — deve ter uma sensação de conclusão
+
+### Organização dos Elementos
+1. **Título** — "Boas Práticas e Próximos Passos" — topo
+2. **Subtítulo** — "Ferramentas, TypeScript e recursos para continuar" — abaixo do título
+3. **Três cards de ferramentas** (grid 1x3):
+   - Card "ESLint": ícone + nome + descrição "Encontre erros automaticamente"
+   - Card "Prettier": ícone + nome + descrição "Código sempre formatado"
+   - Card "TypeScript": ícone + nome + descrição "JavaScript com tipos estáticos" + badge "Recomendado"
+4. **Seção de recursos** (inferior):
+   - Título "Para Continuar Aprendendo"
+   - Grid 2x2 ou 1x4 com cards de recursos:
+     - "Documentação Oficial" (MDN)
+     - "Comunidades" (Stack Overflow, Reddit)
+     - "Projetos Open Source" (GitHub)
+     - "Desafios Práticos" (LeetCode, Codewars)
+5. **Mensagem de encerramento**: frase motivacional centralizada na parte inferior
+
+### Background
+- Camadas globais padrão
+- **Especial**: blobs amarelos levemente mais intensos neste slide para criar sensação de "término quente"
+
+### Elementos Decorativos
+- **Ícone de estrela/conquista** sutil ao fundo
+- **Linha decorativa** horizontal acima da mensagem de encerramento
+
+### Elementos Interativos
+- **Cards de ferramentas**: hover com elevação + borda amarela + ícone pulsa
+- **Cards de recursos**: hover com elevação + borda amarela sutil
+- **Badge "Recomendado"**: pill com glow suave
+
+### Elementos Visuais
+- **Título**: padrão global
+- **Cards de ferramentas**: glassmorphism, border-radius 12px, padding 24px
+  - Ícone: 32px, cor #F7DF1E
+  - Nome: font-weight 600, cor #FFFFFF
+  - Descrição: font-size 0.9rem, cor rgba(255,255,255,0.65)
+  - Badge "Recomendado": background rgba(247,223,30,0.15), borda 1px solid rgba(247,223,30,0.3)
+- **Cards de recursos**: glassmorphism compactos, ícone de link externo
+- **Mensagem de encerramento**: font-size clamp(1.2rem, 2.5vw, 1.6rem), font-weight 500, cor rgba(255,255,255,0.8), centralizada
+
+### Partículas
+- **Aumento sutil** na quantidade de partículas neste slide (50-60) para criar sensação de celebração/conclusão
+- Movimento mais ascendente
+
+### Iluminação
+- Glow amarelo mais pronunciado neste slide
+- Bloom sutil na mensagem de encerramento
+
+### Efeitos
+- **Glassmorphism** em todos os cards
+- **Glow** mais intenso neste slide final
+- **Partículas** em maior quantidade
+
+### Ícones
+- ESLint (shield), Prettier (format), TypeScript (TS) — outline, 28-32px, cor #F7DF1E
+- Link externo nos cards de recursos — 16px
+
+### Imagens
+- Nenhuma
+
+### Tipografia e Animação de Entrada
+1. **Título**: Fade in + Move 20px cima, 700ms, delay 150ms
+2. **Subtítulo**: Fade in, 600ms, delay 300ms
+3. **Cards de ferramentas** (stagger): Fade in + Scale 94%→100% + Blur 5px→0, 700ms, delay 500ms + 120ms por card
+4. **Badge "Recomendado"**: Fade in + Scale 80%→100%, 500ms, delay 800ms
+5. **Título "Para Continuar..."**: Fade in + Move 15px cima, 600ms, delay 900ms
+6. **Cards de recursos** (stagger): Fade in + Move 15px cima, 600ms, delay 1050ms + 100ms por card
+7. **Mensagem de encerramento**: Fade in + Move 20px cima + Glow crescente, 800ms, delay 1400ms
+
+### Interações
+- Hover nos cards: elevação + borda amarela
+- Hover na mensagem de encerramento: glow intensifica
+- Navegação padrão (seta anterior funciona, seta próximasome ou fica desabilitada)
+- **Este é o último slide** — a seta "próximo"some ou fica com opacidade reduzida
+
+### Transição para o Próximo Slide
+- **Não há próximo slide** — a seta Some ou fica desabilitada
+- O usuário pode voltar ao slide anterior com a seta esquerda
+
+### Observações
+- **Este é o slide final** — NÃO colocar "Perguntas?" ou similar
+- A mensagem de encerramento deve ser motivacional, não uma pergunta
+- Exemplo de mensagem: "JavaScript é apenas o começo. O próximo passo é seu."
+- O slide deve ter uma sensação de conclusão satisfatória
+- As partículas extras devem ser discretas — não podem competir com o conteúdo
+- NÃO criar mais slides após este
+
+---
+
+<!-- FIM_ETAPA_6 -->
+
+---
+
+# CHECKLIST FINAL E INSTRUÇÕES PARA A IA DESENVOLVEDORA
+
+## INSTRUÇÕES GERAIS
+
+1. **Crie um único arquivo HTML** contendo todo o HTML, CSS e JavaScript necessários.
+2. **NÃO acesse nenhum outro arquivo** na pasta — toda informação está neste documento TXT.
+3. **Use codificação UTF-8** — declare `<meta charset="UTF-8">` e garanta que nenhum caractere seja corrompido.
+4. **Sem tela de loading** — o slide 1 deve aparecer imediatamente no carregamento.
+5. **Sem caracteres em chinês** — todo texto deve estar em português (Brasil).
+6. **Responsividade total** — tudo deve caber em qualquer resolução, de 1920x1080 até 320px.
+7. **Sem scroll** — nenhum slide pode ser scrollável. Se o conteúdo não couber, use toggles/accordions.
+8. **Scroll do mouse desabilitado** — apenas setas do teclado e botões de navegação trocam slides.
+9. **Clique em qualquer canto NÃO troca slide** — apenas os botões de navegação e teclado.
+
+## ESTRUTURA DO DOCUMENTO HTML
+
+```
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript: A Linguagem da Web</title>
+  <style>/* TODO O CSS AQUI */</style>
+</head>
+<body>
+  <!-- TODO O HTML DOS SLIDES AQUI -->
+  <script>/* TODO O JAVASCRIPT AQUI */</script>
+</body>
+</html>
+```
+
+## SLIDES — QUANTIDADE E ORDEM
+
+Total: 10 slides, nesta ordem:
+1. JavaScript: A Linguagem da Web (Capa)
+2. Fundamentos da Linguagem
+3. Funções e Escopo
+4. Objetos e Arrays
+5. Manipulação do DOM
+6. Programação Assíncrona
+7. Módulos e Organização
+8. APIs do Navegador
+9. Ecossistema e Ferramentas
+10. Boas Práticas e Próximos Passos
+
+## ELEMENTOS GLOBAIS OBRIGATÓRIOS
+
+- Background com 7 camadas (base, grid, blobs, partículas, névoa, vignette, noise)
+- Navigation dots (10 dots) na parte inferior中央
+- Barra de progresso acima dos dots
+- Setas de navegação nos cantos inferiores
+- Transição cross fade entre slides
+- Animações de entrada para cada elemento
+- Stagger para listas e grids
+
+## BLOCOS COM PERSPECTIVA 3D
+
+Usar em: Slide 1 (não aplicável — é a capa com título extrudado), Slide 3 (tipos de função), Slide 9 (Node.js). Pode ser usado opcionalmente em outros slides se fizer sentido visual.
+
+Configuração fixa:
+- Superior: rotateX(-10deg) rotateY(25deg) perspective(250px)
+- Inferior: rotateX(10deg) rotateY(25deg) perspective(250px)
+- Largura máxima: 350px, Altura máxima: 420px
+- Width responsivo: min(350px, 85vw)
+
+## TÍTULO DA CAPA (SLIDE 1)
+
+- Texto branco (#FFFFFF)
+- Text-shadow extrudado com 35 camadas
+- Cores do shadow: gradiente de #FFF8DC (claro) até #8B6914 (escuro)
+- Implementar via JavaScript (loop criando a string de shadow)
+- ::before com sombra ambiente (blur 4px, opacidade 0.35)
+- z-index: 0
+- NÃO usar rotate, skew ou perspective no elemento de texto
+- NÃO criar cover shapes
+
+## CODIFICAÇÃO
+
+- Verificar todos os caracteres UTF-8
+- Nenhum caractere corrompido
+- Todos os acentos devem funcionar corretamente
+- Todos os textos em português (Brasil)
+
+## ANIMAÇÕES
+
+- Easing padrão: cubic-bezier(0.16, 1, 0.3, 1)
+- Transição entre slides: cross fade, saída 500ms, entrada 600ms
+- Nenhum elemento pode aparecer antes de sua animação
+- Todos os elementos devem reiniciar ao retornar ao slide
+
+## RESPONSIVIDADE
+
+- Usar clamp() para tamanhos de fonte
+- Grids responsivos (2 colunas → 1 coluna em mobile)
+- Blocos com perspectiva: width: min(350px, 85vw)
+- Margem de segurança: 5-8% em todas as bordas
+- Padding reduzido em mobile: 12-16px
+
+## CHECKLIST DE VALIDAÇÃO FINAL
+
+Antes de entregar o HTML, validar:
+
+☐ Os 10 slides estão presentes e na ordem correta
+☐ O slide 1 aparece imediatamente no carregamento
+☐ Nenhum slide é scrollável
+☐ Todos os elementos cabem no viewport
+☐ A navegação por teclado funciona (setas)
+☐ A navegação por botões funciona
+☐ Os navigation dots funcionam
+☐ A barra de progresso atualiza corretamente
+☐ As animações de entrada funcionam em todos os slides
+☐ O stagger funciona corretamente
+☐ Os blocos com perspectiva 3D estão corretos (rotateX conforme posição)
+☐ O título da capa tem extrusão 3D com text-shadow
+☐ A cor do título é branca
+☐ A cor do shadow não é branca/cinza/preta
+☐ Não há cover shapes
+☐ Não há caracteres corrompidos
+☐ Não há caracteres em chinês
+☐ O documento é UTF-8
+☐ Não há tela de loading
+☐ O scroll do mouse não troca slides
+☐ Clique em qualquer canto não troca slides
+☐ O slide 10 é o último (setaSome ou desabilitada)
+☐ Não há "Perguntas?" no slide final
+☐ Todos os códigos de exemplo estão corretos
+☐ A responsividade funciona em diferentes resoluções
+☐ Não há conteúdo fora do viewport
+☐ Todos os toggles/accordions funcionam
+☐ As microanimações de hover estão presentes
+☐ O easing das animações é correto
+☐ A codificação UTF-8 está íntegra
+
+---
+
+# FIM DA ESPECIFICAÇÃO
+
+Este documento contém toda a informação necessária para que a IA desenvolvedora crie a apresentação HTML completa. Não é necessário consultar nenhum outro arquivo.
+
+Boa sorte na implementação!

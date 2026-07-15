@@ -53,7 +53,38 @@ Erros comuns no documento HTML que acontecem e como resolve-los e evitar que aco
       duração e easing novamente no momento da aplicação.
     - Prefira retornar apenas os dados necessários (nome, duração, stagger) e montar
       o shorthand uma única vez.
-    - Sempre teste as animações no navegador após criar funções de animação programática.
-    - Use o painel de Computado do DevTools (na aba Elements) para verificar se o
-      property "animation" está com valor válido no elemento.
+     - Sempre teste as animações no navegador após criar funções de animação programática.
+     - Use o painel de Computado do DevTools (na aba Elements) para verificar se o
+       property "animation" está com valor válido no elemento.
 
+---
+
+3. Elementos dos slides ficam borrados (filter: blur permanece após animação)
+
+   Exemplo: Cards, grids e blocos com a classe .anim-fade-scale aparecem com texto
+   embaçado mesmo após a animação de entrada ter terminado.
+
+   Causa: A classe .anim-fade-scale define filter:blur(5px) no estado inicial para
+   criar o efeito de entrada suave. Porém, as regras .slide.active .anim-X só
+   resetavam opacity e transform com !important — esqueceram de incluir
+   filter:none!important. Resultado: o filter:blur(5px) da classe base continuava
+   ativo mesmo depois do slide ficar visível, mantendo o elemento borrado.
+
+   Correção:
+   /* ANTES (faltava resetar filter):
+   .slide.active .anim-3{opacity:1!important;transform:none!important;transition-delay:500ms!important}
+
+   /* DEPOIS (filter tambem e resetado):
+   .slide.active .anim-3{opacity:1!important;transform:none!important;filter:none!important;transition-delay:500ms!important}
+
+   Como resolver:
+   - Abra as regras .slide.active .anim-N (N de 1 a 12) no bloco <style>.
+   - Adicione filter:none!important em cada uma delas.
+   - Salve e recarregue a página — os elementos devem aparecer nítidos.
+
+   Como evitar:
+   - Sempre que uma classe de animação inicial usar filter (blur, brightness, etc.),
+     inclua filter:none!important na regra .slide.active .anim-N correspondente.
+   - Regra geral: se a classe base tem filter, a regra de ativação DEVE resetar filter.
+    - Ao criar novas classes de animação, verifique se há propriedades além de
+      opacity e transform que precisam ser revertidas no estado final.

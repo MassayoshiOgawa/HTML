@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript: A Linguagem da Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--yellow:#F7DF1E;--yellow-dark:#D4A814;--yellow-soft:#FFE066;--yellow-warm:#FFC107;
+--black:#0A0A0F;--gray-vd:#12121A;--gray-dark:#1A1A2E;--gray-md:#2A2A3E;
+--gray-cl:#888899;--gray-vcl:#AAAABB;--white:#FFFFFF;
+--code-bg:#1E1E2E;
+--ease:cubic-bezier(0.16,1,0.3,1);--ease-slide:cubic-bezier(0.4,0,0.2,1);
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--black);color:var(--white);
+font-family:'Inter','Segoe UI',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+/* ===== GLOBAL BACKGROUND ===== */
+.bg-base{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(26,26,46,0.4) 0%,transparent 70%),var(--black);z-index:0}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),
+linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:40px 40px;z-index:1}
+.bg-blobs{position:fixed;inset:0;z-index:2;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(100px);animation:blobDrift 25s ease-in-out infinite alternate}
+.blob-1{width:450px;height:450px;background:rgba(247,223,30,0.03);top:-10%;left:10%;animation-delay:0s}
+.blob-2{width:350px;height:350px;background:rgba(212,168,20,0.025);bottom:10%;right:15%;animation-delay:-8s}
+.blob-3{width:400px;height:400px;background:rgba(247,223,30,0.02);top:40%;left:55%;animation-delay:-16s}
+@keyframes blobDrift{0%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.05)}
+66%{transform:translate(-20px,30px) scale(0.95)}100%{transform:translate(15px,15px) scale(1.02)}}
+.bg-particles{position:fixed;inset:0;z-index:3;pointer-events:none}
+.particle{position:absolute;background:rgba(247,223,30,0.15);border-radius:50%;animation:particleFloat linear infinite}
+@keyframes particleFloat{0%{transform:translateY(0) translateX(0);opacity:var(--po)}
+50%{transform:translateY(calc(var(--tr)*-1)) translateX(calc(var(--tx)*1));opacity:calc(var(--po)*1.3)}
+100%{transform:translateY(calc(var(--tr)*-2)) translateX(calc(var(--tx)*2));opacity:0}}
+.bg-fog{position:fixed;bottom:0;left:0;right:0;height:40%;background:radial-gradient(ellipse at 50% 100%,rgba(247,223,30,0.02) 0%,transparent 70%);z-index:2;pointer-events:none;
+animation:fogBreathe 8s ease-in-out infinite alternate}
+@keyframes fogBreathe{0%{opacity:0.5}100%{opacity:1}}
+.bg-vignette{position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.6) 100%);z-index:4;pointer-events:none}
+.bg-noise{position:fixed;inset:0;z-index:5;pointer-events:none;opacity:0.04;
+background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+background-size:128px 128px}
+
+/* ===== SLIDES CONTAINER ===== */
+.slides-wrapper{position:fixed;inset:0;z-index:10}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+padding:clamp(16px,5vw,60px);opacity:0;transform:scale(1.02);filter:blur(4px);pointer-events:none;
+transition:opacity 500ms var(--ease-slide),transform 600ms var(--ease-slide),filter 600ms var(--ease-slide)}
+.slide.active{opacity:1;transform:scale(1);filter:blur(0);pointer-events:auto}
+.slide.leaving{opacity:0;transform:scale(0.98);filter:blur(4px);pointer-events:none}
+
+/* ===== NAVIGATION ===== */
+.nav-arrows{position:fixed;bottom:30px;left:30px;right:30px;display:flex;justify-content:space-between;
+align-items:center;z-index:50;pointer-events:none;opacity:0;transition:opacity 400ms ease}
+.nav-arrows.visible{opacity:1}
+.nav-btn{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);
+display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;
+transition:all 300ms ease;flex-shrink:0}
+.nav-btn:hover{background:rgba(247,223,30,0.15);border-color:rgba(247,223,30,0.3)}
+.nav-btn svg{width:20px;height:20px;stroke:rgba(255,255,255,0.6);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+transition:stroke 300ms ease}
+.nav-btn:hover svg{stroke:var(--yellow)}
+.nav-btn.disabled{opacity:0;pointer-events:none}
+/* Dots and progress */
+.nav-bottom{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;align-items:center;gap:10px;
+opacity:0;transition:opacity 400ms ease;pointer-events:none}
+.nav-bottom.visible{opacity:1;pointer-events:auto}
+.progress-bar{width:200px;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--yellow),var(--yellow-warm),var(--yellow));border-radius:2px;
+transition:width 500ms var(--ease-slide);box-shadow:0 0 8px rgba(247,223,30,0.4)}
+.dots{display:flex;gap:8px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);cursor:pointer;
+transition:all 400ms var(--ease-slide);border:none;flex-shrink:0}
+.dot.active{width:24px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--yellow),var(--yellow-dark))}
+.dot:hover{background:rgba(255,255,255,0.3)}
+
+/* ===== COMMON ELEMENTS ===== */
+.slide-title{font-size:clamp(2rem,4vw,3.5rem);font-weight:700;color:var(--white);line-height:1.2;margin-bottom:0.8rem;
+opacity:0;transform:translateY(25px);transition:all 700ms var(--ease)}
+.slide.active .slide-title{opacity:1;transform:translateY(0)}
+.slide-subtitle{font-size:clamp(1rem,2vw,1.4rem);font-weight:400;color:rgba(255,255,255,0.6);line-height:1.3;margin-bottom:1.5rem;
+opacity:0;transform:translateY(15px);transition:all 600ms var(--ease)}
+.slide.active .slide-subtitle{opacity:1;transform:translateY(0)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;font-size:0.75rem;font-weight:500;
+letter-spacing:0.08em;text-transform:uppercase;
+background:rgba(247,223,30,0.08);border:1px solid rgba(247,223,30,0.2);color:var(--yellow)}
+.card{background:rgba(26,26,46,0.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:clamp(16px,3vw,28px);
+box-shadow:0 8px 32px rgba(0,0,0,0.3);transition:all 350ms var(--ease-slide)}
+.card:hover{border-color:rgba(247,223,30,0.15);box-shadow:0 8px 32px rgba(0,0,0,0.3),0 0 20px rgba(247,223,30,0.05);transform:translateY(-2px)}
+.code-block{background:var(--code-bg);border:1px solid rgba(255,255,255,0.05);border-radius:8px;
+padding:16px 20px;font-family:'Fira Code','Cascadia Code','Consolas',monospace;font-size:clamp(0.75rem,1.3vw,0.9rem);
+line-height:1.6;overflow-x:auto;white-space:pre}
+.code-block .kw{color:var(--yellow)}
+.code-block .str{color:#98C379}
+.code-block .num{color:#D19A66}
+.code-block .cmt{color:#5C6370}
+.code-block .fn{color:#61AFEF}
+.code-block .op{color:#C678DD}
+.code-block .txt{color:#ABB2BF}
+.code-left-border{border-left:3px solid var(--yellow)}
+.label{font-size:0.75rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-cl)}
+
+/* ===== PERSPECTIVE BLOCKS ===== */
+.persp-block{perspective:250px;max-width:min(350px,85vw);width:100%}
+.persp-inner{background:linear-gradient(135deg,rgba(26,26,46,0.8),rgba(30,30,50,0.6));
+border-top:2px solid rgba(247,223,30,0.3);border-radius:12px;padding:20px;
+box-shadow:0 15px 30px rgba(0,0,0,0.4);transition:all 350ms var(--ease-slide)}
+.persp-inner:hover{border-top-color:rgba(247,223,30,0.5);box-shadow:0 15px 30px rgba(0,0,0,0.4),0 0 15px rgba(247,223,30,0.1)}
+.persp-superior .persp-inner{transform:rotateX(-10deg) rotateY(25deg)}
+.persp-inferior .persp-inner{transform:rotateX(10deg) rotateY(25deg)}
+.persp-title{font-weight:600;color:var(--yellow);margin-bottom:6px;font-size:1rem}
+.persp-desc{font-size:0.85rem;color:rgba(255,255,255,0.65);margin-bottom:8px}
+.persp-code{font-family:'Fira Code',monospace;font-size:0.8rem;color:var(--gray-vcl);background:rgba(30,30,46,0.8);
+padding:8px 12px;border-radius:6px}
+
+/* ===== ACCORDION ===== */
+.accordion{border:1px solid rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;
+background:rgba(26,26,46,0.5);backdrop-filter:blur(12px)}
+.accordion-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;cursor:pointer;
+transition:background 300ms ease;border-bottom:1px solid rgba(255,255,255,0.04)}
+.accordion-header:hover{background:rgba(247,223,30,0.05)}
+.accordion-header span{font-weight:600;font-size:0.95rem}
+.accordion-arrow{color:var(--yellow);transition:transform 400ms var(--ease-slide);font-size:1.1rem}
+.accordion.open .accordion-arrow{transform:rotate(180deg)}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height 400ms var(--ease-slide)}
+.accordion.open .accordion-body{max-height:500px}
+.accordion-content{padding:0 20px 16px 20px}
+
+/* ===== SLIDE-SPECIFIC: COVER ===== */
+#slide-1 .cover-title{font-size:clamp(3.2rem,6.4vw,5.76rem);font-weight:800;color:#1A1A2E;
+line-height:1.1;position:relative;z-index:0;
+opacity:0;transform:translateY(30px) scale(0.95);filter:blur(12px);
+transition:all 1000ms var(--ease)}
+#slide-1.active .cover-title{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+#slide-1 .cover-title::before{content:'JavaScript';position:absolute;top:3px;left:3px;z-index:-1;
+color:transparent;-webkit-text-stroke:0;
+filter:blur(4px);opacity:0.35}
+#slide-1 .cover-subtitle{font-size:clamp(1.2rem,2.4vw,1.8rem);font-weight:500;color:rgba(255,255,255,0.7);
+line-height:1.3;margin-top:0.8rem;opacity:0;transform:translateY(20px);
+transition:all 700ms var(--ease)}
+#slide-1.active .cover-subtitle{opacity:1;transform:translateY(0);transition-delay:900ms}
+#slide-1 .cover-tag{margin-top:1.2rem;opacity:0;transform:scale(0.9);
+transition:all 500ms var(--ease);transition-delay:1200ms}
+#slide-1.active .cover-tag{opacity:1;transform:scale(1)}
+#slide-1 .cover-glow{position:absolute;width:600px;height:300px;border-radius:50%;
+background:radial-gradient(ellipse,rgba(247,223,30,0.08) 0%,transparent 70%);
+top:50%;left:50%;transform:translate(-50%,-50%);z-index:-1;pointer-events:none;
+opacity:0;transition:opacity 1200ms ease 200ms}
+#slide-1.active .cover-glow{opacity:1}
+/* floating code bg */
+.floating-code{position:absolute;color:rgba(247,223,30,0.04);font-family:'Fira Code',monospace;
+font-size:13px;pointer-events:none;animation:codeFloat 30s linear infinite}
+@keyframes codeFloat{0%{transform:translateY(0)}100%{transform:translateY(-80px)}}
+.conn-line{position:absolute;height:1px;background:rgba(247,223,30,0.05);pointer-events:none;transform-origin:left center}
+
+/* ===== GRIDS ===== */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,2vw,20px)}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,2vw,20px)}
+.grid-2x2{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:auto auto;gap:clamp(12px,2vw,20px)}
+.grid-2x3{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:clamp(12px,2vw,20px)}
+.col-left{display:flex;flex-direction:column;gap:clamp(12px,2vw,20px)}
+.col-right{display:flex;flex-direction:column;gap:clamp(12px,2vw,20px)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2vw,20px);width:100%;max-width:1100px}
+.full-width{width:100%;max-width:1100px}
+
+/* ===== CARD INTERNALS ===== */
+.card-icon{width:32px;height:32px;color:var(--yellow);margin-bottom:8px}
+.card-name{font-weight:600;font-size:1rem;margin-bottom:4px}
+.card-desc{font-size:0.85rem;color:rgba(255,255,255,0.6);line-height:1.5}
+.mini-code{font-family:'Fira Code',monospace;font-size:0.8rem;background:rgba(30,30,46,0.8);
+padding:8px 12px;border-radius:6px;margin-top:10px;white-space:pre}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.check-icon{color:#64DC64;font-size:1rem;flex-shrink:0}
+
+/* ===== ANIMATION DELAYS per slide ===== */
+.slide.active .anim-1{opacity:1!important;transform:none!important;filter:none!important;transition-delay:150ms!important}
+.slide.active .anim-2{opacity:1!important;transform:none!important;filter:none!important;transition-delay:300ms!important}
+.slide.active .anim-3{opacity:1!important;transform:none!important;filter:none!important;transition-delay:500ms!important}
+.slide.active .anim-4{opacity:1!important;transform:none!important;filter:none!important;transition-delay:600ms!important}
+.slide.active .anim-5{opacity:1!important;transform:none!important;filter:none!important;transition-delay:700ms!important}
+.slide.active .anim-6{opacity:1!important;transform:none!important;filter:none!important;transition-delay:800ms!important}
+.slide.active .anim-7{opacity:1!important;transform:none!important;filter:none!important;transition-delay:900ms!important}
+.slide.active .anim-8{opacity:1!important;transform:none!important;filter:none!important;transition-delay:1000ms!important}
+.slide.active .anim-9{opacity:1!important;transform:none!important;filter:none!important;transition-delay:1100ms!important}
+.slide.active .anim-10{opacity:1!important;transform:none!important;filter:none!important;transition-delay:1200ms!important}
+.slide.active .anim-11{opacity:1!important;transform:none!important;filter:none!important;transition-delay:1300ms!important}
+.slide.active .anim-12{opacity:1!important;transform:none!important;filter:none!important;transition-delay:1400ms!important}
+
+.anim-base{opacity:0;transition:all 600ms var(--ease)}
+.anim-fade-up{opacity:0;transform:translateY(20px);transition:all 600ms var(--ease)}
+.anim-fade-scale{opacity:0;transform:scale(0.94);filter:blur(5px);transition:all 700ms var(--ease)}
+.anim-fade-left{opacity:0;transform:translateX(-20px);transition:all 800ms var(--ease)}
+.anim-fade-right{opacity:0;transform:translateX(20px);transition:all 800ms var(--ease)}
+
+/* ===== EVOLUTION BAR (slide 6) ===== */
+.evolution-bar{display:flex;align-items:center;gap:0;width:100%;max-width:1000px;margin:10px 0}
+.evo-line{flex:1;height:3px;background:linear-gradient(90deg,#FF5032,var(--yellow),#64DC64);border-radius:2px;
+transform-origin:left;transform:scaleX(0);transition:transform 1000ms var(--ease);transition-delay:500ms}
+.slide.active .evo-line{transform:scaleX(1)}
+.evo-arrow{color:var(--yellow);font-size:1.2rem;flex-shrink:0;margin:0 4px}
+
+/* ===== MISC ===== */
+.section-label{font-size:0.75rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-cl);margin-bottom:6px}
+.divider{width:100%;height:1px;background:rgba(255,255,255,0.05);margin:10px 0}
+.close-msg{font-size:clamp(1.2rem,2.5vw,1.6rem);font-weight:500;color:rgba(255,255,255,0.8);text-align:center;margin-top:16px;
+opacity:0;transform:translateY(20px);transition:all 800ms var(--ease)}
+.slide.active .close-msg{opacity:1;transform:translateY(0);transition-delay:1400ms}
+.tag-pill{display:inline-block;padding:4px 12px;border-radius:12px;font-size:0.7rem;font-weight:600;margin-left:8px}
+.tag-modern{background:rgba(100,220,100,0.15);border:1px solid rgba(100,220,100,0.3);color:#64DC64}
+.tag-rec{background:rgba(247,223,30,0.15);border:1px solid rgba(247,223,30,0.3);color:var(--yellow)}
+.tag-essential{background:rgba(247,223,30,0.15);border:1px solid rgba(247,223,30,0.3);color:var(--yellow)}
+
+/* Framework colors */
+.card-react:hover{border-color:rgba(97,218,251,0.3)!important}
+.card-vue:hover{border-color:rgba(66,184,131,0.3)!important}
+.card-angular:hover{border-color:rgba(221,0,49,0.3)!important}
+.color-react{color:#61DAFB}
+.color-vue{color:#42B883}
+.color-angular{color:#DD0031}
+
+/* Sync columns */
+.sync-col{border-left:3px solid transparent;padding-left:16px}
+.sync-callbacks{border-left-color:rgba(255,80,50,0.5)}
+.sync-promises{border-left-color:rgba(247,223,30,0.5)}
+.sync-async{border-left-color:rgba(100,220,100,0.5)}
+
+/* Responsive */
+@media(max-width:768px){
+.grid-2,.grid-3,.grid-2x2,.grid-2x3,.two-col{grid-template-columns:1fr}
+.evolution-bar{flex-direction:column;gap:8px}
+.evo-line{width:100%;height:3px}
+.evo-arrow{transform:rotate(90deg)}
+.persp-superior .persp-inner,.persp-inferior .persp-inner{transform:none}
+}
+</style>
+</head>
+<body>
+<!-- GLOBAL BACKGROUND LAYERS -->
+<div class="bg-base"></div>
+<div class="bg-grid"></div>
+<div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+<div class="bg-particles" id="particles"></div>
+<div class="bg-fog"></div>
+<div class="bg-vignette"></div>
+<div class="bg-noise"></div>
+
+<!-- SLIDES -->
+<div class="slides-wrapper">
+
+<!-- ==================== SLIDE 1: CAPA ==================== -->
+<div class="slide active" id="slide-1">
+  <!-- Floating code background -->
+  <div class="floating-code" style="top:12%;left:8%;animation-delay:0s">const</div>
+  <div class="floating-code" style="top:20%;right:10%;animation-delay:-5s">{}</div>
+  <div class="floating-code" style="top:70%;left:15%;animation-delay:-12s">=&gt;</div>
+  <div class="floating-code" style="top:78%;right:20%;animation-delay:-8s">function</div>
+  <div class="floating-code" style="top:45%;left:80%;animation-delay:-18s">[]</div>
+  <div class="floating-code" style="top:85%;left:50%;animation-delay:-22s">async</div>
+  <div class="floating-code" style="top:15%;left:45%;animation-delay:-3s">import</div>
+  <div class="floating-code" style="top:55%;left:5%;animation-delay:-15s">class</div>
+  <!-- Connection lines -->
+  <div class="conn-line" style="top:30%;left:5%;width:150px;transform:rotate(15deg)"></div>
+  <div class="conn-line" style="top:65%;right:5%;width:120px;transform:rotate(-20deg)"></div>
+  <!-- Glow -->
+  <div class="cover-glow"></div>
+  <!-- Content -->
+  <div style="position:relative;z-index:1;text-align:center">
+    <div class="cover-title" id="cover-title">JavaScript</div>
+    <div class="cover-subtitle">A Linguagem da Web</div>
+    <div class="cover-tag"><span class="badge">2024</span></div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 2: FUNDAMENTOS ==================== -->
+<div class="slide" id="slide-2">
+  <div style="width:100%;max-width:1100px;display:flex;flex-direction:column;gap:0">
+    <div class="slide-title anim-fade-up anim-1" style="text-align:left">Fundamentos da Linguagem</div>
+    <div class="slide-subtitle anim-fade-up anim-2" style="text-align:left;margin-bottom:1.2rem">Vari&#225;veis, tipos e controle de fluxo</div>
+    <div class="two-col" style="max-width:100%">
+      <!-- Left column -->
+      <div class="col-left">
+        <div class="grid-2 anim-fade-scale anim-3">
+          <!-- let -->
+          <div class="card">
+            <div class="card-header">
+              <span style="color:var(--yellow);font-family:'Fira Code',monospace;font-size:1.2rem">{}</span>
+              <span class="card-name">let</span>
+            </div>
+            <div class="card-desc">Vari&#225;vel com escopo de bloco. Pode ser reatribu&#237;da.</div>
+            <div class="mini-code"><span class="kw">let</span> <span class="txt">nome</span> = <span class="str">"JavaScript"</span>;</div>
+          </div>
+          <!-- const -->
+          <div class="card anim-fade-scale anim-4">
+            <div class="card-header">
+              <span style="color:var(--yellow);font-family:'Fira Code',monospace;font-size:1.2rem">()</span>
+              <span class="card-name">const</span>
+            </div>
+            <div class="card-desc">Constante com escopo de bloco. N&#227;o pode ser reatribu&#237;da.</div>
+            <div class="mini-code"><span class="kw">const</span> <span class="txt">PI</span> = <span class="num">3.14</span>;</div>
+          </div>
+        </div>
+        <div class="card anim-fade-scale anim-5" style="margin-top:0">
+          <div class="section-label">Tipos de Dados</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <span class="badge" style="background:rgba(152,195,121,0.1);border-color:rgba(152,195,121,0.2);color:#98C379">String</span>
+            <span class="badge" style="background:rgba(209,154,102,0.1);border-color:rgba(209,154,102,0.2);color:#D19A66">Number</span>
+            <span class="badge" style="background:rgba(97,175,239,0.1);border-color:rgba(97,175,239,0.2);color:#61AFEF">Boolean</span>
+            <span class="badge" style="background:rgba(198,120,221,0.1);border-color:rgba(198,120,221,0.2);color:#C678DD">null</span>
+            <span class="badge" style="background:rgba(198,120,221,0.1);border-color:rgba(198,120,221,0.2);color:#C678DD">undefined</span>
+            <span class="badge" style="background:rgba(247,223,30,0.1);border-color:rgba(247,223,30,0.2);color:var(--yellow)">Object</span>
+          </div>
+        </div>
+      </div>
+      <!-- Right column: code + control -->
+      <div class="col-right">
+        <div class="code-block code-left-border anim-fade-right anim-4" style="flex:1"><span class="cmt">// Vari&#225;veis e tipos</span>
+<span class="kw">let</span> <span class="txt">nome</span> = <span class="str">"Jo&#227;o"</span>;
+<span class="kw">const</span> <span class="txt">idade</span> = <span class="num">25</span>;
+<span class="kw">let</span> <span class="txt">ativo</span> = <span class="kw">true</span>;
+
+<span class="cmt">// Template literal</span>
+<span class="kw">let</span> <span class="txt">msg</span> = <span class="str">`Ol&#225;, ${</span><span class="txt">nome</span><span class="str">}!`</span>;</div>
+        <div class="anim-fade-up anim-7" style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="badge" style="background:rgba(97,175,239,0.1);border-color:rgba(97,175,239,0.2);color:#61AFEF">Aritm&#233;ticos</span>
+          <span class="badge" style="background:rgba(198,120,221,0.1);border-color:rgba(198,120,221,0.2);color:#C678DD">L&#243;gicos</span>
+          <span class="badge" style="background:rgba(209,154,102,0.1);border-color:rgba(209,154,102,0.2);color:#D19A66">Compara&#231;&#227;o</span>
+        </div>
+      </div>
+    </div>
+    <div class="divider" style="margin:12px 0"></div>
+    <div class="grid-3 anim-fade-up anim-8">
+      <div class="card" style="padding:14px 18px">
+        <div style="color:var(--yellow);font-family:'Fira Code',monospace;font-weight:600;margin-bottom:4px">if / else</div>
+        <div class="card-desc">Condicionais para tomar decis&#245;es no c&#243;digo.</div>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <div style="color:var(--yellow);font-family:'Fira Code',monospace;font-weight:600;margin-bottom:4px">switch</div>
+        <div class="card-desc">M&#250;ltiplas condi&#231;&#245;es com cases organizados.</div>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <div style="color:var(--yellow);font-family:'Fira Code',monospace;font-weight:600;margin-bottom:4px">for / while</div>
+        <div class="card-desc">Loops para repetir bloco de c&#243;digo.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 3: FUN&#199;&#213;ES E ESCOPO ==================== -->
+<div class="slide" id="slide-3">
+  <div style="width:100%;max-width:1100px;display:flex;flex-direction:column;gap:0">
+    <div class="slide-title anim-fade-up anim-1" style="text-align:left">Fun&#231;&#245;es e Escopo</div>
+    <div class="slide-subtitle anim-fade-up anim-2" style="text-align:left;margin-bottom:1rem">Declara&#231;&#227;o, escopo e closures</div>
+    <!-- Three perspective blocks -->
+    <div class="grid-3 anim-fade-scale anim-3">
+      <div class="persp-block persp-superior">
+        <div class="persp-inner" style="min-height:160px">
+          <div class="persp-title">Function Declaration</div>
+          <div class="persp-desc">Hoisted. Dispon&#237;vel antes da declara&#231;&#227;o.</div>
+          <div class="persp-code"><span class="kw">function</span> <span class="fn">soma</span>(<span class="txt">a, b</span>) {
+  <span class="kw">return</span> <span class="txt">a</span> + <span class="txt">b</span>;
+}</div>
+        </div>
+      </div>
+      <div class="persp-block persp-superior">
+        <div class="persp-inner" style="min-height:160px">
+          <div class="persp-title">Function Expression</div>
+          <div class="persp-desc">Atribu&#237;da a uma vari&#225;vel. N&#227;o &#233; hoisted.</div>
+          <div class="persp-code"><span class="kw">const</span> <span class="txt">soma</span> = <span class="kw">function</span>(<span class="txt">a, b</span>) {
+  <span class="kw">return</span> <span class="txt">a</span> + <span class="txt">b</span>;
+};</div>
+        </div>
+      </div>
+      <div class="persp-block persp-superior">
+        <div class="persp-inner" style="min-height:160px">
+          <div class="persp-title">Arrow Function</div>
+          <div class="persp-desc">Sintaxe concisa. N&#227;o tem pr&#243;prio <code style="color:var(--yellow)">this</code>.</div>
+          <div class="persp-code"><span class="kw">const</span> <span class="txt">soma</span> = (<span class="txt">a, b</span>) <span class="op">=&gt;</span> <span class="txt">a</span> + <span class="txt">b</span>;</div>
+        </div>
+      </div>
+    </div>
+    <div class="divider" style="margin:12px 0"></div>
+    <!-- Scope -->
+    <div class="grid-2 anim-fade-scale anim-6" style="margin-bottom:10px">
+      <div class="card">
+        <div class="card-header">
+          <span style="color:var(--yellow);font-size:1.2rem">&#9673;</span>
+          <span class="card-name">Escopo Global</span>
+        </div>
+        <div class="card-desc">Vari&#225;veis acess&#237;veis em qualquer lugar do programa. Use com modera&#231;&#227;o.</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span style="color:var(--yellow);font-size:1.2rem">&#9673;&#9673;</span>
+          <span class="card-name">Escopo de Bloco</span>
+        </div>
+        <div class="card-desc">Vari&#225;veis <code style="color:var(--yellow)">let</code> e <code style="color:var(--yellow)">const</code> ficam confinadas ao bloco <code style="color:#ABB2BF">{}</code>.</div>
+      </div>
+    </div>
+    <!-- Closures accordion -->
+    <div class="accordion anim-fade-up anim-8" id="acc-closures">
+      <div class="accordion-header" onclick="toggleAccordion('acc-closures')">
+        <span>Closures &#8212; O que s&#227;o e por que importam</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <div class="card-desc" style="margin-bottom:10px">Uma closure &#233; quando uma fun&#231;&#227;o "lembra" do escopo onde foi criada, mesmo ap&#243;s esse escopo ter terminado.</div>
+          <div class="code-block"><span class="kw">function</span> <span class="fn">criarContador</span>() {
+  <span class="kw">let</span> <span class="txt">count</span> = <span class="num">0</span>;
+  <span class="kw">return</span> <span class="kw">function</span>() {
+    <span class="kw">return</span> <span class="op">++</span><span class="txt">count</span>;
+  };
+}
+<span class="kw">const</span> <span class="txt">contar</span> = <span class="fn">criarContador</span>();
+<span class="fn">contar</span>(); <span class="cmt">// 1</span>
+<span class="fn">contar</span>(); <span class="cmt">// 2</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 4: OBJETOS E ARRAYS ==================== -->
+<div class="slide" id="slide-4">
+  <div style="width:100%;max-width:1100px;display:flex;flex-direction:column;gap:0">
+    <div class="slide-title anim-fade-up anim-1" style="text-align:left">Objetos e Arrays</div>
+    <div class="slide-subtitle anim-fade-up anim-2" style="text-align:left;margin-bottom:1.2rem">M&#233;todos poderosos para manipula&#231;&#227;o de dados</div>
+    <div class="grid-2x2 anim-fade-scale anim-3">
+      <!-- map -->
+      <div class="card">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12a1 1 0 1 0 2 0 1 1 0 0 0-2 0m6 0a1 1 0 1 0 2 0 1 1 0 0 0-2 0m6 0a1 1 0 1 0 2 0 1 1 0 0 0-2 0"/><path d="M4 12h16"/></svg>
+          <span class="card-name" style="font-family:'Fira Code',monospace">.map()</span>
+        </div>
+        <div class="card-desc">Transforma cada elemento e retorna um novo array.</div>
+        <div class="mini-code"><span class="txt">nums</span>.<span class="fn">map</span>(<span class="txt">n</span> <span class="op">=&gt;</span> <span class="txt">n</span> * <span class="num">2</span>)</div>
+      </div>
+      <!-- filter -->
+      <div class="card">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          <span class="card-name" style="font-family:'Fira Code',monospace">.filter()</span>
+        </div>
+        <div class="card-desc">Retorna apenas os elementos que passam no teste.</div>
+        <div class="mini-code"><span class="txt">nums</span>.<span class="fn">filter</span>(<span class="txt">n</span> <span class="op">=&gt;</span> <span class="txt">n</span> <span class="op">&gt;</span> <span class="num">5</span>)</div>
+      </div>
+      <!-- reduce -->
+      <div class="card">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v18M3 12l9 9 9-9"/></svg>
+          <span class="card-name" style="font-family:'Fira Code',monospace">.reduce()</span>
+        </div>
+        <div class="card-desc">Acumula os elementos em um &#250;nico valor.</div>
+        <div class="mini-code"><span class="txt">nums</span>.<span class="fn">reduce</span>((<span class="txt">a,b</span>) <span class="op">=&gt;</span> <span class="txt">a</span>+<span class="txt">b</span>, <span class="num">0</span>)</div>
+      </div>
+      <!-- forEach -->
+      <div class="card">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
+          <span class="card-name" style="font-family:'Fira Code',monospace">.forEach()</span>
+        </div>
+        <div class="card-desc">Executa uma fun&#231;&#227;o para cada elemento (sem retorno).</div>
+        <div class="mini-code"><span class="txt">nums</span>.<span class="fn">forEach</span>(<span class="txt">n</span> <span class="op">=&gt;</span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="txt">n</span>))</div>
+      </div>
+    </div>
+    <div class="divider" style="margin:12px 0"></div>
+    <div class="grid-2 anim-fade-up anim-7">
+      <div class="card" style="border-color:rgba(247,223,30,0.15)">
+        <div class="section-label" style="margin-bottom:6px">Desestrutura&#231;&#227;o</div>
+        <div class="code-block" style="font-size:0.8rem"><span class="kw">const</span> { <span class="txt">nome</span>, <span class="txt">idade</span> } = <span class="txt">pessoa</span>;
+<span class="kw">const</span> [<span class="txt">primeiro</span>, <span class="txt">segundo</span>] = <span class="txt">array</span>;</div>
+      </div>
+      <div class="card" style="border-color:rgba(247,223,30,0.15)">
+        <div class="section-label" style="margin-bottom:6px">Spread Operator</div>
+        <div class="code-block" style="font-size:0.8rem"><span class="kw">const</span> <span class="txt">novo</span> = [...<span class="txt">arr1</span>, ...<span class="txt">arr2</span>];
+<span class="kw">const</span> <span class="txt">copia</span> = { ...<span class="txt">obj</span>, <span class="txt">novo</span>: <span class="num">1</span> };</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 5: DOM ==================== -->
+<div class="slide" id="slide-5">
+  <div style="width:100%;max-width:1100px;display:flex;flex-direction:column;gap:0">
+    <div class="slide-title anim-fade-up anim-1" style="text-align:left">Manipula&#231;&#227;o do DOM</div>
+    <div class="slide-subtitle anim-fade-up anim-2" style="text-align:left;margin-bottom:1rem">Sele&#231;&#227;o, cria&#231;&#227;o e eventos</div>
+    <div style="display:flex;gap:10px;margin-bottom:1rem" class="anim-fade-scale anim-3">
+      <span class="badge"><span style="font-size:1rem">&#128269;</span> Sele&#231;&#227;o</span>
+      <span class="badge"><span style="font-size:1rem">+</span> Cria&#231;&#227;o</span>
+    </div>
+    <div class="grid-2 anim-fade-up anim-4">
+      <div class="card">
+        <div class="card-name" style="margin-bottom:8px">Selecionar Elementos</div>
+        <div class="code-block code-left-border" style="font-size:0.8rem"><span class="kw">const</span> <span class="txt">el</span> = document.<span class="fn">getElementById</span>(<span class="str">'id'</span>);
+<span class="kw">const</span> <span class="txt">el</span> = document.<span class="fn">querySelector</span>(<span class="str">'.cls'</span>);
+<span class="kw">const</span> <span class="txt">list</span> = document.<span class="fn">querySelectorAll</span>(<span class="str">'li'</span>);</div>
+      </div>
+      <div class="card">
+        <div class="card-name" style="margin-bottom:8px">Criar e Inserir</div>
+        <div class="code-block code-left-border" style="font-size:0.8rem"><span class="kw">const</span> <span class="txt">div</span> = document.<span class="fn">createElement</span>(<span class="str">'div'</span>);
+<span class="txt">div</span>.<span class="txt">textContent</span> = <span class="str">'Ol&#225; Mundo'</span>;
+<span class="txt">parent</span>.<span class="fn">appendChild</span>(<span class="txt">div</span>);</div>
+      </div>
+    </div>
+    <div class="divider" style="margin:10px 0"></div>
+    <div class="section-label anim-fade-up anim-6">Eventos</div>
+    <div class="grid-2 anim-fade-up anim-7">
+      <div class="card" style="padding:16px 20px">
+        <div class="card-name" style="font-size:0.9rem">addEventListener</div>
+        <div class="card-desc">Escuta eventos como clique, teclado e scroll.</div>
+        <div class="mini-code" style="font-size:0.75rem"><span class="txt">btn</span>.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, <span class="txt">fn</span>);</div>
+      </div>
+      <div class="card" style="padding:16px 20px">
+        <div class="card-name" style="font-size:0.9rem">Delega&#231;&#227;o de Eventos</div>
+        <div class="card-desc">Um listener no pai captura eventos dos filhos.</div>
+        <div class="mini-code" style="font-size:0.75rem"><span class="txt">list</span>.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, <span class="txt">e</span> <span class="op">=&gt;</span> {...});</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 6: ASS&#205;NCRONA ==================== -->
+<div class="slide" id="slide-6">
+  <div style="width:100%;max-width:1100px;display:flex;flex-direction:column;gap:0">
+    <div class="slide-title anim-fade-up anim-1" style="text-align:left">Programa&#231;&#227;o Ass&#237;ncrona</div>
+    <div class="slide-subtitle anim-fade-up anim-2" style="text-align:left;margin-bottom:0.5rem">De Callbacks a Async/Await</div>
+    <div class="anim-fade-scale anim-3" style="margin-bottom:0.8rem"><span class="tag-pill tag-essential">Essencial</span></div>
+    <div class="evolution-bar anim-fade-up anim-4">
+      <div class="evo-line"></div>
+    </div>
+    <div class="grid-3 anim-fade-left anim-5" style="margin-top:4px">
+      <!-- Callbacks -->
+      <div class="card sync-col sync-callbacks" style="padding:18px">
+        <div class="card-name" style="font-size:0.95rem">Callbacks</div>
+        <div class="card-desc" style="font-size:0.8rem;margin-bottom:8px;color:rgba(255,150,130,0.8)">Dif&#237;cil de ler</div>
+        <div class="code-block" style="font-size:0.75rem;padding:10px 14px"><span class="fn">getData</span>(<span class="str">'user'</span>, (<span class="txt">user</span>) <span class="op">=&gt;</span> {
+  <span class="fn">getPosts</span>(<span class="txt">user</span>.<span class="txt">id</span>, (<span class="txt">posts</span>) <span class="op">=&gt;</span> {
+    <span class="fn">getComments</span>(<span class="txt">posts</span>[<span class="num">0</span>].<span class="txt">id</span>,
+      (<span class="txt">cmts</span>) <span class="op">=&gt;</span> {
+        <span class="cmt">// callback hell</span>
+    });
+  });
+});</div>
+      </div>
+      <!-- Promises -->
+      <div class="card sync-col sync-promises" style="padding:18px">
+        <div class="card-name" style="font-size:0.95rem">Promises</div>
+        <div class="card-desc" style="font-size:0.8rem;margin-bottom:8px;color:rgba(247,223,30,0.8)">Mais organizado</div>
+        <div class="code-block" style="font-size:0.75rem;padding:10px 14px"><span class="fn">getData</span>(<span class="str">'user'</span>)
+  .<span class="fn">then</span>(<span class="txt">user</span> <span class="op">=&gt;</span>
+    <span class="fn">getPosts</span>(<span class="txt">user</span>.<span class="txt">id</span>))
+  .<span class="fn">then</span>(<span class="txt">posts</span> <span class="op">=&gt;</span>
+    <span class="fn">getComments</span>(<span class="txt">posts</span>[<span class="num">0</span>].<span class="txt">id</span>))
+  .<span class="fn">then</span>(<span class="txt">cmts</span> <span class="op">=&gt;</span> { <span class="cmt">/* ... */</span> })
+  .<span class="fn">catch</span>(<span class="txt">err</span> <span class="op">=&gt;</span> <span class="fn">console</span>.<span class="fn">error</span>(<span class="txt">err</span>));</div>
+      </div>
+      <!-- Async/Await -->
+      <div class="card sync-col sync-async" style="padding:18px">
+        <div class="card-name" style="font-size:0.95rem">Async/Await</div>
+        <div class="card-desc" style="font-size:0.8rem;margin-bottom:8px;color:rgba(100,220,100,0.8)">Elegante e limpo</div>
+        <div class="code-block" style="font-size:0.75rem;padding:10px 14px"><span class="kw">async function</span> <span class="fn">load</span>() {
+  <span class="kw">const</span> <span class="txt">user</span> = <span class="kw">await</span> <span class="fn">getData</span>(<span class="str">'user'</span>);
+  <span class="kw">const</span> <span class="txt">posts</span> = <span class="kw">await</span> <span class="fn">getPosts</span>(<span class="txt">user</span>.<span class="txt">id</span>);
+  <span class="kw">const</span> <span class="txt">cmts</span> = <span class="kw">await</span> <span class="fn">getComments</span>(
+    <span class="txt">posts</span>[<span class="num">0</span>].<span class="txt">id</span>);
+  <span class="kw">return</span> <span class="txt">cmts</span>;
+}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 7: M&#211;DULOS ==================== -->
+<div class="slide" id="slide-7">
+  <div style="width:100%;max-width:1100px;display:flex;flex-direction:column;gap:0">
+    <div class="slide-title anim-fade-up anim-1" style="text-align:left">M&#243;dulos e Organiza&#231;&#227;o</div>
+    <div class="slide-subtitle anim-fade-up anim-2" style="text-align:left;margin-bottom:1rem">ES Modules, CommonJS e boas pr&#225;ticas</div>
+    <div class="grid-2 anim-fade-up anim-3">
+      <!-- ES Modules -->
+      <div class="card" style="position:relative">
+        <span class="tag-pill tag-modern" style="position:absolute;top:14px;right:14px">Moderno</span>
+        <div class="card-name" style="margin-bottom:8px">ES Modules</div>
+        <div class="code-block code-left-border" style="font-size:0.8rem"><span class="cmt">// Importar</span>
+<span class="kw">import</span> { <span class="txt">nome</span> } <span class="kw">from</span> <span class="str">'./modulo.js'</span>;
+
+<span class="cmt">// Exportar</span>
+<span class="kw">export const</span> <span class="txt">nome</span> = <span class="str">"JavaScript"</span>;</div>
+        <div class="card-desc" style="margin-top:10px">Padr&#227;o nativo do navegador. Recomendado para projetos modernos.</div>
+      </div>
+      <!-- CommonJS -->
+      <div class="card" style="position:relative">
+        <span class="tag-pill tag-modern" style="position:absolute;top:14px;right:14px">Node.js</span>
+        <div class="card-name" style="margin-bottom:8px">CommonJS</div>
+        <div class="code-block code-left-border" style="font-size:0.8rem"><span class="cmt">// Importar</span>
+<span class="kw">const</span> { <span class="txt">nome</span> } = <span class="fn">require</span>(<span class="str">'./modulo'</span>);
+
+<span class="cmt">// Exportar</span>
+<span class="txt">module</span>.<span class="txt">exports</span> = { <span class="txt">nome</span> };</div>
+        <div class="card-desc" style="margin-top:10px">Usado no Node.js. Padr&#227;o anterior aos ES Modules.</div>
+      </div>
+    </div>
+    <div class="divider" style="margin:12px 0"></div>
+    <div class="section-label anim-fade-up anim-6">Boas Pr&#225;ticas</div>
+    <div class="grid-2 anim-fade-up anim-7" style="margin-top:4px">
+      <div class="card" style="padding:14px 18px;display:flex;align-items:center;gap:10px">
+        <span class="check-icon">&#10003;</span>
+        <span class="card-desc">Um m&#243;dulo, uma responsabilidade</span>
+      </div>
+      <div class="card" style="padding:14px 18px;display:flex;align-items:center;gap:10px">
+        <span class="check-icon">&#10003;</span>
+        <span class="card-desc">Evite vari&#225;veis globais</span>
+      </div>
+      <div class="card" style="padding:14px 18px;display:flex;align-items:center;gap:10px">
+        <span class="check-icon">&#10003;</span>
+        <span class="card-desc">Use nomes descritivos</span>
+      </div>
+      <div class="card" style="padding:14px 18px;display:flex;align-items:center;gap:10px">
+        <span class="check-icon">&#10003;</span>
+        <span class="card-desc">Comente o c&#243;digo complexo</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 8: APIs ==================== -->
+<div class="slide" id="slide-8">
+  <div style="width:100%;max-width:1100px;display:flex;flex-direction:column;gap:0">
+    <div class="slide-title anim-fade-up anim-1" style="text-align:left">APIs do Navegador</div>
+    <div class="slide-subtitle anim-fade-up anim-2" style="text-align:left;margin-bottom:1.2rem">JavaScript interagindo com o mundo real</div>
+    <div class="grid-2x3 anim-fade-scale anim-3">
+      <!-- Fetch -->
+      <div class="card">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+          <span class="card-name">Fetch API</span>
+        </div>
+        <div class="card-desc">Requisi&#231;&#245;es HTTP modernas e flex&#237;veis.</div>
+        <div class="mini-code" style="font-size:0.75rem"><span class="fn">fetch</span>(<span class="str">'/api'</span>).<span class="fn">then</span>(<span class="txt">r</span> <span class="op">=&gt;</span> <span class="txt">r</span>.<span class="fn">json</span>())</div>
+      </div>
+      <!-- Storage -->
+      <div class="card">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+          <span class="card-name">LocalStorage</span>
+        </div>
+        <div class="card-desc">Armazenamento persistente no navegador.</div>
+        <div class="mini-code" style="font-size:0.75rem"><span class="txt">localStorage</span>.<span class="fn">setItem</span>(<span class="str">'k'</span>, <span class="str">'v'</span>)</div>
+      </div>
+      <!-- Geolocation -->
+      <div class="card">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="card-name">Geolocation</span>
+        </div>
+        <div class="card-desc">Acessa a localiza&#231;&#227;o do dispositivo.</div>
+        <div class="mini-code" style="font-size:0.75rem"><span class="txt">navigator</span>.<span class="txt">geolocation</span>.<span class="fn">getCurrentPosition</span>(<span class="txt">cb</span>)</div>
+      </div>
+      <!-- Notifications -->
+      <div class="card">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="card-name">Notifications</span>
+        </div>
+        <div class="card-desc">Notifica&#231;&#245;es push no desktop e mobile.</div>
+        <div class="mini-code" style="font-size:0.75rem"><span class="txt">Notification</span>.<span class="fn">requestPermission</span>()</div>
+      </div>
+      <!-- Canvas -->
+      <div class="card">
+        <div class="card-header">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <span class="card-name">Canvas</span>
+        </div>
+        <div class="card-desc">Renderiza&#231;&#227;o gr&#225;fica 2D e anima&#231;&#245;es.</div>
+        <div class="mini-code" style="font-size:0.75rem"><span class="txt">ctx</span>.<span class="fn">fillRect</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">100</span>, <span class="num">100</span>)</div>
+      </div>
+      <!-- More -->
+      <div class="card" style="display:flex;align-items:center;justify-content:center;text-align:center">
+        <div>
+          <div style="color:var(--yellow);font-size:1.5rem;margin-bottom:4px">...</div>
+          <div class="card-desc">Web Workers, WebSockets, IntersectionObserver e muito mais.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 9: ECOSSISTEMA ==================== -->
+<div class="slide" id="slide-9">
+  <div style="width:100%;max-width:1100px;display:flex;flex-direction:column;gap:0">
+    <div class="slide-title anim-fade-up anim-1" style="text-align:left">Ecossistema e Ferramentas</div>
+    <div class="slide-subtitle anim-fade-up anim-2" style="text-align:left;margin-bottom:1rem">Node.js, frameworks e gerenciadores de pacotes</div>
+    <!-- Node.js block -->
+    <div class="anim-fade-scale anim-3" style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+      <div class="persp-block persp-superior" style="max-width:280px">
+        <div class="persp-inner" style="background:linear-gradient(135deg,rgba(104,159,56,0.2),rgba(26,26,46,0.8));border-top-color:rgba(104,159,56,0.4)">
+          <div class="persp-title" style="color:#689F38">Node.js</div>
+          <div class="persp-desc">JavaScript no servidor. Base de todo o ecossistema backend.</div>
+        </div>
+      </div>
+    </div>
+    <!-- Frameworks -->
+    <div class="section-label anim-fade-up anim-5">Frameworks Front-end</div>
+    <div class="grid-3 anim-fade-scale anim-6" style="margin-top:6px;margin-bottom:1rem">
+      <div class="card card-react" style="text-align:center">
+        <div style="color:#61DAFB;font-size:2rem;margin-bottom:6px;font-weight:800">&#9651;</div>
+        <div class="card-name">React</div>
+        <div class="card-desc">Biblioteca para interfaces reativas.</div>
+        <span class="tag-pill tag-modern" style="margin-top:8px">Meta</span>
+      </div>
+      <div class="card card-vue" style="text-align:center">
+        <div style="color:#42B883;font-size:2rem;margin-bottom:6px;font-weight:800">V</div>
+        <div class="card-name">Vue.js</div>
+        <div class="card-desc">Framework progressivo e vers&#225;til.</div>
+        <span class="tag-pill tag-modern" style="margin-top:8px;background:rgba(66,184,131,0.15);border-color:rgba(66,184,131,0.3);color:#42B883">Evan You</span>
+      </div>
+      <div class="card card-angular" style="text-align:center">
+        <div style="color:#DD0031;font-size:2rem;margin-bottom:6px;font-weight:800">A</div>
+        <div class="card-name">Angular</div>
+        <div class="card-desc">Framework completo para grandes apps.</div>
+        <span class="tag-pill tag-modern" style="margin-top:8px;background:rgba(221,0,49,0.15);border-color:rgba(221,0,49,0.3);color:#DD0031">Google</span>
+      </div>
+    </div>
+    <!-- Package managers -->
+    <div class="section-label anim-fade-up anim-8">Gerenciadores de Pacotes</div>
+    <div class="grid-2 anim-fade-up anim-9" style="margin-top:6px">
+      <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:12px">
+        <span style="color:var(--red,#CB3837);font-size:1.5rem;font-weight:800;font-family:'Fira Code',monospace">npm</span>
+        <div>
+          <div class="card-name" style="font-size:0.9rem">npm</div>
+          <div class="card-desc">O maior registry de pacotes do mundo.</div>
+        </div>
+      </div>
+      <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:12px">
+        <span style="color:#2C8EBB;font-size:1.5rem;font-weight:800;font-family:'Fira Code',monospace">yarn</span>
+        <div>
+          <div class="card-name" style="font-size:0.9rem">Yarn</div>
+          <div class="card-desc">Alternativa r&#225;pida e segura ao npm.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 10: BOAS PR&#193;TICAS ==================== -->
+<div class="slide" id="slide-10">
+  <div style="width:100%;max-width:1100px;display:flex;flex-direction:column;gap:0">
+    <div class="slide-title anim-fade-up anim-1" style="text-align:left">Boas Pr&#225;ticas e Pr&#243;ximos Passos</div>
+    <div class="slide-subtitle anim-fade-up anim-2" style="text-align:left;margin-bottom:1.2rem">Ferramentas, TypeScript e recursos para continuar</div>
+    <div class="grid-3 anim-fade-scale anim-3">
+      <!-- ESLint -->
+      <div class="card" style="text-align:center">
+        <svg class="card-icon" style="margin:0 auto 8px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <div class="card-name">ESLint</div>
+        <div class="card-desc">Encontre erros automaticamente no seu c&#243;digo.</div>
+      </div>
+      <!-- Prettier -->
+      <div class="card" style="text-align:center">
+        <svg class="card-icon" style="margin:0 auto 8px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
+        <div class="card-name">Prettier</div>
+        <div class="card-desc">C&#243;digo sempre formatado e consistente.</div>
+      </div>
+      <!-- TypeScript -->
+      <div class="card" style="text-align:center;position:relative">
+        <span class="tag-pill tag-rec" style="position:absolute;top:14px;right:14px">Recomendado</span>
+        <svg class="card-icon" style="margin:0 auto 8px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 12v5"/></svg>
+        <div class="card-name">TypeScript</div>
+        <div class="card-desc">JavaScript com tipos est&#225;ticos para mais seguran&#231;a.</div>
+      </div>
+    </div>
+    <div class="divider" style="margin:14px 0"></div>
+    <div class="section-label anim-fade-up anim-6">Para Continuar Aprendendo</div>
+    <div class="grid-2x2 anim-fade-up anim-7" style="margin-top:6px">
+      <div class="card" style="padding:14px 18px;display:flex;align-items:center;gap:10px">
+        <span style="color:var(--yellow);font-size:1rem">&#128214;</span>
+        <div>
+          <div class="card-name" style="font-size:0.85rem">Documenta&#231;&#227;o Oficial</div>
+          <div class="card-desc" style="font-size:0.8rem">MDN Web Docs</div>
+        </div>
+      </div>
+      <div class="card" style="padding:14px 18px;display:flex;align-items:center;gap:10px">
+        <span style="color:var(--yellow);font-size:1rem">&#128172;</span>
+        <div>
+          <div class="card-name" style="font-size:0.85rem">Comunidades</div>
+          <div class="card-desc" style="font-size:0.8rem">Stack Overflow, Reddit, Discord</div>
+        </div>
+      </div>
+      <div class="card" style="padding:14px 18px;display:flex;align-items:center;gap:10px">
+        <span style="color:var(--yellow);font-size:1rem">&#128736;</span>
+        <div>
+          <div class="card-name" style="font-size:0.85rem">Projetos Open Source</div>
+          <div class="card-desc" style="font-size:0.8rem">Contribua no GitHub</div>
+        </div>
+      </div>
+      <div class="card" style="padding:14px 18px;display:flex;align-items:center;gap:10px">
+        <span style="color:var(--yellow);font-size:1rem">&#127942;</span>
+        <div>
+          <div class="card-name" style="font-size:0.85rem">Desafios Pr&#225;ticos</div>
+          <div class="card-desc" style="font-size:0.8rem">LeetCode, Codewars</div>
+        </div>
+      </div>
+    </div>
+    <div class="close-msg">JavaScript &#233; apenas o come&#231;o. O pr&#243;ximo passo &#233; seu.</div>
+  </div>
+</div>
+
+</div><!-- /slides-wrapper -->
+
+<!-- NAVIGATION -->
+<div class="nav-arrows" id="navArrows">
+  <button class="nav-btn disabled" id="btnPrev" aria-label="Slide anterior">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="nav-btn disabled" id="btnNext" aria-label="Pr&#243;ximo slide">
+    <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+  </button>
+</div>
+<div class="nav-bottom" id="navBottom">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+(function(){
+const TOTAL=10;
+let current=0;
+let transitioning=false;
+
+// Build dots
+const dotsEl=document.getElementById('dots');
+for(let i=0;i<TOTAL;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===0?' active':'');
+  d.setAttribute('aria-label','Slide '+(i+1));
+  d.addEventListener('click',()=>goTo(i));
+  dotsEl.appendChild(d);
+}
+
+const slides=document.querySelectorAll('.slide');
+const dots=document.querySelectorAll('.dot');
+const btnPrev=document.getElementById('btnPrev');
+const btnNext=document.getElementById('btnNext');
+const progressFill=document.getElementById('progressFill');
+const navArrows=document.getElementById('navArrows');
+const navBottom=document.getElementById('navBottom');
+
+function updateUI(){
+  dots.forEach((d,i)=>d.classList.toggle('active',i===current));
+  progressFill.style.width=((current+1)/TOTAL*100)+'%';
+  btnPrev.classList.toggle('disabled',current===0);
+  btnNext.classList.toggle('disabled',current===TOTAL-1);
+}
+
+function goTo(idx){
+  if(idx===current||idx<0||idx>=TOTAL||transitioning)return;
+  transitioning=true;
+  const prev=slides[current];
+  const next=slides[idx];
+  prev.classList.add('leaving');
+  prev.classList.remove('active');
+  // Reset all animated children
+  prev.querySelectorAll('[class*="anim-"]').forEach(el=>{
+    el.style.transition='none';
+    el.style.opacity='0';
+    el.style.transform='';
+    el.style.filter='';
+    void el.offsetHeight;
+    el.style.transition='';
+  });
+  next.classList.add('active');
+  current=idx;
+  updateUI();
+  setTimeout(()=>{
+    prev.classList.remove('leaving');
+    transitioning=false;
+  },650);
+}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();goTo(current+1)}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();goTo(current-1)}
+  else if(e.key==='Home'){e.preventDefault();goTo(0)}
+  else if(e.key==='End'){e.preventDefault();goTo(TOTAL-1)}
+});
+
+// Buttons
+btnPrev.addEventListener('click',()=>goTo(current-1));
+btnNext.addEventListener('click',()=>goTo(current+1));
+
+// Touch/swipe
+let touchX=0;
+document.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-touchX;
+  if(Math.abs(dx)>50){
+    if(dx<0)goTo(current+1);else goTo(current-1);
+  }
+},{passive:true});
+
+// Disable scroll
+document.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
+
+// Show nav after delay
+setTimeout(()=>{
+  navArrows.classList.add('visible');
+  navBottom.classList.add('visible');
+},1500);
+
+// Particles
+(function createParticles(){
+  const container=document.getElementById('particles');
+  const count=window.innerWidth<600?25:45;
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const size=Math.random()*1.5+0.8;
+    const x=Math.random()*100;
+    const y=Math.random()*100;
+    const dur=Math.random()*20+15;
+    const delay=Math.random()*-20;
+    const tr=(Math.random()*60+30);
+    const tx=(Math.random()*30-15);
+    const op=(Math.random()*0.12+0.06);
+    p.style.cssText=`width:${size}px;height:${size}px;left:${x}%;top:${y}%;animation-duration:${dur}s;animation-delay:${delay}s;--tr:${tr}px;--tx:${tx}px;--po:${op}`;
+    container.appendChild(p);
+  }
+})();
+
+// Cover title extrusion
+(function buildExtrusion(){
+  const el=document.getElementById('cover-title');
+  if(!el)return;
+  let shadows=[];
+  const r0=255,g0=248,b0=220; // #FFF8DC
+  const r1=139,g1=105,b1=20;  // #8B6914
+  for(let i=0;i<35;i++){
+    const t=i/34;
+    const r=Math.round(r0+(r1-r0)*t);
+    const g=Math.round(g0+(g1-g0)*t);
+    const b=Math.round(b0+(b1-b0)*t);
+    shadows.push(`${-i}px ${i}px 0 rgb(${r},${g},${b})`);
+  }
+  el.style.textShadow=shadows.join(',');
+  // Apply same shadow to ::before via stylesheet
+  const style=document.createElement('style');
+  style.textContent='#slide-1 .cover-title::before{content:"JavaScript";text-shadow:'+shadows.join(',')+'}';
+  document.head.appendChild(style);
+})();
+
+// Accordion
+window.toggleAccordion=function(id){
+  const acc=document.getElementById(id);
+  if(acc)acc.classList.toggle('open');
+};
+
+// Init
+updateUI();
+})();
+</script>
+</body>
+</html>
