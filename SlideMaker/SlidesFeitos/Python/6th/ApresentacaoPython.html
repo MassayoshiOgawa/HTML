@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python — A Linguagem Versátil do Século XXI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--ease-enter:cubic-bezier(0.16,1,0.3,1);
+--ease-exit:cubic-bezier(0.7,0,0.84,0);
+--ease-bounce:cubic-bezier(0.34,1.56,0.64,1);
+--duration-fast:300ms;--duration-normal:600ms;--duration-slow:900ms;--duration-dramatic:1200ms;
+--blue:#3776AB;--yellow:#FFD43B;--cyan:#00D4FF;--green:#306998;--orange:#FF6B35;
+--bg-deep:#050510;--bg-mid:#0B1120;--bg-panel:#0F1A2E;--bg-card:rgba(15,26,46,0.5);
+--glass-border:rgba(255,255,255,0.08);--glass-bg:rgba(255,255,255,0.03);
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-deep);color:#fff;font-family:'Inter','Segoe UI',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{display:flex;align-items:center;justify-content:center}
+
+/* ===== GLOBAL BACKGROUND ===== */
+#bg-global{position:fixed;inset:0;z-index:0;pointer-events:none}
+#bg-global .layer{position:absolute;inset:0}
+#bg-gradient{background:radial-gradient(ellipse at 50% 40%,#0F1A2E 0%,#050510 100%)}
+#bg-gradient::after{content:'';position:absolute;inset:0;animation:bgPulse 5s ease-in-out infinite alternate}
+@keyframes bgPulse{from{opacity:1}to{opacity:.85}}
+#bg-grid{opacity:.3;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:80px 80px}
+#bg-blobs .blob{position:absolute;border-radius:50%;filter:blur(80px);animation:blobDrift 25s ease-in-out infinite alternate}
+#bg-blobs .blob-1{width:400px;height:400px;background:rgba(55,118,171,.08);top:-100px;left:-100px;animation-duration:22s}
+#bg-blobs .blob-2{width:350px;height:350px;background:rgba(255,212,59,.04);bottom:-80px;right:-80px;animation-duration:28s;animation-delay:-5s}
+#bg-blobs .blob-3{width:300px;height:300px;background:rgba(55,118,171,.05);top:40%;left:50%;transform:translate(-50%,-50%);animation-duration:30s;animation-delay:-10s}
+@keyframes blobDrift{0%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.05)}66%{transform:translate(-20px,30px) scale(.95)}100%{transform:translate(10px,10px) scale(1.02)}}
+#bg-particles canvas{position:absolute;inset:0}
+#bg-noise{opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px 128px}
+#bg-vignette{background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.4) 100%)}
+#bg-fog{background:linear-gradient(transparent 60%,rgba(55,118,171,.05) 100%);animation:fogBreath 8s ease-in-out infinite alternate}
+@keyframes fogBreath{from{opacity:.6}to{opacity:1}}
+
+/* ===== SLIDES CONTAINER ===== */
+#slides-container{position:relative;width:100%;height:100%;z-index:1}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6% 8%;opacity:0;visibility:hidden;transform:translateY(20px);filter:blur(6px);transition:opacity .6s var(--ease-enter),transform .6s var(--ease-enter),filter .6s var(--ease-enter);will-change:opacity,transform,filter}
+.slide.active{opacity:1;visibility:visible;transform:translateY(0);filter:blur(0)}
+.slide.exit{opacity:0;transform:scale(.98);filter:blur(4px);transition:all .4s var(--ease-exit)}
+
+/* ===== NAVIGATION ===== */
+#nav-arrows{position:fixed;bottom:32px;left:0;right:0;display:flex;justify-content:space-between;padding:0 32px;z-index:100;pointer-events:none}
+#nav-arrows button{pointer-events:auto;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s var(--ease-enter);opacity:0;animation:navFadeIn .4s var(--ease-enter) forwards}
+#nav-arrows button svg{width:20px;height:20px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+#nav-arrows button:hover{background:rgba(0,212,255,.15);border-color:rgba(0,212,255,.4);box-shadow:0 0 20px rgba(0,212,255,.2)}
+#nav-arrows button:active{transform:scale(.95);opacity:.7}
+#nav-arrows button.disabled{opacity:.2;pointer-events:none}
+@keyframes navFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+#nav-bottom{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:100}
+#slide-counter{font-size:11px;font-weight:500;color:rgba(255,255,255,.4);letter-spacing:.05em}
+#progress-bar{width:100%;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;min-width:160px}
+#progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--yellow));border-radius:2px;transition:width .5s var(--ease-out)}
+#nav-dots{display:flex;gap:8px;align-items:center}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s var(--ease-out)}
+.nav-dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+.nav-dot.active{background:linear-gradient(135deg,var(--blue),var(--yellow));transform:scale(1.3)}
+
+/* ===== COMMON ELEMENTS ===== */
+.tag-3d{perspective:250px;display:inline-block;margin-bottom:16px}
+.tag-3d-inner{padding:10px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;border-radius:6px;color:#fff;transform:perspective(250px) rotateX(-10deg) rotateY(25deg);transform-origin:50% 50% 0px;transition:all .3s var(--ease-enter);box-shadow:0 8px 20px -6px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1)}
+
+.slide-title{font-size:clamp(1.8rem,3.6vw,2.8rem);font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1.15;margin-bottom:8px;opacity:0;transform:translateY(20px) scale(.96);filter:blur(8px);transition:all .9s var(--ease-enter)}
+.slide-title.animate{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+
+.slide-subtitle{font-size:clamp(1rem,1.8vw,1.4rem);font-weight:500;color:rgba(255,255,255,.85);letter-spacing:.02em;margin-bottom:24px;opacity:0;transform:translateY(15px);filter:blur(6px);transition:all .7s var(--ease-enter)}
+.slide-subtitle.animate{opacity:1;transform:translateY(0);filter:blur(0)}
+
+/* ===== 3D PERSPECTIVE BLOCKS ===== */
+.perspective-block{perspective:250px;display:inline-block;transition:all .3s var(--ease-enter);opacity:0;transform:translateY(40px) scale(.94);filter:blur(10px)}
+.perspective-block.animate{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+.perspective-block-upper .pb-inner{transform:perspective(250px) rotateX(-10deg) rotateY(25deg);transform-origin:50% 50% 0px}
+.perspective-block-lower .pb-inner{transform:perspective(250px) rotateX(10deg) rotateY(25deg);transform-origin:50% 50% 0px}
+.pb-inner{width:min(350px,85vw);min-height:80px;padding:20px;background:linear-gradient(135deg,#0F1A2E,#1A2A45);border:1px solid var(--glass-border);border-radius:12px;box-shadow:0 20px 40px -12px rgba(0,0,0,.4);position:relative;overflow:hidden;transition:all .3s var(--ease-enter)}
+.pb-inner::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent)}
+.perspective-block:hover .pb-inner{box-shadow:0 24px 50px -10px rgba(55,118,171,.3);border-color:rgba(0,212,255,.2)}
+
+/* ===== GLASS CARDS ===== */
+.glass-card{background:var(--bg-card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,.3);transition:all .3s var(--ease-enter);opacity:0;transform:translateY(40px) scale(.94);filter:blur(10px)}
+.glass-card.animate{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+.glass-card.animate:hover{border-color:rgba(0,212,255,.25);box-shadow:0 12px 48px rgba(0,212,255,.15);transform:translateY(-4px)}
+
+/* ===== CODE PANEL ===== */
+.code-panel{background:rgba(0,0,0,.4);border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:0;transform:scale(.95);filter:blur(10px);transition:all 1s var(--ease-enter)}
+.code-panel.animate{opacity:1;transform:scale(1);filter:blur(0)}
+.code-panel:hover{border-color:rgba(255,255,255,.12)}
+.code-bar{display:flex;align-items:center;padding:10px 16px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06)}
+.code-dots{display:flex;gap:6px}
+.code-dots span{width:10px;height:10px;border-radius:50%}
+.code-dots span:nth-child(1){background:#FF5F56}
+.code-dots span:nth-child(2){background:#FFBD2E}
+.code-dots span:nth-child(3){background:#27C93F}
+.code-bar-title{flex:1;text-align:center;font-size:12px;color:rgba(255,255,255,.4);font-family:'JetBrains Mono',monospace}
+.code-content{padding:20px;font-family:'JetBrains Mono',monospace;font-size:clamp(.8rem,1.2vw,.95rem);line-height:1.7;overflow-x:auto}
+.code-content .kw{color:#C678DD}
+.code-content .fn{color:#61AFEF}
+.code-content .str{color:#98C379}
+.code-content .num{color:#D19A66}
+.code-content .cm{color:#5C6370}
+.code-content .op{color:#ABB2BF}
+.code-content .var{color:#E06C75}
+.code-content .hl{color:var(--yellow)}
+
+/* ===== ACCORDION ===== */
+.accordion-item{background:rgba(15,26,46,.4);border:1px solid rgba(255,255,255,.06);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:all .3s var(--ease-enter);opacity:0;transform:translateY(15px)}
+.accordion-item.animate{opacity:1;transform:translateY(0)}
+.accordion-item:hover{background:rgba(255,255,255,.03)}
+.accordion-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;transition:background .3s}
+.accordion-header h4{font-size:14px;font-weight:600;color:#fff}
+.accordion-header .arrow{width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;transition:transform .3s var(--ease-enter)}
+.accordion-item.open .accordion-header .arrow{transform:rotate(180deg)}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .4s var(--ease-out)}
+.accordion-item.open .accordion-body{max-height:200px}
+.accordion-body-inner{padding:0 20px 16px;font-size:13px;color:rgba(255,255,255,.6);line-height:1.6}
+.accordion-item .border-left{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 3px 3px 0}
+
+/* ===== BADGES ===== */
+.method-badge{display:inline-block;padding:4px 10px;font-size:11px;font-weight:500;font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:4px;margin:3px;opacity:0;transform:scale(.8);transition:all .3s var(--ease-enter)}
+.method-badge.animate{opacity:1;transform:scale(1)}
+.method-badge:hover{background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.3)}
+
+/* ===== MINI DASHBOARD ===== */
+.mini-chart{display:flex;align-items:flex-end;gap:6px;height:80px;padding:12px;background:rgba(15,26,46,.3);border:1px solid rgba(255,255,255,.05);border-radius:8px}
+.mini-chart .bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--blue),var(--yellow));transform:scaleY(0);transform-origin:bottom;transition:transform 1s var(--ease-enter)}
+.mini-chart .bar.animate{transform:scaleY(1)}
+[data-anim="dashboard"]{opacity:0;transition:opacity .8s var(--ease-enter)}
+
+/* ===== SLIDE 1 - COVER ===== */
+#slide-1 .title-3d-container{position:relative;z-index:0;margin-bottom:16px}
+#slide-1 .title-3d{font-size:clamp(3.2rem,6.4vw,5.76rem);font-weight:800;color:#fff;letter-spacing:-.02em;position:relative;z-index:0;line-height:1;opacity:0;transform:translateY(20px) scale(.96);filter:blur(8px);transition:all .9s var(--ease-enter)}
+#slide-1 .title-3d.animate{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+#slide-1 .title-3d-glow{position:absolute;inset:-40px;background:radial-gradient(ellipse at center,rgba(55,118,171,.15),transparent 70%);z-index:-1;animation:glowPulse 4s ease-in-out infinite alternate}
+@keyframes glowPulse{from{opacity:.7;transform:scale(1)}to{opacity:1;transform:scale(1.05)}}
+#slide-1 .cover-subtitle{font-size:clamp(1rem,1.8vw,1.4rem);font-weight:400;color:rgba(255,255,255,.6);margin-top:12px;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)}
+#slide-1 .cover-subtitle.animate{opacity:1;transform:translateY(0)}
+#slide-1 .cover-info{font-size:13px;font-weight:400;color:rgba(255,255,255,.35);margin-top:40px;opacity:0;transition:opacity .5s var(--ease-enter)}
+#slide-1 .cover-info.animate{opacity:1}
+.cover-deco{position:absolute;pointer-events:none}
+.cover-deco-line{stroke:rgba(255,255,255,.06);stroke-width:1}
+.cover-deco-dot{fill:rgba(0,212,255,.15);animation:dotFloat 4s ease-in-out infinite alternate}
+@keyframes dotFloat{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .slide{padding:5% 6%}
+  .glass-card{padding:16px}
+  .pb-inner{padding:16px}
+  .code-content{font-size:.75rem;padding:14px}
+  #nav-arrows{padding:0 16px}
+  #nav-bottom{bottom:20px}
+  .nav-dot{width:6px;height:6px}
+  .grid-2x2{grid-template-columns:1fr!important}
+  .grid-3col{grid-template-columns:1fr!important}
+  .split-layout{flex-direction:column!important}
+  .split-left,.split-right{width:100%!important}
+}
+</style>
+</head>
+<body>
+
+<!-- GLOBAL BACKGROUND -->
+<div id="bg-global">
+  <div class="layer" id="bg-gradient"></div>
+  <div class="layer" id="bg-grid"></div>
+  <div class="layer" id="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+  <div class="layer" id="bg-particles"><canvas id="particles-canvas"></canvas></div>
+  <div class="layer" id="bg-noise"></div>
+  <div class="layer" id="bg-vignette"></div>
+  <div class="layer" id="bg-fog"></div>
+</div>
+
+<!-- SLIDES -->
+<div id="slides-container">
+
+<!-- ===== SLIDE 1 — CAPA ===== -->
+<div class="slide active" id="slide-1">
+  <svg class="cover-deco" style="width:100%;height:100%;position:absolute;top:0;left:0">
+    <line class="cover-deco-line" x1="50%" y1="45%" x2="15%" y2="15%"/>
+    <line class="cover-deco-line" x1="50%" y1="45%" x2="85%" y2="20%"/>
+    <line class="cover-deco-line" x1="50%" y1="45%" x2="20%" y2="80%"/>
+    <circle class="cover-deco-dot" cx="15%" cy="15%" r="3" style="animation-delay:0s"/>
+    <circle class="cover-deco-dot" cx="85%" cy="20%" r="3" style="animation-delay:1s"/>
+    <circle class="cover-deco-dot" cx="20%" cy="80%" r="3" style="animation-delay:2s"/>
+    <circle class="cover-deco-dot" cx="80%" cy="75%" r="3" style="animation-delay:.5s"/>
+    <circle class="cover-deco-dot" cx="10%" cy="55%" r="2.5" style="animation-delay:1.5s"/>
+    <circle class="cover-deco-dot" cx="90%" cy="50%" r="2.5" style="animation-delay:2.5s"/>
+  </svg>
+  <div class="title-3d-container">
+    <div class="title-3d-glow"></div>
+    <h1 class="title-3d" id="title-3d-python" data-anim="title" data-delay="300">Python</h1>
+  </div>
+  <p class="cover-subtitle" id="cover-subtitle" data-anim="subtitle" data-delay="600">A Linguagem Versátil do Século XXI</p>
+  <p class="cover-info" id="cover-info" data-anim="fade" data-delay="800">2025 | Apresentação Acadêmica</p>
+</div>
+
+<!-- ===== SLIDE 2 — O QUE É PYTHON ===== -->
+<div class="slide" id="slide-2">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#3776AB,#2A5A8A)">Introdução</div>
+  </div>
+  <div class="split-layout" style="display:flex;width:100%;gap:32px;align-items:flex-start">
+    <div class="split-left" style="flex:0 0 55%">
+      <h2 class="slide-title" data-anim="title">O Que É Python?</h2>
+      <p class="slide-subtitle" data-anim="subtitle" style="font-size:clamp(.85rem,1.4vw,1.1rem);color:rgba(255,255,255,.7);font-weight:400;line-height:1.7;margin-bottom:32px">
+        Python é uma linguagem de programação de alto nível, interpretada e de propósito geral. 
+        Criada por Guido van Rossum em 1991, sua filosofia enfatiza a legibilidade do código.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="glass-card" data-anim="card" data-delay="600" style="display:flex;gap:16px;align-items:center;padding:16px 20px">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <div><div style="font-size:14px;font-weight:600;color:#fff">Alto Nível</div><div style="font-size:12px;color:rgba(255,255,255,.6)">Sintaxe limpa e legível</div></div>
+        </div>
+        <div class="glass-card" data-anim="card" data-delay="750" style="display:flex;gap:16px;align-items:center;padding:16px 20px">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <div><div style="font-size:14px;font-weight:600;color:#fff">Multiplataforma</div><div style="font-size:12px;color:rgba(255,255,255,.6)">Windows, Linux, macOS</div></div>
+        </div>
+        <div class="glass-card" data-anim="card" data-delay="900" style="display:flex;gap:16px;align-items:center;padding:16px 20px">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div><div style="font-size:14px;font-weight:600;color:#fff">Comunidade</div><div style="font-size:12px;color:rgba(255,255,255,.6)">Milhões de desenvolvedores</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="split-right" style="flex:0 0 45%;display:flex;justify-content:center;padding-top:40px">
+      <div class="perspective-block perspective-block-upper" data-anim="pb" data-delay="300">
+        <div class="pb-inner" style="width:min(280px,85vw);min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+          <div style="font-size:48px;margin-bottom:12px">&#x1F40D;</div>
+          <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:4px">1991</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.6)">Guido van Rossum</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 3 — BREVE HISTÓRICO ===== -->
+<div class="slide" id="slide-3">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#FFD43B,#F59E0B);color:#000">História</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Breve Histórico</h2>
+  <p class="slide-subtitle" data-anim="subtitle" style="align-self:flex-start;margin-left:8%;margin-bottom:20px;font-size:clamp(.85rem,1.4vw,1rem)"> Marcos importantes na evolução da linguagem</p>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;width:100%;max-width:800px">
+    <div class="perspective-block perspective-block-upper" data-anim="pb" data-delay="500">
+      <div class="pb-inner" style="min-height:120px">
+        <div style="font-size:28px;font-weight:800;color:#FFD43B;margin-bottom:4px">1991</div>
+        <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.9);margin-bottom:4px">Lançamento</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5)">Sucessor do ABC</div>
+      </div>
+    </div>
+    <div class="perspective-block perspective-block-upper" data-anim="pb" data-delay="620">
+      <div class="pb-inner" style="min-height:120px">
+        <div style="font-size:28px;font-weight:800;color:#FFD43B;margin-bottom:4px">2000</div>
+        <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.9);margin-bottom:4px">Python 2.0</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5)">List comprehensions, GC</div>
+      </div>
+    </div>
+    <div class="perspective-block perspective-block-lower" data-anim="pb" data-delay="740">
+      <div class="pb-inner" style="min-height:120px">
+        <div style="font-size:28px;font-weight:800;color:#FFD43B;margin-bottom:4px">2008</div>
+        <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.9);margin-bottom:4px">Python 3.0</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5)">Quebra de compatibilidade</div>
+      </div>
+    </div>
+    <div class="perspective-block perspective-block-lower" data-anim="pb" data-delay="860">
+      <div class="pb-inner" style="min-height:120px">
+        <div style="font-size:28px;font-weight:800;color:#FFD43B;margin-bottom:4px">2020</div>
+        <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.9);margin-bottom:4px">Python 2 EOL</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5)">Fim do suporte oficial</div>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:15px;font-weight:500;font-style:italic;color:rgba(255,255,255,.6);margin-top:24px;opacity:0;transition:all .6s var(--ease-enter)" data-anim="fade" data-delay="1200">Nome inspirado em Monty Python</p>
+</div>
+
+<!-- ===== SLIDE 4 — POR QUE ESCOLHER PYTHON ===== -->
+<div class="slide" id="slide-4">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#00D4FF,#3776AB)">Vantagens</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Por Que Escolher Python?</h2>
+  <div style="display:flex;flex-direction:column;gap:16px;width:100%;max-width:700px;margin-top:16px">
+    <div class="glass-card" data-anim="card" data-delay="500" style="display:flex;gap:20px;align-items:center">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <div><div style="font-size:16px;font-weight:600;color:#fff">Sintaxe Limpa</div><div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px">Indentação em vez de chaves, código legível como pseudocódigo</div></div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="650" style="display:flex;gap:20px;align-items:center">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <div><div style="font-size:16px;font-weight:600;color:#fff">Comunidade Ativa</div><div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px">Extensa documentação, milhares de bibliotecas, suporte ativo</div></div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="800" style="display:flex;gap:20px;align-items:center">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <div><div style="font-size:16px;font-weight:600;color:#fff">Multiplataforma</div><div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px">Funciona em Windows, Linux e macOS sem modificações</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 5 — SINTAXE BÁSICA ===== -->
+<div class="slide" id="slide-5">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#306998,#3776AB)">Sintaxe</div>
+  </div>
+  <div class="split-layout" style="display:flex;width:100%;gap:32px;align-items:flex-start">
+    <div class="split-left" style="flex:0 0 50%">
+      <h2 class="slide-title" data-anim="title">Sintaxe Básica</h2>
+      <div style="display:flex;flex-direction:column;gap:16px;margin-top:16px">
+        <div style="display:flex;gap:12px;align-items:center;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)" data-anim="list-item" data-delay="500">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          <span style="font-size:clamp(.85rem,1.4vw,1rem);color:rgba(255,255,255,.7)">Indentação em vez de chaves</span>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)" data-anim="list-item" data-delay="620">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"><path d="M20 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          <span style="font-size:clamp(.85rem,1.4vw,1rem);color:rgba(255,255,255,.7)">Variáveis sem declaração de tipo</span>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)" data-anim="list-item" data-delay="740">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span style="font-size:clamp(.85rem,1.4vw,1rem);color:rgba(255,255,255,.7)">Comentários com # e strings com aspas</span>
+        </div>
+      </div>
+    </div>
+    <div class="split-right" style="flex:0 0 50%">
+      <div class="code-panel" data-anim="code" data-delay="400">
+        <div class="code-bar">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <div class="code-bar-title">main.py</div>
+        </div>
+        <div class="code-content">
+          <span class="cm"># Olá, mundo!</span><br>
+          <span class="fn">print</span><span class="op">(</span><span class="str">"Olá, mundo!"</span><span class="op">)</span><br><br>
+          <span class="cm"># Variáveis sem tipo</span><br>
+          <span class="var">nome</span> <span class="op">=</span> <span class="str">"Python"</span><br>
+          <span class="var">versao</span> <span class="op">=</span> <span class="num">3.11</span><br><br>
+          <span class="cm"># Lista</span><br>
+          <span class="var">linguagens</span> <span class="op">=</span> <span class="op">[</span><span class="str">"Python"</span><span class="op">,</span> <span class="str">"Java"</span><span class="op">,</span> <span class="str">"C++"</span><span class="op">]</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 6 — TIPOS DE DADOS ===== -->
+<div class="slide" id="slide-6">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#FF6B35,#FF4500)">Tipos</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Tipos de Dados</h2>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;width:100%;max-width:700px;margin-top:16px">
+    <div class="glass-card" data-anim="card" data-delay="500" style="text-align:center;padding:24px">
+      <div style="font-size:32px;color:#FFD43B;margin-bottom:8px">#</div>
+      <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Numéricos</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6)">int, float, complex</div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="650" style="text-align:center;padding:24px">
+      <div style="font-size:32px;color:#00D4FF;margin-bottom:8px">[ ]</div>
+      <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Sequências</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6)">list, tuple, range</div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="800" style="text-align:center;padding:24px">
+      <div style="font-size:32px;color:#3776AB;margin-bottom:8px">"</div>
+      <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Texto</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6)">str</div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="950" style="text-align:center;padding:24px">
+      <div style="font-size:32px;color:#FF6B35;margin-bottom:8px">{ }</div>
+      <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Mapeamentos</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6)">dict</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 7 — ESTRUTURAS DE CONTROLE ===== -->
+<div class="slide" id="slide-7">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#3776AB,#1E3A5F)">Controle</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Estruturas de Controle</h2>
+  <div style="display:flex;gap:20px;width:100%;max-width:900px;margin-top:20px;flex-wrap:wrap;justify-content:center">
+    <div class="perspective-block perspective-block-lower" data-anim="pb" data-delay="500">
+      <div class="pb-inner" style="width:min(240px,85vw);min-height:150px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3776AB" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
+        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Condicionais</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#FFD43B;line-height:1.6"><span class="kw">if</span> x > 0:<br>&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">'positivo'</span>)</div>
+      </div>
+    </div>
+    <div class="perspective-block perspective-block-lower" data-anim="pb" data-delay="650">
+      <div class="pb-inner" style="width:min(240px,85vw);min-height:150px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Loops</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#FFD43B;line-height:1.6"><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):<br>&nbsp;&nbsp;<span class="fn">print</span>(i)</div>
+      </div>
+    </div>
+    <div class="perspective-block perspective-block-lower" data-anim="pb" data-delay="800">
+      <div class="pb-inner" style="width:min(240px,85vw);min-height:150px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Controle</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#FFD43B;line-height:1.6"><span class="kw">break</span><br><span class="kw">continue</span><br><span class="kw">pass</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 8 — FUNÇÕES ===== -->
+<div class="slide" id="slide-8">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#61AFEF,#3776AB)">Funções</div>
+  </div>
+  <div class="split-layout" style="display:flex;width:100%;gap:32px;align-items:flex-start">
+    <div class="split-left" style="flex:0 0 50%">
+      <h2 class="slide-title" data-anim="title">Funções</h2>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
+        <div style="display:flex;gap:10px;align-items:center;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)" data-anim="list-item" data-delay="500">
+          <span style="color:#61AFEF;font-size:14px">&#9654;</span>
+          <span style="font-size:clamp(.85rem,1.4vw,1rem);color:rgba(255,255,255,.7)">Definição com <code style="color:#FFD43B;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px">def</code></span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)" data-anim="list-item" data-delay="620">
+          <span style="color:#61AFEF;font-size:14px">&#9654;</span>
+          <span style="font-size:clamp(.85rem,1.4vw,1rem);color:rgba(255,255,255,.7)">Parâmetros posicionais e keyword</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)" data-anim="list-item" data-delay="740">
+          <span style="color:#61AFEF;font-size:14px">&#9654;</span>
+          <span style="font-size:clamp(.85rem,1.4vw,1rem);color:rgba(255,255,255,.7)">Retorno com <code style="color:#FFD43B;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px">return</code></span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)" data-anim="list-item" data-delay="860">
+          <span style="color:#61AFEF;font-size:14px">&#9654;</span>
+          <span style="font-size:clamp(.85rem,1.4vw,1rem);color:rgba(255,255,255,.7)">Funções lambda anônimas</span>
+        </div>
+      </div>
+    </div>
+    <div class="split-right" style="flex:0 0 50%">
+      <div class="code-panel" data-anim="code" data-delay="400">
+        <div class="code-bar">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <div class="code-bar-title">funcoes.py</div>
+        </div>
+        <div class="code-content">
+          <span class="kw">def</span> <span class="fn">saudacao</span><span class="op">(</span><span class="var">nome</span><span class="op">):</span><br>
+          &nbsp;&nbsp;<span class="kw">return</span> <span class="str">f"Olá, <span class="op">{</span>nome<span class="op">}</span>!"</span><br><br>
+          <span class="cm"># Lambda</span><br>
+          <span class="var">dobro</span> <span class="op">=</span> <span class="kw">lambda</span> <span class="var">x</span><span class="op">:</span> <span class="var">x</span> <span class="op">*</span> <span class="num">2</span><br>
+          <span class="fn">print</span><span class="op">(</span><span class="fn">dobro</span><span class="op">(</span><span class="num">5</span><span class="op">))</span>  <span class="cm"># 10</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:16px;justify-content:center">
+        <div class="perspective-block perspective-block-lower" data-anim="pb" data-delay="800">
+          <div class="pb-inner" style="width:min(200px,85vw);min-height:80px">
+            <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Parâmetros</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.5)">*args, **kwargs, default</div>
+          </div>
+        </div>
+        <div class="perspective-block perspective-block-lower" data-anim="pb" data-delay="950">
+          <div class="pb-inner" style="width:min(200px,85vw);min-height:80px">
+            <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Lambda</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.5)">Funções anônimas em uma linha</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 9 — LISTAS E DICIONÁRIOS ===== -->
+<div class="slide" id="slide-9">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#98C379,#306998)">Estruturas</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Listas e Dicionários</h2>
+  <div class="split-layout" style="display:flex;width:100%;gap:0;margin-top:16px;position:relative">
+    <div class="split-left" style="flex:1;padding:0 24px">
+      <div style="font-size:36px;color:#00D4FF;font-weight:700;margin-bottom:8px;opacity:0;transform:translateX(-20px);transition:all .8s var(--ease-enter)" data-anim="list-section" data-delay="500">[ ]</div>
+      <div style="font-size:18px;font-weight:600;color:#fff;margin-bottom:4px;opacity:0;transition:all .6s var(--ease-enter)" data-anim="list-section" data-delay="500">Listas</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:12px;opacity:0;transition:all .6s var(--ease-enter)" data-anim="list-section" data-delay="500">Coleções mutáveis e ordenadas</div>
+      <div class="code-panel" data-anim="code" data-delay="600">
+        <div class="code-bar"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-bar-title">listas.py</div></div>
+        <div class="code-content">
+          <span class="var">frutas</span> <span class="op">=</span> <span class="op">[</span><span class="str">"maçã"</span><span class="op">,</span> <span class="str">"banana"</span><span class="op">]</span><br>
+          <span class="var">frutas</span><span class="op">.</span><span class="fn">append</span><span class="op">(</span><span class="str">"laranja"</span><span class="op">)</span><br>
+          <span class="fn">print</span><span class="op">(</span><span class="var">frutas</span><span class="op">[</span><span class="num">0</span><span class="op">])</span>  <span class="cm"># maçã</span>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+        <span class="method-badge" data-anim="badge" data-delay="900">append</span>
+        <span class="method-badge" data-anim="badge" data-delay="980">pop</span>
+        <span class="method-badge" data-anim="badge" data-delay="1060">sort</span>
+        <span class="method-badge" data-anim="badge" data-delay="1140">len</span>
+      </div>
+    </div>
+    <div style="width:1px;background:rgba(255,255,255,.08);align-self:stretch;flex-shrink:0"></div>
+    <div class="split-right" style="flex:1;padding:0 24px">
+      <div style="font-size:36px;color:#FFD43B;font-weight:700;margin-bottom:8px;opacity:0;transform:translateX(20px);transition:all .8s var(--ease-enter)" data-anim="list-section" data-delay="600">{ }</div>
+      <div style="font-size:18px;font-weight:600;color:#fff;margin-bottom:4px;opacity:0;transition:all .6s var(--ease-enter)" data-anim="list-section" data-delay="600">Dicionários</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:12px;opacity:0;transition:all .6s var(--ease-enter)" data-anim="list-section" data-delay="600">Pares chave-valor</div>
+      <div class="code-panel" data-anim="code" data-delay="700">
+        <div class="code-bar"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-bar-title">dicts.py</div></div>
+        <div class="code-content">
+          <span class="var">pessoa</span> <span class="op">=</span> <span class="op">{</span><span class="str">"nome"</span><span class="op">:</span> <span class="str">"Ana"</span><span class="op">,</span> <span class="str">"idade"</span><span class="op">:</span> <span class="num">25</span><span class="op">}</span><br>
+          <span class="fn">print</span><span class="op">(</span><span class="var">pessoa</span><span class="op">[</span><span class="str">"nome"</span><span class="op">])</span>  <span class="cm"># Ana</span>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+        <span class="method-badge" data-anim="badge" data-delay="1000">keys</span>
+        <span class="method-badge" data-anim="badge" data-delay="1080">values</span>
+        <span class="method-badge" data-anim="badge" data-delay="1160">items</span>
+        <span class="method-badge" data-anim="badge" data-delay="1240">get</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 10 — MANIPULAÇÃO DE ARQUIVOS ===== -->
+<div class="slide" id="slide-10">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#98C379,#306998)">Arquivos</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Manipulação de Arquivos</h2>
+  <div style="display:flex;gap:16px;width:100%;max-width:900px;margin-top:12px;flex-wrap:wrap;justify-content:center">
+    <div class="glass-card" data-anim="card" data-delay="500" style="flex:1;min-width:200px;text-align:center">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">Abertura</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#FFD43B;margin-bottom:4px">open('arquivo.txt')</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6)">Abre um arquivo no modo especificado</div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="650" style="flex:1;min-width:200px;text-align:center">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">Modos</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:4px">
+        <span class="method-badge animate" style="opacity:1;transform:scale(1)">r</span>
+        <span class="method-badge animate" style="opacity:1;transform:scale(1)">w</span>
+        <span class="method-badge animate" style="opacity:1;transform:scale(1)">a</span>
+        <span class="method-badge animate" style="opacity:1;transform:scale(1)">r+</span>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6)">Controla como o arquivo é acessado</div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="800" style="flex:1;min-width:200px;text-align:center">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#306998" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">Context Manager</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#FFD43B;margin-bottom:4px">with open(...) as f:</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6)">Fecha automaticamente o arquivo</div>
+    </div>
+  </div>
+  <div class="code-panel" data-anim="code" data-delay="900" style="width:100%;max-width:500px;margin-top:16px">
+    <div class="code-bar"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-bar-title">arquivos.py</div></div>
+    <div class="code-content">
+      <span class="kw">with</span> <span class="fn">open</span><span class="op">(</span><span class="str">"dados.txt"</span><span class="op">,</span> <span class="str">"r"</span><span class="op">)</span> <span class="kw">as</span> <span class="var">arquivo</span><span class="op">:</span><br>
+      &nbsp;&nbsp;<span class="var">conteudo</span> <span class="op">=</span> <span class="var">arquivo</span><span class="op">.</span><span class="fn">read</span><span class="op">()</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 11 — TRATAMENTO DE EXCEÇÕES ===== -->
+<div class="slide" id="slide-11">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#E06C75,#BE5046)">Exceções</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Tratamento de Exceções</h2>
+  <div class="split-layout" style="display:flex;width:100%;gap:24px;align-items:flex-start;margin-top:8px">
+    <div class="split-left" style="flex:0 0 55%;display:flex;flex-direction:column;gap:8px">
+      <div class="accordion-item" data-anim="accordion" data-delay="500" onclick="toggleAccordion(this)" style="position:relative">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#E06C75;border-radius:0 3px 3px 0"></div>
+        <div class="accordion-header">
+          <h4>try</h4>
+          <svg class="arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">O bloco que contém o código que pode gerar erro. Python tenta executar este bloco normalmente.</div></div>
+      </div>
+      <div class="accordion-item" data-anim="accordion" data-delay="620" onclick="toggleAccordion(this)" style="position:relative">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#E06C75;border-radius:0 3px 3px 0"></div>
+        <div class="accordion-header">
+          <h4>except</h4>
+          <svg class="arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">Captura exceções específicas ou genéricas. Permite tratamento granular de erros.</div></div>
+      </div>
+      <div class="accordion-item" data-anim="accordion" data-delay="740" onclick="toggleAccordion(this)" style="position:relative">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#E06C75;border-radius:0 3px 3px 0"></div>
+        <div class="accordion-header">
+          <h4>finally</h4>
+          <svg class="arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="accordion-body"><div class="accordion-body-inner">Executa sempre, independente de erro. Ideal para limpeza de recursos.</div></div>
+      </div>
+    </div>
+    <div class="split-right" style="flex:0 0 45%">
+      <div class="code-panel" data-anim="code" data-delay="500">
+        <div class="code-bar"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-bar-title">excecoes.py</div></div>
+        <div class="code-content">
+          <span class="kw">try</span><span class="op">:</span><br>
+          &nbsp;&nbsp;<span class="var">resultado</span> <span class="op">=</span> <span class="num">10</span> <span class="op">/</span> <span class="num">0</span><br>
+          <span class="kw">except</span> <span class="hl">ZeroDivisionError</span><span class="op">:</span><br>
+          &nbsp;&nbsp;<span class="fn">print</span><span class="op">(</span><span class="str">"Erro: divisão por zero"</span><span class="op">)</span><br>
+          <span class="kw">except</span> <span class="hl">Exception</span> <span class="kw">as</span> <span class="var">e</span><span class="op">:</span><br>
+          &nbsp;&nbsp;<span class="fn">print</span><span class="op">(</span><span class="str">f"Erro: <span class="op">{</span>e<span class="op">}</span>"</span><span class="op">)</span><br>
+          <span class="kw">finally</span><span class="op">:</span><br>
+          &nbsp;&nbsp;<span class="fn">print</span><span class="op">(</span><span class="str">"Executado sempre"</span><span class="op">)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 12 — OOP ===== -->
+<div class="slide" id="slide-12">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#C678DD,#9B59B6)">OOP</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Programação Orientada a Objetos</h2>
+  <div style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:700px;margin-top:12px">
+    <div class="glass-card" data-anim="card" data-delay="500" style="display:flex;gap:20px;align-items:flex-start">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C678DD" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:2px"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      <div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">Classes e Objetos</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#FFD43B;margin-bottom:4px">class Dog:<br>&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">__init__</span>(self, name):</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6)">Blueprints para criar objetos</div>
+      </div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="650" style="display:flex;gap:20px;align-items:flex-start">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#61AFEF" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:2px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">Herança e Polimorfismo</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#FFD43B;margin-bottom:4px">class Cachorro(Animal):</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6)">Reutilização e especialização</div>
+      </div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="800" style="display:flex;gap:20px;align-items:flex-start">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#98C379" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:2px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">Encapsulamento</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#FFD43B;margin-bottom:4px">self.__senha = 'secret'</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6)">Proteção de dados internos</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 13 — BIBLIOTECAS E FRAMEWORKS ===== -->
+<div class="slide" id="slide-13">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#FFD43B,#FF6B35);color:#000">Ecossistema</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Bibliotecas e Frameworks</h2>
+  <div style="display:flex;gap:20px;width:100%;max-width:900px;margin-top:16px;flex-wrap:wrap;justify-content:center">
+    <div class="perspective-block perspective-block-upper" data-anim="pb" data-delay="500">
+      <div class="pb-inner" style="width:min(240px,85vw);min-height:150px;text-align:center">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:8px">Dados</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center">
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">NumPy</span>
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">Pandas</span>
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">Matplotlib</span>
+        </div>
+      </div>
+    </div>
+    <div class="perspective-block perspective-block-upper" data-anim="pb" data-delay="650">
+      <div class="pb-inner" style="width:min(240px,85vw);min-height:150px;text-align:center">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:8px">Web</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center">
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">Django</span>
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">Flask</span>
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">FastAPI</span>
+        </div>
+      </div>
+    </div>
+    <div class="perspective-block perspective-block-upper" data-anim="pb" data-delay="800">
+      <div class="pb-inner" style="width:min(240px,85vw);min-height:150px;text-align:center">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C678DD" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2z"/></svg>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:8px">IA</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center">
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">TensorFlow</span>
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">PyTorch</span>
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">scikit-learn</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 14 — PYTHON WEB ===== -->
+<div class="slide" id="slide-14">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#306998,#3776AB)">Web</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Python no Desenvolvimento Web</h2>
+  <div class="split-layout" style="display:flex;width:100%;gap:24px;align-items:flex-start;margin-top:8px">
+    <div class="split-left" style="flex:0 0 50%;display:flex;flex-direction:column;gap:12px">
+      <div class="perspective-block perspective-block-lower" data-anim="pb" data-delay="500">
+        <div class="pb-inner" style="min-height:70px">
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:2px">Backend</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.5)">Lógica, banco de dados, autenticação</div>
+        </div>
+      </div>
+      <div class="perspective-block perspective-block-lower" data-anim="pb" data-delay="620">
+        <div class="pb-inner" style="min-height:70px">
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:2px">APIs RESTful</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.5)">FastAPI, endpoints, JSON</div>
+        </div>
+      </div>
+      <div class="perspective-block perspective-block-lower" data-anim="pb" data-delay="740">
+        <div class="pb-inner" style="min-height:70px">
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:2px">Templates</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.5)">Jinja2, HTML dinâmico</div>
+        </div>
+      </div>
+    </div>
+    <div class="split-right" style="flex:0 0 50%">
+      <div class="code-panel" data-anim="code" data-delay="500">
+        <div class="code-bar"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-bar-title">api.py</div></div>
+        <div class="code-content">
+          <span class="kw">from</span> <span class="var">fastapi</span> <span class="kw">import</span> <span class="hl">FastAPI</span><br>
+          <span class="var">app</span> <span class="op">=</span> <span class="hl">FastAPI</span><span class="op">()</span><br><br>
+          <span class="op">@</span><span class="var">app</span><span class="op">.</span><span class="fn">get</span><span class="op">(</span><span class="str">"/users/{user_id}"</span><span class="op">)</span><br>
+          <span class="kw">def</span> <span class="fn">get_user</span><span class="op">(</span><span class="var">user_id</span><span class="op">:</span> <span class="hl">int</span><span class="op">):</span><br>
+          &nbsp;&nbsp;<span class="kw">return</span> <span class="op">{</span><span class="str">"user_id"</span><span class="op">:</span> <span class="var">user_id</span><span class="op">,</span> <span class="str">"name"</span><span class="op">:</span> <span class="str">"Ana"</span><span class="op">}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 15 — CIÊNCIA DE DADOS ===== -->
+<div class="slide" id="slide-15">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#61AFEF,#3776AB)">Dados</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Python em Ciência de Dados</h2>
+  <div style="display:flex;gap:20px;width:100%;max-width:900px;margin-top:12px;flex-wrap:wrap;justify-content:center">
+    <div class="perspective-block perspective-block-upper" data-anim="pb" data-delay="500">
+      <div class="pb-inner" style="width:min(280px,85vw);min-height:120px;text-align:center">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#61AFEF" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:8px">Análise e Visualização</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center">
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">Pandas</span>
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">Matplotlib</span>
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">Seaborn</span>
+        </div>
+      </div>
+    </div>
+    <div class="perspective-block perspective-block-upper" data-anim="pb" data-delay="650">
+      <div class="pb-inner" style="width:min(280px,85vw);min-height:120px;text-align:center">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C678DD" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2z"/></svg>
+        <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:8px">Machine Learning</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center">
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">scikit-learn</span>
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">TensorFlow</span>
+          <span class="method-badge animate" style="opacity:1;transform:scale(1)">PyTorch</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:16px;width:100%;max-width:700px;margin-top:16px;justify-content:center" data-anim="dashboard" data-delay="700">
+    <div style="flex:1;text-align:center">
+      <div class="mini-chart">
+        <div class="bar" data-anim="bar" data-delay="800" style="height:60%"></div>
+        <div class="bar" data-anim="bar" data-delay="850" style="height:80%"></div>
+        <div class="bar" data-anim="bar" data-delay="900" style="height:45%"></div>
+        <div class="bar" data-anim="bar" data-delay="950" style="height:90%"></div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:6px">Receita</div>
+    </div>
+    <div style="flex:1;text-align:center">
+      <div class="mini-chart">
+        <div class="bar" data-anim="bar" data-delay="820" style="height:70%"></div>
+        <div class="bar" data-anim="bar" data-delay="870" style="height:50%"></div>
+        <div class="bar" data-anim="bar" data-delay="920" style="height:85%"></div>
+        <div class="bar" data-anim="bar" data-delay="970" style="height:65%"></div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:6px">Usuários</div>
+    </div>
+    <div style="flex:1;text-align:center">
+      <div class="mini-chart">
+        <div class="bar" data-anim="bar" data-delay="840" style="height:40%"></div>
+        <div class="bar" data-anim="bar" data-delay="890" style="height:75%"></div>
+        <div class="bar" data-anim="bar" data-delay="940" style="height:95%"></div>
+        <div class="bar" data-anim="bar" data-delay="990" style="height:55%"></div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:6px">Crescimento</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 16 — AUTOMAÇÃO ===== -->
+<div class="slide" id="slide-16">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#98C379,#306998)">Automação</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Python em Automação</h2>
+  <div style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:700px;margin-top:12px">
+    <div class="glass-card" data-anim="card" data-delay="500" style="display:flex;gap:20px;align-items:center">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#98C379" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+      <div><div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:2px">Scripts</div><div style="font-size:13px;color:rgba(255,255,255,.6)">Automatize tarefas repetitivas com scripts curtos e poderosos</div></div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="650" style="display:flex;gap:20px;align-items:center">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#61AFEF" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <div><div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:2px">Web Scraping</div><div style="font-size:13px;color:rgba(255,255,255,.6)">BeautifulSoup e requests para extrair dados da web</div></div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="800" style="display:flex;gap:20px;align-items:center">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFD43B" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+      <div><div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:2px">Automação de Escritório</div><div style="font-size:13px;color:rgba(255,255,255,.6)">openpyxl, smtplib — planilhas e e-mails automaticamente</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 17 — BOAS PRÁTICAS ===== -->
+<div class="slide" id="slide-17">
+  <div class="tag-3d" style="position:absolute;top:6%;left:8%">
+    <div class="tag-3d-inner" style="background:linear-gradient(135deg,#98C379,#306998)">Práticas</div>
+  </div>
+  <h2 class="slide-title" data-anim="title" style="align-self:flex-start;margin-left:8%">Boas Práticas</h2>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;width:100%;max-width:700px;margin-top:12px">
+    <div class="glass-card" data-anim="card" data-delay="500" style="text-align:center;padding:24px">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#98C379" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">PEP 8</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6)">Padrão de estilo para código Python legível e consistente</div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="650" style="text-align:center;padding:24px">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+      <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">Git</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6)">Versionamento colaborativo e histórico de mudanças</div>
+    </div>
+    <div class="glass-card" data-anim="card" data-delay="800" style="text-align:center;padding:24px;grid-column:span 2;max-width:340px;justify-self:center">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#61AFEF" stroke-width="2" stroke-linecap="round" style="margin-bottom:8px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px">Testes</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:8px">unittest e pytest para código confiável</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center">
+        <span class="method-badge animate" style="opacity:1;transform:scale(1)">unittest</span>
+        <span class="method-badge animate" style="opacity:1;transform:scale(1)">pytest</span>
+        <span class="method-badge animate" style="opacity:1;transform:scale(1)">coverage</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 18 — CONCLUSÃO ===== -->
+<div class="slide" id="slide-18">
+  <div class="perspective-block perspective-block-upper" data-anim="pb" data-delay="200" style="margin-bottom:28px">
+    <div class="pb-inner" style="width:min(320px,85vw);min-height:90px;background:linear-gradient(135deg,#3776AB,#FFD43B);display:flex;align-items:center;justify-content:center;text-align:center;border-color:rgba(255,255,255,.2)">
+      <div style="font-size:24px;font-weight:800;color:#fff">Continue Aprendendo</div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+    <div style="display:flex;gap:10px;align-items:center;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)" data-anim="list-item" data-delay="600">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#98C379" stroke="none"><path d="M20 6L9 17l-5-5"/></svg>
+      <span style="font-size:14px;color:rgba(255,255,255,.6)">Python é essencial no mercado de trabalho</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)" data-anim="list-item" data-delay="750">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#98C379" stroke="none"><path d="M20 6L9 17l-5-5"/></svg>
+      <span style="font-size:14px;color:rgba(255,255,255,.6)">Versatilidade em diversas áreas</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;opacity:0;transform:translateY(15px);transition:all .6s var(--ease-enter)" data-anim="list-item" data-delay="900">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#98C379" stroke="none"><path d="M20 6L9 17l-5-5"/></svg>
+      <span style="font-size:14px;color:rgba(255,255,255,.6)">Pratique, construa, evolua</span>
+    </div>
+  </div>
+  <p style="font-size:13px;font-weight:500;color:rgba(255,255,255,.3);margin-top:40px;opacity:0;transition:opacity .5s var(--ease-enter)" data-anim="fade" data-delay="1200">Python — A Linguagem do Século XXI</p>
+</div>
+
+</div><!-- /slides-container -->
+
+<!-- NAVIGATION -->
+<div id="nav-arrows">
+  <button id="btn-prev" class="disabled" aria-label="Slide anterior">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button id="btn-next" aria-label="Próximo slide">
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+<div id="nav-bottom">
+  <div id="slide-counter">01 / 18</div>
+  <div id="progress-bar"><div id="progress-fill" style="width:5.56%"></div></div>
+  <div id="nav-dots"></div>
+</div>
+
+<script>
+(function(){
+  const TOTAL=18;
+  let current=1;
+  let animating=false;
+  const slides=document.querySelectorAll('.slide');
+  const counter=document.getElementById('slide-counter');
+  const progressFill=document.getElementById('progress-fill');
+  const dotsContainer=document.getElementById('nav-dots');
+  const btnPrev=document.getElementById('btn-prev');
+  const btnNext=document.getElementById('btn-next');
+
+  // Create dots
+  for(let i=1;i<=TOTAL;i++){
+    const d=document.createElement('div');
+    d.className='nav-dot'+(i===1?' active':'');
+    d.dataset.slide=i;
+    d.addEventListener('click',()=>goToSlide(i));
+    dotsContainer.appendChild(d);
+  }
+
+  function updateUI(){
+    counter.textContent=String(current).padStart(2,'0')+' / '+TOTAL;
+    progressFill.style.width=((current/TOTAL)*100)+'%';
+    document.querySelectorAll('.nav-dot').forEach((d,i)=>{
+      d.classList.toggle('active',i+1===current);
+    });
+    btnPrev.classList.toggle('disabled',current===1);
+    btnNext.classList.toggle('disabled',current===TOTAL);
+  }
+
+  function resetSlide(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.classList.remove('animate');
+      if(el.classList.contains('accordion-item'))el.classList.remove('open');
+      const anim=el.dataset.anim;
+      if(anim==='list-item'){
+        el.style.opacity='0';
+        el.style.transform='translateY(15px)';
+        el.style.filter='blur(6px)';
+      }
+      if(anim==='list-section'){
+        const origTransform=el.getAttribute('data-orig-transform')||'translateY(15px)';
+        el.style.opacity='0';
+        el.style.transform=origTransform;
+        el.style.filter='blur(6px)';
+      }
+      if(anim==='fade')el.style.opacity='0';
+    });
+  }
+
+  function animateSlide(slide){
+    const items=slide.querySelectorAll('[data-anim]');
+    items.forEach(el=>{
+      const delay=parseInt(el.dataset.delay)||0;
+      setTimeout(()=>{
+        const anim=el.dataset.anim;
+        if(anim==='title')el.classList.add('animate');
+        else if(anim==='subtitle')el.classList.add('animate');
+        else if(anim==='card')el.classList.add('animate');
+        else if(anim==='pb')el.classList.add('animate');
+        else if(anim==='code')el.classList.add('animate');
+        else if(anim==='list-item'){
+          el.style.opacity='1';
+          el.style.transform='translateY(0)';
+          el.style.filter='blur(0)';
+        }
+        else if(anim==='list-section'){
+          el.style.opacity='1';
+          el.style.transform='translateX(0)';
+          el.style.filter='blur(0)';
+        }
+        else if(anim==='badge')el.classList.add('animate');
+        else if(anim==='accordion')el.classList.add('animate');
+        else if(anim==='fade')el.style.opacity='1';
+        else if(anim==='bar')el.classList.add('animate');
+        else if(anim==='dashboard')el.style.opacity='1';
+      },delay);
+    });
+  }
+
+  // Store original transforms for list-section elements
+  document.querySelectorAll('[data-anim="list-section"]').forEach(el=>{
+    const cs=getComputedStyle(el);
+    const t=cs.transform||'none';
+    if(t!=='none'){
+      el.setAttribute('data-orig-transform',t);
+    }else{
+      const inlineTransform=el.style.transform;
+      if(inlineTransform)el.setAttribute('data-orig-transform',inlineTransform);
+      else el.setAttribute('data-orig-transform','translateY(15px)');
+    }
+  });
+
+  function goToSlide(n){
+    if(n===current||animating||n<1||n>TOTAL)return;
+    animating=true;
+    const prev=slides[current-1];
+    const next=slides[n-1];
+
+    prev.classList.remove('active');
+    prev.classList.add('exit');
+    resetSlide(prev);
+
+    setTimeout(()=>{
+      prev.classList.remove('exit');
+      prev.style.visibility='hidden';
+      next.style.visibility='visible';
+      next.classList.add('active');
+      current=n;
+      updateUI();
+      animateSlide(next);
+      setTimeout(()=>{animating=false;},600);
+    },400);
+  }
+
+  // Keyboard
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();goToSlide(current+1);}
+    else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();goToSlide(current-1);}
+    else if(e.key==='Home'){e.preventDefault();goToSlide(1);}
+    else if(e.key==='End'){e.preventDefault();goToSlide(TOTAL);}
+  });
+
+  // Mouse wheel - DISABLED
+  document.addEventListener('wheel',e=>{e.preventDefault();},{passive:false});
+
+  // Touch/Swipe
+  let touchStartX=0,touchStartY=0;
+  document.addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-touchStartX;
+    const dy=e.changedTouches[0].clientY-touchStartY;
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+      if(dx<0)goToSlide(current+1);else goToSlide(current-1);
+    }
+  },{passive:true});
+
+  // Arrow buttons
+  btnPrev.addEventListener('click',()=>goToSlide(current-1));
+  btnNext.addEventListener('click',()=>goToSlide(current+1));
+
+  // Click on slide - DISABLED (no click-to-advance)
+
+  // Accordion
+  window.toggleAccordion=function(item){
+    item.classList.toggle('open');
+  };
+
+  // Particles
+  const canvas=document.getElementById('particles-canvas');
+  const ctx=canvas.getContext('2d');
+  let particles=[];
+  function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+  resizeCanvas();
+  window.addEventListener('resize',resizeCanvas);
+
+  function createParticles(){
+    particles=[];
+    const count=35;
+    for(let i=0;i<count;i++){
+      particles.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        size:Math.random()*1.5+1.5,
+        speedY:-(Math.random()*0.3+0.2),
+        opacity:Math.random()*0.1+0.05
+      });
+    }
+  }
+  createParticles();
+
+  function drawParticles(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${p.opacity})`;
+      ctx.fill();
+      p.y+=p.speedY;
+      if(p.y<-10){p.y=canvas.height+10;p.x=Math.random()*canvas.width;}
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  // Title 3D extrusion
+  const titleEl=document.getElementById('title-3d-python');
+  if(titleEl){
+    const layers=[];
+    for(let i=1;i<=38;i++){
+      const r=Math.round(255-(255-55)*(i/38));
+      const g=Math.round(212-(212-118)*(i/38));
+      const b=Math.round(59+(171-59)*(i/38));
+      layers.push(`${i}px ${i}px 0 rgba(${r},${g},${b},0.8)`);
+    }
+    titleEl.style.textShadow=layers.join(',');
+  }
+
+  // Initial animation for slide 1
+  setTimeout(()=>{
+    const s1=document.getElementById('slide-1');
+    if(s1)animateSlide(s1);
+  },100);
+})();
+</script>
+</body>
+</html>
