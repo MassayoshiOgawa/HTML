@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backrooms: O Universo do Horror Liminar</title>
+<style>
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --preto-profundo: #0a0a0f;
+    --branco-fantasma: #e8e6e1;
+    --amarelo-fluorescente: #c5b33a;
+    --verde-fluorescente: #39ff14;
+    --marrom-escuro: #2a1f0e;
+    --cinza-medio: #4a4a4f;
+    --amarelo-quente: #d4a017;
+    --vermelho-perigo: #8b0000;
+    --fundo-base-topo: #0a0a0f;
+    --fundo-base-fundo: #12110d;
+    --fundo-atmosfero-centro: #1a180f;
+    --cards-fundo: rgba(30, 28, 20, 0.85);
+    --cards-borda: rgba(197, 179, 58, 0.15);
+    --botoes-fundo: #c5b33a;
+    --botoes-texto: #0a0a0f;
+    --botoes-hover: #d4a017;
+    --titulos-cor: #e8e6e1;
+    --subtitulos-cor: #c5b33a;
+    --textos-conteudo: #d4d2cd;
+    --textos-secundarios: #8a8880;
+    --links-hover: #39ff14;
+    --extrusao-cor: #1a1508;
+    --sombra-fundo: #0a0a0f;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--preto-profundo);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    color: var(--textos-conteudo);
+    -webkit-font-smoothing: antialiased;
+}
+
+#presentation {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 500ms ease-in;
+    padding: clamp(20px, 4vw, 60px);
+    padding-bottom: 80px;
+}
+
+.slide.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Global background layers */
+.bg-base {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at 50% 50%, var(--fundo-atmosfero-centro) 0%, var(--preto-profundo) 100%);
+    z-index: -10;
+}
+
+.bg-noise {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -9;
+    opacity: 0.04;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    animation: noiseBreath 8s ease-in-out infinite;
+}
+
+@keyframes noiseBreath {
+    0%, 100% { opacity: 0.03; }
+    50% { opacity: 0.05; }
+}
+
+.bg-scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -8;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 2px,
+        rgba(255,255,255,0.03) 2px,
+        rgba(255,255,255,0.03) 4px
+    );
+    animation: scanlinesMove 12s linear infinite;
+}
+
+@keyframes scanlinesMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(4px); }
+}
+
+.bg-vignette {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -7;
+    pointer-events: none;
+    box-shadow: inset 0 0 150px rgba(0,0,0,0.7);
+}
+
+#particles-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -6;
+    pointer-events: none;
+}
+
+/* Navigation */
+.nav-btn {
+    position: fixed;
+    bottom: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(197, 179, 58, 0.1);
+    border: 1px solid rgba(197, 179, 58, 0.3);
+    color: rgba(197, 179, 58, 0.6);
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 300ms ease-out;
+    font-family: 'Inter', sans-serif;
+}
+
+.nav-btn:hover {
+    background: rgba(197, 179, 58, 0.2);
+    border-color: rgba(197, 179, 58, 0.7);
+    color: rgba(197, 179, 58, 0.9);
+    box-shadow: 0 0 20px rgba(197, 179, 58, 0.3);
+    transform: scale(1.1);
+}
+
+.nav-btn:active {
+    transform: scale(0.97);
+}
+
+.nav-btn.prev {
+    left: 24px;
+}
+
+.nav-btn.next {
+    right: 24px;
+}
+
+.nav-btn.disabled {
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.nav-dots {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+    align-items: center;
+}
+
+.nav-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid rgba(197, 179, 58, 0.3);
+    background: transparent;
+    cursor: pointer;
+    transition: all 300ms ease-out;
+}
+
+.nav-dot.active {
+    background: var(--amarelo-fluorescente);
+    width: 8px;
+    height: 8px;
+    border-color: var(--amarelo-fluorescente);
+    animation: dotPulse 3s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.nav-dot:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 8px rgba(197, 179, 58, 0.4);
+}
+
+.progress-bar {
+    position: fixed;
+    bottom: 52px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--amarelo-fluorescente), var(--verde-fluorescente));
+    transition: width 600ms ease-out;
+    border-radius: 2px;
+}
+
+/* Index panel */
+.index-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 36px;
+    height: 36px;
+    background: rgba(197, 179, 58, 0.08);
+    border: 1px solid rgba(197, 179, 58, 0.15);
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 300ms ease-out;
+}
+
+.index-btn span {
+    width: 16px;
+    height: 1.5px;
+    background: rgba(197, 179, 58, 0.5);
+    transition: all 300ms ease-out;
+}
+
+.index-btn:hover {
+    background: rgba(197, 179, 58, 0.15);
+    border-color: rgba(197, 179, 58, 0.3);
+}
+
+.index-btn:hover span {
+    background: rgba(197, 179, 58, 0.8);
+}
+
+.index-panel {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 280px;
+    height: 100%;
+    background: rgba(10, 10, 15, 0.97);
+    border-right: 1px solid rgba(197, 179, 58, 0.15);
+    z-index: 1002;
+    transition: left 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 80px 20px 20px;
+    overflow-y: auto;
+}
+
+.index-panel.open {
+    left: 0;
+}
+
+.index-panel h3 {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--amarelo-fluorescente);
+    margin-bottom: 20px;
+}
+
+.index-item {
+    padding: 12px 16px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 300ms ease-out;
+    font-size: 0.85rem;
+    color: var(--textos-secundarios);
+    border-left: 2px solid transparent;
+}
+
+.index-item:hover {
+    background: rgba(197, 179, 58, 0.08);
+    color: var(--branco-fantasma);
+    border-left-color: var(--amarelo-fluorescente);
+}
+
+.index-item.active {
+    color: var(--amarelo-fluorescente);
+    border-left-color: var(--amarelo-fluorescente);
+}
+
+.index-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1001;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 400ms ease-out;
+}
+
+.index-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 3D Perspective blocks */
+.bloco-perspectiva {
+    background: linear-gradient(135deg, rgba(30, 28, 20, 0.9), rgba(20, 18, 12, 0.95));
+    border: 1px solid rgba(197, 179, 58, 0.12);
+    border-radius: 4px;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(197, 179, 58, 0.08);
+    width: min(350px, 85vw);
+    max-width: 350px;
+    max-height: 420px;
+    padding: clamp(12px, 3vw, 24px) clamp(16px, 4vw, 32px);
+    transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bloco-perspectiva-superior {
+    transform: perspective(250px) rotateX(-10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+}
+
+.bloco-perspectiva-inferior {
+    transform: perspective(250px) rotateX(10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+}
+
+/* Slide 1 specific */
+.slide-1-bg-blobs {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -5;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    animation: blobBreathe 6s ease-in-out infinite;
+}
+
+@keyframes blobBreathe {
+    0%, 100% { transform: scale(0.98); }
+    50% { transform: scale(1.02); }
+}
+
+/* Glitch effect */
+.glitch-title {
+    position: relative;
+}
+
+.glitch-title.glitching::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 2px;
+    color: var(--verde-fluorescente);
+    opacity: 0.7;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    animation: glitchClip 100ms steps(2) forwards;
+}
+
+@keyframes glitchClip {
+    0% { transform: translate(3px, -1px); }
+    50% { transform: translate(-2px, 1px); }
+    100% { transform: translate(0, 0); opacity: 0; }
+}
+
+/* Slide content typography */
+.slide-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 700;
+    color: var(--titulos-cor);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+}
+
+.slide-subtitle {
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    font-weight: 400;
+    color: var(--subtitulos-cor);
+    letter-spacing: 0.08em;
+    margin-bottom: 1.5rem;
+}
+
+.slide-content {
+    font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+    font-weight: 400;
+    color: var(--textos-conteudo);
+    line-height: 1.6;
+}
+
+.label-tech {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 0.7rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--amarelo-fluorescente);
+    opacity: 0.15;
+    position: absolute;
+}
+
+/* Entrance animations */
+.anim-hidden {
+    opacity: 0;
+    transform: translateY(25px);
+    filter: blur(10px);
+    transition: all 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.anim-hidden.sub-anim {
+    transform: translateY(-15px);
+    transition-duration: 700ms;
+}
+
+.anim-hidden.content-anim {
+    transform: translateY(12px);
+    transition-duration: 600ms;
+    transition-timing-function: ease-out;
+}
+
+.anim-hidden.card-anim {
+    transform: translateY(20px) scale(0.94);
+    filter: blur(8px);
+    transition-duration: 800ms;
+}
+
+.anim-hidden.icon-anim {
+    transform: scale(0.5);
+    transition-duration: 500ms;
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.anim-hidden.persp-anim {
+    transform: perspective(250px) rotateX(-10deg) rotateY(25deg) translateZ(-40px);
+    filter: blur(4px);
+    transition-duration: 1000ms;
+}
+
+.anim-hidden.persp-anim-inferior {
+    transform: perspective(250px) rotateX(10deg) rotateY(25deg) translateZ(-40px);
+    filter: blur(4px);
+    transition-duration: 1000ms;
+}
+
+.anim-hidden.line-anim {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition-duration: 600ms;
+    transition-timing-function: ease-out;
+}
+
+.anim-hidden.fade-anim {
+    transform: none;
+    filter: none;
+    transition-duration: 600ms;
+    transition-timing-function: ease-out;
+}
+
+.anim-hidden.move-left-anim {
+    transform: translateX(-30px);
+    filter: blur(4px);
+    transition-duration: 800ms;
+}
+
+.anim-hidden.move-right-anim {
+    transform: translateX(30px);
+    filter: blur(4px);
+    transition-duration: 800ms;
+}
+
+.slide.active .anim-hidden,
+.slide.active .anim-hidden {
+    opacity: 1;
+    transform: none;
+    filter: none;
+}
+
+.slide.active .anim-hidden.persp-anim {
+    transform: perspective(250px) rotateX(-10deg) rotateY(25deg) translateZ(0);
+    filter: none;
+}
+
+.slide.active .anim-hidden.persp-anim-inferior {
+    transform: perspective(250px) rotateX(10deg) rotateY(25deg) translateZ(0);
+    filter: none;
+}
+
+/* SLIDE 1 - Cover */
+#slide-1 {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+}
+
+#slide-1 .main-title {
+    font-size: clamp(3.2rem, 6.4vw, 5.76rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--branco-fantasma);
+    position: relative;
+    z-index: 0;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    max-width: 90vw;
+    word-wrap: break-word;
+}
+
+#slide-1 .main-title::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    color: var(--preto-profundo);
+    filter: blur(3px);
+    opacity: 0.4;
+    z-index: -1;
+}
+
+#slide-1 .main-subtitle {
+    font-size: clamp(1rem, 1.8vw, 1.3rem);
+    font-weight: 400;
+    color: var(--amarelo-fluorescente);
+    letter-spacing: 0.08em;
+}
+
+.slide-1-line {
+    position: absolute;
+    top: 30%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: rgba(197, 179, 58, 0.1);
+    z-index: -1;
+}
+
+.slide-1-badge {
+    position: absolute;
+    bottom: 120px;
+    left: clamp(20px, 4vw, 60px);
+}
+
+.slide-1-badge .bloco-perspectiva {
+    width: min(220px, 85vw);
+    padding: 12px 16px;
+    text-align: left;
+}
+
+.slide-1-badge .badge-label {
+    font-family: 'Courier New', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--amarelo-fluorescente);
+    opacity: 0.7;
+}
+
+.slide-1-badge .badge-text {
+    font-size: 0.75rem;
+    color: var(--textos-secundarios);
+    margin-top: 4px;
+}
+
+/* SLIDE 2 - What are Backrooms */
+#slide-2 {
+    justify-content: flex-start;
+    padding-top: clamp(60px, 8vw, 100px);
+}
+
+#slide-2 .content-layout {
+    display: flex;
+    gap: clamp(20px, 4vw, 60px);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex: 1;
+    align-items: flex-start;
+}
+
+#slide-2 .text-area {
+    flex: 0 0 55%;
+    max-width: 55%;
+}
+
+#slide-2 .cards-area {
+    flex: 0 0 40%;
+    max-width: 40%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.slide-2-divider {
+    position: absolute;
+    top: 0;
+    left: 55%;
+    width: 1px;
+    height: 100%;
+    background: rgba(197, 179, 58, 0.08);
+    z-index: -1;
+}
+
+.info-card {
+    background: linear-gradient(135deg, rgba(30, 28, 20, 0.9), rgba(20, 18, 12, 0.95));
+    border: 1px solid rgba(197, 179, 58, 0.12);
+    border-radius: 4px;
+    padding: 20px;
+    width: min(260px, 100%);
+    box-shadow: 0 15px 30px -8px rgba(0, 0, 0, 0.5);
+    transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.info-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+    border-color: rgba(197, 179, 58, 0.25);
+}
+
+.info-card .card-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 10px;
+}
+
+.info-card .card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--branco-fantasma);
+    margin-bottom: 6px;
+}
+
+.info-card .card-text {
+    font-size: 0.8rem;
+    color: var(--textos-conteudo);
+    line-height: 1.5;
+}
+
+/* SLIDE 3 - Origin */
+#slide-3 {
+    justify-content: flex-start;
+    padding-top: clamp(60px, 8vw, 100px);
+}
+
+#slide-3 .content-layout {
+    display: flex;
+    gap: clamp(20px, 4vw, 60px);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex: 1;
+    align-items: flex-start;
+}
+
+#slide-3 .text-area {
+    flex: 0 0 55%;
+}
+
+#slide-3 .visual-area {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.corridor-block {
+    border-radius: 4px;
+    transition: all 400ms ease-out;
+}
+
+.corridor-block:hover {
+    box-shadow: 0 0 30px rgba(197, 179, 58, 0.15);
+}
+
+.slide-quote {
+    border-left: 3px solid var(--amarelo-fluorescente);
+    padding-left: clamp(16px, 3vw, 32px);
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 600px;
+}
+
+.slide-quote p {
+    font-size: clamp(1rem, 1.6vw, 1.2rem);
+    font-weight: 500;
+    color: var(--amarelo-fluorescente);
+    font-style: italic;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+}
+
+.slide-quote:hover {
+    border-left-color: var(--amarelo-quente);
+}
+
+/* SLIDE 4 - Levels */
+#slide-4 {
+    justify-content: flex-start;
+    padding-top: clamp(60px, 8vw, 100px);
+}
+
+#slide-4 .levels-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    flex: 1;
+    align-items: start;
+    position: relative;
+}
+
+.level-progress-bar {
+    position: absolute;
+    left: -40px;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--verde-fluorescente), var(--amarelo-fluorescente), #d4760a, var(--vermelho-perigo));
+    border-radius: 2px;
+    opacity: 0.6;
+}
+
+.level-card {
+    background: linear-gradient(135deg, rgba(30, 28, 20, 0.9), rgba(20, 18, 12, 0.95));
+    border: 1px solid rgba(197, 179, 58, 0.12);
+    border-radius: 4px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.level-card:hover {
+    transform: translateY(-3px);
+}
+
+.level-card .level-number {
+    font-size: 2rem;
+    font-weight: 800;
+    opacity: 0.3;
+    position: absolute;
+    top: 8px;
+    right: 12px;
+}
+
+.level-card .level-icon {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 8px;
+}
+
+.level-card .level-name {
+    font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+    font-weight: 600;
+    color: var(--branco-fantasma);
+    margin-bottom: 6px;
+}
+
+.level-card .level-desc {
+    font-size: clamp(0.75rem, 1vw, 0.85rem);
+    color: var(--textos-conteudo);
+    line-height: 1.5;
+}
+
+.level-card.level-0 { border-left: 3px solid rgba(57, 255, 20, 0.4); }
+.level-card.level-1 { border-left: 3px solid rgba(197, 179, 58, 0.4); }
+.level-card.level-2 { border-left: 3px solid rgba(212, 118, 10, 0.4); }
+.level-card.level-3 { border-left: 3px solid rgba(139, 0, 0, 0.4); }
+
+.level-card.level-0:hover { box-shadow: 0 8px 24px -6px rgba(57, 255, 20, 0.15); border-color: rgba(57, 255, 20, 0.3); }
+.level-card.level-1:hover { box-shadow: 0 8px 24px -6px rgba(197, 179, 58, 0.15); border-color: rgba(197, 179, 58, 0.3); }
+.level-card.level-2:hover { box-shadow: 0 8px 24px -6px rgba(212, 118, 10, 0.15); border-color: rgba(212, 118, 10, 0.3); }
+.level-card.level-3:hover { box-shadow: 0 8px 24px -6px rgba(139, 0, 0, 0.15); border-color: rgba(139, 0, 0, 0.3); }
+
+.level-card.level-0 .level-number { color: var(--verde-fluorescente); }
+.level-card.level-1 .level-number { color: var(--amarelo-fluorescente); }
+.level-card.level-2 .level-number { color: #d4760a; }
+.level-card.level-3 .level-number { color: var(--vermelho-perigo); }
+
+/* SLIDE 5 - Entities */
+#slide-5 {
+    justify-content: flex-start;
+    padding-top: clamp(60px, 8vw, 100px);
+}
+
+#slide-5 .entities-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    flex: 1;
+    align-items: center;
+}
+
+.entity-card {
+    background: rgba(15, 12, 10, 0.9);
+    border-radius: 4px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.6);
+    transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.entity-card:hover {
+    transform: translateY(-3px);
+}
+
+.entity-card.entity-smilers { border-left: 3px solid var(--vermelho-perigo); }
+.entity-card.entity-hounds { border-left: 3px solid #d4760a; }
+.entity-card.entity-skin { border-left: 3px solid #5a0000; }
+
+.entity-card:hover.entity-smilers { box-shadow: 0 8px 24px -6px rgba(139, 0, 0, 0.2); }
+.entity-card:hover.entity-hounds { box-shadow: 0 8px 24px -6px rgba(212, 118, 10, 0.2); }
+.entity-card:hover.entity-skin { box-shadow: 0 8px 24px -6px rgba(90, 0, 0, 0.2); }
+
+.entity-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.entity-info {
+    flex: 1;
+}
+
+.entity-info .entity-name {
+    font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+    font-weight: 700;
+    color: var(--branco-fantasma);
+    margin-bottom: 2px;
+}
+
+.entity-info .entity-desc {
+    font-size: clamp(0.75rem, 1vw, 0.85rem);
+    color: var(--textos-conteudo);
+}
+
+.danger-indicator {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.danger-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+}
+
+.danger-dot.active { background: var(--vermelho-perigo); }
+.danger-dot.active.orange { background: #d4760a; }
+
+.entity-card:hover .danger-dot.active {
+    filter: brightness(1.4);
+}
+
+.entity-note {
+    font-size: 0.8rem;
+    color: var(--textos-secundarios);
+    opacity: 0.6;
+    text-align: center;
+    margin-top: 8px;
+}
+
+.alert-badge {
+    width: min(180px, 85vw);
+    padding: 12px 16px;
+    text-align: center;
+}
+
+.alert-badge .alert-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--branco-fantasma);
+}
+
+.slide-5-red-line {
+    width: 100%;
+    max-width: 500px;
+    height: 1px;
+    background: rgba(139, 0, 0, 0.2);
+    margin-bottom: 8px;
+}
+
+/* SLIDE 6 - Mechanics */
+#slide-6 {
+    justify-content: flex-start;
+    padding-top: clamp(60px, 8vw, 100px);
+}
+
+#slide-6 .mechanics-layout {
+    display: flex;
+    gap: clamp(20px, 4vw, 60px);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex: 1;
+    align-items: flex-start;
+}
+
+#slide-6 .tabs-area {
+    flex: 0 0 35%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tab-btn {
+    padding: 14px 16px;
+    background: rgba(20, 18, 12, 0.6);
+    border: none;
+    border-left: 3px solid transparent;
+    color: var(--textos-secundarios);
+    font-size: clamp(0.8rem, 1.1vw, 0.9rem);
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all 300ms ease-out;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 0 4px 4px 0;
+}
+
+.tab-btn:hover {
+    background: rgba(197, 179, 58, 0.06);
+    color: var(--branco-fantasma);
+}
+
+.tab-btn.active {
+    background: rgba(197, 179, 58, 0.1);
+    border-left-color: var(--amarelo-fluorescente);
+    color: var(--branco-fantasma);
+}
+
+.tab-btn svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+#slide-6 .content-area {
+    flex: 0 0 60%;
+    position: relative;
+}
+
+.tab-content {
+    display: none;
+    animation: tabFadeIn 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content-item {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(197, 179, 58, 0.06);
+}
+
+.tab-content-item h4 {
+    font-size: clamp(0.85rem, 1.2vw, 1rem);
+    font-weight: 600;
+    color: var(--branco-fantasma);
+    margin-bottom: 4px;
+}
+
+.tab-content-item p {
+    font-size: clamp(0.8rem, 1.1vw, 0.9rem);
+    color: var(--textos-conteudo);
+    line-height: 1.5;
+}
+
+.stat-card {
+    width: min(200px, 100%);
+    text-align: center;
+    margin-top: 20px;
+}
+
+.stat-card .stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--amarelo-fluorescente);
+}
+
+.stat-card .stat-label {
+    font-size: 0.75rem;
+    color: var(--textos-secundarios);
+}
+
+/* SLIDE 7 - Liminal Spaces */
+#slide-7 {
+    justify-content: flex-start;
+    padding-top: clamp(60px, 8vw, 100px);
+}
+
+#slide-7 .columns-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(16px, 3vw, 32px);
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex: 1;
+    align-items: start;
+}
+
+.liminal-column {
+    background: rgba(20, 18, 12, 0.4);
+    border: 1px solid rgba(197, 179, 58, 0.06);
+    border-radius: 4px;
+    padding: 20px;
+    transition: all 400ms ease-out;
+}
+
+.liminal-column:hover {
+    border-color: rgba(197, 179, 58, 0.15);
+    background: rgba(20, 18, 12, 0.55);
+}
+
+.liminal-column .col-icon {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 12px;
+}
+
+.liminal-column .col-title {
+    font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+    font-weight: 600;
+    color: var(--branco-fantasma);
+    margin-bottom: 8px;
+}
+
+.liminal-column .col-text {
+    font-size: clamp(0.75rem, 1vw, 0.85rem);
+    color: var(--textos-conteudo);
+    line-height: 1.6;
+}
+
+.liminal-column .col-text + .col-text {
+    margin-top: 8px;
+    opacity: 0.8;
+}
+
+/* SLIDE 8 - Pop Culture */
+#slide-8 {
+    justify-content: flex-start;
+    padding-top: clamp(60px, 8vw, 100px);
+}
+
+#slide-8 .bento-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr auto;
+    gap: 8px;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex: 1;
+    align-items: start;
+}
+
+.bento-card {
+    background: rgba(20, 18, 12, 0.85);
+    border: 1px solid rgba(197, 179, 58, 0.08);
+    border-radius: 4px;
+    padding: 20px;
+    transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.5);
+    border-color: rgba(197, 179, 58, 0.2);
+}
+
+.bento-card.card-games {
+    grid-row: 1 / 3;
+    grid-column: 1;
+}
+
+.bento-card.card-movies {
+    grid-row: 1;
+    grid-column: 2;
+}
+
+.bento-card.card-youtube {
+    grid-row: 2;
+    grid-column: 2;
+}
+
+.bento-card.card-creepypasta {
+    grid-row: 2;
+    grid-column: 3;
+}
+
+.bento-card.card-highlight {
+    grid-row: 3;
+    grid-column: 1 / 4;
+    background: rgba(30, 28, 20, 0.9);
+    border-color: rgba(197, 179, 58, 0.15);
+    text-align: center;
+}
+
+.bento-card .bento-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 10px;
+}
+
+.bento-card .bento-title {
+    font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+    font-weight: 600;
+    color: var(--branco-fantasma);
+    margin-bottom: 8px;
+}
+
+.bento-card .bento-text {
+    font-size: clamp(0.75rem, 1vw, 0.85rem);
+    color: var(--textos-conteudo);
+    line-height: 1.5;
+}
+
+.bento-card .game-list {
+    list-style: none;
+    padding: 0;
+}
+
+.bento-card .game-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(197, 179, 58, 0.06);
+    font-size: 0.85rem;
+    color: var(--textos-conteudo);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bento-card .game-list li:last-child {
+    border-bottom: none;
+}
+
+.game-tag {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: rgba(197, 179, 58, 0.1);
+    color: var(--amarelo-fluorescente);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+/* SLIDE 9 - Why it resonates */
+#slide-9 {
+    justify-content: flex-start;
+    padding-top: clamp(60px, 8vw, 100px);
+    align-items: center;
+}
+
+#slide-9 .reflection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    flex: 1;
+    justify-content: center;
+}
+
+.reflection-point {
+    padding: 16px 24px;
+    background: rgba(20, 18, 12, 0.3);
+    border-left: 2px solid rgba(197, 179, 58, 0.15);
+    border-radius: 0 4px 4px 0;
+    transition: all 400ms ease-out;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.reflection-point:hover {
+    border-left-color: rgba(197, 179, 58, 0.4);
+    background: rgba(20, 18, 12, 0.45);
+}
+
+.reflection-point .ref-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.reflection-point .ref-title {
+    font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+    font-weight: 600;
+    color: var(--branco-fantasma);
+    margin-bottom: 4px;
+}
+
+.reflection-point .ref-text {
+    font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+    color: var(--textos-conteudo);
+    line-height: 1.6;
+}
+
+/* SLIDE 10 - Conclusion */
+#slide-10 {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+}
+
+#slide-10 .conclusion-title {
+    font-size: clamp(3.2rem, 6.4vw, 5.76rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--branco-fantasma);
+    position: relative;
+    z-index: 0;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+#slide-10 .conclusion-title::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    color: var(--preto-profundo);
+    filter: blur(3px);
+    opacity: 0.4;
+    z-index: -1;
+}
+
+#slide-10 .conclusion-subtitle {
+    font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+    font-weight: 400;
+    color: var(--amarelo-fluorescente);
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+}
+
+.conclusion-points {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.conclusion-point {
+    background: rgba(20, 18, 12, 0.4);
+    border: 1px solid rgba(197, 179, 58, 0.08);
+    border-radius: 4px;
+    padding: 12px 16px;
+    font-size: clamp(0.75rem, 1vw, 0.85rem);
+    color: var(--textos-conteudo);
+    transition: all 400ms ease-out;
+}
+
+.conclusion-point:hover {
+    border-color: rgba(197, 179, 58, 0.2);
+    background: rgba(20, 18, 12, 0.55);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #slide-2 .content-layout,
+    #slide-3 .content-layout,
+    #slide-6 .mechanics-layout {
+        flex-direction: column;
+    }
+
+    #slide-2 .text-area,
+    #slide-2 .cards-area,
+    #slide-3 .text-area,
+    #slide-3 .visual-area,
+    #slide-6 .tabs-area,
+    #slide-6 .content-area {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    #slide-4 .levels-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #slide-7 .columns-layout {
+        grid-template-columns: 1fr;
+    }
+
+    #slide-8 .bento-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+
+    .bento-card.card-games,
+    .bento-card.card-movies,
+    .bento-card.card-youtube,
+    .bento-card.card-creepypasta,
+    .bento-card.card-highlight {
+        grid-row: auto;
+        grid-column: auto;
+    }
+
+    .slide-2-divider {
+        display: none;
+    }
+
+    .level-progress-bar {
+        display: none;
+    }
+
+    .conclusion-points {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 400px) {
+    .bloco-perspectiva {
+        width: min(350px, 85vw);
+    }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(197, 179, 58, 0.2);
+    border-radius: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-base"></div>
+<div class="bg-noise"></div>
+<div class="bg-scanlines"></div>
+<div class="bg-vignette"></div>
+<canvas id="particles-canvas"></canvas>
+
+<div id="presentation">
+
+<!-- SLIDE 1 - Cover -->
+<div class="slide active" id="slide-1">
+    <div class="slide-1-bg-blobs">
+        <div class="blob" style="width:400px;height:400px;background:#3d3510;opacity:0.12;top:-100px;right:-100px;"></div>
+        <div class="blob" style="width:350px;height:350px;background:#3d3510;opacity:0.10;bottom:-80px;left:-80px;animation-delay:-3s;"></div>
+    </div>
+
+    <div class="slide-1-line anim-hidden fade-anim" style="transition-delay:100ms;"></div>
+
+    <div class="label-tech" style="top:20px;right:20px;opacity:0.15;" data-delay="300">SYS::BACKROOMS</div>
+
+    <div class="slide-1-badge anim-hidden persp-anim" style="transition-delay:400ms;">
+        <div class="bloco-perspectiva bloco-perspectiva-superior" style="width:min(220px,85vw);padding:12px 16px;text-align:left;">
+            <div class="badge-label">2019 • Fenômeno Internet</div>
+            <div class="badge-text">Origem: 4chan /r/liminalspace</div>
+        </div>
+    </div>
+
+    <div class="main-title anim-hidden" data-text="BACKROOMS: O UNIVERSO DO HORROR LIMINAR" style="transition-delay:200ms;">BACKROOMS: O UNIVERSO DO HORROR LIMINAR</div>
+    <div class="main-subtitle anim-hidden sub-anim" style="transition-delay:600ms;">Uma Jornada pelo Desconhecido</div>
+</div>
+
+<!-- SLIDE 2 - What are Backrooms -->
+<div class="slide" id="slide-2">
+    <div class="slide-2-divider anim-hidden fade-anim" style="transition-delay:100ms;"></div>
+    <div class="label-tech" style="top:20px;right:20px;opacity:0.12;" data-delay="500">NIVEL::DESCONHECIDO</div>
+
+    <div class="slide-title anim-hidden" style="transition-delay:200ms;">O que são as Backrooms?</div>
+    <div class="slide-subtitle anim-hidden sub-anim" style="transition-delay:450ms;">Um conceito que transcende o horror convencional</div>
+
+    <div class="content-layout">
+        <div class="text-area">
+            <div class="slide-content anim-hidden content-anim" style="transition-delay:900ms;">
+                <p>As Backrooms são um universo de horror colaborativo baseado na ideia de espaços liminais — lugares familiares, porém vazios e perturbadores. O conceito surgiu a partir de um post anônimo no 4chan em 2019, acompanhado de uma imagem de um corredor amarelo e vazio.</p>
+                <br>
+                <p>A premissa central é que, se você "tropeçar na realidade" — um erro no tecido do espaço-tempo — pode acabar caindo nas Backrooms: um labirinto infinito de corredores interconectados, todos com o mesmo papel de parede amarelo, carpete úmido e zumbido de luzes fluorescentes.</p>
+                <br>
+                <p>O universo expandiu rapidamente através da criatividade coletiva da internet, tornando-se um dos mitos digitais mais fascinantes da última década.</p>
+            </div>
+        </div>
+
+        <div class="cards-area">
+            <div class="info-card anim-hidden card-anim" style="transition-delay:600ms;">
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+                <div class="card-title">Espaços Infinitos</div>
+                <div class="card-text">Vazios e familiares que causam desconforto inexplicável</div>
+            </div>
+
+            <div class="info-card anim-hidden card-anim" style="transition-delay:720ms;">
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <div class="card-title">Origem: 4chan, 2019</div>
+                <div class="card-text">Post anônimo com imagem de liminal space viralizou</div>
+            </div>
+
+            <div class="info-card anim-hidden card-anim" style="transition-delay:840ms;">
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <div class="card-title">A Premissa</div>
+                <div class="card-text">Se você tropeçar na realidade, pode cair nas Backrooms</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 3 - Origin -->
+<div class="slide" id="slide-3">
+    <div class="label-tech" style="top:20px;right:20px;opacity:0.12;">ORIGEM::POST_2019</div>
+
+    <div class="slide-title anim-hidden" style="transition-delay:300ms;">A Origem e a Primeira Imagem</div>
+    <div class="slide-subtitle anim-hidden sub-anim" style="transition-delay:500ms;">O post que deu início a um mito digital</div>
+
+    <div class="content-layout">
+        <div class="text-area">
+            <div class="slide-content anim-hidden content-anim" style="transition-delay:600ms;">
+                <p>Em maio de 2019, um post anônimo no board /x/ do 4chan compartilhou uma imagem de um corredor banal e vazio, acompanhada de um texto perturbador:</p>
+            </div>
+            <div class="slide-quote anim-hidden content-anim" style="transition-delay:800ms;">
+                <p>"Se você não for mais cuidadoso, você acabará nas Backrooms. Não há espaço para você lá. Não há nada além do cheiro úmido de carpete velho, da monotonia do corredor infinito e do zumbido das luzes fluorescentes."</p>
+            </div>
+            <div class="slide-content anim-hidden content-anim" style="transition-delay:1000ms;margin-top:1.5rem;">
+                <p>A imagem e o texto criaram algo que nenhumargumento racional poderia explicar: uma resposta emocional coletiva. Milhares de pessoas reconheceram naquela imagem uma sensação que sempre tiveram mas nunca conseguiram descrever. O mito nasceu ali.</p>
+            </div>
+        </div>
+
+        <div class="visual-area">
+            <div class="corridor-block bloco-perspectiva bloco-perspectiva-superior anim-hidden persp-anim" style="width:280px;height:80px;background:linear-gradient(135deg,rgba(197,179,58,0.2),rgba(197,179,58,0.08));display:flex;align-items:center;justify-content:center;transition-delay:400ms;">
+                <span style="font-family:'Courier New',monospace;font-size:0.7rem;letter-spacing:0.1em;color:rgba(197,179,58,0.4);text-transform:uppercase;">Nivel 0 — The Lobby</span>
+            </div>
+            <div class="corridor-block bloco-perspectiva bloco-perspectiva-superior anim-hidden persp-anim" style="width:220px;height:60px;background:linear-gradient(135deg,rgba(197,179,58,0.12),rgba(197,179,58,0.04));display:flex;align-items:center;justify-content:center;transition-delay:600ms;">
+                <span style="font-family:'Courier New',monospace;font-size:0.65rem;letter-spacing:0.1em;color:rgba(197,179,58,0.3);text-transform:uppercase;">Corredor Infinito</span>
+            </div>
+            <div class="corridor-block bloco-perspectiva bloco-perspectiva-superior anim-hidden persp-anim" style="width:160px;height:40px;background:linear-gradient(135deg,rgba(197,179,58,0.06),rgba(197,179,58,0.02));display:flex;align-items:center;justify-content:center;transition-delay:800ms;">
+                <span style="font-family:'Courier New',monospace;font-size:0.6rem;letter-spacing:0.1em;color:rgba(197,179,58,0.2);text-transform:uppercase;">...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 4 - Levels -->
+<div class="slide" id="slide-4">
+    <div class="label-tech" style="top:20px;right:20px;opacity:0.12;">CLASSIFICACAO::NIVEIS</div>
+
+    <div class="slide-title anim-hidden" style="transition-delay:300ms;">Os Níveis Fundamentais</div>
+    <div class="slide-subtitle anim-hidden sub-anim" style="transition-delay:500ms;">A progressão de perigo nas profundezas</div>
+
+    <div class="levels-grid">
+        <div class="level-progress-bar anim-hidden line-anim" style="transition-delay:200ms;"></div>
+
+        <div class="level-card level-0 anim-hidden card-anim" style="transition-delay:600ms;">
+            <span class="level-number">0</span>
+            <svg class="level-icon" viewBox="0 0 24 24" fill="none" stroke="#39ff14" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+            <div class="level-name">Nível 0 — The Lobby</div>
+            <div class="level-desc">Corredores infinitos com carpete amarelo e papel de parede. O mais "seguro" — mas não há como escapar.</div>
+        </div>
+
+        <div class="level-card level-1 anim-hidden card-anim" style="transition-delay:720ms;">
+            <span class="level-number">1</span>
+            <svg class="level-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+            <div class="level-name">Nível 1 — Habitable Zone</div>
+            <div class="level-desc">Armazéns escuros com condensação e água. Recursos encontrados, mas entidades mais presentes.</div>
+        </div>
+
+        <div class="level-card level-2 anim-hidden card-anim" style="transition-delay:840ms;">
+            <span class="level-number">2</span>
+            <svg class="level-icon" viewBox="0 0 24 24" fill="none" stroke="#d4760a" stroke-width="1.5"><path d="M12 2v20M2 12h20M6 6l12 12M18 6L6 18"/></svg>
+            <div class="level-name">Nível 2 — Pipe Dreams</div>
+            <div class="level-desc">Túneis subterrâneos com trilhos e calor extremo. Entidades hostis e condições perigosas.</div>
+        </div>
+
+        <div class="level-card level-3 anim-hidden card-anim" style="transition-delay:960ms;">
+            <span class="level-number">3</span>
+            <svg class="level-icon" viewBox="0 0 24 24" fill="none" stroke="#8b0000" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <div class="level-name">Nível 3 — Electrical Station</div>
+            <div class="level-desc">Labirintos de fios e instalações industriais. Altamente perigoso — poucos retornam.</div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 5 - Entities -->
+<div class="slide" id="slide-5">
+    <div class="label-tech" style="top:20px;right:20px;opacity:0.12;">ENTIDADE::CLASSE_B</div>
+
+    <div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:300px;height:300px;background:#3a0a0a;border-radius:50%;filter:blur(100px);opacity:0.08;pointer-events:none;z-index:-5;"></div>
+
+    <div class="slide-title anim-hidden" style="transition-delay:300ms;">Entidades das Backrooms</div>
+    <div class="slide-subtitle anim-hidden sub-anim" style="transition-delay:500ms;">As ameaças que habitam o vazio</div>
+
+    <div class="slide-5-red-line anim-hidden line-anim" style="transition-delay:200ms;"></div>
+
+    <div style="position:absolute;top:60px;right:clamp(20px,4vw,60px);">
+        <div class="bloco-perspectiva bloco-perspectiva-superior alert-badge anim-hidden persp-anim" style="transition-delay:600ms;animation:alertPulse 3s ease-in-out infinite;">
+            <div class="alert-text">&#9888; CLASSE AMEAÇA</div>
+        </div>
+    </div>
+
+    <div class="entities-container">
+        <div class="entity-card entity-smilers anim-hidden move-left-anim" style="transition-delay:700ms;">
+            <svg class="entity-icon" viewBox="0 0 24 24" fill="none" stroke="#8b0000" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            <div class="entity-info">
+                <div class="entity-name">Smilers</div>
+                <div class="entity-desc">Criaturas com sorrisos brilhantes na escuridão</div>
+            </div>
+            <div class="danger-indicator">
+                <div class="danger-dot active"></div>
+                <div class="danger-dot active"></div>
+                <div class="danger-dot active"></div>
+                <div class="danger-dot"></div>
+                <div class="danger-dot"></div>
+            </div>
+        </div>
+
+        <div class="entity-card entity-hounds anim-hidden move-left-anim" style="transition-delay:820ms;">
+            <svg class="entity-icon" viewBox="0 0 24 24" fill="none" stroke="#d4760a" stroke-width="1.5"><path d="M12 2a7 7 0 00-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 00-7-7z"/><circle cx="12" cy="9" r="2"/></svg>
+            <div class="entity-info">
+                <div class="entity-name">Hounds</div>
+                <div class="entity-desc">Seres humanoides rápidos e predatórios</div>
+            </div>
+            <div class="danger-indicator">
+                <div class="danger-dot active orange"></div>
+                <div class="danger-dot active orange"></div>
+                <div class="danger-dot active orange"></div>
+                <div class="danger-dot active orange"></div>
+                <div class="danger-dot"></div>
+            </div>
+        </div>
+
+        <div class="entity-card entity-skin anim-hidden move-left-anim" style="transition-delay:940ms;">
+            <svg class="entity-icon" viewBox="0 0 24 24" fill="none" stroke="#5a0000" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M12 11v4"/></svg>
+            <div class="entity-info">
+                <div class="entity-name">Skin-Stealers</div>
+                <div class="entity-desc">Entidades que imitam aparência humana</div>
+            </div>
+            <div class="danger-indicator">
+                <div class="danger-dot active"></div>
+                <div class="danger-dot active"></div>
+                <div class="danger-dot active"></div>
+                <div class="danger-dot active"></div>
+                <div class="danger-dot active"></div>
+            </div>
+        </div>
+
+        <div class="entity-note anim-hidden fade-anim" style="transition-delay:1100ms;">Cada nível possui ameaças únicas</div>
+    </div>
+</div>
+
+<!-- SLIDE 6 - Mechanics -->
+<div class="slide" id="slide-6">
+    <div class="label-tech" style="top:20px;right:20px;opacity:0.12;">SISTEMA::OPERACAO</div>
+
+    <div class="slide-title anim-hidden" style="transition-delay:200ms;">Mecânicas do Universo</div>
+    <div class="slide-subtitle anim-hidden sub-anim" style="transition-delay:450ms;">Como o universo das Backrooms funciona</div>
+
+    <div class="mechanics-layout">
+        <div class="tabs-area">
+            <button class="tab-btn active anim-hidden move-left-anim" data-tab="niveis" style="transition-delay:500ms;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M8 18l4-4 4 4M4 14l4-4 4 4"/></svg>
+                Níveis
+            </button>
+            <button class="tab-btn anim-hidden move-left-anim" data-tab="suprimentos" style="transition-delay:600ms;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+                Suprimentos
+            </button>
+            <button class="tab-btn anim-hidden move-left-anim" data-tab="grupos" style="transition-delay:700ms;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                Grupos
+            </button>
+            <button class="tab-btn anim-hidden move-left-anim" data-tab="mapeamento" style="transition-delay:800ms;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="1,6 1,22 8,18 16,22 23,18 23,2 16,6 8,2"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+                Mapeamento
+            </button>
+
+            <div class="bloco-perspectiva bloco-perspectiva-superior stat-card anim-hidden persp-anim" style="transition-delay:1100ms;">
+                <div class="stat-number">20+</div>
+                <div class="stat-label">níveis documentados</div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="tab-content active" data-tab="niveis">
+                <div class="tab-content-item">
+                    <h4>Progressão de Risco</h4>
+                    <p>Os níveis são classificados por perigo crescente. O Nível 0 é o mais acessível, enquanto níveis mais profundos apresentam entidades mais perigosas e condições hostis.</p>
+                </div>
+                <div class="tab-content-item">
+                    <h4>Níveis Seguros vs. Perigosos</h4>
+                    <p>Níveis baixos permitem sobrevivência com suprimentos básicos. Níveis altos exigem preparação extrema e conhecimento das rotas seguras documentadas pela comunidade.</p>
+                </div>
+                <div class="tab-content-item">
+                    <h4>Níveis Especiais</h4>
+                    <p>Alguns níveis são considerados "seguros" ou "para-estáveis", oferecendo refúgio temporário. Outros são "níveis caóticos" onde as leis da física não se aplicam.</p>
+                </div>
+            </div>
+
+            <div class="tab-content" data-tab="suprimentos">
+                <div class="tab-content-item">
+                    <h4>Água e Hidratação</h4>
+                    <p>Água é encontrada em vários níveis, mas nem sempre é segura. Alguns níveis oferecem "Água de Nível", que é pura e segura, enquanto outras fontes podem ser contaminadas.</p>
+                </div>
+                <div class="tab-content-item">
+                    <h4>Alimentos</h4>
+                    <p>Alimentos processados (como "Almond Water") e itens encontrados são essenciais. A caça e coleta são arriscadas devido à presença de entidades.</p>
+                </div>
+                <div class="tab-content-item">
+                    <h4>Equipamentos</h4>
+                    <p>Ferramentas como facas, cordas, lanterna e dispositivos de comunicação são vitais para sobrevivência e navegação entre níveis.</p>
+                </div>
+            </div>
+
+            <div class="tab-content" data-tab="grupos">
+                <div class="tab-content-item">
+                    <h4>M.E.G. (Major Explorer Group)</h4>
+                    <p>A maior organização de exploradores. Documenta níveis, cria rotas seguras e ajuda novos "noclippers" a sobreviver nas Backrooms.</p>
+                </div>
+                <div class="tab-content-item">
+                    <h4>B.N.T.G. (Backrooms Neutral Trading Group)</h4>
+                    <p>Grupo focado em comércio e troca de suprimentos entre exploradores. Mantém postos de troca em níveis seguros.</p>
+                </div>
+                <div class="tab-content-item">
+                    <h4>Outposts e Comunidades</h4>
+                    <p>Vários outposts menores existem em diferentes níveis, cada um com suas regras e especializações. Alguns são abertos, outros são hostis.</p>
+                </div>
+            </div>
+
+            <div class="tab-content" data-tab="mapeamento">
+                <div class="tab-content-item">
+                    <h4>Sistema de Classificação</h4>
+                    <p>Cada nível possui um número, nome e classificação de perigo. O sistema é padronizado e compartilhado via wiki colaborativa.</p>
+                </div>
+                <div class="tab-content-item">
+                    <h4>Documentação Colaborativa</h4>
+                    <p>A wiki das Backrooms é mantida por centenas de colaboradores que adicionam descobertas, entidades e rotas documentadas.</p>
+                </div>
+                <div class="tab-content-item">
+                    <h4>Rotas e Navegação</h4>
+                    <p>Exploradores mapearam rotas específicas entre níveis, usando "pontos de transição" que conectam diferentes áreas do labirinto.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 7 - Liminal Spaces -->
+<div class="slide" id="slide-7">
+    <div class="label-tech" style="top:20px;right:20px;opacity:0.12;">PSICOLOGIA::LIMINAL</div>
+
+    <div class="slide-title anim-hidden" style="transition-delay:200ms;">Espaços Liminais e a Psicologia do Medo</div>
+    <div class="slide-subtitle anim-hidden sub-anim" style="transition-delay:450ms;">Por que esses lugares nos perturbam</div>
+
+    <div class="columns-layout">
+        <div class="liminal-column anim-hidden card-anim" style="transition-delay:600ms;">
+            <svg class="col-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+            <div class="col-title">O que são</div>
+            <div class="col-text">Liminal Spaces</div>
+            <div class="col-text">Transições entre lugares conhecidos — corredores, saguões, salas de aula vazias. Lugares que existem entre um destino e outro.</div>
+            <div class="col-text">Quando estão vazios, perdem seu propósito e ganham uma atmosfera perturbadora.</div>
+        </div>
+
+        <div class="liminal-column anim-hidden card-anim" style="transition-delay:720ms;">
+            <svg class="col-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><path d="M12 2a7 7 0 00-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 00-7-7z"/><circle cx="12" cy="9" r="3"/></svg>
+            <div class="col-title">Por que assustam</div>
+            <div class="col-text">Psicologia do Medo</div>
+            <div class="col-text">Familiaridade vazia. A ausência de pessoas em lugares projetados para elas cria uma dissonância cognitiva.</div>
+            <div class="col-text">Nosso cérebro registra que algo está errado, mas não consegue identificar o quê.</div>
+        </div>
+
+        <div class="liminal-column anim-hidden card-anim" style="transition-delay:840ms;">
+            <svg class="col-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            <div class="col-title">Conexão coletiva</div>
+            <div class="col-text">Memória Compartilhada</div>
+            <div class="col-text">Estádios vazios, corredores de escola, shopping centers à noite — todos sentimos o mesmo desconforto.</div>
+            <div class="col-text">A internet transformou essa sensação individual em uma experiência coletiva.</div>
+        </div>
+    </div>
+
+    <div class="bloco-perspectiva bloco-perspectiva-inferior anim-hidden persp-anim-inferior" style="width:min(320px,85vw);margin:1.5rem auto 0;text-align:center;transition-delay:1000ms;">
+        <p style="font-size:clamp(0.85rem,1.2vw,1rem);font-weight:500;color:var(--amarelo-fluorescente);font-style:italic;">"Transições entre lugares conhecidos"</p>
+    </div>
+</div>
+
+<!-- SLIDE 8 - Pop Culture -->
+<div class="slide" id="slide-8">
+    <div class="label-tech" style="top:20px;right:20px;opacity:0.12;">CULTURA::POP</div>
+
+    <div class="slide-title anim-hidden" style="transition-delay:200ms;">As Backrooms na Cultura Popular</div>
+    <div class="slide-subtitle anim-hidden sub-anim" style="transition-delay:450ms;">Um fenômeno que permeia toda a mídia</div>
+
+    <div class="bento-grid">
+        <div class="bento-card card-games anim-hidden card-anim" style="transition-delay:600ms;">
+            <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="14" y1="12" x2="18" y2="12"/><line x1="16" y1="10" x2="16" y2="14"/></svg>
+            <div class="bento-title">Jogos</div>
+            <ul class="game-list">
+                <li><span class="game-tag">PC</span> Backrooms Escape</li>
+                <li><span class="game-tag">PC/Console</span> The Exit 8</li>
+                <li><span class="game-tag">Multi</span> Roblox Backrooms</li>
+                <li><span class="game-tag">Indie</span> Backrooms: The Spatial Reasoning</li>
+            </ul>
+        </div>
+
+        <div class="bento-card card-movies anim-hidden card-anim" style="transition-delay:720ms;">
+            <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><polygon points="5,3 19,12 5,21 5,3"/></svg>
+            <div class="bento-title">Filmes e Séries</div>
+            <div class="bento-text">Inspiração em produções de horror como "The Backrooms" (2022) de Kane Pixels, que viralizou no YouTube com efeitos visuais impressionantes.</div>
+        </div>
+
+        <div class="bento-card card-youtube anim-hidden card-anim" style="transition-delay:840ms;">
+            <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><polygon points="5,3 19,12 5,21 5,3"/><line x1="12" y1="12" x2="12" y2="12.01"/></svg>
+            <div class="bento-title">YouTube</div>
+            <div class="bento-text">Canais de exploração e narrativas criam conteúdo sobre níveis, entidades e teorias do universo.</div>
+        </div>
+
+        <div class="bento-card card-creepypasta anim-hidden card-anim" style="transition-delay:960ms;">
+            <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <div class="bento-title">Creepypastas</div>
+            <div class="bento-text">Terror colaborativo online expande o universo com histórias de sobreviventes e entidades.</div>
+        </div>
+
+        <div class="bento-card card-highlight anim-hidden content-anim" style="transition-delay:1100ms;">
+            <p style="font-size:clamp(0.9rem,1.3vw,1.1rem);font-weight:500;color:var(--amarelo-fluorescente);">O fenômeno como ferramenta de terror colaborativo</p>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 9 - Why it resonates -->
+<div class="slide" id="slide-9">
+    <div class="label-tech" style="top:20px;right:20px;opacity:0.12;">IMPACTO::PSICOLOGICO</div>
+
+    <div style="position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:400px;height:400px;background:#c5b33a;border-radius:50%;filter:blur(100px);opacity:0.04;pointer-events:none;z-index:-5;"></div>
+
+    <div class="slide-title anim-hidden" style="transition-delay:300ms;text-align:center;">Por Que as Backrooms Tocam Tanta Gente?</div>
+    <div class="slide-subtitle anim-hidden sub-anim" style="transition-delay:500ms;text-align:center;">As razões por trás do fenômeno</div>
+
+    <div class="reflection-container">
+        <div class="reflection-point anim-hidden move-left-anim" style="transition-delay:700ms;">
+            <svg class="ref-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <div>
+                <div class="ref-title">Medo do Desconhecido</div>
+                <div class="ref-text">O infinito assusta porque não possui fim. As Backrooms transformam esse medo abstrato em um lugar concreto.</div>
+            </div>
+        </div>
+
+        <div class="reflection-point anim-hidden move-left-anim" style="transition-delay:900ms;">
+            <svg class="ref-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+            <div>
+                <div class="ref-title">Familiaridade Perdida</div>
+                <div class="ref-text">Estar perdido em um lugar que parece familiar é mais perturbador do que estar em um lugar completamente novo.</div>
+            </div>
+        </div>
+
+        <div class="reflection-point anim-hidden move-left-anim" style="transition-delay:1100ms;">
+            <svg class="ref-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            <div>
+                <div class="ref-title">Criação Coletiva</div>
+                <div class="ref-text">Qualquer pessoa pode contribuir. Cada pessoa adiciona seu próprio medo ao universo, tornando-o infinitamente mais rico.</div>
+            </div>
+        </div>
+
+        <div class="reflection-point anim-hidden move-left-anim" style="transition-delay:1300ms;">
+            <svg class="ref-icon" viewBox="0 0 24 24" fill="none" stroke="#c5b33a" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <div>
+                <div class="ref-title">Isolamento Digital</div>
+                <div class="ref-text">Em tempos de conexão constante, as Backrooms representam o medo de estar completamente sozinho.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bloco-perspectiva bloco-perspectiva-inferior anim-hidden persp-anim-inferior" style="width:min(160px,85vw);margin:1rem auto 0;text-align:center;transition-delay:1500ms;padding:12px 16px;">
+        <div style="font-size:0.8rem;font-weight:600;color:var(--amarelo-fluorescente);">Medo Universal</div>
+    </div>
+</div>
+
+<!-- SLIDE 10 - Conclusion -->
+<div class="slide" id="slide-10">
+    <div class="label-tech" style="top:20px;right:20px;opacity:0.15;">FIM::TRANSMISSAO</div>
+
+    <div style="position:absolute;top:-100px;left:-100px;width:400px;height:400px;background:#3d3510;border-radius:50%;filter:blur(120px);opacity:0.10;pointer-events:none;z-index:-5;"></div>
+    <div style="position:absolute;bottom:-100px;right:-100px;width:350px;height:350px;background:#3d3510;border-radius:50%;filter:blur(120px);opacity:0.08;pointer-events:none;z-index:-5;animation-delay:-3s;"></div>
+
+    <div class="conclusion-title anim-hidden" data-text="CONCLUSÃO" style="transition-delay:300ms;">CONCLUSÃO</div>
+    <div class="conclusion-subtitle anim-hidden sub-anim" style="transition-delay:800ms;">Um universo que continua crescendo</div>
+
+    <div class="conclusion-points">
+        <div class="conclusion-point anim-hidden content-anim" style="transition-delay:1000ms;">Reflexo dos medos modernos da humanidade</div>
+        <div class="conclusion-point anim-hidden content-anim" style="transition-delay:1100ms;">Um universo que continua crescendo e se reinventando</div>
+        <div class="conclusion-point anim-hidden content-anim" style="transition-delay:1200ms;">O poder da internet para criar mitologias</div>
+        <div class="conclusion-point anim-hidden content-anim" style="transition-delay:1300ms;">Explorar o desconhecido com curiosidade</div>
+    </div>
+</div>
+
+</div><!-- /presentation -->
+
+<!-- Navigation -->
+<button class="nav-btn prev disabled" id="prevBtn" aria-label="Slide anterior">&#8249;</button>
+<button class="nav-btn next" id="nextBtn" aria-label="Próximo slide">&#8250;</button>
+
+<div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<div class="nav-dots" id="navDots"></div>
+
+<!-- Index -->
+<button class="index-btn" id="indexBtn" aria-label="Índice">
+    <span></span><span></span><span></span>
+</button>
+<div class="index-overlay" id="indexOverlay"></div>
+<div class="index-panel" id="indexPanel">
+    <h3>Índice</h3>
+    <div id="indexList"></div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    const TOTAL_SLIDES = 10;
+    const SLIDE_TITLES = [
+        'Backrooms: O Universo do Horror Liminar',
+        'O que são as Backrooms?',
+        'A Origem e a Primeira Imagem',
+        'Os Níveis Fundamentais',
+        'Entidades das Backrooms',
+        'Mecânicas do Universo',
+        'Espaços Liminais e a Psicologia do Medo',
+        'As Backrooms na Cultura Popular',
+        'Por Que as Backrooms Tocam Tanta Gente?',
+        'Conclusão'
+    ];
+
+    let currentSlide = 0;
+    let isTransitioning = false;
+
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressFill = document.getElementById('progressFill');
+    const navDotsContainer = document.getElementById('navDots');
+    const indexBtn = document.getElementById('indexBtn');
+    const indexPanel = document.getElementById('indexPanel');
+    const indexOverlay = document.getElementById('indexOverlay');
+    const indexList = document.getElementById('indexList');
+
+    // Create navigation dots
+    for (let i = 0; i < TOTAL_SLIDES; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+        dot.addEventListener('click', () => goToSlide(i));
+        navDotsContainer.appendChild(dot);
+    }
+
+    // Create index list
+    SLIDE_TITLES.forEach((title, i) => {
+        const item = document.createElement('div');
+        item.className = 'index-item' + (i === 0 ? ' active' : '');
+        item.textContent = (i + 1) + '. ' + title;
+        item.addEventListener('click', () => {
+            goToSlide(i);
+            closeIndex();
+        });
+        indexList.appendChild(item);
+    });
+
+    function updateUI() {
+        // Update buttons
+        prevBtn.classList.toggle('disabled', currentSlide === 0);
+        nextBtn.classList.toggle('disabled', currentSlide === TOTAL_SLIDES - 1);
+
+        // Update progress
+        const progress = ((currentSlide + 1) / TOTAL_SLIDES) * 100;
+        progressFill.style.width = progress + '%';
+
+        // Update dots
+        document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+        });
+
+        // Update index
+        document.querySelectorAll('.index-item').forEach((item, i) => {
+            item.classList.toggle('active', i === currentSlide);
+        });
+    }
+
+    function goToSlide(index) {
+        if (isTransitioning || index === currentSlide || index < 0 || index >= TOTAL_SLIDES) return;
+        isTransitioning = true;
+
+        // Fade out current
+        const current = slides[currentSlide];
+        current.classList.remove('active');
+
+        currentSlide = index;
+        updateUI();
+
+        // Reset animations on new slide
+        const next = slides[currentSlide];
+        const animElements = next.querySelectorAll('.anim-hidden');
+        animElements.forEach(el => {
+            el.style.transition = 'none';
+            el.style.opacity = '0';
+            el.offsetHeight; // force reflow
+            el.style.transition = '';
+        });
+
+        // Fade in new slide
+        setTimeout(() => {
+            next.classList.add('active');
+            setTimeout(() => { isTransitioning = false; }, 600);
+        }, 150);
+    }
+
+    function nextSlide() {
+        if (currentSlide < TOTAL_SLIDES - 1) goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+        if (currentSlide > 0) goToSlide(currentSlide - 1);
+    }
+
+    function openIndex() {
+        indexPanel.classList.add('open');
+        indexOverlay.classList.add('visible');
+    }
+
+    function closeIndex() {
+        indexPanel.classList.remove('open');
+        indexOverlay.classList.remove('visible');
+    }
+
+    // Event listeners
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+    indexBtn.addEventListener('click', openIndex);
+    indexOverlay.addEventListener('click', closeIndex);
+
+    document.addEventListener('keydown', (e) => {
+        if (indexPanel.classList.contains('open')) {
+            if (e.key === 'Escape') closeIndex();
+            return;
+        }
+        if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+        else if (e.key === 'Home') goToSlide(0);
+        else if (e.key === 'End') goToSlide(TOTAL_SLIDES - 1);
+    });
+
+    // Touch/Swipe
+    let touchStartX = 0;
+    let touchStartY = 0;
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+            if (dx < 0) nextSlide();
+            else prevSlide();
+        }
+    }, { passive: true });
+
+    // Prevent scroll
+    document.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelector('.tab-content[data-tab="' + tabId + '"]').classList.add('active');
+        });
+    });
+
+    // 3D Extrusion for titles
+    function applyExtrusion(el) {
+        if (!el) return;
+        let shadow = '';
+        for (let i = 0; i < 35; i++) {
+            shadow += (shadow ? ',' : '') + (-i) + 'px ' + i + 'px 0 #1a1508';
+        }
+        el.style.textShadow = shadow;
+    }
+
+    applyExtrusion(document.querySelector('.main-title'));
+    applyExtrusion(document.querySelector('.conclusion-title'));
+
+    // Glitch effect
+    function triggerGlitch(el) {
+        if (!el) return;
+        el.classList.add('glitching');
+        setTimeout(() => el.classList.remove('glitching'), 100);
+    }
+
+    const mainTitle = document.querySelector('.main-title');
+    const conclusionTitle = document.querySelector('.conclusion-title');
+
+    function scheduleGlitch() {
+        const delay = 5000 + Math.random() * 3000;
+        setTimeout(() => {
+            if (currentSlide === 0) triggerGlitch(mainTitle);
+            else if (currentSlide === 9) triggerGlitch(conclusionTitle);
+            scheduleGlitch();
+        }, delay);
+    }
+    scheduleGlitch();
+
+    // Particles
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = 1 + Math.random() * 2;
+            this.speedX = (Math.random() - 0.5) * 0.3;
+            this.speedY = (Math.random() - 0.5) * 0.2 - 0.1;
+            this.opacity = 0.02 + Math.random() * 0.06;
+            this.life = 0;
+            this.maxLife = 25 + Math.random() * 15;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            this.life++;
+            if (this.life > this.maxLife || this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                this.reset();
+            }
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(232, 230, 225, ${this.opacity})`;
+            ctx.fill();
+        }
+    }
+
+    for (let i = 0; i < 25; i++) {
+        particles.push(new Particle());
+    }
+
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Init
+    updateUI();
+})();
+</script>
+
+<style>
+@keyframes alertPulse {
+    0%, 100% { transform: perspective(250px) rotateX(-10deg) rotateY(25deg) scale(1); opacity: 0.8; }
+    50% { transform: perspective(250px) rotateX(-10deg) rotateY(25deg) scale(1.02); opacity: 1; }
+}
+</style>
+
+</body>
+</html>

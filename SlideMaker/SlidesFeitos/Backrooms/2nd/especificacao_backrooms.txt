@@ -1,0 +1,1468 @@
+# ESPECIFICAÇÃO VISUAL — BACKROOMS: O UNIVERSO DO HORROR LIMINAR
+
+---
+
+# INSTRUÇÕES GERAIS PARA A IA DESENVOLVEDORA
+
+**IMPORTANTE:** Esta especificação é um documento TXT destinado a servir como guia absoluto para a criação de um documento HTML contendo uma apresentação completa. A IA desenvolvedora NÃO deve acessar nenhum outro arquivo dentro da pasta. A IA deve criar APENAS o documento HTML, sem consultar arquivos auxiliares, sem criar arquivos adicionais, sem gerar partes separadas. O HTML deve ser um único arquivo contendo todo o código (HTML + CSS + JS).
+
+O documento HTML deve ser salvo como `backrooms.html`.
+
+O documento deve utilizar codificação UTF-8 com `<meta charset="UTF-8">`. Não haverá tela de loading. Todos os caracteres acentuados devem estar perfeitamente representados (ç, ã, é, á, etc.).
+
+---
+
+# 1. IDENTIDADE VISUAL GERAL
+
+A apresentação transmite a sensação de explorar algo proibido, abandonado e sobrenatural. É uma experiência visual que combina horror liminal com estética tecnológica corrompida. Cada slide deve parecer um fragmento de memória digital recuperada de um lugar que não deveria existir. A atmosfera é de isolamento, tensão crescente e desconforto existencial. O visual combina o mundo real abandonado (corredores, carpete amarelo, luz fluorescente) com uma camada digital corrompida (glitch, scanlines, interferência).
+
+---
+
+# 2. PALETA DE CORES
+
+## Cores Principais
+- **Preto profundo:** #0a0a0f — fundo base, escuridão dominante
+- **Branco fantasma:** #e8e6e1 — textos principais, com leve tom envelhecido (não branco puro)
+- **Amarelo fluorescente:** #c5b33a — cor icônica dos Backrooms (papel de parede, carpete), cor de destaque principal
+
+## Cores Secundárias
+- **Verde fluorescente:** #39ff14 — luzes de alerta, efeitos de glitch, alertas
+- **Marrom escuro:** #2a1f0e — degradação, umidade, muro velho
+- **Cinza médio:** #4a4a4f — textos secundários, bordas
+
+## Cores de Destaque
+- **Amarelo quente:** #d4a017 — highlights, glow, hover states
+- **Vermelho de perigo:** #8b0000 — elementos de alerta, entidades, perigo
+
+## Cores de Fundo
+- **Gradiente base:** De #0a0a0f (topo) para #12110d (fundo) — gradiente escuro quase imperceptível
+- **Gradiente atmosférico:** Radial gradient centrado em #1a180f com transição para #0a0a0f
+
+## Cores de Elementos
+- **Cards/painéis:** rgba(30, 28, 20, 0.85) com borda rgba(197, 179, 58, 0.15)
+- **Botões:** Fundo #c5b33a, texto #0a0a0f; hover: fundo #d4a017
+- **Títulos:** #e8e6e1 (com sombra amarela escura)
+- **Subtítulos:** #c5b33a (amarelo fluorescente)
+- **Textos de conteúdo:** #d4d2cd (branco levemente envelhecido)
+- **Textos secundários:** #8a8880
+- **Links/hover:** #39ff14 (verde neon)
+
+---
+
+# 3. TIPOGRAFIA
+
+## Fontes
+- **Títulos:** `'Inter', 'Segoe UI', system-ui, sans-serif` — peso 800, uppercase
+- **Subtítulos:** `'Inter', 'Segoe UI', system-ui, sans-serif` — peso 600, letterSpacing 0.05em
+- **Corpo do texto:** `'Inter', 'Segoe UI', system-ui, sans-serif` — peso 400, lineHeight 1.6
+- **Elementos técnicos/código:** `'Courier New', 'Consolas', monospace` — para labels decorativos e textos "corrompidos"
+
+## Hierarquia Visual
+- Título principal (slide de capa): `clamp(3.2rem, 6.4vw, 5.76rem)` — peso 900, uppercase, com efeito de extrusão 3D via text-shadow
+- Título de slide: `clamp(1.8rem, 3.5vw, 2.8rem)` — peso 700
+- Subtítulo: `clamp(1.1rem, 2vw, 1.5rem)` — peso 500
+- Texto de conteúdo: `clamp(0.85rem, 1.2vw, 1rem)` — peso 400
+- Labels/técnicos: `0.7rem` — peso 400, uppercase, letterSpacing 0.15em
+
+## Espaçamentos
+- Espaçamento entre título e subtítulo: 0.5rem
+- Espaçamento entre subtítulo e conteúdo: 1.5rem
+- Espaçamento entre parágrafos: 1rem
+- Espaçamento entre blocos: 2rem
+
+---
+
+# 4. ESTILO VISUAL
+
+**Estilo base:** Dark Mode / Horror Liminal / Tech Corrompida
+
+Combinação de:
+- **Dark Mode:** Fundo escuro dominante, alta presença de preto
+- **Liminal Spaces:** Sensação de lugares familiares mas vazios e errados
+- **Glitch/CRT:** Interferência visual, scanlines, distorção sutil
+- **Industrial Abandoned:** Texturas de concreto, metal enferrujado, fios expostos
+- **Minimalismo sombrio:** Poucos elementos por slide, mas cada um com peso visual enorme
+
+Não se aplica: glassmorphism, neumorphism, futurismo limpo, corporativo, luxuoso.
+
+---
+
+# 5. CONCEITO ARTÍSTICO
+
+A apresentação deve transmitir a sensação de estar dentro das Backrooms. O usuário não está apenas vendo uma apresentação — está tendo uma experiência de exploração. Cada slide é como caminhar por um corredor infinito onde algo está errado. A luz pisca, o carpete está úmido, o zumbido dos tubos fluorescentes nunca para. A camada digital (glitch, scanlines) representa a "ruptura na realidade" — o momento em que o mundo familiar se fragmenta e revela algo impossível por trás. A experiência deve ser perturbadora, mas visualmente viciante.
+
+---
+
+# 6. BACKGROUND GLOBAL
+
+## Camadas (de trás para frente):
+
+### Camada 1 — Fundo base
+Gradiente radial escuro centrado no viewport:
+```css
+background: radial-gradient(ellipse at 50% 50%, #1a180f 0%, #0a0a0f 100%);
+```
+
+### Camada 2 — Textura de noise/grain
+Overlay com noise fino que cobre todo o slide. Grain cinematográfico sutil (opacity 0.03-0.06). Criar via CSS com `background-image: url("data:image/svg+xml,...")` ou gerar via canvas com noise aleatório. Deve ser contínuo e levemente animado.
+
+### Camada 3 — Scanlines
+Linhas horizontais finas simulando tela CRT.间距 de 2px, opacity 0.03-0.05. Color: rgba(255,255,255,0.03). Animacao lenta de deslocamento vertical.
+
+### Camada 4 — Vignette
+Gradiente radial escurecendo as bordas do viewport. Usar `box-shadow: inset 0 0 150px rgba(0,0,0,0.7)` ou equivalente. Isso cria a sensação de estar olhando através de uma lente ou câmera de segurança.
+
+### Camada 5 — Blobs animados (não em todos os slides)
+Em slides específicos (capa, slides de maior impacto), adicionar 1-2 blobs escuros com cor amarela escura (#3d3510) ou verde escuro (#1a2a0a), com animação de movimento lento, blur alto (80-120px), opacity muito baixa (0.08-0.15). Esses blobs transmitem a sensação de luz fluorescente distante se refletindo em superfícies molhadas.
+
+### Camada 6 — Partículas de poeira
+Partículas flutuantes simulando poeira suspensa em ar parado. Tipo: pontos brancos com opacity entre 0.02 e 0.08. Movimento: flutuação lenta e aleatória ( translateY + translateX com variação). Velocidade: 20-40 segundos por ciclo. Quantidade: 15-25 partículas. Tamanho: 1-3px. Essas partículas criam a sensação de ar velho e parado, típico de espaços abandonados.
+
+### Camada 7 — Noise de luz (apenas em slides de impacto)
+Sobreposição sutil de manchas claras e escuras que simulam reflexo irregular de luz fluorescente em superfícies de concreto. Opacity: 0.02. Movimento: lenta respiração (scale 0.98 → 1.02).
+
+---
+
+# 7. NAVEGAÇÃO
+
+## Como trocar slides
+- **Teclado:** Seta direita (próximo), seta esquerda (anterior). Home = primeiro slide, End = último slide.
+- **Mouse:** Apenas os botões de navegação (setas nos cantos inferiores). O scroll do mouse NÃO troca de slides. O clique em qualquer canto da tela NÃO troca de slides.
+- **Touch/Swipe:** Arrastar para esquerda (próximo), arrastar para direita (anterior).
+
+## Botões de navegação
+- Posicionados nos cantos inferiores do viewport: botão "anterior" no canto inferior esquerdo, botão "próximo" no canto inferior direito.
+- Aparência: Ícones de seta (< e >) dentro de círculos sutis.
+- Cor: rgba(197, 179, 58, 0.4) normal, rgba(197, 179, 58, 0.9) hover.
+- Tamanho: 44px × 44px (mínimo para touch).
+- Animação hover: glow amarelo ao redor, leve scale 1.1, transição 300ms ease-out.
+- Botão desabilitado (início/fim): opacity 0.2, pointer-events none.
+
+## Navigation dots
+- Posicionados na parte inferior central, no mesmo nível de altura dos botões de navegação (alinhados ao centro vertical dos botões).
+- Cada dot representa um slide.
+- Dot ativo: preenchido com cor amarela (#c5b33a), tamanho 8px.
+- Dot inativo: contorno sutil, tamanho 6px, cor rgba(197, 179, 58, 0.3).
+- Hover: leve glow, scale 1.3.
+- Transição entre dots: suave, 300ms.
+
+## Barra de progresso
+- Posicionada ACIMA dos navigation dots (distância de 12px entre a barra e os dots).
+- Largura: 200px (ou proporcionais ao número de slides).
+- Altura: 3px.
+- Cor de fundo: rgba(255,255,255,0.08).
+- Cor de preenchimento: gradiente de #c5b33a (esquerda) para #39ff14 (direita).
+- Animação de preenchimento: transição suave de 600ms ease-out ao trocar de slide.
+- A barra indica o progresso percentual da apresentação.
+
+## Índice de slides
+- Pequeno ícone/hambúrguer no canto superior esquerdo.
+- Ao clicar, abre painel lateral escuro com lista de todos os slides.
+- Cada item clicável leva ao slide correspondente.
+- Hover: destaque amarelo.
+
+---
+
+# 8. ANIMAÇÕES GLOBAIS
+
+## Animações de entrada de elementos
+- **Títulos:** Fade In + Move 25px para baixo → 0 + Blur 10px → 0. Duração: 900ms. Easing: cubic-bezier(0.16, 1, 0.3, 1). Delay: 200ms.
+- **Subtítulos:** Fade In + Move 15px para cima → 0. Duração: 700ms. Easing: cubic-bezier(0.16, 1, 0.3, 1). Delay: 500ms.
+- **Textos de conteúdo:** Fade In + Move 12px para baixo → 0. Duração: 600ms. Easing: ease-out. Delay: 700ms.
+- **Cards:** Fade In + Scale 0.94 → 1 + Blur 8px → 0 + Move 20px para baixo → 0. Duração: 800ms. Easing: cubic-bezier(0.16, 1, 0.3, 1). Stagger: 120ms entre cada card.
+- **Ícones:** Fade In + Scale 0.5 → 1. Duração: 500ms. Easing: cubic-bezier(0.34, 1.56, 0.64, 1) (spring-like). Delay: variável conforme posição.
+- **Elementos com perspectiva 3D:** Entram com fade + translateZ(-30px) → translateZ(0) + leve blur que reduz. Duração: 1000ms. Easing: cubic-bezier(0.16, 1, 0.3, 1).
+
+## Sequência padrão de entrada
+1. Background estabiliza (se já não estiver visível)
+2. Elementos decorativos (grain, scanlines) já estão ativos
+3. Elementos de perspectiva 3D entram
+4. Título aparece
+5. Subtítulo aparece
+6. Conteúdo/cards entram com stagger
+7. Ícones e elementos interativos surgem
+8. Efeitos finais (glow, partículas extras) aparecem
+
+## Transições entre slides
+- **Saída do slide atual:** Todos os elementos fazem Fade Out + Move 15px na direção do avanço + leve Blur. Duração: 500ms. Easing: ease-in.
+- **Entrada do novo slide:** Todos os elementos iniciam invisíveis e entram conforme a sequência descrita acima.
+- **Delay entre saída e entrada:** 150ms para garantir que o slide anterior terminou completamente.
+- **Tipo de transição global:** Dissolve com leve deslocamento horizontal (Push sutil).
+
+## Microanimações contínuas
+- Partículas de poeira flutuando: ciclo de 25-40s, movimento sutil.
+- Grain noise: leve variação de opacity (0.03 ↔ 0.05) em ciclo de 8s.
+- Scanlines: deslocamento vertical lento, ciclo de 12s.
+- Blobs de luz (quando presentes): respiração de scale 0.98 ↔ 1.02 em ciclo de 6s.
+- Navigation dots: leve pulso do dot ativo (scale 1 ↔ 1.05) em ciclo de 3s.
+- Botões de navegação: leve oscilação de opacity (0.4 ↔ 0.6) em ciclo de 4s.
+
+---
+
+# 9. ELEMENTOS INTERATIVOS GLOBAIS
+
+## Botões
+- **Hover:** Glow amarelo ao redor (box-shadow: 0 0 20px rgba(197, 179, 58, 0.5)), scale 1.05, transição 300ms ease-out.
+- **Pressed/Click:** Scale 0.97, brilho reduz, transição 100ms.
+- **Focus (teclado):** Outline amarelo sutil (2px solid rgba(197, 179, 58, 0.5)).
+- **Feedback visual:** Ripple sutil no clique.
+
+## Cards
+- **Hover:** Levante 4px (translateY(-4px)), sombra ampliada, borda brilha levemente, transição 400ms cubic-bezier(0.16, 1, 0.3, 1).
+- **Idle:** Sombra suave, borda sutil, semi-transparente.
+
+## Tooltips
+- Aparecem no hover de elementos marcados com indicador de tooltip (ícone (?) pequeno).
+- Fundo escuro com borda amarela sutil.
+- Texto em branco.
+- Aparecem com fade + scale 0.95 → 1.
+- Posicionamento: acima do elemento, com seta para baixo.
+
+## Toggles/Accordions
+- Usados em slides com muito conteúdo (quando necessário).
+- Header clicável com ícone de seta que rotaciona (0° → 180°) ao abrir/fechar.
+- Conteúdo expande com animação de height.
+- Transição: 400ms cubic-bezier(0.16, 1, 0.3, 1).
+- Borda lateral amarela indicando estado ativo.
+
+## Elementos com cursor magnético
+- Botões de navegação e elementos interativos importantes atraem levemente o cursor quando próximo (distância de 30px).
+- Efeito sutil: o elemento se move 3-5px na direção do cursor.
+
+---
+
+# 10. SISTEMA DE BLOCOS COM PERSPECTIVA 3D
+
+Os blocos com perspectiva 3D real são um elemento recorrente da identidade visual desta apresentação. Eles representam "fragmentos" ou "painéis de controle" encontrados dentro das Backrooms — como monitores de segurança ou painéis industriais abandonados.
+
+## Configurações ( conforme ExemploPerspectiva.html )
+
+**Bloco na metade superior do slide:**
+```css
+.bloco-perspectiva-superior {
+    transform: perspective(250px) rotateX(-10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+}
+```
+
+**Bloco na metade inferior do slide:**
+```css
+.bloco-perspectiva-inferior {
+    transform: perspective(250px) rotateX(10deg) rotateY(25deg);
+    transform-origin: 50% 50% 0px;
+    perspective-origin: 50% 50%;
+}
+```
+
+## Aparência dos blocos
+- **Fundo:** Gradiente escuro com sutil textura de concreto/metal. Exemplo: `linear-gradient(135deg, rgba(30, 28, 20, 0.9), rgba(20, 18, 12, 0.95))`.
+- **Borda:** 1px solid rgba(197, 179, 58, 0.12) — borda amarela muito sutil.
+- **Sombra:** `box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(197, 179, 58, 0.08)` — sombra profunda + highlight sutil no topo.
+- **Border-radius:** 4px.
+- **Padding:** mínimo 20px.
+- **Largura máxima:** 350px (nunca ultrapassar).
+- **Altura máxima:** 420px (nunca ultrapassar).
+- **Texto interno:** Herda naturalmente a perspectiva. NENHUMA transformação extra no texto.
+
+## Conteúdo dos blocos
+Cada bloco DEVE conter conteúdo real: título, subtítulo, número, ícone com label, ou frase de destaque. NUNCA bloco vazio.
+
+## Animação de entrada dos blocos
+- Transição de translateZ(-40px) → translateZ(0) + fade + leve blur que se resolve.
+- Duração: 1000ms. Easing: cubic-bezier(0.16, 1, 0.3, 1).
+
+## Responsividade
+```css
+.bloco-perspectiva {
+    width: min(350px, 85vw);
+    max-width: 350px;
+    max-height: 420px;
+    padding: clamp(12px, 3vw, 24px) clamp(16px, 4vw, 32px);
+}
+```
+Em telas < 400px, largura: min(350px, 85vw). A perspectiva 3D é MANTIDA em todas as resoluções.
+
+---
+
+<!-- FIM_ETAPA_1 -->
+
+---
+
+# SLIDES
+
+---
+
+## SLIDE 1 — Backrooms: O Universo do Horror Liminar
+
+**Objetivo:** Apresentar o tema com impacto máximo. Este é o slide de abertura — ele define todo o tom visual da apresentação. O usuário deve sentir imediatamente que está entrando em algo perturbador e fascinante.
+
+**Emoção que deve transmitir:** Intrigação, tensão, curiosidade imediata. Uma sensação de "algo está errado, mas não consigo parar de olhar".
+
+**Layout:** Centralizado dramático. O título domina o centro do viewport. Elementos sutis ao redor reforçam a atmosfera.
+
+**Organização dos elementos:**
+- Título principal: centro do viewport, levemente acima do centro vertical (45% do topo)
+- Subtítulo: abaixo do título
+- Elemento decorativo: bloco com perspectiva 3D no canto inferior esquerdo (badge com "2019 • Fenômeno Internet")
+- Navegação: botões e dots na parte inferior
+
+**Background:** O background global黑暗 é aplicado com intensidade máxima neste slide. Adicionar 2 blobs animados escuros (cor #3d3510, blur 120px, opacity 0.12) posicionados no canto superior direito e canto inferior esquerdo. Esses blobs simulam a luz fluorescente distante das Backrooms. Partículas de poeira são mais densas neste slide (25 partículas).
+
+**Elementos decorativos:**
+- Linha horizontal sutil (1px, rgba(197, 179, 58, 0.1)) atravessando o slide na horizontal, posicionada a 30% do topo, atrás do conteúdo. Essa linha representa o "horizonte" dos corredores infinitos.
+- Pequenos labels técnicos decorativos nos cantos: "SYS::BACKROOMS" no canto superior direito (fonte monospace, 10px, opacity 0.15, cor amarela).
+- Scanlines mais visíveis neste slide (opacity 0.06).
+
+**Elementos visuais (do Visual.txt):**
+- Noise/grain cinematográfico (overlay global)
+- Scanlines CRT (overlay global)
+- Vignette pesado (inset shadow)
+- Blobs animados (background)
+- Partículas de poeira (canvas ou CSS)
+- Texto com efeito glitch sutil (uma vez a cada 5-8 segundos, o título sofre uma distorção horizontal de 2-3px por 100ms, depois volta ao normal)
+
+**Partículas:**
+- Tipo: poeira (pontos brancos)
+- Quantidade: 25
+- Movimento: flutuação aleatória (drift)
+- Velocidade: ciclo de 25-40 segundos
+- Tamanho: 1-3px
+- Opacity: 0.02-0.08
+
+**Iluminação:**
+- Glow amarelo muito sutil emanando de trás do título (radial gradient, opacity 0.08)
+- Vignette escuro nas bordas
+- Sem sombras diretas (luz ambiente difusa)
+
+**Efeitos:**
+- Grain overlay (opacity 0.04)
+- Scanlines (opacity 0.05)
+- Vignette (inset shadow preto)
+- Glitch intermitente no título
+- Blur sutil no background blobs
+
+**Ícones:** Nenhum visível neste slide (foco total no título).
+
+**Imagens:** Nenhuma imagem neste slide. A atmosfera é criada apenas por elementos abstratos.
+
+**Tipografia:**
+- Título: font-size `clamp(3.2rem, 6.4vw, 5.76rem)`, peso 900, uppercase, cor branca (#e8e6e1)
+- O título NÃO pode ter gradiente. É branco puro.
+- O título possui efeito de extrusão 3D via text-shadow (múltiplas camadas, ver seção especial abaixo)
+- Subtítulo: font-size `clamp(1rem, 1.8vw, 1.3rem)`, peso 400, cor #c5b33a (amarelo), letterSpacing 0.08em
+
+**Efeito de Extrusão 3D no Título (OBRIGATÓRIO):**
+O título "BACKROOMS: O UNIVERSO DO HORROR LIMINAR" deve ter efeito de texto 3D extrudado. O texto em si fica PERFEITAMENTE RETO e HORIZONTAL. A profundidade é criada apenas por dezenas de text-shadow.
+
+Implementação:
+```javascript
+let shadow = "";
+for (let i = 0; i < 35; i++) {
+    shadow += (shadow ? "," : "") +
+              (-i) + "px " +
+              i + "px 0 #1a1508";
+}
+titulo.style.textShadow = shadow;
+```
+A cor da extrusão deve ser #1a1508 (amarelo muito escuro, quase marrom). Isso cria profundidade sem competir com o branco do texto principal.
+
+Além disso, usar `::before` no título com o mesmo texto, posicionado levemente deslocado (2px para baixo, 2px para a direita), com cor #0a0a0f e filter: blur(3px), opacity 0.4. Isso simula uma sombra ambiente sobre a superfície.
+
+O z-index do título deve ser ZERO para não sobrepor outros textos.
+
+**Ordem de entrada dos elementos:**
+1. Background estabiliza (já visível)
+2. Linha decorativa horizontal aparece (fade in, 800ms)
+3. Labels técnicos decorativos surgem (fade in, 600ms)
+4. Bloco com perspectiva 3D entra (fade + translateZ, 1000ms, delay 400ms)
+5. Título aparece com efeito de extrusão (fade + move 25px para baixo + blur, 900ms, delay 200ms)
+6. Subtítulo aparece (fade + move 15px para cima, 700ms, delay 600ms)
+7. Glitch intermitente começa a ocorrer periodicamente
+
+**Interações:**
+- Botão próximo (canto inferior direito): avança para slide 2
+- Navigation dots: clicáveis, indicam slide 1 como ativo
+- Botão anterior desabilitado (é o primeiro slide)
+- Botão índice (canto superior esquerdo): abre painel lateral
+- Título com efeito glitch que responde ao tempo (automático, não ao hover)
+
+**Transição para o próximo slide:**
+Fade out de todos os elementos com move 15px na direção do avanço. Duração: 500ms. Easing: ease-in. Delay de 150ms antes de iniciar a entrada do slide 2.
+
+**Observações:**
+- Este slide é o mais importante da apresentação. Ele define se o usuário continuará assistindo.
+- O efeito de extrusão 3D no título é OBRIGATÓRIO e deve ser impressionante.
+- O z-index do título deve ser 0.
+- É proibido criar "cover shapes" (polígonos decorativos com clip-path) atrás do título. O fundo deve conter apenas as camadas globais.
+- O título não pode ter gradiente — é branco puro (#e8e6e1).
+- O text-shadow do título NÃO pode ser branco ou cinza — deve ser amarelo escuro (#1a1508).
+
+---
+
+## SLIDE 2 — O que são as Backrooms?
+
+**Objetivo:** Explicar o conceito fundamental das Backrooms de forma clara e visualmente envolvente. O slide deve funcionar como uma introdução didática que mantém a atmosfera sombria.
+
+**Emoção que deve transmitir:** Curiosidade crescente, leve desconforto ao entender o conceito, fascinação pelo absurdo da ideia.
+
+**Layout:** Assimétrico. Conteúdo textual à esquerda (60% da largura) com cards de informação à direita (40%).
+
+**Organização dos elementos:**
+- Título do slide: canto superior esquerdo
+- Subtítulo: abaixo do título
+- 3 cards de informação empilhados verticalmente à direita, cada um com perspectiva 3D
+- Texto explicativo à esquerda, abaixo do subtítulo
+- Navegação na parte inferior
+
+**Background:** Global黑暗 padrão. Sem blobs extras. Partículas de poeira normais (18 partículas).
+
+**Elementos decorativos:**
+- Linha vertical sutil (1px, rgba(197, 179, 58, 0.08)) separando a área de texto (esquerda) dos cards (direita), posicionada a 55% da largura.
+- Labels técnicos: "NIVEL::DESCONHECIDO" no canto superior direito (monospace, 10px, opacity 0.12)
+
+**Elementos visuais (do Visual.txt):**
+- Cards com perspectiva 3D (3 cards, todos na metade superior do slide → rotateX -10deg)
+- Noise overlay
+- Vignette
+- Scanlines sutis
+
+**Cards com perspectiva 3D (3 cards):**
+Cada card contém:
+1. **Card 1:** Ícone de空间 (ícone de espaço/explorar) + título "Espaços Infinitos" + texto "Vazios e familiares que causam desconforto inexplicável"
+2. **Card 2:** Ícone de post/txt + título "Origem: 4chan, 2019" + texto "Post anônimo com imagem de liminal space viralizou"
+3. **Card 3:** Ícone de warning + título "A Premissa" + texto "Se você tropeçar na realidade, pode cair nas Backrooms"
+
+Configuração dos cards:
+- Largura: 260px cada (dentro do limite de 350px)
+- Altura: auto (conteúdo define)
+- Fundo: `linear-gradient(135deg, rgba(30, 28, 20, 0.9), rgba(20, 18, 12, 0.95))`
+- Borda: 1px solid rgba(197, 179, 58, 0.12)
+- Sombra: `0 15px 30px -8px rgba(0, 0, 0, 0.5)`
+- Padding: 20px
+- Todos na metade superior → rotateX(-10deg) rotateY(25deg) perspective(250px)
+
+**Partículas:**
+- Tipo: poeira
+- Quantidade: 18
+- Movimento: flutuação
+- Velocidade: ciclo de 30s
+
+**Iluminação:**
+- Glow amarelo muito sutil nos cards (inset highlight no topo)
+- Vignette global
+
+**Efeitos:**
+- Grain overlay
+- Scanlines leves
+- Cards com perspectiva 3D
+
+**Ícones:** SVG inline, estilo outline, cor #c5b33a, tamanho 24px, dentro de cada card.
+
+**Imagens:** Nenhuma.
+
+**Tipografia:**
+- Título: `clamp(1.8rem, 3.5vw, 2.8rem)`, peso 700, cor #e8e6e1
+- Subtítulo: `clamp(0.9rem, 1.5vw, 1.1rem)`, peso 400, cor #c5b33a
+- Texto de conteúdo: `clamp(0.8rem, 1.1vw, 0.95rem)`, peso 400, cor #d4d2cd, lineHeight 1.6
+- Texto dentro dos cards: `0.8rem`, peso 400, cor #d4d2cd
+- Títulos dos cards: `0.95rem`, peso 600, cor #e8e6e1
+
+**Ordem de entrada dos elementos:**
+1. Background estabiliza
+2. Linha decorativa vertical aparece (fade in, 600ms)
+3. Labels técnicos surgem (fade in, 500ms)
+4. Título do slide aparece (fade + move 25px para baixo + blur, 900ms, delay 200ms)
+5. Subtítulo aparece (fade + move 15px para cima, 700ms, delay 450ms)
+6. Card 1 entra (fade + translateZ + blur, 1000ms, delay 600ms)
+7. Card 2 entra (fade + translateZ + blur, 1000ms, delay 720ms — stagger 120ms)
+8. Card 3 entra (fade + translateZ + blur, 1000ms, delay 840ms — stagger 120ms)
+9. Texto explicativo à esquerda aparece (fade + move 12px para baixo, 600ms, delay 900ms)
+
+**Interações:**
+- Cards: hover → levantam 4px, sombra ampliada, borda brilha (transição 400ms)
+- Botões de navegação: funcionais
+- Tooltips nos cards: ao passar o mouse nos ícones, exibe tooltip com informação extra
+
+**Transição para o próximo slide:**
+Fade out + move 15px para esquerda. Duração: 500ms. Delay: 150ms.
+
+**Observações:**
+- O layout deve ser calibrado para que NADA saia da tela. O conteúdo textual à esquerda e os 3 cards à direita devem caber confortavelmente.
+- Se o conteúdo textual for muito grande, reduzir para 2-3 parágrafos curtos.
+- Os cards com perspectiva devem ter conteúdo real (não decoração vazia).
+
+---
+
+## SLIDE 3 — A Origem e a Primeira Imagem
+
+**Objetivo:** Contar a história do post original que deu início ao mito. Foco na imagem icônica do corredor amarelo.
+
+**Emoção que debe transmitir:** Tensão crescente, sensação de "estar lá", imersão na narrativa original.
+
+**Layout:** Split screen. Lado esquerdo (55%) com texto narrativo. Lado direito (45%) com representação visual do corredor (elemento visual abstrato que evoca o corredor amarelo — não uma imagem real, mas uma composição com cores e formas que remetem ao ambiente).
+
+**Organização dos elementos:**
+- Título do slide: canto superior esquerdo
+- Texto narrativo dividido em 2-3 blocos abaixo do título
+- Lado direito: elemento visual abstrato representando o corredor (blocos com perspectiva 3D empilhados simulando profundidade do corredor)
+- Quote destaque: "Se você ouvir o zumbido das luzes, já está tarde demais" — posicionada abaixo do conteúdo, centralizada, com estilo de citação
+- Navegação na parte inferior
+
+**Background:** Global黑暗. Neste slide, adicionar um blob de luz amarela sutil (#c5b33a, opacity 0.04, blur 100px) posicionado no centro do lado direito, simulando a luz fluorescente do corredor.
+
+**Elementos decorativos:**
+- 3 blocos com perspectiva 3D à direita, empilhados verticalmente com leve espaçamento, simulando a profundidade de um corredor. Cada bloco é mais estreito que o anterior (efeito de perspectiva forçada).
+  - Bloco 1 (topo): largura 280px, altura 80px, cor mais clara (#c5b33a com opacity 0.2)
+  - Bloco 2 (meio): largura 220px, altura 60px, cor média (#c5b33a com opacity 0.12)
+  - Bloco 3 (fundo): largura 160px, altura 40px, cor escura (#c5b33a com opacity 0.06)
+  - Todos com rotateX(-10deg) rotateY(25deg) perspective(250px) — estão na metade superior do slide
+  - Esses blocos criam a sensação de um corredor se estendendo para o infinito
+
+- Quote com borda lateral amarela (3px solid #c5b33a) e padding esquerdo generoso
+
+**Elementos visuais (do Visual.txt):**
+- Blocos com perspectiva 3D (3 blocos simulando corredor)
+- Blob animado de luz amarela (background)
+- Noise overlay
+- Vignette
+
+**Partículas:**
+- Tipo: poeira
+- Quantidade: 20 (mais densas no lado direito, perto do "corredor")
+- Movimento: flutuação com leve deriva horizontal (simulando corrente de ar no corredor)
+
+**Iluminação:**
+- Blob amarelo no lado direito simulando luz fluorescente
+- Glow muito sutil emanando dos blocos perspectivados
+- Vignette mais intenso nas bordas
+
+**Efeitos:**
+- Grain
+- Scanlines
+- Blobs de luz
+
+**Ícones:** Ícone de câmera/foto ao lado do título (SVG outline, #c5b33a, 20px).
+
+**Imagens:** Nenhuma imagem real. A representação visual é feita com blocos abstratos.
+
+**Tipografia:**
+- Título: `clamp(1.8rem, 3.5vw, 2.8rem)`, peso 700, cor #e8e6e1
+- Texto narrativo: `clamp(0.8rem, 1.1vw, 0.95rem)`, peso 400, cor #d4d2cd, lineHeight 1.7
+- Quote: `clamp(1rem, 1.6vw, 1.2rem)`, peso 500, cor #c5b33a, fontStyle italic, letterSpacing 0.02em
+
+**Ordem de entrada dos elementos:**
+1. Background estabiliza
+2. Blob amarelo surge suavemente (fade in, 1200ms)
+3. Blocos do corredor entram sequencialmente de cima para baixo (stagger 200ms cada, fade + translateZ, 800ms)
+4. Título aparece (fade + move, 900ms, delay 300ms)
+5. Texto narrativo aparece parágrafo por parágrafo (fade + move 12px, 600ms cada, stagger 200ms, delay 600ms)
+6. Quote aparece por último (fade + move 10px para baixo, 700ms, delay 1200ms)
+
+**Interações:**
+- Blocos do corredor: ao hover, leve pulsão de glow (intensidade aumenta sutilmente)
+- Quote: ao hover, borda lateral brilha mais
+- Botões de navegação: funcionais
+
+**Transição para o próximo slide:**
+Fade out + dissolve. Duração: 500ms. Delay: 150ms.
+
+**Observações:**
+- A composição dos 3 blocos perspectivados à direita é crucial para criar a sensação de profundidade do corredor. Eles devem parecer estar se estendendo para longe.
+- O layout deve ser validado para não ultrapassar o viewport. Se o texto narrativo for longo, usar no máximo 3 parágrafos curtos.
+- A quote é o elemento de destaque emocional deste slide — ela deve ter presença visual forte.
+
+---
+
+<!-- FIM_ETAPA_2 -->
+
+---
+
+## SLIDE 4 — Os Níveis Fundamentais
+
+**Objetivo:** Apresentar os 4 níveis principais das Backrooms de forma visualmente impactante e organizada. Este slide é informativo mas deve manter a tensão.
+
+**Emoção que deve transmitir:** Progressão de perigo, sensação de descida a algo cada vez pior, fascinação pela estrutura do universo.
+
+**Layout:** Grid 2×2. Cada nível ocupa um quadrante do viewport (com margem de segurança). Os 4 quadrantes representam a progressão de risco (Nível 0 → Nível 3).
+
+**Organização dos elementos:**
+- Título do slide: canto superior esquerdo
+- Grid 2×2 abaixo do título, ocupando ~80% da área restante
+- Cada célula do grid contém: nível (número), nome, descrição curta, ícone temático
+- Barra de progresso vertical sutil à esquerda do grid indicando a progressão de perigo (verde → amarelo → laranja → vermelho)
+
+**Background:** Global黑暗. Adicionar blob de luz verde escura (#1a2a0a, opacity 0.06, blur 80px) no canto inferior direito, simulando a atmosfera dos níveis mais profundos.
+
+**Elementos decorativos:**
+- Barra de progressão vertical à esquerda do grid: linha de 2px com gradiente de #39ff14 (topo, Nível 0) → #c5b33a (meio) → #8b0000 (fundo, Nível 3). Essa barra representa o aumento do perigo.
+- Labels técnicos: "CLASSIFICACAO::NIVEIS" no canto superior direito
+- Pequenos marcadores de nível (0, 1, 2, 3) ao lado de cada célula, com cor correspondente ao nível
+
+**Elementos visuais (do Visual.txt):**
+- Grid layout (2×2)
+- Cards com perspectiva 3D (4 cards, todos na metade inferior do slide → rotateX 10deg)
+- Barra de progressão vertical (gradiente animado)
+- Blob animado
+
+**Cards de nível (4 cards com perspectiva 3D):**
+Todos os 4 cards estão na metade inferior do slide → rotateX(10deg) rotateY(25deg) perspective(250px).
+
+1. **Nível 0 — The Lobby:** Fundo #1a2a0a (verde escuro), ícone de corredor, texto "Corredores infinitos com carpete amarelo e papel de parede". Cor de destaque do card: #39ff14 (verde neon — nível seguro).
+
+2. **Nível 1 — Habitable Zone:** Fundo #2a2a0a (amarelo escuro), ícone de armazém, texto "Armazéns escuros com condensação e água". Cor de destaque: #c5b33a (amarelo — cautela).
+
+3. **Nível 2 — Pipe Dreams:** Fundo #2a1a0a (laranja escuro), ícone de tubos, texto "Túneis subterrâneos com trilhos e calor extremo". Cor de destaque: #d4760a (laranja — perigo).
+
+4. **Nível 3 — Electrical Station:** Fundo #2a0a0a (vermelho escuro), ícone de fios/eletricidade, texto "Labirintos de fios e instalações industriais". Cor de destaque: #8b0000 (vermelho — alto perigo).
+
+Configuração de cada card:
+- Largura: min(280px, 40vw) (dentro do limite de 350px)
+- Altura: auto (conteúdo define, max 200px)
+- Fundo: gradiente escuro com a cor temática do nível
+- Borda: 1px solid com cor de destaque do nível (opacity 0.2)
+- Sombra: `0 12px 24px -8px rgba(0,0,0,0.5)`
+- Padding: 16px
+- O número do nível aparece grande no canto superior esquerdo do card (font-size 2rem, peso 800, cor de destaque com opacity 0.3)
+
+**Partículas:**
+- Tipo: poeira
+- Quantidade: 15
+- Movimento: flutuação
+- Velocidade: ciclo de 35s (mais lenta — sensação de estagnação)
+
+**Iluminação:**
+- Cada card possui glow lateral sutil na cor de destaque do seu nível
+- Vignette global
+
+**Efeitos:**
+- Grain
+- Scanlines leves
+- Cards com perspectiva 3D
+- Barra de progressão com gradiente animado
+
+**Ícones:** SVG inline para cada nível:
+- Nível 0: ícone de corredor/porta
+- Nível 1: ícone de caixa/armazém
+- Nível 2: ícone de tubo
+- Nível 3: ícone de raio/eletricidade
+Todos em estilo outline, cor de destaque do nível, tamanho 28px.
+
+**Imagens:** Nenhuma.
+
+**Tipografia:**
+- Título: `clamp(1.8rem, 3.5vw, 2.8rem)`, peso 700, cor #e8e6e1
+- Número do nível: `2rem`, peso 800, cor de destaque (opacity 0.3)
+- Nome do nível: `clamp(0.9rem, 1.3vw, 1.1rem)`, peso 600, cor #e8e6e1
+- Descrição: `clamp(0.75rem, 1vw, 0.85rem)`, peso 400, cor #d4d2cd
+
+**Ordem de entrada dos elementos:**
+1. Background estabiliza
+2. Barra de progressão vertical aparece (draw line de cima para baixo, 1000ms, delay 200ms)
+3. Título aparece (fade + move, 900ms, delay 300ms)
+4. Card Nível 0 entra (fade + translateZ + blur, 900ms, delay 600ms)
+5. Card Nível 1 entra (fade + translateZ + blur, 900ms, delay 720ms — stagger 120ms)
+6. Card Nível 2 entra (fade + translateZ + blur, 900ms, delay 840ms — stagger 120ms)
+7. Card Nível 3 entra (fade + translateZ + blur, 900ms, delay 960ms — stagger 120ms)
+8. Labels técnicos surgem (fade in, 500ms, delay 1100ms)
+
+**Interações:**
+- Cards: hover → levantam 3px, glow da cor do nível intensifica, borda brilha (transição 400ms)
+- Barra de progressão: pulsão sutil de glow contínuo
+- Botões de navegação: funcionais
+
+**Transição para o próximo slide:**
+Fade out + move 15px para baixo. Duração: 500ms. Delay: 150ms.
+
+**Observações:**
+- A progressão de cores (verde → amarelo → laranja → vermelho) é fundamental para comunicar o aumento do perigo.
+- O layout 2×2 deve ser validado para caber em todas as resoluções. Em telas estreitas, reorganizar para 1×4 (empilhado).
+- Os cards não devem ser grandes demais — o conteúdo é curto e o card deve ter tamanho justo.
+
+---
+
+## SLIDE 5 — Entidades das Backrooms
+
+**Objetivo:** Apresentar as principais entidades/criaturas das Backrooms. Este slide é o mais "assustador" — deve transmitir perigo e tensão.
+
+**Emoção que deve transmitir:** Medo, tensão, alerta. O usuário deve sentir que há algo perigoso se aproximando.
+
+**Layout:** Centralizado com cards empilhados. 3 cards de entidade dispostos em coluna centralizada, cada um com identidade visual própria. Um bloco com perspectiva 3D no canto superior direito com texto de alerta.
+
+**Organização dos elementos:**
+- Título do slide: canto superior esquerdo
+- Subtítulo abaixo do título
+- 3 cards de entidade centralizados, empilhados verticalmente com espaçamento
+- Bloco com perspectiva 3D no canto superior direito (badge de alerta: "⚠ CLASSE AMEAÇA")
+- Nota inferior: "Cada nível possui ameaças únicas" — texto discreto abaixo dos cards
+- Navegação na parte inferior
+
+**Background:** Global黑暗. Neste slide, o background deve ser levemente mais denso — adicionar um blob vermelho escuro (#3a0a0a, opacity 0.08, blur 100px) no centro, simulando uma atmosfera de perigo.
+
+**Elementos decorativos:**
+- Linha vermelha sutil (1px, rgba(139, 0, 0, 0.2)) abaixo do título, servindo como separador
+- O blob vermeldo no centro do background
+- Labels técnicos: "ENTIDADE::CLASSE_B" no canto superior direito
+
+**Elementos visuais (do Visual.txt):**
+- Cards de entidade (3 cards)
+- Bloco com perspectiva 3D (badge de alerta)
+- Blob vermelho (background)
+- Glow vermelho sutil
+
+**Cards de entidade (3 cards):**
+Cada card contém:
+1. **Smilers:** Fundo escuro com borda lateral vermelha (#8b0000). Ícone de sorriso brilhante. Título "Smilers". Descrição: "Criaturas com sorrisos brilhantes na escuridão". Indicador de perigo: 3/5 (três pontos vermelhos acesos).
+
+2. **Hounds:** Fundo escuro com borda lateral laranja (#d4760a). Ícone de caveira/cão. Título "Hounds". Descrição: "Seres humanoides rápidos e predatórios". Indicador de perigo: 4/5 (quatro pontos laranjas acesos).
+
+3. **Skin-Stealers:** Fundo escuro com borda lateral vermelha escura (#5a0000). Ícone de máscara. Título "Skin-Stealers". Descrição: "Entidades que imitam aparência humana". Indicador de perigo: 5/5 (cinco pontos vermelhos acesos).
+
+Configuração de cada card:
+- Largura: min(400px, 80vw) (dentro do limite de 350px... ajustar para 320px se necessário para caber)
+- Altura: auto
+- Fundo: `rgba(15, 12, 10, 0.9)`
+- Borda lateral: 3px solid (cor de perigo da entidade)
+- Sombra: `0 8px 20px -6px rgba(0, 0, 0, 0.6)`
+- Padding: 16px 20px
+- Layout interno: flex row com ícone à esquerda, texto ao meio, indicador de perigo à direita
+
+**Bloco com perspectiva 3D (badge de alerta):**
+- Posição: canto superior direito (acima de 50% → rotateX -10deg)
+- Largura: 180px (ajustada ao conteúdo)
+- Altura: 60px
+- Conteúdo: "⚠ CLASSE AMEAÇA"
+- Fundo: `linear-gradient(135deg, rgba(139, 0, 0, 0.8), rgba(90, 0, 0, 0.9))`
+- Borda: 1px solid rgba(139, 0, 0, 0.3)
+- Cor do texto: #e8e6e1
+
+**Partículas:**
+- Tipo: poeira + algumas partículas avermelhadas (pontos com cor #8b0000, opacity 0.04)
+- Quantidade: 18 (15 brancas + 3 vermelhas)
+- Movimento: flutuação lenta, as vermelhas se movem mais devagar
+- Velocidade: ciclo de 30s
+
+**Iluminação:**
+- Glow vermelho sutil emanando dos cards (borda lateral)
+- Blob vermeldo no background
+- Vignette intenso
+
+**Efeitos:**
+- Grain
+- Scanlines
+- Glow vermeldo nos cards
+- Blob de perigo
+
+**Ícones:** SVG inline para cada entidade:
+- Smilers: ícone de sorriso/sorriso brilhante
+- Hounds: ícone de caveira ou presas
+- Skin-Stealers: ícone de máscara/rosto
+Todos em estilo outline, cor da entidade, tamanho 24px.
+
+**Imagens:** Nenhuma.
+
+**Tipografia:**
+- Título: `clamp(1.8rem, 3.5vw, 2.8rem)`, peso 700, cor #e8e6e1
+- Subtítulo: `clamp(0.85rem, 1.3vw, 1rem)`, peso 400, cor #c5b33a
+- Nome da entidade: `clamp(0.95rem, 1.4vw, 1.15rem)`, peso 700, cor #e8e6e1
+- Descrição: `clamp(0.75rem, 1vw, 0.85rem)`, peso 400, cor #d4d2cd
+- Badge de alerta: `0.75rem`, peso 600, uppercase, letterSpacing 0.1em, cor #e8e6e1
+
+**Ordem de entrada dos elementos:**
+1. Background estabiliza + blob vermeldo surge (fade in, 1000ms)
+2. Linha vermelha separadora aparece (draw line da esquerda para direita, 600ms, delay 200ms)
+3. Título aparece (fade + move, 900ms, delay 300ms)
+4. Subtítulo aparece (fade + move, 700ms, delay 500ms)
+5. Bloco de alerta entra (fade + translateZ, 1000ms, delay 600ms)
+6. Card Smilers entra (fade + move da esquerda + blur, 800ms, delay 700ms)
+7. Card Hounds entra (fade + move da esquerda + blur, 800ms, delay 820ms — stagger 120ms)
+8. Card Skin-Stealers entra (fade + move da esquerda + blur, 800ms, delay 940ms — stagger 120ms)
+9. Nota inferior aparece (fade in, 600ms, delay 1100ms)
+10. Labels técnicos surgem (fade in, 500ms, delay 1200ms)
+
+**Interações:**
+- Cards de entidade: hover → borda lateral brilha intensamente, glow vermelho aumenta, card levanta 3px (transição 400ms). Se houver indicador de perigo, os pontos acendem mais no hover.
+- Bloco de alerta: pulsão contínua de glow (scale 1 ↔ 1.02, opacity 0.8 ↔ 1.0) em ciclo de 3s
+- Botões de navegação: funcionais
+
+**Transição para o próximo slide:**
+Fade out + dissolve com leve tremor (camera shake sutil de 1px por 200ms antes do fade). Duração: 500ms. Delay: 150ms.
+
+**Observações:**
+- Este é o slide mais tenso da apresentação. O uso de vermelho e o indicador de perigo comunicam claramente o risco.
+- Os cards não devem ser largos demais — 320px é suficiente para o conteúdo.
+- O indicador de perigo (pontos acesos) é um elemento interativo que enriquece a experiência.
+- A nota inferior "Cada nível possui ameaças únicas" deve ser discreta (texto pequeno, opacity 0.6).
+
+---
+
+## SLIDE 6 — Mecânicas do Universo
+
+**Objetivo:** Explicar como o universo das Backrooms funciona: níveis seguros vs perigosos, suprimentos, grupos humanos e sistema de mapeamento.
+
+**Emoção que deve transmitir:** Compreensão sistêmica, fascinação pela complexidade do universo, sensação de que há uma lógica por trás do caos.
+
+**Layout:** Split screen com abas (tabs). Lado esquerdo (45%) com abas de navegação entre categorias. Lado direito (55%) com o conteúdo da aba selecionada.
+
+**Organização dos elementos:**
+- Título do slide: canto superior esquerdo
+- Abas à esquerda: "Níveis", "Suprimentos", "Grupos", "Mapeamento"
+- Conteúdo da aba ativa à direita
+- Bloco com perspectiva 3D abaixo das abas (card de destaque com estatística: "20+ níveis documentados")
+- Navegação na parte inferior
+
+**Background:** Global黑暗 padrão. Sem blobs extras.
+
+**Elementos decorativos:**
+- Linha vertical sutil separando abas do conteúdo
+- Labels técnicos: "SISTEMA::OPERACAO" no canto superior direito
+
+**Elementos visuais (do Visual.txt):**
+- Abas (Tabs) interativas
+- Bloco com perspectiva 3D (card estatístico)
+- Cards de informação dentro de cada aba
+
+**Abas (4 abas):**
+Cada aba é um botão vertical à esquerda do slide:
+1. **Níveis:** Ícone de escada + texto "Níveis seguros vs. perigosos: a progressão de risco"
+2. **Suprimentos:** Ícone de caixa + texto "A importância de alimentos e suprimentos dentro das Backrooms"
+3. **Grupos:** Ícone de pessoas + texto "Grupos humanos organizados: M.E.G., B.N.T.G. e Outposts"
+4. **Mapeamento:** Ícone de mapa + texto "O sistema de classificação e mapeamento colaborativo"
+
+Configuração das abas:
+- Largura: 140px cada
+- Altura: auto (conteúdo)
+- Fundo inativo: `rgba(20, 18, 12, 0.6)`
+- Fundo ativo: `rgba(197, 179, 58, 0.1)` com borda esquerda 3px solid #c5b33a
+- Cor do texto inativo: #8a8880
+- Cor do texto ativo: #e8e6e1
+- Transição de estado: 300ms ease-out
+
+**Conteúdo de cada aba (lado direito):**
+1. **Níveis:** 2-3 bullets explicando a progressão de risco entre níveis. Cards pequenos com exemplos.
+2. **Suprimentos:** Texto explicando a importância de água, comida e itens de sobrevivência.
+3. **Grupos:** Cards com os 3 grupos principais (M.E.G., B.N.T.G., Outposts), cada um com nome, descrição curta e ícone.
+4. **Mapeamento:** Texto sobre o sistema de classificação colaborativo e wiki.
+
+**Bloco com perspectiva 3D (card estatístico):**
+- Posição: abaixo das abas, lado esquerdo (acima de 50% → rotateX -10deg)
+- Largura: 200px
+- Altura: 100px
+- Conteúdo: "20+" (número grande) + "níveis documentados" (texto pequeno)
+- Fundo: gradiente escuro com borda amarela sutil
+- Cor do número: #c5b33a
+
+**Partículas:**
+- Tipo: poeira
+- Quantidade: 15
+- Movimento: flutuação
+
+**Iluminação:**
+- Glow amarelo sutil na aba ativa
+- Vignette global
+
+**Efeitos:**
+- Grain
+- Scanlines leves
+
+**Ícones:** SVG inline para cada aba (escada, caixa, pessoas, mapa). Estilo outline, cor #c5b33a quando ativo, #8a8880 quando inativo. Tamanho 20px.
+
+**Imagens:** Nenhuma.
+
+**Tipografia:**
+- Título: `clamp(1.8rem, 3.5vw, 2.8rem)`, peso 700, cor #e8e6e1
+- Texto das abas: `clamp(0.8rem, 1.1vw, 0.9rem)`, peso 500
+- Conteúdo das abas: `clamp(0.8rem, 1.1vw, 0.9rem)`, peso 400, cor #d4d2cd, lineHeight 1.6
+- Número estatístico: `2.5rem`, peso 800, cor #c5b33a
+- Label estatístico: `0.75rem`, peso 400, cor #8a8880
+
+**Ordem de entrada dos elementos:**
+1. Background estabiliza
+2. Título aparece (fade + move, 900ms, delay 200ms)
+3. Abas aparecem sequencialmente de cima para baixo (fade + move da esquerda, 600ms cada, stagger 100ms, delay 500ms)
+4. Conteúdo da primeira aba (Níveis) aparece (fade + move, 700ms, delay 900ms)
+5. Bloco estatístico entra (fade + translateZ, 1000ms, delay 1100ms)
+6. Labels técnicos surgem (fade in, 500ms, delay 1200ms)
+
+**Interações:**
+- **Abas:** Clicáveis. Ao clicar, a aba ativa muda visualmente (fundo amarelo sutil, borda esquerda amarela) e o conteúdo do lado direito troca com animação de fade out + fade in. Transição: 400ms.
+- **Conteúdo das abas:** Pode conter cards clicáveis que expandem para mostrar mais detalhes (toggle).
+- **Bloco estatístico:** Hover → glow amarelo intensifica
+- **Botões de navegação:** funcionais
+
+**Transição para o próximo slide:**
+Fade out + dissolve. Duração: 500ms. Delay: 150ms.
+
+**Observações:**
+- As abas são essenciais para organizar o conteúdo sem sobrecarregar o slide. Cada aba deve ter no máximo 3-4 linhas de conteúdo.
+- O bloco estatístico com perspectiva 3D reforça a identidade visual recorrente.
+- A troca de abas deve ser fluida, com fade out do conteúdo antigo e fade in do novo.
+- O layout deve ser validado para caber sem scroll.
+
+---
+
+<!-- FIM_ETAPA_3 -->
+
+---
+
+## SLIDE 7 — Espaços Liminais e a Psicologia do Medo
+
+**Objetivo:** Explicar o conceito de "Liminal Spaces" e por que eles nos assustam. Conectar o fenômeno das Backrooms com a psicologia humana.
+
+**Emoção que deve transmitir:** Reflexão, reconhecimento ("eu já senti isso"), leve desconforto ao entender por que esses espaços nos perturbam.
+
+**Layout:** Centralizado com conteúdo dividido em 3 colunas iguais. Cada coluna aborda um aspecto do conceito.
+
+**Organização dos elementos:**
+- Título do slide: canto superior esquerdo
+- Subtítulo abaixo do título
+- 3 colunas abaixo do subtítulo:
+  - Coluna 1: "O que são" — definição de liminal spaces
+  - Coluna 2: "Por que assustam" — psicologia do medo
+  - Coluna 3: "Conexão coletiva" — memória compartilhada
+- Bloco com perspectiva 3D na parte inferior centralizada (quote: "Transições entre lugares conhecidos")
+- Navegação na parte inferior
+
+**Background:** Global黑暗. Neste slide, adicionar uma textura sutil de papel envelhecido/parede amarela sobre o background escuro (opacity 0.03), evocando o papel de parede icônico das Backrooms. Essa textura pode ser gerada com CSS (repeating pattern) ou canvas.
+
+**Elementos decorativos:**
+- 3 linhas verticais sutis separando as colunas (1px, rgba(197, 179, 58, 0.06))
+- Bloco perspectivado inferior com quote
+- Labels técnicos: "PSICOLOGIA::LIMINAL" no canto superior direito
+
+**Elementos visuais (do Visual.txt):**
+- Textura de parede sutil (background)
+- 3 colunas de conteúdo
+- Bloco com perspectiva 3D (quote)
+- Noise overlay
+
+**Conteúdo das colunas:**
+
+**Coluna 1 — "O que são":**
+- Ícone: ícone de espaço vazio/porta
+- Título: "Liminal Spaces"
+- Texto: "Transições entre lugares conhecidos — corredores, saguões, salas de aula vazias. Lugares que existem entre um destino e outro."
+- Texto adicional: "Quando estão vazios, perdem seu propósito e ganham uma atmosfera perturbadora."
+
+**Coluna 2 — "Por que assustam":**
+- Ícone: ícone de cérebro/olho
+- Título: "Psicologia do Medo"
+- Texto: "Familiaridade vazia. A ausência de pessoas em lugares projetados para elas cria uma dissonância cognitiva."
+- Texto adicional: "Nosso cérebro registra que algo está errado, mas não consegue identificar o quê."
+
+**Coluna 3 — "Conexão coletiva":**
+- Ícone: ícone de rede/conexão
+- Título: "Memória Compartilhada"
+- Texto: "Estádios vazios, corredores de escola, shopping centers à noite — todos sentimos o mesmo desconforto."
+- Texto adicional: "A internet transformou essa sensação individual em uma experiência coletiva."
+
+Configuração das colunas:
+- Largura: calc((100% - 4rem) / 3) — 3 colunas com gap de 2rem
+- Padding interno: 20px
+- Fundo: semi-transparente (rgba(20, 18, 12, 0.4))
+- Borda: 1px solid rgba(197, 179, 58, 0.06)
+- Border-radius: 4px
+
+**Bloco com perspectiva 3D (quote):**
+- Posição: parte inferior centralizada (abaixo de 50% → rotateX 10deg)
+- Largura: 320px (próximo do limite, justificado pela frase longa)
+- Altura: 80px
+- Conteúdo: "Transições entre lugares conhecidos"
+- Fundo: gradiente escuro
+- Cor do texto: #c5b33a, fontStyle italic
+
+**Partículas:**
+- Tipo: poeira
+- Quantidade: 15
+- Movimento: flutuação lenta
+
+**Iluminação:**
+- Glow amarelo muito sutil nas bordas das colunas
+- Vignette global
+
+**Efeitos:**
+- Grain
+- Scanlines leves
+- Textura de parede sutil no background
+
+**Ícones:** SVG inline para cada coluna (espaço vazio, cérebro, rede). Estilo outline, cor #c5b33a, tamanho 28px.
+
+**Imagens:** Nenhuma.
+
+**Tipografia:**
+- Título: `clamp(1.8rem, 3.5vw, 2.8rem)`, peso 700, cor #e8e6e1
+- Subtítulo: `clamp(0.85rem, 1.3vw, 1rem)`, peso 400, cor #c5b33a
+- Título da coluna: `clamp(0.9rem, 1.3vw, 1.1rem)`, peso 600, cor #e8e6e1
+- Texto da coluna: `clamp(0.75rem, 1vw, 0.85rem)`, peso 400, cor #d4d2cd, lineHeight 1.6
+- Quote: `clamp(0.85rem, 1.2vw, 1rem)`, peso 500, cor #c5b33a, fontStyle italic
+
+**Ordem de entrada dos elementos:**
+1. Background estabiliza + textura de parede aparece (fade in, 1000ms)
+2. Título aparece (fade + move, 900ms, delay 200ms)
+3. Subtítulo aparece (fade + move, 700ms, delay 450ms)
+4. Coluna 1 aparece (fade + move de baixo + blur, 800ms, delay 600ms)
+5. Coluna 2 aparece (fade + move de baixo + blur, 800ms, delay 720ms — stagger 120ms)
+6. Coluna 3 aparece (fade + move de baixo + blur, 800ms, delay 840ms — stagger 120ms)
+7. Bloco perspectivado entra (fade + translateZ, 1000ms, delay 1000ms)
+8. Labels técnicos surgem (fade in, 500ms, delay 1100ms)
+
+**Interações:**
+- Colunas: hover → borda brilha sutilmente, fundo fica levemente mais claro (transição 400ms)
+- Bloco perspectivado: hover → glow amarelo intensifica
+- Botões de naveagação: funcionais
+
+**Transição para o próximo slide:**
+Fade out + dissolve. Duração: 500ms. Delay: 150ms.
+
+**Observações:**
+- O conteúdo textual de cada coluna deve ser curto (2-3 frases no máximo). Se ficar longo, reduzir.
+- A textura de parede no background é um detalhe sutil que reforça a conexão com as Backrooms.
+- O layout 3 colunas deve ser responsivo: em telas estreitas, empilhar verticalmente.
+
+---
+
+## SLIDE 8 — As Backrooms na Cultura Popular
+
+**Objetivo:** Mostrar como as Backrooms se infiltraram na cultura pop: jogos, filmes, YouTube, creepypastas.
+
+**Emoção que deve transmitir:** Entusiasmo, reconhecimento ("eu já vi isso!", "eu conheço esse jogo!"), sensação de que o fenômeno é onipresente.
+
+**Layout:** Bento Grid assimétrico. 4-5 cards de tamanhos diferentes dispostos em padrão bento, cada um representando uma área da cultura pop.
+
+**Organização dos elementos:**
+- Título do slide: canto superior esquerdo
+- Subtítulo abaixo do título
+- Bento Grid abaixo do subtítulo, ocupando ~85% da área restante
+  - Card grande (esquerda): "Jogos" — ocupa 60% da largura, 100% da altura do grid
+  - Card médio (direita superior): "Filmes e Séries" — ocupa 40% da largura, 50% da altura
+  - Card médio (direita inferior esquerda): "YouTube" — ocupa 20% da largura, 50% da altura
+  - Card pequeno (direita inferior direita): "Creepypastas" — ocupa 20% da largura, 50% da altura
+- Navegação na parte inferior
+
+**Background:** Global黑暗 padrão. Sem blobs extras.
+
+**Elementos decorativos:**
+- Bento Grid com gaps sutis (8px)
+- Labels técnicos: "CULTURA::POP" no canto superior direito
+
+**Elementos visuais (do Visual.txt):**
+- Bento Grid
+- Cards com hover reveal
+- Blocos com perspectiva 3D (1 card de destaque)
+
+**Cards do Bento Grid:**
+
+1. **Card "Jogos" (grande, esquerda):**
+   - Fundo: `rgba(20, 18, 12, 0.85)`
+   - Conteúdo: Título "Jogos", lista de jogos: "Backrooms Escape", "The Exit 8", "Roblox Backrooms"
+   - Cada jogo pode ter um small tag/badge indicando a plataforma
+   - Hover: card levanta, borda amarela brilha
+   - Pode ter um bloco com perspectiva 3D dentro (badge "INDIE")
+
+2. **Card "Filmes e Séries" (médio, direita superior):**
+   - Fundo: `rgba(20, 18, 12, 0.85)`
+   - Conteúdo: Título "Filmes e Séries", texto "Inspiração em produções de horror"
+   - Hover: borda brilha
+
+3. **Card "YouTube" (médio, direita inferior esquerda):**
+   - Fundo: `rgba(20, 18, 12, 0.85)`
+   - Conteúdo: Título "YouTube", texto "Canais de exploração e narrativas"
+   - Hover: borda brilha
+
+4. **Card "Creepypastas" (pequeno, direita inferior direita):**
+   - Fundo: `rgba(20, 18, 12, 0.85)`
+   - Conteúdo: Título "Creepypastas", texto "Terror colaborativo online"
+   - Hover: borda brilha
+
+5. **Card de destaque (inferior, largura total):**
+   - Fundo: `rgba(30, 28, 20, 0.9)`
+   - Conteúdo: "O fenômeno como ferramenta de terror colaborativo"
+   - Texto maior, centralizado
+   - Borda: 1px solid rgba(197, 179, 58, 0.15)
+
+Configuração do Bento Grid:
+```css
+.bento-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr auto;
+    gap: 8px;
+}
+```
+
+**Partículas:**
+- Tipo: pixels/fragmentos digitais (pontos quadrados, 2-4px, cor #c5b33a com opacity 0.03-0.06)
+- Quantidade: 12
+- Movimento: flutuação com leve deriva horizontal
+
+**Iluminação:**
+- Glow amarelo sutil nos cards
+- Vignette global
+
+**Efeitos:**
+- Grain
+- Scanlines leves
+
+**Ícones:** SVG inline para cada card:
+- Jogos: ícone de controle/joystick
+- Filmes: ícone de cinema/play
+- YouTube: ícone de play/video
+- Creepypastas: ícone de texto/livro
+Todos em estilo outline, cor #c5b33a, tamanho 24px.
+
+**Imagens:** Nenhuma.
+
+**Tipografia:**
+- Título: `clamp(1.8rem, 3.5vw, 2.8rem)`, peso 700, cor #e8e6e1
+- Subtítulo: `clamp(0.85rem, 1.3vw, 1rem)`, peso 400, cor #c5b33a
+- Título dos cards: `clamp(0.9rem, 1.3vw, 1.1rem)`, peso 600, cor #e8e6e1
+- Texto dos cards: `clamp(0.75rem, 1vw, 0.85rem)`, peso 400, cor #d4d2cd
+- Texto do card de destaque: `clamp(0.9rem, 1.3vw, 1.1rem)`, peso 500, cor #c5b33a
+
+**Ordem de entrada dos elementos:**
+1. Background estabiliza
+2. Título aparece (fade + move, 900ms, delay 200ms)
+3. Subtítulo aparece (fade + move, 700ms, delay 450ms)
+4. Card "Jogos" (grande) entra (fade + scale 0.94 + blur, 900ms, delay 600ms)
+5. Card "Filmes" entra (fade + scale 0.94 + blur, 900ms, delay 720ms — stagger 120ms)
+6. Card "YouTube" entra (fade + scale 0.94 + blur, 900ms, delay 840ms — stagger 120ms)
+7. Card "Creepypastas" entra (fade + scale 0.94 + blur, 900ms, delay 960ms — stagger 120ms)
+8. Card de destaque inferior entra (fade + move de baixo, 800ms, delay 1100ms)
+9. Labels técnicos surgem (fade in, 500ms, delay 1200ms)
+
+**Interações:**
+- **Cards:** Hover → levantam 4px, sombra ampliada, borda amarela brilha, fundo fica levemente mais claro (transição 400ms cubic-bezier(0.16, 1, 0.3, 1))
+- **Card "Jogos":** Pode ter toggle para expandir e mostrar mais detalhes sobre cada jogo
+- **Card de destaque:** Hover → glow amarelo intensifica
+- **Botões de navegação:** funcionais
+
+**Transição para o próximo slide:**
+Fade out + dissolve. Duração: 500ms. Delay: 150ms.
+
+**Observações:**
+- O Bento Grid deve ser calibrado para caber sem scroll. Se o conteúdo for muito, reduzir texto.
+- Os cards devem ter tamanhos proporcionais ao conteúdo (não forçar tamanhos iguais).
+- O card "Jogos" é o maior porque tem mais conteúdo (lista de 3 jogos).
+- Em telas estreitas, o Bento Grid reorganiza para coluna única.
+
+---
+
+<!-- FIM_ETAPA_4 -->
+
+---
+
+## SLIDE 9 — Por Que as Backrooms Tocam Tanta Gente?
+
+**Objetivo:** Explorar as razões emocionais e psicológicas pelas quais as Backrooms ressoam com tantas pessoas. Este é o slide mais reflexivo e emocional da apresentação.
+
+**Emoção que deve transmitir:** Conexão emocional, reflexão profunda, sensação de que o fenômeno toca algo primal e compartilhado.
+
+**Layout:** Centralizado dramático. Conteúdo empilhado no centro do viewport, com espaçamento generoso. Estilo "presentation" — cada ponto é um bloco de texto que surge sequencialmente.
+
+**Organização dos elementos:**
+- Título do slide: centro do viewport, levemente acima do centro (42% do topo)
+- 4 pontos de reflexão empilhados abaixo do título, cada um aparecendo sequencialmente
+- Bloco com perspectiva 3D no canto inferior esquerdo (badge: "Medo Universal")
+- Navegação na parte inferior
+
+**Background:** Global黑暗. Neste slide, o background deve ter um blob de luz quente (#c5b33a, opacity 0.04, blur 100px) posicionado no centro, simulando uma luz distante no final de um corredor. Esse blob representa a "esperança" ou o "fim" que nunca chega.
+
+**Elementos decorativos:**
+- Blob central quente (descrito acima)
+- 4 linhas horizontais sutis separando os pontos (1px, rgba(197, 179, 58, 0.06))
+- Labels técnicos: "IMPACTO::PSICOLOGICO" no canto superior direito
+
+**Elementos visuais (do Visual.txt):**
+- Blob central (background)
+- Conteúdo empilhado com animação sequencial
+- Bloco com perspectiva 3D
+
+**Pontos de reflexão (4 blocos):**
+Cada bloco contém um ícone, um título curto e uma frase de reflexão:
+
+1. **Ícone de labirinto + "Medo do Desconhecido":** "O infinito assusta porque não possui fim. As Backrooms transformam esse medo abstrato em um lugar concreto."
+
+2. **Ícone de casa + "Familiaridade Perdida":** "Estar perdido em um lugar que parece familiar é mais perturbador do que estar em um lugar completamente novo."
+
+3. **Ícone de pessoas + "Criação Coletiva":** "Qualquer pessoa pode contribuir. Cada pessoa adiciona seu próprio medo ao universo, tornando-o infinitamente mais rico."
+
+4. **Ícone de tela + "Isolamento Digital":** "Em tempos de conexão constante, as Backrooms representam o medo de estar completamente sozinho."
+
+Configuração de cada bloco:
+- Largura: min(500px, 85vw)
+- Padding: 16px 24px
+- Fundo: semi-transparente (rgba(20, 18, 12, 0.3))
+- Borda esquerda: 2px solid rgba(197, 179, 58, 0.15)
+- Border-radius: 0 4px 4px 0
+
+**Bloco com perspectiva 3D (badge):**
+- Posição: canto inferior esquerdo (abaixo de 50% → rotateX 10deg)
+- Largura: 160px (ajustado ao conteúdo)
+- Altura: 60px
+- Conteúdo: "Medo Universal"
+- Fundo: gradiente escuro
+- Cor do texto: #c5b33a
+
+**Partículas:**
+- Tipo: poeira
+- Quantidade: 12 (menos que outros slides — mais limpo, mais foco no conteúdo)
+- Movimento: flutuação muito lenta (ciclo de 40s)
+
+**Iluminação:**
+- Blob central quente
+- Glow sutil nos blocos de texto
+- Vignette
+
+**Efeitos:**
+- Grain
+- Scanlines leves
+- Blob central
+
+**Ícones:** SVG inline para cada ponto (labirinto, casa, pessoas, tela). Estilo outline, cor #c5b33a, tamanho 24px.
+
+**Imagens:** Nenhuma.
+
+**Tipografia:**
+- Título: `clamp(1.8rem, 3.5vw, 2.8rem)`, peso 700, cor #e8e6e1
+- Título do ponto: `clamp(0.9rem, 1.3vw, 1.1rem)`, peso 600, cor #e8e6e1
+- Texto do ponto: `clamp(0.8rem, 1.1vw, 0.95rem)`, peso 400, cor #d4d2cd, lineHeight 1.6
+- Badge: `0.8rem`, peso 600, cor #c5b33a
+
+**Ordem de entrada dos elementos:**
+1. Background estabiliza + blob central surge (fade in, 1200ms)
+2. Título aparece (fade + move 25px para baixo + blur, 900ms, delay 300ms)
+3. Linhas separadoras aparecem sequencialmente (draw line, 400ms cada, stagger 150ms, delay 600ms)
+4. Ponto 1 aparece (fade + move da esquerda, 700ms, delay 700ms)
+5. Ponto 2 aparece (fade + move da esquerda, 700ms, delay 900ms — stagger 200ms)
+6. Ponto 3 aparece (fade + move da esquerda, 700ms, delay 1100ms — stagger 200ms)
+7. Ponto 4 aparece (fade + move da esquerda, 700ms, delay 1300ms — stagger 200ms)
+8. Bloco perspectivado entra (fade + translateZ, 1000ms, delay 1500ms)
+9. Labels técnicos surgem (fade in, 500ms, delay 1600ms)
+
+**Interações:**
+- Blocos de texto: hover → borda esquerda brilha mais, fundo fica levemente mais claro (transição 400ms)
+- Bloco perspectivado: hover → glow amarelo intensifica
+- Botões de navegação: funcionais
+
+**Transição para o próximo slide:**
+Fade out + dissolve. Duração: 500ms. Delay: 150ms.
+
+**Observações:**
+- Este slide é o mais reflexivo. O ritmo de entrada dos pontos deve ser mais lento que os outros slides (stagger 200ms em vez de 120ms).
+- O blob central é crucial para criar a sensação de "luz no fim do corredor".
+- O layout centralizado com espaçamento generoso transmite calma e reflexão.
+
+---
+
+## SLIDE 10 — Conclusão
+
+**Objetivo:** Encerrar a apresentação com impacto. Reforçar a relevância do fenômeno e deixar o usuário com uma sensação de fascinação duradoura.
+
+**Emoção que deve transmitir:** Impacto final, fascinação, vontade de explorar mais, sensação de ter aprendido algo memorável.
+
+**Layout:** Centralizado dramático. Título grande no centro, pontos de conclusão ao redor. Estilo "slide de encerramento premium".
+
+**Organização dos elementos:**
+- Título principal: centro do viewport (45% do topo), com efeito de extrusão 3D (igual ao slide 1)
+- 4 pontos de conclusão distribuídos simetricamente ao redor do título:
+  - 2 acima do título (esquerda e direita)
+  - 2 abaixo do título (esquerda e direita)
+- Sutext final: "Um universo que continua crescendo" — abaixo do título, centralizado
+- Navegação: botão anterior funcional, botão próximo desabilitado (é o último slide)
+
+**Background:** Global黑暗 com intensidade máxima (igual ao slide 1). Dois blobs animados (escuros, amarelos) nos cantos opostos. Partículas de poeira densas (25 partículas). Scanlines mais visíveis (opacity 0.06). Vignette pesado.
+
+**Elementos decorativos:**
+- 2 blobs animados (canto superior esquerdo e canto inferior direito)
+- Scanlines intensas
+- Vignette pesado
+- Labels técnicos: "FIM::TRANSMISSAO" no canto superior direito
+- Linhas diagonais sutis nos cantos (1px, rgba(197, 179, 58, 0.04))
+
+**Elementos visuais (do Visual.txt):**
+- Texto com extrusão 3D (título)
+- Blobs animados
+- Partículas densas
+- Scanlines intensas
+- Vignette pesado
+- Noise/grain
+
+**Pontos de conclusão (4 pontos):**
+Distribuídos simetricamente ao redor do título central:
+
+1. **Superior esquerdo:** "Reflexo dos medos modernos da humanidade"
+2. **Superior direito:** "Um universo que continua crescendo e se reinventando"
+3. **Inferior esquerdo:** "O poder da internet para criar mitologias"
+4. **Inferior direito:** "Explorar o desconhecido com curiosidade"
+
+Configuração de cada ponto:
+- Largura: min(200px, 35vw)
+- Padding: 12px 16px
+- Fundo: semi-transparente (rgba(20, 18, 12, 0.4))
+- Borda: 1px solid rgba(197, 179, 58, 0.08)
+- Border-radius: 4px
+- Posicionamento: flex, distribuídos ao redor do título
+
+**Efeito de Extrusão 3D no Título (OBRIGATÓRIO):**
+O título "CONCLUSÃO" deve ter o mesmo efeito de extrusão 3D do slide 1:
+```javascript
+let shadow = "";
+for (let i = 0; i < 35; i++) {
+    shadow += (shadow ? "," : "") +
+              (-i) + "px " +
+              i + "px 0 #1a1508";
+}
+titulo.style.textShadow = shadow;
+```
+Cor da extrusão: #1a1508. Cor do texto principal: #e8e6e1 (branco puro, sem gradiente).
+
+Além disso, usar `::before` com o mesmo texto, deslocado 2px para baixo e 2px para a direita, cor #0a0a0f, filter: blur(3px), opacity 0.4.
+
+O z-index do título deve ser ZERO.
+
+**Partículas:**
+- Tipo: poeira
+- Quantidade: 25 (densas, como no slide 1)
+- Movimento: flutuação
+- Velocidade: ciclo de 25s
+
+**Iluminação:**
+- Glow amarelo emanando de trás do título (radial gradient, opacity 0.08)
+- Blobs escuros nos cantos
+- Vignette pesado
+
+**Efeitos:**
+- Grain intenso (opacity 0.05)
+- Scanlines intensas (opacity 0.06)
+- Vignette pesado
+- Extrusão 3D no título
+- Glitch intermitente no título (uma vez a cada 5-8 segundos)
+
+**Ícones:** Nenhum visível (foco total no título).
+
+**Imagens:** Nenhuma.
+
+**Tipografia:**
+- Título: `clamp(3.2rem, 6.4vw, 5.76rem)`, peso 900, uppercase, cor #e8e6e1
+- Subtítulo final: `clamp(0.9rem, 1.5vw, 1.2rem)`, peso 400, cor #c5b33a, letterSpacing 0.05em
+- Texto dos pontos: `clamp(0.75rem, 1vw, 0.85rem)`, peso 400, cor #d4d2cd
+
+**Ordem de entrada dos elementos:**
+1. Background estabiliza + blobs surgem (fade in, 1000ms)
+2. Título aparece com extrusão 3D (fade + move 25px para baixo + blur, 1000ms, delay 300ms)
+3. Subtítulo final aparece (fade + move 15px para cima, 700ms, delay 800ms)
+4. Ponto superior esquerdo aparece (fade + move, 600ms, delay 1000ms)
+5. Ponto superior direito aparece (fade + move, 600ms, delay 1100ms — stagger 100ms)
+6. Ponto inferior esquerdo aparece (fade + move, 600ms, delay 1200ms — stagger 100ms)
+7. Ponto inferior direito aparece (fade + move, 600ms, delay 1300ms — stagger 100ms)
+8. Labels técnicos surgem (fade in, 500ms, delay 1400ms)
+9. Glitch intermitente começa a ocorrer periodicamente
+
+**Interações:**
+- Pontos de conclusão: hover → borda brilha, fundo fica mais claro (transição 400ms)
+- Título: glitch intermitente (automático)
+- Botão anterior: funcional
+- Botão próximo: desabilitado (opacity 0.2, pointer-events none)
+- Navigation dots: último dot ativo
+
+**Transição para o próximo slide:**
+NÃO HÁ. Este é o último slide. O botão próximo está desabilitado.
+
+**Observações:**
+- Este slide é o encerramento — ele deve ser tão impactante quanto o slide 1.
+- A extrusão 3D no título é OBRIGATÓRIA.
+- O layout simétrico com os 4 pontos ao redor do título cria uma composição de "constelação" ou "mapa mental".
+- É estritamente proibido colocar "Perguntas?" ou qualquer texto que sugira dúvida.
+- O z-index do título deve ser 0.
+- É proibido criar "cover shapes" atrás do título.
+
+---
+
+# CHECKLIST FINAL — VALIDAÇÃO DO DOCUMENTO DE ESPECIFICAÇÃO
+
+Antes de entregar este documento TXT, validar:
+
+## Conteúdo
+☑ Todos os 10 slides possuem objetivo claramente definido
+☑ Todos os slides possuem emoção definida
+☑ Todos os slides possuem layout descrito
+☑ Nenhum slide ficou genérico
+☑ Nenhum slide ficou incompleto
+☑ O conteúdo está distribuído corretamente
+
+## Identidade Visual
+☑ Existe identidade visual consistente (dark mode / horror liminal)
+☑ Existe atmosfera definida (sombria, perturbadora, tecnológica)
+☑ Existe coerência entre todos os slides
+☑ Paleta de cores coerente com o tema (amarelo, preto, branco, verde neon, vermelho)
+☑ Branco e preto foram utilizados como cores principais
+
+## Layout
+☑ Todos os slides possuem composição profissional
+☑ Existe hierarquia visual clara
+☑ Nenhum elemento ficou desalinhado
+☑ Foi utilizada composição assimétrica quando apropriado
+
+## Background
+☑ Background possui profundidade (múltiplas camadas)
+☑ Background possui identidade (noise, scanlines, vignette, blobs)
+☑ Background nunca compete com o conteúdo
+☑ Background transmite atmosfera
+
+## Elementos Visuais
+☑ Foram selecionados elementos do Visual.txt para cada slide
+☑ Cada elemento possui justificativa
+☑ Os elementos possuem propósito
+
+## Elementos Interativos
+☑ Foram selecionados elementos do Interativos.txt
+☑ Os elementos agregam valor
+☑ Botões possuem feedback
+☑ Existe hover em todos os elementos interativos
+
+## Animações
+☑ Todas as animações estão documentadas com duração, delay e easing
+☑ Existe sequência lógica de entrada
+☑ Existe stagger quando necessário
+☑ Nenhuma animação é brusca
+
+## Blocos com Perspectiva 3D
+☑ Blocos são usados em vários slides (recorrentes)
+☑ Configuração correta: rotateX(-10deg) superior / rotateX(10deg) inferior
+☑ rotateY(25deg) fixo em todos
+☑ perspective(250px) fixo
+☑ transform-origin: 50% 50% 0px
+☑ perspective-origin: 50% 50%
+☑ Largura máxima: 350px (respeitada em todos)
+☑ Altura máxima: 420px (respeitada em todos)
+☑ Conteúdo real em todos os blocos
+☑ Texto herda perspectiva naturalmente
+
+## Responsividade
+☑ Todos os layouts são responsivos
+☑ Nenhum elemento sai da tela
+☑ Blocos perspectivados mantêm responsividade
+
+## Codificação
+☑ Documento UTF-8
+☑ Sem caracteres corrompidos
+☑ `<meta charset="UTF-8">` declarado
+
+## Proibições
+☑ Nenhum "cover shape" (clip-path decorativo) criado
+☑ Nenhum texto com gradiente no título (branco puro)
+☑ Nenhum scroll nos slides
+☑ Scroll do mouse não troca slides
+☑ Clique na tela não troca slides
+☑ Nenhum "Perguntas?" ou similar no slide final
+☑ Nenhuma linha do tempo independente
+
+---
+
+**FIM DA ESPECIFICAÇÃO**
+
+Este documento contém todas as instruções necessárias para que uma IA desenvolvedora crie o documento HTML completo da apresentação "Backrooms: O Universo do Horror Liminar". A IA deve seguir fielmente todas as especificações acima, sem tomar decisões criativas próprias.
+
+---
+
+<!-- FIM_ETAPA_5 -->

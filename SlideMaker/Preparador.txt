@@ -2589,6 +2589,8 @@ Somente entregue o documento quando todas as respostas forem NÃO e todos os ite
 
 É estritamente proibido criar mais de um documento txt, não poderá ser feito "Parte1" ou "Parte2", só pode criar um único documento txt para a IA fazer em uma tacada só.
 
+É estritamente proibido que haja caracteres em chinês em qualquer parte do documento, tanto no documento TXT quanto no documento HTML.
+
 SISTEMA OBRIGATÓRIO DE BLOCOS COM PERSPECTIVA 3D REAL (USO RECORRENTE EM TODAS AS APRESENTAÇÕES)
 Diretriz obrigatória
 
@@ -2979,3 +2981,256 @@ leia o arquivo ErrosComuns.txt. Ele contém erros que já ocorreram durante algu
 Assim que começar, já crie o documento HTML e vá adicionando o conteúdo nele por partes, até porque o projeto é muito grande pra ser feito de uma vez só, pois se tentar fazer de uma vez só, o seu sistema irá dar erro e eu digo isso porque eu te conheço e sei como funciona o seu sistema.
 
 É estritamente proibido que o tamanho do titulo principal seja pequeno, use como base essas dimensões: clamp(3.2rem, 6.4vw, 5.76rem). elas servem pra um titulo pequeno, como por exemplo "JavaScript".
+
+ESTRATÉGIA DE ESCRITA PROGRESSIVA DE DOCUMENTOS GRANDES — GUIA PARA IA
+O PROBLEMA
+Quando uma IA do opencode precisa gerar um documento extremamente longo e detalhado (como uma especificação visual completa de uma apresentação HTML com múltiplos slides), a abordagem natural é tentar gerar o conteúdo inteiro numa única chamada de ferramenta write. Isso frequentemente falha por uma razão técnica simples: o modelo tem um limite de tokens por resposta. Quando o documento excede esse limite, a geração é truncada ou a ferramenta retorna erro de timeout, resultando em:
+- Documento incompleto (metade do conteúdo faltando)
+- Documento truncado no meio de uma frase ou seção
+- Necessidade de refazer todo o trabalho do zero
+- Perda de contexto sobre o que já foi escrito
+- Frustração do usuário e desperdício de tempo
+A SOLUÇÃO: ESCRITA EM ETAPAS PROGRESSIVAS
+Em vez de tentar gerar o documento completo numa única chamada, a IA deve dividir o trabalho em etapas menores e gerenciáveis, escrevendo e acumulando conteúdo progressivamente num único arquivo.
+A quantidade de etapas NÃO é fixa. Ela varia conforme o tamanho total do documento. Uma apresentação com 5 slides precisa de menos etapas do que uma com 15 slides. A IA deve avaliar o volume total antes de começar e planejar a quantidade ideal de etapas com base no conteúdo.
+COMO FUNCIONA NA PRÁTICA
+Passo 1 — Planejamento inicial
+Antes de escrever qualquer coisa, a IA deve:
+1. Ler todo o conteúdo fornecido pelo usuário (texto dos slides)
+2. Analisar a quantidade de slides e o volume de conteúdo de cada um
+3. Estimar o tamanho total do documento TXT que será gerado
+4. Dividir o trabalho em etapas lógicas e de tamanho gerenciável
+5. Comunicar ao usuário o plano de etapas antes de começar
+Regra de estimativa: Cada chamada de edit deve gerar no máximo ~2.500-3.500 palavras de conteúdo novo. Se o documento total tiver 20.000 palavras, são pelo menos 6-7 etapas. Se tiver 8.000 palavras, são 3-4 etapas. A IA deve fazer essa conta mental antes de iniciar.
+Passo 2 — Crie o arquivo com a seção inicial
+A primeira chamada write cria o arquivo contendo apenas as primeiras seções. Para uma especificação de apresentação, seriam as seções globais:
+- Identidade visual
+- Paleta de cores
+- Tipografia
+- Estilo visual
+- Conceito artístico
+- Background global
+- Navegação
+- Animações globais
+- Elementos interativos globais
+- Regras de blocos com perspectiva 3D
+- Regras de responsividade
+- Regras de codificação
+Essas seções são a "base" do documento e sempre vêm primeiro, independentemente de quantos slides existam.
+Passo 3 — Leia o que já foi escrito
+Antes de escrever a próxima parte, a IA deve usar a ferramenta read para reler o arquivo. Isso serve para:
+- Relembrar o que já foi escrito
+- Manter consistência de tom, formatação e terminologia
+- Evitar repetir informações
+- Continuar exatamente de onde parou
+- Identificar a última linha do arquivo (que será usada como âncora para o edit)
+Passo 4 — Acrescente o conteúdo seguinte
+A chamada seguinte usa a ferramenta edit (não write) para acrescentar conteúdo ao final do arquivo. O oldString deve ser a última linha ou parágrafo já existente, e o newString deve conter esse mesmo texto seguido do novo conteúdo.
+Por que edit e não write? Porque o write substitui todo o conteúdo do arquivo. Se você usar write na segunda etapa, todo o trabalho da primeira etapa é apagado. O edit faz uma substituição pontual, permitindo acrescentar sem destruir.
+Passo 5 — Repita até completar
+Repita os passos 3 e 4 para cada etapa restante, sempre:
+1. Lendo o arquivo atual
+2. Identificando o último trecho (âncora)
+3. Acrescentando o próximo bloco de conteúdo
+4. Marcando o final da etapa com uma comentário de progresso
+Passo 6 — Revisão final
+Após completar todas as etapas, leia o arquivo inteiro uma última vez para validar:
+- Coerência geral
+- Formatação consistente
+- Nenhuma seção faltando
+- Nenhum texto truncado
+- Nenhum caractere corrompido
+COMO DIVIDIR AS ETAPAS — MÉTODO UNIVERSAL
+A divisão não depende de um número fixo de slides. Ela depende do tamanho do conteúdo total. Aqui está o método:
+Para qualquer apresentação, siga esta estrutura:
+Etapa 1 — Seções Globais (sempre a primeira)
+- Tudo que é compartilhado entre todos os slides
+- Identidade visual, cores, tipografia, background, navegação, animações globais, etc.
+- Essa etapa é fixa e sempre existe, independente da quantidade de slides
+Etapa 2 em diante — Slides agrupados (quantidade variável)
+- Agrupe slides em grupos de 2 a 4 por etapa
+- Cada grupo deve gerar ~2.500-3.500 palavras
+- Slides muito densos (muitos elementos interativos, animações detalhadas) podem ocupar uma etapa sozinhos
+- Slides mais simples podem ser agrupados com outros
+Última etapa — Checklist e validação final
+- Checklist de validação do documento
+- Instruções finais para a IA desenvolvedora
+- Observações gerais
+Exemplos de divisão:
+Apresentação com 5 slides (conteúdo moderado):
+- Etapa 1: Seções globais
+- Etapa 2: Slides 1-3
+- Etapa 3: Slides 4-5 + Checklist final
+- Total: 3 etapas
+Apresentação com 10 slides (conteúdo denso):
+- Etapa 1: Seções globais
+- Etapa 2: Slides 1-3
+- Etapa 3: Slides 4-6
+- Etapa 4: Slides 7-8
+- Etapa 5: Slides 9-10 + Checklist final
+- Total: 5 etapas
+Apresentação com 15 slides (conteúdo muito denso):
+- Etapa 1: Seções globais
+- Etapa 2: Slides 1-3
+- Etapa 3: Slides 4-6
+- Etapa 4: Slides 7-9
+- Etapa 5: Slides 10-12
+- Etapa 6: Slides 13-15 + Checklist final
+- Total: 6 etapas
+Apresentação com 20+ slides:
+- Etapa 1: Seções globais
+- Etapas 2 a N: Slides agrupados (3 por etapa, ajustando conforme densidade)
+- Última etapa: Checklist final
+- Total: variável, mas sempre ≥ 7 etapas
+A IA deve adaptar essa divisão ao caso específico, nunca seguir um modelo rígido.
+REGRAS FUNDAMENTAIS
+Regra 1 — Nunca tente gerar tudo de uma vez
+Independentemente do tamanho do documento, nunca use uma única chamada write para gerar mais do que ~3.000 palavras de conteúdo. Se o documento total tiver mais que isso, são obrigatoriamente múltiplas etapas. Essa é a regra mais importante de todas.
+Regra 2 — Sempre leia antes de escrever
+Nunca escreva conteúdo novo sem antes reler o que já existe no arquivo. Isso garante continuidade e evita contradições, repetições e perda de contexto.
+Regra 3 — Use edit para acrescentar, nunca write para reescrever
+Depois da primeira criação do arquivo, todas as adições devem ser feitas com edit. Usar write depois da primeira vez apaga todo o conteúdo anterior. Essa é uma confusão comum e devastadora — sempre verifique se está usando a ferramenta correta.
+Regra 4 — Identifique o ponto de continuidade (âncora)
+Antes de cada edit, identifique exatamente qual é a última linha significativa do arquivo. Essa linha será o oldString. O newString será essa mesma linha seguida do novo conteúdo. Se o oldString não for encontrado exatamente como está no arquivo, a edição falhará.
+Dica prática: Ao finalizar cada etapa, adicione uma linha de marcação como <!-- FIM_ETAPA_X -->. Na próxima etapa, use essa marcação como âncora do edit. Depois de usar, remova-a na etapa seguinte ou substitua pela nova marcação.
+Regra 5 — Mantenha formatação consistente
+Use exatamente o mesmo padrão de formatação em todas as etapas:
+- Títulos de seção com ##
+- Títulos de subsection com ###
+- Listas com - ou ☐
+- Separação entre slides com ---
+- Recuo e espaçamento consistentes
+- Nunca mude o estilo de formatação no meio do documento
+Regra 6 — Comunique o progresso ao usuário
+Após cada etapa concluída, informe ao usuário:
+- O que foi escrito nesta etapa
+- Quantas etapas restam
+- O que será escrito na próxima etapa
+Isso mantém o usuário informado e permite que ele faça ajustes entre etapas.
+Regra 7 — Se uma etapa falhar, não refaça as anteriores
+Se a chamada de edit de uma etapa falhar, não reescreva as etapas anteriores. Apenas leia o arquivo como está e refaça apenas a etapa que falhou. O conteúdo anterior já está salvo e seguro.
+Regra 8 — Nunca pule etapas
+Mesmo que um slide pareça "fácil", ele deve passar por todas as etapas: leitura, planejamento, escrita, verificação. Pular etapas para "ir mais rápido" geralmente resulta em truncamento ou perda de qualidade.
+VANTAGENS DESTA ABORDAGEM
+1. Zero truncamento — Cada chamada gera apenas uma fração do documento, cabendo confortavelmente no limite de tokens.
+2. Zero perda de trabalho — Se uma etapa falhar, todo o conteúdo anterior já está salvo no arquivo. Nunca se começa do zero.
+3. Maior qualidade — A IA consegue prestar mais atenção em cada seção quando não precisa gerar tudo de uma vez. Cada slide recebe a devida atenção.
+4. Consistência — Ao reler o arquivo antes de cada adição, a IA mantém tom, estilo, formatação e terminologia uniformes ao longo de todo o documento.
+5. Revisão incremental — O usuário pode acompanhar o progresso slide a slide e dar feedback entre etapas, sem precisar esperar o documento inteiro ficar pronto.
+6. Flexibilidade — Se o usuário pedir uma alteração em um slide específico, basta ler até aquele ponto, aplicar a mudança com edit e não mexer no resto.
+7. Previsibilidade — Cada etapa tem um tamanho estimado e conhecido, facilitando o planejamento e evitando surpresas.
+8. Escalabilidade — Funciona para 3 slides ou para 30 slides. A quantidade de etapas se adapta automaticamente ao tamanho do conteúdo.
+COMO A IA DEVE SE COMPORTAR
+Ao iniciar o trabalho:
+1. Leia todo o conteúdo fornecido pelo usuário
+2. Analise a quantidade de slides e o volume de cada um
+3. Estime o tamanho total do documento TXT (~palavras)
+4. Divida em etapas lógicas, agrupando slides por proximidade temática ou por tamanho
+5. Calcule quantas chamadas serão necessárias (máx ~3.000 palavras por chamada)
+6. Informe ao usuário o plano de etapas: quantas são e o que cada uma conterá
+7. Comece pela primeira etapa
+Durante o trabalho:
+1. Após cada write ou edit bem-sucedido, confirme o que foi escrito
+2. Antes da próxima etapa, leia o arquivo para verificar o estado atual
+3. Se encontrar erro na leitura, ajuste antes de continuar
+4. Nunca pule etapas
+5. Nunca tente "compensar" escrevendo mais em uma etapa para cobrir a próxima
+6. Mantenha um registro mental do que já foi coberto e o que falta
+7. Se perceber que uma etapa ficou grande demais, divida-a em duas antes de escrever
+Ao finalizar:
+1. Leia o documento completo (todas as etapas)
+2. Valide que todas as seções e slides estão presentes
+3. Verifique formatação e coerência geral
+4. Confirme ao usuário que o documento está completo
+5. Ofereça-se para fazer ajustes se necessário
+EXEMPLO DE CHAMADAS CORRETAS
+Etapa 1 — Criação do arquivo:
+Ferramenta: write
+Arquivo: especificacao.txt
+Conteúdo: Seções globais + marker <!-- FIM_ETAPA_1 -->
+Etapa 2 — Leitura antes de continuar:
+Ferramenta: read
+Arquivo: especificacao.txt
+Resultado: Encontra <!-- FIM_ETAPA_1 --> como última linha
+Etapa 3 — Acrescentar slides 1-3:
+Ferramenta: edit
+Arquivo: especificacao.txt
+oldString: <!-- FIM_ETAPA_1 -->
+newString: <!-- FIM_ETAPA_1 -->
+
+---
+
+## SLIDE 1 — [Nome]
+
+[conteúdo completo do slide 1]
+
+---
+
+## SLIDE 2 — [Nome]
+
+[conteúdo completo do slide 2]
+
+---
+
+## SLIDE 3 — [Nome]
+
+[conteúdo completo do slide 3]
+
+---
+
+<!-- FIM_ETAPA_2 -->
+Etapa 4 — Leitura novamente:
+Ferramenta: read
+Arquivo: especificacao.txt
+Resultado: Confere que slides 1-3 foram escritos, encontra <!-- FIM_ETAPA_2 -->
+E assim por diante até completar todos os slides e o checklist final.
+ERROS COMUNS A EVITAR:
+1. Usar write na 2ª etapa
+Consequência: Apaga todo o conteúdo anterior
+Solução: Usar edit para acrescentar
+2. Não ler antes de escrever
+Consequência: Perda de contexto, repetições
+Solução: Sempre usar read antes de edit
+3. Tentar gerar tudo de uma vez
+Consequência: Truncamento ou timeout
+Solução: Dividir em etapas (~3.000 palavras cada)
+4. oldString não encontrado
+Consequência: Edição falha
+Solução: Ler arquivo e copiar exatamente a última linha/marcador
+5. Misturar CSS dentro de JS
+Consequência: Erro de sintaxe
+Solução: Separar sempre HTML/CSS/JS em blocos distintos
+6. Não informar o usuário sobre o processo
+Consequência: Confusão sobre progresso
+Solução: Comunicar etapas claramente
+7. Usar write em vez de edit acidentalmente
+Consequência: Perda total do conteúdo
+Solução: Sempre verificar a ferramenta antes de confirmar
+8. Não usar marcadores de etapa
+Consequência: Dificuldade em retomar trabalho
+Solução: Sempre adicionar <!-- FIM_ETAPA_X --> ao final
+9. Gerar mais de 3.500 palavras numa chamada
+Consequência: Risco de truncamento
+Solução: Respeitar o limite por etapa
+10. Não reler o arquivo entre etapas
+Consequência: Inconsistências e repetições
+Solução: Read obrigatório antes de cada edit
+QUANDO APLICAR ESTA ESTRATÉGIA
+Esta abordagem deve ser usada sempre que:
+- O documento tiver mais de ~3.000 palavras estimadas
+- A especificação envolver múltiplas seções ou slides
+- O conteúdo precisar de detalhamento extremo (animações, interações, microdetalhes por slide)
+- Existir risco real de truncamento pela IA
+- O usuário pedir um documento "muito detalhado" ou "extremamente completo"
+- A quantidade de slides for superior a 5
+Em resumo: sempre que o trabalho for grande o suficiente para causar timeout, divida-o. É mais rápido, mais seguro e produzimentalmente superior.
+CHECKLIST PESSOAL DA IA ANTES DE CADA CHAMADA
+Antes de cada chamada de write ou edit, a IA deve responder mentalmente:
+- Eu li o arquivo atual?
+- Eu sei exatamente onde o arquivo termina?
+- O conteúdo que vou gerar cabe em ~3.000 palavras?
+- Estou usando edit (não write) para acrescentar?
+- O oldString que vou usar existe exatamente no arquivo?
+- A formatação que vou usar é consistente com o que já existe?
+- Ao final desta etapa, vou adicionar um marcador de progresso?
+Se qualquer resposta for NÃO, a IA deve corrigir antes de executar a chamada.
