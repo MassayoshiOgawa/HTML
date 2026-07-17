@@ -86,5 +86,36 @@ Erros comuns no documento HTML que acontecem e como resolve-los e evitar que aco
    - Sempre que uma classe de animação inicial usar filter (blur, brightness, etc.),
      inclua filter:none!important na regra .slide.active .anim-N correspondente.
    - Regra geral: se a classe base tem filter, a regra de ativação DEVE resetar filter.
-    - Ao criar novas classes de animação, verifique se há propriedades além de
-      opacity e transform que precisam ser revertidas no estado final.
+     - Ao criar novas classes de animação, verifique se há propriedades além de
+       opacity e transform que precisam ser revertidas no estado final.
+
+---
+
+4. Failed to load resource: /favicon.ico 404 (Not Found)
+
+   Exemplo: :5500/favicon.ico:1 Failed to load resource: the server responded with a status of 404 (Not Found)
+
+   Causa: O navegador solicita automaticamente /favicon.ico em todo site/página local.
+   Se o arquivo não existe no diretório raiz do servidor, o servidor responde com 404.
+   Isso aparece no console do navegador como erro, embora não afete o funcionamento
+   da página — apenas gera ruído no console.
+
+   Correção:
+   Adicione um favicon inline no <head> do HTML, evitando que o navegador busque o
+   arquivo externamente. Uma forma simples é usar um favicon SVG data URI:
+
+   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
+   Ou, se preferir uma imagem real, crie um arquivo favicon.ico ou favicon.png na pasta
+   do projeto e referencie:
+   <link rel="icon" href="favicon.ico">
+
+   Como resolver:
+   - Abra o <head> do HTML e adicione o <link rel="icon"> antes do </head>.
+   - Recarregue a página — o erro 404 do favicon deve desaparecer do console.
+
+   Como evitar:
+   - Sempre inclua um <link rel="icon"> no <head> de todo documento HTML.
+   - Use o favicon SVG data URI para evitar dependência de arquivo externo.
+   - Se usar arquivo externo (favicon.ico), certifique-se de que ele existe no diretório
+     correto antes de iniciar o servidor local.

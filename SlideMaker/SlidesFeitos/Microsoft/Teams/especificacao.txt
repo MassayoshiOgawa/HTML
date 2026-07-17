@@ -1,0 +1,1857 @@
+ESPECIFICAÇÃO VISUAL — APRESENTAÇÃO MICROSOFT TEAMS
+
+INSTRUÇÕES PARA A IA DESENVOLVEDORA:
+- Este é o ÚNICO documento que você deve consultar.
+- NÃO acesse nenhum outro arquivo dentro da pasta.
+- Crie APENAS um único arquivo HTML contendo todo o código (HTML + CSS + JS).
+- O arquivo HTML deve estar em UTF-8 sem caracteres corrompidos.
+- Não crie tela de loading.
+- Siga TODAS as instruções deste documento com precisão absoluta.
+- Não tome decisões criativas — tudo já foi decidido aqui.
+
+---
+
+# 1. IDENTIDADE VISUAL GERAL
+
+A apresentação possui uma identidade visual inspirada na linguagem de design do Microsoft Design System, evoluindo para um visual premium, moderno e profissional. O tema combina a identidade corporativa da Microsoft com elementos tecnológicos sutis que remetem à nuvem, conectividade e colaboração. A sensação geral é de uma plataforma poderosa, confiável e elegante — como um painel de comando de uma aplicação enterprise de alta qualidade.
+
+O estilo visual é Corporativo-Tecnológico com toques de futurismo sutil. Não é cyberpunk, não é minimalista extremo — é um equilíbrio sofisticado entre profissionalismo e modernidade. A apresentação deve parecer um keynote oficial da Microsoft, com acabamento de nível Awwwards.
+
+A atmosfera é de confiança, inovação e produtividade. O usuário deve sentir que está diante de uma ferramenta profissional e indispensável para o trabalho em equipe.
+
+---
+
+# 2. PALETA DE CORES
+
+## Cores Principais
+- Roxo Teams: #6264A7 (a cor oficial do Microsoft Teams)
+- Roxo Escuro: #464775
+- Roxo Claro: #8B8FC7
+- Branco: #FFFFFF
+- Preto/Dark: #0F0F1A
+
+## Cores Secundárias
+- Azul Microsoft: #0078D4
+- Azul Escuro: #004578
+- Cinza Escuro: #252525
+- Cinza Médio: #3B3B3B
+- Cinza Claro: #616161
+
+## Cores de Destaque
+- Verde Sucesso: #107C10
+- Laranja Alerta: #FF8C00
+- Vermelho Erro: #D13438
+- Azul Claro Info: #00BCF2
+
+## Cores de Fundo
+- Fundo Principal: #0F0F1A (quase preto com leve tom azulado)
+- Fundo Secundário: #141425
+- Fundo Cards: rgba(255,255,255,0.04) a rgba(255,255,255,0.08)
+- Fundo Glass: rgba(98,100,167,0.08)
+
+## Cores dos Botões
+- Primário: #6264A7
+- Primário Hover: #7B7DB8
+- Secundário: transparente com borda rgba(98,100,167,0.4)
+- Secundário Hover: rgba(98,100,167,0.15)
+
+## Cores dos Textos
+- Títulos: #FFFFFF
+- Subtítulos: rgba(255,255,255,0.85)
+- Texto Principal: rgba(255,255,255,0.75)
+- Texto Secundário: rgba(255,255,255,0.50)
+- Texto Muted: rgba(255,255,255,0.30)
+
+## Cores de Links
+- Link: #6264A7
+- Link Hover: #8B8FC7
+
+## Cores de Hover
+- Card Hover: rgba(255,255,255,0.06)
+- Elemento Hover: rgba(98,100,167,0.15)
+
+---
+
+# 3. TIPOGRAFIA
+
+## Fontes
+- Títulos: 'Segoe UI Bold', 'Inter', system-ui, sans-serif (peso 700-800)
+- Subtítulos: 'Segoe UI Semibold', 'Inter', system-ui, sans-serif (peso 600)
+- Conteúdo: 'Segoe UI', 'Inter', system-ui, sans-serif (peso 400-500)
+- Monolíneo (dados/estatísticas): 'Cascadia Code', 'Fira Code', monospace (peso 500)
+
+## Hierarquia Visual
+- Título Principal (H1): clamp(2.8rem, 5.5vw, 4.5rem) — peso 800
+- Título do Slide (H2): clamp(1.8rem, 3.2vw, 2.8rem) — peso 700
+- Subtítulo (H3): clamp(1.1rem, 1.8vw, 1.4rem) — peso 600
+- Texto Corpo: clamp(0.85rem, 1.2vw, 1.05rem) — peso 400
+- Texto Pequeno: clamp(0.7rem, 0.9vw, 0.85rem) — peso 400
+- Números/Estatísticas: clamp(2.2rem, 4vw, 3.5rem) — peso 700, Cascadia Code
+
+## Espaçamentos
+- Entre título e subtítulo: 12px-16px
+- Entre subtítulo e conteúdo: 20px-28px
+- Entre blocos de conteúdo: 16px-24px
+- Entre linhas de texto: 1.5-1.7
+
+---
+
+# 4. ESTILO VISUAL
+
+O estilo é Corporativo-Tecnológico Premium. Combina a sofisticação visual de uma apresentação enterprise com elementos de design moderno que evocam tecnologia e inovação.
+
+Elementos característicos:
+- Glassmorphism moderado: cards e painéis com backdrop-filter: blur(16px) e bordas sutis translúcidas
+- Bordas com gradiente luminoso nas bordas dos cards (usando ::before com gradiente e mask)
+- Sombras multicamadas para profundidade (mínimo 2-3 camadas de box-shadow)
+- Background escuro com gradientes radiais sutis em roxo
+- Blobs animados difusos no fundo para atmosfera
+- Grid points sutis como textura de fundo
+- Microtextura noise sobre o background para evitar aparência plana
+
+---
+
+# 5. CONCEITO ARTÍSTICO
+
+A apresentação deve transmitir a sensação de estar acessando o painel de comando de uma plataforma poderosa de colaboração. O visual remete a uma interface de software premium — como se o próprio Teams fosse a apresentação.
+
+A cada slide, o usuário deve sentir que está explorando funcionalidades reais de um produto sofisticado. Os elementos visuais reforçam a ideia de conectividade, fluxo de trabalho e ecossistema integrado.
+
+A paleta em roxo e tons escuros transmite autoridade tecnológica e confiança, enquanto os toques de brilho e glow trazem energia e modernidade.
+
+---
+
+# 6. BACKGROUND GLOBAL
+
+## Estrutura do Background (de trás para frente)
+
+### Camada 1 — Background Base
+- Cor sólida: #0F0F1A
+- Gradiente radial sutil: radial-gradient(ellipse at 20% 30%, rgba(98,100,167,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 70%, rgba(0,120,212,0.05) 0%, transparent 50%)
+- Aplicado em todo o body
+
+### Camada 2 — Grid de Pontos
+- Grid de pontos sutis sobre todo o background
+- Implementação: radial-gradient com repeat, pontos de 1px, cor rgba(255,255,255,0.03), espaçamento 40px
+- Deve ser quase invisível, apenas criando textura sutil
+
+### Camada 3 — Blobs Animados
+- 3 blobs animados difusos no fundo
+- Blob 1: Roxo Teams (#6264A7), raio ~300px, opacidade 0.06, posição superior esquerda, animação float lenta (20s)
+- Blob 2: Azul Microsoft (#0078D4), raio ~250px, opacidade 0.04, posição inferior direita, animação float lenta (25s, delay 5s)
+- Blob 3: Roxo Claro (#8B8FC7), raio ~200px, opacidade 0.03, posição centro-direita, animação float lenta (22s, delay 10s)
+- Movimento: leve translação em X e Y (±30px), extremamente suave
+- Implementação: divs com border-radius: 50%, filter: blur(80px), position: fixed
+
+### Camada 4 — Noise/Grain
+- Overlay de noise fino sobre todo o viewport
+- Opacidade: 0.02-0.03
+- Implementação: SVG filter ou CSS background com imagem de noise repetida
+- Deve ser quase imperceptível, apenas eliminando aparência digital "limpa demais"
+
+### Camada 5 — Vignette
+- Vignette suave nas bordas do viewport
+- Implementação: radial-gradient transparente no centro escurecendo para rgba(0,0,0,0.3) nas bordas
+- Cria sensação de foco no centro da tela
+
+### Camada 6 — Partículas
+- Partículas distantes (fundo): ~15-20 pontos brancos pequenos (1-2px), opacidade 0.08-0.15, movimento vertical lento ascendente (velocidade: 15-25s para percorrer a tela)
+- Partículas próximas (frente): ~5-8 pontos brancos maiores (2-3px), opacidade 0.10-0.20, movimento horizontal lento (velocidade: 20-30s)
+- Total: ~20-28 partículas
+- Implementação: position fixed, animação CSS com keyframes translate
+
+---
+
+# 7. NAVEGAÇÃO
+
+## Botões de Navegação (Setas)
+- Posição: cantos inferiores do slide
+- Botão Anterior: canto inferior esquerdo (padding 20px das bordas)
+- Botão Próximo: canto inferior direito (padding 20px das bordas)
+- Aparência: círculo de 44px de diâmetro, fundo rgba(255,255,255,0.06), borda 1px solid rgba(255,255,255,0.1)
+- Ícone: seta SVG (chevron) de 18px, cor rgba(255,255,255,0.6)
+- Hover: fundo rgba(98,100,167,0.2), borda rgba(98,100,167,0.4), ícone branco, scale(1.05), sombra glow roxa sutil
+- Click: scale(0.95) momentâneo, depois retorna
+- Transição: 250ms ease-out
+- Botão Anterior no slide 1: invisível (opacity: 0, pointer-events: none)
+- Botão Próximo no último slide: invisível (opacity: 0, pointer-events: none)
+
+## Navigation Dots
+- Posição: parte inferior central, entre os dois botões de seta, na mesma altura
+- Quantidade: 12 dots (um por slide)
+- Aparência: círculo de 8px de diâmetro, cor rgba(255,255,255,0.2)
+- Dot ativo: cor #6264A7, largura expandida para 24px (forma de pill/capsula), transição suave
+- Hover: cor rgba(255,255,255,0.5)
+- Click: navega para o slide correspondente
+- Transição: 300ms ease-out
+- Gap entre dots: 8px
+- Em telas menores (mobile): dots menores (6px), gap 6px
+
+## Barra de Progresso
+- Posição: imediatamente acima dos navigation dots
+- Largura: mesma largura total dos dots (do primeiro ao último)
+- Altura: 3px
+- Fundo: rgba(255,255,255,0.08)
+- Preenchimento: gradiente horizontal de #6264A7 para #0078D4
+- Animação do preenchimento: transição suave de largura (400ms cubic-bezier(0.4,0,0.2,1))
+- Largura = ((slideAtual - 1) / (totalSlides - 1)) * 100%
+- Border-radius: 2px
+
+## Teclado
+- Seta Direita ou Espaço: próximo slide
+- Seta Esquerda: slide anterior
+- Home: primeiro slide
+- End: último slide
+
+## Mouse
+- Apenas os botões de seta e dots
+- Scroll do mouse NÃO troca de slide (proibido)
+- Clique em qualquer canto da tela NÃO troca de slide (proibido)
+
+## Touch (Mobile)
+- Swipe para esquerda: próximo slide
+- Swipe para direita: slide anterior
+- Threshold mínimo do swipe: 50px
+
+## Transição entre Slides
+- Tipo: Cross Fade com leve escala
+- Saída do slide atual: opacity 1→0, scale 1→0.98, duração 400ms
+- Entrada do novo slide: opacity 0→1, scale 1.02→1, duração 500ms
+- Delay entre saída e entrada: 100ms
+- Easing: cubic-bezier(0.4, 0, 0.2, 1)
+- Todos os elementos internos do slide devem ser reinicializados (opacity:0, transform初始) antes da entrada
+
+---
+
+# 8. ANIMAÇÕES GLOBAIS
+
+## Princípios
+- Toda animação deve ser fluida, cinematográfica e suave
+- Nada deve aparecer instantaneamente
+- O primeiro slide deve animar automaticamente no carregamento da página
+- Ao trocar de slide, todos os elementos do novo slide devem iniciar invisíveis e aparecer via animação
+- Ao voltar para um slide, as animações devem se repetir completamente
+
+## Easing Padrão
+- Entrada de elementos: cubic-bezier(0.16, 1, 0.3, 1) — desaceleração suave
+- Saída de elementos: cubic-bezier(0.4, 0, 1, 1) — aceleração suave
+- Transições de slide: cubic-bezier(0.4, 0, 0.2, 1)
+
+## Sequência Padrão de Entrada (Stagger)
+Para a maioria dos slides, a sequência é:
+1. Background do slide (0ms)
+2. Elementos decorativos/blobs (100ms)
+3. Bloco com perspectiva 3D ou elemento de destaque (200-300ms)
+4. Título principal (300-400ms)
+5. Subtítulo (450-550ms)
+6. Conteúdo/cards/lista (600ms+)
+7. Elementos interativos (800ms+)
+8. Efeitos finais/glow (1000ms+)
+
+## Animação de Títulos
+- Fade In + MoveY(20px→0) + Blur(8px→0)
+- Duração: 800ms
+- Delay: variável por slide (300-500ms)
+- Easing: cubic-bezier(0.16, 1, 0.3, 1)
+
+## Animação de Subtítulos
+- Fade In + MoveY(15px→0)
+- Duração: 700ms
+- Delay: título + 150ms
+- Easing: cubic-bezier(0.16, 1, 0.3, 1)
+
+## Animação de Cards/Itens de Lista
+- Fade In + MoveY(30px→0) + Scale(0.95→1) + Blur(4px→0)
+- Duração: 700ms
+- Stagger: 120ms entre cada item
+- Delay inicial: variável por slide
+- Easing: cubic-bezier(0.16, 1, 0.3, 1)
+
+## Animação de Blocos com Perspectiva 3D
+- Fade In + MoveY(40px→0) acompanhando a direção da perspectiva
+- Duração: 900ms
+- Delay: variável
+- Easing: cubic-bezier(0.16, 1, 0.3, 1)
+- Conteúdo interno aparece 200ms após o bloco
+
+## Animação de Ícones
+- Fade In + Scale(0.8→1) + Rotate(-10deg→0)
+- Duração: 600ms
+- Stagger: 80ms entre ícones
+- Easing: cubic-bezier(0.34, 1.56, 0.64, 1) — spring suave
+
+## Animação de Contadores/Números
+- Contador numérico de 0 ao valor final
+- Duração: 1500ms
+- Easing: ease-out
+- Suffix automático (%, +, etc.)
+
+## Microanimações Contínuas (após estabilização)
+- Blobs de fundo: leve float (±15px em X/Y, 15-25s)
+- Partículas: movimento lento ascendente/horizontal
+- Glow sutil pulsando: opacidade variando 0.04↔0.08, ciclo 4-6s
+- Elementos decorativos: leve oscilação vertical (±3px, 6-8s)
+- Cards: leve respiração de sombra (shadow blur variando 1-2px, 5-7s)
+
+---
+
+# 9. ELEMENTOS INTERATIVOS GLOBAIS
+
+## Cards com Hover
+- Hover: fundo rgba(255,255,255,0.06), borda rgba(98,100,167,0.3), translateY(-4px), sombra增加了, glow sutil
+- Transição: 300ms cubic-bezier(0.16, 1, 0.3, 1)
+- Cursor: pointer
+
+## Botões Interativos
+- Idle: fundo #6264A7, borda transparente
+- Hover: fundo #7B7DB8, sombra glow roxa, translateY(-2px)
+- Pressed: scale(0.97), translateY(0)
+- Focus (teclado): outline 2px solid rgba(98,100,167,0.5), outline-offset 2px
+- Transição: 200ms ease-out
+
+## Tooltips
+- Aparência: fundo rgba(20,20,37,0.95), borda 1px solid rgba(98,100,167,0.3), border-radius 8px, padding 8px 12px
+- Texto: 13px, cor rgba(255,255,255,0.9)
+- Sombra: 0 8px 32px rgba(0,0,0,0.4)
+- Aparição: 200ms delay, fade + translateY(4px→0)
+- Posição: acima do elemento, centralizada
+- Pointer-events: none
+
+## Toggles/Accordions (para conteúdo extenso)
+- Aparência: borda inferior sutil, ícone de seta indicando expand/collapse
+- Hover: background rgba(255,255,255,0.03)
+- Animação de expand: max-height transition 400ms ease-out
+- Ícone rotaciona 180deg durante expand
+- Conteúdo revelado com fade in
+
+## Tabs
+- Aparência: linha de abas com indicador deslizante
+- Tab ativa: cor #6264A7, borda inferior 2px solid #6264A7
+- Tab inativa: cor rgba(255,255,255,0.5)
+- Hover: cor rgba(255,255,255,0.8)
+- Indicador deslizante: transição de position 300ms cubic-bezier(0.4,0,0.2,1)
+- Conteúdo: fade + leve movimento vertical ao trocar de aba
+
+## Estilo dos Blocos com Perspectiva 3D
+- Implementação EXATA参照 ExemploPerspectiva.html
+- BLOCO SUPERIOR (acima de 50% da altura do slide):
+  transform: perspective(250px) rotateX(-10deg) rotateY(25deg);
+  transform-origin: 50% 50% 0px;
+  perspective-origin: 50% 50%;
+- BLOCO INFERIOR (abaixo de 50% da altura do slide):
+  transform: perspective(250px) rotateX(10deg) rotateY(25deg);
+  transform-origin: 50% 50% 0px;
+  perspective-origin: 50% 50%;
+- Largura máxima: 350px (min(350px, 85vw))
+- Altura máxima: 420px
+- Padding mínimo: 20px
+- Background: gradiente roxo Teams ou glassmorphism escuro com borda translúcida
+- Sombra: box-shadow: 0 20px 40px -12px rgba(98,100,167,0.4), inset 0 1px 0 rgba(255,255,255,0.15)
+- Texto interno: herda naturalmente a perspectiva (NENHUMA transformação extra no texto)
+- Todo bloco DEVE conter conteúdo real (título, número, ícone+texto, label)
+- Todo bloco DEVE ter comentário no código explicando seu tamanho
+
+---
+
+# REGRAS GLOBAIS IMPORTANTES
+
+## Responsividade
+- Tudo deve ser 100% responsivo
+- Nenhum elemento pode sair da tela em nenhuma resolução
+- Nenhum slide pode ser scrollável
+- Utilizar clamp() para tamanhos de fonte
+- Utilizar min()/max() para larguras
+- Em telas menores que 768px: reorganizar grids para 1 coluna, reduzir gaps
+- Em telas menores que 480px: simplificar ainda mais, manter hierarquia
+
+## Bloco com Perspectiva Sozinho no Slide
+- Se houver APENAS UM bloco com perspectiva em um slide, ele NÃO pode ficar centralizado na tela
+- Deve ficar posicionado à esquerda ou à direita, com conteúdo complementar ao lado oposto
+- Centralização só é permitida quando houver 3 ou mais blocos com perspectiva no mesmo slide
+
+## UTF-8
+- Meta charset UTF-8 obrigatório
+- Todos os textos devem ter acentos corretos
+- Nenhum caractere corrompido é aceitável
+
+## Próibicoes
+- NÃO criar cover shapes (polígonos clip-path decorativos atrás do título)
+- NÃO usar scroll do mouse para trocar slides
+- NÃO usar clique em canto para trocar slide
+- NÃO criar "Perguntas?" no slide final
+- NÃO criar linhas do tempo (timeline) como solicitado nos slides — usar abordagem diferente
+- NÃO criar tela de loading
+- NÃO criar texto em chinês
+- NÃO usar caracteres corrompidos
+- NÃO criar mais de um arquivo TXT
+- NÃO acessar outros arquivos da pasta
+
+---
+
+<!-- FIM_ETAPA_1 -->
+
+---
+
+## SLIDE 1 — CAPA: Microsoft Teams
+
+### Objetivo
+Impactar imediatamente. Apresentar o tema com autoridade visual. O usuário deve sentir que está diante de algo profissional e importante.
+
+### Emoção que deve transmitir
+Poder, confiança, inovação. O momento "UAU" inicial.
+
+### Layout
+Layout centralizado dramático. O título ficará exatamente no centro da tela, com elementos decorativos sutis ao redor criando profundidade. Regra dos terços: o título ocupa a zona central, com elementos secundários (subtítulo, tagline) posicionados na terça inferior.
+
+### Organização dos elementos
+- Centro: Título principal "Microsoft Teams" com efeito 3D extrudado
+- Abaixo do título (16px gap): Subtítulo "Colaboração em tempo real integrada à sua rotina"
+- Acima do título (32px): Ícone/logo do Teams (SVG do Teams) com glow roxo
+- Parte inferior: Tag "Oficina de Ferramentas Digitais" em texto pequeno
+
+### Background
+Mesmo background global (camadas 1-6). Adicionalmente, no slide 1:
+- Blob roxo maior e mais intenso: rgba(98,100,167,0.10), centralizado, raio ~400px
+- Animação de respiração neste blob: opacidade 0.08↔0.12, ciclo 5s
+
+### Elementos decorativos
+- 4-6 linhas diagonais sutis (1px, rgba(98,100,167,0.08)) emanando do centro, criando efeito de "raios" discretos
+- Pequenos dots luminosos flutuando ao redor do título (3-5 pontos, 2px, rgba(98,100,167,0.2), animação float 8-12s)
+- Apenas elementos sutis — o título é o herói absoluto
+
+### Elementos interativos
+- Nenhum elemento interativo no slide 1 (apenas navegação)
+
+### Elementos visuais
+- Título 3D extrudado:详见 seção especial abaixo
+- Ícone Teams: SVG oficial do Microsoft Teams, tamanho 64px, cor roxo Teams #6264A7, com glow roxo ao redor (box-shadow: 0 0 40px rgba(98,100,167,0.4))
+- Subtítulo: fonte 1.1rem, peso 400, cor rgba(255,255,255,0.65), letter-spacing 0.02em
+- Tag inferior: fonte 0.75rem, peso 500, cor rgba(98,100,167,0.6), text-transform uppercase, letter-spacing 0.15em
+
+### TÍTULO 3D EXTRUDADO — IMPLEMENTAÇÃO OBRIGATÓRIA
+
+O título "Microsoft Teams" no slide de capa deve ter efeito de texto 3D extrudado com múltiplos text-shadow.
+
+O texto deve permanecer COMPLETAMENTE RETO (horizontal). NÃO aplique nenhuma rotação, inclinação ou perspectiva ao elemento do texto. O título fica paralelo ao topo da tela.
+
+A sensação de tridimensionalidade vem EXCLUSIVAMENTE da extrusão por text-shadow:
+
+Implementação via JavaScript no carregamento:
+```
+let shadow = "";
+for (let i = 0; i < 35; i++) {
+    shadow += (shadow ? "," : "") +
+              (-i) + "px " +
+              i + "px 0 #cfcfcf";
+}
+titulo.style.textShadow = shadow;
+```
+
+CORES DO SHADOW: O shadow NÃO pode ser branco, cinza ou preto. Deve ser um gradiente de cor vívida:
+- Camadas próximas ao texto (i=0 a i=10): #8B8FC7 (roxo claro)
+- Camadas médias (i=11 a i=22): #6264A7 (roxo Teams)
+- Camadas distantes (i=23 a i=35): #464775 (roxo escuro)
+
+A segunda camada usa ::before no título:
+- Posicionamento: absolute, sobre o título
+- Mesmo conteúdo do título
+- Deslocamento: translate(-2px, 2px)
+- Cor: escurecida (rgba(0,0,0,0.15))
+- filter: blur(3px)
+- Opacidade: 0.4
+- Função: simular sombra ambiente, aumentar percepção de profundidade
+
+Tamanho do título: clamp(3.2rem, 6.4vw, 5.76rem)
+Peso: 800
+Cor do texto principal: #FFFFFF (BRANCO)
+z-index: 0
+
+### Partículas
+Mesmas partículas globais. Adicionalmente, no slide 1:
+- 2-3 partículas maiores (4px) com glow roxo, flutuando lentamente ao redor do título
+
+### Iluminação
+- Glow central sutil emanando de trás do título: radial-gradient, cor rgba(98,100,167,0.12), raio ~200px
+- O ícone Teams possui glow próprio (box-shadow roxo)
+- Direção de luz: canto superior esquerdo (influencia sombras de todos os elementos)
+
+### Efeitos
+- Background: vignette suave
+- Título: text-shadow extrudado (35 camadas)
+- Título ::before: blur(3px), opacidade 0.4
+- Ícone: glow roxo
+- Partículas: leve bloom (filter: blur(1px))
+
+### Ícones
+- Ícone Microsoft Teams (SVG): 64px, centralizado acima do título, cor #6264A7
+
+### Tipografia
+Ordem de entrada:
+1. Ícone Teams (fade + scale 0.8→1)
+2. Título "Microsoft Teams" (extrusão aparece via animação progressiva das 35 camadas de shadow)
+3. Subtítulo (fade + moveY 15px→0)
+4. Tag inferior (fade)
+
+### Ordem de entrada dos elementos
+1. Background e blobs (instantâneo, mas blob tem respiração)
+2. Linhas decorativas diagonais (fade in, 1200ms, delay 200ms)
+3. Dots luminosos (fade in, 800ms, delay 400ms)
+4. Ícone Teams (fade + scale, 700ms, delay 300ms)
+5. Título extrudado (as 35 camadas de shadow aparecem progressivamente, 1000ms, delay 500ms)
+6. Subtítulo (fade + moveY, 700ms, delay 900ms)
+7. Tag inferior (fade, 600ms, delay 1100ms)
+
+### Interações
+- Navegação apenas (setas, dots, teclado, swipe)
+- Hover nos dots de navegação
+- Hover nos botões de seta
+
+### Transição para o próximo slide
+- Cross Fade com leve scale
+- Saída: opacity 1→0, scale 1→0.98, 400ms
+- Entrada do slide 2: opacity 0→1, scale 1.02→1, 500ms
+
+### Observações
+- O título é o elemento MAIS importante de toda a apresentação
+- O efeito 3D extrudado deve impressionar imediatamente
+- O z-index do título deve ser ZERO para não sobrepor outros textos
+- O fundo do slide de capa NÃO deve ter cover shapes, polígonos clip-path ou formas decorativas atrás do título
+- APENAS as camadas globais de background devem estar presentes
+
+---
+
+## SLIDE 2 — O que é o Microsoft Teams?
+
+### Objetivo
+Explicar de forma clara e objetiva o que é o Microsoft Teams. Estabelecer a base de conhecimento.
+
+### Emoção que deve transmitir
+Clareza, simplicidade, acessibilidade. O usuário deve entender rapidamente.
+
+### Layout
+Layout em duas colunas (60/40):
+- Coluna esquerda (60%): Título + subtítulo + descrição textual + lista de pontos-chave
+- Coluna direita (40%): Bloco com perspectiva 3D contendo o ícone do Teams + "Plataforma de Comunicação e Colaboração"
+
+### Organização dos elementos
+- Topo esquerda: Título "O que é o Microsoft Teams?"
+- Abaixo: Subtítulo "Plataforma de comunicação e colaboração da Microsoft"
+- Abaixo: Parágrafo descritivo (2-3 linhas)
+- Abaixo: 3-4 bullet points com ícones (chat, videoconferência, arquivos, aplicativos)
+- Direita: Bloco com perspectiva 3D (posicionado na metade superior, rotateX -10deg)
+
+### Background
+Background global padrão.
+
+### Elementos decorativos
+- Linha vertical sutil à esquerda do bloco de texto (2px, gradiente roxo, opacidade 0.3)
+- Pequeno ícone decorativo de conexão no canto superior direito (SVG sutil, opacidade 0.08)
+
+### Elementos interativos
+- Cada bullet point tem hover: leve glow à esquerda + destaque de cor
+- Bloco com perspectiva: hover com leve elevação adicional
+
+### Elementos visuais
+- Título: H2, clamp(1.8rem, 3.2vw, 2.8rem), peso 700, cor branca
+- Subtítulo: H3, 1.1rem, peso 600, cor rgba(255,255,255,0.7)
+- Parágrafo: 0.95rem, peso 400, cor rgba(255,255,255,0.6), line-height 1.7
+- Bullet points: ícone de verify (check) em verde #107C10 + texto em rgba(255,255,255,0.75)
+- Bloco perspectiva: gradiente roxo escuro (#1a1a3e para #252550), borda translúcida, conteúdo: ícone Teams 40px + "Plataforma de Comunicação e Colaboração" em 14px
+
+### Bloco com Perspectiva 3D
+- Posição: coluna direita, acima de 50% da altura → rotateX(-10deg)
+- Largura: ~280px (ajustada ao conteúdo)
+- Altura: ~180px
+- Conteúdo: Ícone Teams 40px + texto descritivo 2-3 linhas
+- Background: gradiente linear(135deg, #1a1a3e, #252550)
+- Borda: 1px solid rgba(98,100,167,0.2)
+- Sombra: 0 15px 30px -8px rgba(98,100,167,0.3)
+- Comentário no código: "Bloco informativo Teams — 280x180px, conteúdo: ícone + descrição"
+
+### Partículas
+Partículas globais padrão.
+
+### Iluminação
+- Glow sutil no bloco com perspectiva (borda superior levemente mais clara)
+- Luz vinda do canto superior esquerdo
+
+### Efeitos
+- Bullet points: ícone com leve glow verde no hover
+- Bloco perspectiva: glassmorphism leve (backdrop-filter: blur(8px))
+
+### Ícones
+- Ícone de verificação (checkmark): 18px, cor #107C10, para cada bullet
+- Ícone Teams no bloco perspectiva: 40px, cor #6264A7
+
+### Tipografia
+Ordem de entrada:
+1. Título (fade + moveY + blur)
+2. Subtítulo (fade + moveY, 150ms após título)
+3. Parágrafo (fade, 200ms após subtítulo)
+4. Bullet points (stagger, 120ms entre cada)
+5. Bloco perspectiva (fade + moveY, 300ms após bullets)
+
+### Ordem de entrada dos elementos
+1. Título: fade in, moveY(20px→0), blur(8px→0), 800ms, delay 300ms
+2. Subtítulo: fade in, moveY(15px→0), 700ms, delay 500ms
+3. Parágrafo: fade in, 600ms, delay 650ms
+4. Bullet 1: fade in, moveY(15px→0), 500ms, delay 800ms
+5. Bullet 2: fade in, moveY(15px→0), 500ms, delay 920ms
+6. Bullet 3: fade in, moveY(15px→0), 500ms, delay 1040ms
+7. Bullet 4: fade in, moveY(15px→0), 500ms, delay 1160ms
+8. Bloco perspectiva: fade in, moveY(30px→0), 900ms, delay 700ms
+9. Conteúdo do bloco perspectiva: fade in, 600ms, delay 1100ms
+
+### Interações
+- Hover nos bullets: glow verde sutil à esquerda, background rgba(16,124,16,0.05)
+- Hover no bloco perspectiva: translateY(-3px), sombra aumenta
+
+### Transição para o próximo slide
+- Cross Fade com leve escala (padrão global)
+
+### Observações
+- O bloco com perspectiva NÃO deve estar centralizado — está na coluna direita
+- Mantenha o texto conciso — máximo 3-4 linhas no parágrafo
+- Bullet points com no máximo 8 palavras cada
+
+---
+
+## SLIDE 3 — Por que o Teams é relevante hoje?
+
+### Objetivo
+Demonstrar a importância atual do Teams no cenário corporativo. Justificar o investimento em adoção.
+
+### Emoção que debe transmitir
+Urgência, relevância, oportunidade. O usuário deve sentir que precisa do Teams.
+
+### Layout
+Layout em 3 colunas (cards de destaque). Cada coluna contém um card com perspectiva 3D:
+- Coluna esquerda: "Trabalho Remoto e Híbrido"
+- Coluna central: "Centralização de Ferramentas"
+- Coluna direita: "Segurança Empresarial"
+Acima dos cards: título + subtítulo.
+
+### Organização dos elementos
+- Topo centralizado: Título "Por que o Teams é relevante hoje?"
+- Abaixo: Subtítulo (linha curta)
+- Abaixo: 3 cards com perspectiva 3D lado a lado
+- Abaixo dos cards: linha decorativa sutil
+
+### Background
+Background global padrão.
+
+### Elementos decorativos
+- Linha horizontal decorativa abaixo do subtítulo (gradiente roxo, opacidade 0.2, largura 60px, centralizada)
+- Pequenos ícones flutuando ao redor dos cards (muito sutis, opacidade 0.05)
+
+### Elementos interativos
+- Cards: hover com elevação + glow borda roxa + ícone pulsa levemente
+- Cada card pode ser clicável (toggle) para revelar informação extra (se necessário para ajustar conteúdo)
+
+### Elementos visuais
+- Título: H2, clamp(1.8rem, 3.2vw, 2.8rem), peso 700, cor branca
+- Subtítulo: 1rem, peso 400, cor rgba(255,255,255,0.6)
+- Cards: glassmorphism, fundo rgba(255,255,255,0.04), borda 1px solid rgba(98,100,167,0.15), border-radius 12px, padding 28px
+- Ícones nos cards: 36px, cor roxo Teams
+- Títulos dos cards: 1.05rem, peso 600, cor branca
+- Textos dos cards: 0.85rem, peso 400, cor rgba(255,255,255,0.6), max 3 linhas
+
+### Cards com Perspectiva 3D
+Três cards lado a lado. Todos posicionados na metade inferior do slide (abaixo de 50% da altura) → rotateX(10deg) para todos.
+
+Card 1 — Trabalho Remoto e Híbrido:
+- Largura: ~260px
+- Altura: ~200px
+- Ícone: home/remote work (SVG), 36px
+- Título: "Trabalho Remoto e Híbrido"
+- Texto: "Crescimento do trabalho remoto e híbrido exige ferramentas de colaboração eficazes"
+- Background: gradiente linear(135deg, rgba(98,100,167,0.15), rgba(98,100,167,0.05))
+- Comentário: "Card perspectiva — 260x200px, conteúdo: ícone + título + texto"
+
+Card 2 — Centralização:
+- Largura: ~260px
+- Altura: ~200px
+- Ícone: hub/centralizar (SVG), 36px
+- Título: "Centralização de Ferramentas"
+- Texto: "Necessidade de centralizar chat, reuniões, arquivos e aplicativos em um único lugar"
+- Background: gradiente linear(135deg, rgba(0,120,212,0.15), rgba(0,120,212,0.05))
+- Comentário: "Card perspectiva — 260x200px, conteúdo: ícone + título + texto"
+
+Card 3 — Segurança:
+- Largura: ~260px
+- Altura: ~200px
+- Ícone: shield/segurança (SVG), 36px
+- Título: "Segurança Empresarial"
+- Texto: "Conformidade com Microsoft 365, criptografia e políticas de acesso corporativas"
+- Background: gradiente linear(135deg, rgba(16,124,16,0.15), rgba(16,124,16,0.05))
+- Comentário: "Card perspectiva — 260x200px, conteúdo: ícone + título + texto"
+
+### Partículas
+Partículas globais padrão. Adicionalmente:
+- Pequenas partículas roxas (2px, opacidade 0.10) flutuando entre os cards
+
+### Iluminação
+- Glow difuso vindo de cima (key light simulada)
+- Cada card com borda superior levemente mais clara (inset highlight)
+- Sombras dos cards respeitam direção da luz
+
+### Efeitos
+- Cards: glassmorphism (backdrop-filter: blur(12px))
+- Hover nos cards: glow borda, sombra aumenta
+- Ícones: glow roxo sutil contínuo
+
+### Ícones
+- 3 ícones SVG: home, hub, shield — estilo outlined, 36px, cor #6264A7
+
+### Tipografia
+Ordem de entrada:
+1. Título (fade + moveY + blur)
+2. Subtítulo (fade + moveY)
+3. Cards (stagger de baixo para cima, 150ms entre cada)
+
+### Ordem de entrada dos elementos
+1. Título: 800ms, delay 300ms
+2. Subtítulo: 700ms, delay 500ms
+3. Linha decorativa: 600ms, delay 600ms (scale de 0→1 no eixo X)
+4. Card esquerdo: fade + moveY(40px→0) + scale(0.95→1) + blur(4px→0), 800ms, delay 700ms
+5. Card central: mesmo, delay 850ms
+6. Card direito: mesmo, delay 1000ms
+7. Ícones dos cards: fade + scale(0.8→1), 500ms, delay +200ms após cada card
+
+### Interações
+- Hover nos cards: translateY(-4px), borda roxa brilha, sombra intensifica, ícone pulsa scale(1.05)
+- Toggle nos cards (se conteúdo extenso): clique expande para mostrar detalhes extras
+
+### Transição para o próximo slide
+- Cross Fade com leve escala (padrão global)
+
+### Observações
+- Os 3 cards devem ter alturas IGUAIS (usar min-height ou flex stretch)
+- Em mobile: cards empilham verticalmente
+- Cada card tem exatamente 1 ícone + 1 título + 1 texto curto
+- Não sobrecarregue os cards — máximo 2-3 linhas de texto cada
+
+---
+
+## SLIDE 4 — Principais funcionalidades
+
+### Objetivo
+Apresentar as funcionalidades core do Teams de forma visual e memorável.
+
+### Emoção que deve transmitir
+Poder, completude, versatilidade. O usuário deve perceber que o Teams faz tudo.
+
+### Layout
+Layout grid 2x2 (quadrante). Cada quadrant contém um card glassmorphism com ícone grande + título + descrição curta.
+
+### Organização dos elementos
+- Topo centralizado: Título "Principais funcionalidades"
+- Abaixo: Grid 2x2 com 4 cards
+- Cada card: ícone grande (48px) + título (1rem) + descrição (0.85rem)
+
+### Background
+Background global padrão.
+
+### Elementos decorativos
+- Cruz sutil no centro do grid (2 linhas, rgba(255,255,255,0.03)) separando os quadrantes
+- Pequenos dots nos cantos do grid (opacidade 0.1)
+
+### Elementos interativos
+- Cards: hover com glow borda + elevação + ícone anima (rotate ou pulse)
+- Cada card pode ter tooltip com detalhes extras
+
+### Elementos visuais
+- Título: H2, clamp(1.8rem, 3.2vw, 2.8rem), peso 700, cor branca
+- Cards: fundo rgba(255,255,255,0.03), borda 1px solid rgba(255,255,255,0.06), border-radius 16px, padding 28px
+- Ícones: 48px, cor roxo Teams #6264A7, com leve glow
+- Títulos dos cards: 1rem, peso 600, cor branca
+- Descrições: 0.85rem, peso 400, cor rgba(255,255,255,0.55)
+
+### Conteúdo dos 4 Cards
+Card 1 — Chat:
+- Ícone: chat bubble (SVG)
+- Título: "Chat individual e em grupo"
+- Texto: "Histórico completo, menções, formatação e compartilhamento"
+
+Card 2 — Videoconferência:
+- Ícone: câmera/video (SVG)
+- Título: "Videoconferências"
+- Texto: "Até 1.000 participantes, compartilhamento de tela e gravação"
+
+Card 3 — Compartilhamento:
+- Ícone: share/upload (SVG)
+- Título: "Compartilhamento de arquivos"
+- Texto: "Apresentação de arquivos e colaboração em tempo real"
+
+Card 4 — Gravação:
+- Ícone: record/microfone (SVG)
+- Título: "Gravação e transcrição"
+- Texto: "Gravação de reuniões com transcrição automática por IA"
+
+### Partículas
+Partículas globais padrão.
+
+### Iluminação
+- Glow difuso no centro do grid
+- Cards com bordas superior e esquerda levemente mais claras (key light)
+
+### Efeitos
+- Cards: glassmorphism leve
+- Ícones: glow roxo contínuo sutil (opacidade variando 0.3↔0.5, 4s)
+- Hover: glow intensifica
+
+### Ícones
+- 4 ícones SVG: chat, camera, share, record — estilo outlined, 48px
+
+### Tipografia
+Ordem de entrada:
+1. Título (fade + moveY + blur)
+2. Cards (stagger em ziguezague: canto superior esquerdo → superior direito → inferior esquerdo → inferior direito, 120ms entre cada)
+
+### Ordem de entrada dos elementos
+1. Título: 800ms, delay 300ms
+2. Card chat (canto superior esquerdo): fade + scale(0.9→1) + blur(4px→0), 700ms, delay 600ms
+3. Card video (canto superior direito): mesmo, delay 720ms
+4. Card share (canto inferior esquerdo): mesmo, delay 840ms
+5. Card record (canto inferior direito): mesmo, delay 960ms
+6. Ícones: fade + scale, 500ms, cada um +150ms após seu card
+
+### Interações
+- Hover nos cards: translateY(-4px), borda rgba(98,100,167,0.3), sombra aumenta, ícone pulsa scale(1.08)
+- Tooltip ao hover nos cards (posicionado acima): detalhes extras em 1-2 linhas
+
+### Transição para o próximo slide
+- Cross Fade com leve escala (padrão global)
+
+### Observações
+- Os 4 cards devem ter tamanhos IGUAIS (grid uniforme)
+- Em mobile: grid vira 1 coluna (4 cards empilhados)
+- Gap entre cards: 20px
+- Os ícones são o ponto focal de cada card — devem ter presença visual
+
+---
+
+<!-- FIM_ETAPA_2 -->
+
+---
+
+## SLIDE 5 — Trabalho com equipes e canais
+
+### Objetivo
+Explicar a estrutura organizacional do Teams — equipes, canais e como tudo se conecta.
+
+### Emoção que deve transmitir
+Ordem, organização, clareza. O usuário deve visualizar como o Teams organiza o trabalho.
+
+### Layout
+Layout assimétrico: coluna esquerda (55%) com conteúdo textual estruturado + coluna direita (45%) com representação visual da estrutura (diagrama em camadas usando blocos com perspectiva 3D).
+
+### Organização dos elementos
+- Topo esquerda: Título "Trabalho com equipes e canais"
+- Abaixo: Lista estruturada com 4 itens, cada um com ícone + título + descrição curta
+- Direita: Diagrama visual com 3 blocos empilhados em perspectiva mostrando a hierarquia: Equipe → Canal → Conversa
+
+### Background
+Background global padrão.
+
+### Elementos decorativos
+- Linhas de conexão verticais entre os itens da lista (2px, gradiente roxo, opacidade 0.15)
+- Pequenos nós (dots) nos pontos de conexão das linhas
+
+### Elementos interativos
+- Itens da lista: hover com glow à esquerda + background sutil
+- Blocos do diagrama: hover em cada bloco destaca-o com glow e mostra detalhes extras
+- Tooltip ao hover nos blocos: informação contextual
+
+### Elementos visuais
+- Título: H2, clamp(1.8rem, 3.2vw, 2.8rem), peso 700, cor branca
+- Itens da lista: ícone 20px + título 0.95rem peso 600 + descrição 0.85rem peso 400
+- Blocos do diagrama: 3 retângulos empilhados com perspectiva 3D, cada um com label
+
+### Conteúdo da Lista
+Item 1:
+- Ícone: people/equipe (SVG), cor roxo
+- Título: "Organização por equipes"
+- Texto: "Departamentos, projetos, áreas"
+
+Item 2:
+- Ícone: hashtag/channel (SVG), cor azul
+- Título: "Canais temáticos"
+- Texto: "Dentro de cada equipe"
+
+Item 3:
+- Ícone: chat (SVG), cor verde
+- Título: "Conversas focadas"
+- Texto: "Por canal, evitando ruído"
+
+Item 4:
+- Ícone: folder (SVG), cor laranja
+- Título: "Arquivos compartilhados"
+- Texto: "Armazenamento por canal"
+
+### Diagrama com Blocos de Perspectiva 3D
+Três blocos empilhados na coluna direita, mostrando hierarquia:
+
+Bloco 1 (superior — acima de 50% → rotateX -10deg):
+- Label: "Equipe"
+- Largura: ~200px, Altura: ~80px
+- Background: gradiente roxo escuro (#2a2a50 para #1a1a3a)
+- Borda: 1px solid rgba(98,100,167,0.3)
+- Comentário: "Bloco hierarquia — Equipe — 200x80px"
+
+Bloco 2 (inferior — abaixo de 50% → rotateX 10deg):
+- Label: "Canal"
+- Largura: ~180px, Altura: ~70px
+- Background: gradiente azul escuro (#1a2a40 para #0f1a30)
+- Borda: 1px solid rgba(0,120,212,0.3)
+- Comentário: "Bloco hierarquia — Canal — 180x70px"
+
+Bloco 3 (inferior → rotateX 10deg):
+- Label: "Conversa"
+- Largura: ~160px, Altura: ~60px
+- Background: gradiente verde escuro (#0a2a15 para #051a0a)
+- Borda: 1px solid rgba(16,124,16,0.3)
+- Comentário: "Bloco hierarquia — Conversa — 160x60px"
+
+### Partículas
+Partículas globais padrão. Pequenas partículas de conexão (dots连线系) entre os blocos do diagrama.
+
+### Iluminação
+- Glow sutil entre os blocos do diagrama (simulando fluxo de dados)
+- Luz vinda de cima, bordas superiores dos blocos levemente mais claras
+
+### Efeitos
+- Blocos: glassmorphism leve
+- Linhas de conexão: gradiente animado (opacidade pulsando)
+- Hover nos blocos: glow intensifica
+
+### Ícones
+- 4 ícones SVG para a lista: people, hashtag, chat, folder — estilo outlined, 20px
+- 3 labels nos blocos: texto simples, sem ícone
+
+### Tipografia
+Ordem de entrada:
+1. Título (fade + moveY + blur)
+2. Blocos do diagrama (stagger de cima para baixo, 200ms entre cada)
+3. Itens da lista (stagger de cima para baixo, 120ms entre cada)
+
+### Ordem de entrada dos elementos
+1. Título: 800ms, delay 300ms
+2. Bloco Equipe: fade + moveX(-30px→0), 700ms, delay 600ms
+3. Bloco Canal: fade + moveX(-30px→0), 700ms, delay 800ms
+4. Bloco Conversa: fade + moveX(-30px→0), 700ms, delay 1000ms
+5. Linha de conexão 1-2: draw, 500ms, delay 900ms
+6. Linha de conexão 2-3: draw, 500ms, delay 1100ms
+7. Item lista 1: fade + moveX(20px→0), 500ms, delay 800ms
+8. Item lista 2: mesmo, delay 920ms
+9. Item lista 3: mesmo, delay 1040ms
+10. Item lista 4: mesmo, delay 1160ms
+
+### Interações
+- Hover nos itens da lista: background rgba(98,100,167,0.08), glow à esquerda
+- Hover nos blocos: translateY(-3px), glow borda, detalhes extras aparecem
+- Tooltip nos blocos: "Esta é a camada de Equipe/Canal/Conversa"
+
+### Transição para o próximo slide
+- Cross Fade com leve escala (padrão global)
+
+### Observações
+- O diagrama deve parecer uma representação visual da hierarquia, não apenas caixas
+- As linhas de conexão entre blocos reforçam o fluxo
+- Em mobile: diagrama fica abaixo da lista, empilhado
+- Manter texto curto em todos os itens
+
+---
+
+## SLIDE 6 — Integrações e aplicativos
+
+### Objetivo
+Mostrar o ecossistema de integrações do Teams, demonstrando que ele se conecta com tudo.
+
+### Emoção que deve transmitir
+Ecossistema, poder, conectividade. O usuário deve sentir que o Teams é o hub central.
+
+### Layout
+Layout centralizado com título no topo + grid de ícones/cards representando integrações. Estilo "hub and spoke" — Teams no centro, integrações ao redor (mas implementado como grid 2x3 para caber no slide).
+
+### Organização dos elementos
+- Topo centralizado: Título "Integrações e aplicativos"
+- Abaixo: Grid 2x3 com 6 cards de integração
+- Cada card: ícone da integração + nome + descrição curta (1 linha)
+
+### Background
+Background global padrão. Adicionalmente:
+- Glow central difuso sutil (radial-gradient, rgba(0,120,212,0.06)) simulando o "hub"
+
+### Elementos decorativos
+- Linhas de conexão sutis entre os cards (como uma rede/teia, opacidade 0.05)
+- Pequenos nós nos cruzamentos das linhas
+
+### Elementos interativos
+- Cards: hover com glow + borda colorida correspondente à marca + elevação
+- Tooltip ao hover: detalhes extras sobre cada integração
+
+### Elementos visuais
+- Título: H2, clamp(1.8rem, 3.2vw, 2.8rem), peso 700, cor branca
+- Cards: fundo rgba(255,255,255,0.03), borda 1px solid rgba(255,255,255,0.06), border-radius 12px, padding 20px
+- Ícones: 32px, cor da marca correspondente ou roxo Teams
+- Nome: 0.9rem, peso 600, cor branca
+- Descrição: 0.75rem, peso 400, cor rgba(255,255,255,0.5)
+
+### Conteúdo dos 6 Cards
+Card 1 — Microsoft 365:
+- Ícone: M365 logo (SVG simplificado), cor #D83B01
+- Nome: "Microsoft 365"
+- Texto: "Word, Excel, PowerPoint, Outlook"
+
+Card 2 — Trello:
+- Ícone: Trello board (SVG), cor #0079BF
+- Nome: "Trello"
+- Texto: "Gestão de projetos ágeis"
+
+Card 3 — Asana:
+- Ícone: Asana (SVG), cor #F06A6A
+- Nome: "Asana"
+- Texto: "Organização de tarefas"
+
+Card 4 — GitHub:
+- Ícone: GitHub (SVG), cor #FFFFFF
+- Nome: "GitHub"
+- Texto: "Repositórios e code review"
+
+Card 5 — Power Automate:
+- Ícone: Power Automate (SVG), cor #0066FF
+- Nome: "Power Automate"
+- Texto: "Automação de processos"
+
+Card 6 — Abas Personalizadas:
+- Ícone: puzzle/plugin (SVG), cor #6264A7
+- Nome: "Abas personalizadas"
+- Texto: "Ferramentas dentro dos canais"
+
+### Partículas
+Partículas globais padrão. Partículas extras de "conexão" (dots连线系 que se movem entre os cards).
+
+### Iluminação
+- Glow central (hub) que respira suavemente
+- Cada card com glow correspondente à sua cor de marca
+
+### Efeitos
+- Cards: glassmorphism leve
+- Linhas de conexão: gradiente animado
+- Ícones: glow colorido contínuo sutil
+
+### Ícones
+- 6 ícones SVG representando cada integração — estilo outlined/simplificado, 32px
+
+### Tipografia
+Ordem de entrada:
+1. Título (fade + moveY + blur)
+2. Cards (stagger em espiral a partir do centro, 100ms entre cada)
+
+### Ordem de entrada dos elementos
+1. Título: 800ms, delay 300ms
+2. Card M365: fade + scale(0.85→1), 600ms, delay 600ms
+3. Card Trello: mesmo, delay 700ms
+4. Card Asana: mesmo, delay 800ms
+5. Card GitHub: mesmo, delay 900ms
+6. Card Power Automate: mesmo, delay 1000ms
+7. Card Abas: mesmo, delay 1100ms
+8. Linhas de conexão: fade, 800ms, delay 1200ms
+
+### Interações
+- Hover nos cards: translateY(-3px), borda ganha cor da marca, glow colorido, sombra aumenta
+- Tooltip: "Integra com [ferramenta] via [método]"
+
+### Transição para o próximo slide
+- Cross Fade com leve escala (padrão global)
+
+### Observações
+- Os ícones das marcas devem ser reconhecíveis (usar cores oficiais quando possível)
+- Em mobile: grid vira 2 colunas ou 1 coluna
+- Manter descrições curtas (máximo 4 palavras)
+- As linhas de conexão são sutis — não competem com os cards
+
+---
+
+## SLIDE 7 — Inteligência Artificial no Teams
+
+### Objetivo
+Destacar as funcionalidades de IA (Copilot) do Teams, mostrando o futuro da colaboração.
+
+### Emoção que deve transmitir
+Inovação, futuristicidade, poder. O usuário deve sentir que está vendo algo avançado.
+
+### Layout
+Layout em coluna única centralizada, com bloco de destaque (perspectiva 3D) no topo + 3 cards de funcionalidade de IA abaixo.
+
+### Organização dos elementos
+- Topo centralizado: Título "Inteligência Artificial no Teams"
+- Abaixo: Bloco com perspectiva 3D grande centralizado com "Copilot" e ícone de IA
+- Abaixo: 3 cards lado a lado, cada um com funcionalidade de IA
+
+### Background
+Background global padrão. Adicionalmente:
+- Efeito sutil de "matriz digital" ou grid de dados no fundo (linhas horizontais e verticais muito sutis, opacidade 0.02, simulando dados fluindo)
+
+### Elementos decorativos
+- Grid de dados sutil no fundo
+- Pequenos ícones de circuito ao redor do bloco Copilot (opacidade 0.05)
+- Glow neon roxo ao redor do bloco principal
+
+### Elementos interativos
+- Bloco Copilot: hover com glow intensificado + leve vibração
+- Cards de IA: hover com glow + ícone anima (pulse ou rotação)
+
+### Elementos visuais
+- Título: H2, clamp(1.8rem, 3.2vw, 2.8rem), peso 700, cor branca
+- Bloco Copilot: glassmorphism com borda neon roxa, padding 32px
+- Cards: fundo rgba(255,255,255,0.03), borda 1px solid rgba(98,100,167,0.15), border-radius 12px, padding 24px
+
+### Bloco Copilot com Perspectiva 3D
+- Posição: centralizado na metade superior → rotateX(-10deg)
+- Largura: ~320px (próximo do limite de 350px)
+- Altura: ~160px
+- Conteúdo: Ícone de IA (estrela/brilho SVG) 48px + "Copilot" em 1.4rem peso 700 + "Sua IA integrada ao Teams" em 0.85rem
+- Background: gradiente linear(135deg, rgba(98,100,167,0.2), rgba(98,100,167,0.05))
+- Borda: 1px solid rgba(98,100,167,0.4) com glow neon roxo
+- Sombra: 0 20px 60px -12px rgba(98,100,167,0.5)
+- Comentário: "Bloco destaque Copilot — 320x160px, conteúdo: ícone + nome + descrição"
+
+### Conteúdo dos 3 Cards de IA
+Card 1 — Resumo Automático:
+- Ícone: document/list (SVG), cor roxo
+- Título: "Resumo automático"
+- Texto: "Conversas e reuniões resumidas por IA"
+
+Card 2 — Transcrição:
+- Ícone: subtitles/caption (SVG), cor azul
+- Título: "Transcrição em tempo real"
+- Texto: "Legendas e transcrição automática"
+
+Card 3 — Tarefas por IA:
+- Ícone: task/check (SVG), cor verde
+- Título: "Geração de tarefas"
+- Texto: "IA resolve pendências e cria tarefas"
+
+### Partículas
+Partículas globais. Adicionalmente:
+- Partículas de "dados" (dots连线系 que se movem verticalmente como dados fluindo), opacidade 0.08
+
+### Iluminação
+- Glow neon roxo intenso ao redor do bloco Copilot
+- Cards com borda superior levemente brilhante
+- Efeito de "pulse" no glow do Copilot (opacidade variando, 3s)
+
+### Efeitos
+- Bloco Copilot: glow neon pulsante, glassmorphism
+- Cards: glassmorphism leve
+- Grid de dados: animação de linhas se movendo verticalmente (muito lenta, 30s)
+- Ícones: glow contínuo
+
+### Ícones
+- Ícone IA (estrela/brilho): 48px no bloco Copilot
+- 3 ícones SVG: document, subtitles, task — estilo outlined, 28px
+
+### Tipografia
+Ordem de entrada:
+1. Título (fade + moveY + blur)
+2. Bloco Copilot (fade + scale + glow crescente)
+3. Cards (stagger, 150ms entre cada)
+
+### Ordem de entrada dos elementos
+1. Título: 800ms, delay 300ms
+2. Bloco Copilot: fade + moveY(30px→0) + scale(0.95→1) + blur(6px→0), 1000ms, delay 500ms
+3. Glow do Copilot: cresce de 0 para intensidade final, 1200ms, delay 700ms
+4. Conteúdo do bloco: fade, 600ms, delay 900ms
+5. Card Resumo: fade + moveY(25px→0), 700ms, delay 1100ms
+6. Card Transcrição: mesmo, delay 1250ms
+7. Card Tarefas: mesmo, delay 1400ms
+
+### Interações
+- Hover no bloco Copilot: glow intensifica, borda brilha mais, leve scale(1.02)
+- Hover nos cards: translateY(-3px), glow borda, ícone anima
+
+### Transição para o próximo slide
+- Cross Fade com leve escala (padrão global)
+
+### Observações
+- O bloco Copilot é o herói deste slide — deve chamar atenção imediatamente
+- O efeito neon no bloco deve ser sutil, não exagerado
+- Em mobile: os 3 cards empilham verticalmente
+- O grid de dados no fundo é extremamente sutil — quase invisível
+
+---
+
+## SLIDE 8 — Gerenciamento de reuniões
+
+### Objetivo
+Detalhar como o Teams gerencia reuniões de forma completa e organizada.
+
+### Emoção que deve transmitir
+Controle, organização, eficiência. O usuário deve sentir que terá reuniões produtivas.
+
+### Layout
+Layout dividido horizontalmente: título no topo + área principal com 2 colunas:
+- Coluna esquerda (50%): Lista de funcionalidades com ícones
+- Coluna direita (50%): Bloco com perspectiva 3D mostrando "Controles do Organizador"
+
+### Organização dos elementos
+- Topo centralizado: Título "Gerenciamento de reuniões"
+- Abaixo esquerda: 4 itens de funcionalidade com ícone + texto
+- Abaixo direita: Bloco perspectiva com controles do organizador
+
+### Background
+Background global padrão.
+
+### Elementos decorativos
+- Linha vertical separando as duas colunas (gradiente roxo, opacidade 0.15)
+- Ícone decorativo de calendário ao fundo (opacidade 0.04)
+
+### Elementos interativos
+- Itens da lista: hover com glow + destaque
+- Bloco perspectiva: hover com elevação + glow
+- Possível toggle no bloco para mostrar/ocultar detalhes dos controles
+
+### Elementos visuais
+- Título: H2, clamp(1.8rem, 3.2vw, 2.8rem), peso 700, cor branca
+- Itens: ícone 24px + título 0.95rem peso 600 + texto 0.85rem peso 400
+- Bloco perspectiva: glassmorphism escuro
+
+### Conteúdo dos Itens da Lista
+Item 1:
+- Ícone: calendar (SVG), cor roxo
+- Título: "Agendamento integrado"
+- Texto: "Com Outlook e calendário do Teams"
+
+Item 2:
+- Ícone: link (SVG), cor azul
+- Título: "Múltiplas formas de acesso"
+- Texto: "Encontro agendado, reunião imediata ou link"
+
+Item 3:
+- Ícone: controls/sliders (SVG), cor verde
+- Título: "Controles do organizador"
+- Texto: "Silenciar, admitir, retirar participantes"
+
+Item 4:
+- Ícone: grid/breakout (SVG), cor laranja
+- Título: "Espaços de breakout"
+- Texto: "Salas separadas para discussões"
+
+### Bloco com Perspectiva 3D
+- Posição: coluna direita, acima de 50% → rotateX(-10deg)
+- Largura: ~280px
+- Altura: ~200px
+- Conteúdo: Título "Controles do Organizador" + lista de 3 controles (Silenciar, Admitir/Retirar, Breakout Rooms) com ícones ao lado
+- Background: gradiente roxo escuro
+- Borda: 1px solid rgba(98,100,167,0.25)
+- Sombra: 0 15px 35px -8px rgba(98,100,167,0.35)
+- Comentário: "Bloco controles organizador — 280x200px, conteúdo: título + 3 controles com ícones"
+
+### Partículas
+Partículas globais padrão.
+
+### Iluminação
+- Glow vindo de cima-esquerda (key light)
+- Bloco perspectiva com borda superior mais clara
+
+### Efeitos
+- Bloco: glassmorphism leve
+- Ícones: glow colorido sutil
+
+### Ícones
+- 4 ícones SVG para lista: calendar, link, controls, grid — outlined, 24px
+- 3 ícones menores no bloco perspectiva: 16px
+
+### Tipografia
+Ordem de entrada:
+1. Título (fade + moveY + blur)
+2. Itens da lista (stagger, 120ms entre cada)
+3. Bloco perspectiva (fade + moveY)
+
+### Ordem de entrada dos elementos
+1. Título: 800ms, delay 300ms
+2. Item 1: fade + moveX(20px→0), 500ms, delay 600ms
+3. Item 2: mesmo, delay 720ms
+4. Item 3: mesmo, delay 840ms
+5. Item 4: mesmo, delay 960ms
+6. Bloco perspectiva: fade + moveX(30px→0) + blur(4px→0), 800ms, delay 700ms
+7. Conteúdo do bloco: fade, 500ms, delay 1100ms
+
+### Interações
+- Hover nos itens: background rgba(98,100,167,0.08), glow à esquerda
+- Hover no bloco: translateY(-3px), glow borda intensifica
+- Toggle no bloco: expande para mostrar detalhes extras dos controles
+
+### Transição para o próximo slide
+- Cross Fade com leve escala (padrão global)
+
+### Observações
+- O bloco com perspectiva está na coluna direita — NÃO centralizado
+- Em mobile: bloco vai para baixo da lista
+- Itens da lista com no máximo 2 linhas de texto
+- O bloco pode ter toggle se o conteúdo for extenso demais
+
+---
+
+<!-- FIM_ETAPA_3 -->
+
+---
+
+## SLIDE 9 — Segurança e conformidade
+
+### Objetivo
+Transmitir confiança na segurança do Teams. Demonstrar que dados estão protegidos.
+
+### Emoção que deve transmitir
+Confiança, solidez, proteção. O usuário deve se sentir seguro.
+
+### Layout
+Layout centralizado com bloco de destaque (perspectiva 3D) no topo + grid 2x2 com 4 cards de segurança abaixo.
+
+### Organização dos elementos
+- Topo centralizado: Título "Segurança e conformidade"
+- Abaixo: Bloco com perspectiva 3D centralizado com ícone de escudo + "Proteção de dados"
+- Abaixo: Grid 2x2 com 4 cards: Criptografia, Controles de Acesso, Conformidade, Autenticação
+
+### Background
+Background global padrão. Adicionalmente:
+- Padrão sutil de escudo/grade no fundo (opacidade 0.02, simulando proteção)
+
+### Elementos decorativos
+- Grade de segurança sutil no fundo (linhas cruzadas opacidade 0.02)
+- Escudo decorativo grande ao fundo (opacidade 0.03)
+
+### Elementos interativos
+- Bloco escudo: hover com glow verde intensificado
+- Cards: hover com glow borda + elevação
+- Cada card pode ter tooltip explicativo
+
+### Elementos visuais
+- Título: H2, clamp(1.8rem, 3.2vw, 2.8rem), peso 700, cor branca
+- Bloco escudo: glassmorphism com borda verde
+- Cards: fundo rgba(255,255,255,0.03), borda 1px solid rgba(255,255,255,0.06), border-radius 12px, padding 22px
+
+### Bloco com Perspectiva 3D
+- Posição: centralizado, acima de 50% → rotateX(-10deg)
+- Largura: ~300px
+- Altura: ~130px
+- Conteúdo: Ícone escudo 44px (cor verde #107C10) + "Proteção de dados" em 1.2rem peso 700 + "Microsoft 365 Security" em 0.8rem
+- Background: gradiente linear(135deg, rgba(16,124,16,0.15), rgba(16,124,16,0.05))
+- Borda: 1px solid rgba(16,124,16,0.3)
+- Sombra: 0 18px 40px -10px rgba(16,124,16,0.3)
+- Comentário: "Bloco destaque segurança — 300x130px, conteúdo: escudo + título + subtítulo"
+
+### Conteúdo dos 4 Cards
+Card 1 — Criptografia:
+- Ícone: lock (SVG), cor verde
+- Título: "Criptografia completa"
+- Texto: "Dados em trânsito e em repouso criptografados"
+
+Card 2 — Controles de Acesso:
+- Ícone: key/shield (SVG), cor azul
+- Título: "Controles de acesso"
+- Texto: "Políticas do Microsoft 365"
+
+Card 3 — Conformidade:
+- Ícone: document/check (SVG), cor roxo
+- Título: "Conformidade regulatória"
+- Texto: "GDPR, LGPD e normas corporativas"
+
+Card 4 — Autenticação:
+- Ícone: fingerprint/2fa (SVG), cor laranja
+- Título: "Autenticação multifator"
+- Texto: "Exigência de MFA para acesso"
+
+### Partículas
+Partículas globais padrão. Partículas verdes sutis (2px, opacidade 0.08) flutuando.
+
+### Iluminação
+- Glow verde sutil ao redor do bloco escudo
+- Cards com borda superior levemente brilhante
+
+### Efeitos
+- Bloco: glassmorphism com tinta verde
+- Cards: glassmorphism leve
+- Escudo: glow verde pulsante sutil (opacidade 0.3↔0.5, 5s)
+
+### Ícones
+- Ícone escudo: 44px, verde #107C10
+- 4 ícones SVG: lock, key, document, fingerprint — outlined, 28px
+
+### Tipografia
+Ordem de entrada:
+1. Título (fade + moveY + blur)
+2. Bloco escudo (fade + scale + glow)
+3. Cards (stagger, 120ms entre cada)
+
+### Ordem de entrada dos elementos
+1. Título: 800ms, delay 300ms
+2. Bloco escudo: fade + moveY(30px→0) + scale(0.95→1), 900ms, delay 500ms
+3. Conteúdo do bloco: fade, 600ms, delay 800ms
+4. Card Criptografia: fade + moveY(25px→0), 700ms, delay 1000ms
+5. Card Controles: mesmo, delay 1120ms
+6. Card Conformidade: mesmo, delay 1240ms
+7. Card Autenticação: mesmo, delay 1360ms
+
+### Interações
+- Hover no bloco escudo: glow verde intensifica, leve scale(1.02)
+- Hover nos cards: translateY(-3px), borda ganha cor, glow
+- Tooltip nos cards: detalhes extras
+
+### Transição para o próximo slide
+- Cross Fade com leve escala (padrão global)
+
+### Observações
+- O bloco escudo está centralizado — como há apenas 1 bloco de perspectiva mas 4 cards abaixo, a composição fica equilibrada
+- A cor verde domina este slide (segurança = verde)
+- Em mobile: cards empilham em 1 coluna
+
+---
+
+## SLIDE 10 — Dicas para adoção eficaz
+
+### Objetivo
+Fornecer dicas práticas para uma adoção bem-sucedida do Teams.
+
+### Emoção que deve transmitir
+Praticidade, orientação, confiança. O usuário deve sentir que tem um caminho claro.
+
+### Layout
+Layout em coluna única centralizada com 4 cards empilhados verticalmente, cada um com número de ordem + título + descrição. Estilo "passo a passo" visual, NÃO timeline.
+
+### Organização dos elementos
+- Topo centralizado: Título "Dicas para adoção eficaz"
+- Abaixo: 4 cards empilhados, cada um com:
+  - Número de ordem (01, 02, 03, 04) em destaque
+  - Título da dica
+  - Descrição curta
+
+### Background
+Background global padrão.
+
+### Elementos decorativos
+- Linha vertical conectando os cards (gradiente roxo, opacidade 0.15)
+- Números decorativos grandes ao fundo de cada card (opacidade 0.04)
+
+### Elementos interativos
+- Cards: hover com glow borda + elevação + número brilha
+- Cada card pode ser clicável para toggle de detalhes
+
+### Elementos visuais
+- Título: H2, clamp(1.8rem, 3.2vw, 2.8rem), peso 700, cor branca
+- Cards: fundo rgba(255,255,255,0.03), borda 1px solid rgba(255,255,255,0.06), border-radius 12px, padding 22px
+- Números: 2.5rem, peso 800, cor roxo com opacidade 0.3 (decoration), posicionado à esquerda do card
+- Títulos: 1rem, peso 600, cor branca
+- Descrições: 0.85rem, peso 400, cor rgba(255,255,255,0.6)
+
+### Conteúdo dos 4 Cards
+Card 1:
+- Número: 01
+- Título: "Estrutura clara de equipes e canais"
+- Texto: "Definir desde o início a organização de equipes e canais"
+
+Card 2:
+- Número: 02
+- Título: "Boas práticas de comunicação"
+- Texto: "Uso de @menções, respostas em tópicos, posturas adequadas"
+
+Card 3:
+- Número: 03
+- Título: "Capacitação dos colaboradores"
+- Texto: "Treinamentos básicos para todos os usuários"
+
+Card 4:
+- Número: 04
+- Título: "Revisão periódica"
+- Texto: "Revisar periodicamente a organização dos canais"
+
+### Partículas
+Partículas globais padrão.
+
+### Iluminação
+- Glow sutil ao redor do card ativo/focado
+- Números com glow roxo sutil
+
+### Efeitos
+- Cards: glassmorphism leve
+- Números: glow roxo contínuo sutil
+- Linha conectiva: gradiente animado (opacidade pulsando)
+
+### Ícones
+- Números decorativos 01-04: fonte monospace, peso 800
+
+### Tipografia
+Ordem de entrada:
+1. Título (fade + moveY + blur)
+2. Cards (stagger de cima para baixo, 150ms entre cada)
+
+### Ordem de entrada dos elementos
+1. Título: 800ms, delay 300ms
+2. Card 01: fade + moveY(30px→0), 700ms, delay 600ms
+3. Card 02: mesmo, delay 750ms
+4. Card 03: mesmo, delay 900ms
+5. Card 04: mesmo, delay 1050ms
+6. Números: fade + scale(0.8→1), 500ms, cada +100ms após seu card
+7. Linha conectiva: draw de cima para baixo, 1200ms, delay 600ms
+
+### Interações
+- Hover nos cards: translateY(-2px), borda roxa brilha, número ganha glow intenso
+- Toggle nos cards: expande para mostrar detalhes extras
+
+### Transição para o próximo slide
+- Cross Fade com leve escala (padrão global)
+
+### Observações
+- NÃO criar timeline — são cards empilhados com números decorativos
+- A linha conectiva é visual, não interativa
+- Em mobile: cards mantêm a mesma estrutura, números menores
+- Manter descrições curtas (máximo 2 linhas)
+
+---
+
+## SLIDE 11 — Casos de uso comuns
+
+### Objetivo
+Mostrar exemplos reais de como o Teams é utilizado no dia a dia corporativo.
+
+### Emoção que deve transmitir
+Versatilidade, aplicabilidade, oportunidade. O usuário deve ver o Teams funcionando em diversos contextos.
+
+### Layout
+Layout grid 2x2 com 4 cards de casos de uso. Cada card contém ícone grande + título + descrição + tag de categoria.
+
+### Organização dos elementos
+- Topo centralizado: Título "Casos de uso comuns"
+- Abaixo: Grid 2x2 com 4 cards
+- Cada card: ícone 36px + título + descrição + tag colorida
+
+### Background
+Background global padrão.
+
+### Elementos decorativos
+- Sutis ícones de caso de uso ao fundo (opacidade 0.03)
+- Linhas de conexão entre cards (opacidade 0.03)
+
+### Elementos interativos
+- Cards: hover com glow borda + elevação + tag brilha
+- Tooltip ao hover: detalhes extras
+
+### Elementos visuais
+- Título: H2, clamp(1.8rem, 3.2vw, 2.8rem), peso 700, cor branca
+- Cards: fundo rgba(255,255,255,0.03), borda 1px solid rgba(255,255,255,0.06), border-radius 16px, padding 24px
+- Ícones: 36px, cor roxo
+- Títulos: 1rem, peso 600, cor branca
+- Descrições: 0.85rem, peso 400, cor rgba(255,255,255,0.55)
+- Tags: fonte 0.7rem, peso 600, uppercase, padding 4px 10px, border-radius 20px
+
+### Conteúdo dos 4 Cards
+Card 1 — Reuniões de Alinhamento:
+- Ícone: calendar-check (SVG), cor roxo
+- Título: "Reuniões de alinhamento"
+- Texto: "Diário ou semanal com a equipe"
+- Tag: "Recorrente", cor fundo rgba(98,100,167,0.2), cor texto #8B8FC7
+
+Card 2 — Projetos Distribuídos:
+- Ícone: globe/people (SVG), cor azul
+- Título: "Projetos com times distribuídos"
+- Texto: "Trabalho entre equipes geograficamente separadas"
+- Tag: "Colaboração", cor fundo rgba(0,120,212,0.2), cor texto #00BCF2
+
+Card 3 — Atendimento ao Cliente:
+- Ícone: headset/support (SVG), cor verde
+- Título: "Atendimento ao cliente"
+- Texto: "Integrado com Dynamics 365"
+- Tag: "CRM", cor fundo rgba(16,124,16,0.2), cor texto #107C10
+
+Card 4 — Onboarding:
+- Ícone: user-plus/welcome (SVG), cor laranja
+- Título: "Onboarding de colaboradores"
+- Texto: "Canais dedicados para novos membros"
+- Tag: "RH", cor fundo rgba(255,140,0,0.2), cor texto #FF8C00
+
+### Partículas
+Partículas globais padrão.
+
+### Iluminação
+- Glow difuso no centro do grid
+- Tags com glow correspondente à sua cor
+
+### Efeitos
+- Cards: glassmorphism leve
+- Tags: glow colorido sutil
+- Ícones: glow roxo contínuo
+
+### Ícones
+- 4 ícones SVG: calendar-check, globe, headset, user-plus — outlined, 36px
+
+### Tipografia
+Ordem de entrada:
+1. Título (fade + moveY + blur)
+2. Cards (stagger em ziguezague, 120ms entre cada)
+
+### Ordem de entrada dos elementos
+1. Título: 800ms, delay 300ms
+2. Card Reuniões: fade + scale(0.9→1) + blur(4px→0), 700ms, delay 600ms
+3. Card Projetos: mesmo, delay 720ms
+4. Card Atendimento: mesmo, delay 840ms
+5. Card Onboarding: mesmo, delay 960ms
+6. Tags: fade, 400ms, cada +100ms após seu card
+
+### Interações
+- Hover nos cards: translateY(-4px), borda ganha cor da tag, glow colorido
+- Tooltip: detalhes extras sobre o caso de uso
+
+### Transição para o próximo slide
+- Cross Fade com leve escala (padrão global)
+
+### Observações
+- Os 4 cards devem ter tamanhos IGUAIS
+- Em mobile: grid vira 1 coluna
+- Tags trazem variedade de cor ao slide
+- Cada card representa um caso de uso distinto e memorável
+
+---
+
+## SLIDE 12 — ENCERRAMENTO
+
+### Objetivo
+Concluir a apresentação com impacto. Resumir os pontos principais e deixar uma impressão memorável.
+
+### Emoção que deve transmitir
+Inspiração, confiança, motivacao. O usuário deve sair motivado a usar o Teams.
+
+### Layout
+Layout centralizado dramático (similar ao slide 1). Título grande no centro com efeito 3D extrudado, subtítulo motivacional abaixo, e barra inferior com pontos-chave.
+
+### Organização dos elementos
+- Centro: Título "Transforme sua colaboração" com efeito 3D extrudado
+- Abaixo (16px): Subtítulo "Microsoft Teams — onde o trabalho acontece"
+- Abaixo (32px): 3-4 badges/pills com pontos-chave resumidos
+- Parte inferior: Barra decorativa gradiente roxo
+
+### Background
+Background global padrão. Adicionalmente:
+- Blob roxo centralizado (maior que o normal): rgba(98,100,167,0.12), raio ~450px
+- Animação de respiração mais intensa
+
+### Elementos decorativos
+- Linhas diagonais sutis emanando do centro (como no slide 1, mas mais sutis)
+- Pequenos dots luminosos flutuando (3-5 pontos)
+- Barra gradiente decorativa na parte inferior (largura 200px, altura 3px, gradiente roxo→azul)
+
+### Elementos interativos
+- Badges: hover com glow + leve elevação
+- Navegação apenas
+
+### Elementos visuais
+- Título: clamp(2.5rem, 5vw, 4rem), peso 800, cor branca, com efeito 3D extrudado (mesmo método do slide 1)
+- Subtítulo: 1.1rem, peso 400, cor rgba(255,255,255,0.6)
+- Badges: fundo rgba(98,100,167,0.15), borda 1px solid rgba(98,100,167,0.3), border-radius 20px, padding 8px 18px, texto 0.8rem peso 500
+
+### TÍTULO 3D EXTRUDADO — MESMA IMPLEMENTAÇÃO DO SLIDE 1
+- Mesmo código do slide 1: 35 camadas de text-shadow
+- Cores do shadow: gradiente de #8B8FC7 (próximas) → #6264A7 (médias) → #464775 (distantes)
+- ::before com blur(3px), translate(-2px, 2px), opacidade 0.4
+- z-index: 0
+- Cor do texto principal: #FFFFFF
+
+### Badges/Pills com Pontos-Chave
+- Badge 1: "Comunicação"
+- Badge 2: "Colaboração"
+- Badge 3: "Segurança"
+- Badge 4: "IA Integrada"
+- Posição: linha horizontal centralizada abaixo do subtítulo
+- Gap entre badges: 12px
+- Em mobile: badges quebram linha
+
+### Partículas
+Partículas globais. Adicionalmente:
+- Partículas extras: 5-8 pontos maiores (3px) com glow roxo, flutuando ao redor do título
+
+### Iluminação
+- Glow central intenso: radial-gradient, rgba(98,100,167,0.15), raio ~250px
+- Título com sombra extrudada (já cria profundidade)
+- Badges com glow roxo sutil
+
+### Efeitos
+- Título: text-shadow extrudado (35 camadas)
+- ::before: blur(3px)
+- Glow central pulsante
+- Partículas com bloom
+
+### Ícones
+- Nenhum ícone explícito — badges são apenas texto
+
+### Tipografia
+Ordem de entrada:
+1. Glow central (cresce)
+2. Título extrudado (35 camadas aparecem progressivamente)
+3. Subtítulo (fade + moveY)
+4. Badges (stagger, 100ms entre cada)
+
+### Ordem de entrada dos elementos
+1. Glow central: cresce de 0 para intensidade final, 1500ms, delay 0ms
+2. Título extrudado: 35 camadas de shadow aparecem progressivamente, 1200ms, delay 300ms
+3. Subtítulo: fade + moveY(15px→0), 700ms, delay 800ms
+4. Badge 1: fade + scale(0.8→1), 500ms, delay 1000ms
+5. Badge 2: mesmo, delay 1100ms
+6. Badge 3: mesmo, delay 1200ms
+7. Badge 4: mesmo, delay 1300ms
+8. Barra decorativa: scale de 0→1 no eixo X, 800ms, delay 1400ms
+
+### Interações
+- Hover nos badges: translateY(-2px), glow borda roxa, background rgba(98,100,167,0.2)
+
+### Transição para o próximo slide
+- NÃO há próximo slide — este é o último
+- O slide permanece estático após a animação de entrada
+- Microanimações contínuas permanecem (partículas, glow pulsante, blobs)
+
+### Observações
+- Este slide é o segundo momento "UAU" (junto com o slide 1)
+- O título extrudado deve ser igualmente impressionante ao do slide 1
+- NÃO criar "Perguntas?" ou qualquer texto de dúvida
+- NÃO criar "Obrigado!" — o título "Transforme sua colaboração" é a mensagem final
+- Os badges resumem os 4 pilares da apresentação: Comunicação, Colaboração, Segurança, IA
+- O slide deve parecer conclusivo e inspirador
+
+---
+
+# CHECKLIST FINAL DE VALIDAÇÃO
+
+Antes de entregar o documento HTML, a IA desenvolvedora deve validar TODOS os itens abaixo:
+
+## Conteúdo
+☐ Todos os 12 slides possuem objetivo claramente definido
+☐ Todos os slides possuem emoção definida
+☐ Nenhum slide ficou genérico
+☐ Nenhum slide ficou sobrecarregado
+☐ Todos os conteúdos cabem dentro do viewport
+☐ Caso necessário, toggles foram criados
+☐ Nenhuma informação importante ficou escondida
+
+## Identidade Visual
+☐ Paleta de cores coerente (roxo Teams como principal)
+☐ Branco e preto utilizados corretamente
+☐ Atmosfera corporativo-tecnológica consistente
+☐ Coherence entre todos os slides
+
+## Layout
+☐ Todos os slides cabem na tela (sem scroll)
+☐ Composição profissional em todos os slides
+☐ Hierarquia visual clara
+☐ Regra dos terços aplicada quando possível
+☐ Nenhum elemento desalinhado
+
+## Background
+☐ 6 camadas de background implementadas
+☐ Blobs animados presentes
+☐ Grid de pontos sutil
+☐ Noise/grain aplicado
+☐ Vignette presente
+☐ Partículas funcionando
+
+## Navegação
+☐ Botões de seta nos cantos inferiores
+☐ Navigation dots centrais inferiores
+☐ Barra de progresso acima dos dots
+☐ Teclado funciona (setas, Home, End)
+☐ Swipe funciona em mobile
+☐ Scroll do mouse NÃO troca slides
+☐ Clique em canto NÃO troca slides
+
+## Blocos com Perspectiva 3D
+☐ Configuração EXATA: perspective(250px) rotateX(-10deg ou 10deg) rotateY(25deg)
+☐ transform-origin: 50% 50% 0px
+☐ perspective-origin: 50% 50%
+☐ Largura nunca ultrapassa 350px
+☐ Altura nunca ultrapassa 420px
+☐ Todo bloco contém conteúdo real
+☐ Texto herda perspectiva naturalmente (sem transformações extras)
+☐ Blocos com tamanho justificado por conteúdo
+☐ Comentários no código explicando tamanho
+☐ Em mobile: perspectiva MANTIDA
+
+## Animações
+☐ Primeiro slide anima automaticamente no load
+☐ Todos os elementos iniciam invisíveis
+☐ Nenhum conteúdo aparece antes da animação
+☐ Sequência de entrada lógica em cada slide
+☐ Stagger em listas, cards e elementos múltiplos
+☐ Durações definidas para cada animação
+☐ Easings apropriados (cubic-bezier)
+☐ Animações se repetem ao voltar para um slide
+☐ Transições entre slides fluidas
+
+## Microanimações
+☐ Hover em todos os cards
+☐ Hover nos botões
+☐ Hover nos badges
+☐ Glow pulsante contínuo
+☐ Partículas em movimento
+☐ Blobs flutuando
+☐ Nada parece completamente estático
+
+## Responsividade
+☐ Todos os elementos cabem em 1920x1080
+☐ Todos os elementos cabem em 1366x768
+☐ Todos os elementos cabem em mobile (375px)
+☐ Grids reorganizam para 1 coluna em mobile
+☐ Tamanhos de fonte usam clamp()
+☐ Larguras usam min()/max()
+
+## Título Extrudado (Slides 1 e 12)
+☐ 35 camadas de text-shadow implementadas
+☐ Cores do shadow: roxo claro → roxo médio → escuro (NÃO branco/cinza/preto)
+☐ ::before com blur(3px) e translate(-2px, 2px)
+☐ Texto principal: cor #FFFFFF, completamente reto
+☐ Nenhuma rotação ou skew no texto
+☐ z-index: 0
+
+## Codificação
+☐ Meta charset UTF-8 presente
+☐ Todos os acentos corretos
+☐ Nenhum caractere corrompido
+☐ Nenhum texto em chinês
+☐ Todos os textos auditados
+
+## Proibições
+☐ Nenhum cover shape (clip-path decorativo)
+☐ Nenhum "Perguntas?" no slide final
+☐ Nenhuma timeline independente
+☐ Nenhuma tela de loading
+☐ Nenhum scroll no slide
+☐ Nenhum clique em canto para trocar slide
+
+## Qualidade Visual
+☐ Cada slide parece feito manualmente
+☐ Cada detalhe parece intencional
+☐ Cada animação parece refinada
+☐ O documento parece desenvolvido por equipe profissional
+☐ Nível visual comparável a apresentações premium
+
+---
+
+# INSTRUÇÕES FINAIS PARA A IA DESENVOLVEDORA
+
+1. Crie APENAS um único arquivo HTML contendo HTML + CSS + JS
+2. NÃO acesse nenhum outro arquivo da pasta
+3. NÃO crie mais de um arquivo
+4. Siga TODAS as instruções deste documento
+5. Implemente blocos com perspectiva 3D EXATAMENTE como especificado
+6. Implemente o título extrudado EXATAMENTE como especificado
+7. Valide TODOS os itens do checklist antes de entregar
+8. Certifique-se de que TODO o conteúdo cabe no viewport em qualquer resolução
+9. Implemente TODAS as animações documentadas
+10. Implemente TODAS as interações documentadas
+11. Mantenha a paleta de cores consistente em todos os slides
+12. Garanta UTF-8 em todo o documento
+13. Não Simplifique soluções — implemente tudo o que foi especificado
+14. Não omita funcionalidades
+15. Cada pixel deve parecer pensado
+
+---
+
+<!-- FIM_DOCUMENTO -->
