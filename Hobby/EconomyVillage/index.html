@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Economy Village - Simulador Economico Medieval</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#1a1209;--bg2:#2a1f10;--bg3:#3a2d18;--bg4:#4a3d28;--text:#d4c5a0;--text2:#b0a080;--text3:#8a7a60;--gold:#c9a84c;--gold2:#a08030;--gold3:#e0c060;--wood:#5a3a1a;--wood2:#7a5a2a;--bronze:#8b6914;--danger:#8b3a3a;--success:#3a6b3a;--warning:#8b6b1a;--info:#3a5a8b;--shadow:0 2px 8px rgba(0,0,0,0.5);--glow:0 0 8px rgba(201,168,76,0.3);--radius:4px;--transition:all 0.2s ease}
+html,body{width:100%;height:100%;overflow:hidden;font-family:Georgia,'Times New Roman',serif;background:var(--bg);color:var(--text);font-size:14px}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--wood2);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--gold2)}
+button{background:linear-gradient(180deg,var(--bg3),var(--bg2));border:1px solid var(--gold2);color:var(--gold);padding:6px 14px;border-radius:var(--radius);cursor:pointer;font-family:inherit;font-size:12px;transition:var(--transition);position:relative;overflow:hidden}
+button:hover{border-color:var(--gold);box-shadow:var(--glow);transform:translateY(-1px)}button:active{transform:translateY(0);box-shadow:none}
+button.primary{background:linear-gradient(180deg,var(--gold2),var(--gold));color:var(--bg);font-weight:bold}
+button.danger{border-color:var(--danger);color:#d48080}button.success{border-color:var(--success);color:#80b080}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;background:var(--bg3);border-radius:3px;outline:none;border:1px solid var(--wood2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:linear-gradient(180deg,var(--gold),var(--gold2));border:2px solid var(--bg);cursor:pointer}
+select{background:var(--bg2);border:1px solid var(--wood2);color:var(--text);padding:4px 8px;border-radius:var(--radius);font-family:inherit;font-size:12px}
+input[type=checkbox],input[type=radio]{accent-color:var(--gold);width:16px;height:16px;cursor:pointer}
+.progress-bar{width:100%;height:8px;background:var(--bg);border-radius:4px;border:1px solid var(--wood2);overflow:hidden}
+.progress-bar .fill{height:100%;border-radius:4px;transition:width 0.5s ease;background:linear-gradient(90deg,var(--gold2),var(--gold))}
+#app{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}
+#top-bar{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,var(--bg3),var(--bg));border-bottom:1px solid var(--wood2);padding:4px 12px;min-height:40px;flex-shrink:0;z-index:100}
+#top-bar .resources{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.res-item{display:flex;align-items:center;gap:3px;background:var(--bg2);padding:2px 6px;border-radius:var(--radius);border:1px solid var(--wood);font-size:11px;white-space:nowrap}
+.res-item .val{color:var(--gold);font-weight:bold}
+.res-item .delta{font-size:9px}.res-item .delta.pos{color:var(--success)}.res-item .delta.neg{color:var(--danger)}
+#top-bar .controls{display:flex;gap:4px;align-items:center}#top-bar .controls button{padding:4px 10px;font-size:11px}
+.speed-display{color:var(--gold);font-size:12px;margin:0 4px;min-width:30px;text-align:center}
+#date-display{color:var(--gold);font-size:12px;margin:0 8px;white-space:nowrap}
+#main{display:flex;flex:1;overflow:hidden;position:relative}
+#sidebar{width:260px;min-width:260px;background:var(--bg);border-right:1px solid var(--wood2);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:var(--transition)}
+#sidebar.collapsed{width:0;min-width:0;border:none}
+#sidebar-tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--wood2);flex-shrink:0;overflow-x:auto}
+#sidebar-tabs button{flex:1;padding:6px 2px;font-size:10px;border:none;border-radius:0;border-bottom:2px solid transparent;background:none;color:var(--text3)}
+#sidebar-tabs button.active{color:var(--gold);border-bottom-color:var(--gold)}
+#sidebar-content{flex:1;overflow-y:auto;padding:8px}
+.side-panel{display:none}.side-panel.active{display:block}
+#game-area{flex:1;position:relative;overflow:hidden;cursor:grab}
+#game-area.dragging{cursor:grabbing}
+#game-canvas{position:absolute;top:0;left:0}
+#minimap{position:absolute;bottom:8px;right:8px;width:160px;height:120px;background:var(--bg2);border:1px solid var(--wood2);border-radius:var(--radius);overflow:hidden;z-index:10;box-shadow:var(--shadow)}
+#minimap canvas{width:100%;height:100%}
+#right-panel{width:280px;min-width:280px;background:var(--bg);border-left:1px solid var(--wood2);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+#right-panel.collapsed{width:0;min-width:0;border:none}
+#right-tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--wood2);flex-shrink:0;overflow-x:auto}
+#right-tabs button{flex:1;padding:6px 2px;font-size:10px;border:none;border-radius:0;border-bottom:2px solid transparent;background:none;color:var(--text3)}
+#right-tabs button.active{color:var(--gold);border-bottom-color:var(--gold)}
+#right-content{flex:1;overflow-y:auto;padding:8px}
+.right-panel{display:none}.right-panel.active{display:block}
+.card{background:var(--bg2);border:1px solid var(--wood2);border-radius:var(--radius);padding:8px;margin-bottom:8px;transition:var(--transition)}
+.card:hover{border-color:var(--wood)}
+.card-title{color:var(--gold);font-size:13px;font-weight:bold;margin-bottom:4px}
+.card-body{color:var(--text2);font-size:11px}
+.card-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0;font-size:11px}
+.card-row .label{color:var(--text3)}.card-row .value{color:var(--gold)}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.kpi{background:var(--bg2);border:1px solid var(--wood);border-radius:var(--radius);padding:6px;text-align:center}
+.kpi .kpi-val{font-size:18px;color:var(--gold);font-weight:bold}
+.kpi .kpi-label{font-size:9px;color:var(--text3);text-transform:uppercase;margin-top:2px}
+.kpi .kpi-delta{font-size:9px}.kpi .kpi-delta.pos{color:var(--success)}.kpi .kpi-delta.neg{color:var(--danger)}
+.event-card{background:linear-gradient(135deg,var(--bg3),var(--bg2));border:2px solid var(--gold2);border-radius:8px;padding:16px;animation:slideIn 0.3s ease;position:relative}
+.event-card .event-icon{font-size:32px;text-align:center;margin-bottom:8px}
+.event-card .event-title{color:var(--gold);font-size:16px;text-align:center;font-weight:bold;margin-bottom:8px}
+.event-card .event-desc{color:var(--text2);font-size:12px;text-align:center;margin-bottom:12px;line-height:1.5}
+.event-card .event-choices{display:flex;flex-direction:column;gap:6px}
+.event-card .event-btn{padding:8px 12px;font-size:12px;width:100%;text-align:left}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:500;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s ease}
+.modal{background:var(--bg2);border:2px solid var(--wood2);border-radius:8px;padding:20px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.modal h2{color:var(--gold);margin-bottom:12px;font-size:18px}
+.modal-close{position:absolute;top:8px;right:12px;background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer}
+.modal-close:hover{color:var(--gold)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--gold2);color:var(--text);padding:8px 20px;border-radius:var(--radius);z-index:600;animation:toastIn 0.3s ease;font-size:12px;box-shadow:var(--shadow)}
+#event-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:400;display:none;align-items:center;justify-content:center}
+#event-overlay.show{display:flex}
+#event-container{width:90%;max-width:500px}
+.slider-group{margin-bottom:8px}
+.slider-group label{display:block;font-size:11px;color:var(--text2);margin-bottom:2px}
+.slider-group .slider-row{display:flex;align-items:center;gap:6px}
+.slider-group input[type=range]{flex:1}
+.slider-group .slider-val{min-width:40px;text-align:right;color:var(--gold);font-size:11px}
+.checkbox-group{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11px;color:var(--text2)}
+.checkbox-group input{flex-shrink:0}
+.build-item{display:flex;align-items:center;gap:8px;padding:6px;background:var(--bg);border:1px solid var(--wood);border-radius:var(--radius);margin-bottom:4px;cursor:pointer;transition:var(--transition)}
+.build-item:hover{border-color:var(--gold2);background:var(--bg3)}
+.build-item.selected{border-color:var(--gold);box-shadow:var(--glow)}
+.build-item .b-icon{font-size:20px;width:28px;text-align:center}
+.build-item .b-info{flex:1}
+.build-item .b-name{font-size:12px;color:var(--text);font-weight:bold}
+.build-item .b-cost{font-size:10px;color:var(--text3)}
+.tech-node{display:inline-block;padding:4px 8px;margin:2px;background:var(--bg);border:1.25px solid var(--wood);border-radius:var(--radius);font-size:10px;color:var(--text3);transition:var(--transition);cursor:pointer}
+
+.tech-node.unlocked{border-color:var(--success);color:var(--success)}
+.tech-node.available{border-color:var(--gold);color:var(--gold);animation:pulse 2.2s infinite}
+.tech-node:hover{border-color:var(--gold2)}
+.chart-container{background:var(--bg);border:1px solid var(--wood);border-radius:var(--radius);padding:8px;margin-bottom:8px}
+.chart-container canvas{width:100%;height:120px}
+.chart-title{font-size:11px;color:var(--gold);margin-bottom:4px;text-align:center}
+#news-ticker{background:var(--bg2);border-top:1px solid var(--wood);padding:4px 12px;font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;flex-shrink:0}
+#news-text{display:inline-block;animation:ticker 30s linear infinite}
+#bottom-bar{display:flex;align-items:center;background:var(--bg);border-top:1px solid var(--wood2);padding:2px 12px;min-height:28px;flex-shrink:0;gap:12px;flex-wrap:wrap}
+#bottom-bar .stat{font-size:10px;color:var(--text3)}#bottom-bar .stat span{color:var(--gold)}
+@keyframes slideIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(50px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+@keyframes pulse{0%,100%{box-shadow:none}50%{box-shadow:var(--glow)}}
+@keyframes ticker{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+.particle-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:300}
+.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleFly linear forwards}
+@keyframes particleFly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}}
+.section-title{color:var(--gold);font-size:12px;font-weight:bold;border-bottom:1px solid var(--wood2);padding-bottom:4px;margin:8px 0 6px 0;text-transform:uppercase;letter-spacing:1px}
+.tooltip{position:fixed;background:var(--bg3);border:1px solid var(--gold2);color:var(--text);padding:8px 12px;border-radius:var(--radius);font-size:11px;max-width:250px;z-index:700;pointer-events:none;box-shadow:var(--shadow);line-height:1.4}
+.list-item{display:flex;justify-content:space-between;align-items:center;padding:4px 6px;border-bottom:1px solid var(--bg);font-size:11px}
+.list-item:last-child{border:none}.list-item:hover{background:var(--bg3)}
+.happiness-bar{display:flex;gap:2px;margin-top:4px}
+.happiness-bar .h-seg{height:6px;border-radius:2px;flex:1;transition:background 0.3s ease}
+#loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#loading-screen h1{color:var(--gold);font-size:28px;margin-bottom:8px}
+#loading-screen p{color:var(--text3);font-size:14px;margin-bottom:20px}
+#loading-bar{width:300px}#loading-bar .fill{width:0%;transition:width 0.3s ease}
+canvas{image-rendering:pixelated}
+@media(max-width:900px){#sidebar{width:200px;min-width:200px}#right-panel{width:220px;min-width:220px}}
+@media(max-width:700px){#sidebar,#right-panel{position:absolute;z-index:50;height:100%}#sidebar{left:0}#right-panel{right:0}#top-bar .resources{max-width:50%;overflow-x:auto}#bottom-bar{font-size:9px}#bottom-bar .stat{margin-right:4px}}
+@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}.res-item{font-size:10px;padding:1px 4px}button{padding:4px 8px;font-size:10px}.speed-display{font-size:10px}#date-display{font-size:10px}}
+</style>
+</head>
+<body>
+<div id="loading-screen"><h1>Economy Village</h1><p>Preparando sua vila...</p><div id="loading-bar" class="progress-bar"><div class="fill"></div></div></div>
+<div id="app" style="display:none">
+<div id="top-bar">
+<div class="resources" id="res-bar"></div>
+<div class="controls">
+<span id="date-display">Ano 1 - Mes 1</span>
+<button onclick="G.speedDown()" title="Diminuir velocidade">&#9664;</button>
+<span class="speed-display" id="speed-display">1x</span>
+<button onclick="G.speedUp()" title="Aumentar velocidade">&#9654;</button>
+<button onclick="G.togglePause()" id="pause-btn" title="Pausar">&#10074;&#10074;</button>
+<button onclick="G.saveGame()" title="Salvar">&#128190;</button>
+<button onclick="UI.showMenu()" title="Menu">&#9776;</button>
+</div></div>
+<div id="main">
+<div id="sidebar">
+<div id="sidebar-tabs">
+<button class="active" onclick="UI.switchSideTab('build')" data-tab="build">Construir</button>
+<button onclick="UI.switchSideTab('policies')" data-tab="policies">Politicas</button>
+<button onclick="UI.switchSideTab('trade')" data-tab="trade">Comercio</button>
+<button onclick="UI.switchSideTab('tech')" data-tab="tech">Tecnologia</button>
+</div>
+<div id="sidebar-content">
+<div class="side-panel active" id="panel-build"></div>
+<div class="side-panel" id="panel-policies"></div>
+<div class="side-panel" id="panel-trade"></div>
+<div class="side-panel" id="panel-tech"></div>
+</div></div>
+<div id="game-area">
+<canvas id="game-canvas"></canvas>
+<div id="minimap"><canvas id="minimap-canvas" width="160" height="120"></canvas></div>
+</div>
+<div id="right-panel">
+<div id="right-tabs">
+<button class="active" onclick="UI.switchRightTab('overview')" data-tab="overview">Visao</button>
+<button onclick="UI.switchRightTab('pop')" data-tab="pop">Populacao</button>
+<button onclick="UI.switchRightTab('economy')" data-tab="economy">Economia</button>
+<button onclick="UI.switchRightTab('charts')" data-tab="charts">Graficos</button>
+</div>
+<div id="right-content">
+<div class="right-panel active" id="rpanel-overview"></div>
+<div class="right-panel" id="rpanel-pop"></div>
+<div class="right-panel" id="rpanel-economy"></div>
+<div class="right-panel" id="rpanel-charts"><div class="chart-container"><div class="chart-title">PIB</div><canvas id="chart-gdp"></canvas></div><div class="chart-container"><div class="chart-title">Populacao</div><canvas id="chart-pop"></canvas></div><div class="chart-container"><div class="chart-title">Felicidade</div><canvas id="chart-happy"></canvas></div><div class="chart-container"><div class="chart-title">Inflacao</div><canvas id="chart-infl"></canvas></div><div class="chart-container"><div class="chart-title">Tesouro</div><canvas id="chart-treas"></canvas></div><div class="chart-container"><div class="chart-title">Construcoes</div><canvas id="chart-build"></canvas></div><div class="chart-container"><div class="chart-title">Recursos</div><canvas id="chart-res"></canvas></div><div class="chart-container"><div class="chart-title">Felicidade</div><canvas id="chart-hg"></canvas></div><div class="chart-container"><div class="chart-title">Saude</div><canvas id="chart-hpg"></canvas></div></div>
+</div></div>
+</div>
+<div id="news-ticker"><span id="news-text">Bem-vindo ao Economy Village! Construa sua vila e gerencie a economia.</span></div>
+<div id="bottom-bar">
+<div class="stat">Pop: <span id="b-pop">0</span></div>
+<div class="stat">Emprego: <span id="b-emp">0%</span></div>
+<div class="stat">Felicidade: <span id="b-hap">0%</span></div>
+<div class="stat">PIB: <span id="b-pib">0</span></div>
+<div class="stat">Inflacao: <span id="b-inf">0%</span></div>
+<div class="stat">Ano: <span id="b-ano">1</span></div>
+</div>
+</div>
+<div id="event-overlay"><div id="event-container"></div></div>
+<div class="particle-container" id="particles"></div>
+<div class="tooltip" id="tooltip" style="display:none"></div>
+<script>
+"use strict";
+
+// Game state defined below
+const MD={W:40,H:30,ts:32,ox:0,oy:0,zoom:1,tiles:[]};
+const T={GRASS:0,WATER:1,STONE:2,FOREST:3};
+
+const RES={
+wood:{n:'Madeira',i:'\u{1FAB5}',bp:2},stone:{n:'Pedra',i:'\u{1FAA8}',bp:3},iron:{n:'Ferro',i:'\u{2699}',bp:5},
+coal:{n:'Carvao',i:'\u{2B1B}',bp:4},food:{n:'Comida',i:'\u{1F354}',bp:3},fish:{n:'Peixe',i:'\u{1F41F}',bp:4},
+wheat:{n:'Trigo',i:'\u{1F33E}',bp:2},flour:{n:'Farinha',i:'\u{1F35E}',bp:4},bread:{n:'Pao',i:'\u{1F35E}',bp:6},
+tools:{n:'Ferramentas',i:'\u{1F528}',bp:8},coins:{n:'Moedas',i:'\u{1FA99}',bp:1},fabric:{n:'Tecidos',i:'\u{1F9F6}',bp:5},
+wool:{n:'La',i:'\u{1F411}',bp:3},animals:{n:'Animais',i:'\u{1F43E}',bp:10},luxury:{n:'Luxo',i:'\u{1F48E}',bp:20},
+clay:{n:'Argila',i:'\u{1F331}',bp:2}
+};
+
+const BLD={
+house:{n:'Casa',i:'\u{1F3E0}',cost:{wood:15,stone:5},maint:1,jobs:0,pop:4,hap:2,poll:0,desc:'Moradia para 4'},
+farm:{n:'Fazenda',i:'\u{1F33E}',cost:{wood:20,coins:10},maint:2,jobs:3,pop:0,hap:1,poll:0,prod:{food:8,wheat:3},sz:2,desc:'+8 comida, +3 trigo/mes'},
+lumbermill:{n:'Serraria',i:'\u{1FAB5}',cost:{wood:10,coins:5},maint:2,jobs:2,pop:0,hap:-1,poll:1,prod:{wood:6},req:'forest',desc:'+6 madeira/mes'},
+mine:{n:'Mina',i:'\u{26CF}',cost:{wood:25,coins:20},maint:4,jobs:4,pop:0,hap:-2,poll:2,prod:{stone:5,iron:3,coal:2},req:'stone',desc:'+5 pedra, +3 ferro, +2 carvao'},
+quarry:{n:'Pedreira',i:'\u{1FAA8}',cost:{wood:15,coins:10},maint:3,jobs:3,pop:0,hap:-1,poll:2,prod:{stone:8,clay:3},req:'stone',desc:'+8 pedra, +3 argila'},
+smithy:{n:'Ferreiro',i:'\u{1F528}',cost:{wood:20,stone:15,iron:10},maint:3,jobs:2,pop:0,hap:0,poll:1,prod:{tools:3},desc:'+3 ferramentas'},
+market:{n:'Mercado',i:'\u{1F3EA}',cost:{wood:30,stone:20,coins:30},maint:5,jobs:4,pop:0,hap:5,poll:0,comm:1.2,prod:{luxury:1},desc:'+20% comercio, +1 luxo/mes'},
+bakery:{n:'Padaria',i:'\u{1F35E}',cost:{wood:15,stone:10,coins:15},maint:3,jobs:2,pop:0,hap:3,poll:0,prod:{bread:5},desc:'+5 pao/mes'},
+stable:{n:'Estabulo',i:'\u{1F434}',cost:{wood:25,stone:10},maint:3,jobs:1,pop:0,hap:2,poll:1,prod:{animals:1,wool:2},desc:'+1 animal, +2 la/mes'},
+hospital:{n:'Hospital',i:'\u{1F3E5}',cost:{wood:30,stone:40,coins:50},maint:8,jobs:5,pop:0,hap:10,poll:0,hp:15,desc:'+15 saude'},
+school:{n:'Escola',i:'\u{1F3EB}',cost:{wood:25,stone:30,coins:40},maint:6,jobs:3,pop:0,hap:5,poll:0,edu:10,desc:'+10 educacao'},
+townhall:{n:'Prefeitura',i:'\u{1F3DB}',cost:{wood:40,stone:60,coins:80},maint:10,jobs:5,pop:0,hap:8,poll:0,sz:2,desc:'Centro admin'},
+bank:{n:'Banco',i:'\u{1F3E6}',cost:{wood:30,stone:50,coins:100},maint:12,jobs:4,pop:0,hap:3,poll:0,desc:'Financas'},
+warehouse:{n:'Armazem',i:'\u{1F3F7}',cost:{wood:30,stone:15},maint:2,jobs:1,pop:0,hap:0,poll:0,desc:'+200 armazenamento'},
+port:{n:'Porto',i:'\u{26F5}',cost:{wood:50,stone:30,coins:60},maint:8,jobs:6,pop:0,hap:3,poll:1,trade:1.3,req:'water',sz:2,desc:'Comercio maritimo'},
+fishery:{n:'Pesqueiro',i:'\u{1F3A3}',cost:{wood:20,coins:10},maint:2,jobs:2,pop:0,hap:1,poll:0,prod:{fish:6},req:'water',desc:'+6 peixe'},
+windmill:{n:'Moinho',i:'\u{1F3ED}',cost:{wood:25,stone:20,coins:20},maint:3,jobs:2,pop:0,hap:2,poll:0,prod:{flour:5},desc:'+5 farinha'},
+chapel:{n:'Capela',i:'\u{26EA}',cost:{wood:20,stone:25,coins:30},maint:3,jobs:1,pop:0,hap:8,poll:0,desc:'+8 felicidade'},
+tavern:{n:'Taverna',i:'\u{1F37A}',cost:{wood:20,stone:10,coins:15},maint:2,jobs:2,pop:0,hap:6,poll:1,desc:'+6 lazer'},
+wall:{n:'Muralha',i:'\u{1F9F1}',cost:{stone:20},maint:1,jobs:0,pop:0,hap:3,poll:0,desc:'Protecao'},
+road:{n:'Estrada',i:'\u{1F6E3}',cost:{wood:3},maint:0,jobs:0,pop:0,hap:1,poll:0,comm:1.05,infra:2,desc:'Conecta areas'},
+bridge:{n:'Ponte',i:'\u{1F309}',cost:{wood:15,stone:10,coins:10},maint:1,jobs:0,pop:0,hap:2,poll:0,infra:5,req:'water',desc:'Cruza rios'},
+well:{n:'Poco',i:'\u{1F6B0}',cost:{wood:5,stone:10},maint:1,jobs:0,pop:0,hap:3,poll:0,hp:5,desc:'Agua limpa'},
+garden:{n:'Jardim',i:'\u{1F33F}',cost:{wood:5,coins:5},maint:1,jobs:0,pop:0,hap:4,poll:-1,desc:'Embeleza'}
+};
+
+const TTREE={
+agriculture:{n:'Agricultura',lv:[{n:'Rotacao',c:50,d:'+20% agricola',fx:{fp:1.2}},{n:'Irrigacao',c:150,d:'+40% agricola',fx:{fp:1.4},r:0},{n:'Arado Ferro',c:300,d:'+60% agricola',fx:{fp:1.6},r:1}]},
+metalurgy:{n:'Metalurgia',lv:[{n:'Fundicao',c:80,d:'+30% ferro',fx:{ip:1.3}},{n:'Aco',c:200,d:'+50% ferro',fx:{ip:1.5},r:0},{n:'Liga',c:400,d:'Ferramentas duraveis',fx:{td:1.5},r:1}]},
+construction:{n:'Construcao',lv:[{n:'Alvenaria',c:60,d:'-20% pedra',fx:{sc:0.8}},{n:'Arcos',c:180,d:'Pontes baratas',fx:{bc:0.6},r:0},{n:'Engenharia',c:350,d:'-30% geral',fx:{bc:0.7},r:1}]},
+education:{n:'Educacao',lv:[{n:'Escola Basica',c:70,d:'+15% produtividade',fx:{pr:1.15}},{n:'Biblioteca',c:200,d:'+25% produtividade',fx:{pr:1.25},r:0},{n:'Universidade',c:500,d:'+40% produtividade',fx:{pr:1.4},r:1}]},
+health:{n:'Saude',lv:[{n:'Herborismo',c:40,d:'+10% saude',fx:{hb:1.1}},{n:'Cirurgia',c:160,d:'+25% saude',fx:{hb:1.25},r:0},{n:'Vacinas',c:380,d:'+40% saude',fx:{hb:1.4},r:1}]},
+trade:{n:'Comercio',lv:[{n:'Moeda',c:60,d:'+15% comercio',fx:{tb:1.15}},{n:'Contabilidade',c:170,d:'+25% comercio',fx:{tb:1.25},r:0},{n:'Rotas',c:400,d:'+40% comercio',fx:{tb:1.4},r:1}]},
+mining:{n:'Mineracao',lv:[{n:'Escavacao',c:70,d:'+25% mineracao',fx:{mp:1.25}},{n:'Explosivos',c:220,d:'+50% mineracao',fx:{mp:1.5},r:0},{n:'Dragagem',c:450,d:'+80% mineracao',fx:{mp:1.8},r:1}]}
+};
+
+const EVTS=[
+{id:'drought',t:'Seca Prolongada',i:'\u{2600}',d:'Seca devastando plantacoes.',ch:[{t:'Distribuir reservas',fx:{food:-15,coins:-10,hap:5}},{t:'Nao fazer nada',fx:{food:-30,hap:-10}},{t:'Investir irrigacao',fx:{coins:-25,hap:3},cost:{coins:25}}],w:3},
+{id:'flood',t:'Enchente',i:'\u{1F30A}',d:'Rio transbordou!',ch:[{t:'Construir barragens',fx:{coins:-30,hap:5},cost:{wood:20,stone:15}},{t:'Evacuar',fx:{hap:-5,food:-10}}],w:2},
+{id:'fire',t:'Incendio!',i:'\u{1F525}',d:'Incendio ameaca a vila.',ch:[{t:'Combater fogo',fx:{coins:-15,wood:-10},cost:{coins:15}},{t:'Deixar arder',fx:{hap:-15,wood:-20}}],w:3},
+{id:'gold_find',t:'Ouro!',i:'\u{1F4B0}',d:'Ouro encontrado nas minas!',ch:[{t:'Usar no tesouro',fx:{coins:50}},{t:'Dividir com povo',fx:{coins:20,hap:15}}],w:1},
+
+{id:'epidemic',t:'Epidemia!',i:'\u{1F9A0}',d:'Doenca se espalha!',ch:[{t:'Quarentena',fx:{coins:-30,hp:10,hap:-5},cost:{coins:30}},{t:'Esperar passar',fx:{hp:-20,hap:-10,pop:-3}}],w:2},
+{id:'migration',t:'Migrantes',i:'\u{1F30D}',d:'Migrantes querem entrar.',ch:[{t:'Aceitar todos',fx:{pop:8,food:-15}},{t:'Aceitar familias',fx:{pop:4,food:-8,hap:3}},{t:'Recusar',fx:{hap:-5}}],w:2},
+{id:'boom',t:'Boom Agricola',i:'\u{1F33E}',d:'Excelente colheita!',ch:[{t:'Vender excedente',fx:{food:30,coins:25}},{t:'Armazenar',fx:{food:40}},{t:'Festival',fx:{food:15,hap:15,coins:-10}}],w:3},
+{id:'merchant',t:'Mercador',i:'\u{1F9DE}',d:'Mercador estrangeiro chega.',ch:[{t:'Comprar tecidos',fx:{fabric:20,coins:-40},cost:{coins:40}},{t:'Comprar ferramentas',fx:{tools:10,coins:-50},cost:{coins:50}},{t:'Nao comprar',fx:{}},{t:'Vender madeira',fx:{wood:-25,coins:30},cost:{wood:25}}],w:3},
+{id:'corruption',t:'Corrupcao',i:'\u{1F47E}',d:'Funcionarios desviam fundos!',ch:[{t:'Investigar',fx:{coins:-20,hap:5},cost:{coins:20}},{t:'Ignorar',fx:{coins:-15,hap:-8}}],w:2},
+{id:'festival',t:'Festival',i:'\u{1F389}',d:'Povo quer celebrar.',ch:[{t:'Aprovar',fx:{coins:-15,hap:20}},{t:'Modesto',fx:{coins:-5,hap:10}},{t:'Cancelar',fx:{hap:-10}}],w:4},
+{id:'inflation',t:'Inflacao Alta!',i:'\u{1F4C8}',d:'Precos subindo rapido!',ch:[{t:'Elevar juros',fx:{inf:-5,hap:-3}},{t:'Controle precos',fx:{inf:-3,hap:-2}},{t:'Nada',fx:{inf:5,hap:-5}}],w:3,cond:()=>S.eco.infl>5},
+{id:'riot',t:'Revolta',i:'\u{1F6A8}',d:'Povo ameaca revoltar!',ch:[{t:'Atender demandas',fx:{coins:-25,hap:15}},{t:'Restaurar ordem',fx:{coins:-10,hap:-5}},{t:'Negociar',fx:{hap:8,coins:-5}}],w:2,cond:()=>S.pop.hap<30},
+{id:'good_trade',t:'Oportunidade',i:'\u{1F4E6}',d:'Rota comercial lucrativa.',ch:[{t:'Investir',fx:{coins:25},cost:{coins:20}},{t:'Ignorar',fx:{}}],w:3},
+{id:'holiday',t:'Feriado',i:'\u{2728}',d:'Feriado sagrado.',ch:[{t:'Pompa',fx:{coins:-10,hap:12}},{t:'Modesto',fx:{coins:-3,hap:6}}],w:4},
+{id:'animal_attack',t:'Animais Selvagens',i:'\u{1F43A}',d:'Lobos atacam gado!',ch:[{t:'Montar guarda',fx:{coins:-8},cost:{coins:8}},{t:'Perder gado',fx:{animals:-3,hap:-5}}],w:2,cond:()=>S.res.animals>2},
+{id:'tech_discovery',t:'Nova Tecnologia',i:'\u{1F52C}',d:'Pesquisadores descobrem algo!',ch:[{t:'Aplicar',fx:{hap:5}},{t:'Vender patente',fx:{coins:40}}],w:1,cond:()=>S.pop.edu>40}
+];
+
+function F(v,d){v=parseFloat(v);if(isNaN(v)||!isFinite(v))return(0).toFixed(d||0);return v.toFixed(d===undefined?2:d)}
+function N(v){v=parseFloat(v);return(isNaN(v)||!isFinite(v))?0:v}
+function getTechFx(){const b={fp:1,ip:1,sc:1,bc:1,pr:1,hb:1,tb:1,mp:1,td:1};Object.keys(TTREE).forEach(c=>{const u=S.tech[c]||0;TTREE[c].lv.forEach((l,i)=>{if(i<u&&l.fx)Object.keys(l.fx).forEach(k=>b[k]=N(b[k])*N(l.fx[k])||1)})});return b}
+
+const S={
+res:{},buildings:[],pop:{total:10,employed:0,unemployed:0,hap:60,hp:60,edu:20,fs:50,hs:40,js:50,ts:60,sf:50,le:30,inf:20},
+eco:{gdp:0,gdpc:0,infl:0,dem:{},sup:{},prices:{},tb:0,treas:100,debt:0,debtInt:0.05,conf:60,taxRev:0,ms:1000},
+pol:{incTax:10,tradTax:5,farmTax:5,indTax:5,propTax:5,expTax:5,luxTax:10,impTax:5,minWage:2,pubInv:10,hpInv:10,eduInv:10,safeInv:5,infraInv:5,intRate:5,resInv:5,
+subAgri:false,unempIns:false,minWageLaw:false,socAid:false,centBank:false,inflCtrl:false,envLaw:false,laborLaw:false,tariffs:false,freeMarket:true},
+tech:{},hist:{gdp:[],pop:[],hap:[],infl:[],treas:[]},evts:{cd:{}},trend:0
+};
+
+function initRes(){const r=S.res;r.wood=50;r.stone=30;r.iron=10;r.coal=5;r.clay=5;r.food=40;r.fish=5;r.wheat=10;r.flour=0;r.bread=0;r.tools=2;r.coins=100;r.fabric=0;r.wool=5;r.animals=0;r.luxury=0;
+Object.keys(RES).forEach(k=>{if(r[k]===undefined)r[k]=0;S.eco.dem[k]=0;S.eco.sup[k]=0;S.eco.prices[k]=RES[k].bp})}
+
+const MapMod={
+init(){MD.tiles=[];for(let y=0;y<MD.H;y++){MD.tiles[y]=[];for(let x=0;x<MD.W;x++)MD.tiles[y][x]={t:T.GRASS,b:null,v:Math.random(),lv:0}}
+for(let i=0;i<80;i++){const x=Math.floor(Math.random()*MD.W),y=Math.floor(Math.random()*MD.H);MD.tiles[y][x].t=T.FOREST}
+for(let i=0;i<40;i++){const x=Math.floor(Math.random()*MD.W),y=Math.floor(Math.random()*MD.H);MD.tiles[y][x].t=T.STONE}
+for(let i=0;i<30;i++){const sx=Math.floor(Math.random()*MD.W),sy=Math.floor(Math.random()*MD.H),len=3+Math.floor(Math.random()*8);for(let j=0;j<len;j++){const nx=sx+j;if(nx<MD.W){MD.tiles[sy][nx].t=T.WATER;if(sy+1<MD.H&&Math.random()>.5)MD.tiles[sy+1][nx].t=T.WATER}}}
+const cx=MD.W/2|0,cy=MD.H/2|0;MD.tiles[cy][cx]={t:T.GRASS,b:'townhall',v:0,lv:0};MD.tiles[cy-1][cx]={t:T.GRASS,b:'market',v:0,lv:0};MD.tiles[cy+1][cx]={t:T.GRASS,b:'house',v:0,lv:0};MD.tiles[cy][cx-1]={t:T.GRASS,b:'house',v:0,lv:0};MD.tiles[cy][cx+1]={t:T.GRASS,b:'farm',v:0,lv:0};
+MD.ox=-(cx*MD.ts*MD.zoom-400);MD.oy=-(cy*MD.ts*MD.zoom-300)},
+countB(type){let c=0;for(let y=0;y<MD.H;y++)for(let x=0;x<MD.W;x++)if(MD.tiles[y][x].b===type)c++;return c},
+terrCount(){const c={forest:0,stone:0,water:0};for(let y=0;y<MD.H;y++)for(let x=0;x<MD.W;x++){const t=MD.tiles[y][x].t;if(t===T.FOREST)c.forest++;if(t===T.STONE)c.stone++;if(t===T.WATER)c.water++}return c},
+adjTerrain(x,y,tr){const d=[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]];for(const[dx,dy]of d){const nx=x+dx,ny=y+dy;if(nx>=0&&nx<MD.W&&ny>=0&&ny<MD.H){const tile=MD.tiles[ny][nx];if(tile.t===tr)return true;if(tile.b){const bd=BLD[tile.b];if(bd&&bd.req===tr)return true}}}return false}
+};
+
+const Render={
+canvas:null,ctx:null,mm:null,mmCtx:null,
+init(){this.canvas=document.getElementById('game-canvas');this.ctx=this.canvas.getContext('2d');this.mm=document.getElementById('minimap-canvas');this.mmCtx=this.mm.getContext('2d');this.resize();window.addEventListener('resize',()=>this.resize());this.setupInput()},
+resize(){const a=document.getElementById('game-area');this.canvas.width=a.clientWidth;this.canvas.height=a.clientHeight},
+setupInput(){
+const a=document.getElementById('game-area');let drag=false,lx,ly;
+a.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;a.classList.add('dragging')});
+window.addEventListener('mousemove',e=>{if(drag){MD.ox+=e.clientX-lx;MD.oy+=e.clientY-ly;lx=e.clientX;ly=e.clientY}});
+window.addEventListener('mouseup',()=>{drag=false;a.classList.remove('dragging')});
+a.addEventListener('wheel',e=>{e.preventDefault();const oz=MD.zoom;MD.zoom*=e.deltaY<0?1.1:.9;MD.zoom=Math.max(.3,Math.min(3,MD.zoom));const r=a.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;MD.ox=mx-(mx-MD.ox)*(MD.zoom/oz);MD.oy=my-(my-MD.oy)*(MD.zoom/oz)},{passive:false});
+a.addEventListener('click',e=>{const r=a.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;const tx=Math.floor((mx-MD.ox)/(MD.ts*MD.zoom)),ty=Math.floor((my-MD.oy)/(MD.ts*MD.zoom));if(tx>=0&&tx<MD.W&&ty>=0&&ty<MD.H){G.selectedTile={x:tx,y:ty};UI.updateAll()}});
+let ts=null,pd=null;
+a.addEventListener('touchstart',e=>{if(e.touches.length===1)ts={x:e.touches[0].clientX,y:e.touches[0].clientY};if(e.touches.length===2)pd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY)});
+a.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&ts){MD.ox+=e.touches[0].clientX-ts.x;MD.oy+=e.touches[0].clientY-ts.y;ts={x:e.touches[0].clientX,y:e.touches[0].clientY}}if(e.touches.length===2&&pd){const nd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);MD.zoom*=nd/pd;MD.zoom=Math.max(.3,Math.min(3,MD.zoom));pd=nd}},{passive:false});
+a.addEventListener('touchend',()=>{ts=null;pd=null})},
+tCol(tile){switch(tile.t){case T.GRASS:return tile.v>.7?'#3a5a2a':'#2d4a22';case T.WATER:return'#1a3a5a';case T.STONE:return'#5a5a5a';case T.FOREST:return'#1a3a1a';default:return'#2d4a22'}},
+draw(){const c=this.ctx,w=this.canvas.width,h=this.canvas.height;c.fillStyle='#0a0a06';c.fillRect(0,0,w,h);const ts=MD.ts*MD.zoom;const sx=Math.max(0,Math.floor(-MD.ox/ts)),sy=Math.max(0,Math.floor(-MD.oy/ts));const ex=Math.min(MD.W,Math.ceil((w-MD.ox)/ts)+1),ey=Math.min(MD.H,Math.ceil((h-MD.oy)/ts)+1);
+for(let y=sy;y<ey;y++){for(let x=sx;x<ex;x++){const tile=MD.tiles[y][x];const px=x*ts+MD.ox,py=y*ts+MD.oy;c.fillStyle=this.tCol(tile);c.fillRect(px,py,ts+1,ts+1);
+if(tile.t===T.FOREST&&ts>12){c.fillStyle='#1a4a1a';c.beginPath();c.arc(px+ts/2,py+ts/2,ts*.35,0,Math.PI*2);c.fill();c.fillStyle='#2a5a2a';c.beginPath();c.arc(px+ts/2,py+ts*.35,ts*.25,0,Math.PI*2);c.fill()}
+if(tile.t===T.WATER&&ts>10){c.fillStyle='rgba(30,80,130,0.3)';const wv=Math.sin(Date.now()/500+x*.5+y*.3)*2;c.fillRect(px+2,py+ts/2+wv,ts-4,2)}
+if(tile.t===T.STONE&&ts>14){c.fillStyle='#6a6a6a';c.fillRect(px+ts*.2,py+ts*.3,ts*.25,ts*.2);c.fillStyle='#5a5a5a';c.fillRect(px+ts*.5,py+ts*.5,ts*.3,ts*.2)}
+if(tile.b){const bd=BLD[tile.b];if(bd){const hov=G.selectedTile&&G.selectedTile.x===x&&G.selectedTile.y===y;if(hov){c.strokeStyle='#c9a84c';c.lineWidth=2;c.strokeRect(px+1,py+1,ts-2,ts-2)}
+if(tile.b==='road'){c.fillStyle='#6a5a3a';c.fillRect(px+2,py+ts*.35,ts-4,ts*.3);c.fillStyle='#7a6a4a';c.fillRect(px+ts*.2,py+ts*.4,ts*.6,ts*.2)}
+else if(ts>16){c.font=`${Math.min(ts*.7,24)}px serif`;c.textAlign='center';c.textBaseline='middle';c.fillText(bd.i,px+ts/2,py+ts/2)}else{c.fillStyle=hov?'#c9a84c':'#8a7a50';c.fillRect(px+2,py+2,ts-4,ts-4)}}}
+if(ts>20){c.strokeStyle='rgba(80,60,30,0.15)';c.lineWidth=.5;c.strokeRect(px,py,ts,ts)}}}
+this.drawMinimap()},
+drawMinimap(){const c=this.mmCtx,mw=160,mh=120,tw=mw/MD.W,th=mh/MD.H;c.fillStyle='#0a0a06';c.fillRect(0,0,mw,mh);
+for(let y=0;y<MD.H;y++){for(let x=0;x<MD.W;x++){const tile=MD.tiles[y][x];c.fillStyle=tile.b?'#c9a84c':this.tCol(tile);c.fillRect(x*tw,y*th,tw+.5,th+.5)}}
+const a=document.getElementById('game-area'),ts=MD.ts*MD.zoom,vw=(a.clientWidth/ts)*tw,vh=(a.clientHeight/ts)*th,vx=(-MD.ox/ts)*tw,vy=(-MD.oy/ts)*th;c.strokeStyle='#c9a84c';c.lineWidth=1;c.strokeRect(vx,vy,vw,vh)}
+};
+
+const Econ={
+update(){this.prod();this.demand();this.prices();this.jobs();this.tax();this.pop();this.gdp();this.infl();this.trade();this.hap();this.hist()},
+prod(){const tx=getTechFx();Object.keys(S.eco.sup).forEach(k=>S.eco.sup[k]=0);
+MD.tiles.forEach(r=>r.forEach(tile=>{if(!tile.b)return;const bd=BLD[tile.b];if(bd&&bd.prod){const lv=1+N(tile.lv||0)*.5;Object.keys(bd.prod).forEach(res=>{let a=N(bd.prod[res])*lv;if(res==='food'||res==='bread'||res==='wheat')a*=N(tx.fp);if(res==='iron'||res==='stone'||res==='coal'||res==='clay')a*=N(tx.mp);if(res==='tools')a*=N(tx.td);if(res==='flour')a*=N(tx.fp);S.eco.sup[res]=N(S.eco.sup[res])+a})}}));
+Object.keys(S.eco.sup).forEach(k=>{if(S.eco.sup[k]>0)S.res[k]=N(S.res[k])+N(S.eco.sup[k])})},
+demand(){const p=N(S.pop.total);const pd={food:1.5,wood:.3,stone:.1,iron:.1,fabric:.2,bread:.4,tools:.05,luxury:.05,fish:.3};
+Object.keys(pd).forEach(k=>{S.eco.dem[k]=N(pd[k])*p})},
+prices(){Object.keys(S.eco.prices).forEach(k=>{const s=N(S.eco.sup[k]),d=N(S.eco.dem[k])||1,r=d/Math.max(s,.1);let tp=N(RES[k].bp)*r;tp*=(1+N(S.eco.infl)/100);tp*=(N(S.eco.conf)/80);if(S.pol.subAgri&&k==='food')tp*=.9;
+if(N(S.eco.prices[k])<tp)S.eco.prices[k]=N(S.eco.prices[k])+(tp-N(S.eco.prices[k]))*(S.pol.freeMarket?.15:.07);else S.eco.prices[k]=N(S.eco.prices[k])+(tp-N(S.eco.prices[k]))*(S.pol.freeMarket?.2:.1);S.eco.prices[k]=Math.max(.5,N(S.eco.prices[k]))})},
+jobs(){let total=0;MD.tiles.flat().forEach(t=>{if(t.b){const bd=BLD[t.b];if(bd)total+=N(bd.jobs)*(1+N(t.lv||0)*.3)}});S.pop.employed=Math.min(N(S.pop.total),total);S.pop.unemployed=Math.max(0,N(S.pop.total)-N(S.pop.employed))},
+tax(){const p=S.pol;let rev=0;rev+=N(S.pop.total)*N(p.incTax)*.5*(1+N(S.eco.infl)/20);rev+=MD.tiles.flat().filter(t=>t.b==='market').length*N(p.tradTax)*2;rev+=MD.tiles.flat().filter(t=>t.b==='farm').length*N(p.farmTax)*1.5;rev+=MD.tiles.flat().filter(t=>t.b==='smithy'||t.b==='lumbermill').length*N(p.indTax)*2;rev+=MD.tiles.flat().filter(t=>t.b==='house').length*N(p.propTax);rev+=N(S.eco.tb)*N(p.expTax)*.05;rev+=N(S.res.luxury||0)*N(p.luxTax)*.1;S.eco.taxRev=N(rev);S.eco.treas=N(S.eco.treas)+N(rev)*.05;
+let exp=0;MD.tiles.forEach(r=>r.forEach(t=>{if(t.b){const bd=BLD[t.b];if(bd&&bd.maint)exp+=N(bd.maint)}}));exp+=N(p.pubInv)*.5+N(p.hpInv)*.3+N(p.eduInv)*.3+N(p.safeInv)*.2+N(p.infraInv)*.2+N(p.resInv)*.2;if(p.unempIns)exp+=N(S.pop.unemployed)*.5;if(p.laborLaw)exp+=N(S.pop.employed)*.3;if(p.socAid)exp+=N(S.pop.total)*.1;
+S.eco.treas=N(S.eco.treas)-N(exp)*.05;S.eco.monthlyExp=N(exp)*.05;if(N(S.eco.treas)<0&&N(S.eco.debt)<500){const amt=Math.abs(N(S.eco.treas))*.5;S.eco.debt=N(S.eco.debt)+amt;S.eco.treas=N(S.eco.treas)+amt}S.eco.debtInt=0.01+N(S.pol.intRate)*0.005;S.eco.debt=N(S.eco.debt)+N(S.eco.debt)*N(S.eco.debtInt)*.01},
+pop(){const p=S.pop,fa=N(S.res.food)+N(S.res.bread)+N(S.res.fish),hc=MD.tiles.flat().filter(t=>t.b==='house').length*4,fpc=N(p.total)>0?fa/N(p.total):0;
+p.fs=Math.min(100,fpc*20);p.hs=Math.min(100,hc/Math.max(N(p.total),1)*80);p.js=N(p.total)>0?(N(p.employed)/N(p.total))*100:0;p.ts=Math.max(0,100-N(S.pol.incTax)*3);
+p.hp=Math.min(100,30+MD.tiles.flat().filter(t=>t.b==='hospital').length*15+N(p.hpInv));
+p.edu=Math.min(100,10+MD.tiles.flat().filter(t=>t.b==='school').length*15+N(p.eduInv));
+p.sf=Math.min(100,20+N(p.safeInv)*2);p.le=Math.min(100,MD.tiles.flat().filter(t=>t.b==='tavern'||t.b==='chapel').length*15+10+N(MD.tiles.flat().reduce((a,t)=>a+(t.b?(t.lv||0)*2:0),0)));
+p.inf=Math.min(100,MD.tiles.flat().filter(t=>t.b==='road').length*3+10+N(S.pol.infraInv)*2);
+p.hap=Math.round(N(p.fs)*.15+N(p.hs)*.15+N(p.js)*.2+N(p.hp)*.15+N(p.edu)*.1+N(p.ts)*.1+N(p.le)*.05+N(p.inf)*.05+N(p.sf)*.05);
+p.hap=Math.max(0,Math.min(100,N(p.hap)));
+if(fpc<.3&&N(p.total)>5)p.total=Math.max(3,N(p.total)-1);if(N(p.hap)>70&&N(p.total)<hc&&N(S.res.food)>N(p.total)*2)p.total+=Math.random()>.7?1:0;if(N(p.hap)<20&&N(p.total)>5)p.total-=Math.random()>.5?1:0},
+gdp(){let pv=0;Object.keys(S.eco.sup).forEach(k=>{pv+=N(S.eco.sup[k])*N(S.eco.prices[k])});pv*=N(getTechFx().pr);S.eco.gdp=N(pv)*12;S.eco.gdpc=N(S.pop.total)>0?N(S.eco.gdp)/N(S.pop.total):0},
+infl(){const td=Object.values(S.eco.dem).reduce((a,b)=>N(a)+N(b),0),ts=Object.values(S.eco.sup).reduce((a,b)=>N(a)+N(b),0);const r=ts>0?td/ts:1;let ti=(r-1)*20;if(S.pol.inflCtrl)ti*=.5;if(S.pol.centBank)ti*=.7;S.eco.infl=N(S.eco.infl)+(ti-N(S.eco.infl))*.05;S.eco.infl=Math.max(-10,Math.min(50,N(S.eco.infl)))},
+trade(){let imp=0,exp=0;Object.keys(S.eco.prices).forEach(k=>{const d=N(S.eco.dem[k]),s=N(S.eco.sup[k]);if(d>s*1.5){const df=(d-s)*.1;imp+=df*N(S.eco.prices[k])*(1+N(S.pol.impTax)*.02);S.res[k]=N(S.res[k])+df}if(s>d*1.5){const sv=(s-d)*.1;exp+=sv*N(S.eco.prices[k])*.8;S.res[k]=Math.max(0,N(S.res[k])-sv*.5)}});S.eco.tb=N(exp)-N(imp);if(S.pol.tariffs)S.eco.tb=N(S.eco.tb)*1.2},
+hap(){if(N(S.eco.conf)<N(S.pop.hap))S.eco.conf=N(S.eco.conf)+(N(S.pop.hap)-N(S.eco.conf))*.02;else S.eco.conf=N(S.eco.conf)-(N(S.eco.conf)-N(S.pop.hap))*.02;S.eco.conf=Math.max(0,Math.min(100,N(S.eco.conf)))},
+hist(){const h=S.hist;h.gdp.push(Math.round(N(S.eco.gdp)));h.pop.push(N(S.pop.total));h.hap.push(N(S.pop.hap));h.infl.push(Math.round(N(S.eco.infl)*10)/10);h.treas.push(Math.round(N(S.eco.treas)));Object.keys(h).forEach(k=>{if(h[k].length>200)h[k]=h[k].slice(-200)})}};
+
+const Snd={ctx:null,init(){},
+play(t){try{if(!this.ctx){this.ctx=new(window.AudioContext||window.webkitAudioContext)}if(this.ctx.state==='suspended')this.ctx.resume();const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.connect(g);g.connect(this.ctx.destination);
+if(t==='click'){o.frequency.value=800;g.gain.value=.1;o.type='sine'}else if(t==='build'){o.frequency.value=400;g.gain.value=.15;o.type='triangle'}else if(t==='coin'){o.frequency.value=1200;g.gain.value=.08;o.type='sine'}else if(t==='alert'){o.frequency.value=300;g.gain.value=.12;o.type='square'}else{o.frequency.value=600;g.gain.value=.1;o.type='sine'}
+g.gain.exponentialRampToValueAtTime(.001,this.ctx.currentTime+.3);o.start(this.ctx.currentTime);o.stop(this.ctx.currentTime+.3)}catch(e){}}};
+
+const Particles={el:null,init(){this.el=document.getElementById('particles')},
+emit(x,y,col,n){for(let i=0;i<n;i++){const p=document.createElement('div');p.className='particle';const sz=2+Math.random()*4;p.style.width=sz+'px';p.style.height=sz+'px';p.style.background=col;p.style.left=x+'px';p.style.top=y+'px';p.style.setProperty('--dx',(Math.random()*60-30)+'px');p.style.setProperty('--dy',(Math.random()*-40-10)+'px');p.style.animationDuration=(.5+Math.random()*.5)+'s';this.el.appendChild(p);setTimeout(()=>p.remove(),1e3)}},
+coin(x,y){this.emit(x,y,'#c9a84c',6)},dust(x,y){this.emit(x,y,'#8a7a50',6)}};
+
+const Tip={
+el:null,show(e,text){if(!this.el)this.el=document.getElementById('tooltip');if(!text){this.hide();return}this.el.textContent=text;this.el.style.display='block';const r=e.target.getBoundingClientRect();let x=r.left,y=r.bottom+5;if(x+250>window.innerWidth)x=window.innerWidth-260;if(y+50>window.innerHeight)y=r.top-35;this.el.style.left=x+'px';this.el.style.top=y+'px'},
+hide(){if(!this.el)this.el=document.getElementById('tooltip');this.el.style.display='none'},
+init(){document.addEventListener('mouseover',e=>{const t=e.target.closest('[data-tip]');if(t)Tip.show(e,t.getAttribute('data-tip'))});document.addEventListener('mouseout',e=>{const t=e.target.closest('[data-tip]');if(t)Tip.hide()})}};
+
+const Evts={
+checkStrike(){
+const p=S.pop,pol=S.pol,causes=[];
+if(N(p.js)<30)causes.push({key:'emprego',msg:'Desemprego alto ('+Math.round(N(p.js))+'%) - faltam vagas!',fix:'Construir mais fazendas e oficinas aumenta a demanda por mao de obra.'});
+if(N(p.fs)<30)causes.push({key:'comida',msg:'Fome crônica - nao ha comida suficiente!',fix:'Construa fazendas, mercados ou compre alimentos no comercio.'});
+if(N(p.ts)<30)causes.push({key:'impostos',msg:'Impostos de renda excessivos ('+Math.round(N(pol.incTax))+'%) - o povo esta sobrecarregado!',fix:'Reduza o imposto de renda no painel de Politicas.'});
+if(N(p.hs)<30)causes.push({key:'moradia',msg:'Falta de moradia - casas lotadas!',fix:'Construa mais casas para abrigar a populacao.'});
+if(N(p.hp)<30)causes.push({key:'saude',msg:'Sistema de saude precario - pessoas ficam doentes!',fix:'Construa hospitais ou aumente o Investimento em Saude.'});
+if(N(p.sf)<30)causes.push({key:'seguranca',msg:'Insegurança nas ruas - criminalidade!',fix:'Aumente o Investimento em Seguranca no painel de Politicas.'});
+if(N(p.inf)<30)causes.push({key:'infra',msg:'Falta de infraestrutura - ruas sem pavimento!',fix:'Construa estradas ou aumente a Infraestrutura.'});
+if(N(pol.incTax)>=30&&N(pol.incTax)<50&&N(p.ts)<50)causes.push({key:'impostos',msg:'Impostos altos ('+Math.round(N(pol.incTax))+'%) incomodam o povo!',fix:'Reduza o imposto de renda.'});
+if(N(p.le)<20)causes.push({key:'lazer',msg:'Sem lazer - o povo esta estressado!',fix:'Construa tavernas ou capelas para entretenimento.'});
+if(causes.length===0)return null;
+const msgs=causes.map((c,i)=>'• '+c.msg).join('<br>');
+const fixes=causes.map((c,i)=>(i+1)+'. '+c.fix).join(' ');
+const ch=[];
+ch.push({t:'Atender todas as demandas ('+causes.length+' problemas)',fx:{coins:-10*causes.length,hap:5*causes.length}});
+if(causes.some(c=>c.key==='impostos'))ch.push({t:'Reduzir impostos agora',fx:{hap:8}});
+if(causes.some(c=>c.key==='emprego'))ch.push({t:'Criar novos empregos',fx:{coins:-15,hap:6}});
+ch.push({t:'Rejeitar',fx:{hap:-8-causes.length*3}});
+return{id:'dynamic_strike',t:'Greve dos Trabalhadores!',i:'\u{2696}',d:'Os trabalhadores pararam! Motivos:<br><br>'+msgs+'<br><br><b>Como resolver:</b> '+fixes,ch};
+},
+check(){if(G.activeEvent)return;if(G.eventQueue.length>0){this.trigger(G.eventQueue.shift());return}
+if(G.tick%30===0){
+if(S.evts.cd['dynamic_strike']&&S.evts.cd['dynamic_strike']>G.tick){}else if(S.pop.hap<45&&S.pop.total>3){const st=this.checkStrike();if(st){this.trigger(st);S.evts.cd['dynamic_strike']=G.tick+120;return}}
+const av=EVTS.filter(e=>{if(S.evts.cd[e.id]&&S.evts.cd[e.id]>G.tick)return false;if(e.cond&&!e.cond())return false;return true});
+if(av.length>0){const ws=av.map(e=>e.w),tot=ws.reduce((a,b)=>a+b,0);let r=Math.random()*tot;for(let i=0;i<av.length;i++){r-=ws[i];if(r<=0){this.trigger(av[i]);S.evts.cd[av[i].id]=G.tick+60;return}}}}},
+trigger(ev){G.activeEvent=ev;Snd.play('alert');const ct=document.getElementById('event-container');let ch='';ev.ch.forEach((c,i)=>{let dis=false;if(c.cost)Object.keys(c.cost).forEach(r=>{if((S.res[r]||0)<c.cost[r])dis=true});
+ch+=`<button class="event-btn" ${dis?'disabled':''} onclick="Evts.choose(${i})">${c.t}</button>`});
+ct.innerHTML=`<div class="event-card"><div class="event-icon">${ev.i}</div><div class="event-title">${ev.t}</div><div class="event-desc">${ev.d}</div><div class="event-choices">${ch}</div></div>`;
+document.getElementById('event-overlay').classList.add('show')},
+choose(i){const ev=G.activeEvent;if(!ev)return;const c=ev.ch[i];Snd.play('click');
+if(c.cost)Object.keys(c.cost).forEach(r=>{S.res[r]=N(S.res[r])-N(c.cost[r])});
+if(c.fx){const e=c.fx;if(e.coins)S.eco.treas=N(S.eco.treas)+N(e.coins);if(e.food)S.res.food=Math.max(0,N(S.res.food)+N(e.food));if(e.wood)S.res.wood=Math.max(0,N(S.res.wood)+N(e.wood));if(e.stone)S.res.stone=Math.max(0,N(S.res.stone)+N(e.stone));if(e.iron)S.res.iron=Math.max(0,N(S.res.iron)+N(e.iron));if(e.tools)S.res.tools=Math.max(0,N(S.res.tools)+N(e.tools));if(e.fabric)S.res.fabric=Math.max(0,N(S.res.fabric)+N(e.fabric));if(e.animals)S.res.animals=Math.max(0,N(S.res.animals)+N(e.animals));if(e.hap)S.pop.hap=Math.max(0,Math.min(100,N(S.pop.hap)+N(e.hap)));if(e.hp)S.pop.hp=Math.max(0,Math.min(100,N(S.pop.hp)+N(e.hp)));if(e.pop)S.pop.total=Math.max(1,N(S.pop.total)+N(e.pop));if(e.inf)S.eco.infl=N(S.eco.infl)+N(e.inf)}
+document.getElementById('event-overlay').classList.remove('show');G.activeEvent=null;Particles.coin(window.innerWidth/2,window.innerHeight/2)}
+};
+
+const Research={
+canUnlock(cat,lv){if(!TTREE[cat])return false;const cur=S.tech[cat]||0;if(cur!==lv)return false;const rc=N((TTREE[cat].lv[lv]||{c:99999}).c)*(1-N(S.pol.resInv)*.02);return N(S.eco.treas)>=rc},
+unlock(cat){const cur=S.tech[cat]||0;if(!this.canUnlock(cat,cur))return;const t=TTREE[cat].lv[cur];const rc=N(t.c)*(1-N(S.pol.resInv)*.02);S.eco.treas=N(S.eco.treas)-rc;S.tech[cat]=cur+1;Snd.play('success');UI.toast('Tecnologia: '+t.n);UI.updateAll()}};
+
+const Build={
+canBuild(type,x,y){const bd=BLD[type];if(!bd)return false;if(x<0||x>=MD.W||y<0||y>=MD.H)return false;const tile=MD.tiles[y][x];if(tile.b)return false;if(type==='farm'&&tile.t!==T.GRASS)return false;
+if(bd.req){if(bd.req==='forest'&&tile.t!==T.FOREST&&!MapMod.adjTerrain(x,y,'forest'))return false;if(bd.req==='stone'&&tile.t!==T.STONE&&!MapMod.adjTerrain(x,y,'stone'))return false;if(bd.req==='water'&&tile.t!==T.WATER&&!MapMod.adjTerrain(x,y,'water'))return false}
+if((bd.sz||1)>1)for(let dy=0;dy<bd.sz;dy++)for(let dx=0;dx<bd.sz;dx++){const nx=x+dx,ny=y+dy;if(nx>=MD.W||ny>=MD.H||MD.tiles[ny][nx].b)return false}
+const tx=getTechFx();let ok=true;Object.keys(bd.cost).forEach(r=>{const a=r==='stone'?N(bd.cost[r])*N(tx.sc):N(bd.cost[r]);if(N(S.res[r])<a)ok=false});return ok},
+build(type,x,y){if(!this.canBuild(type,x,y))return false;const bd=BLD[type],tx=getTechFx();Object.keys(bd.cost).forEach(r=>{const a=r==='stone'?N(bd.cost[r])*N(tx.sc):N(bd.cost[r]);S.res[r]=N(S.res[r])-a});
+MD.tiles[y][x].b=type;Snd.play('build');Particles.dust(x*MD.ts*MD.zoom+MD.ox+MD.ts*MD.zoom/2,y*MD.ts*MD.zoom+MD.oy+MD.ts*MD.zoom/2);UI.updateAll();return true},
+demolish(x,y){const tile=MD.tiles[y][x];if(!tile.b)return;const bd=BLD[tile.b];if(bd)Object.keys(bd.cost).forEach(r=>{S.res[r]=N(S.res[r])+Math.floor(N(bd.cost[r])*.3)});tile.b=null;tile.lv=0;Snd.play('click');UI.updateAll()},
+upgradeCost(type,lv){const bd=BLD[type];if(!bd)return{};const cost={};Object.keys(bd.cost).forEach(r=>{cost[r]=Math.floor(N(bd.cost[r])*(lv+1)*1.5)});return cost},
+canUpgrade(x,y){const tile=MD.tiles[y][x];if(!tile.b)return false;if((tile.lv||0)>=2)return false;const cost=this.upgradeCost(tile.b,tile.lv||0);let ok=true;Object.keys(cost).forEach(r=>{if(N(S.res[r])<cost[r])ok=false});return ok},
+upgrade(x,y){if(!this.canUpgrade(x,y))return false;const tile=MD.tiles[y][x];const cost=this.upgradeCost(tile.b,tile.lv||0);Object.keys(cost).forEach(r=>{S.res[r]=N(S.res[r])-cost[r]});tile.lv=(tile.lv||0)+1;Snd.play('build');Particles.dust(x*MD.ts*MD.zoom+MD.ox+MD.ts*MD.zoom/2,y*MD.ts*MD.zoom+MD.oy+MD.ts*MD.zoom/2);UI.toast(BLD[tile.b].n+' upgraded to Level '+(tile.lv+1));UI.updateAll();return true}};
+
+const Charts={
+line(id,data,col,label){const cv=document.getElementById(id);if(!cv||!data||data.length<2)return;const c=cv.getContext('2d');const w=cv.width=cv.parentElement.clientWidth-16,h=cv.height=120;c.clearRect(0,0,w,h);c.fillStyle='#1a1209';c.fillRect(0,0,w,h);
+const safe=data.map(v=>N(v));const mn=Math.min(...safe),mx=Math.max(...safe),rng=mx-mn||1,pd=5;c.beginPath();c.strokeStyle=col;c.lineWidth=1.5;safe.forEach((v,i)=>{const x=pd+(i/(safe.length-1))*(w-pd*2),y=h-pd-((v-mn)/rng)*(h-pd*2);i===0?c.moveTo(x,y):c.lineTo(x,y)});c.stroke();
+c.lineTo(w-pd,h-pd);c.lineTo(pd,h-pd);c.closePath();c.fillStyle=col.replace('1)','0.1)').replace('rgb','rgba');if(!c.fillStyle.includes('rgba'))c.fillStyle='rgba(201,168,76,0.05)';c.fill();
+c.fillStyle='#d4c5a0';c.font='10px Georgia';c.textAlign='left';c.fillText(label+': '+F(safe[safe.length-1],1),pd+2,12);c.fillStyle='#8a7a60';c.fillText('Min:'+F(mn,1),pd+2,h-pd-2);c.fillText('Max:'+F(mx,1),w-pd-40,h-pd-2)},
+bar(id,data,cols,labels){const cv=document.getElementById(id);if(!cv)return;const c=cv.getContext('2d');const w=cv.width=cv.parentElement.clientWidth-16,h=cv.height=120;c.clearRect(0,0,w,h);c.fillStyle='#1a1209';c.fillRect(0,0,w,h);if(!data||!data.length)return;const mx=Math.max(...data.map(v=>N(v)))||1;const bw=(w-10)/data.length-2;
+data.forEach((v,i)=>{const nv=N(v),bh=(nv/mx)*(h-25),x=5+i*(bw+2),y=h-15-bh;c.fillStyle=cols[i%cols.length];c.fillRect(x,y,bw,bh);if(labels&&labels[i]){c.fillStyle='#8a7a60';c.font='8px Georgia';c.textAlign='center';c.fillText(labels[i],x+bw/2,h-3)}})},
+pie(id,data,cols,labels){const cv=document.getElementById(id);if(!cv)return;const c=cv.getContext('2d');const w=cv.width=cv.parentElement.clientWidth-16,h=cv.height=120;c.clearRect(0,0,w,h);c.fillStyle='#1a1209';c.fillRect(0,0,w,h);const safe=data.map(v=>N(v));const tot=safe.reduce((a,b)=>a+b,0);if(!tot)return;const cx=w/2,cy=h/2,r=Math.min(w,h)/2-15;let a=-Math.PI/2;
+safe.forEach((v,i)=>{const sa=(v/tot)*Math.PI*2;c.beginPath();c.moveTo(cx,cy);c.arc(cx,cy,r,a,a+sa);c.closePath();c.fillStyle=cols[i%cols.length];c.fill();c.strokeStyle='#1a1209';c.lineWidth=1;c.stroke();
+if(sa>.2){const ma=a+sa/2,lx=cx+Math.cos(ma)*r*.65,ly=cy+Math.sin(ma)*r*.65;c.fillStyle='#d4c5a0';c.font='9px Georgia';c.textAlign='center';c.fillText(labels[i]||'',lx,ly)}a+=sa})},
+gauge(id,val,max,label){const cv=document.getElementById(id);if(!cv)return;const c=cv.getContext('2d');const w=cv.width=cv.parentElement.clientWidth-16,h=cv.height=80;c.clearRect(0,0,w,h);c.fillStyle='#1a1209';c.fillRect(0,0,w,h);const cx=w/2,cy=h-10,r=Math.min(w/2-10,h-20);const sv=N(val),sm=N(max)||1;
+c.beginPath();c.arc(cx,cy,r,Math.PI,0);c.strokeStyle='#3a2d18';c.lineWidth=12;c.stroke();const pct=Math.max(0,Math.min(1,sv/sm)),ea=Math.PI+pct*Math.PI;
+const gr=c.createLinearGradient(cx-r,cy,cx+r,cy);gr.addColorStop(0,'#8b3a3a');gr.addColorStop(.5,'#c9a84c');gr.addColorStop(1,'#3a6b3a');
+c.beginPath();c.arc(cx,cy,r,Math.PI,ea);c.strokeStyle=gr;c.lineWidth=12;c.stroke();c.fillStyle='#c9a84c';c.font='bold 16px Georgia';c.textAlign='center';c.fillText(F(sv,1),cx,cy-10);c.fillStyle='#8a7a60';c.font='10px Georgia';c.fillText(label,cx,cy+5)}};
+
+const News={
+texts:['A economia esta em crescimento!','Novos migrantes chegam.','Boa colheita reportada.','Banco registra depositos.','Mercadores estrangeiros chegam.','Escolas reportam alunos.','Hospital atende pacientes.','Producao de ferramentas cresce.','Comercio local aquecido.','Tesouro registra superavit.'],
+idx:0,tick:0,update(){this.tick++;if(this.tick%120===0){this.idx=(this.idx+1)%this.texts.length;document.getElementById('news-text').textContent=this.texts[this.idx]}}};
+
+const UI={
+switchSideTab(t){document.querySelectorAll('#sidebar-tabs button').forEach(b=>b.classList.remove('active'));document.querySelector(`#sidebar-tabs button[data-tab="${t}"]`).classList.add('active');document.querySelectorAll('.side-panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+t).classList.add('active')},
+switchRightTab(t){document.querySelectorAll('#right-tabs button').forEach(b=>b.classList.remove('active'));document.querySelector(`#right-tabs button[data-tab="${t}"]`).classList.add('active');document.querySelectorAll('.right-panel').forEach(p=>p.classList.remove('active'));document.getElementById('rpanel-'+t).classList.add('active');if(t==='charts')this.updateCharts()},
+updateAll(){this.updateRes();this.updateOverview();this.updatePop();this.updateEcon();this.updateBottom();this.updateDate();this.updateBuild()},
+updateRes(){const bar=document.getElementById('res-bar');const show=['coins','food','wood','stone','iron','bread','tools'];bar.innerHTML=show.map(r=>{const d=RES[r],v=N(S.res[r]),sp=N(S.eco.sup[r]),delta=sp>0?'+'+F(sp,1):'';return`<div class="res-item" title="${d.n}"><span>${d.i}</span><span class="val">${Math.floor(v)}</span><span class="delta pos">${delta}</span></div>`}).join('')},
+updateOverview(){const p=document.getElementById('rpanel-overview'),e=S.eco,pp=S.pop;p.innerHTML=`
+<div class="kpi-grid">
+<div class="kpi" data-tip="Total de habitantes da vila"><div class="kpi-val">${N(pp.total)}</div><div class="kpi-label">Populacao</div><div class="kpi-delta ${N(pp.total)>10?'pos':'neg'}">${N(pp.total)>10?'\u2191':'\u2192'}</div></div>
+<div class="kpi" data-tip="Nivel medio de satisfacao dos habitantes"><div class="kpi-val">${N(pp.hap)}%</div><div class="kpi-label">Felicidade</div><div class="kpi-delta ${N(pp.hap)>50?'pos':'neg'}">${N(pp.hap)>50?'\u2191':'\u2193'}</div></div>
+<div class="kpi" data-tip="Produto Interno Bruto anual da vila"><div class="kpi-val">${Math.round(N(e.gdp))}</div><div class="kpi-label">PIB Anual</div><div class="kpi-delta ${N(e.gdp)>100?'pos':'neg'}">${S.trend>0?'\u2191':'\u2193'}</div></div>
+<div class="kpi" data-tip="Total de moedas disponiveis no tesouro"><div class="kpi-val">${Math.round(N(e.treas))}</div><div class="kpi-label">Tesouro</div><div class="kpi-delta ${N(e.treas)>50?'pos':'neg'}">${N(e.treas)>50?'\u2191':'\u2193'}</div></div>
+<div class="kpi" data-tip="Percentual da populacao empregada"><div class="kpi-val">${F(N(pp.employed)/Math.max(N(pp.total),1)*100,0)}%</div><div class="kpi-label">Emprego</div></div>
+<div class="kpi" data-tip="Taxa de variacao dos precos"><div class="kpi-val">${N(e.infl)>0?'+':''}${F(N(e.infl),1)}%</div><div class="kpi-label">Inflacao</div><div class="kpi-delta ${Math.abs(N(e.infl))<5?'pos':'neg'}">${Math.abs(N(e.infl))<5?'OK':'ALERTA'}</div></div>
+</div>
+<div class="section-title">Saude da Vila</div>
+<div class="card"><div class="card-row"><span class="label">Saude</span><span class="value">${N(pp.hp)}%</span></div><div class="progress-bar"><div class="fill" style="width:${N(pp.hp)}%;background:${N(pp.hp)>60?'#3a6b3a':N(pp.hp)>30?'#8b6b1a':'#8b3a3a'}"></div></div></div>
+<div class="card"><div class="card-row"><span class="label">Educacao</span><span class="value">${N(pp.edu)}%</span></div><div class="progress-bar"><div class="fill" style="width:${N(pp.edu)}%"></div></div></div>
+<div class="card"><div class="card-row"><span class="label">Seguranca</span><span class="value">${N(pp.sf)}%</span></div><div class="progress-bar"><div class="fill" style="width:${N(pp.sf)}%"></div></div></div>
+<div class="card"><div class="card-row"><span class="label">Lazer</span><span class="value">${N(pp.le)}%</span></div><div class="progress-bar"><div class="fill" style="width:${N(pp.le)}%"></div></div></div>
+<div class="section-title">Resumo Financeiro</div>
+<div class="card">
+<div class="card-row"><span class="label">Receita Mensal</span><span class="value" style="color:#80b080">+${F(N(e.taxRev)*.05,1)}</span></div>
+<div class="card-row"><span class="label">Despesas Mensais</span><span class="value" style="color:#d48080">-${F(N(e.monthlyExp||0),1)}</span></div>
+<div class="card-row"><span class="label">Resultado</span><span class="value" style="color:${N(e.taxRev)*.05>N(e.monthlyExp||0)?'#80b080':'#d48080'}">${N(e.taxRev)*.05>N(e.monthlyExp||0)?'Superavit':'Deficit'} (${F(Math.abs(N(e.taxRev)*.05-N(e.monthlyExp||0)),1)})</span></div>
+<div class="card-row"><span class="label">Divida</span><span class="value" style="color:#d48080">${Math.round(N(e.debt))}</span></div>
+<div class="card-row"><span class="label">Balanca Comercial</span><span class="value" style="color:${N(e.tb)>0?'#80b080':'#d48080'}">${N(e.tb)>0?'+':''}${F(N(e.tb),1)}</span></div>
+<div class="card-row"><span class="label">Confianca</span><span class="value">${F(N(e.conf),0)}%</span></div>
+</div>
+${G.selectedTile?this.tileInfo(G.selectedTile.x,G.selectedTile.y):'<div class="card" style="text-align:center;color:var(--text3)"><em>Clique no mapa</em></div>'}`},
+updatePop(){const p=document.getElementById('rpanel-pop'),pp=S.pop;p.innerHTML=`
+<div class="section-title">Populacao</div>
+<div class="card">
+<div class="card-row"><span class="label">Total</span><span class="value">${N(pp.total)}</span></div>
+<div class="card-row"><span class="label">Empregados</span><span class="value" style="color:#80b080">${N(pp.employed)}</span></div>
+<div class="card-row"><span class="label">Desempregados</span><span class="value" style="color:#d48080">${N(pp.unemployed)}</span></div>
+<div class="card-row"><span class="label">Taxa Emprego</span><span class="value">${F(N(pp.employed)/Math.max(N(pp.total),1)*100,0)}%</span></div>
+</div>
+<div class="section-title">Satisfacao</div>
+<div class="card"><div class="card-row"><span class="label">Comida</span><span class="value">${F(N(pp.fs),0)}%</span></div><div class="progress-bar"><div class="fill" style="width:${N(pp.fs)}%;background:${N(pp.fs)>50?'#3a6b3a':'#8b3a3a'}"></div></div></div>
+<div class="card"><div class="card-row"><span class="label">Moradia</span><span class="value">${F(N(pp.hs),0)}%</span></div><div class="progress-bar"><div class="fill" style="width:${N(pp.hs)}%"></div></div></div>
+<div class="card"><div class="card-row"><span class="label">Emprego</span><span class="value">${F(N(pp.js),0)}%</span></div><div class="progress-bar"><div class="fill" style="width:${N(pp.js)}%"></div></div></div>
+<div class="card"><div class="card-row"><span class="label">Impostos</span><span class="value">${F(N(pp.ts),0)}%</span></div><div class="progress-bar"><div class="fill" style="width:${N(pp.ts)}%"></div></div></div>
+<div class="section-title">Felicidade</div>
+<div class="card" style="text-align:center">
+<div style="font-size:32px;color:var(--gold);font-weight:bold">${N(pp.hap)}%</div>
+<div style="color:var(--text3);font-size:11px">${N(pp.hap)>70?'Muito Feliz':N(pp.hap)>40?'Contente':N(pp.hap)>20?'Insatisfeito':'Revoltingo!'}</div>
+<div class="happiness-bar" style="margin-top:8px">
+${[{v:N(pp.fs),c:'#3a6b3a'},{v:N(pp.hs),c:'#5a5a3a'},{v:N(pp.js),c:'#3a5a6b'},{v:N(pp.hp),c:'#6b3a3a'},{v:N(pp.edu),c:'#5a3a6b'},{v:N(pp.le),c:'#6b6b3a'},{v:N(pp.sf),c:'#3a6b5a'}].map(s=>`<div class="h-seg" style="background:${s.c};opacity:${.3+s.v/140}"></div>`).join('')}
+</div></div>`},
+updateEcon(){const p=document.getElementById('rpanel-economy'),e=S.eco;p.innerHTML=`
+<div class="section-title">Economia</div>
+<div class="card">
+<div class="card-row"><span class="label">PIB Anual</span><span class="value">${Math.round(N(e.gdp))}</span></div>
+<div class="card-row"><span class="label">PIB Per Capita</span><span class="value">${Math.round(N(e.gdpc))}</span></div>
+<div class="card-row"><span class="label">Inflacao</span><span class="value" style="color:${Math.abs(N(e.infl))<5?'#80b080':'#d48080'}">${F(N(e.infl),1)}%</span></div>
+<div class="card-row"><span class="label">Oferta Total</span><span class="value">${F(Object.values(e.sup).reduce((a,b)=>N(a)+N(b),0),1)}</span></div>
+<div class="card-row"><span class="label">Demanda Total</span><span class="value">${F(Object.values(e.dem).reduce((a,b)=>N(a)+N(b),0),1)}</span></div>
+</div>
+<div class="section-title">Precos de Mercado</div>
+${Object.keys(RES).map(k=>`<div class="card"><div class="card-row"><span class="label">${RES[k].i} ${RES[k].n}</span><span class="value">${F(N(e.prices[k]),1)}c</span></div><div class="card-row"><span class="label" style="font-size:10px">O:${F(N(e.sup[k]),1)} D:${F(N(e.dem[k]),1)}</span></div></div>`).join('')}`},
+updateCharts(){const h=S.hist;Charts.line('chart-gdp',h.gdp,'rgb(201,168,76)','PIB');Charts.line('chart-pop',h.pop,'rgb(100,180,100)','Pop');Charts.line('chart-happy',h.hap,'rgb(180,130,220)','Felicidade');Charts.line('chart-infl',h.infl,'rgb(220,100,100)','Inflacao');Charts.line('chart-treas',h.treas,'rgb(100,180,220)','Tesouro');
+const bt={};MD.tiles.flat().forEach(t=>{if(t.b)bt[t.b]=(bt[t.b]||0)+1});const bl=Object.keys(bt),bv=Object.values(bt),bc=['#c9a84c','#8b6914','#5a3a1a','#3a6b3a','#3a5a8b','#8b3a3a','#6b5a3a','#4a6a4a'];
+Charts.bar('chart-build',bv,bc,bl.map(l=>BLD[l]?BLD[l].i:l));
+const rd=Object.keys(S.res).filter(k=>S.res[k]>0).map(k=>S.res[k]),rl=Object.keys(S.res).filter(k=>S.res[k]>0).map(k=>RES[k].i);
+Charts.pie('chart-res',rd,['#c9a84c','#8b6914','#5a3a1a','#3a6b3a','#3a5a8b','#8b3a3a','#6b5a3a','#4a6a4a','#aa6633','#336666'],rl);
+Charts.gauge('chart-hg',S.pop.hap,100,'Felicidade');Charts.gauge('chart-hpg',S.pop.hp,100,'Saude')},
+updateBottom(){const e=S.eco,pp=S.pop;document.getElementById('b-pop').textContent=N(pp.total);document.getElementById('b-emp').textContent=F(N(pp.employed)/Math.max(N(pp.total),1)*100,0)+'%';document.getElementById('b-hap').textContent=N(pp.hap)+'%';document.getElementById('b-pib').textContent=Math.round(N(e.gdp));document.getElementById('b-inf').textContent=F(N(e.infl),1)+'%';document.getElementById('b-ano').textContent=G.year},
+updateDate(){const m=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];document.getElementById('date-display').textContent=`Ano ${G.year} - ${m[G.month-1]}`},
+updateBuild(){const p=document.getElementById('panel-build');let h='<div class="section-title">Construcoes</div>';
+const cats={'Moradia':['house'],'Producao':['farm','fishery','windmill','bakery'],'Recursos':['lumbermill','mine','quarry'],'Industria':['smithy','stable'],'Comercio':['market','bank','port'],'Servicos':['hospital','school','chapel','tavern','well','garden'],'Infra':['road','bridge','wall','warehouse','townhall']};
+Object.keys(cats).forEach(cat=>{h+=`<div style="color:var(--text3);font-size:10px;margin:6px 0 2px">${cat}</div>`;cats[cat].forEach(type=>{const bd=BLD[type];if(!bd)return;
+const cs=Object.keys(bd.cost).map(r=>`${RES[r]?RES[r].i:''}${bd.cost[r]}`).join(' ');h+=`<div class="build-item ${G.selectedBuild===type?'selected':''}" onclick="UI.selBuild('${type}')" data-tip="${bd.desc} | Custo: ${cs} | Empregos: ${bd.jobs} | Manutencao: ${bd.maint}/mes"><div class="b-icon">${bd.i}</div><div class="b-info"><div class="b-name">${bd.n}</div><div class="b-cost">${cs} ${bd.jobs?'Emp:'+bd.jobs:''} ${bd.prod?Object.keys(bd.prod).map(r=>RES[r].i+bd.prod[r]).join(' '):''}</div></div></div>`})});
+if(G.selectedTile)h+=`<div style="margin-top:8px"><button class="danger" onclick="UI.demolSel()" style="width:100%">Demolir</button></div>`;
+p.innerHTML=h},
+selBuild(t){G.selectedBuild=G.selectedBuild===t?null:t;Snd.play('click');this.updateBuild()},
+demolSel(){if(!G.selectedTile)return;Build.demolish(G.selectedTile.x,G.selectedTile.y);this.updateBuild()},
+tileInfo(x,y){const tile=MD.tiles[y][x];const tn={0:'Grama',1:'Agua',2:'Pedra',3:'Floresta'};let h=`<div class="section-title">Tile (${x},${y})</div><div class="card">`;
+h+=`<div class="card-row"><span class="label">Terreno</span><span class="value">${tn[tile.t]||'Grama'}</span></div>`;
+if(tile.b){const bd=BLD[tile.b];const lv=tile.lv||0;h+=`<div class="card-row"><span class="label">Construcao</span><span class="value">${bd.i} ${bd.n} ${lv>0?'Lv.'+(lv+1):''}</span></div>`;
+h+=`<div class="card-row"><span class="label">Empregos</span><span class="value">${Math.floor(N(bd.jobs)*(1+lv*.3))}</span></div>`;
+if(bd.prod)h+=`<div class="card-row"><span class="label">Producao</span><span class="value">${Object.keys(bd.prod).map(r=>RES[r].i+Math.floor(N(bd.prod[r])*(1+lv*.5))).join(' ')}</span></div>`;
+if(bd.maint)h+=`<div class="card-row"><span class="label">Manutencao</span><span class="value" style="color:#d48080">${bd.maint}/mes</span></div>`;
+if(lv<2){const cost=Build.upgradeCost(tile.b,lv);const canUp=Build.canUpgrade(x,y);const cs=Object.keys(cost).map(r=>`${RES[r]?RES[r].i:''}${cost[r]}`).join(' ');
+h+=`<div style="margin-top:8px"><button class="${canUp?'primary':''}" ${canUp?'':'disabled'} onclick="Build.upgrade(${x},${y})" style="width:100%">Upgrade (${cs})</button></div>`}else{h+=`<div style="margin-top:4px;color:var(--gold);font-size:10px;text-align:center">Nivel Maximo</div>`}}
+else{h+=`<div class="card-row"><span class="label">Status</span><span class="value">Vazio</span></div>`;
+if(G.selectedBuild){const bd=BLD[G.selectedBuild],canB=Build.canBuild(G.selectedBuild,x,y);
+h+=`<div style="margin-top:8px"><button class="${canB?'primary':''}" ${canB?'':'disabled'} onclick="UI.buildHere(${x},${y})">${canB?'Construir '+bd.n:'Nao pode'}</button></div>`}}
+h+='</div>';return h},
+buildHere(x,y){if(!G.selectedBuild)return;if(Build.build(G.selectedBuild,x,y)){this.toast(BLD[G.selectedBuild].n+' construida!')}},
+toast(m){let t=document.querySelector('.toast');if(t)t.remove();t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3000)},
+showMenu(){const o=document.createElement('div');o.className='modal-overlay';o.innerHTML=`<div class="modal" style="position:relative"><button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button><h2>Economy Village</h2>
+<div style="display:flex;flex-direction:column;gap:8px">
+<button onclick="G.saveGame();UI.toast('Salvo!');this.closest('.modal-overlay').remove()">Salvar</button>
+<button onclick="G.loadGame();this.closest('.modal-overlay').remove()">Carregar</button>
+<button onclick="UI.showManual()">Manual</button>
+<button class="danger" onclick="if(confirm('Reiniciar?')){localStorage.removeItem('econVil');location.reload()}">Novo Jogo</button>
+</div></div>`;document.body.appendChild(o);o.addEventListener('click',e=>{if(e.target===o)o.remove()})},
+showManual(){const o=document.createElement('div');o.className='modal-overlay';o.innerHTML=`<div class="modal" style="position:relative;max-width:700px"><button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button><h2>Manual</h2>
+<div style="color:var(--text2);font-size:12px;line-height:1.6">
+<h3 style="color:var(--gold)">Como Jogar</h3><p>Gerencie uma vila medieval. Construa, defina politicas, reaja a eventos. Seu objetivo e criar uma vila próspera com alta felicidade e economia forte.</p>
+<h3 style="color:var(--gold)">Recursos</h3><p>Madeira, Pedra, Ferro, Carvao, Argila, Comida, Peixe, Trigo, Farinha, Pao, Ferramentas, Moedas, Tecidos, La, Animais, Luxo. Cada recurso e produzido por construcoes especificas.</p>
+<h3 style="color:var(--gold)">Construcoes</h3><p>Construa casas para moradia, fazendas para comida, minas para minerio, mercados para comercio. Cada construcao oferece empregos, producao e felicidade. Construcoes podem ser upgradeadas ate o nivel 3.</p>
+<h3 style="color:var(--gold)">Economia</h3><p><b>Oferta/Demanda:</b> Precos mudam com escassez. <b>Inflacao:</b> Demandas > Oferta = precos sobem. <b>PIB:</b> Producao x Precos. <b>Impostos:</b> Renda, Comercial, Agricola, Industrial, Propriedade, Exportacao, Luxo, Importacao.</p>
+<h3 style="color:var(--gold)">Politicas</h3><p><b>Investimentos:</b> Publico, Saude, Educacao, Seguranca, Infraestrutura, Pesquisa. <b>Leis:</b> Livre Mercado, Subsidio Agricola, Seguro Desemprego, Lei Salario Min., Auxilio Social, Controle Inflacao, Banco Central Ind., Lei Ambiental, Lei Trabalhista, Tarifas Int.</p>
+<h3 style="color:var(--gold)">Tecnologia</h3><p>Desbloqueie melhorias em Agricultura, Metalurgia, Construcao, Educacao, Saude, Comercio e Mineracao. Cada nivel oferece bonus progressivos.</p>
+<h3 style="color:var(--gold)">Eventos</h3><p>Eventos aleatorios aparecem periodicamente. Escolhas afetam economia, populacao e felicidade. Reaja rapidamente!</p>
+<h3 style="color:var(--gold)">Dicas</h3><ul><li>Mantenha comida suficiente</li><li>Construa casas antes de crescer</li><li>Equilibre impostos - altos geram receita mas reduzem felicidade</li><li>Invista em saude e educacao</li><li>Economize para crises</li><li>Upgrade construcoes para aumentar producao</li><li>Use tecnologia para desbloquear bonus</li><li>Monitore superavit/deficit mensal</li></ul></div></div>`;document.body.appendChild(o);o.addEventListener('click',e=>{if(e.target===o)o.remove()})},
+updatePolicies(){const p=document.getElementById('panel-policies'),pl=S.pol;let h='<div class="section-title">Impostos</div>';
+[{k:'incTax',l:'Imp. Renda',mx:50},{k:'tradTax',l:'Imp. Comercial',mx:30},{k:'farmTax',l:'Imp. Agricola',mx:30},{k:'indTax',l:'Imp. Industrial',mx:30},{k:'propTax',l:'Imp. Propriedade',mx:20},{k:'expTax',l:'Imp. Exportacao',mx:20},{k:'luxTax',l:'Imp. Luxo',mx:30},{k:'impTax',l:'Imp. Importacao',mx:20}].forEach(s=>{
+h+=`<div class="slider-group"><label>${s.l}</label><div class="slider-row"><input type="range" min="0" max="${s.mx}" value="${pl[s.k]}" oninput="UI.setPol('${s.k}',this.value)"><span class="slider-val" id="sv-${s.k}">${pl[s.k]}%</span></div></div>`});
+h+='<div class="section-title">Politicas</div>';
+[{k:'minWage',l:'Salario Min.',mx:10},{k:'pubInv',l:'Inv. Publico',mx:30},{k:'hpInv',l:'Inv. Saude',mx:30},{k:'eduInv',l:'Inv. Educacao',mx:30},{k:'safeInv',l:'Inv. Seguranca',mx:20},{k:'infraInv',l:'Infraestrutura',mx:20},{k:'intRate',l:'Taxa Juros',mx:20},{k:'resInv',l:'Inv. Pesquisa',mx:20}].forEach(s=>{
+h+=`<div class="slider-group"><label>${s.l}</label><div class="slider-row"><input type="range" min="0" max="${s.mx}" value="${pl[s.k]}" oninput="UI.setPol('${s.k}',this.value)"><span class="slider-val" id="sv-${s.k}">${pl[s.k]}%</span></div></div>`});
+h+='<div class="section-title">Leis</div>';
+[{k:'freeMarket',l:'Livre Mercado'},{k:'subAgri',l:'Subsidio Agricola'},{k:'unempIns',l:'Seguro Desemprego'},{k:'minWageLaw',l:'Lei Salario Min.'},{k:'socAid',l:'Auxilio Social'},{k:'inflCtrl',l:'Controle Inflacao'},{k:'centBank',l:'Banco Central Ind.'},{k:'envLaw',l:'Lei Ambiental'},{k:'laborLaw',l:'Lei Trabalhista'},{k:'tariffs',l:'Tarifas Int.'}].forEach(c=>{
+h+=`<div class="checkbox-group"><input type="checkbox" id="cb-${c.k}" ${pl[c.k]?'checked':''} onchange="UI.togglePol('${c.k}')"><label for="cb-${c.k}">${c.l}</label></div>`});
+p.innerHTML=h},
+setPol(k,v){S.pol[k]=parseInt(v);const s=document.getElementById('sv-'+k);if(s)s.textContent=v+'%';Snd.play('click')},
+togglePol(k){S.pol[k]=!S.pol[k];Snd.play('click')},
+updateTrade(){const p=document.getElementById('panel-trade');let h='<div class="section-title">Comercio</div><div class="card"><div class="card-title">Exportar</div>';
+Object.keys(RES).forEach(k=>{if(k==='coins')return;const v=N(S.res[k]);if(v>0){const pr=F(N(S.eco.prices[k])*.8,1);h+=`<div class="list-item"><span>${RES[k].i} ${RES[k].n}: ${Math.floor(v)}</span><button onclick="UI.expRes('${k}')" style="padding:2px 8px;font-size:10px">Vender (${pr}c)</button></div>`}});
+h+='</div><div class="card"><div class="card-title">Importar</div>';
+Object.keys(RES).forEach(k=>{if(k==='coins')return;const pr=F(N(S.eco.prices[k])*1.3,1);h+=`<div class="list-item"><span>${RES[k].i} ${RES[k].n}</span><button onclick="UI.impRes('${k}')" style="padding:2px 8px;font-size:10px">Comprar (${pr}c)</button></div>`});
+h+=`</div><div class="section-title">Financas</div><div class="card">
+<button class="primary" onclick="UI.issueDebt()" style="width:100%;margin-bottom:4px">Emitir Titulo (+50c)</button>
+<button onclick="UI.payDebt()" style="width:100%">Quitar Divida (${Math.round(N(S.eco.debt))}c)</button></div>`;
+p.innerHTML=h},
+expRes(k){const amt=Math.min(N(S.res[k]),10);if(amt<=0)return;const pr=N(S.eco.prices[k])*0.8*amt;S.res[k]=N(S.res[k])-amt;S.eco.treas=N(S.eco.treas)+pr;Snd.play('coin');UI.toast(`Vendeu ${Math.floor(amt)} ${RES[k].n} por ${Math.round(pr)}c`);UI.updateAll()},
+impRes(k){const pr=N(S.eco.prices[k])*1.3;if(N(S.eco.treas)<pr){UI.toast('Moedas insuficientes!');return}const amt=5;S.eco.treas=N(S.eco.treas)-pr;S.res[k]=N(S.res[k])+amt;Snd.play('click');UI.toast(`Comprou ${amt} ${RES[k].n}`);UI.updateAll()},
+issueDebt(){S.eco.treas=N(S.eco.treas)+50;S.eco.debt=N(S.eco.debt)+60;Snd.play('coin');UI.toast('Titulo emitido: +50c (divida: 60c)');UI.updateAll()},
+payDebt(){if(N(S.eco.debt)<=0)return;const pay=Math.min(N(S.eco.treas),N(S.eco.debt));S.eco.treas=N(S.eco.treas)-pay;S.eco.debt=N(S.eco.debt)-pay;Snd.play('coin');UI.toast(`Divida quitada: ${Math.round(pay)}c`);UI.updateAll()},
+updateTech(){const p=document.getElementById('panel-tech');let h='<div class="section-title">Arvore Tecnologica</div>';
+Object.keys(TTREE).forEach(cat=>{const tree=TTREE[cat],cur=S.tech[cat]||0;h+=`<div class="card"><div class="card-title">${tree.n}</div>`;tree.lv.forEach((lv,i)=>{
+let st='locked';if(i<cur)st='unlocked';else if(i===cur&&Research.canUnlock(cat,i))st='available';
+h+=`<div class="tech-node ${st}" onclick="${st==='available'?`Research.unlock('${cat}')`:''}" title="${lv.d} (${lv.c}c)">${st==='unlocked'?'\u2713':st==='available'?'\u2605':'\u{1F512}'} ${lv.n} <span style="color:var(--text3);font-size:9px">(${lv.c}c)</span></div>`});
+h+='</div>'});
+p.innerHTML=h}
+};
+
+const G={
+running:false,paused:false,speed:1,maxSpeed:5,tick:0,month:1,year:1,selectedBuild:null,selectedTile:null,eventQueue:[],activeEvent:null,lastSave:0,
+speedUp(){this.speed=Math.min(this.maxSpeed,this.speed+1);document.getElementById('speed-display').textContent=this.speed+'x'},
+speedDown(){this.speed=Math.max(1,this.speed-1);document.getElementById('speed-display').textContent=this.speed+'x'},
+togglePause(){this.paused=!this.paused;document.getElementById('pause-btn').innerHTML=this.paused?'&#9654;':'&#10074;&#10074'},
+saveGame(){try{const data={res:S.res,eco:S.eco,pol:S.pol,tech:S.tech,pop:S.pop,tiles:MD.tiles.map(r=>r.map(t=>({t:t.t,b:t.b,lv:t.lv||0}))),year:this.year,month:this.month,tick:this.tick,hist:S.hist,evts:S.evts,speed:this.speed,paused:this.paused,selectedBuild:this.selectedBuild};localStorage.setItem('econVil',JSON.stringify(data));UI.toast('Jogo salvo!')}catch(e){UI.toast('Erro ao salvar')}},
+loadGame(){try{const d=JSON.parse(localStorage.getItem('econVil'));if(!d)return;Object.assign(S.res,d.res);Object.assign(S.eco,d.eco);Object.assign(S.pol,d.pol);Object.assign(S.tech,d.tech);Object.assign(S.pop,d.pop);S.hist=d.hist||{gdp:[],pop:[],hap:[],infl:[],treas:[]};S.evts=d.evts||{cd:{}};if(d.tiles)d.tiles.forEach((r,y)=>r.forEach((t,x)=>{if(MD.tiles[y]&&MD.tiles[y][x]){MD.tiles[y][x].t=t.t;MD.tiles[y][x].b=t.b;MD.tiles[y][x].lv=t.lv||0}}));this.year=d.year||1;this.month=d.month||1;this.tick=d.tick||0;if(d.speed)this.speed=d.speed;if(d.paused!==undefined)this.paused=d.paused;if(d.selectedBuild)this.selectedBuild=d.selectedBuild;UI.updateAll();UI.toast('Jogo carregado!')}catch(e){UI.toast('Erro ao carregar')}},
+gameLoop(ts){requestAnimationFrame(ts2=>this.gameLoop(ts2));if(this.paused||!this.running)return;
+if(ts-this.lastTick>=1000/this.speed){this.lastTick=ts;this.tick++;
+this.month++;if(this.month>12){this.month=1;this.year++}
+Econ.update();Evts.check();News.update();
+if(this.tick%10===0)UI.updateAll();
+if(ts-this.lastSave>30000){this.saveGame();this.lastSave=ts}}
+Render.draw()}
+};
+
+window.addEventListener('load',()=>{
+const lb=document.querySelector('#loading-bar .fill');
+let progress=0;const iv=setInterval(()=>{progress+=10;lb.style.width=progress+'%';
+if(progress>=100){clearInterval(iv);setTimeout(()=>{document.getElementById('loading-screen').style.display='none';document.getElementById('app').style.display='flex';
+initRes();MapMod.init();Render.init();Snd.init();Particles.init();Tip.init();
+UI.updatePolicies();UI.updateTrade();UI.updateTech();UI.updateAll();
+G.running=true;G.lastTick=performance.now();G.lastSave=performance.now();G.gameLoop(performance.now());
+},300)}},80)});
+</script>
+</body>
+</html>
+

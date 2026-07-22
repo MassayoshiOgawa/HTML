@@ -1,0 +1,1576 @@
+================================================================================
+    PENDENCIAS DE IMPLEMENTACAO - ECONOMY VILLAGE
+    Auditoria gerada em: 2026-07-21
+    Arquivo auditado: index.html (551 linhas)
+================================================================================
+
+
+================================================================================
+RESUMO DA AUDITORIA
+================================================================================
+
+Total de itens verificados: 224
+Itens completos:           96
+Itens parciais:            48
+Itens ausentes:            80
+Percentual estimado:       42.9%
+
+Total de BUGS criticos encontrados: 14
+Total de funcionalidades mortas:    9
+Total de funcionalidades ausentes:  72
+
+
+================================================================================
+SECAO 1 - ESTRUTURA GERAL (12/17 = 70%)
+================================================================================
+
+1.1 CSS INTERNO
+Status: Completo
+Observacao: CSS completo e bem estruturado nas linhas 7-122.
+
+1.2 JAVASCRIPT INTERNO
+Status: Completo
+Observacao: JS completo nas linhas 182-548.
+
+1.3 UTF-8
+Status: Completo
+Observacao: Declarado em <meta charset="UTF-8"> (linha 4).
+
+1.4 RESPONSIVIDADE
+Status: Parcial
+Importancia: Media
+O que existe: Media queries basicas para 900px e 700px (linhas 120-121).
+O que falta: Media queries adicionais para tablets (1024px), 
+             ajuste de fontes para mobile, layouts empilhados em telas 
+             muito pequenas, touch targets maiores.
+
+1.5 SEM DEPENDENCIAS EXTERNAS
+Status: Completo
+
+1.6 CODIGO COMENTADO
+Status: Parcial
+Importancia: Baixa
+O que existe: Comentario "use strict" e "Game state defined below".
+O que falta: Comentarios explicativos em funcoes principais, 
+             secoes do jogo, formulas economicas.
+
+1.7 ARQUITETURA MODULAR
+Status: Completo
+Observacao: Codigos organizados em modulos (MapMod, Render, Econ, Snd,
+            Particles, Evts, Research, Build, Charts, News, UI, G).
+
+1.8 SEM CODIGO MORTO
+Status: Parcial
+Importancia: Media
+O que existe: Algumas funcoes/variaveis sem uso claro.
+O que falta: Auditoria completa de funcoes nao chamadas, 
+             variaveis declaradas nao utilizadas.
+
+1.9 SEM DUPLICACOES DESNECESSARIAS
+Status: Completo
+Observacao: Nao foram encontradas duplicacoes significativas.
+
+1.10 SEM CARACTERES CORROMPIDOS / SEM ERROS DE SINTAXE
+Status: Completo
+
+1.11 SEM FUNCOES VAZIAS
+Status: Completo
+Observacao: Todas as funcoes possuem implementacao.
+
+1.12 SEM VARIAVEIS INUTEIS
+Status: Parcial
+Importancia: Baixa
+O que existe: Algumas variaveis de estado podem nao ter uso efetivo.
+
+
+================================================================================
+SECAO 2 - INTERFACE (17/20 = 85%)
+================================================================================
+
+2.1 MENU PRINCIPAL
+Status: Completo
+Observacao: showMenu() na linha 481, modal com Salvar/Carregar/Manual/Novo.
+
+2.2 HUD
+Status: Completo
+Observacao: #top-bar com recursos, controles, data; #bottom-bar com stats.
+
+2.3 Paineis
+Status: Completo
+Observacao: Sidebar com 4 tabs, Right-panel com 4 tabs.
+
+2.4 CARDS
+Status: Completo
+Observacao: Classe .card utilizada extensivamente.
+
+2.5 MODAIS
+Status: Completo
+Observacao: Sistema de modal com overlay (linhas 68-72, 481-492).
+
+2.6 TOOLTIPS
+Status: Parcial
+Importancia: Media
+O que existe: Atributo title em elementos (tooltip nativo do browser).
+O que falta: Tooltip personalizado com CSS, posicionamento inteligente,
+             conteudo rico (descricao detalhada, dicas).
+
+2.7 BARRAS
+Status: Completo
+Observacao: .progress-bar com classe .fill (linhas 20-21).
+
+2.8 JANELAS
+Status: Completo
+
+2.9 BOTOES
+Status: Completo
+Observacao: Classes .primary, .danger, .success definidas.
+
+2.10 SCROLL PERSONALIZADO
+Status: Completo
+Observacao: ::-webkit-scrollbar estilizado (linha 11).
+
+2.11 CHECKBOX PERSONALIZADO
+Status: Parcial
+Importancia: Baixa
+O que existe: Apenas accent-color: var(--gold) (linha 19).
+O que falta: Checkbox completamente customizado com CSS puro,
+             aparecimento visual de marca, animacao de transicao.
+
+2.12 RADIO PERSONALIZADO
+Status: Ausente
+Importancia: Baixa
+O que deveria existir: Radio buttons customizados com tema medieval.
+O que existe: Nao ha radio buttons no jogo.
+
+2.13 SELECT PERSONALIZADO
+Status: Parcial
+Importancia: Baixa
+O que existe: Estilizacao basica de select (linha 18).
+O que falta: Select completamente customizado com dropdown animado,
+             seta customizada, hover states.
+
+2.14 SLIDER PERSONALIZADO
+Status: Completo
+Observacao: Range input estilizado com thumb customizado (linhas 16-17).
+
+2.15 PROGRESS PERSONALIZADO
+Status: Completo
+
+2.16 LAYOUT ORGANIZADO / ELEMENTOS ALINHADOS
+Status: Completo
+Observacao: Flexbox e grid utilizados corretamente.
+
+2.17 FUNCIONA EM DIFERENTES RESOLUCOES
+Status: Parcial
+Importancia: Media
+O que existe: Duas media queries (900px, 700px).
+O que falta: Mais breakpoints, testes em resolucoes variadas,
+             orientacao landscape/portrait.
+
+
+================================================================================
+SECAO 3 - TEMA VISUAL (10/12 = 83%)
+================================================================================
+
+3.1 MARROM
+Status: Completo
+Observacao: Variaveis --bg, --bg2, --bg3, --bg4 em tons marrom.
+
+3.2 BRONZE
+Status: Completo
+Observacao: --bronze: #8b6914 (linha 9).
+
+3.3 DOURADO
+Status: Completo
+Observacao: --gold: #c9a84c (linha 9).
+
+3.4 MADEIRA
+Status: Completo
+Observacao: --wood: #5a3a1a (linha 9).
+
+3.5 PERGAMINHO
+Status: Parcial
+Importancia: Baixa
+O que existe: Tons escuros de fundo.
+O que falta: Textura de pergaminho em paineis principais, 
+             textura de papel para modais.
+
+3.6 SOMBRAS
+Status: Completo
+Observacao: --shadow: 0 2px 8px rgba(0,0,0,0.5).
+
+3.7 HOVER
+Status: Completo
+Observacao: :hover em botoes, cards, itens de construcao.
+
+3.8 TRANSICOES
+Status: Completo
+Observacao: --transition: all 0.2s ease.
+
+3.9 MICRO ANIMACOES
+Status: Parcial
+Importancia: Baixa
+O que existe: Animacao pulse, slideIn, fadeIn, toastIn.
+O que falta: Animacoes em elementos de UI como numeros mudando,
+             barras preenchendo, cards aparecendo.
+
+3.10 RIPPLE
+Status: Ausente
+Importancia: Baixa
+O que deveria existir: Efeito ripple ao clicar botoes (material design).
+O que existe: Nao implementado.
+
+3.11 GLOW DOURADO
+Status: Completo
+Observacao: --glow: 0 0 8px rgba(201,168,76,0.3).
+
+3.12 INTERFACE CONSISTENTE
+Status: Completo
+
+
+================================================================================
+SECAO 4 - MAPA (10/12 = 83%)
+================================================================================
+
+4.1 TOP DOWN
+Status: Completo
+Observacao: Visao de cima com canvas 2D (Render.draw).
+
+4.2 GRID
+Status: Parcial
+Importancia: Media
+O que existe: Tiles em grid logico, calculo de posicao por grid.
+O que falta: Linhas de grid visiveis (toggle), indicador de snap.
+
+4.3 TILES
+Status: Completo
+Observacao: 4 tipos: GRASS, WATER, STONE, FOREST.
+
+4.4 ZOOM
+Status: Completo
+Observacao: Mouse wheel zoom (linha 291).
+
+4.5 ARRASTAR MAPA
+Status: Completo
+Observacao: Mousedown/mousemove drag (linhas 287-290).
+
+4.6 MINI MAPA
+Status: Completo
+Observacao: #minimap com canvas 160x120 (linha 42-43, 307-309).
+
+4.7 AGUA
+Status: Completo
+Observacao: Tiles WATER com animacao de onda (linha 301).
+
+4.8 ARVORES
+Status: Completo
+Observacao: Tiles FOREST com desenho de arvores (linhas 300).
+
+4.9 ROCHAS
+Status: Completo
+Observacao: Tiles STONE com desenho de pedras (linha 302).
+
+4.10 ESTRADAS
+Status: Parcial
+Importancia: Media
+O que existe: Construcao road disponivel, conecta areas.
+O que falta: Visual de estrada no mapa (tile visual diferente),
+             estradas conectando construcoes automaticamente.
+
+4.11 TERRENOS
+Status: Completo
+Observacao: 4 tipos de terreno com cores diferentes.
+
+4.12 CONSTRUCOES NO MAPA
+Status: Completo
+Observacao: Icones de construcoes desenhados nos tiles (linha 304).
+
+
+================================================================================
+SECAO 5 - CONSTRUCOES (20/37 = 54%)
+================================================================================
+
+5.1 LISTA DE CONSTRUCOES
+
+Casa:           Completo (custo, manutencao, pop+4, hap+2)
+Fazenda:        Completo (custo, manutencao, empregos, producao)
+Mina:           Completo (custo, manutencao, empregos, producao dupla)
+Mercado:        Completo (custo, comercio, empregos)
+Banco:          Completo (custo, manutencao, empregos)
+Prefeitura:     Completo (custo, manutencao, empregos)
+Hospital:       Completo (custo, manutencao, empregos, saude)
+Escola:         Completo (custo, manutencao, empregos, educacao)
+Ferreiro:       Completo (custo, manutencao, producao)
+Serraria:       Completo (custo, manutencao, producao, req floresta)
+Porto:          Completo (custo, manutencao, comercio, req agua)
+Armazem:        Completo (custo, manutencao)
+Estradas:       Completo (custo, infra)
+Pontes:         Completo (custo, infra, req agua)
+Muralhas:       Completo (custo, protecao)
+Praça:          AUSENTE - Nao existe construcao praça
+
+Construcoes extras presentes nao solicitadas:
+Pedreira, Padaria, Estabulo, Pesqueiro, Moinho, Capela, 
+Taverna, Poco, Jardim.
+
+5.2 CUSTO
+Status: Completo
+Observacao: Todas as construcoes possuem custo em recursos.
+
+5.3 MANUTENCAO
+Status: Completo
+Observacao: Todas as construcoes possuem manutencao mensal.
+
+5.4 PRODUCAO
+Status: Completo
+Observacao: Construcoes produtivas possuem campo prod.
+
+5.5 EMPREGOS
+Status: Completo
+Observacao: Campo jobs em todas as construcoes.
+
+5.6 EVOLUCAO
+Status: Ausente
+Importancia: Alta
+O que deveria existir: Sistema de evolucao de construcoes 
+    (Nivel 1 -> 2 -> 3 com melhorias de stats).
+O que existe: Construcoes sao estaticas, sem niveis.
+O que falta: 
+    - Campo level em cada construcao
+    - Custo de upgrade por nivel
+    - Bonus de producao/empregos por nivel
+    - Requisitos de nivel para construcoes avancadas
+
+5.7 MELHORIAS
+Status: Ausente
+Importancia: Alta
+O que deveria existir: Sistema de melhorias individuais 
+    para construcoes (ex:+producao, +empregos, +eficiencia).
+O que existe: Nenhum sistema de melhorias.
+O que falta:
+    - Lista de melhorias por tipo de construcao
+    - Custo de cada melhoria
+    - Efeitos especificos de cada melhoria
+
+5.8 SINERGIAS
+Status: Ausente
+Importancia: Media
+O que deveria existir: Bonus quando construcoes 
+    relacionadas estao proximas.
+O que existe: Nenhum sistema de sinergia.
+O que falta:
+    - Definicao de sinergias (ex: fazenda+moinho = bonus farinha)
+    - Calculo de distancia entre construcoes
+    - Bonus aplicados a construcoes sinergicas
+
+5.9 EFEITOS ECONOMICOS
+Status: Parcial
+Importancia: Media
+O que existe: Efeitos em felicidade, empregos, producao.
+O que falta: Efeitos em mercado local, valorizacao de terrenos,
+             bonus para construcoes vizinhas.
+
+
+================================================================================
+SECAO 6 - RECURSOS (14/18 = 78%)
+================================================================================
+
+6.1 RECURSOS PRESENTES
+
+Madeira:     Completo
+Pedra:       Completo
+Ferro:       Completo
+Argila:      Completo (definida, mas sem construcao que produza)
+Carvao:      Completo (definido, mas sem construcao que produza)
+Comida:      Completo
+Trigo:       Completo (definido, mas sem construcao que produza)
+Farinha:     Completo
+Pao:         Completo
+Peixe:       Completo
+Lã:          Completo (definida, mas sem construcao que produza)
+Tecidos:     Completo
+Animais:     Completo
+Luxo:        Completo (definido, mas SEM construcao que produza)
+Moedas:      Completo
+Ferramentas: Completo
+
+6.2 OURO (recurso)
+Status: Ausente
+Importancia: Media
+O que deveria existir: Recurso "Ouro" separado de "Moedas".
+O que existe: Apenas Moedas (coins) como moeda de troca.
+
+6.3 AGUA (recurso)
+Status: Ausente
+Importancia: Baixa
+O que deveria existir: Recurso "Agua" para construcoes e agricultura.
+O que existe: Nenhum recurso agua.
+
+6.4 ENERGIA (recurso)
+Status: Ausente
+Importancia: Baixa
+O que deveria existir: Recurso "Energia" para industria.
+O que existe: Nenhum recurso energia.
+
+6.5 PRODUTOS MANUFATURADOS (recurso)
+Status: Ausente
+Importancia: Media
+O que deveria existir: Categoria de recursos manufaturados.
+O que existe: Apenas ferramentas e tecidos.
+
+6.6 RECURSOS SEM PRODUCAO
+Importancia: Alta
+Problema: Argila, Carvao, Trigo, La, Luxo estao definidos mas
+    NENHUMA construcao os produz. Esses recursos nunca aumentam
+    naturalmente, apenas existem como 0 ou valores iniciais.
+    Exception: Animais produzidos pelo Estabulo.
+
+
+================================================================================
+SECAO 7 - POPULACAO (4/12 = 33%)
+================================================================================
+
+7.1 HABITANTES
+Status: Completo
+Observacao: S.pop.total, cresce/decresce com condicoes.
+
+7.2 IDADE
+Status: Ausente
+Importancia: Alta
+O que deveria existir: Sistema de idade dos habitantes 
+    (criancas, adultos, idosos), envelhecimento, mortalidade 
+    por idade, idade minima para trabalhar.
+O que existe: Populacao e apenas um numero.
+O que falta: 
+    - Idades individuais ou faixas etarias
+    - Taxa de natalidade/mortalidade por idade
+    - Trabalho apenas para faixa etaria ativa
+    - Aposentadoria
+
+7.3 EMPREGO / DESEMPREGO
+Status: Completo
+Observacao: Calculado a partir de jobs disponiveis vs populacao.
+
+7.4 PROFISSOES
+Status: Ausente
+Importancia: Alta
+O que deveria existir: Cidadãos com profissoes asignadas 
+    (agricultor, minerador, ferreiro, etc).
+O que existe: Emprego generico, todos trabalhadores sao equivalentes.
+O que falta:
+    - Lista de profissoes
+    - Assignacao automatica de profissoes
+    - Bonus/malus por profissao
+    - Profissao afeta felicidade e producao
+
+7.5 RENDA
+Status: Ausente
+Importancia: Alta
+O que deveria existir: Cada cidadao recebe renda pelo trabalho.
+O que existe: Nenhum sistema de salario individual.
+O que falta:
+    - Salario por profissao
+    - Renda afeta poder de compra
+    - Renda afeta satisfacao com impostos
+
+7.6 CONSUMO
+Status: Ausente
+Importancia: Media
+O que deveria existir: Cidadaos consomem recursos 
+    baseado em necessidades.
+O que existe: Demanda macro (para precos) mas sem consumo 
+    real de recursos pela populacao.
+O que falta:
+    - Consumo individual de comida, moradia, etc.
+    - Consumo afeta estoques
+    - Necessidades basicas vs desejos
+
+7.7 POUPANCA
+Status: Ausente
+Importancia: Baixa
+O que deveria existir: Cidadaos podem poupar dinheiro.
+O que existe: Nenhum sistema de poupanca.
+
+7.8 FELICIDADE
+Status: Completo
+Observacao: Calculada como media ponderada de sub-fatores.
+
+7.9 MIGRACAO
+Status: Parcial
+Importancia: Media
+O que existe: Populacao cresce se hap>70, diminui se hap<20.
+O que falta:
+    - Evento de migracao com condicoes
+    - Fatores pull/push
+    - Origem dos migrantes
+    - Custo de integracao
+
+7.10 MORTALIDADE
+Status: Parcial
+Importancia: Media
+O que existe: Populacao diminui se comida < 0.3 per capita 
+    ou hap < 20.
+O que falta:
+    - Taxa de mortalidade
+    - Mortalidade por idade
+    - Mortalidade por doenca
+    - Mortalidade por acidente
+
+7.11 NATALIDADE
+Status: Parcial
+Importancia: Media
+O que existe: Populacao cresce se hap>70, moradia e comida OK.
+O que falta:
+    - Taxa de natalidade
+    - Natalidade por idade
+    - Natalidade afetada por saude/educacao
+
+
+================================================================================
+SECAO 8 - EMPRESAS (0/10 = 0%)
+================================================================================
+
+8.1 CAPITAL
+Status: Ausente
+Importancia: Alta
+O que deveria existir: Cada construcao/empresa tem capital proprio.
+O que existe: Apenas tesouro global.
+
+8.2 LUCRO
+Status: Ausente
+Importancia: Alta
+O que deveria existir: Empresas calculam lucro 
+    (receita - custos).
+O que existe: Nenhum calculo de lucro por construcao.
+
+8.3 ESTOQUE
+Status: Ausente
+Importancia: Media
+O que deveria existir: Estoque individual por construcao.
+O que existe: Estoque global apenas.
+
+8.4 PRODUCAO (empresas)
+Status: Parcial
+Importancia: Media
+O que existe: Producao global somada de todas construcoes.
+O que falta: Producao individual rastreada.
+
+8.5 FUNCIONARIOS
+Status: Ausente
+Importancia: Media
+O que deveria existir: Funcionarios atribuidos a cada empresa.
+O que existe: Apenas contagem total de empregados.
+
+8.6 CUSTOS (empresas)
+Status: Parcial
+Importancia: Media
+O que existe: Manutencao global.
+O que falta: Custos individuais (salarios, materias-primas).
+
+8.7 FALENCIA
+Status: Ausente
+Importancia: Alta
+O que deveria existir: Construcoes podem quebrar se sem lucro.
+O que existe: Nenhum sistema de falencia.
+O que falta:
+    - Condicoes de falencia
+    - Alerta antes de fechar
+    - Opcao de socorrer ou deixar fechar
+    - Construcao fechada = sem producao/empregos
+
+8.8 EXPANSAO
+Status: Ausente
+Importancia: Media
+O que deveria existir: Empresas podem expandir.
+O que existe: Nenhum sistema de expansao.
+
+8.9 COMPETICAO
+Status: Ausente
+Importancia: Baixa
+O que deveria existir: Empresas competem por clientes.
+O que existe: Sem competicao.
+
+8.10 INVESTIMENTOS
+Status: Ausente
+Importancia: Media
+O que deveria existir: Opcao de investir em construcoes.
+O que existe: Investimento publico via slider apenas.
+
+
+================================================================================
+SECAO 9 - ECONOMIA (10/24 = 42%)
+================================================================================
+
+9.1 OFERTA
+Status: Completo
+Observacao: S.eco.sup[] calculado em Econ.prod().
+
+9.2 DEMANDA
+Status: Completo
+Observacao: S.eco.dem[] calculado em Econ.demand().
+
+9.3 ELASTICIDADE
+Status: Ausente
+Importancia: Media
+O que deveria existir: Elasticidade de demanda/oferta.
+O que existe: Relacao direta supply/demand sem elasticidade.
+
+9.4 PIB
+Status: Completo
+Observacao: Calculado em Econ.gdp().
+
+9.5 PIB PER CAPITA
+Status: Completo
+Observacao: Calculado em Econ.gdp().
+
+9.6 INFLACAO
+Status: Completo
+Observacao: Calculada em Econ.infl() com controle via checkbox.
+
+9.7 DEFLACAO
+Status: Parcial
+Importancia: Baixa
+O que existe: Inflacao pode ser negativa (Math.max(-10,...)).
+O que falta: Efeitos especificos de deflacao na economia.
+
+9.8 JUROS
+Status: Parcial
+Importancia: Alta
+O que existe: Slider intRate definido mas SEM EFEITO no jogo 
+    (BUG CRITICO - veja Secao 28).
+O que falta: Efeitos de juros em emprestimos, investimentos,
+             poupadores, inflacao.
+
+9.9 DIVIDA
+Status: Completo
+Observacao: Sistema de divida com emissao e quitacao.
+
+9.10 SUPERAVIT
+Status: Ausente
+Importancia: Media
+O que deveria existir: Indicador explicito de superavit.
+O que existe: Apenas resultado calculado implicitamente.
+
+9.11 DEFICIT
+Status: Ausente
+Importancia: Media
+O que deveria existir: Indicador explicito de deficit.
+O que existe: Tesouro negativo aciona emprestimo automatico.
+
+9.12 BALANCA COMERCIAL
+Status: Completo
+Observacao: S.eco.tb calculado em Econ.trade().
+
+9.13 MERCADO INTERNO
+Status: Parcial
+Importancia: Media
+O que existe: Comercio entre construcoes (implicito).
+O que falta: Sistema de mercado interno visivel.
+
+9.14 MERCADO EXTERNO
+Status: Parcial
+Importancia: Media
+O que existe: Importacao/exportacao automatica + manual.
+O que falta: Paises vizinhos, relacoes comerciais, tarifas reais.
+
+9.15 RESERVAS
+Status: Completo
+Observacao: Tesouro (S.eco.treas).
+
+9.16 PODER DE COMPRA
+Status: Ausente
+Importancia: Media
+O que deveria existir: Indicador de poder de compra da populacao.
+O que existe: Nao calculado.
+
+9.17 LIQUIDEZ
+Status: Ausente
+Importancia: Baixa
+O que deveria existir: Indicador de liquidez do mercado.
+
+9.18 FLUXO DE CAIXA
+Status: Parcial
+Importancia: Baixa
+O que existe: Entradas e saidas do tesouro.
+O que falta: Demonstracao detalhada de fluxo de caixa.
+
+9.19 INVESTIMENTOS
+Status: Parcial
+Importancia: Media
+O que existe: Investimento publico via slider.
+O que falta: Investimento privado, retorno sobre investimento.
+
+9.20 CRESCIMENTO
+Status: Parcial
+Importancia: Media
+O que existe: PIB muda ao longo do tempo.
+O que falta: Indicador de taxa de crescimento, meta de crescimento.
+
+9.21 RECESSAO
+Status: Ausente
+Importancia: Media
+O que deveria existir: Definicao de recessao (PIB cai 2+ trimestres).
+O que existe: Nenhum sistema de recessao.
+
+9.22 CRISES
+Status: Parcial
+Importancia: Alta
+O que existe: Eventos aleatorios (seca, enchente, etc).
+O que falta: Crises economicas sistemicas (bancarias, 
+             hiperinflacao, colapso de credito).
+
+9.23 BOLHAS
+Status: Ausente
+Importancia: Baixa
+O que deveria existir: Sistema de bolhas economicas.
+O que existe: Nao implementado.
+
+9.24 ESCASSEZ / EXCESSO DE PRODUCAO
+Status: Parcial
+Importancia: Media
+O que existe: Precos refletem escassez via ratio supply/demand.
+O que falta: Efeitos de escassez extrema (fome, motins),
+             efeitos de excesso (desperdicio, queda de preco).
+
+
+================================================================================
+SECAO 10 - BANCO (2/6 = 33%)
+================================================================================
+
+10.1 EMPRESTIMOS
+Status: Parcial
+Observacao: Emissao de titulos (+50c, divida: 60c) e quitacao.
+O que falta: Emprestimos com juros, parcelamento, garantias.
+
+10.2 JUROS (BANCO)
+Status: Ausente
+Importancia: Alta
+O que deveria existir: Banco cobra juros sobre divida.
+O que existe: Divida cresce por debtInt (5%) mas slider intRate 
+    nao afeta nada (BUG).
+O que falta:
+    - intRate afeta taxa de juros da divida
+    - Juros afetam emprestimos e poupadores
+    - Juros altos desestimulam investimento
+
+10.3 CREDITO
+Status: Ausente
+Importancia: Alta
+O que deveria existir: Sistema de credito para construcoes.
+O que existe: Nenhum sistema de credito.
+
+10.4 RESERVA
+Status: Parcial
+Observacao: Tesouro funciona como reserva.
+O que falta: Reserva bancaria separada, requisitos de reserva.
+
+10.5 FINANCIAMENTOS
+Status: Ausente
+Importancia: Media
+O que deveria existir: Financiamento de construcoes.
+O que existe: Nao implementado.
+
+10.6 INADIMPLENCIA
+Status: Ausente
+Importancia: Media
+O que deveria existir: Pagadores que nao pagam dividas.
+O que existe: Nao implementado.
+
+
+================================================================================
+SECAO 11 - IMPOSTOS (7/8 = 88%)
+================================================================================
+
+11.1 IMPOSTO DE RENDA
+Status: Completo
+Observacao: incTax usado em tax() linha 322.
+BUG: Calculo de satisfacao usa p.incTax (undefined) em vez 
+     de S.pol.incTax - satisfacao de impostos sempre 100%.
+
+11.2 COMERCIAL
+Status: Completo
+Observacao: tradTax usado em tax() linha 322.
+
+11.3 INDUSTRIAL
+Status: Completo
+Observacao: indTax usado em tax() linha 322.
+
+11.4 AGRICOLA
+Status: Completo
+Observacao: farmTax usado em tax() linha 322.
+
+11.5 EXPORTACAO
+Status: Completo
+Observacao: expTax usado em tax() linha 322.
+
+11.6 IMPORTACAO
+Status: Ausente
+Importancia: Media
+O que deveria existir: Imposto sobre importacoes.
+O que existe: Apenas expTax sobre balanca comercial.
+O que falta: Imposto especifico sobre importacoes.
+
+11.7 PROPRIEDADE
+Status: Completo
+Observacao: propTax usado em tax() linha 322.
+
+11.8 LUXO
+Status: BUG CRITICO
+Importancia: Alta
+O que existe: Slider luxTax existe na UI.
+O que falta: luxTax NAO e usado em nenhuma funcao de 
+    calculo de impostos. Slider morto.
+
+
+================================================================================
+SECAO 12 - SLIDERS (7/11 = 64%)
+================================================================================
+
+12.1 JUROS (intRate)
+Status: BUG CRITICO
+O que existe: Slider na UI (0-20%).
+O que falta: intRate nao afeta nenhuma calculo. Slider morto.
+
+12.2 SALARIO MINIMO (minWage)
+Status: BUG CRITICO
+O que existe: Slider na UI (0-10).
+O que falta: minWage nao afeta nenhuma calculo. Slider morto.
+
+12.3 EDUCACAO (eduInv)
+Status: Completo
+Observacao: Afeta S.pop.edu (linha 328) e gastos (linha 323).
+
+12.4 SAUDE (hpInv)
+Status: Completo
+Observacao: Afeta S.pop.hp (linha 327) e gastos (linha 323).
+
+12.5 SEGURANCA (safeInv)
+Status: Completo
+Observacao: Afeta S.pop.sf (linha 329) e gastos (linha 323).
+
+12.6 INFRAESTRUTURA (infraInv)
+Status: BUG
+Importancia: Alta
+O que existe: Slider na UI, gastos no tesouro (linha 323).
+O que falta: infraInv NAO afeta S.pop.inf (linha 330). 
+    S.pop.inf so conta estradas, ignora o slider.
+    Efeito: Slider gasta dinheiro mas nao melhora infraestrutura.
+
+12.7 PESQUISA
+Status: Ausente
+Importancia: Media
+O que deveria existir: Slider de investimento em pesquisa.
+O que existe: Nao existe slider de pesquisa.
+
+12.8 ORCAMENTO (pubInv)
+Status: Completo
+Observacao: Afeta gastos publicos (linha 323).
+
+12.9 CONTROLE DE PRECOS
+Status: Ausente
+Importancia: Media
+O que deveria existir: Slider ou controle de precos.
+O que existe: Nao implementado.
+
+12.10 EMISSAO MONETARIA
+Status: Ausente
+Importancia: Media
+O que deveria existir: Controle de oferta monetaria.
+O que existe: Nao implementado.
+
+12.11 SUBSIDIOS
+Status: Parcial
+Importancia: Media
+O que existe: Checkbox subAgri para subsidio agricola.
+O que falta: Slider de subsidios gerais.
+
+
+================================================================================
+SECAO 13 - CHECKBOXES (7/12 = 58%)
+================================================================================
+
+13.1 LIVRE MERCADO (freeMarket)
+Status: BUG
+Importancia: Alta
+O que existe: Checkbox na UI.
+O que falta: freeMarket nao afeta nenhuma calculo. Checkbox morto.
+
+13.2 ECONOMIA MISTA
+Status: Ausente
+Importancia: Media
+O que deveria existir: Checkbox para economia mista.
+
+13.3 CONTROLE ESTATAL
+Status: Ausente
+Importancia: Media
+O que deveria existir: Checkbox para controle estatal.
+
+13.4 SUBSIDIOS (subAgri)
+Status: Completo
+Observacao: Afeta precos de comida (linha 319).
+
+13.5 SEGURO DESEMPREGO (unempIns)
+Status: Completo
+Observacao: Afeta gastos publicos (linha 323).
+
+13.6 SALARIO MINIMO (minWageLaw)
+Status: BUG
+Importancia: Alta
+O que existe: Checkbox na UI.
+O que falta: minWageLaw nao afeta nenhuma calculo. Checkbox morto.
+
+13.7 AUXILIO SOCIAL (socAid)
+Status: Completo
+Observacao: Afeta gastos publicos (linha 323).
+
+13.8 BANCO CENTRAL INDEPENDENTE (centBank)
+Status: BUG CRITICO
+Importancia: Alta
+O que existe: Definido em S.pol (linha 263) como centBank:false.
+O que falta: 
+    - NAO aparece na UI (nao tem checkbox)
+    - NAO afeta nenhuma calculo
+    - Variavel completamente morta
+
+13.9 CONTROLE INFLACIONARIO (inflCtrl)
+Status: Completo
+Observacao: Reduz pressao inflacionaria pela metade (linha 335).
+
+13.10 LEI AMBIENTAL (envLaw)
+Status: BUG
+Importancia: Media
+O que existe: Checkbox na UI.
+O que falta: envLaw nao afeta nenhuma calculo. Checkbox morto.
+
+13.11 LEI TRABALHISTA (laborLaw)
+Status: BUG
+Importancia: Media
+O que existe: Checkbox na UI.
+O que falta: laborLaw nao afeta nenhuma calculo. Checkbox morto.
+
+13.12 TARIFAS INTERNACIONAIS (tariffs)
+Status: Completo
+Observacao: Multiplica balanca comercial por 1.2 (linha 336).
+
+
+================================================================================
+SECAO 14 - SISTEMA DE CARTAS/EVENTOS (7/9 = 78%)
+================================================================================
+
+14.1 EXISTE
+Status: Completo
+Observacao: Array EVTS com 18 eventos, modulo Evts.
+
+14.2 GERACAO ALEATORIA
+Status: Completo
+Observacao: Eventos selecionados por peso aleatorio.
+
+14.3 EVENTOS
+Status: Completo
+Observacao: 18 eventos definidos com escolhas.
+
+14.4 CADEIAS DE EVENTOS
+Status: Ausente
+Importancia: Media
+O que deveria existir: Eventos que desencadeiam outros eventos.
+O que existe: Eventos independentes, sem encadeamento.
+O que falta:
+    - Eventos com consequencias futuras
+    - Cadeias de 2-3 eventos
+    - Conexao entre eventos relacionados
+
+14.5 CONSEQUENCIAS
+Status: Completo
+Observacao: Cada escolha tem efeitos (fx) e custos (cost).
+
+14.6 EFEITOS OCULTOS
+Status: Ausente
+Importancia: Baixa
+O que deveria existir: Efeitos nao visiveis imediatamente.
+O que existe: Todos os efeitos sao diretos e visiveis.
+
+14.7 PROBABILIDADE
+Status: Completo
+Observacao: Campo 'w' (peso) controla probabilidade.
+
+14.8 CONDICOES
+Status: Parcial
+Observacao: Alguns eventos tem campo 'cond' (inflation, riot, 
+            animals, tech_discovery). Nem todos precisam.
+
+14.9 PERSISTENCIA
+Status: Completo
+Observacao: Sistema de cooldown (S.evts.cd) impede repeticao 
+            imediata.
+
+
+================================================================================
+SECAO 15 - IA ECONOMICA (0/12 = 0%)
+================================================================================
+
+15.1-15.12 CONSUMIDORES, EMPRESAS, GOVERNO, MERCADO, BANCOS,
+           PRODUCAO, CONSUMO, INVESTIMENTOS, FALENCIAS,
+           CONTRATACOES, DEMISSOES, MIGRACAO
+
+Status: TODOS AUSENTES como IA autonoma
+Importancia: Critica
+
+O que existe: Apenas formulas matematicas (Econ.prod, 
+    Econ.demand, Econ.prices). Nao ha agentes IA.
+
+O que falta: Sistema de agentes autonomos que tomam decisoes:
+    - Consumidores escolhem onde comprar
+    - Empresas decidem producao, precos, contratacao
+    - Governo toma politicas automaticamente
+    - Bancos concedem/negam emprestimos
+    - Empresas quebram ou expandem
+    - Trabalhadores sao contratados/demitidos
+
+
+================================================================================
+SECAO 16 - MERCADO (5/6 = 83%)
+================================================================================
+
+16.1 OFERTA
+Status: Completo
+
+16.2 DEMANDA
+Status: Completo
+
+16.3 AJUSTE AUTOMATICO DE PRECOS
+Status: Completo
+Observacao: Precos ajustam suavemente baseado em supply/demand.
+
+16.4 ESCASSEZ
+Status: Parcial
+Observacao: Preco sobe com escassez. Falta efeitos colaterais.
+
+16.5 EXCESSO
+Status: Parcial
+Observacao: Preco cai com excesso. Falta efeitos colaterais.
+
+16.6 IMPORTACAO / EXPORTACAO
+Status: Completo
+
+
+================================================================================
+SECAO 17 - PESQUISA (4/4 = 100%)
+================================================================================
+
+17.1 ARVORE TECNOLOGICA
+Status: Completo
+Observacao: 7 categorias com 3 niveis cada.
+
+17.2 TECNOLOGIAS
+Status: Completo
+Observacao: 21 tecnologias no total.
+
+17.3 DESBLOQUEIOS
+Status: Completo
+Observacao: Requisito de nivel e custo para desbloquear.
+
+17.4 PROGRESSAO
+Status: Completo
+Observacao: Progressao sequencial (nivel 0, 1, 2).
+
+
+================================================================================
+SECAO 18 - GRAFICOS (5/13 = 38%)
+================================================================================
+
+18.1-18.2 PIZZA / ROSCA
+Status: PIZZA Completo / ROSCA Ausente
+Observacao: Charts.pie existe mas nao ha tipo rosca.
+
+18.3 LINHA
+Status: Completo
+Observacao: Charts.line implementado.
+
+18.4 AREA
+Status: Parcial
+Observacao: Charts.line tem fill parcial, mas nao e grafico 
+            de area dedicado.
+
+18.5 BARRA / COLUNAS
+Status: Completo
+Observacao: Charts.bar implementado.
+
+18.6 RADAR
+Status: Ausente
+Importancia: Baixa
+
+18.7 HISTOGRAMA
+Status: Ausente
+Importancia: Baixa
+
+18.8 HEATMAP
+Status: Ausente
+Importancia: Baixa
+
+18.9 INDICADORES
+Status: Parcial
+Observacao: KPIs no dashboard. Sem indicadores em graficos.
+
+18.10 VELOCIMETRO
+Status: Completo
+Observacao: Charts.gauge implementado.
+
+18.11 MINI GRAFICOS
+Status: Ausente
+Importancia: Baixa
+
+18.12 TODOS ANIMADOS
+Status: Ausente
+Importancia: Baixa
+O que existe: Graficos sao redesenhados a cada update.
+O que falta: Animacao de transicao entre valores.
+
+18.13 BUG CRITICO - GRAFICOS NAO FUNCIONAM
+Importancia: Critica
+Problema: UI.updateCharts() referencia canvas IDs que NAO 
+    existem no HTML: chart-gdp, chart-pop, chart-happy, 
+    chart-infl, chart-treas, chart-build, chart-res, 
+    chart-hg, chart-hpg.
+    Nenhum desses elementos e criado dinamicamente.
+    Resultado: aba Graficos mostra NADA. Falha silenciosa.
+
+
+================================================================================
+SECAO 19 - DASHBOARD (4/5 = 80%)
+================================================================================
+
+19.1 KPIS
+Status: Completo
+Observacao: Grid KPIs com 6 indicadores no overview.
+
+19.2 CARDS
+Status: Completo
+
+19.3 INDICADORES
+Status: Completo
+Observacao: KPIs servem como indicadores.
+
+19.4 ALERTAS
+Status: Parcial
+Observacao: Toast messages existem. Falta sistema de alertas
+            persistentes para situacoes criticas.
+
+19.5 RESUMO FINANCEIRO
+Status: Completo
+Observacao: Secao "Resumo Financeiro" no overview.
+
+
+================================================================================
+SECAO 20 - HISTORICO (1/5 = 20%)
+================================================================================
+
+20.1 TIMELINE
+Status: Ausente
+Importancia: Media
+O que deveria existir: Timeline visual de eventos.
+O que existe: Dados historicos (S.hist) mas sem UI de timeline.
+
+20.2 EVENTOS
+Status: Parcial
+Observacao: News ticker com textos fixos (10 textos).
+O que falta: Historico de eventos jogados.
+
+20.3 FILTROS
+Status: Ausente
+Importancia: Baixa
+
+20.4 BUSCA
+Status: Ausente
+Importancia: Baixa
+
+20.5 CATEGORIAS
+Status: Ausente
+Importancia: Baixa
+
+
+================================================================================
+SECAO 21 - SAVE (4/4 = 100%)
+================================================================================
+
+21.1 LOCALSTORAGE
+Status: Completo
+Observacao: Chave 'econVil'.
+
+21.2 AUTOSAVE
+Status: Completo
+Observacao: A cada 30 segundos (linha 537).
+
+21.3 CARREGAMENTO
+Status: Completo
+Observacao: loadGame() restaura estado.
+
+21.4 PERSISTENCIA COMPLETA
+Status: Parcial
+O que falta: Nao salva G.speed, G.paused, G.selectedBuild.
+
+
+================================================================================
+SECAO 22 - MANUAL (1/7 = 14%)
+================================================================================
+
+22.1 EXISTE
+Status: Completo
+Observacao: showManual() na linha 488.
+
+22.2 EXPLICACOES
+Status: Parcial
+Observacao: Secao "Como Jogar" basica.
+
+22.3 ECONOMIA
+Status: Parcial
+Observacao: Paragrafo curto sobre oferta/demanda/inflacao.
+
+22.4 IMPOSTOS
+Status: Ausente
+O que falta: Explicacao de cada tipo de imposto.
+
+22.5 PRODUCAO
+Status: Ausente
+O que falta: Explicacao do sistema de producao.
+
+22.6 OFERTA / DEMANDA
+Status: Parcial
+Observacao: Mencionado superficialmente.
+
+22.7 OBJETIVOS
+Status: Ausente
+O que falta: Objetivos do jogo, como vencer.
+
+22.8 INTERFACE
+Status: Ausente
+O que falta: Guia da interface, significado de cada botao.
+
+
+================================================================================
+SECAO 23 - AUDIO (3/3 = 100%)
+================================================================================
+
+23.1 WEB AUDIO API
+Status: Completo
+Observacao: AudioContext com fallback (linha 340).
+
+23.2 SONS
+Status: Completo
+Observacao: 4 tipos: click, build, coin, alert.
+
+23.3 FEEDBACK SONORO
+Status: Completo
+Observacao: Sons em acoes do usuario e eventos.
+
+
+================================================================================
+SECAO 24 - PARTICULAS (2/7 = 29%)
+================================================================================
+
+24.1 POEIRA
+Status: Completo
+Observacao: Particles.dust() na linha 347.
+
+24.2 MOEDAS
+Status: Completo
+Observacao: Particles.coin() na linha 347.
+
+24.3 BRILHO
+Status: Ausente
+Importancia: Baixa
+
+24.4 FOLHAS
+Status: Ausente
+Importancia: Baixa
+
+24.5 FUMACA
+Status: Ausente
+Importancia: Baixa
+
+24.6 CHUVA
+Status: Ausente
+Importancia: Baixa
+
+24.7 NEVE
+Status: Ausente
+Importancia: Baixa
+
+
+================================================================================
+SECAO 25 - PERFORMANCE (3/7 = 43%)
+================================================================================
+
+25.1 REQUESTANIMATIONFRAME
+Status: Completo
+Observacao: Usado em gameLoop (linha 532).
+
+25.2 EVENT DELEGATION
+Status: Ausente
+Importancia: Media
+O que existe: Event listeners individuais em cada elemento.
+O que falta: Event delegation no container pai para reduzir 
+            listeners.
+
+25.3 OBJETOS REUTILIZADOS
+Status: Parcial
+Observacao: Canvas reutilizado. Particles criam/destruem DOM.
+
+25.4 POOLING
+Status: Ausente
+Importancia: Baixa
+O que existe: Particles criam DOM elements diretamente.
+O que falta: Object pool para particulas.
+
+25.5 SEM LOOPS DESNECESSARIOS
+Status: Parcial
+Observacao: Econ.update() roda a cada tick com multiplas 
+            iteracoes sobre MD.tiles.flat().
+
+25.6 BOA ORGANIZACAO
+Status: Completo
+
+25.7 SEM VAZAMENTOS DE MEMORIA
+Status: Parcial
+Observacao: Particles removem apos 1s. Canvas nao 
+            tem listeners leak. Pode haver leak no 
+            news-ticker animation.
+
+
+================================================================================
+SECAO 26 - BALANCEAMENTO (4/7 = 57%)
+================================================================================
+
+26.1 ECONOMIA ESTAVEL
+Status: Parcial
+Observacao: Producao de 5% por tick pode ser lenta demais.
+            Recursos como argila, carvao, trigo, la nunca 
+            sao produzidos - economia parcialmente travada.
+
+26.2 CRISES POSSIVEIS
+Status: Completo
+Observacao: 18 eventos com potencial de crise.
+
+26.3 CRESCIMENTO POSSIVEL
+Status: Completo
+Observacao: Populacao e PIB podem crescer.
+
+26.4 DECISOES IMPACTAM O JOGO
+Status: Parcial
+Observacao: 9 controles nao fazem nada (BUGS).
+
+26.5 NAO EXISTE ESTRATEGIA CLARAMENTE DOMINANTE
+Status: Parcial
+Observacao: Sem testes, dificil avaliar.
+
+26.6 EXISTE RISCO NAS ESCOLHAS
+Status: Completo
+
+26.7 EXISTE RECOMPENSA NAS ESCOLHAS
+Status: Completo
+
+
+================================================================================
+SECAO 27 - UX (6/8 = 75%)
+================================================================================
+
+27.1 INTERFACE INTUITIVA
+Status: Completo
+
+27.2 NAVEGACAO CLARA
+Status: Completo
+Observacao: Sistema de tabs bem definido.
+
+27.3 FEEDBACK VISUAL
+Status: Completo
+Observacao: Hover, glow, selected states, toasts.
+
+27.4 FEEDBACK SONORO
+Status: Completo
+
+27.5 TOOLTIPS UTEIS
+Status: Parcial
+Observacao: Apenas atributo title nativo do browser.
+
+27.6 TEXTOS LEGIVEIS
+Status: Completo
+
+27.7 CONTRASTE ADEQUADO
+Status: Completo
+
+27.8 HIERARQUIA VISUAL CONSISTENTE
+Status: Completo
+
+
+================================================================================
+SECAO 28 - BUGS E PROBLEMAS GERAIS
+================================================================================
+
+28.1 BUG CRITICO: SATISFACAO DE IMPOSTOS SEMPRE 100%
+Importancia: Critica
+Localizacao: index.html:326
+Problema: p.ts = Math.max(0, 100 - N(p.incTax) * 3)
+    p = S.pop, entao p.incTax = undefined
+    N(undefined) = 0, logo p.ts = 100 sempre.
+Correcao necessaria: Usar S.pol.incTax em vez de p.incTax.
+
+28.2 BUG CRITICO: ABAS DE GRAFICOS VAZIAS
+Importancia: Critica
+Localizacao: index.html:453
+Problema: Canvas IDs (chart-gdp, chart-pop, etc.) nao 
+    existem no HTML. Funcoes Charts.* retornam silenciosamente.
+Correcao necessaria: Criar canvas elements no HTML ou gerar
+    dinamicamente antes de desenhar.
+
+28.3 BUG CRITICO: SLIDER luxTax NAO FUNCIONA
+Importancia: Alta
+Localizacao: index.html:322 (Econ.tax)
+Problema: luxTax definido na UI mas nao usado em nenhum 
+    calculo de imposto.
+Correcao necessaria: Adicionar luxTax ao calculo de tax().
+
+28.4 BUG CRITICO: SLIDER minWage NAO FUNCIONA
+Importancia: Alta
+Problema: minWage definido na UI mas nao afeta nada.
+
+28.5 BUG CRITICO: SLIDER intRate NAO FUNCIONA
+Importancia: Alta
+Problema: intRate definido na UI mas nao afeta juros 
+    nem divida nem economia.
+
+28.6 BUG: SLIDER infraInv NAO AFETA SATISFACAO
+Importancia: Alta
+Localizacao: index.html:330
+Problema: p.inf conta apenas estradas, ignora infraInv.
+    Slider gasta dinheiro mas nao melhora infra.
+
+28.7 BUG: CHECKBOX freeMarket NAO FUNCIONA
+Importancia: Alta
+Problema: Definido na UI mas nao afeta nenhuma calculo.
+
+28.8 BUG: CHECKBOX minWageLaw NAO FUNCIONA
+Importancia: Alta
+Problema: Definido na UI mas nao afeta nenhuma calculo.
+
+28.9 BUG: CHECKBOX envLaw NAO FUNCIONA
+Importancia: Media
+Problema: Definido na UI mas nao afeta nenhuma calculo.
+
+28.10 BUG: CHECKBOX laborLaw NAO FUNCIONA
+Importancia: Media
+Problema: Definido na UI mas nao afeta nenhuma calculo.
+
+28.11 BUG: centBank DEFINIDO MAS AUSENTE DA UI
+Importancia: Alta
+Localizacao: index.html:263
+Problema: S.pol.centBank definido mas sem checkbox 
+    e sem efeito.
+
+28.12 BUG: RECURSOS SEM PRODUCAO
+Importancia: Alta
+Problema: Argila, Carvao, Trigo, La, Luxo estao definidos 
+    mas NENHUMA construcao os produz. Esses recursos 
+    permanecem em 0 para sempre (exceto valores iniciais).
+
+28.13 BUG: PRODUCAO MENSAL REDUZIDA A 5%
+Importancia: Media
+Localizacao: index.html:316
+Problema: S.res[k] += S.eco.sup[k] * .05
+    Cada tick = 1 mes, mas producao e multiplicada por 0.05.
+    Resultado: Producao real e 5% da declarada por mes.
+Correcao necessaria: Multiplicador deve ser 1.0 (ou ajustar 
+    valores de producao).
+
+28.14 BUG: SALVAMENTO INCOMPLETO
+Importancia: Baixa
+Problema: saveGame() nao persiste G.speed, G.paused, 
+    G.selectedBuild.
+
+
+================================================================================
+PENDENCIAS POR PRIORIDADE
+================================================================================
+
+=== CRITICA (4 itens) ===
+1. Sistema de IA economica autonoma (agentes)
+2. Bug: satisfacao de impostos sempre 100% (linha 326)
+3. Bug: abas de graficos completamente vazias
+4. Sistema de evolucao/melhorias de construcoes
+
+=== ALTA (14 itens) ===
+5. Bug: luxTax slider nao funciona
+6. Bug: minWage slider nao funciona
+7. Bug: intRate slider nao funciona
+8. Bug: infraInv nao afeta satisfacao
+9. Bug: freeMarket checkbox nao funciona
+10. Bug: minWageLaw checkbox nao funciona
+11. Bug: centBank ausente da UI
+12. Bug: recursos sem producao (argila, carvao, trigo, la, luxo)
+13. Sistema de empresas (capital, lucro, falencia)
+14. Sistema de profissoes
+15. Sistema de renda
+16. Sistema de idade/populacao
+17. Sistema de sinergias entre construcoes
+18. Manual completo com todas as mecanicas
+
+=== MEDIA (22 itens) ===
+19. Bug: envLaw checkbox nao funciona
+20. Bug: laborLaw checkbox nao funciona
+21. Bug: producao mensal 5% (linha 316)
+22. Elasticidade de demanda/oferta
+23. Superavit/D deficit explicitos
+24. Poder de compra
+25. Crescimento/recessao explicitos
+26. Cadeias de eventos
+27. Imposto de importacao
+28. Slider de pesquisa
+29. Slider de controle de precos
+30. Slider de emissao monetaria
+31. Checkbox economia mista
+32. Checkbox controle estatal
+33. Historico com timeline
+34. Tooltip personalizado
+35. Grid visivel no mapa
+36. Melhor visual de estradas no mapa
+37. Responsividade aprimorada
+38. Event delegation
+39. Comentarios no codigo
+
+=== BAIXA (32 itens) ===
+40. Recurso Ouro separado
+41. Recurso Agua
+42. Recurso Energia
+43. Produtos manufaturados
+44. Economia mista / Controle estatal
+45. Rosca como tipo de grafico
+46. Radar chart
+47. Histograma
+48. Heatmap
+49. Mini graficos
+50. Animacao em graficos
+51. Poeira/brilho/folhas/fumaca/chuva/neve
+52. Object pooling
+53. Radio personalizado
+54. Checkbox completamente customizado
+55. Select completamente customizado
+56. Ripple effect
+57. Textura de pergaminho
+58. Micro animacoes mais detalhadas
+59. Filtros no historico
+60. Busca no historico
+61. Categorias no historico
+62. Efeitos ocultos em eventos
+63. Deflacao com efeitos especificos
+64. Liquidez
+65. Fluxo de caixa detalhado
+66. Reserva bancaria
+67. Inadimplencia
+68. Financiamentos
+69. Bolhas economicas
+70. Salvar G.speed/paused/selectedBuild
+71. Pooling de particulas
+72. Mais breakpoints de media query
+
+
+================================================================================
+FIM DA AUDITORIA
+================================================================================
