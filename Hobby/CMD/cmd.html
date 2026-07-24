@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>C:\Windows\System32\cmd.exe</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
+  #terminal {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    padding: 8px 10px;
+    font-family: 'Consolas', 'Lucida Console', 'Courier New', monospace;
+    font-size: 14px;
+    color: #cccccc;
+    background: #0c0c0c;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-y: auto;
+    outline: none;
+    line-height: 1.2;
+    caret-color: #cccccc;
+  }
+  #terminal::-webkit-scrollbar { width: 16px; }
+  #terminal::-webkit-scrollbar-track { background: #0c0c0c; }
+  #terminal::-webkit-scrollbar-thumb { background: #444; border: 3px solid #0c0c0c; }
+  #terminal::-webkit-scrollbar-thumb:hover { background: #555; }
+  .input-line { display: inline; padding: 0; }
+  #input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #cccccc;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    width: 80%;
+    caret-color: #cccccc;
+  }
+  #cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: #cccccc;
+    animation: blink 1s step-end infinite;
+    vertical-align: baseline;
+    margin-bottom: 0;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+  ::selection { background: #ffffff; color: #000000; }
+</style>
+</head>
+<body>
+<div id="terminal" tabindex="0">
+<div id="output"></div>
+<div class="input-line">
+  <span id="prompt">C:\Users\leandro.ogawa&gt;</span>
+  <input id="input" type="text" autofocus spellcheck="false" autocomplete="off">
+  <span id="cursor"></span>
+</div>
+</div>
+
+<script>
+const output = document.getElementById('output');
+const input = document.getElementById('input');
+const terminal = document.getElementById('terminal');
+const promptSpan = document.getElementById('prompt');
+const cursor = document.getElementById('cursor');
+
+let currentDir = 'C:\\Users\\leandro.ogawa';
+let commandHistory = [];
+let historyIndex = -1;
+
+const asciiArt = [
+  '',
+  'Microsoft Windows [Versão 10.0.19045.3208]',
+  '(c) Microsoft Corporation. Todos os direitos reservados.',
+  ''
+];
+
+const helpText = [
+  '',
+  '╔══════════════════════════════════════════════════════════════╗',
+  '║                     COMANDOS DISPONÍVEIS                   ║',
+  '╠══════════════════════════════════════════════════════════════╣',
+  '║                                                            ║',
+  '║  help        - Mostra esta lista de comandos               ║',
+  '║  dir         - Lista os arquivos do diretório atual        ║',
+  '║  cls         - Limpa a tela                                ║',
+  '║  echo        - Exibe uma mensagem                          ║',
+  '║  date        - Mostra a data atual                         ║',
+  '║  time        - Mostra a hora atual                         ║',
+  '║  ver         - Mostra a versão do Windows                  ║',
+  '║  color       - Altera as cores do console                  ║',
+  '║  title       - Define o título da janela                   ║',
+  '║  ipconfig    - Mostra configuração de rede                 ║',
+  '║  hostname    - Mostra o nome do computador                 ║',
+  '║  whoami      - Mostra o usuário atual                      ║',
+  '║  tasklist    - Lista processos em execução                 ║',
+  '║  systeminfo  - Mostra informações do sistema               ║',
+  '║  tree        - Mostra estrutura de diretórios em árvore    ║',
+  '║  ping        - Testa conectividade de rede                 ║',
+  '║  exit        - Fecha o prompt de comando                   ║',
+  '║                                                            ║',
+  '╚══════════════════════════════════════════════════════════════╝',
+  ''
+];
+
+const dirOutput = [
+  '',
+  ' Volume na unidade C não tem etiqueta.',
+  ' Número de Série do Volume: 4C2E-ABCD',
+  '',
+  ' Diretório de C:\\Users\\leandro.ogawa',
+  '',
+  '24/07/2026  10:23    <DIR>          .',
+  '24/07/2026  10:23    <DIR>          ..',
+  '24/07/2026  08:15    <DIR>          Desktop',
+  '24/07/2026  09:30    <DIR>          Documents',
+  '24/07/2026  07:45    <DIR>          Downloads',
+  '24/07/2026  06:00    <DIR>          Music',
+  '24/07/2026  05:30    <DIR>          Pictures',
+  '24/07/2026  04:00    <DIR>          Videos',
+  '24/07/2026  10:20    <DIR>          AppData',
+  '               0 Arquivo(s)              0 bytes',
+  '               9 Dir(s)  256.000.000.000 bytes livres',
+  ''
+];
+
+const ipconfigOutput = [
+  '',
+  'Configuração de IP do Windows',
+  '',
+  'Adaptador Ethernet Ethernet:',
+  '',
+  '   Sufixo DNS específico de conexão: .home',
+  '   Endereço IPv4. . . . . . . . . . . : 192.168.1.105',
+  '   Máscara de Sub-rede . . . . . . . : 255.255.255.0',
+  '   Gateway Padrão . . . . . . . . . : 192.168.1.1',
+  ''
+];
+
+const systeminfoOutput = [
+  '',
+  'Nome do Sistema Operacional:    Microsoft Windows 10 Pro',
+  'Versão:                         10.0.19045 Compilação 19045',
+  'Fabricante do Sistema Operacional: Microsoft Corporation',
+  'Nome do Sistema:                DESKTOP-ABC1234',
+  'Nome do Computador:             DESKTOP-ABC1234',
+  'Processador(es):                Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz',
+  'BIOS:                           American Megatrends Inc. F.20',
+  'Memória Física Total:           16.384 MB',
+  'Memória Física Disponível:      8.192 MB',
+  'Espaço em Disco Total:          512.000 MB',
+  'Espaço em Disco Livre:          256.000 MB',
+  ''
+];
+
+const tasklistHeader = [
+  '',
+  'Nome da imagem           PID Nome da sessão  Mem USO',
+  '======================== === ================ ========',
+];
+
+const tasklistProcesses = [
+  ['System Idle Process',     '0',  'Services', '8 K'],
+  ['System',                  '4',  'Services', '1.580 K'],
+  ['svchost.exe',             '892','Services', '32.768 K'],
+  ['svchost.exe',             '1044','Services','25.600 K'],
+  ['explorer.exe',            '3456','Console', '89.344 K'],
+  ['cmd.exe',                 '5678','Console', '4.096 K'],
+  ['chrome.exe',              '7890','Console', '456.780 K'],
+  ['code.exe',                '2345','Console', '234.567 K'],
+  ['dwm.exe',                 '1111','Console', '65.432 K'],
+  ['SearchHost.exe',          '6666','Services','128.000 K'],
+];
+
+function getProcessTable() {
+  let lines = [...tasklistHeader];
+  tasklistProcesses.forEach(p => {
+    lines.push(
+      p[0].padEnd(25) + p[1].padStart(3) + ' ' +
+      p[2].padEnd(16) + p[3].padStart(8)
+    );
+  });
+  lines.push('');
+  lines.push(`Processos: ${tasklistProcesses.length}`);
+  lines.push('');
+  return lines;
+}
+
+function printLines(lines) {
+  lines.forEach(line => {
+    output.innerHTML += escapeHtml(line) + '\n';
+  });
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function updatePrompt() {
+  promptSpan.textContent = currentDir + '>';
+}
+
+function getTimestamp() {
+  const now = new Date();
+  const dd = String(now.getDate()).padStart(2, '0');
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const yyyy = now.getFullYear();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mi = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  return `${dd}/${mm}/${yyyy}  ${hh}:${mi}:${ss}`;
+}
+
+function scrollToEnd() {
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+function processCommand(cmd) {
+  const trimmed = cmd.trim();
+  const lower = trimmed.toLowerCase();
+
+  output.innerHTML += escapeHtml(promptSpan.textContent + trimmed) + '\n';
+
+  if (lower === '') {
+    scrollToEnd();
+    return;
+  }
+
+  commandHistory.push(trimmed);
+  historyIndex = commandHistory.length;
+
+  if (lower === 'help') {
+    printLines(helpText);
+  } else if (lower === 'cls') {
+    output.innerHTML = '';
+  } else if (lower === 'dir') {
+    printLines(dirOutput);
+  } else if (lower === 'ver') {
+    printLines(['', 'Microsoft Windows [Versão 10.0.19045.3208]', '']);
+  } else if (lower === 'date') {
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    printLines(['', `A data atual é: ${dd}/${mm}/${yyyy}`, '']);
+  } else if (lower === 'time') {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mi = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    const ms = String(now.getMilliseconds()).padStart(2, '0').substring(0, 2);
+    printLines(['', `A hora atual é: ${hh}:${mi}:${ss}.${ms}`, '']);
+  } else if (lower.startsWith('echo ')) {
+    const msg = trimmed.substring(5);
+    printLines(['', msg, '']);
+  } else if (lower === 'ipconfig') {
+    printLines(ipconfigOutput);
+  } else if (lower === 'hostname') {
+    printLines(['', 'DESKTOP-ABC1234', '']);
+  } else if (lower === 'whoami') {
+    printLines(['', 'desktop-abc1234\\leandro.ogawa', '']);
+  } else if (lower === 'tasklist') {
+    printLines(getProcessTable());
+  } else if (lower === 'systeminfo') {
+    printLines(systeminfoOutput);
+  } else if (lower === 'tree') {
+    printLines([
+      '',
+      'C:\\Users\\leandro.ogawa',
+      '├───Desktop',
+      '├───Documents',
+      '│   └───Projetos',
+      '│       └───HTML',
+      '├───Downloads',
+      '├───Music',
+      '├───Pictures',
+      '│   └───Screenshots',
+      '├───Videos',
+      '└───AppData',
+      '    ├───Local',
+      '    ├───LocalLow',
+      '    └───Roaming',
+      ''
+    ]);
+  } else if (lower === 'color') {
+    printLines([
+      '',
+      'Define a cor padrão do console.',
+      '',
+      'COLOR [attr]',
+      '',
+      '  attr    Especifica os atributos de cor do console',
+      '',
+      'Cores:',
+      '  0 = Preto       8 = Cinza',
+      '  1 = Azul        9 = Azul claro',
+      '  2 = Verde       A = Verde claro',
+      '  3 = Azul-agua   B = Azul-agua claro',
+      '  4 = Vermelho    C = Vermelho claro',
+      '  5 = Roxo        D = Lilás',
+      '  6 = Amarelo     E = Amarelo claro',
+      '  7 = Branco      F = Branco brilhante',
+      ''
+    ]);
+  } else if (lower === 'title') {
+    printLines(['', 'Define o título da janela do prompt de comando.', '']);
+  } else if (lower === 'ping') {
+    printLines([
+      '',
+      'Disparando www.microsoft.com [13.107.4.52] com 32 bytes de dados:',
+      'Resposta de 13.107.4.52: bytes=32 tempo=12ms TTL=118',
+      'Resposta de 13.107.4.52: bytes=32 tempo=11ms TTL=118',
+      'Resposta de 13.107.4.52: bytes=32 tempo=10ms TTL=118',
+      'Resposta de 13.107.4.52: bytes=32 tempo=11ms TTL=118',
+      '',
+      'Estatísticas do Ping para 13.107.4.52:',
+      '    Pacotes: Enviados = 4, Recebidos = 4, Perdidos = 0 (0% de perda)',
+      'Tempo aproximado das idas e vindas em milissegundos:',
+      '    Mínimo = 10ms, Máximo = 12ms, Média = 11ms',
+      ''
+    ]);
+  } else if (lower === 'exit') {
+    printLines(['', 'Obrigado por usar o CMD! Até mais.', '']);
+    input.disabled = true;
+    cursor.style.display = 'none';
+  } else {
+    printLines([
+      '',
+      `'${trimmed}' não é reconhecido como um comando interno ou externo,`,
+      'um programa operável ou um arquivo em lotes.',
+      ''
+    ]);
+  }
+
+  scrollToEnd();
+}
+
+input.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const cmd = input.value;
+    input.value = '';
+    processCommand(cmd);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (historyIndex > 0) {
+      historyIndex--;
+      input.value = commandHistory[historyIndex];
+    }
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (historyIndex < commandHistory.length - 1) {
+      historyIndex++;
+      input.value = commandHistory[historyIndex];
+    } else {
+      historyIndex = commandHistory.length;
+      input.value = '';
+    }
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    const val = input.value.toLowerCase();
+    const commands = ['help','dir','cls','echo','date','time','ver','color','title','ipconfig','hostname','whoami','tasklist','systeminfo','tree','ping','exit'];
+    const match = commands.find(c => c.startsWith(val));
+    if (match) input.value = match;
+  }
+});
+
+terminal.addEventListener('click', function() {
+  input.focus();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (document.activeElement !== input) {
+    input.focus();
+  }
+});
+
+printLines(asciiArt);
+updatePrompt();
+scrollToEnd();
+</script>
+</body>
+</html>
